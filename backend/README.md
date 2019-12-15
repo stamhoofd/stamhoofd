@@ -4,6 +4,12 @@
 
 Build, run, or test using the `go` command like you would usually. This automatically downloads all that is necessary.
 
+## Communication
+
+Communication between backend services happens via [Protocol Buffers](https://developers.google.com/protocol-buffers/).
+
+> Protocol buffers are Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data – think XML, but smaller, faster, and simpler. You define how you want your data to be structured once, then you can use special generated source code to easily write and read your structured data to and from a variety of data streams and using a variety of languages.
+
 ## Structure
 
 ```bash
