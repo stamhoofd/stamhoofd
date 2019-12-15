@@ -18,9 +18,11 @@ type server struct {
 }
 
 func (s *server) AddUser(_ context.Context, request *service.AddUserRequest) (*service.AddUserResponse, error) {
+	email := request.GetEmail()
+	log.Printf("Added user %s", email)
 	return &service.AddUserResponse{
 		User: &service.User{
-			Email: request.GetEmail(),
+			Email: email,
 		},
 		Status: &status.Status{
 			Code:    1,
