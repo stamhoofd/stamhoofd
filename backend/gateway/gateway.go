@@ -15,16 +15,21 @@ const (
 
 func main() {
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	authClient := authService.NewAuthClient(conn)
 
-	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	// Start a new timeout
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
+	// Contact the server and print out its response.
 	user, err := authClient.AddUser(ctx, &authService.AddUserRequest{
 		Email:    "name@example.com",
 		Password: "password",
