@@ -1,0 +1,72 @@
+syntax = "proto3";
+package be.stamhoofd.backend.auth;
+option go_package = "auth/service";
+
+import "protos/googleapis/google/rpc/status.proto";
+
+service Auth {
+  // Register a user and send an email to his account with a confirm token.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+  // Confirm the user creation with the email sent to the account.
+  rpc RegisterConfirm(RegisterConfirmRequest)
+      returns (RegisterConfirmResponse) {}
+
+  // Log a user in with its credentials and return an auth token.
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  // Request a password reset.
+  // Send an email to the user with a link that has the token that needs to be
+  // passed to the ResetPassword endpoint.
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {}
+  // Reset the password the the token that has been sent to the user in an
+  // email.
+  rpc ResetPasswordConfirm(ResetPasswordConfirmRequest)
+      returns (ResetPasswordConfirmResponse) {}
+}
+
+message User {
+  string id = 1;
+  Timestamp created_at = 2;
+  Timestamp updated_at = 3;
+  Timestamp deleted_at = 4;
+  string email = 5;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  google.rpc.Status status = 1;
+  User user = 2;
+}
+
+message RegisterConfirmRequest {
+  string email = 1;
+  string confirm_token = 2;
+}
+
+message RegisterConfirmResponse { google.rpc.Status status = 1; }
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  google.rpc.Status status = 1;
+  User user = 2;
+  string auth_token = 3;
+}
+
+message ResetPasswordRequest { string email = 1; }
+
+message ResetPasswordResponse { google.rpc.Status status = 1; }
+
+message ResetPasswordConfirmRequest {
+  string email = 1;
+  string confirm_token = 2;
+}
+
+message ResetPasswordConfirmResponse { google.rpc.Status status = 1; }
