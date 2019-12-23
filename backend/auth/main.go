@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/stamhoofd/stamhoofd/backend/auth/service"
 	"google.golang.org/grpc"
 )
@@ -14,7 +15,7 @@ const port = ":8000"
 func main() {
 	authServer := &server{
 		databaseInfo: databaseInfo{
-			dialect: "sqlite",
+			dialect: "sqlite3",
 			args:    []interface{}{"auth.db"},
 		},
 	}

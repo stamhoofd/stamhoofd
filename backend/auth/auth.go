@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/golang/protobuf/ptypes/any"
 	"github.com/jinzhu/gorm"
 	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 	"github.com/stamhoofd/stamhoofd/backend/auth/service"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct {
@@ -45,20 +45,23 @@ func (s *server) register(_ context.Context, request *service.RegisterRequest, d
 	if err != nil {
 		return nil, err
 	}
+
+	err = SendEmail(request.GetEmail(), "Welcome to Stamhoofd!",
+		"This is the welcome body!")
+	if err != nil {
+		log.Println(err)
+		return &service.RegisterResponse{}, status.New(codes.Internal, "failed to send email").Err()
+	}
+	log.Printf("email sent to %s", request.GetEmail())
+
 	user := &models.User{
 		Email:    request.GetEmail(),
 		Password: string(hashedPassword),
 	}
 	db.Create(user)
 
-	// TODO Send an email using the email service.
-	log.Printf("Added user %v", user)
+	log.Printf("saved user to database: %v", user)
 	return &service.RegisterResponse{
-		Status: &status.Status{
-			Code:    1,
-			Message: "message",
-			Details: []*any.Any{},
-		},
 		User: &service.User{
 			Id:    user.ID.String(),
 			Email: user.Email,
@@ -77,11 +80,5 @@ func (s *server) Register(ctx context.Context, request *service.RegisterRequest)
 
 func (s *server) RegisterConfirm(_ context.Context, request *service.RegisterConfirmRequest) (*service.RegisterConfirmResponse, error) {
 	log.Printf("Confirm email %s and token %s", request.GetEmail(), request.GetConfirmToken())
-	return &service.RegisterConfirmResponse{
-		Status: &status.Status{
-			Code:    1,
-			Message: "message",
-			Details: []*any.Any{},
-		},
-	}, nil
+	return &service.RegisterConfirmResponse{}, nil
 }

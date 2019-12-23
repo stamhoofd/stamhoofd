@@ -1,0 +1,24 @@
+syntax = "proto3";
+package be.stamhoofd.backend.email;
+option go_package = "email/service";
+
+import "google/protobuf/empty.proto";
+
+service Email {
+  // Send an email to a specific email address.
+  rpc Send(SendRequest) returns (google.protobuf.Empty) {}
+  // Send an email to a specific user id.
+  rpc SendUser(SendUserRequest) returns (google.protobuf.Empty) {}
+}
+
+message SendRequest {
+  string to = 1;
+  string subject = 2;
+  string body = 3;
+}
+
+message SendUserRequest {
+  string user_id = 1;
+  string subject = 2;
+  string body = 3;
+}

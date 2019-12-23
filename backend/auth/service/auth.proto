@@ -2,7 +2,7 @@ syntax = "proto3";
 package be.stamhoofd.backend.auth;
 option go_package = "auth/service";
 
-import "protos/googleapis/google/rpc/status.proto";
+import "google/protobuf/timestamp.proto";
 
 service Auth {
   // Register a user and send an email to his account with a confirm token.
@@ -26,9 +26,9 @@ service Auth {
 
 message User {
   string id = 1;
-  Timestamp created_at = 2;
-  Timestamp updated_at = 3;
-  Timestamp deleted_at = 4;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp deleted_at = 4;
   string email = 5;
 }
 
@@ -37,17 +37,14 @@ message RegisterRequest {
   string password = 2;
 }
 
-message RegisterResponse {
-  google.rpc.Status status = 1;
-  User user = 2;
-}
+message RegisterResponse { User user = 1; }
 
 message RegisterConfirmRequest {
   string email = 1;
   string confirm_token = 2;
 }
 
-message RegisterConfirmResponse { google.rpc.Status status = 1; }
+message RegisterConfirmResponse {}
 
 message LoginRequest {
   string email = 1;
@@ -55,18 +52,17 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  google.rpc.Status status = 1;
-  User user = 2;
-  string auth_token = 3;
+  User user = 1;
+  string auth_token = 2;
 }
 
 message ResetPasswordRequest { string email = 1; }
 
-message ResetPasswordResponse { google.rpc.Status status = 1; }
+message ResetPasswordResponse {}
 
 message ResetPasswordConfirmRequest {
   string email = 1;
   string confirm_token = 2;
 }
 
-message ResetPasswordConfirmResponse { google.rpc.Status status = 1; }
+message ResetPasswordConfirmResponse {}

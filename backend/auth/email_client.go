@@ -5,15 +5,15 @@ import (
 	"log"
 	"time"
 
-	authService "github.com/stamhoofd/stamhoofd/backend/auth/service"
+	email "github.com/stamhoofd/stamhoofd/backend/email/service"
 	"google.golang.org/grpc"
 )
 
 const (
-	address = "localhost:8000"
+	address = "localhost:8002"
 )
 
-func main() {
+func SendEmail(to, subject, body string) error {
 	// Set up a connection to the server.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -23,19 +23,17 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	authClient := authService.NewAuthClient(conn)
+	emailClient := email.NewEmailClient(conn)
 
 	// Start a new timeout
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	// Contact the server and print out its response.
-	user, err := authClient.Register(ctx, &authService.RegisterRequest{
-		Email:    "",
-		Password: "password",
+	_, err = emailClient.Send(ctx, &email.SendRequest{
+		To:      to,
+		Subject: subject,
+		Body:    body,
 	})
-	if err != nil {
-		log.Fatalf("could not add user: %v", err)
-	}
-	log.Printf("Added user: %s", user.GetUser())
+	return err
 }
