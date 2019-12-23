@@ -49,7 +49,7 @@ func (s *server) register(_ context.Context, request *service.RegisterRequest, d
 	err = SendEmail(request.GetEmail(), "Welcome to Stamhoofd!",
 		"This is the welcome body!")
 	if err != nil {
-		log.Println(err)
+		log.Printf("Failed to send register email: %+v", err)
 		return &service.RegisterResponse{}, status.New(codes.Internal, "failed to send email").Err()
 	}
 	log.Printf("email sent to %s", request.GetEmail())

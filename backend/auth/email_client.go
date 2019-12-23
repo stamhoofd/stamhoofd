@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
 	"time"
 
+	"github.com/pkg/errors"
 	email "github.com/stamhoofd/stamhoofd/backend/email/service"
 	"google.golang.org/grpc"
 )
@@ -20,7 +20,7 @@ func SendEmail(to, subject, body string) error {
 
 	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		return errors.Wrap(err, "Can't connect with email service")
 	}
 	defer conn.Close()
 	emailClient := email.NewEmailClient(conn)

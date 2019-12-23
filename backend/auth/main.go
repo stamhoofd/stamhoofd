@@ -2,12 +2,12 @@
 package main
 
 import (
-	"log"
-	"net"
-
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/pkg/errors"
 	"github.com/stamhoofd/stamhoofd/backend/auth/service"
 	"google.golang.org/grpc"
+	"log"
+	"net"
 )
 
 const port = ":8000"
@@ -21,17 +21,17 @@ func main() {
 	}
 	err := authServer.Setup()
 	if err != nil {
-		log.Fatalf("failed to setup: %v", err)
+		log.Fatalf("failed to setup: %+v", errors.WithStack(err))
 	}
 
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %+v", errors.WithStack(err))
 	}
 
 	grpcServer := grpc.NewServer()
 	service.RegisterAuthServer(grpcServer, authServer)
 	if err = grpcServer.Serve(listener); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("failed to serve: %+v", errors.WithStack(err))
 	}
 }
