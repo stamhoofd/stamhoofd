@@ -1,4 +1,4 @@
-//go:generate protoc --proto_path=../ --go_out=plugins=grpc:.. auth/service/auth.proto
+//go:generate protoc --proto_path=../protos/stamhoofd --go_out=plugins=grpc:service auth.proto email.proto
 package main
 
 import (
@@ -16,9 +16,10 @@ func main() {
 	authServer := &server{
 		databaseInfo: databaseInfo{
 			dialect: "sqlite3",
-			args:    []interface{}{"auth.db"},
+			args:    []interface{}{":memory:"},
 		},
 	}
+
 	err := authServer.Setup()
 	if err != nil {
 		log.Fatalf("failed to setup: %+v", errors.WithStack(err))
@@ -31,6 +32,8 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	service.RegisterAuthServer(grpcServer, authServer)
+
+	log.Println("Starting auth service...")
 	if err = grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %+v", errors.WithStack(err))
 	}

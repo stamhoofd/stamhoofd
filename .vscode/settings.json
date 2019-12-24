@@ -4,5 +4,6 @@
             // This makes the "vscode-proto3" extension correctly detect imports.
             "--proto_path=${workspaceRoot}/backend",
         ]
-    }
+    },
+    "go.useLanguageServer": true
 }

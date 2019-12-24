@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "backend/auth"
+		},
+		{
+			"path": "backend/email"
+		},
+		{
+			"path": "backend/gateway"
+		},
+		{
+			"path": "backend/member"
+		}
+	],
+	"settings": {
+		"protoc": {
+			"options": [
+				"--proto_path=${workspaceRoot}/backend"
+			]
+		},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"backend/auth": true,
+			"backend/email": true,
+			"backend/gateway": true,
+			"backend/member": true
+		}
+	}
+}
