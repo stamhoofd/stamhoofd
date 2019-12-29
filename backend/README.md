@@ -40,6 +40,8 @@ message CallResponse {}
         .gitkeep
         # Generated Go code from protobuf.
         {service-name}.pb.go
+    # Configuration file of the service, see section "Local Development".
+    .config.toml
     # Use the same name as the service as the location of your main function.
     {service-name}.go
     # Entrypoint of the service containing the main function.
@@ -95,6 +97,29 @@ _How to generate the Go code from the protobuf interface definitions._
     In case this reports some Go error, run the command that is after `//go:generate` in the service's `main.go` file.
 
 ## Local Development
+
+### `stamhoofd watch`
+
+A custom commandline program has been written to help with local development. This because there were no proper existing tools available. It can be installed and used like so:
+
+```bash
+# backend/cmd/stamhoofd
+➜ go install .
+➜ cd ../..
+➜ stamhoofd watch
+```
+
+Optionally specify where the backend directory is, default is the current directory:
+```bash
+➜ stamhoofd watch backend/
+```
+
+The `stamhoofd watch` command uses a `.config.toml` configuration file in the service folder to store its settings. See an example with info below and go to [`cmd/stamhoofd/watch/config.go`](cmd/stamhoofd/watch/config.go) for its full definition. Adding this configuration file is required for it to be picked up by the command.
+
+```toml
+# List of proto files that need their Go code generated.
+protos = ["auth.proto", "email.proto"]
+```
 
 ### Realize
 

@@ -2,12 +2,13 @@
 package main
 
 import (
+	"log"
+	"net"
+
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"github.com/stamhoofd/stamhoofd/backend/auth/service"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 const port = ":8000"
