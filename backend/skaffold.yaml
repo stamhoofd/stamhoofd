@@ -1,0 +1,21 @@
+apiVersion: skaffold/v2alpha1
+kind: Config
+build:
+  artifacts:
+    - image: gcr.io/k8s-skaffold/auth
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          SERVICE_NAME: auth
+    - image: gcr.io/k8s-skaffold/email
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          SERVICE_NAME: email
+deploy:
+  kubectl:
+    manifests:
+      - ./auth/k8s/*
+      - ./email/k8s/*

@@ -1,4 +1,4 @@
-//go:generate protoc --proto_path=../ --go_out=plugins=grpc:.. email/service/email.proto
+//go:generate protoc --proto_path=../protos/stamhoofd --go_out=plugins=grpc:service email.proto
 package main
 
 import (
@@ -29,6 +29,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	service.RegisterEmailServer(grpcServer, emailServer)
+	log.Println("Starting email service...")
 	if err = grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

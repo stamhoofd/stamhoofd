@@ -133,3 +133,4 @@ $RECYCLE.BIN/
 
 # Ignore SQLite databases.
 *.db
+*.pb.go

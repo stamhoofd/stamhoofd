@@ -1,0 +1,67 @@
+syntax = "proto3";
+package service;
+option go_package = "service";
+
+import "google/protobuf/timestamp.proto";
+
+service Auth {
+  // Register a user and send an email to his account with a confirm token.
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+  // Confirm the user creation with the email sent to the account.
+  rpc RegisterConfirm(RegisterConfirmRequest)
+      returns (RegisterConfirmResponse) {}
+
+  // Log a user in with its credentials and return an auth token.
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+
+  // Request a password reset.
+  // Send an email to the user with a link that has the token that needs to be
+  // passed to the ResetPassword endpoint.
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {}
+  // Reset the password the the token that has been sent to the user in an
+  // email.
+  rpc ResetPasswordConfirm(ResetPasswordConfirmRequest)
+      returns (ResetPasswordConfirmResponse) {}
+}
+
+message User {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  string email = 5;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterResponse { User user = 1; }
+
+message RegisterConfirmRequest {
+  string email = 1;
+  string confirm_token = 2;
+}
+
+message RegisterConfirmResponse {}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  User user = 1;
+  string auth_token = 2;
+}
+
+message ResetPasswordRequest { string email = 1; }
+
+message ResetPasswordResponse {}
+
+message ResetPasswordConfirmRequest {
+  string email = 1;
+  string confirm_token = 2;
+}
+
+message ResetPasswordConfirmResponse {}
