@@ -1,41 +1,35 @@
 package main
 
 import (
-	"context"
-	"log"
-	"time"
-
-	authService "github.com/stamhoofd/stamhoofd/backend/auth/service"
-	"google.golang.org/grpc"
-)
-
-const (
-	address = "localhost:8000"
+	"fmt"
+	"github.com/nautilus/gateway"
+	"github.com/nautilus/graphql"
+	"net/http"
 )
 
 func main() {
-	// Set up a connection to the server.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	conn, err := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
+	// introspect the apis
+	schemas, err := graphql.IntrospectRemoteSchemas(
+		"http://localhost:9000",
+		// "http://localhost:3001",
+	)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		panic(err)
 	}
-	defer conn.Close()
-	authClient := authService.NewAuthClient(conn)
 
-	// Start a new timeout
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	// Contact the server and print out its response.
-	user, err := authClient.Register(ctx, &authService.RegisterRequest{
-		Email:    "",
-		Password: "password",
-	})
+	// create the gateway instance
+	gw, err := gateway.New(schemas)
 	if err != nil {
-		log.Fatalf("could not add user: %v", err)
+		panic(err)
 	}
-	log.Printf("Added user: %s", user.GetUser())
+
+	// add the playground endpoint to the router
+	http.HandleFunc("/graphql", gw.PlaygroundHandler)
+
+	// start the server
+	fmt.Println("Starting server")
+	err = http.ListenAndServe(":3000", nil)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }

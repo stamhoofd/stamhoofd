@@ -16,6 +16,13 @@ func main() {
 				Aliases: []string{"w"},
 				Usage:   "Watch the backend services for changes and reload them on change. Optionally pass a directory of where the backend folder is located.",
 				Action:  watch.Command,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "service",
+						Aliases: []string{"s"},
+						Usage:   "Specify a single service.",
+					},
+				},
 			},
 		},
 	}

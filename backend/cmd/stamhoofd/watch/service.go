@@ -53,10 +53,16 @@ type Service struct {
 }
 
 // GetServices gets the list of services that have a configuration file.
-func GetServices(log *logrus.Logger, backendDir string) []*Service {
+// Specify a service name to only retrieve a single service.
+func GetServices(log *logrus.Logger, backendDir, serviceName string) []*Service {
 	services := []*Service{}
 	filepath.Walk(backendDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
+			// Skip if only a single service is requested and it's not this one.
+			if len(serviceName) > 0 && info.Name() != serviceName {
+				return nil
+			}
+
 			config, err := NewConfig(path)
 			if err != nil {
 				return nil

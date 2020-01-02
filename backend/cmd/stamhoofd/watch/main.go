@@ -20,10 +20,12 @@ func Command(c *cli.Context) error {
 		backendDir = defaultBackendDir
 	}
 
+	serviceName := c.String("service")
+
 	log := logrus.New()
 	log.Formatter = new(prefixed.TextFormatter)
 	log.Level = logrus.DebugLevel
-	services := GetServices(log, backendDir)
+	services := GetServices(log, backendDir, serviceName)
 
 	// Gracefully stop all of the services when it receives a SIGTERM signal.
 	terminate := make(chan os.Signal, 1)

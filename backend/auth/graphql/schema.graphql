@@ -1,0 +1,37 @@
+
+type User {
+    id: ID!
+    email: String!
+}
+
+type LoggedInResponse {
+    user: User!
+    token: String!
+}
+
+# You cannot have empty types in GraphQL.
+type ResetPasswordResponse {
+    email: String!
+}
+
+type Query {
+    me: User!
+}
+
+type Mutation {
+    # Register a user and send an email to his account with a confirm token.
+    register(email: String!, password: String!): User!
+    # Confirm the user creation with the email sent to the account.
+    registerConfirm(email: String!, token: String!): LoggedInResponse!
+
+    # Log a user in with its credentials and return an auth token.
+    login(email: String!, password: String!): LoggedInResponse!
+
+    # Request a password reset.
+    # Send an email to the user with a link that has the token that needs to be
+    # passed to the ResetPassword endpoint.
+    resetPassword(email: String!): ResetPasswordResponse!
+    # Reset the password the the token that has been sent to the user in an
+    # email.
+    resetPasswordConfirm(email: String!, token: String!): LoggedInResponse!
+}
