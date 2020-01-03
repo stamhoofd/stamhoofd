@@ -34,16 +34,46 @@ message CallResponse {}
 
 ```bash
 # One folder per (micro)service.
-{service-name}/
-    service/
+{service}/
+    # All of the code to handle GraphQL requests.
+    graphql/
+        # Generated code for the exec section in gqlgen.yml.
+        exec.gql.go
+        # Generated code for the model section in gqlgen.yml.
+        models.gql.go
+        # Resolver that implements the resolvers generated in exec.gql.go.
+        resolver.go
+        # The GraphQL schema.
+        schema.graphql
+    # Models representing the database, uses gorm.
+    models/
+        # Example of the struct "User" that is saved to the database.
+        user.go
+    # Genereted code for gRPC and Protobuf.
+    pb/
         # Empty file to indicate this file needs to be added to Git.
         .gitkeep
-        # Generated Go code from protobuf.
-        {service-name}.pb.go
+        # Example of generated Go code when "protos" in .config.toml is set
+        # to ["auth", "email"].
+        auth.pb.go
+        email.pb.go
+    # Scripts specific to this service.
+    scripts/
+        # Required for every service that uses GraphQL, copy this from an existing
+        # serviec. This is the GraphQL commandline app.
+        # See: https://github.com/99designs/gqlgen/issues/800
+        gqlgen.go
+    # The logic of the service is defined here so it can be used by both GraphQL and gRPC.
+    # Only the serialization needs to be adjusted by GraphQL or gRPC.
+    service/
+        # A feature of this service.
+        {feature}.go
+        # Tests of this feature.
+        {feature}_test.go
     # Configuration file of the service, see section "Local Development".
     .config.toml
     # Use the same name as the service as the location of your main function.
-    {service-name}.go
+    {service}.go
     # Entrypoint of the service containing the main function.
     main.go
 
@@ -52,7 +82,7 @@ protos/
     # All of the stamhoofd definitions.
     stamhoofd/
         # Protobuf file describing the service gRPC.
-        {service-name}.proto
+        {service}.proto
     # Other folders can be Git submodules containing public definitions.
 ```
 

@@ -6,10 +6,10 @@
 schema:
 - graphql/schema.graphql
 exec:
-  filename: graphql/generated.go
+  filename: graphql/exec.gql.go
   package: graphql
 model:
-  filename: graphql/models.go
+  filename: graphql/models.gql.go
   package: graphql
 resolver:
   filename: graphql/resolver.go

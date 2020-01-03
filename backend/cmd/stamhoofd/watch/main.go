@@ -20,12 +20,12 @@ func Command(c *cli.Context) error {
 		backendDir = defaultBackendDir
 	}
 
-	serviceName := c.String("service")
+	serviceNames := c.StringSlice("service")
 
 	log := logrus.New()
 	log.Formatter = new(prefixed.TextFormatter)
 	log.Level = logrus.DebugLevel
-	services := GetServices(log, backendDir, serviceName)
+	services := GetServices(log, backendDir, serviceNames)
 
 	// Gracefully stop all of the services when it receives a SIGTERM signal.
 	terminate := make(chan os.Signal, 1)
@@ -45,8 +45,6 @@ func Command(c *cli.Context) error {
 
 	done := make(chan bool)
 	<-done
-
-	log.Println("Done watching...")
 
 	return nil
 }

@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// add the playground endpoint to the router
-	http.HandleFunc("/graphql", gw.PlaygroundHandler)
+	http.HandleFunc("/", gw.PlaygroundHandler)
 
 	// start the server
 	fmt.Println("Starting server")

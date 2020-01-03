@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
@@ -18,11 +19,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	grpcPort    = ":8000"
-	graphqlPort = ":9000"
-)
-
 func main() {
 	db, err := gorm.Open("sqlite3", ":memory:")
 	if err != nil {
@@ -32,8 +28,12 @@ func main() {
 
 	db.AutoMigrate(&models.User{})
 
-	ServeGrpc(db)
-	ServeGraphQL(db)
+	go ServeGrpc(db)
+	go ServeGraphQL(db)
+	go ServeStatus()
+
+	done := make(chan bool)
+	<-done
 }
 
 func ServeGrpc(db *gorm.DB) {
@@ -42,7 +42,7 @@ func ServeGrpc(db *gorm.DB) {
 	}
 
 	// listener, err
-	_, err := net.Listen("tcp", grpcPort)
+	_, err := net.Listen("tcp", os.Getenv("GRPC_PORT"))
 	if err != nil {
 		log.Fatalf("failed to listen: %+v", errors.WithStack(err))
 	}
@@ -69,8 +69,20 @@ func ServeGraphQL(db *gorm.DB) {
 			},
 		),
 	)
-	router.Handle("/query", server)
+	router.Handle("/", server)
 
 	log.Println("Starting GraphQL server...")
-	log.Fatal(http.ListenAndServe(graphqlPort, router))
+	log.Fatal(http.ListenAndServe(os.Getenv("GRAPHQL_PORT"), router))
+}
+
+func ServeStatus() {
+	router := chi.NewRouter()
+	router.Handle("/readiness", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+	router.Handle("/liveness", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+
+	log.Fatal(http.ListenAndServe(os.Getenv("STATUS_PORT"), router))
 }
