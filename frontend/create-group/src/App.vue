@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <header>
+        <h1>Jouw vereniging aansluiten</h1>
+    </header>
   </div>
 </template>
 
@@ -18,12 +19,14 @@ export default class App extends Vue {}
 </script>
 
 <style lang="scss">
+@import "~@shared/scss/fonts.scss";
+
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Metropolis', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: $dark-color;
   margin-top: 60px;
 }
 </style>
