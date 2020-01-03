@@ -13,6 +13,7 @@ func database() *gorm.DB {
 	}
 
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.PasswordReset{})
 
 	return db
 }

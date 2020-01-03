@@ -49,7 +49,7 @@ message CallResponse {}
     models/
         # Example of the struct "User" that is saved to the database.
         user.go
-    # Genereted code for gRPC and Protobuf.
+    # Generated code for gRPC and Protobuf.
     pb/
         # Empty file to indicate this file needs to be added to Git.
         .gitkeep

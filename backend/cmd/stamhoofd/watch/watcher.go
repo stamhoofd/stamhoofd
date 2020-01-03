@@ -11,6 +11,7 @@ var ignoredFiles []string = []string{
 	"go.mod",
 	"go.sum",
 	".tmp",
+	"_test.go",
 }
 
 type OnChange func(event fsnotify.Event)

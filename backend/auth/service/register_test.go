@@ -16,7 +16,7 @@ func TestRegister(t *testing.T) {
 	password := "password"
 	registeredUser, err := Register(db, email, password)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	var users []models.User

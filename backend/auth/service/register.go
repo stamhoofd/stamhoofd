@@ -38,7 +38,10 @@ func Register(db *gorm.DB, email, password string) (*models.User, error) {
 		Password:          string(hashedPassword),
 		RegistrationToken: generateToken(128),
 	}
-	db.Create(user)
+	err = db.Create(user).Error
+	if err != nil {
+		return nil, err
+	}
 
 	logrus.Infof("saved user to database: %v", user)
 	return user, nil
