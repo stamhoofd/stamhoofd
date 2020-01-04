@@ -330,6 +330,12 @@ func (s *Service) ForceGenerateProtos() {
 // GenerateProtos generates the needed protobuf files.
 // Please use *Service.GenerateProtos instead.
 func (s *Service) ForceGenerateGraphQL() {
+	// Do not generate GraphQL if the settings file is not there.
+	_, err := os.Stat(filepath.Join(s.Dir(), "gqlgen.yml"))
+	if os.IsNotExist(err) {
+		return
+	}
+
 	s.logger.Info("Generating graphql code...")
 
 	cmd := exec.Command("go", "run", "scripts/gqlgen.go", "-v")
@@ -341,6 +347,7 @@ func (s *Service) ForceGenerateGraphQL() {
 // generates the protobuf files again when a change is detected.
 func (s *Service) Watch() {
 	s.ForceGenerateProtos()
+	s.ForceGenerateGraphQL()
 	s.Start()
 
 	s.watchFolder()
