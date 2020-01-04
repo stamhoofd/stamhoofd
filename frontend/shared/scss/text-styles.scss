@@ -1,0 +1,26 @@
+.style-title-1 {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.style-label {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.style-placeholder {
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-gray;
+}
+
+.style-caption {
+    font-size: 14px;
+    font-weight: bold;
+    color: $color-gray;
+    text-transform: uppercase;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
