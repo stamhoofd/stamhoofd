@@ -22,14 +22,13 @@
     box-sizing: border-box;
     display: block;
     transition: border-color 0.2s;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 
     &:focus {
         border-color: $color-primary;
     }
 
     ::placeholder { color: $color-gray; }
-
-    
 }
 
 select.input {

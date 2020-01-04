@@ -31,6 +31,8 @@
             </div>
            
         </div>
+
+        <button class="button primary">Verder</button>
         
     </article>
 </template>
@@ -56,6 +58,7 @@ export default class General extends Vue {
     @use '~@shared/scss/layout/split-inputs.scss';
     @use '~@shared/scss/base/text-styles.scss';
     @use '~@shared/scss/components/inputs.scss';
+    @use '~@shared/scss/components/buttons.scss';
 
     h1 {
         @extend .style-title-1;

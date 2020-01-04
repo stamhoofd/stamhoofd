@@ -1,0 +1,30 @@
+@use '../base/variables' as *;
+
+.button {
+    &.primary {
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        padding: 12px 40px;
+        background: linear-gradient(to right, $color-primary, $color-primary-destination);
+        text-align: center;
+        word-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: $border-radius;
+        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
+        cursor: pointer;
+        box-shadow: 0 6px 10px 0 rgba($color-primary,0.20);
+
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+
+        &:active {
+            transform: scale(0.95, 0.95);
+            box-shadow: 0 0px 15px 0 rgba($color-primary,0.20);
+        }
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+}
