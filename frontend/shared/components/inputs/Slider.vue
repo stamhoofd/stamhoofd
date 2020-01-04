@@ -10,7 +10,7 @@
         </div>
        
         <div class="number">
-            <input type="number" pattern="[0-9]*" v-model.number="value" v-on:change="updateSlider">
+            <input type="number" pattern="[0-9]*" v-model.number="value" v-on:change="updateSlider" @focus="$event.target.select()">
         </div>
     </div>
 </template>
