@@ -49,7 +49,7 @@ export default class Slider extends Vue {
         document.addEventListener('touchend', this.mouseUp, {passive: false});
     }
 
-    dettach() {
+    detach() {
         document.removeEventListener('mousemove', this.mouseMove);
         document.removeEventListener('touchmove', this.mouseMove);
 
@@ -176,7 +176,7 @@ export default class Slider extends Vue {
 
     mouseUp(event) {
         if (this.dragging) {
-            this.dettach();
+            this.detach();
             this.dragging = false;
         }
     }
