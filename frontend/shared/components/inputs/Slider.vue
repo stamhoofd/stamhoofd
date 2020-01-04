@@ -10,7 +10,7 @@
         </div>
        
         <div class="number">
-            <input type="number" v-model.number="value" v-on:change="updateSlider">
+            <input type="number" pattern="[0-9]*" v-model.number="value" v-on:change="updateSlider">
         </div>
     </div>
 </template>
@@ -167,12 +167,16 @@ export default class Slider extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
     @use "~@shared/scss/base/variables.scss";
+    @use "~@shared/scss/components/inputs.scss";
+
     $slider-height: 6px;
 
     .slider-box {
         display: flex;
         flex-direction: row;
         align-items: center;
+        @extend .input-spacing;
+        margin-bottom: 20px;
     }
 
     .slider-container {
@@ -205,7 +209,7 @@ export default class Slider extends Vue {
     }
 
     .slider {
-        margin: 20px 0;
+        margin: 15px 0;
         position: relative;
         height: $slider-height;
         display: block;
