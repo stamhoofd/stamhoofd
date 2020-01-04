@@ -60,3 +60,10 @@ button, input, select, textarea, blockquote {
     -webkit-appearance: none;		
     border-radius: 0;		
 }
+
+// Disable number arrows in inputs
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
