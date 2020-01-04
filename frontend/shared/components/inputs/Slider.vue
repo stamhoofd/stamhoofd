@@ -50,11 +50,11 @@ export default class Slider extends Vue {
     }
 
     dettach() {
-        document.removeEventListener('mousemove', this.mouseMove, {passive: false});
-        document.removeEventListener('touchmove', this.mouseMove, {passive: false});
+        document.removeEventListener('mousemove', this.mouseMove);
+        document.removeEventListener('touchmove', this.mouseMove);
 
-        document.removeEventListener('mouseup', this.mouseUp, {passive: false});
-        document.removeEventListener('touchend', this.mouseUp, {passive: false});
+        document.removeEventListener('mouseup', this.mouseUp);
+        document.removeEventListener('touchend', this.mouseUp);
     }
 
     getEventX(event) {
