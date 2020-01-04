@@ -4,15 +4,29 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label">Naam van je vereniging</label>
-                <input type="text" placeholder="De naam van je vereniging" autocomplete="organization">
+                <label class="style-label" for="organization-name">Naam van je vereniging</label>
+                <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name">
+
+                <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
+                <input class="input" type="text" placeholder="Needs to get replaced with slider" id="organization-count">
             </div>
 
             <div>
                 <label class="style-label">Adres van je vereniging</label>
-                <input type="text" placeholder="Straat en number" autocomplete="address-line1">
-                <input type="text" placeholder="Postcode" autocomplete="postal-code">
-                <input type="text" placeholder="Gemeente" autocomplete="city">
+                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
+                <div class="input-group">
+                    <div>
+                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code">
+                    </div>
+                    <div>
+                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city">
+                    </div>
+                </div>
+
+                <select class="input">
+                    <option>België</option>
+                    <option>Nederland</option>
+                </select>
                 
             </div>
            
@@ -30,9 +44,14 @@ export default class General extends Vue {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
+<style scoped lang="scss">
     // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
     @use '~@shared/scss/layout/split-inputs.scss';
+    @use '~@shared/scss/base/text-styles.scss';
+    @use '~@shared/scss/components/inputs.scss';
 
-    
+    h1 {
+        @extend .style-title-1;
+        margin-bottom: 40px;
+    }
 </style>

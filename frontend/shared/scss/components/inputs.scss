@@ -1,0 +1,64 @@
+@use '../base/variables' as *;
+
+.input {
+    color: $color-dark;
+    border: $border-width solid $color-gray-lighter;
+    border-radius: $border-radius;
+    padding: 5px 15px;
+    height: 44px;
+    line-height: 44px - 10px - 2*$border-width;
+    vertical-align: middle;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 500px;
+    display: block;
+
+    &:focus {
+        border-color: $color-primary;
+    }
+
+    ::placeholder { color: $color-gray; }
+
+    + label.style-label  {
+        margin-top: 30px;
+    }
+}
+
+select.input {
+    cursor: pointer;
+    
+    // Add a background arrow to our selection field.
+    background: url(~@shared/assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
+
+    // Increase the right padding just a little.
+    padding-right: 35px;
+
+    // Remove dotted line in Firefox
+    &:-moz-focusring { color: transparent;
+        text-shadow: 0 0 0 #000; }
+}
+
+// Used to put multiple inputs next to each other
+.input-group {
+    display: flex;
+    flex-direction: row;
+    margin: 10px 0;
+
+    &>* {
+        flex-grow: 1;
+        margin: 0 5px;
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        .input {
+            margin: 0;
+        }
+    }
+}

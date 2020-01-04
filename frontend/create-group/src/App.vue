@@ -39,6 +39,7 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
+@use "~@shared/scss/base/reset.scss";
 @use "~@shared/scss/base/text-styles.scss";
 @use "~@shared/scss/elements/body.scss"; 
 @use "~@shared/scss/layout/steps.scss";
