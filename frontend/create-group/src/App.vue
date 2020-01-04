@@ -17,21 +17,18 @@
 			</div>
 		</header>
 		<main>
-            <article>
-                <h1>Jouw vereniging aansluiten</h1>
-                <p>Blablabla</p>
-            </article>
+            <GeneralStep></GeneralStep>
 		</main>
 	</div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import GeneralStep from './components/steps/General.vue';
 
 @Component({
 	components: {
-		HelloWorld,
+		GeneralStep,
 	},
 })
 
@@ -42,11 +39,10 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
-@import "~@shared/scss/fonts.scss";
-@import "~@shared/scss/text-styles.scss";
-@import "~@shared/scss/body.scss";
-@import "~@shared/scss/layout/steps.scss";
-@import "~@shared/scss/components/logo.scss";
+@use "~@shared/scss/base/text-styles.scss";
+@use "~@shared/scss/elements/body.scss"; 
+@use "~@shared/scss/layout/steps.scss";
+@use "~@shared/scss/components/logo.scss";
 
 body {
 	background: $color-white-shade;

@@ -6,7 +6,7 @@ module.exports = {
       scss: {
         /// This auto prepends the variable imports to all SCSS. So we can use the variables from everywhere.
         /// In SCSS we need to use ~ + alias to use an alias name. 
-        prependData: `@import "~@shared/scss/variables.scss";`
+        prependData: `@use "~@shared/scss/base/variables.scss" as *;`
       }
     }
   },
