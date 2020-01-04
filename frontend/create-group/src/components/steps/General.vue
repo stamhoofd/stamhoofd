@@ -8,7 +8,7 @@
                 <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name">
 
                 <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
-                <input class="input" type="text" placeholder="Needs to get replaced with slider" id="organization-count">
+                <Slider></Slider>
             </div>
 
             <div>
@@ -37,9 +37,16 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import Slider from '@shared/components/inputs/Slider.vue';
 
-@Component
+@Component({
+  // All component options are allowed in here
+  components: {
+      Slider
+  }
+})
 export default class General extends Vue {
+
 }
 </script>
 
