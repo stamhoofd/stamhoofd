@@ -38,11 +38,23 @@ export default class Slider extends Vue {
     dragging: boolean = false;
 
     mounted() {
-        document.addEventListener('mousemove', this.mouseMove);
-        document.addEventListener('touchmove', this.mouseMove);
+        
+    }
 
-        document.addEventListener('mouseup', this.mouseUp);
-        document.addEventListener('touchend', this.mouseUp);
+    attach() {
+        document.addEventListener('mousemove', this.mouseMove, {passive: false});
+        document.addEventListener('touchmove', this.mouseMove, {passive: false});
+
+        document.addEventListener('mouseup', this.mouseUp, {passive: false});
+        document.addEventListener('touchend', this.mouseUp, {passive: false});
+    }
+
+    dettach() {
+        document.removeEventListener('mousemove', this.mouseMove, {passive: false});
+        document.removeEventListener('touchmove', this.mouseMove, {passive: false});
+
+        document.removeEventListener('mouseup', this.mouseUp, {passive: false});
+        document.removeEventListener('touchend', this.mouseUp, {passive: false});
     }
 
     getEventX(event) {
@@ -81,6 +93,9 @@ export default class Slider extends Vue {
     }
 
     dragStart(event) {
+        if (this.dragging) {
+            return;
+        }
         this.startOffset = this.getHandleOffset(event);
         console.log("Start with offset "+this.startOffset);
         this.dragging = true;
@@ -92,11 +107,12 @@ export default class Slider extends Vue {
 
             this.animate = true;
             this.mouseMove(event);
-        } else {
-            this.animate = false;
         }
-        
+        // Prevent scrolling (on mobile) and other stuff
+        event.preventDefault();
 
+        this.attach();
+        return false;
     }
 
     // Set the percentage and value based on a manual entered value
@@ -130,10 +146,6 @@ export default class Slider extends Vue {
     }
 
     mouseMove(event) {
-        if (!this.dragging) {
-            return;
-        }
-
         var handleWidth = this.getHandleWidth();
         var width = this.getWidth();
         var x = this.getEventX(event) - this.getXOffset() - this.startOffset - handleWidth/2;
@@ -156,10 +168,17 @@ export default class Slider extends Vue {
             this.animate = false;
         }
         console.log("value: "+this.value);
+
+        // Prevent scrolling (on mobile) and other stuff
+        event.preventDefault();
+        return false;
     }
 
     mouseUp(event) {
-        this.dragging = false;
+        if (this.dragging) {
+            this.dettach();
+            this.dragging = false;
+        }
     }
 }
 </script>
