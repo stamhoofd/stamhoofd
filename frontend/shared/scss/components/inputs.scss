@@ -48,7 +48,12 @@ select.input {
 }
 
 .radio, .checkbox {
-    @extend .input-spacing;
+    margin: 10px 0;
+
+    + label.style-label  {
+        margin-top: 30px;
+    }
+
     display: block;
     cursor: pointer;
 

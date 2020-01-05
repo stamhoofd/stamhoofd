@@ -22,10 +22,13 @@
         </div>
         
         <label class="style-label">Jongens en meisjes</label>
-        <Radio>Gemengd</Radio>
-        <Radio>Gescheiden</Radio>
-        <Radio>Enkel jongens</Radio>
-        <Radio>Enkel meisjes</Radio>
+        <RadioGroup>
+            <Radio>Gemengd</Radio>
+            <Radio>Gescheiden</Radio>
+            <Radio>Enkel jongens</Radio>
+            <Radio>Enkel meisjes</Radio>
+        </RadioGroup>
+
 
         <label class="style-label">Test</label>
         <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
@@ -40,13 +43,15 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Slider from '@shared/components/inputs/Slider.vue';
 import Checkbox from '@shared/components/inputs/Checkbox.vue';
 import Radio from '@shared/components/inputs/Radio.vue';
+import RadioGroup from '@shared/components/inputs/RadioGroup.vue';
 
 @Component({
   // All component options are allowed in here
   components: {
       Slider,
       Checkbox,
-      Radio
+      Radio,
+      RadioGroup
   }
 })
 export default class General extends Vue {
