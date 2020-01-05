@@ -17,7 +17,7 @@
 			</div>
 		</header>
 		<main>
-            <transition name="right-to-left" v-on:after-leave="resetScrollPosition()">
+            <transition :name="pageTransition" v-on:after-leave="resetScrollPosition()" appear>
                 <div v-if="step == 1" key="general"><GeneralStep v-on:next="goNext()"></GeneralStep></div>
                 <div v-if="step == 2" key="group-settings"><GroupSettingsStep v-on:next="goNext()"></GroupSettingsStep></div>
             </transition>
@@ -38,12 +38,15 @@ import GroupSettingsStep from './components/steps/GroupSettings.vue';
 })
 export default class App extends Vue {
     step: number = 1;
+    pageTransition: string = "right-to-left";
 
     goNext() {
+        this.pageTransition = "right-to-left";
         this.step++;
     }
 
     goBack() {
+        this.pageTransition = "left-to-right";
         this.step--;
     }
 
