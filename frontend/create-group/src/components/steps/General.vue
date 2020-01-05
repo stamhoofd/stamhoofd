@@ -32,7 +32,7 @@
            
         </div>
 
-        <button class="button primary" v-on:click="$emit('next')">Verder</button>
+        <button class="button primary" v-on:click="$emit('next')" id="next-button">Verder</button>
         
     </article>
 </template>
@@ -66,6 +66,10 @@ export default class General extends Vue {
 
     h1 {
         @extend .style-title-1;
-        margin-bottom: 40px;
+        margin-bottom: 20px;
+    }
+
+    #next-button {
+        margin-top: 30px;
     }
 </style>

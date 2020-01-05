@@ -23,13 +23,9 @@ export default class RadioGroup extends Vue {
         flex-wrap: wrap;
         margin: 10px 0;
 
-        + label.style-label  {
-            margin-top: 20px;
-        }
-        
         .radio {
             flex-shrink: 0;
-            margin-right: 20px;
+            padding-right: 20px;
         }
     }
 </style>

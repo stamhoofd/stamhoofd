@@ -33,7 +33,7 @@
         <label class="style-label">Test</label>
         <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
 
-        <button class="button primary">Verder</button>
+        <button class="button primary" id="next-button">Verder</button>
         
     </article>
 </template>
@@ -73,6 +73,10 @@ export default class General extends Vue {
 
     h1 {
         @extend .style-title-1;
-        margin-bottom: 40px;
+        margin-bottom: 20px;
+    }
+
+    #next-button {
+        margin-top: 30px;
     }
 </style>
