@@ -1,23 +1,21 @@
 <template>
 	<div id="app" class="steps-layout">
-		<header>
-			<div>
-                <div class="left">
-                    <transition name="move" mode="out-in">
-                        <a href="/" id="logo" alt="Stamhoofd" v-if="step <= 1"></a>
-                        <div v-else v-on:click.prevent="goBack();">Terug</div>
-                    </transition>
-                </div>
-				<div class="center">
-                    <span class="style-caption">Stap {{ step }} / 3</span>
-                </div>
-				<div class="right">
-                    Right
-                </div>
-			</div>
-		</header>
+		<Header>
+			<template v-slot:left>
+                <transition name="move" mode="out-in">
+                    <a href="/" id="logo" alt="Stamhoofd" v-if="step <= 1"></a>
+                    <div v-else v-on:click.prevent="goBack();">Terug</div>
+                </transition>
+            </template>
+            <template v-slot:center>
+                <span class="style-caption">Stap {{ step }} / 3</span>
+            </template>
+            <template v-slot:right>
+                Right
+            </template>
+		</Header>
 		<main>
-            <transition :name="pageTransition" v-on:after-leave="resetScrollPosition()" appear>
+            <transition :name="pageTransition" v-on:after-leave="resetScrollPosition()">
                 <div v-if="step == 1" key="general"><GeneralStep v-on:next="goNext()"></GeneralStep></div>
                 <div v-if="step == 2" key="group-settings"><GroupSettingsStep v-on:next="goNext()"></GroupSettingsStep></div>
             </transition>
@@ -27,11 +25,13 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import GeneralStep from './components/steps/General.vue';
+import Header from './components/Header.vue';
 import GroupSettingsStep from './components/steps/GroupSettings.vue';
+import GeneralStep from './components/steps/General.vue';
 
 @Component({
 	components: {
+        Header,
         GeneralStep,
         GroupSettingsStep,
 	},

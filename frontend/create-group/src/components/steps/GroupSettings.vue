@@ -5,7 +5,7 @@
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
+                <select class="input" ref="firstInput">
                     <option>Scoutsgroep</option>
                     <option>Chirogroep</option>
                 </select>
@@ -247,7 +247,11 @@ import Slider from '@shared/components/inputs/Slider.vue';
   }
 })
 export default class General extends Vue {
-
+    mounted() {
+        // Focus first input automatically
+        let input = this.$refs.firstInput as HTMLElement;
+        input.focus();
+    }
 }
 </script>
 

@@ -11,6 +11,7 @@ $header-height: 50px;
 
 	> header {
         
+        
         > div {
             position: fixed;
             left: 0;
@@ -20,6 +21,26 @@ $header-height: 50px;
             display: flex;
             flex-direction: row;
             padding: 10px 15px;
+            z-index: 1000;
+
+            background: $color-white-shade;
+
+            @media (max-width: 800px + 50px*2) {
+                background: $color-white;
+            }
+
+            &::after {
+                content: '';
+                left: 0;
+                right: 0;
+                top: $header-height;
+                height: 50px;
+                background: linear-gradient($color-white-shade, rgba($color-white-shade, 0));
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s;
+                position: absolute;
+            }
             
             >.left {
                 flex-grow: 1;
@@ -51,6 +72,14 @@ $header-height: 50px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+        }
+
+        &[data-scrolled="true"] {
+            &> div {
+                &::after {
+                    opacity: 1;
+                }
             }
         }
 	}

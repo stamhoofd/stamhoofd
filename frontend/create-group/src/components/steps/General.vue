@@ -5,7 +5,7 @@
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Naam van je vereniging</label>
-                <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name">
+                <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name" ref="firstInput">
 
                 <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
                 <Slider></Slider>
@@ -48,7 +48,11 @@ import Slider from '@shared/components/inputs/Slider.vue';
   }
 })
 export default class General extends Vue {
-
+    mounted() {
+        // Focus first input automatically
+        let input = this.$refs.firstInput as HTMLElement;
+        input.focus();
+    }
 }
 </script>
 
