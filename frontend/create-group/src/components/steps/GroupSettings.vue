@@ -19,217 +19,16 @@
                 </select>
                 
             </div>
-           
         </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
+        
+        <label class="style-label">Jongens en meisjes</label>
+        <Radio>Gemengd</Radio>
+        <Radio>Gescheiden</Radio>
+        <Radio>Enkel jongens</Radio>
+        <Radio>Enkel meisjes</Radio>
 
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
-        <div class="split-inputs">
-            <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input">
-                    <option>Scoutsgroep</option>
-                    <option>Chirogroep</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
-                <select class="input">
-                    <option>Scouts & Gidsen Vlaanderen</option>
-                    <option>FOS</option>
-                </select>
-                
-            </div>
-           
-        </div>
+        <label class="style-label">Test</label>
+        <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
 
         <button class="button primary">Verder</button>
         
@@ -239,11 +38,15 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Slider from '@shared/components/inputs/Slider.vue';
+import Checkbox from '@shared/components/inputs/Checkbox.vue';
+import Radio from '@shared/components/inputs/Radio.vue';
 
 @Component({
   // All component options are allowed in here
   components: {
-      Slider
+      Slider,
+      Checkbox,
+      Radio
   }
 })
 export default class General extends Vue {

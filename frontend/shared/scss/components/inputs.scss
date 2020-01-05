@@ -1,4 +1,5 @@
 @use '../base/variables' as *;
+@use '../base/text-styles';
 
 .input-spacing {
     margin: 10px 0;
@@ -11,6 +12,7 @@
 
 .input {
     @extend .input-spacing;
+    @extend .style-input;
     color: $color-dark;
     border: $border-width solid $color-gray-lighter;
     border-radius: $border-radius;
@@ -44,6 +46,89 @@ select.input {
     &:-moz-focusring { color: transparent;
         text-shadow: 0 0 0 #000; }
 }
+
+.radio, .checkbox {
+    @extend .input-spacing;
+    display: block;
+    cursor: pointer;
+
+    > input {
+        display: none;
+    }
+
+    > div {
+        @extend .style-input;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+
+        > div {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            flex-basis: 20px;
+            border-radius: $border-radius;
+            border: $border-width solid $color-gray-lighter;
+            background: transparent;
+            box-sizing: border-box;
+
+            margin-right: 15px;
+            transition: background-color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg > path {
+                stroke-dasharray: 30;
+                stroke-dashoffset: 30;
+                transition: stroke-dashoffset 0.4s;
+            }
+        }
+    
+
+    }
+
+    > input[type=radio] + div {
+        > div {
+            border-radius: 11px;
+
+            &::after {
+                content: '';
+                height: 20px - $border-width*2;
+                width: 20px - $border-width*2;
+                background: white;
+                border-radius: (20px - $border-width*2)/2;
+                transition: transform 0.2s;
+                transform: scale(1, 1);
+            }
+        }
+    }
+
+    > input:checked + div {
+        > div {
+            border: $border-width solid $color-primary;
+            background: $color-primary;
+
+            svg > path {
+                stroke-dashoffset: 0;
+            }
+        }
+    }
+
+    > input[type=radio]:checked + div {
+        > div {
+            &::after {
+                transform: scale(0.4, 0.4);
+            }
+        }
+    }
+
+    
+
+}
+
 
 // Used to put multiple inputs next to each other
 .input-group {
