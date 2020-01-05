@@ -3,13 +3,13 @@
 $header-height: 50px;
 
 .steps-layout {
-	display: flex;
-	min-height: 100vh;
-	flex-direction: column;
+    background: $color-white-shade;
+
+    @media (max-width: 800px + 50px*2) {
+        background: $color-white;
+    }
 
 	> header {
-		height: $header-height;
-        flex-shrink: 0;
         
         > div {
             position: fixed;
@@ -56,19 +56,59 @@ $header-height: 50px;
 	}
 
 	&> main {
-        flex-grow: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        &> article {
-            width: 800px;
-            padding: 50px;
-            background: $color-white;
 
-            @media (max-width: 500px) {
-                padding: 30px 20px;
+        // Div is used for animations
+        &> div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding-top: $header-height;
+            box-sizing: border-box;
+
+            &> article {
+                box-sizing: content-box;
+                flex-basis: 800px;
+                padding: 50px;
+                background: $color-white;
+                border-radius: $border-radius;
+    
+                @media (max-width: 800px + 50px*2) {
+                    border-radius: 0;
+                }
+    
+                @media (max-width: 500px) {
+                    padding: 30px 20px;
+                }
             }
+        }
+        
+       
+
+        // During animation, the incoming frame is rendered fixed
+        .right-to-left-enter {
+            transform: translateX(50%);
+            opacity: 0;
+        }
+        .right-to-left-leave-to {
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        .right-to-left-enter-active {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+        }
+    
+        .right-to-left-enter-active, .right-to-left-leave-active {
+            transition: transform 0.3s, opacity 0.3s;
+        }
+    
+        .right-to-left-enter-to, .right-to-left-leave /* .fade-leave-active below version 2.1.8 */ {
+            transform: translateX(0);
+            opacity: 1;
         }
 	}
 }

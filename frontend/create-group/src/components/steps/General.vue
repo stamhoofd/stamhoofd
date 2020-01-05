@@ -32,7 +32,7 @@
            
         </div>
 
-        <button class="button primary">Verder</button>
+        <button class="button primary" v-on:click="$emit('next')">Verder</button>
         
     </article>
 </template>

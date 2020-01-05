@@ -20,13 +20,13 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class Slider extends Vue {
-    min: integer = 0;
-    max: integer = 300;
+    min: number = 0;
+    max: number = 300;
 
     /// Offset from the center of the handle during drag.
-    startOffset: float = 0;
-    handlePercentage: float = 50;
-    round: int? = 10;
+    startOffset: number = 0;
+    handlePercentage: number = 50;
+    round?: number = 10;
 
     // if softBounds = true, maximum and minimum is overrideable by the user 
     // when he manually enters a number. This is usefull if the maximum and 
@@ -34,7 +34,7 @@ export default class Slider extends Vue {
     softBounds: boolean = true;
     animate: boolean = false;
 
-    value: integer = 150;
+    value: number = 150;
     dragging: boolean = false;
 
     mounted() {
