@@ -38,8 +38,12 @@ $header-height: 50px;
                 background: linear-gradient($color-white-shade, rgba($color-white-shade, 0));
                 opacity: 0;
                 pointer-events: none;
-                transition: opacity 0.2s;
+                transition: opacity 0.4s;
                 position: absolute;
+
+                @media (max-width: 800px + 50px*2) {
+                    background: linear-gradient($color-white, rgba($color-white, 0));
+                }
             }
             
             >.left {

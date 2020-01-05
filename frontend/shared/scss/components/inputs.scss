@@ -134,6 +134,13 @@ select.input {
 
 }
 
+// Extra padding on first
+label.style-label {
+    +.checkbox, + .radio {
+        margin-top: 20px;
+    }
+}
+
 
 // Used to put multiple inputs next to each other
 .input-group {

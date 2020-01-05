@@ -28,9 +28,9 @@ export default class Header extends Vue {
 
     onScroll() {
         let scroll = window.scrollY;
-        if (scroll > 50) {
+        if (scroll > 10) {
             this.scrolled = true;
-        } else if (scroll < 30) {
+        } else if (scroll < 5) {
             this.scrolled = false;
         }
     }

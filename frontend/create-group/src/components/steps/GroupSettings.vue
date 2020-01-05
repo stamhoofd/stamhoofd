@@ -2,6 +2,9 @@
     <article>
         <h1>Inschrijven & groepen</h1>
 
+        <hr>
+        <h2>Samenstelling</h2>
+
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Soort vereniging</label>
@@ -30,8 +33,26 @@
         </RadioGroup>
 
 
-        <label class="style-label">Test</label>
-        <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
+        <label class="style-label">Extra onderverdelingen</label>
+        <Checkbox>Woutlopers</Checkbox>
+
+        <hr>
+        <h2>Werkjaar</h2>
+
+        <div class="split-inputs">
+            <div>
+                <label class="style-label" for="organization-name">Start werkjaar</label>
+                <input class="input" type="text" placeholder="Kies een datum" autocomplete="organization" id="organization-name">
+            </div>
+
+            <div>
+                <label class="style-label" for="organization-name">Inschrijvingsperiode</label>
+                <input class="input" type="text" placeholder="Van tot" autocomplete="organization" id="organization-name">
+                
+            </div>
+           
+        </div>
+
 
         <button class="button primary" id="next-button">Verder</button>
         
@@ -70,10 +91,21 @@ export default class General extends Vue {
     @use '~@shared/scss/base/text-styles.scss';
     @use '~@shared/scss/components/inputs.scss';
     @use '~@shared/scss/components/buttons.scss';
+    @use '~@shared/scss/elements/hr.scss';
 
     h1 {
         @extend .style-title-1;
         margin-bottom: 20px;
+    }
+
+    h2 {
+        @extend .style-title-2;
+        margin-bottom: 20px;
+    }
+
+    hr {
+        @extend .hr;
+        margin-top: 40px;
     }
 
     #next-button {
