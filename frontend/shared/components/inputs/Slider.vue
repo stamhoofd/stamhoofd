@@ -10,7 +10,7 @@
         </div>
        
         <div class="number">
-            <input type="number" pattern="[0-9]*" v-model.number="value" v-on:change="updateSlider" @focus="$event.target.select()">
+            <input type="number" pattern="[0-9]*" v-model.number="value" v-on:change="updateSlider" @focus="delayedSelect">
         </div>
     </div>
 </template>
@@ -55,6 +55,24 @@ export default class Slider extends Vue {
 
         document.removeEventListener('mouseup', this.mouseUp);
         document.removeEventListener('touchend', this.mouseUp);
+    }
+
+    delayedSelect(event) {
+        // Prevent default seems to be required because else it wont work 100% of the time
+        event.preventDefault();
+
+        // Select all the text
+        event.target.select();
+
+        const handler = (event) => {
+            // Safari fix
+            event.preventDefault();
+            document.removeEventListener('mouseup', handler);
+            return false;
+        };
+
+        // Safari fix
+        document.addEventListener('mouseup', handler);
     }
 
     getEventX(event) {
