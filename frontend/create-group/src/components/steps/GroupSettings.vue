@@ -83,7 +83,7 @@
         <label class="style-label">Verminderd lidgeld</label>
         <PriceInput></PriceInput>
 
-        <button class="button primary" id="next-button">Verder</button>
+        <button class="button primary" v-on:click="$emit('next')" id="next-button">Verder</button>
         
     </article>
 </template>

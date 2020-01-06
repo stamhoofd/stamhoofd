@@ -18,6 +18,7 @@
             <transition :name="pageTransition" v-on:after-leave="resetScrollPosition()">
                 <div v-if="step == 1" key="general"><GeneralStep v-on:next="goNext()"></GeneralStep></div>
                 <div v-if="step == 2" key="group-settings"><GroupSettingsStep v-on:next="goNext()"></GroupSettingsStep></div>
+                <div v-if="step == 3" key="groups"><GroupsStep v-on:next="goNext()"></GroupsStep></div>
             </transition>
 		</main>
 	</div>
@@ -28,12 +29,14 @@ import { Component, Vue } from 'vue-property-decorator';
 import Header from './components/Header.vue';
 import GroupSettingsStep from './components/steps/GroupSettings.vue';
 import GeneralStep from './components/steps/General.vue';
+import GroupsStep from './components/steps/Groups.vue';
 
 @Component({
 	components: {
         Header,
         GeneralStep,
         GroupSettingsStep,
+        GroupsStep
 	},
 })
 export default class App extends Vue {
