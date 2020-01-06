@@ -1,10 +1,15 @@
 <template>
     <label class="price-input">
-        <!-- We use type = text here because the specs of number make that we can't get the raw string value, we need this -->
+        <!-- 
+            We use type = text here because the specs of number inputs ensure that we can't get 
+            the raw string value, but we need this for our placeholder logic.
+            Also inputmode is more specific on mobile devices. 
+            Only downside is that we lose the stepper input on desktop.
+        -->
         <input type="text" inputmode="decimal" step="any" v-model="valueString" ref="input">
         <div v-if="isNaN(value)"><span>{{ valueString }}</span></div>
         <div v-else-if="valueString != ''"><span>{{ valueString }}</span> {{ currency }}</div>
-        <div v-else>Gratis</div>
+        <div v-else>{{ placeholder }}</div>
     </label>
 </template>
 
@@ -46,6 +51,7 @@ export default class PriceInput extends Vue {
 
         &> div {
             pointer-events: none;
+            user-select: none; 
         }
         
         &> input {
