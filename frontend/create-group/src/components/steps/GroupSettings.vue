@@ -66,10 +66,22 @@
         <h2>Prijzen</h2>
         <p>Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende stap.</p>
 
-        <label class="style-label">Lidgeld</label>
+        <div class="split-inputs">
+            <div>
+                <label class="style-label">Lidgeld</label>
+                <PriceInput></PriceInput>
+            </div>
+
+            <div>
+                <label class="style-label">Lidgeld voor beheerders</label>
+                <PriceInput></PriceInput>
+            </div>
+        </div>
+
+        <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
+
+        <label class="style-label">Verminderd lidgeld</label>
         <PriceInput></PriceInput>
-
-
 
         <button class="button primary" id="next-button">Verder</button>
         

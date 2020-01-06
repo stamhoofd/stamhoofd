@@ -52,6 +52,10 @@ export default class PriceInput extends Vue {
         &> div {
             pointer-events: none;
             user-select: none; 
+
+            span {
+                white-space: pre;
+            }
         }
         
         &> input {
