@@ -88,7 +88,7 @@ select.input {
             svg > path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
-                transition: stroke-dashoffset 0.4s;
+                transition: stroke-dashoffset 0.4s 0.1s;
             }
         }
     

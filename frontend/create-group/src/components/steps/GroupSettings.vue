@@ -42,13 +42,22 @@
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Start werkjaar</label>
-                <input class="input" type="text" placeholder="Kies een datum" autocomplete="organization" id="organization-name">
+                <select class="input">
+                    <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                </select>
             </div>
 
             <div>
                 <label class="style-label" for="organization-name">Inschrijvingsperiode</label>
-                <input class="input" type="text" placeholder="Van tot" autocomplete="organization" id="organization-name">
-                
+                <div class="mixed-input">
+                    <select>
+                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                    </select>
+                    <span>tot</span>
+                    <select>
+                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                    </select>
+                </div>
             </div>
            
         </div>
@@ -76,6 +85,8 @@ import RadioGroup from '@shared/components/inputs/RadioGroup.vue';
   }
 })
 export default class General extends Vue {
+    months: string[] = ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"];
+
     mounted() {
         // Focus first input automatically
         let input = this.$refs.firstInput as HTMLElement;
@@ -90,6 +101,7 @@ export default class General extends Vue {
     @use '~@shared/scss/layout/split-inputs.scss';
     @use '~@shared/scss/base/text-styles.scss';
     @use '~@shared/scss/components/inputs.scss';
+    @use '~@shared/scss/components/mixed-input.scss';
     @use '~@shared/scss/components/buttons.scss';
     @use '~@shared/scss/elements/hr.scss';
 
