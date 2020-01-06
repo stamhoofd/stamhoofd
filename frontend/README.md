@@ -36,7 +36,7 @@
     package.json
     # Vue cli configuration file (best to adjust webpack config here)
     vue.config.js
-    # Versions of each dependency that were installed by yarn
+    # Versions of each dependency that was installed by yarn
     yarn.lock
 
 # All shared scripts and assets
