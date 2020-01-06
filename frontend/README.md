@@ -114,4 +114,4 @@ The PostCSS [autoprefixer plugin](https://github.com/postcss/autoprefixer) is en
 
 ### Designs
 
-Designs are made in Figma and some in Sketch (still need to pick a final one). You can request access via @SimonBackx.
+Designs are made in Figma and some in Sketch (still need to pick a final one). You can request access via [@SimonBackx](https://github.com/SimonBackx).
