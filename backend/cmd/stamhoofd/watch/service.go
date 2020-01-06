@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,14 +19,16 @@ import (
 )
 
 const (
-	Interval time.Duration = time.Millisecond * 250
+	Interval       = time.Millisecond * 250
+	ProtobufOutput = "pb"
 )
 
 type ServiceEvent int
 
 const (
 	Restart ServiceEvent = iota
-	Generate
+	GenerateProtos
+	GenerateGraphQL
 )
 
 type Service struct {
@@ -39,6 +42,8 @@ type Service struct {
 	IsRunning bool
 	// Service configuration.
 	Config *Config
+	// List of all services.
+	Services map[string]*Service
 
 	// Channel to send service events.
 	eventChannel  chan ServiceEvent
@@ -53,16 +58,30 @@ type Service struct {
 }
 
 // GetServices gets the list of services that have a configuration file.
-func GetServices(log *logrus.Logger, backendDir string) []*Service {
-	services := []*Service{}
+// Specify a service name to only retrieve a single service.
+func GetServices(log *logrus.Logger, backendDir string, serviceNames []string) map[string]*Service {
+	services := make(map[string]*Service)
 	filepath.Walk(backendDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
+			// Skip if only a single service is requested and it's not this one.
+			if serviceNames != nil {
+				found := false
+				for _, serviceName := range serviceNames {
+					if info.Name() == serviceName {
+						found = true
+					}
+				}
+				if !found {
+					return nil
+				}
+			}
+
 			config, err := NewConfig(path)
 			if err != nil {
 				return nil
 			}
-			service := NewService(log, backendDir, path, config)
-			services = append(services, service)
+			service := NewService(log, backendDir, path, config, services)
+			services[service.Name] = service
 		}
 		return nil
 	})
@@ -70,11 +89,12 @@ func GetServices(log *logrus.Logger, backendDir string) []*Service {
 }
 
 // NewServices creates a new service.
-func NewService(log *logrus.Logger, backendDir, path string, config *Config) *Service {
+func NewService(log *logrus.Logger, backendDir, path string, config *Config, services map[string]*Service) *Service {
 	name := filepath.Base(path)
 	s := &Service{
 		Name:       name,
 		Config:     config,
+		Services:   services,
 		backendDir: backendDir,
 		logger: log.WithFields(logrus.Fields{
 			"prefix": strings.ToUpper(name),
@@ -114,8 +134,10 @@ func (s *Service) initEventDebounce() {
 					switch key {
 					case Restart:
 						s.ForceRestart()
-					case Generate:
-						s.ForceGenerate()
+					case GenerateProtos:
+						s.ForceGenerateProtos()
+					case GenerateGraphQL:
+						s.ForceGenerateGraphQL()
 					}
 					return true
 				})
@@ -156,6 +178,23 @@ func (s *Service) Start() {
 		return
 	}
 
+	// Check whether the dependencies are ready to receive requests.
+	dependencies := s.Dependencies()
+	dependenciesRunning := &sync.WaitGroup{}
+	dependenciesRunning.Add(len(dependencies))
+
+	for _, dependency := range dependencies {
+		go func(dependency *Service) {
+			if !dependency.IsReady() {
+				s.logger.Infof("Waiting for %s to be ready...", dependency.Name)
+			}
+			for !dependency.IsReady() {
+				time.Sleep(time.Millisecond)
+			}
+			dependenciesRunning.Done()
+		}(dependency)
+	}
+
 	s.logger.Info("Installing...")
 	installCmd := exec.Command("go", "install", ".")
 	installCmd.Dir = s.Dir()
@@ -180,28 +219,52 @@ func (s *Service) Start() {
 	s.IsRunning = true
 	s.Cmd = exec.Command(s.Name)
 	s.Cmd.Dir = s.Dir()
+	s.Cmd.Env = os.Environ()
 
-	cmdOutput, err := s.Cmd.StderrPipe()
+	for key, value := range s.Config.Env {
+		s.Cmd.Env = append(s.Cmd.Env, fmt.Sprintf("%s=%s", key, value))
+	}
+
+	// The dependencies should be ready before running the service.
+	dependenciesRunning.Wait()
+	wrapStartCmd(s.Cmd, s.logger, false)
+}
+
+// wrapStartCmd wraps an *exec.Cmd and pipes its output to logrus.
+// The wait command specifies whether or not to wait for the command to complete.
+func wrapStartCmd(cmd *exec.Cmd, logger *logrus.Entry, wait bool) {
+	cmdOutput, err := cmd.StderrPipe()
 	if err != nil {
-		s.logger.Error(err)
-		s.logger.Fatal("Could not pipe stderr.")
+		logger.Error(err)
+		logger.Fatal("Could not pipe stderr.")
 	}
 
-	if err := s.Cmd.Start(); err != nil {
-		s.logger.Error(err)
-		s.logger.Fatal("Could not start command.")
+	if err := cmd.Start(); err != nil {
+		logger.Error(err)
+		logger.Fatal("Could not start command: %v", cmd)
 	}
 
-	go func(cmdOutput io.ReadCloser) {
+	waitGroup := &sync.WaitGroup{}
+
+	if wait {
+		waitGroup.Add(1)
+	}
+
+	go func(cmdOutput io.ReadCloser, waitGroup *sync.WaitGroup, wait bool) {
 		scanner := bufio.NewScanner(cmdOutput)
 		for scanner.Scan() {
-			s.logger.Info(scanner.Text())
+			logger.Info(scanner.Text())
 		}
 		if err = scanner.Err(); err != nil {
-			s.logger.Error(err)
-			s.logger.Fatal("An error occurred when piping the output to the logger.")
+			logger.Error(err)
+			logger.Error("An error occurred when piping the output to the logger.")
 		}
-	}(cmdOutput)
+		if wait {
+			waitGroup.Done()
+		}
+	}(cmdOutput, waitGroup, wait)
+
+	waitGroup.Wait()
 }
 
 // Kill kills the process that is currently running and its children of the same
@@ -230,9 +293,16 @@ func (s *Service) Restart() {
 	s.eventChannel <- Restart
 }
 
-// Generate sends a message on the event channel indicating that a generate is requested.
-func (s *Service) Generate() {
-	s.eventChannel <- Generate
+// GenerateProtos sends a message on the event channel indicating that the
+// protobuf files need to be regenerated.
+func (s *Service) GenerateProtos() {
+	s.eventChannel <- GenerateProtos
+}
+
+// GenerateGraphQL sends a message on the event channel indicating that the
+// graphql files need to be regenerated.
+func (s *Service) GenerateGraphQL() {
+	s.eventChannel <- GenerateGraphQL
 }
 
 // Immediately stop and start the service.
@@ -242,38 +312,85 @@ func (s *Service) ForceRestart() {
 	s.Start()
 }
 
-// Generate generates the needed protobuf files.
-// Please use *Service.Generate instead.
-func (s *Service) ForceGenerate() {
+// GenerateProtos generates the needed protobuf files.
+// Please use *Service.GenerateProtos instead.
+func (s *Service) ForceGenerateProtos() {
 	s.logger.Info("Generating protobuf code...")
 
 	args := []string{
-		"--proto_path=../protos/stamhoofd", "--go_out=plugins=grpc:service",
+		"--proto_path=../protos/stamhoofd", fmt.Sprintf("--go_out=plugins=grpc:%s", ProtobufOutput),
 	}
 	args = append(args, s.Config.Protos...)
 
 	cmd := exec.Command("protoc", args...)
 	cmd.Dir = s.Dir()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	wrapStartCmd(cmd, s.logger, true)
+}
 
-	if err := cmd.Run(); err != nil {
-		s.logger.Fatalf("Could not generate protobuf files:\n%v\n", err)
+// GenerateProtos generates the needed protobuf files.
+// Please use *Service.GenerateProtos instead.
+func (s *Service) ForceGenerateGraphQL() {
+	// Do not generate GraphQL if the settings file is not there.
+	_, err := os.Stat(filepath.Join(s.Dir(), "gqlgen.yml"))
+	if os.IsNotExist(err) {
+		return
 	}
+
+	s.logger.Info("Generating graphql code...")
+
+	cmd := exec.Command("go", "run", "scripts/gqlgen.go", "-v")
+	cmd.Dir = s.Dir()
+	wrapStartCmd(cmd, s.logger, true)
 }
 
 // Watch watches both the service's folder and protobuf files and restarts and
 // generates the protobuf files again when a change is detected.
 func (s *Service) Watch() {
-	s.ForceGenerate()
+	s.ForceGenerateProtos()
+	s.ForceGenerateGraphQL()
 	s.Start()
 
 	s.watchFolder()
 	s.watchProtos()
 }
 
+// IsReady returns true when the container is ready to receive requests.
+func (s *Service) IsReady() bool {
+	return s.okResponse(fmt.Sprintf("http://localhost%s/readiness", s.Config.StatusPort()))
+}
+
+// IsAlive returns true when the container is alive, false means that it needs to be restarted.
+func (s *Service) IsAlive() bool {
+	return s.okResponse(fmt.Sprintf("http://localhost%s/liveness", s.Config.StatusPort()))
+}
+
+// okResponse returns true when there was no error` requesting the given URL and
+// the status code was successful (>= 200 and < 400).
+func (s *Service) okResponse(url string) bool {
+	resp, err := http.Get(url)
+	if err != nil {
+		return false
+	}
+
+	return resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusBadRequest
+}
+
+// Dependencies returns the list of services this service depends on.
+func (s *Service) Dependencies() []*Service {
+	dependencies := []*Service{}
+	for _, dependencyName := range s.Config.Dependencies {
+		for serviceName, service := range s.Services {
+			if dependencyName == serviceName {
+				dependencies = append(dependencies, service)
+				break
+			}
+		}
+	}
+	return dependencies
+}
+
 // watchFolder watches the service's files and automatically restarts the service
-// when a file changes.
+// when a file changes, optionally generating code like GraphQL.
 func (s *Service) watchFolder() {
 	err := watchPaths(func(event fsnotify.Event) {
 		s.logger.WithField(
@@ -281,10 +398,18 @@ func (s *Service) watchFolder() {
 			strings.ToUpper(fmt.Sprintf("%s %v", s.Name, event.Op)),
 		).Info(event.Name)
 
-		isProtoRemoved := filepath.Base(filepath.Dir(event.Name)) == "service" && event.Op&(fsnotify.Rename|fsnotify.Remove) != 0
+		isProtoRemoved := filepath.Base(filepath.Dir(event.Name)) == ProtobufOutput && event.Op&(fsnotify.Rename|fsnotify.Remove) != 0
 		if isProtoRemoved {
-			s.Generate()
+			s.GenerateProtos()
+			return
 		}
+
+		isGraphQL := filepath.Ext(event.Name) == ".graphql"
+		if isGraphQL {
+			s.GenerateGraphQL()
+			return
+		}
+
 		s.Restart()
 	}, func(err error) {
 		s.logger.Error(err)
@@ -311,7 +436,7 @@ func (s *Service) watchProtos() {
 			"prefix",
 			strings.ToUpper(fmt.Sprintf("%s %v", s.Name, event.Op)),
 		).Info(event.Name)
-		s.Generate()
+		s.GenerateProtos()
 	}, func(err error) {
 		s.logger.Info("error:", err)
 		s.Stop()

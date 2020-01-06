@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
-	"github.com/stamhoofd/stamhoofd/backend/auth/service"
+	"github.com/stamhoofd/stamhoofd/backend/auth/pb"
 )
 
 const (
@@ -23,14 +23,14 @@ func SendEmail(to, subject, body string) error {
 		return errors.Wrap(err, "Can't connect with email service")
 	}
 	defer conn.Close()
-	emailClient := service.NewEmailClient(conn)
+	emailClient := pb.NewEmailClient(conn)
 
 	// Start a new timeout
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	// Contact the server and print out its response.
-	_, err = emailClient.Send(ctx, &service.SendRequest{
+	_, err = emailClient.Send(ctx, &pb.SendRequest{
 		To:      to,
 		Subject: subject,
 		Body:    body,

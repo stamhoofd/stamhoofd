@@ -133,5 +133,12 @@ $RECYCLE.BIN/
 
 # Ignore SQLite databases.
 *.db
+
+# Go protobuf generated code.
 *.pb.go
+
+# Go GraphQL generated code.
+*.gql.go
+
+# Temporary files.
 *.tmp

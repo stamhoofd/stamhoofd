@@ -1,6 +1,6 @@
 syntax = "proto3";
-package service;
-option go_package = "service";
+package pb;
+option go_package = "pb";
 
 import "google/protobuf/timestamp.proto";
 
@@ -46,7 +46,7 @@ message RegisterConfirmRequest {
 message RegisterConfirmResponse {}
 
 message LoginRequest {
-  string email = 1;
+  // string email = 1;
   string password = 2;
 }
 
