@@ -62,6 +62,14 @@
            
         </div>
 
+        <hr>
+        <h2>Prijzen</h2>
+        <p>Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende stap.</p>
+
+        <label class="style-label">Lidgeld</label>
+        <PriceInput></PriceInput>
+
+
 
         <button class="button primary" id="next-button">Verder</button>
         
@@ -74,6 +82,7 @@ import Slider from '@shared/components/inputs/Slider.vue';
 import Checkbox from '@shared/components/inputs/Checkbox.vue';
 import Radio from '@shared/components/inputs/Radio.vue';
 import RadioGroup from '@shared/components/inputs/RadioGroup.vue';
+import PriceInput from '@shared/components/inputs/PriceInput.vue';
 
 @Component({
   // All component options are allowed in here
@@ -81,7 +90,8 @@ import RadioGroup from '@shared/components/inputs/RadioGroup.vue';
       Slider,
       Checkbox,
       Radio,
-      RadioGroup
+      RadioGroup,
+      PriceInput
   }
 })
 export default class General extends Vue {
