@@ -76,7 +76,7 @@ Inside a services directory, run `yarn serve` to start a development server with
 Configuration and development dependencies are managed by Vue CLI. Please refer to the [Configuration Reference](https://cli.vuejs.org/config/#global-cli-config). This makes the setup a bit easier, and we can always decide to move away from Vue CLI in the future.
 
 ### Single file components
-Single file components are used. These group the HTML, Typescript/Javascript and SCSS related to the same Vue component in a single file. [Check the official documentation](https://vuejs.org/v2/guide/single-file-components.html).
+Single file components are used. These group the HTML, TypeScript/JavaScript and SCSS related to the same Vue component in a single file. [Check the official documentation](https://vuejs.org/v2/guide/single-file-components.html).
 
 * `shared/components/**/*.vue`: Components used by multiple services
 * `{service-name}/src/components/**/*.vue`: Components used by a single service
