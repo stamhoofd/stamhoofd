@@ -114,6 +114,7 @@ export default class Slider extends Vue {
         if (this.dragging) {
             return;
         }
+        // startOffset = the distance between the center of the handle during dragging
         this.startOffset = this.getHandleOffset(event);
         this.dragging = true;
         
