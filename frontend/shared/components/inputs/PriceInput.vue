@@ -1,13 +1,13 @@
 <template>
-    <label class="price-input">
+    <label class="price-input" :class="{error: !valid}">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
             Also inputmode is more specific on mobile devices. 
             Only downside is that we lose the stepper input on desktop.
         -->
-        <input type="text" inputmode="decimal" step="any" v-model="valueString" ref="input">
-        <div v-if="isNaN(value)"><span>{{ valueString }}</span></div>
+        <input type="text" inputmode="decimal" step="any" v-model="valueString" ref="input" v-on:blur="clean" v-on:keydown.up.prevent="step(1)" v-on:keydown.down.prevent="step(-1)">
+        <div v-if="!valid"><span>{{ valueString }}</span></div>
         <div v-else-if="valueString != ''"><span>{{ valueString }}</span> {{ currency }}</div>
         <div v-else>{{ placeholder }}</div>
     </label>
@@ -18,9 +18,10 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 
 @Component
 export default class PriceInput extends Vue {
-    min: number = 0;
-    max?: number = null;
+    min: number = -200;
+    max?: number = 100;
     valueString: string = "40";
+    valid: boolean = true;
     value: number = 40;
     currency: string = 'euro';
 
@@ -31,10 +32,69 @@ export default class PriceInput extends Vue {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
         if (value == "") {
-            this.value = 0;
+            this.valid = true;
+            this.value = Math.max(0, this.min);
         } else {
-            this.value = parseFloat(value);
+            const separator = this.whatDecimalSeparator();
+            if (separator == ',') {
+                value = value.replace(',', '.');
+            }
+            const v = parseFloat(value);
+            if (isNaN(v)) {
+                this.valid = false;
+                this.value = this.min;
+            } else {
+                this.valid = true;
+
+                // Remove extra decimals
+                this.value = Math.round(v*100)/100;
+                this.constrain();
+            }
         }
+    }
+
+    whatDecimalSeparator(): string {
+        const n = 1.1;
+        const str = n.toLocaleString().substring(1, 2);
+        return str;
+    }
+
+    // Restore invalid input, make the input value again
+    // And set valueString
+    clean() {
+        if (!this.valid) {
+            return;
+        }
+        // Check if has decimals
+        const decimals = this.value % 1;
+        const abs = Math.abs(this.value);
+
+        if (decimals != 0) {
+            // Include decimals
+            this.valueString = (this.value < 0 ? '-' : '')+Math.floor(abs)+this.whatDecimalSeparator()+Math.round(Math.abs(decimals)*100);
+        } else {
+            // Hide decimals
+            this.valueString = this.value+"";
+        }
+    }
+
+    // Limit value to bounds
+    constrain() {
+        this.value = Math.max(this.min, this.value);
+        if (this.max && this.value > this.max) {
+            this.value = this.max;
+        }
+    }
+
+    step(add: number) {
+        if (!this.valid) {
+            return;
+        }
+        this.clean();
+        this.value += add;
+        this.constrain();
+        
+        this.clean();
     }
    
 }
@@ -52,6 +112,7 @@ export default class PriceInput extends Vue {
         &> div {
             pointer-events: none;
             user-select: none; 
+            white-space: nowrap;
 
             span {
                 white-space: pre;
