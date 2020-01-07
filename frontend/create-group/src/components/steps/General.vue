@@ -58,7 +58,6 @@ export default class General extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-    // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
     @use '~@shared/scss/layout/split-inputs.scss';
     @use '~@shared/scss/base/text-styles.scss';
     @use '~@shared/scss/components/inputs.scss';

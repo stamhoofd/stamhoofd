@@ -65,7 +65,7 @@ export default class Slider extends Vue {
         event.target.select();
 
         const handler = (event) => {
-            // Safari fix
+            // Safari deselects the text on mouse up, we need to prevent this
             event.preventDefault();
             document.removeEventListener('mouseup', handler);
             return false;
@@ -115,7 +115,6 @@ export default class Slider extends Vue {
             return;
         }
         this.startOffset = this.getHandleOffset(event);
-        console.log("Start with offset "+this.startOffset);
         this.dragging = true;
         
         
