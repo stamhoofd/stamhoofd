@@ -35,8 +35,8 @@ export default class PriceInput extends Vue {
             this.valid = true;
             this.value = Math.max(0, this.min);
         } else {
-            const separator = this.whatDecimalSeparator();
-            if (separator == ',') {
+            if (!value.includes('.')) {
+                // We do this for all locales since some browsers report the language locale instead of the formatting locale
                 value = value.replace(',', '.');
             }
             const v = parseFloat(value);
@@ -53,6 +53,7 @@ export default class PriceInput extends Vue {
         }
     }
 
+    /// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
     whatDecimalSeparator(): string {
         const n = 1.1;
         const str = n.toLocaleString().substring(1, 2);
