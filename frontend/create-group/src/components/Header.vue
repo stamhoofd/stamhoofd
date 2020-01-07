@@ -10,6 +10,7 @@
             <div class="right">
                 <slot name="right"></slot>
             </div>
+            <div class="progress" :style="{width: progress*100+'%'}" :class="{hide: progress >= 1}"></div>
         </div>
     </header>
 </template>
@@ -21,6 +22,9 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class Header extends Vue {
     scrolled: boolean = false;
+
+    @Prop()
+    progress: number = 0;
 
     mounted() {
         document.addEventListener('scroll', this.onScroll, {passive: true});

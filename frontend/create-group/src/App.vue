@@ -1,6 +1,6 @@
 <template>
 	<div id="app" class="steps-layout">
-		<Header>
+		<Header :progress="(step - 1) / 3">
 			<template v-slot:left>
                 <transition name="move" mode="out-in">
                     <a href="/" id="logo" alt="Stamhoofd" v-if="step <= 1"></a>
