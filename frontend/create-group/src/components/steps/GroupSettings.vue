@@ -132,6 +132,11 @@ export default class General extends Vue {
         margin-bottom: 20px;
     }
 
+    p {
+        @extend .style-description;
+        margin: 10px 0;
+    }
+
     h2 {
         @extend .style-title-2;
         margin-bottom: 20px;

@@ -18,8 +18,8 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 
 @Component
 export default class PriceInput extends Vue {
-    min: number = -200;
-    max?: number = 100;
+    min: number = 0;
+    max?: number = null;
     valueString: string = "40";
     valid: boolean = true;
     value: number = 40;

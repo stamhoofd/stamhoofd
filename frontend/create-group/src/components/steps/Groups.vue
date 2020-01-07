@@ -38,6 +38,11 @@ export default class Groups extends Vue {
         margin-bottom: 20px;
     }
 
+    p {
+        @extend .style-description;
+        margin: 10px 0;
+    }
+
     #next-button {
         margin-top: 30px;
     }
