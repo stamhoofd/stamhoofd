@@ -4,6 +4,28 @@
         <p>Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Je kan nu wijzigingen maken, maar je kan deze op elk moment nog wijzigen.</p>
 
         <h2 class="style-label">Leden</h2>
+        <CheckboxList>
+            <CheckboxItem>
+                <template v-slot:left>Kapoenen</template>
+                <template v-slot:right>6 - 8 jaar</template>
+            </CheckboxItem>
+            <CheckboxItem>
+                <template v-slot:left>Welpen</template>
+                <template v-slot:right></template>
+            </CheckboxItem>
+            <CheckboxItem>
+                <template v-slot:left>Kabouters</template>
+                <template v-slot:right></template>
+            </CheckboxItem>
+            <CheckboxItem>
+                <template v-slot:left>Jongverkenners</template>
+                <template v-slot:right></template>
+            </CheckboxItem>
+            <CheckboxItem>
+                <template v-slot:left>Jonggidsen</template>
+                <template v-slot:right></template>
+            </CheckboxItem>
+        </CheckboxList>
 
 
         <button class="button primary" v-on:click="$emit('next')" id="next-button">Verder</button>
@@ -13,11 +35,15 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Slider from '@shared/components/inputs/Slider.vue';
+import CheckboxList from '@shared/components/inputs/CheckboxList.vue';
+import CheckboxItem from '@shared/components/inputs/CheckboxItem.vue';
 
 @Component({
   // All component options are allowed in here
   components: {
-      Slider
+      Slider,
+      CheckboxList,
+      CheckboxItem
   }
 })
 export default class Groups extends Vue {
