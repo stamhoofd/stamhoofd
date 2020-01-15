@@ -32,17 +32,22 @@ export default class CheckboxItem extends Vue {
     @use "~@shared/scss/components/checkbox.scss";
 
     .checkbox.item {
-        padding: 10px 0;
-
-        &+ .checkbox.item {
-            border-bottom: $border-width solid $color-gray-lighter;
+        margin: 0;
+        
+        &+ .checkbox.item .group {
+            border-top: $border-width solid $color-gray-lighter;
         }
         .group {
+            padding: 15px 0;
             flex-grow: 1;
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+
+            &>div:last-child {
+                color: $color-gray;
+            }
         }
     
     }
