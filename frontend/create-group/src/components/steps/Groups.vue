@@ -1,7 +1,7 @@
 <template>
     <article>
         <h1>Groepindeling</h1>
-        <p>Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Je kan nu wijzigingen maken, maar je kan deze op elk moment nog wijzigen.</p>
+        <p>Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Selecteer de groepen die je wilt toevoegen. Je kan nu wijzigingen maken, maar je kan alles op elk moment nog wijzigen.</p>
 
         <h2 class="style-label">Leden</h2>
         <CheckboxList>
