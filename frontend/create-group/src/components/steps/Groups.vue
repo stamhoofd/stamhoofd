@@ -7,7 +7,10 @@
         <CheckboxList>
             <CheckboxItem>
                 <template v-slot:left>Kapoenen</template>
-                <template v-slot:right>6 - 8 jaar</template>
+                <template v-slot:right>
+                    6 - 8 jaar
+                    <GenderSelector></GenderSelector>
+                </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Welpen</template>
@@ -37,13 +40,15 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Slider from '@shared/components/inputs/Slider.vue';
 import CheckboxList from '@shared/components/inputs/CheckboxList.vue';
 import CheckboxItem from '@shared/components/inputs/CheckboxItem.vue';
+import GenderSelector from '@shared/components/inputs/GenderSelector.vue';
 
 @Component({
   // All component options are allowed in here
   components: {
       Slider,
       CheckboxList,
-      CheckboxItem
+      CheckboxItem,
+      GenderSelector
   }
 })
 export default class Groups extends Vue {
