@@ -14,19 +14,27 @@
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Welpen</template>
-                <template v-slot:right></template>
+                <template v-slot:right>
+                    <GenderSelector></GenderSelector>
+                </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Kabouters</template>
-                <template v-slot:right></template>
+                <template v-slot:right>
+                    <GenderSelector></GenderSelector>
+                </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Jongverkenners</template>
-                <template v-slot:right></template>
+                <template v-slot:right>
+                    <GenderSelector></GenderSelector>
+                </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Jonggidsen</template>
-                <template v-slot:right></template>
+                <template v-slot:right>
+                    <GenderSelector></GenderSelector>
+                </template>
             </CheckboxItem>
         </CheckboxList>
 
