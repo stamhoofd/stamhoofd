@@ -41,7 +41,7 @@ export default class CheckboxItem extends Vue {
             border-top: $border-width solid $color-gray-lighter;
         }
         .group {
-            padding: 15px 0;
+            
             flex-grow: 1;
             display: flex;
             flex-direction: row;
@@ -52,6 +52,7 @@ export default class CheckboxItem extends Vue {
             min-width: 0;
 
             &> div:first-child {
+                padding: 15px 0;
                 padding-right: 10px;
                 flex-grow: 1;
                 flex-basis: 0;
