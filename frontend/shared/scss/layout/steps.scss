@@ -120,11 +120,12 @@ $header-height: 50px;
             box-sizing: border-box;
 
             &> article {
-                box-sizing: content-box;
+                box-sizing: border-box;  
                 flex-basis: 800px;
                 padding: 50px;
                 background: $color-white;
                 border-radius: $border-radius;
+                max-width: 100%;
     
                 @media (max-width: 800px + 50px*2) {
                     border-radius: 0;

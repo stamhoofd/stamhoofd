@@ -8,8 +8,11 @@
                 </svg>
             </div>
             <div class="group">
-                <div><slot name="left"></slot></div>
-                <div><slot name="right"></slot></div>
+                <div>
+                    <div><slot name="left"></slot></div>
+                    <div><slot name="right"></slot></div>
+                </div>
+                <div><slot name="buttons"></slot></div>
             </div>
             
         </div>
@@ -44,9 +47,55 @@ export default class CheckboxItem extends Vue {
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
+            
+            // Min width to fix overflow
+            min-width: 0;
+
+            &> div:first-child {
+                padding-right: 10px;
+                flex-grow: 1;
+                flex-basis: 0;
+                flex-shrink: 100;
+
+                // Min width to fix ellipsis
+                min-width: 0;
+                
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+
+                @media (max-width: 300px) {
+                    flex-direction: column;
+                    align-items: stretch;
+                    flex-shrink: 100;
+                }
+
+                &> div {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                }
+
+                &> div:first-child {
+                    flex-grow: 1;
+                    padding-right: 10px;
+                } 
+
+                &>div:last-child {
+                    color: $color-gray;
+                }
+            }
 
             &>div:last-child {
-                color: $color-gray;
+                flex-shrink: 0;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+
+                > *:last-child {
+                    margin-right: 0 !important;
+                }
             }
         }
     

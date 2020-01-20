@@ -55,6 +55,10 @@ export default class GenderSelector extends Vue {
                 stroke-dashoffset: 30;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
+
+            @media (pointer: coarse) {
+                padding: 0 5px;
+            }
         }
         input.female + div {
             background-image: url(~@shared/assets/images/icons/border/female.svg);
