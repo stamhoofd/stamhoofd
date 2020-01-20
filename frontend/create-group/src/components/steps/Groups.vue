@@ -9,31 +9,55 @@
                 <template v-slot:left>Kapoenen</template>
                 <template v-slot:right>
                     6 - 8 jaar
+                </template>
+
+                <template v-slot:buttons>
                     <GenderSelector></GenderSelector>
+                    <MoreButton></MoreButton>
                 </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Welpen</template>
                 <template v-slot:right>
+                    6 - 8 jaar
+                </template>
+
+                <template v-slot:buttons>
                     <GenderSelector></GenderSelector>
+                    <MoreButton></MoreButton>
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Kabouters</template>
+                <template v-slot:left>Kaboutersmeteenhelelangenaamhierzo</template>
                 <template v-slot:right>
+                    6 - 8 jaar
+                </template>
+
+                <template v-slot:buttons>
                     <GenderSelector></GenderSelector>
+                    <MoreButton></MoreButton>
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Jongverkenners</template>
+                <template v-slot:left>Jongverkenners en nog wat tekst hierzo, om te testen</template>
                 <template v-slot:right>
+                    6 - 8 jaar
+                </template>
+
+                <template v-slot:buttons>
                     <GenderSelector></GenderSelector>
+                    <MoreButton></MoreButton>
                 </template>
             </CheckboxItem>
             <CheckboxItem>
                 <template v-slot:left>Jonggidsen</template>
                 <template v-slot:right>
+                    6 - 8 jaar
+                </template>
+
+                <template v-slot:buttons>
                     <GenderSelector></GenderSelector>
+                    <MoreButton></MoreButton>
                 </template>
             </CheckboxItem>
         </CheckboxList>
@@ -49,6 +73,7 @@ import Slider from '@shared/components/inputs/Slider.vue';
 import CheckboxList from '@shared/components/inputs/CheckboxList.vue';
 import CheckboxItem from '@shared/components/inputs/CheckboxItem.vue';
 import GenderSelector from '@shared/components/inputs/GenderSelector.vue';
+import MoreButton from '@shared/components/buttons/MoreButton.vue';
 
 @Component({
   // All component options are allowed in here
@@ -56,7 +81,8 @@ import GenderSelector from '@shared/components/inputs/GenderSelector.vue';
       Slider,
       CheckboxList,
       CheckboxItem,
-      GenderSelector
+      GenderSelector,
+      MoreButton
   }
 })
 export default class Groups extends Vue {
