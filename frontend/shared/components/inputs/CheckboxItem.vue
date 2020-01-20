@@ -65,7 +65,7 @@ export default class CheckboxItem extends Vue {
                 justify-content: space-between;
                 align-items: center;
 
-                @media (max-width: 300px) {
+                @media (max-width: 400px) {
                     flex-direction: column;
                     align-items: stretch;
                     flex-shrink: 100;
