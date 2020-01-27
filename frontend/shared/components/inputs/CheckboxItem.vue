@@ -38,7 +38,7 @@ export default class CheckboxItem extends Vue {
         margin: 0;
         
         &+ .checkbox.item .group {
-            border-top: $border-width solid $color-gray-lighter;
+            border-top: $border-width solid $color-gray-light;
         }
         .group {
             
