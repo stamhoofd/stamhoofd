@@ -83,9 +83,10 @@ export default class SegmentedControl extends Vue {
                     position: absolute;
                     left: 10px;
                     right: 10px;
-                    top: 50%;
+                    top: 0;
+                    height: 100%;
+                    line-height: 34px;
                     text-align: center;
-                    transform: translateY(-50%);
                     text-overflow: ellipsis;
                     opacity: 1;
                     overflow: hidden;
@@ -100,9 +101,10 @@ export default class SegmentedControl extends Vue {
                     position: absolute;
                     left: 10px;
                     right: 10px;
-                    top: 50%;
+                    top: 0;
+                    height: 100%;
+                    line-height: 34px;
                     text-align: center;
-                    transform: translateY(-50%);
                     text-overflow: ellipsis;
                     font-weight: 600;
                     overflow: hidden;
