@@ -232,7 +232,7 @@ export default class Slider extends Vue {
             text-align: right;
             width: 50px;
             display: block;
-            border-bottom: 2px dashed $color-gray-lighter;
+            border-bottom: 2px dashed $color-gray-light;
             padding: 5px 0;
 
             // Firefox fix
@@ -257,7 +257,7 @@ export default class Slider extends Vue {
             right: $slider-height/2;
             bottom: 0;
             position: absolute;
-            background: $color-gray-lighter;
+            background: $color-gray-light;
             clip-path: polygon(0 $slider-height/2 - $border-width/2,100% 0,100% 100%,0 $slider-height/2 + $border-width/2);
     
             .fill {
@@ -320,7 +320,7 @@ export default class Slider extends Vue {
 
          &::after {
             content: '';
-            background: $color-gray-lighter;
+            background: $color-gray-light;
             right: 0;
             top: 0;
 

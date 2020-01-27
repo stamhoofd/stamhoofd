@@ -2,7 +2,7 @@
     <transition appear name="fade" mode="out-in">
         <div class="modal" @click="dismiss">
             <div @click.stop="">
-                <component :key="component.key" :is="component.component" v-bind="component.properties"></component>
+                <component :key="component.key" :is="component.component" v-bind="component.properties" @dismiss="dismiss"></component>
             </div>
         </div>
     </transition>
@@ -37,6 +37,7 @@ export default class Modal extends Vue {
         align-items: center;
         justify-content: center;
         z-index: 10000;
+        padding: 20px;
 
         &> div {
             max-width: 900px;
