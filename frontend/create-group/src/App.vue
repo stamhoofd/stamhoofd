@@ -21,6 +21,7 @@
                 <div v-if="step == 3" key="groups"><GroupsStep v-on:next="goNext()"></GroupsStep></div>
             </transition>
 		</main>
+        <StackComponent></StackComponent>
 	</div>
 </template>
 
@@ -30,13 +31,15 @@ import Header from './components/Header.vue';
 import GroupSettingsStep from './components/steps/GroupSettings.vue';
 import GeneralStep from './components/steps/General.vue';
 import GroupsStep from './components/steps/Groups.vue';
+import StackComponent from '@shared/components/layout/StackComponent.vue';
 
 @Component({
 	components: {
         Header,
         GeneralStep,
         GroupSettingsStep,
-        GroupsStep
+        GroupsStep,
+        StackComponent
 	},
 })
 export default class App extends Vue {

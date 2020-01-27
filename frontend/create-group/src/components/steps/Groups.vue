@@ -3,7 +3,7 @@
         <h1>Groepindeling</h1>
         <p>Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Selecteer de groepen die je wilt toevoegen. Je kan nu wijzigingen maken, maar je kan alles op elk moment nog wijzigen.</p>
 
-        <h2 class="style-label">Leden</h2>
+        <h2 class="style-label" v-on:click="editGroup()">Leden</h2>
         <CheckboxList>
             <CheckboxItem>
                 <template v-slot:left>Kapoenen</template>
@@ -68,12 +68,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import Vue from 'vue'
+import Component from 'vue-class-component'
 import Slider from '@shared/components/inputs/Slider.vue';
 import CheckboxList from '@shared/components/inputs/CheckboxList.vue';
 import CheckboxItem from '@shared/components/inputs/CheckboxItem.vue';
 import GenderSelector from '@shared/components/inputs/GenderSelector.vue';
 import MoreButton from '@shared/components/buttons/MoreButton.vue';
+import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
+import { PresentComponentEvent } from 'stamhoofd-shared/classes/PresentComponentEvent';
+import EditGroup from '../EditGroup.vue';
+import Modal from '@shared/components/layout/Modal.vue';
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 
 @Component({
   // All component options are allowed in here
@@ -86,7 +92,13 @@ import MoreButton from '@shared/components/buttons/MoreButton.vue';
   }
 })
 export default class Groups extends Vue {
-   
+    editGroup() {
+        eventBus.send("show", new ComponentWithProperties(Modal, {
+            component: new ComponentWithProperties(EditGroup, {
+                text: "Custom text"
+            })
+        }));
+    }
 }
 </script>
 
