@@ -3,7 +3,7 @@
 .button {
     &.primary {
         font-size: 18px;
-        font-weight: bold;
+        font-weight: 600;
         color: white;
         padding: 12px 40px;
         background: linear-gradient(to right, $color-primary, $color-primary-destination);

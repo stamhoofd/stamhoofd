@@ -30,6 +30,8 @@ export default class SegmentedControl extends Vue {
 </script>
 
 <style lang="scss">
+    @use '~@shared/scss/base/text-styles.scss';
+
     .segmented-control {
         background: $color-gray-lighter;
         padding: $border-width;
@@ -40,6 +42,7 @@ export default class SegmentedControl extends Vue {
         position: relative;
         z-index: 0;
         overflow: hidden;
+        @extend .style-input;
 
         &>div {
             flex-grow: 1;
@@ -101,7 +104,7 @@ export default class SegmentedControl extends Vue {
                     text-align: center;
                     transform: translateY(-50%);
                     text-overflow: ellipsis;
-                    font-weight: bold;
+                    font-weight: 600;
                     overflow: hidden;
                     word-wrap: none;
                     white-space: nowrap;
