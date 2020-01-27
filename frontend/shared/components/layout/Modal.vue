@@ -1,5 +1,5 @@
 <template>
-    <transition>
+    <transition appear name="fade" mode="out-in">
         <div class="modal" @click="dismiss">
             <div @click.stop="">
                 <component :key="component.key" :is="component.component" v-bind="component.properties"></component>
@@ -25,7 +25,7 @@ export default class Modal extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     .modal {
         background: rgba(black, 0.5);
         position: fixed;
@@ -43,6 +43,21 @@ export default class Modal extends Vue {
             flex-basis: 100%;
             background: white;
             border-radius: 5px;
+        }
+
+        &.fade-enter-active, &.fade-leave-active {
+            transition: opacity 0.3s;
+
+            &> div {
+                transition: opacity 0.3s, transform 0.3s;
+            }
+        }
+        &.fade-enter, &.fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+            opacity: 0;
+
+            &> div {
+                transform: translate(0, 50vh);
+            }
         }
     }
 </style>
