@@ -80,6 +80,7 @@ import { PresentComponentEvent } from 'stamhoofd-shared/classes/PresentComponent
 import EditGroup from '../EditGroup.vue';
 import Modal from '@shared/components/layout/Modal.vue';
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
+import NavigationController from 'stamhoofd-shared/components/layout/NavigationController.vue';
 
 @Component({
   // All component options are allowed in here
@@ -94,8 +95,10 @@ import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithP
 export default class Groups extends Vue {
     editGroup() {
         eventBus.send("show", new ComponentWithProperties(Modal, {
-            component: new ComponentWithProperties(EditGroup, {
-                text: "Custom text"
+            component: new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditGroup, {
+                    text: "Custom text"
+                })
             })
         }));
     }
