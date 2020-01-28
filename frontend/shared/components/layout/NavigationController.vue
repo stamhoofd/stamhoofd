@@ -2,6 +2,7 @@
     <div class="navigation-controller">
         <template>
             <transition
+                v-if="mainComponent.component != 'none'"
                 :name="transitionName"
                 v-on:enter="enter"
                 v-on:after-enter="afterEnter"
@@ -10,7 +11,7 @@
                 <keep-alive>
                     <component
                         :name="mainComponent.key"
-                        :data-key="mainComponent.key"
+                        :key="mainComponent.key"
                         :is="mainComponent.component"
                         v-bind="mainComponent.properties"
                         @push="push"

@@ -1,5 +1,11 @@
 <template>
     <div style="padding: 40px 40px;">
+        <button
+            v-if="$parent.components && $parent.components.length > 1"
+            @click="back"
+        >
+            Terug
+        </button>
         <h1>Nieuwe groep toevoegen</h1>
         <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
 
@@ -34,6 +40,10 @@ export default class EditGroup extends Vue {
             "push",
             new ComponentWithProperties(EditGroupDetail, { text: "test" })
         );
+    }
+
+    back() {
+        this.$emit("pop");
     }
 }
 </script>
