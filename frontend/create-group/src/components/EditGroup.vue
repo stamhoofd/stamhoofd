@@ -8,6 +8,7 @@
         </button>
         <h1>Nieuwe groep toevoegen</h1>
         <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
+        <p>{{ tab }}</p>
 
         <button class="button primary" v-on:click="next" id="save-button">
             Volgende

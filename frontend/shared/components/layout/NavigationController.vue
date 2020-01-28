@@ -2,7 +2,7 @@
     <div class="navigation-controller">
         <template>
             <transition
-                v-if="mainComponent.component != 'none'"
+                v-if="mainComponent"
                 :name="transitionName"
                 v-on:enter="enter"
                 v-on:after-enter="afterEnter"
@@ -33,10 +33,7 @@ import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 @Component
 export default class NavigationController extends Vue {
     components: ComponentWithProperties[] = [];
-    mainComponent: ComponentWithProperties = new ComponentWithProperties(
-        "none",
-        {}
-    );
+    mainComponent: ComponentWithProperties | null = null;
     transitionName: string = "none";
     counter: number = 0;
 
@@ -98,6 +95,13 @@ export default class NavigationController extends Vue {
 
     enterCancelled(element: HTMLElement) {
         this.unfreezeSize();
+    }
+
+    beforeDestroy() {
+        console.log("Destroyed navigation controller");
+        // Prevent memory issues by removing all references
+        this.components = [];
+        this.mainComponent = null;
     }
 }
 </script>
