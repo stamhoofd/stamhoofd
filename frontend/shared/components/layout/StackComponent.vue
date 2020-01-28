@@ -1,14 +1,20 @@
 <template>
-	<div>
-		<component v-for="(component, index) in components" :key="component.key" :is="component.component" v-bind="component.properties" @remove="removeAt(index, component.key)"></component>
-	</div>
+    <div>
+        <component
+            v-for="(component, index) in components"
+            :key="component.key"
+            :is="component.component"
+            v-bind="component.properties"
+            @remove="removeAt(index, component.key)"
+        ></component>
+    </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
-import { EventBusListener } from '../../classes/event-bus/EventBusListener';
+import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 
 @Component
@@ -35,7 +41,7 @@ export default class StackComponent extends Vue {
     beforeDestroy() {
         eventBus.removeListener(this.listener);
         this.listener = null;
+        this.components = [];
     }
-    
 }
 </script>
