@@ -1,25 +1,25 @@
 <template>
     <div id="app">
-        <StackComponent></StackComponent>
+        <ModalStackComponent></ModalStackComponent>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import Steps from "./components/Steps.vue";
-import StackComponent from "@shared/components/layout/StackComponent.vue";
+import ModalStackComponent from "@shared/components/layout/ModalStackComponent.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 
 @Component({
     components: {
         Steps,
-        StackComponent
+        ModalStackComponent
     }
 })
 export default class App extends Vue {
     mounted() {
-        eventBus.send("show", new ComponentWithProperties(Steps, {}));
+        eventBus.send("show-modal", new ComponentWithProperties(Steps, {}));
     }
 }
 </script>

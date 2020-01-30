@@ -3,6 +3,8 @@ export class ComponentWithProperties {
     public component: any;
     public properties: Object;
     public key: number | null = null;
+    public type: string | null = null;
+    public hide: boolean = false;
 
     constructor(component: any, properties: Object = {}) {
         this.component = component;

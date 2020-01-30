@@ -92,7 +92,6 @@ import MoreButton from "@shared/components/buttons/MoreButton.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponentEvent";
 import EditGroup from "../EditGroup.vue";
-import Modal from "@shared/components/layout/Modal.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
 
@@ -109,12 +108,10 @@ import NavigationController from "stamhoofd-shared/components/layout/NavigationC
 export default class Groups extends Vue {
     editGroup() {
         eventBus.send(
-            "show",
-            new ComponentWithProperties(Modal, {
-                component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(EditGroup, {
-                        text: "Custom text"
-                    })
+            "show-modal",
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditGroup, {
+                    text: "Custom text"
                 })
             })
         );
