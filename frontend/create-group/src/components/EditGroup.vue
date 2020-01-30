@@ -1,14 +1,27 @@
 <template>
     <div style="padding: 40px 40px;">
-        <button
-            v-if="$parent.components && $parent.components.length > 1"
-            @click="back"
-        >
-            Terug
+        <button @click="back">
+            Sluiten
         </button>
         <h1>Nieuwe groep toevoegen</h1>
         <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
         <p>{{ tab }}</p>
+
+        <label class="style-label" for="group-name">Naam van de groep</label>
+        <input
+            class="input"
+            type="text"
+            placeholder="De naam van de groep"
+            id="group-name"
+            ref="firstInput"
+        />
+
+        <label class="style-label" for="group-description">Beschrijving</label>
+        <textarea
+            class="input"
+            id="group-description"
+            placeholder="Zichtbaar voor leden bij het inschrijven"
+        ></textarea>
 
         <button class="button primary" v-on:click="next" id="save-button">
             Volgende

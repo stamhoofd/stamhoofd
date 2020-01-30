@@ -1,5 +1,5 @@
 <template>
-    <transition appear name="fade" mode="out-in">
+    <transition appear name="fade" mode="out-in" v-on:after-enter="afterEnter">
         <div class="modal" @click="dismiss">
             <div @click.stop="">
                 <component
@@ -26,6 +26,10 @@ export default class Modal extends Vue {
     dismiss() {
         this.$emit("remove");
     }
+    afterEnter() {
+        // Remove body
+        this.$emit("hide-others");
+    }
 }
 </script>
 
@@ -45,10 +49,14 @@ export default class Modal extends Vue {
     padding: 20px;
 
     & > div {
-        max-width: 900px;
+        max-width: 800px;
         flex-basis: 100%;
         background: white;
         border-radius: 5px;
+
+        max-height: 100vh;
+        overflow-y: auto;
+        box-sizing: border-box;
     }
 
     &.fade-enter-active,
@@ -64,6 +72,32 @@ export default class Modal extends Vue {
 
         & > div {
             transform: translate(0, 50vh);
+        }
+    }
+
+    @media (max-width: 500px) {
+        padding: 0px;
+        display: block;
+        bottom: auto;
+        position: relative;
+        background: white;
+
+        &.fade-enter-active,
+        &.fade-leave-active {
+            position: fixed;
+        }
+
+        & > div {
+            border-radius: 0;
+
+            max-width: none;
+            max-height: none;
+            width: 100%;
+            height: 100%;
+
+            & > .navigation-controller {
+                width: 100% !important;
+            }
         }
     }
 }
