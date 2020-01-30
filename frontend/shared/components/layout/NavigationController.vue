@@ -77,6 +77,10 @@ export default class NavigationController extends Vue {
     }
 
     pop() {
+        if (this.components.length <= 1) {
+            this.$emit("dismiss");
+            return;
+        }
         this.transitionName = "pop";
         this.freezeSize();
         this.components.splice(this.components.length - 1, 1);

@@ -1,7 +1,5 @@
 <template>
-    <div
-        style="padding: 40px 40px; max-height: 100vh; overflow-y: auto; box-sizing: border-box;"
-    >
+    <div style="padding: 40px 40px;">
         <button @click="back">Terug</button>
         <h1>Nieuwe groep toevoegen</h1>
         <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
@@ -83,7 +81,7 @@ import EditGroup from "./EditGroup.vue";
 })
 export default class EditGroupDetail extends Vue {
     tabs = ["Algemeen", "Inschrijven", "Toegang", "Test"];
-    tab = this.tabs[0];
+    tab = this.tabs[1];
 
     next() {
         this.$emit(
