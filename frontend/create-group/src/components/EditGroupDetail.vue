@@ -60,6 +60,7 @@
         <button class="button primary" v-on:click="next" id="save-button">
             Volgende
         </button>
+        <button @click="back">Terug</button>
     </div>
 </template>
 
