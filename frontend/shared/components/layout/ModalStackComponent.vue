@@ -40,7 +40,7 @@ export default class ModalStackComponent extends Vue {
     counter: number = 0;
 
     show(component: ComponentWithProperties) {
-        component.type = this.components.length <= 0 ? "normal" : "normal";
+        component.type = this.components.length <= 0 ? "normal" : "popup";
         component.key = this.counter++;
         this.components.push(component);
     }
@@ -54,8 +54,10 @@ export default class ModalStackComponent extends Vue {
         console.log("Updated hide");
         this.updateHidden();
 
-        // Restore scroll position
-        window.scrollTo(0, 0);
+        if (insertedElement.getAttribute("modal-type") == "normal") {
+            // Restore scroll position
+            window.scrollTo(0, 0);
+        }
 
         // Manually remove the fixed position
         console.log("After enter");
@@ -138,7 +140,11 @@ export default class ModalStackComponent extends Vue {
             background: white;
             border-radius: 5px;
 
-            max-height: 100vh;
+            & > * {
+                max-height: 100vh;
+                max-height: calc(var(--vh, 1vh) * 100);
+            }
+
             overflow-y: auto;
             box-sizing: border-box;
         }
@@ -196,6 +202,10 @@ export default class ModalStackComponent extends Vue {
             & > .navigation-controller {
                 width: 100% !important;
             }
+        }
+
+        .navigation-controller {
+            height: auto !important;
         }
     }
 
