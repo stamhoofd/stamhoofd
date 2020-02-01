@@ -162,14 +162,18 @@ export default class NavigationController extends Vue {
                 // Adjust original
 
                 if (this.isModalRoot()) {
-                    this.getScrollElement().scrollTop = next;
-
                     element.style.cssText =
                         "position: fixed; overflow: hidden; height: " +
                         height +
                         "px; top: " +
                         -current +
                         "px;";
+
+                    setTimeout(() => {
+                        Vue.nextTick(() => {
+                            this.getScrollElement().scrollTop = next;
+                        });
+                    }, 10);
                 } else {
                     this.getScrollElement().scrollTop = next;
 
@@ -192,12 +196,6 @@ export default class NavigationController extends Vue {
                     "px;transform: translateY(" +
                     -current +
                     "px); top: 0px;";*/
-
-                setTimeout(() => {
-                    Vue.nextTick(() => {
-                        this.getScrollElement().scrollTop = next;
-                    });
-                }, 10);
             });
         });
     }

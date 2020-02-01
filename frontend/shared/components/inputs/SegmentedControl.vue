@@ -71,6 +71,12 @@ export default class SegmentedControl extends Vue {
         cursor: pointer;
         user-select: none;
         position: relative;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+        &:active {
+            opacity: 0.5;
+        }
 
         &::before {
             content: "";
