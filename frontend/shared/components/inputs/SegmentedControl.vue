@@ -74,10 +74,6 @@ export default class SegmentedControl extends Vue {
         touch-action: manipulation;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-        &:active {
-            opacity: 0.5;
-        }
-
         &::before {
             content: "";
             position: absolute;
@@ -89,7 +85,7 @@ export default class SegmentedControl extends Vue {
             border-radius: $border-width/2;
             background: $color-gray-light;
             opacity: 1;
-            transition: opacity 0.2s;
+            transition: opacity 0.25s;
         }
 
         &.selected,
@@ -117,7 +113,7 @@ export default class SegmentedControl extends Vue {
                 overflow: hidden;
                 word-wrap: none;
                 white-space: nowrap;
-                transition: opacity 0.2s;
+                transition: opacity 0.25s;
             }
 
             &::after {
@@ -136,7 +132,13 @@ export default class SegmentedControl extends Vue {
                 word-wrap: none;
                 white-space: nowrap;
                 opacity: 0;
-                transition: opacity 0.2s;
+                transition: opacity 0.25s;
+            }
+        }
+
+        &:active > span {
+            &::before {
+                opacity: 0.4;
             }
         }
 
@@ -147,6 +149,13 @@ export default class SegmentedControl extends Vue {
             }
             &::after {
                 opacity: 1;
+            }
+        }
+
+        // Animate font weight change
+        &.selected:active > span {
+            &::after {
+                opacity: 0.4;
             }
         }
     }
@@ -166,7 +175,7 @@ export default class SegmentedControl extends Vue {
             bottom: 0;
             background: white;
             border-radius: 4px;
-            transition: left 0.2s;
+            transition: left 0.25s;
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
         }
     }

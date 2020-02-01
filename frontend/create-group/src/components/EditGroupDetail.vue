@@ -96,6 +96,10 @@ export default class EditGroupDetail extends Vue {
     back() {
         this.$emit("pop");
     }
+
+    destroyed() {
+        console.log("EditGroupDetail destroyed");
+    }
 }
 </script>
 

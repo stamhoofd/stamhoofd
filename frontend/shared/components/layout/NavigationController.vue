@@ -20,6 +20,7 @@
                         :data-transition-name="transitionName"
                         @push="push"
                         @pop="pop"
+                        ref="child"
                     ></component>
                 </keep-alive>
             </transition>
@@ -124,12 +125,20 @@ export default class NavigationController extends Vue {
             this.$emit("dismiss");
             return;
         }
+
+        const componentRef = this.$refs.child as any;
+
         this.transitionName = "pop";
         this.freezeSize();
         this.components.splice(this.components.length - 1, 1);
         this.nextScrollPosition = this.savedScrollPositions.pop() as number;
 
         this.mainComponent = this.components[this.components.length - 1];
+
+        // Remove popped component from memory
+        setTimeout(() => {
+            componentRef.$destroy();
+        }, 400);
     }
 
     beforeEnter(insertedElement: HTMLElement) {
@@ -239,12 +248,12 @@ export default class NavigationController extends Vue {
 
     > .push {
         &-enter-active {
-            transition: opacity 0.3s;
+            transition: opacity 0.35s;
             position: relative;
 
             & > div {
                 //overflow: hidden !important;
-                transition: transform 0.3s;
+                transition: transform 0.35s;
             }
         }
 
@@ -255,10 +264,10 @@ export default class NavigationController extends Vue {
             left: 0;
             top: 0;
             right: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.35s;
 
             & > div {
-                transition: transform 0.3s;
+                transition: transform 0.35s;
             }
         }
 
@@ -281,12 +290,12 @@ export default class NavigationController extends Vue {
 
     > .pop {
         &-enter-active {
-            transition: opacity 0.3s;
+            transition: opacity 0.35s;
             position: relative;
 
             & > div {
                 //overflow: hidden !important;
-                transition: transform 0.3s;
+                transition: transform 0.35s;
             }
         }
 
@@ -295,10 +304,10 @@ export default class NavigationController extends Vue {
             left: 0;
             top: 0;
             right: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.35s;
 
             & > div {
-                transition: transform 0.3s;
+                transition: transform 0.35s;
             }
         }
 
