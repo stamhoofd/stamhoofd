@@ -4,14 +4,25 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name">Naam van je vereniging</label>
-                <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name" ref="firstInput">
+                <label class="style-label" for="organization-name"
+                    >Naam van je vereniging</label
+                >
+                <input
+                    class="input"
+                    type="text"
+                    placeholder="De naam van je vereniging"
+                    autocomplete="organization"
+                    id="organization-name"
+                    ref="firstInput"
+                />
 
-                <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
+                <label class="style-label" for="organization-count"
+                    >Hoeveel leden hebben jullie ongeveer?</label
+                >
                 <Slider></Slider>
             </div>
 
-            <div>
+            <!--<div>
                 <label class="style-label">Adres van je vereniging</label>
                 <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
                 <div class="input-group">
@@ -28,24 +39,33 @@
                     <option>Nederland</option>
                 </select>
                 
-            </div>
-           
+            </div>-->
         </div>
 
-        <button class="button primary" v-on:click="$emit('next')" id="next-button">Verder</button>
-        
+        <button
+            class="button primary"
+            v-on:click="$emit('next')"
+            id="next-button"
+        >
+            Verder
+        </button>
+        <button class="button secundary" @click="editGroup">Test</button>
     </article>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import Slider from '@shared/components/inputs/Slider.vue';
-
+import { Component, Prop, Vue } from "vue-property-decorator";
+import Slider from "@shared/components/inputs/Slider.vue";
+import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
+import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponentEvent";
+import EditGroup from "../EditGroup.vue";
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
+import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
 @Component({
-  // All component options are allowed in here
-  components: {
-      Slider
-  }
+    // All component options are allowed in here
+    components: {
+        Slider
+    }
 })
 export default class General extends Vue {
     mounted() {
@@ -53,22 +73,32 @@ export default class General extends Vue {
         let input = this.$refs.firstInput as HTMLElement;
         input.focus();
     }
+    editGroup() {
+        eventBus.send(
+            "show-modal",
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditGroup, {
+                    text: "Custom text"
+                })
+            })
+        );
+    }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-    @use '~@shared/scss/layout/split-inputs.scss';
-    @use '~@shared/scss/base/text-styles.scss';
-    @use '~@shared/scss/components/inputs.scss';
-    @use '~@shared/scss/components/buttons.scss';
+@use '~@shared/scss/layout/split-inputs.scss';
+@use '~@shared/scss/base/text-styles.scss';
+@use '~@shared/scss/components/inputs.scss';
+@use '~@shared/scss/components/buttons.scss';
 
-    h1 {
-        @extend .style-title-1;
-        margin-bottom: 20px;
-    }
+h1 {
+    @extend .style-title-1;
+    margin-bottom: 20px;
+}
 
-    #next-button {
-        margin-top: 30px;
-    }
+#next-button {
+    margin-top: 30px;
+}
 </style>

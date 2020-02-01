@@ -18,7 +18,9 @@ module.exports = {
         },
         output: {
             filename: "[name].[hash].js"
-        }
+        },
+        // Remove for production
+        devtool: "source-map"
     },
     // Fix external eslint config missing
     chainWebpack: config => {

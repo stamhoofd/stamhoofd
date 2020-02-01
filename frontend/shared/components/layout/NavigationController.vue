@@ -55,7 +55,7 @@ export default class NavigationController extends Vue {
 
     freezeSize() {
         if (this.isModalRoot()) {
-            return;
+            //return;
         }
         const el = this.$el as HTMLElement;
 
@@ -64,10 +64,14 @@ export default class NavigationController extends Vue {
     }
 
     setSize(width: number, height: number) {
-        if (this.isModalRoot()) {
-            return;
-        }
         const el = this.$el as HTMLElement;
+
+        if (this.isModalRoot()) {
+            // Only resize if larger
+            if (height <= el.offsetHeight) {
+                return;
+            }
+        }
 
         el.style.width = width + "px";
         el.style.height = height + "px";
@@ -75,7 +79,7 @@ export default class NavigationController extends Vue {
 
     unfreezeSize() {
         if (this.isModalRoot()) {
-            return;
+            //return;
         }
         const el = this.$el as HTMLElement;
 
@@ -130,29 +134,82 @@ export default class NavigationController extends Vue {
 
     beforeEnter(insertedElement: HTMLElement) {
         // Manually set position fixed during animation, so we kan keep it one tick longer
-        insertedElement.setAttribute("data-extended-enter", "true");
     }
 
     enter(element: HTMLElement) {
         if (this.transitionName == "none") {
             return;
         }
+        console.log("Enter");
         Vue.nextTick(() => {
+            console.log("Enter next tick");
             this.setSize(element.offsetWidth, element.offsetHeight);
         });
     }
 
     leave(element: HTMLElement) {
+        console.log("leave");
+
+        // Prevent blinking due to slow rerender after scrollTop changes
+        // Create a clone and offset the clone first. After that, adjust the scroll position
         var current = this.getScrollElement().scrollTop;
         var next = this.nextScrollPosition;
-        // prettier-ignore
-        element.style.top = (next - current) + "px";
 
-        this.getScrollElement().scrollTop = next;
+        Vue.nextTick(() => {
+            Vue.nextTick(() => {
+                console.log("leave next tick");
+                var height = element.offsetHeight;
+                // Adjust original
+
+                if (this.isModalRoot()) {
+                    this.getScrollElement().scrollTop = next;
+
+                    element.style.cssText =
+                        "position: fixed; overflow: hidden; height: " +
+                        height +
+                        "px; top: " +
+                        -current +
+                        "px;";
+                } else {
+                    this.getScrollElement().scrollTop = next;
+
+                    element.style.cssText =
+                        "position: absolute; overflow: hidden; height: " +
+                        height +
+                        "px;transform: translateY(" +
+                        (next - current) +
+                        "px); top: 0px;";
+                }
+                /*element.style.cssText =
+                    "position: " +
+                    (this.isModalRoot()
+                        ? "fixed"
+                        : "sticky; position: -webkit-sticky") +
+                    "; overflow: visible; height: " +
+                    height +
+                    "px; margin-bottom: " +
+                    -height +
+                    "px;transform: translateY(" +
+                    -current +
+                    "px); top: 0px;";*/
+
+                setTimeout(() => {
+                    Vue.nextTick(() => {
+                        this.getScrollElement().scrollTop = next;
+                    });
+                }, 10);
+            });
+        });
     }
 
     afterLeave(element: HTMLElement) {
         element.style.top = "";
+        element.style.position = "";
+        element.style.overflow = "";
+        element.style.height = "";
+        element.style.marginBottom = "";
+
+        element.style.transform = "";
     }
 
     afterEnter(element: HTMLElement) {
@@ -161,10 +218,6 @@ export default class NavigationController extends Vue {
 
         // Search for scroll position here
         //this.getScrollElement().scrollTop = this.nextScrollPosition;
-
-        window.setTimeout(() => {
-            element.removeAttribute("data-extended-enter");
-        }, 2000);
     }
 
     enterCancelled(element: HTMLElement) {
@@ -183,27 +236,32 @@ export default class NavigationController extends Vue {
 <style lang="scss">
 .navigation-controller {
     // Scrolling should happen inside the children!
-    overflow: hidden; // Should be visible because some elements inside will all become absolute, causing the height of the navigation controller to collapse, but they still need to stay visible
-    overflow-y: auto;
-    max-height: 100vh;
+    overflow: visible;
     position: relative;
-    transition: width 0.3s, height 0.3s;
 
-    .push {
-        &-enter-active,
-        *[data-transition-name="push"][data-extended-enter="true"] {
+    > .push {
+        &-enter-active {
+            transition: opacity 0.3s;
             position: relative;
-            overflow: hidden !important;
-            transition: opacity 0.3s, transform 0.3s;
+
+            & > div {
+                //overflow: hidden !important;
+                transition: transform 0.3s;
+            }
         }
 
         &-leave-active {
+            // Javascript will make this sticky later with a custom top offset
+
             position: absolute;
-            overflow: hidden !important;
-            transition: opacity 0.3s, transform 0.3s;
             left: 0;
             top: 0;
             right: 0;
+            transition: opacity 0.3s;
+
+            & > div {
+                transition: transform 0.3s;
+            }
         }
 
         &-enter, &-leave-to /* .fade-leave-active below version 2.1.8 */ {
@@ -211,29 +269,39 @@ export default class NavigationController extends Vue {
         }
 
         &-enter {
-            transform: translateX(100%);
+            & > div {
+                transform: translateX(100%);
+            }
         }
 
         &-leave-to {
-            transform: translateX(-100%);
+            & > div {
+                transform: translateX(-100%);
+            }
         }
     }
 
-    .pop {
-        &-enter-active,
-        *[data-transition-name="pop"][data-extended-enter="true"] {
+    > .pop {
+        &-enter-active {
+            transition: opacity 0.3s;
             position: relative;
-            overflow: hidden !important;
-            transition: opacity 0.3s, transform 0.3s;
+
+            & > div {
+                //overflow: hidden !important;
+                transition: transform 0.3s;
+            }
         }
 
         &-leave-active {
             position: absolute;
-            overflow: hidden !important;
-            transition: opacity 0.3s, transform 0.3s;
             left: 0;
-            top: 0; // Will get adjusted based on scroll position earlier
+            top: 0;
             right: 0;
+            transition: opacity 0.3s;
+
+            & > div {
+                transition: transform 0.3s;
+            }
         }
 
         &-enter, &-leave-to /* .fade-leave-active below version 2.1.8 */ {
@@ -241,15 +309,15 @@ export default class NavigationController extends Vue {
         }
 
         &-enter {
-            transform: translateX(-100%);
-        }
-
-        &-leave {
-            transform: translateX(0);
+            & > div {
+                transform: translateX(-100%);
+            }
         }
 
         &-leave-to {
-            transform: translateX(100%);
+            & > div {
+                transform: translateX(100%);
+            }
         }
     }
 }
