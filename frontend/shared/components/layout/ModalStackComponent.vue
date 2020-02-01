@@ -147,6 +147,7 @@ export default class ModalStackComponent extends Vue {
                 max-height: 100vh;
                 max-height: calc(var(--vh, 1vh) * 100);
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 transition: width 0.3s, height 0.3s;
 
                 // Remove scroll blinks
