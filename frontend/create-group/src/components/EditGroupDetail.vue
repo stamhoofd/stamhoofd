@@ -1,66 +1,68 @@
 <template>
-    <div style="padding: 40px 40px;">
-        <button @click="back">Terug</button>
-        <h1>Nieuwe groep toevoegen</h1>
-        <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
+    <div>
+        <div style="padding: 40px 40px;">
+            <button @click="back">Terug</button>
+            <h1>Nieuwe groep toevoegen</h1>
+            <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
 
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
-        <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
+            <p>Dit is een test!</p>
 
-        <button class="button primary" v-on:click="next" id="save-button">
-            Volgende
-        </button>
-        <button @click="back">Terug</button>
+            <button class="button primary" v-on:click="next" id="save-button">
+                Volgende
+            </button>
+            <button @click="back">Terug</button>
+        </div>
     </div>
 </template>
 
