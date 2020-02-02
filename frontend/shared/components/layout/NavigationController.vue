@@ -215,18 +215,16 @@ export default class NavigationController extends Vue {
                 // Adjust original
 
                 if (this.isModalRoot()) {
+                    // Still blinks sometimes in Safari (macOS only) if current > 0. Need to find a way to combine the following
+                    // two lines in one statement to prevent rerendering between them.
                     element.style.cssText = "position: fixed; overflow: hidden; top: 0px; bottom: 0px;";
-                    // Transfer scroll position to fixed element
-                    (element.firstElementChild as HTMLElement).style.height = "100%";
                     (element.firstElementChild as HTMLElement).scrollTop = current;
-                    this.getScrollElement().style.overflowY = "hidden";
 
                     setTimeout(() => {
                         Vue.nextTick(() => {
                             this.getScrollElement().scrollTop = next;
-                            this.getScrollElement().style.overflowY = "scroll";
                         });
-                    }, 10);
+                    }, 50);
 
                     /*element.style.cssText =
                         "position: fixed; overflow: hidden; height: " + height + "px; top: " + -current + "px;";
@@ -304,7 +302,11 @@ export default class NavigationController extends Vue {
 
     &[data-animation-type="modal"] > * {
         // Fix: apply this background color permanently, else it won't work during transition for some strange reason
-        background-color: rgba(0, 0, 0, 0.7);
+        // background-color: rgba(0, 0, 0, 0.7);
+        & > div {
+            // Will change scroll position of this one during transitions
+            will-change: scroll-position;
+        }
     }
 
     > .modal {
@@ -318,7 +320,7 @@ export default class NavigationController extends Vue {
                     transition: transform 0.35s;
                 }
 
-                transition: background-color 0.35s;
+                //transition: background-color 0.35s;
                 overflow: hidden;
                 & > div {
                     min-height: 100vh;
@@ -329,11 +331,11 @@ export default class NavigationController extends Vue {
             }
 
             &-enter {
-                background-color: rgba(0, 0, 0, 0) !important;
+                //background-color: rgba(0, 0, 0, 0) !important;
             }
 
             &-enter-to {
-                background-color: rgba(0, 0, 0, 0.7);
+                //background-color: rgba(0, 0, 0, 0.7);
             }
 
             &-leave-active {
@@ -380,8 +382,8 @@ export default class NavigationController extends Vue {
                     transition: transform 0.35s;
                 }
 
-                transition: background-color 0.35s;
-                background-color: rgba(0, 0, 0, 0.7);
+                //transition: background-color 0.35s;
+                //background-color: rgba(0, 0, 0, 0.7);
                 & > div {
                     min-height: 100vh;
                     min-height: calc(var(--vh, 1vh) * 100);
@@ -391,11 +393,11 @@ export default class NavigationController extends Vue {
             }
 
             &-leave {
-                background-color: rgba(0, 0, 0, 0.7);
+                //background-color: rgba(0, 0, 0, 0.7);
             }
 
             &-leave-to {
-                background-color: rgba(0, 0, 0, 0);
+                //background-color: rgba(0, 0, 0, 0);
                 & > div {
                     transform: translateY(100vh);
                 }
