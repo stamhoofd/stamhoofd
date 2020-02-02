@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div style="padding: 40px 40px;">
+        <div style="padding: 40px 40px; ">
             <button @click="back">Terug</button>
             <h1>Nieuwe groep toevoegen</h1>
             <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
@@ -56,6 +56,16 @@
             <p>Dit is een test!</p>
             <p>Dit is een test!</p>
             <p>Dit is een test!</p>
+
+            <label class="style-label" for="group-description"
+                >Beschrijving</label
+            >
+            <textarea
+                class="input"
+                id="group-description"
+                placeholder="Zichtbaar voor leden bij het inschrijven"
+            ></textarea>
+
             <p>Dit is een test!</p>
 
             <button class="button primary" v-on:click="next" id="save-button">

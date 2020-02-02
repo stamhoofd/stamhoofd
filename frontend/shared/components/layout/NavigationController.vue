@@ -74,18 +74,31 @@ export default class NavigationController extends Vue {
             }
         }
 
+        console.log("Set width: " + width);
+
+        if (!this.isModalRoot() && height >= window.innerHeight) {
+            // Respect max height + improve animation durations
+            el.style.height = "100vh";
+            el.style.height = "calc(var(--vh, 1vh) * 100)";
+        } else {
+            el.style.height = height + "px";
+        }
+
         el.style.width = width + "px";
-        el.style.height = height + "px";
     }
 
     unfreezeSize() {
-        if (this.isModalRoot()) {
-            //return;
-        }
         const el = this.$el as HTMLElement;
-
         el.style.width = "auto";
         el.style.height = "auto";
+        if (this.isModalRoot()) {
+            //el.style.width = "auto";
+            //el.style.height = "auto";
+            return;
+        }
+
+        //el.style.width = "auto";
+        //el.style.height = "auto";
     }
 
     isModalRoot(): boolean {
@@ -152,7 +165,10 @@ export default class NavigationController extends Vue {
         console.log("Enter");
         Vue.nextTick(() => {
             console.log("Enter next tick");
-            this.setSize(element.offsetWidth, element.offsetHeight);
+            this.setSize(
+                (element.firstChild as HTMLElement).offsetWidth,
+                (element.firstChild as HTMLElement).offsetHeight
+            );
         });
     }
 
@@ -177,10 +193,11 @@ export default class NavigationController extends Vue {
                         "px; top: " +
                         -current +
                         "px;";
-
+                    this.getScrollElement().style.overflowY = "hidden";
                     setTimeout(() => {
                         Vue.nextTick(() => {
                             this.getScrollElement().scrollTop = next;
+                            this.getScrollElement().style.overflowY = "scroll";
                         });
                     }, 10);
                 } else {
