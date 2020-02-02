@@ -1,100 +1,38 @@
 <template>
-    <transition-group
-        tag="div"
-        name="fade"
-        v-on:after-enter="afterEnter"
-        v-on:before-enter="beforeEnter"
-        class="modal-stack"
-    >
-        <div
-            class="modal"
-            v-for="component in components"
-            @click="removeAt(component.key)"
-            :key="component.key"
-            :data-hide="component.hide"
-            :modal-type="component.type"
-        >
-            <div @click.stop="">
-                <component
-                    :is="component.component"
-                    v-bind="component.properties"
-                    @dismiss="removeAt(component.key)"
-                ></component>
-            </div>
-        </div>
-    </transition-group>
+    <!-- Components taking up the whole document. Listens to show-modal -->
+    <NavigationController
+        :scroll-document="true"
+        ref="navigationController"
+        :root="root"
+    ></NavigationController>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import Modal from "@shared/components/layout/Modal.vue";
+import NavigationController from "./NavigationController.vue";
 
-@Component
+@Component({
+    components: {
+        NavigationController
+    }
+})
 export default class ModalStackComponent extends Vue {
-    components: ComponentWithProperties[] = [];
+    @Prop()
+    readonly root!: ComponentWithProperties;
+
     listener: EventBusListener | null = null;
     counter: number = 0;
 
     show(component: ComponentWithProperties) {
-        component.type = this.components.length <= 0 ? "normal" : "popup";
-        component.key = this.counter++;
-        this.components.push(component);
-    }
-
-    beforeEnter(insertedElement) {
-        // Manually set position fixed during animation, so we kan keep it one tick longer
-        insertedElement.setAttribute("data-extended-enter", "true");
-    }
-
-    afterEnter(insertedElement) {
-        console.log("Updated hide");
-        this.updateHidden();
-
-        if (insertedElement.getAttribute("modal-type") == "normal") {
-            // Restore scroll position
-            window.scrollTo(0, 0);
+        if (component.component === NavigationController) {
+            component.properties.scrollDocument = true;
         }
-
-        // Manually remove the fixed position
-        console.log("After enter");
-        console.log(insertedElement);
-        window.setTimeout(() => {
-            insertedElement.removeAttribute("data-extended-enter");
-        }, 200);
-    }
-
-    updateHidden() {
-        var found = false;
-        for (let index = this.components.length - 1; index >= 0; index--) {
-            const element = this.components[index];
-            if (found) {
-                element.hide = true;
-                continue;
-            }
-            if (element.type == "normal") {
-                found = true;
-            }
-            element.hide = false;
-        }
-    }
-
-    removeAt(key) {
-        console.log("Dismiss");
-
-        for (let index = this.components.length - 1; index >= 0; index--) {
-            const element = this.components[index];
-            if (element.key == key) {
-                this.components.splice(index, 1);
-                this.updateHidden();
-                return;
-            }
-        }
-
-        console.error("Not found!");
+        this.$refs.navigationController.push(component);
     }
 
     mounted() {
@@ -103,14 +41,6 @@ export default class ModalStackComponent extends Vue {
 
     beforeDestroy() {
         eventBus.removeListener(this.listener);
-        this.listener = null;
-        this.components = [];
-    }
-
-    get visibleComponents() {
-        return this.components.filter(component => {
-            return !component.hide;
-        });
     }
 }
 </script>
@@ -120,45 +50,6 @@ export default class ModalStackComponent extends Vue {
     position: relative;
 }
 .modal {
-    &[modal-type="popup"] {
-        // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
-        background: rgba(black, 0.7);
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        padding: 20px;
-
-        // Improve performance
-
-        & > div {
-            max-width: 800px;
-            flex-basis: 100%;
-            background: white;
-            border-radius: 5px;
-
-            & > * {
-                max-height: 100vh;
-                max-height: calc(var(--vh, 1vh) * 100);
-                overflow: hidden;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                overscroll-behavior-y: contain;
-                transition: width 0.3s, height 0.3s;
-
-                // Remove scroll blinks
-                will-change: scroll-position;
-            }
-
-            box-sizing: border-box;
-        }
-    }
-
     &.fade-enter-active,
     &.fade-leave-active,
     &[data-extended-enter="true"] {
