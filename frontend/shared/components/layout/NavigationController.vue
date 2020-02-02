@@ -45,13 +45,18 @@ export default class NavigationController extends Vue {
     nextScrollPosition: number = 0;
 
     @Prop()
-    root!: ComponentWithProperties;
+    readonly root!: ComponentWithProperties;
+
+    @Prop({ default: false })
+    scrollDocument!: boolean;
 
     mounted() {
         this.root.key = this.counter++;
         this.mainComponent = this.root;
         console.log(this.mainComponent);
         this.components = [this.root];
+
+        console.log("scroll document: " + this.scrollDocument);
     }
 
     freezeSize() {
@@ -102,11 +107,7 @@ export default class NavigationController extends Vue {
     }
 
     isModalRoot(): boolean {
-        return (
-            (((this.$el as HTMLElement).parentElement as HTMLElement)
-                .parentElement as HTMLElement).getAttribute("modal-type") ==
-            "normal"
-        );
+        return this.scrollDocument;
     }
 
     getScrollElement(): HTMLElement {
@@ -135,7 +136,7 @@ export default class NavigationController extends Vue {
 
     pop() {
         if (this.components.length <= 1) {
-            this.$emit("dismiss");
+            this.$emit("pop");
             return;
         }
 
@@ -262,6 +263,7 @@ export default class NavigationController extends Vue {
     // Scrolling should happen inside the children!
     overflow: visible;
     position: relative;
+    width: 100% !important;
 
     > .push {
         &-enter-active {

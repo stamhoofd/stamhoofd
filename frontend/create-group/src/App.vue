@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <ModalStackComponent></ModalStackComponent>
+        <ModalStackComponent :root="root"></ModalStackComponent>
     </div>
 </template>
 
@@ -18,9 +18,9 @@ import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithP
     }
 })
 export default class App extends Vue {
-    mounted() {
-        eventBus.send("show-modal", new ComponentWithProperties(Steps, {}));
-    }
+    public root = new ComponentWithProperties(Steps, {});
+
+    mounted() {}
 }
 </script>
 
