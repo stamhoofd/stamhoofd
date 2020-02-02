@@ -166,7 +166,7 @@ export default class NavigationController extends Vue {
             // Remove popped component from memory
             setTimeout(() => {
                 componentRef.$destroy();
-            }, 15000);
+            }, 400);
         });
     }
 
@@ -300,12 +300,11 @@ export default class NavigationController extends Vue {
     overflow: visible;
     position: relative;
 
-    &[data-animation-type="modal"] > * {
-        // Fix: apply this background color permanently, else it won't work during transition for some strange reason
-        // background-color: rgba(0, 0, 0, 0.7);
-        & > div {
-            // Will change scroll position of this one during transitions
-            will-change: scroll-position;
+    &[data-animation-type="modal"] {
+        will-change: transform;
+        & > * {
+            // Fix: apply this background color permanently, else it won't work during transition for some strange reason
+            // background-color: rgba(0, 0, 0, 0.7);
         }
     }
 

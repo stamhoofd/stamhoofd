@@ -4,9 +4,7 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name"
-                    >Naam van je vereniging</label
-                >
+                <label class="style-label" for="organization-name">Naam van je vereniging</label>
                 <input
                     class="input"
                     type="text"
@@ -16,9 +14,7 @@
                     ref="firstInput"
                 />
 
-                <label class="style-label" for="organization-count"
-                    >Hoeveel leden hebben jullie ongeveer?</label
-                >
+                <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
                 <Slider></Slider>
             </div>
 
@@ -42,11 +38,7 @@
             </div>-->
         </div>
 
-        <button
-            class="button primary"
-            v-on:click="$emit('next')"
-            id="next-button"
-        >
+        <button class="button primary" v-on:click="$emit('next')" id="next-button">
             Verder
         </button>
         <button class="button secundary" @click="editGroup">Test</button>
@@ -61,6 +53,7 @@ import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponent
 import EditGroupDetail from "../EditGroupDetail.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import Popup from "stamhoofd-shared/components/layout/Popup.vue";
 @Component({
     // All component options are allowed in here
     components: {
@@ -75,10 +68,12 @@ export default class General extends Vue {
     }
     editGroup() {
         eventBus.send(
-            "show-modal",
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditGroupDetail, {
-                    text: "Custom text"
+            "show",
+            new ComponentWithProperties(Popup, {
+                root: new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditGroupDetail, {
+                        text: "Custom text"
+                    })
                 })
             })
         );
