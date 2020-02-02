@@ -55,10 +55,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import Slider from "@shared/components/inputs/Slider.vue";
+import Slider from "stamhoofd-shared/components/inputs/Slider.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponentEvent";
-import EditGroup from "../EditGroup.vue";
+import EditGroupDetail from "../EditGroupDetail.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
 @Component({
@@ -77,7 +77,7 @@ export default class General extends Vue {
         eventBus.send(
             "show-modal",
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditGroup, {
+                root: new ComponentWithProperties(EditGroupDetail, {
                     text: "Custom text"
                 })
             })

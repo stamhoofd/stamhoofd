@@ -84,11 +84,11 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import Slider from "@shared/components/inputs/Slider.vue";
-import CheckboxList from "@shared/components/inputs/CheckboxList.vue";
-import CheckboxItem from "@shared/components/inputs/CheckboxItem.vue";
-import GenderSelector from "@shared/components/inputs/GenderSelector.vue";
-import MoreButton from "@shared/components/buttons/MoreButton.vue";
+import Slider from "stamhoofd-shared/components/inputs/Slider.vue";
+import CheckboxList from "stamhoofd-shared/components/inputs/CheckboxList.vue";
+import CheckboxItem from "stamhoofd-shared/components/inputs/CheckboxItem.vue";
+import GenderSelector from "stamhoofd-shared/components/inputs/GenderSelector.vue";
+import MoreButton from "stamhoofd-shared/components/buttons/MoreButton.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponentEvent";
 import EditGroup from "../EditGroup.vue";
@@ -121,10 +121,10 @@ export default class Groups extends Vue {
 
 <style scoped lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
-@use '~@shared/scss/layout/split-inputs.scss';
-@use '~@shared/scss/base/text-styles.scss';
-@use '~@shared/scss/components/inputs.scss';
-@use '~@shared/scss/components/buttons.scss';
+@use 'stamhoofd-shared/scss/layout/split-inputs.scss';
+@use 'stamhoofd-shared/scss/base/text-styles.scss';
+@use 'stamhoofd-shared/scss/components/inputs.scss';
+@use 'stamhoofd-shared/scss/components/buttons.scss';
 
 h1 {
     @extend .style-title-1;

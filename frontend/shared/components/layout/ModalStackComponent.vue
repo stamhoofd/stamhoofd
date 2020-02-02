@@ -2,6 +2,7 @@
     <!-- Components taking up the whole document. Listens to show-modal -->
     <NavigationController
         :scroll-document="true"
+        animation-type="modal"
         ref="navigationController"
         :root="root"
     ></NavigationController>
@@ -30,9 +31,9 @@ export default class ModalStackComponent extends Vue {
 
     show(component: ComponentWithProperties) {
         if (component.component === NavigationController) {
-            component.properties.scrollDocument = true;
+            (component.properties as any).scrollDocument = true;
         }
-        this.$refs.navigationController.push(component);
+        (this.$refs.navigationController as NavigationController).push(component);
     }
 
     mounted() {
