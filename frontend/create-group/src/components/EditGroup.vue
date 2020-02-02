@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div style="padding: 40px 40px;">
+        <div style="padding: 40px 40px">
             <button @click="back">
                 Sluiten
             </button>

@@ -40,7 +40,7 @@ export default class ModalStackComponent extends Vue {
     counter: number = 0;
 
     show(component: ComponentWithProperties) {
-        component.type = this.components.length <= 0 ? "normal" : "normal";
+        component.type = this.components.length <= 0 ? "normal" : "popup";
         component.key = this.counter++;
         this.components.push(component);
     }
@@ -135,7 +135,6 @@ export default class ModalStackComponent extends Vue {
         padding: 20px;
 
         // Improve performance
-        will-change: transform;
 
         & > div {
             max-width: 800px;
@@ -146,15 +145,16 @@ export default class ModalStackComponent extends Vue {
             & > * {
                 max-height: 100vh;
                 max-height: calc(var(--vh, 1vh) * 100);
+                overflow: hidden;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                overscroll-behavior-y: contain;
                 transition: width 0.3s, height 0.3s;
 
                 // Remove scroll blinks
                 will-change: scroll-position;
             }
 
-            overflow-y: auto;
             box-sizing: border-box;
         }
     }
