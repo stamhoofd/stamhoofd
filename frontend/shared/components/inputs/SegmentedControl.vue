@@ -32,10 +32,10 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 export default class SegmentedControl extends Vue {
     public selectedIndex: number = 0;
     @Prop({ type: Array })
-    public items: string[];
+    public items!: string[];
 
     @Prop({ type: String })
-    public value: string;
+    public value!: string;
 
     mounted() {
         this.selectedIndex = this.items.indexOf(this.value);

@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import Steps from "./components/Steps.vue";
-import ModalStackComponent from "@shared/components/layout/ModalStackComponent.vue";
+import ModalStackComponent from "stamhoofd-shared/components/layout/ModalStackComponent.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 
@@ -25,10 +25,10 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@shared/scss/base/reset.scss";
-@use "~@shared/scss/base/text-styles.scss";
-@use "~@shared/scss/elements/body.scss";
-@use "~@shared/scss/components/logo.scss";
+@use "stamhoofd-shared/scss/base/reset.scss";
+@use "stamhoofd-shared/scss/base/text-styles.scss";
+@use "stamhoofd-shared/scss/elements/body.scss";
+@use "stamhoofd-shared/scss/components/logo.scss";
 
 body {
 }
