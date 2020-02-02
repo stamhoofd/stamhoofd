@@ -1,6 +1,10 @@
 <template>
     <div id="app">
+        <!-- To display things that cover everything else and require document scrolling on mobile -->
         <ModalStackComponent :root="root"></ModalStackComponent>
+
+        <!-- To display temporary messages, popups and everything that covers other modals-->
+        <StackComponent :root="root"></StackComponent>
     </div>
 </template>
 
@@ -10,11 +14,13 @@ import Steps from "./components/Steps.vue";
 import ModalStackComponent from "stamhoofd-shared/components/layout/ModalStackComponent.vue";
 import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
+import StackComponent from "stamhoofd-shared/components/layout/StackComponent.vue";
 
 @Component({
     components: {
         Steps,
-        ModalStackComponent
+        ModalStackComponent,
+        StackComponent
     }
 })
 export default class App extends Vue {

@@ -1,13 +1,8 @@
 <template>
     <transition appear name="fade">
-        <div class="popup" @click="dismiss">
+        <div class="popup" @click="pop">
             <div @click.stop="">
-                <component
-                    :key="component.key"
-                    :is="component.component"
-                    v-bind="component.properties"
-                    @dismiss="dismiss"
-                ></component>
+                <component :key="root.key" :is="root.component" v-bind="root.properties" @pop="pop"></component>
             </div>
         </div>
     </transition>
@@ -20,54 +15,57 @@ import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 
 @Component({
     props: {
-        component: ComponentWithProperties
+        root: ComponentWithProperties
     }
 })
 export default class Popup extends Vue {
-    dismiss() {
-        this.$emit("remove");
+    pop() {
+        this.$emit("pop");
     }
 }
 </script>
 
 <style lang="scss">
 .popup {
-        // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
-        background: rgba(black, 0.7);
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        padding: 20px;
+    // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
+    background: rgba(black, 0.7);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
 
-        // Improve performance
+    // Improve performance
 
-        & > div {
-            max-width: 800px;
-            flex-basis: 100%;
-            background: white;
-            border-radius: 5px;
+    & > div {
+        max-width: 800px;
+        flex-basis: 100%;
+        background: white;
+        border-radius: 5px;
 
-            & > * {
-                max-height: 100vh;
-                max-height: calc(var(--vh, 1vh) * 100);
-                overflow: hidden;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                overscroll-behavior-y: contain;
-                transition: width 0.3s, height 0.3s;
+        // Rounded corners need overflow hidden on scroll
+        overflow: hidden;
+        will-change: transform;
 
-                // Remove scroll blinks
-                will-change: scroll-position;
-            }
+        & > * {
+            max-height: 100vh;
+            max-height: calc(var(--vh, 1vh) * 100);
+            overflow: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            transition: width 0.3s, height 0.3s;
 
-            box-sizing: border-box;
+            // Remove scroll blinks
+            will-change: scroll-position;
         }
+
+        box-sizing: border-box;
     }
 
     &.fade-enter-active,

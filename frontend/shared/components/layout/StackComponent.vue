@@ -6,9 +6,7 @@
             ref="children"
             :is="component.component"
             v-bind="component.properties"
-            v-show="!hideOthers || hideOthers == component.key"
-            @remove="removeAt(index, component.key)"
-            @hide-others="setHideOthers(index, component.key)"
+            @pop="removeAt(index, component.key)"
         ></component>
     </div>
 </template>
@@ -25,7 +23,6 @@ export default class StackComponent extends Vue {
     components: ComponentWithProperties[] = [];
     listener: EventBusListener | null = null;
     counter: number = 0;
-    hideOthers: number | null = null;
 
     show(component: ComponentWithProperties) {
         component.key = this.counter++;
@@ -36,15 +33,7 @@ export default class StackComponent extends Vue {
         if (this.components[index].key === key) {
             this.components.splice(index, 1);
         }
-        if (key == this.hideOthers) {
-            this.hideOthers = null;
-        }
     }
-
-    setHideOthers(index, key) {
-        this.hideOthers = key;
-    }
-
     mounted() {
         this.listener = eventBus.listen("show", this.show.bind(this));
     }
