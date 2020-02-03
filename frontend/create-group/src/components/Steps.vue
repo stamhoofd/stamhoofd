@@ -14,7 +14,14 @@
                 Right
             </template>
         </Header>
-        <main>
+
+        <NavigationController
+            ref="navigationController"
+            :root="firstStep"
+            :scroll-document="true"
+        ></NavigationController>
+
+        <!--<main>
             <transition
                 :name="pageTransition"
                 v-on:after-leave="resetScrollPosition()"
@@ -29,7 +36,7 @@
                     <GroupsStep v-on:next="goNext()"></GroupsStep>
                 </div>
             </transition>
-        </main>
+        </main>-->
     </div>
 </template>
 
@@ -39,33 +46,22 @@ import Header from "./Header.vue";
 import GroupSettingsStep from "./steps/GroupSettings.vue";
 import GeneralStep from "./steps/General.vue";
 import GroupsStep from "./steps/Groups.vue";
-import StackComponent from "@shared/components/layout/StackComponent.vue";
+import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 
 @Component({
     components: {
         Header,
-        GeneralStep,
-        GroupSettingsStep,
-        GroupsStep,
-        StackComponent
+        NavigationController
     }
 })
 export default class Steps extends Vue {
-    step: number = 1;
-    pageTransition: string = "right-to-left";
-
-    goNext() {
-        this.pageTransition = "right-to-left";
-        this.step++;
-    }
+    step: number = 2;
+    firstStep = new ComponentWithProperties(GeneralStep, {});
 
     goBack() {
-        this.pageTransition = "left-to-right";
-        this.step--;
-    }
-
-    resetScrollPosition() {
-        window.scrollTo(0, 0);
+        //this.step--;
+        (this.$refs.navigationController as NavigationController).pop();
     }
 }
 </script>

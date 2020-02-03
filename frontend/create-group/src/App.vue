@@ -4,7 +4,7 @@
         <ModalStackComponent :root="root"></ModalStackComponent>
 
         <!-- To display temporary messages, popups and everything that covers other modals-->
-        <StackComponent :root="root"></StackComponent>
+        <StackComponent></StackComponent>
     </div>
 </template>
 
