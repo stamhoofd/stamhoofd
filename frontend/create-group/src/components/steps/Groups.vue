@@ -2,9 +2,8 @@
     <article>
         <h1>Groepindeling</h1>
         <p>
-            Om je wat werk te besparen hebben we een voorstel gemaakt als
-            groepindeling. Selecteer de groepen die je wilt toevoegen. Je kan nu
-            wijzigingen maken, maar je kan alles op elk moment nog wijzigen.
+            Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Selecteer de groepen die je
+            wilt toevoegen. Je kan nu wijzigingen maken, maar je kan alles op elk moment nog wijzigen.
         </p>
 
         <h2 class="style-label" v-on:click="editGroup()">Leden</h2>
@@ -32,9 +31,7 @@
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left
-                    >Kaboutersmeteenhelelangenaamhierzo</template
-                >
+                <template v-slot:left>Kaboutersmeteenhelelangenaamhierzo</template>
                 <template v-slot:right>
                     6 - 8 jaar
                 </template>
@@ -45,10 +42,7 @@
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left
-                    >Jongverkenners en nog wat tekst hierzo, om te
-                    testen</template
-                >
+                <template v-slot:left>Jongverkenners en nog wat tekst hierzo, om te testen</template>
                 <template v-slot:right>
                     6 - 8 jaar
                 </template>
@@ -71,11 +65,7 @@
             </CheckboxItem>
         </CheckboxList>
 
-        <button
-            class="button primary"
-            v-on:click="$emit('next')"
-            id="next-button"
-        >
+        <button class="button primary" v-on:click="$emit('next')" id="next-button">
             Verder
         </button>
     </article>

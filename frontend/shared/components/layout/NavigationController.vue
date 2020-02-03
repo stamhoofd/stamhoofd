@@ -1,5 +1,9 @@
 <template>
-    <div class="navigation-controller" :data-animation-type="animationType">
+    <div
+        class="navigation-controller"
+        :data-animation-type="animationType"
+        :data-scroll-document="scrollDocument ? 'true' : 'false'"
+    >
         <transition
             v-if="mainComponent"
             :name="transitionName"
@@ -10,7 +14,7 @@
             v-on:after-leave="afterLeave"
             v-on:after-enter="afterEnter"
             v-on:enter-cancelled="enterCancelled"
-            :duration="350"
+            v-bind:css="false"
         >
             <keep-alive>
                 <FramedComponent
@@ -72,6 +76,8 @@ export default class NavigationController extends Vue {
         }
         const el = this.$el as HTMLElement;
 
+        console.log("Freeze size: " + el.offsetWidth + "x" + el.offsetHeight);
+
         el.style.width = el.offsetWidth + "px";
         el.style.height = el.offsetHeight + "px";
     }
@@ -100,11 +106,11 @@ export default class NavigationController extends Vue {
         if (this.isModalRoot()) {
             //el.style.width = "auto";
             //el.style.height = "auto";
-            return;
+            //return;
         }
         const el = this.$el as HTMLElement;
-        el.style.width = "auto";
-        el.style.height = "auto";
+        el.style.width = "";
+        el.style.height = "";
         if (this.isModalRoot()) {
             //el.style.width = "auto";
             //el.style.height = "auto";
@@ -123,7 +129,7 @@ export default class NavigationController extends Vue {
         if (this.isModalRoot()) {
             return document.documentElement;
         }
-        return this.$el as HTMLElement;
+        return ((this.$refs.child as FramedComponent).$el as HTMLElement).firstElementChild as HTMLElement;
     }
 
     push(component: ComponentWithProperties) {
@@ -139,8 +145,12 @@ export default class NavigationController extends Vue {
         // Save width and height
 
         this.freezeSize();
-        this.components.push(component);
-        this.mainComponent = component;
+
+        // Make sure the transition name changed, so wait for a rerender
+        Vue.nextTick(() => {
+            this.components.push(component);
+            this.mainComponent = component;
+        });
     }
 
     pop() {
@@ -165,41 +175,71 @@ export default class NavigationController extends Vue {
 
             // Remove popped component from memory
             setTimeout(() => {
-                componentRef.$destroy();
+                //componentRef.$destroy();
             }, 400);
         });
     }
 
     beforeEnter(insertedElement: HTMLElement) {
-        // Reset styles
+        if (this.transitionName == "none") {
+            return;
+        }
+        insertedElement.className = this.transitionName + "-enter";
 
-        insertedElement.style.top = "";
+        // Prevent blink
+        // Reset styles
+        /*insertedElement.style.top = "";
         insertedElement.style.position = "";
         insertedElement.style.overflow = "";
         insertedElement.style.height = "";
         insertedElement.style.marginBottom = "";
         insertedElement.style.transform = "";
-        insertedElement.style.bottom = "";
+        insertedElement.style.bottom = "";*/
     }
 
-    beforeLeave(element: HTMLElement) {}
+    beforeLeave(element: HTMLElement) {
+        var current = this.previousScrollPosition;
+        element.className = this.transitionName + "-leave";
+        (element.firstElementChild as HTMLElement).scrollTop = current;
+    }
 
-    enter(element: HTMLElement) {
+    enter(element: HTMLElement, done) {
         if (this.transitionName == "none") {
+            done();
             return;
         }
 
-        console.log("Enter");
-        Vue.nextTick(() => {
-            console.log("Enter next tick");
-            this.setSize(
-                (element.firstChild as HTMLElement).offsetWidth,
-                (element.firstChild as HTMLElement).offsetHeight
-            );
+        const w = (element.firstChild as HTMLElement).offsetWidth;
+        const h = (element.firstChild as HTMLElement).offsetHeight;
+        console.log("Entered element size: " + w + "x" + h);
+        var next = this.nextScrollPosition;
+        // We need this animation frame! Else the browser will not be able to correctly animate translate 100%
+        // due to the width and height not calculated correctly if it contains flex children
+        requestAnimationFrame(() => {
+            // Lock position if needed
+            this.setSize(w, h);
+
+            // Set initial position
+            element.className = this.transitionName + "-enter";
+
+            // Enable animation only in the next frame (to prevent animating to the initial frame)
+            requestAnimationFrame(() => {
+                element.className = this.transitionName + "-enter-active";
+
+                // Start animation in the next frame
+                requestAnimationFrame(() => {
+                    (element.firstChild as HTMLElement).style.transform = "";
+                    element.className = this.transitionName + "-enter-active " + this.transitionName + "-enter-to";
+
+                    setTimeout(() => {
+                        done();
+                    }, 350);
+                });
+            });
         });
     }
 
-    leave(element: HTMLElement) {
+    leave(element: HTMLElement, done) {
         console.log("leave");
 
         // Prevent blinking due to slow rerender after scrollTop changes
@@ -208,74 +248,44 @@ export default class NavigationController extends Vue {
         var next = this.nextScrollPosition;
         console.log("Set scroll position of leaving frame: " + current);
 
-        Vue.nextTick(() => {
-            Vue.nextTick(() => {
-                console.log("leave next tick");
-                var height = element.offsetHeight;
-                // Adjust original
+        //Vue.nextTick(() => {
+        //Vue.nextTick(() => {
+        var height = element.offsetHeight;
+        // Adjust original
 
-                if (this.isModalRoot()) {
-                    // Still blinks sometimes in Safari (macOS only) if current > 0. Need to find a way to combine the following
-                    // two lines in one statement to prevent rerendering between them.
-                    element.style.cssText = "position: fixed; overflow: hidden; top: 0px; bottom: 0px;";
-                    (element.firstElementChild as HTMLElement).scrollTop = current;
+        //if (this.isModalRoot()) {
+        // Still blinks sometimes in Safari (macOS only) if current > 0. So we combine the following
+        // lines in one animation frame to prevent rerendering between them.
 
-                    setTimeout(() => {
-                        Vue.nextTick(() => {
-                            this.getScrollElement().scrollTop = next;
-                        });
-                    }, 50);
+        requestAnimationFrame(() => {
+            // Set initial position
+            element.className = this.transitionName + "-leave";
+            (element.firstElementChild as HTMLElement).scrollTop = current;
 
-                    /*element.style.cssText =
-                        "position: fixed; overflow: hidden; height: " + height + "px; top: " + -current + "px;";
-                    this.getScrollElement().style.overflowY = "hidden";
-                    setTimeout(() => {
-                        Vue.nextTick(() => {
-                            this.getScrollElement().scrollTop = next;
-                            this.getScrollElement().style.overflowY = "scroll";
-                        });
-                    }, 10);*/
-                } else {
+            requestAnimationFrame(() => {
+                element.className = this.transitionName + "-leave-active";
+                requestAnimationFrame(() => {
                     this.getScrollElement().scrollTop = next;
 
-                    element.style.cssText =
-                        "position: absolute; overflow: hidden; height: " +
-                        height +
-                        "px;transform: translateY(" +
-                        (next - current) +
-                        "px); top: 0px;";
-                }
-                /*element.style.cssText =
-                    "position: " +
-                    (this.isModalRoot()
-                        ? "fixed"
-                        : "sticky; position: -webkit-sticky") +
-                    "; overflow: visible; height: " +
-                    height +
-                    "px; margin-bottom: " +
-                    -height +
-                    "px;transform: translateY(" +
-                    -current +
-                    "px); top: 0px;";*/
+                    element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
+
+                    setTimeout(() => {
+                        done();
+                    }, 350);
+                });
             });
         });
     }
 
     afterLeave(element: HTMLElement) {
         console.log("After leave");
-        element.style.top = "";
-        element.style.position = "";
-        element.style.overflow = "";
-        element.style.height = "";
-        element.style.marginBottom = "";
-        element.style.bottom = "";
-
-        element.style.transform = "";
+        element.className = "";
     }
 
     afterEnter(element: HTMLElement) {
         this.unfreezeSize();
         console.log("After enter");
+        element.className = "";
 
         // Search for scroll position here
         //this.getScrollElement().scrollTop = this.nextScrollPosition;
@@ -297,56 +307,61 @@ export default class NavigationController extends Vue {
 <style lang="scss">
 .navigation-controller {
     // Scrolling should happen inside the children!
-    overflow: visible;
+    overflow: hidden;
     position: relative;
 
     &[data-animation-type="modal"] {
-        will-change: transform;
         & > * {
             // Fix: apply this background color permanently, else it won't work during transition for some strange reason
             // background-color: rgba(0, 0, 0, 0.7);
         }
     }
 
+    &[data-scroll-document="false"] {
+        transition: width 0.35s, height 0.35s;
+    }
+
+    &[data-animation-type="default"] {
+        & > * {
+            overflow: hidden;
+        }
+    }
+
     > .modal {
         &-push {
             &-enter-active {
-                transition: opacity 0.35s;
-                position: relative;
-                overflow: hidden !important;
-
                 & > div {
                     transition: transform 0.35s;
                 }
+            }
 
-                //transition: background-color 0.35s;
-                overflow: hidden;
+            &-enter,
+            &-enter-active {
+                position: relative;
+
                 & > div {
                     min-height: 100vh;
                     min-height: calc(var(--vh, 1vh) * 100);
                     background: white;
-                    transition: transform 0.35s;
                 }
             }
 
-            &-enter {
-                //background-color: rgba(0, 0, 0, 0) !important;
-            }
-
-            &-enter-to {
-                //background-color: rgba(0, 0, 0, 0.7);
-            }
-
+            &-leave,
             &-leave-active {
-                // Javascript will make this fixed or absolute later with a custom top offset
                 position: absolute;
-                left: 0;
-                top: 0;
-                right: 0;
+
+                // During leave animation, the div inside this container will transition to the left, causing scroll offsets
+                // We'll need to ignore these
                 overflow: hidden !important;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
 
                 & > div {
-                    transition: transform 0.35s;
+                    overflow: hidden !important;
+                    width: 100%;
+                    height: 100%;
                 }
             }
 
@@ -358,45 +373,38 @@ export default class NavigationController extends Vue {
         }
 
         &-pop {
-            &-enter-active {
-                position: relative;
-                overflow: hidden !important;
-
+            &-leave-active {
                 & > div {
                     transition: transform 0.35s;
                 }
-
-                z-index: -1;
             }
 
+            &-leave,
             &-leave-active {
                 position: absolute;
-                left: 0;
-                top: 0;
-                right: 0;
-                transition: opacity 0.35s;
+                z-index: 10000;
+
+                // During leave animation, the div inside this container will transition to the left, causing scroll offsets
+                // We'll need to ignore these
                 overflow: hidden !important;
-
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
                 & > div {
-                    transition: transform 0.35s;
-                }
-
-                //transition: background-color 0.35s;
-                //background-color: rgba(0, 0, 0, 0.7);
-                & > div {
-                    min-height: 100vh;
-                    min-height: calc(var(--vh, 1vh) * 100);
+                    overflow: hidden !important;
                     background: white;
-                    transition: transform 0.35s;
+                    width: 100%;
+                    height: 100%;
                 }
             }
 
-            &-leave {
-                //background-color: rgba(0, 0, 0, 0.7);
+            &-enter,
+            &-enter-active {
+                position: relative;
             }
 
             &-leave-to {
-                //background-color: rgba(0, 0, 0, 0);
                 & > div {
                     transform: translateY(100vh);
                 }
@@ -405,26 +413,36 @@ export default class NavigationController extends Vue {
     }
 
     > .push {
-        &-enter-active {
+        &-enter-active,
+        &-leave-active {
             transition: opacity 0.35s;
-            position: relative;
 
             & > div {
                 transition: transform 0.35s;
             }
         }
 
-        &-leave-active {
-            // Javascript will make this fixed or absolute later with a custom top offset
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
+        &-enter,
+        &-enter-active {
+            position: relative;
+        }
 
-            transition: opacity 0.35s;
+        &-leave,
+        &-leave-active {
+            position: absolute;
+
+            // During leave animation, the div inside this container will transition to the left, causing scroll offsets
+            // We'll need to ignore these
+            overflow: hidden !important;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
 
             & > div {
-                transition: transform 0.35s;
+                overflow: hidden !important;
+                width: 100%;
+                height: 100%;
             }
         }
 
@@ -446,25 +464,33 @@ export default class NavigationController extends Vue {
     }
 
     > .pop {
-        &-enter-active {
+        &-enter-active,
+        &-leave-active {
             transition: opacity 0.35s;
-
-            position: relative;
 
             & > div {
                 transition: transform 0.35s;
             }
         }
 
+        &-enter,
+        &-enter-active {
+            position: relative;
+        }
+
+        &-leave,
         &-leave-active {
             position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            transition: opacity 0.35s;
+            overflow: hidden !important;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
 
             & > div {
-                transition: transform 0.35s;
+                overflow: hidden !important;
+                width: 100%;
+                height: 100%;
             }
         }
 
@@ -481,6 +507,18 @@ export default class NavigationController extends Vue {
         &-leave-to {
             & > div {
                 transform: translateX(100%);
+            }
+        }
+    }
+
+    &[data-scroll-document="true"] {
+        > .pop,
+        > .push,
+        > .modal-pop,
+        > .modal-push {
+            &-leave,
+            &-leave-active {
+                position: fixed;
             }
         }
     }

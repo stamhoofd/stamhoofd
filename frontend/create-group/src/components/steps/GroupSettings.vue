@@ -1,5 +1,5 @@
 <template>
-    <article>
+    <Step>
         <h1>Inschrijven & groepen</h1>
 
         <hr />
@@ -7,9 +7,7 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name"
-                    >Soort vereniging</label
-                >
+                <label class="style-label" for="organization-name">Soort vereniging</label>
                 <select class="input" ref="firstInput">
                     <option>Scoutsgroep</option>
                     <option>Chirogroep</option>
@@ -17,9 +15,7 @@
             </div>
 
             <div>
-                <label class="style-label" for="organization-name"
-                    >Koepelorganisatie</label
-                >
+                <label class="style-label" for="organization-name">Koepelorganisatie</label>
                 <select class="input">
                     <option>Scouts & Gidsen Vlaanderen</option>
                     <option>FOS</option>
@@ -43,40 +39,21 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name"
-                    >Start werkjaar</label
-                >
+                <label class="style-label" for="organization-name">Start werkjaar</label>
                 <select class="input">
-                    <option
-                        v-for="(month, index) in months"
-                        :value="index"
-                        :key="index"
-                        >{{ month }}</option
-                    >
+                    <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
                 </select>
             </div>
 
             <div>
-                <label class="style-label" for="organization-name"
-                    >Inschrijvingsperiode</label
-                >
+                <label class="style-label" for="organization-name">Inschrijvingsperiode</label>
                 <div class="mixed-input">
                     <select>
-                        <option
-                            v-for="(month, index) in months"
-                            :value="index"
-                            :key="index"
-                            >{{ month }}</option
-                        >
+                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
                     </select>
                     <span>tot</span>
                     <select>
-                        <option
-                            v-for="(month, index) in months"
-                            :value="index"
-                            :key="index"
-                            >{{ month }}</option
-                        >
+                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
                     </select>
                 </div>
             </div>
@@ -85,8 +62,7 @@
         <hr />
         <h2>Prijzen</h2>
         <p>
-            Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende
-            stap.
+            Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende stap.
         </p>
 
         <div class="split-inputs">
@@ -101,24 +77,17 @@
             </div>
         </div>
 
-        <Checkbox
-            >Verminder het lidgeld voor leden met financiële
-            moeilijkheden</Checkbox
-        >
+        <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
 
         <label class="style-label">Verminderd lidgeld</label>
         <PriceInput></PriceInput>
 
-        <button
-            class="button primary"
-            v-on:click="$emit('next')"
-            id="next-button"
-        >
+        <button class="button primary" v-on:click="$emit('next')" id="next-button">
             Verder
         </button>
 
         <button class="button secundary" @click="editGroup">Test</button>
-    </article>
+    </Step>
 </template>
 
 <script lang="ts">
@@ -134,11 +103,14 @@ import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponent
 import EditGroup from "../EditGroup.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import Step from "../Step.vue";
+import EditGroupDetail from "../EditGroupDetail.vue";
 
 @Component({
     // All component options are allowed in here
     components: {
         Slider,
+        Step,
         Checkbox,
         Radio,
         RadioGroup,
@@ -163,15 +135,24 @@ export default class General extends Vue {
 
     mounted() {
         // Focus first input automatically
-        let input = this.$refs.firstInput as HTMLElement;
-        input.focus();
+        document.addEventListener("transitionend", this.focus, { passive: true });
+    }
+
+    beforeDestroy() {
+        document.removeEventListener("transitionend", this.focus);
+    }
+
+    focus() {
+        // Carefull about focussing, can cause transition bugs
+        //let input = this.$refs.firstInput as HTMLElement;
+        //input.focus();
     }
 
     editGroup() {
         eventBus.send(
             "show-modal",
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditGroup, {
+                root: new ComponentWithProperties(EditGroupDetail, {
                     text: "Custom text"
                 })
             })

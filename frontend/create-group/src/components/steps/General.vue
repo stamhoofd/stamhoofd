@@ -1,5 +1,5 @@
 <template>
-    <article>
+    <Step>
         <h1>Jouw vereniging aansluiten</h1>
 
         <div class="split-inputs">
@@ -18,15 +18,15 @@
                 <Slider></Slider>
             </div>
 
-            <!--<div>
+            <div>
                 <label class="style-label">Adres van je vereniging</label>
-                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
+                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" />
                 <div class="input-group">
                     <div>
-                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code">
+                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code" />
                     </div>
                     <div>
-                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city">
+                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city" />
                     </div>
                 </div>
 
@@ -34,15 +34,14 @@
                     <option>België</option>
                     <option>Nederland</option>
                 </select>
-                
-            </div>-->
+            </div>
         </div>
 
-        <button class="button primary" v-on:click="$emit('next')" id="next-button">
+        <button class="button primary" v-on:click="next" id="next-button">
             Verder
         </button>
         <button class="button secundary" @click="editGroup">Test</button>
-    </article>
+    </Step>
 </template>
 
 <script lang="ts">
@@ -54,10 +53,14 @@ import EditGroupDetail from "../EditGroupDetail.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
 import Popup from "stamhoofd-shared/components/layout/Popup.vue";
+import Step from "../Step.vue";
+import GroupSettings from "./GroupSettings.vue";
+
 @Component({
     // All component options are allowed in here
     components: {
-        Slider
+        Slider,
+        Step
     }
 })
 export default class General extends Vue {
@@ -77,6 +80,10 @@ export default class General extends Vue {
                 })
             })
         );
+    }
+
+    next() {
+        this.$emit("push", new ComponentWithProperties(GroupSettings, {}));
     }
 }
 </script>

@@ -2,7 +2,7 @@
     <!-- Element that will get displayed fixed left, top, right bottom during transitions -->
     <div>
         <!-- Element that will take over the document scroll position during transitions -->
-        <div style="overflow: hidden; background: white; height: 100%;">
+        <div>
             <!-- Actual content with padding -->
             <component
                 :name="root.key"
