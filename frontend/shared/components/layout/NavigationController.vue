@@ -267,8 +267,6 @@ export default class NavigationController extends Vue {
             return;
         }
 
-        debugger;
-        console.log("After leave");
         element.className = "";
     }
 
@@ -277,13 +275,8 @@ export default class NavigationController extends Vue {
             return;
         }
 
-        debugger;
         this.unfreezeSize();
-        console.log("After enter");
         element.className = "";
-
-        // Search for scroll position here
-        //this.getScrollElement().scrollTop = this.nextScrollPosition;
     }
 
     enterCancelled(element: HTMLElement) {
