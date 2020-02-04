@@ -6,7 +6,6 @@
     >
         <transition
             v-if="mainComponent"
-            :name="transitionName"
             v-on:before-enter="beforeEnter"
             v-on:before-leave="beforeLeave"
             v-on:enter="enter"
@@ -147,11 +146,9 @@ export default class NavigationController extends Vue {
         this.freezeSize();
 
         // Make sure the transition name changed, so wait for a rerender
-        Vue.nextTick(() => {
-            this.components.push(component);
-            this.mainComponent = component;
-            this.$emit("didPush");
-        });
+        this.components.push(component);
+        this.mainComponent = component;
+        this.$emit("didPush");
     }
 
     pop() {
@@ -167,42 +164,34 @@ export default class NavigationController extends Vue {
 
         console.log("Prepared previous scroll positoin: " + this.previousScrollPosition);
 
-        Vue.nextTick(() => {
-            this.freezeSize();
-            this.components.splice(this.components.length - 1, 1);
-            this.nextScrollPosition = this.savedScrollPositions.pop() as number;
+        this.freezeSize();
+        this.components.splice(this.components.length - 1, 1);
+        this.nextScrollPosition = this.savedScrollPositions.pop() as number;
 
-            this.mainComponent = this.components[this.components.length - 1];
-            this.$emit("didPop");
+        this.mainComponent = this.components[this.components.length - 1];
+        this.$emit("didPop");
 
-            // Remove popped component from memory
-            setTimeout(() => {
-                componentRef.$destroy();
-            }, 400);
-        });
+        // Remove popped component from memory
+        setTimeout(() => {
+            componentRef.$destroy();
+        }, 400);
     }
 
     beforeEnter(insertedElement: HTMLElement) {
         if (this.transitionName == "none") {
             return;
         }
-        insertedElement.className = this.transitionName + "-enter";
 
-        // Prevent blink
-        // Reset styles
-        /*insertedElement.style.top = "";
-        insertedElement.style.position = "";
-        insertedElement.style.overflow = "";
-        insertedElement.style.height = "";
-        insertedElement.style.marginBottom = "";
-        insertedElement.style.transform = "";
-        insertedElement.style.bottom = "";*/
+        // We need to set the class already to hide the incoming element
+        insertedElement.className = this.transitionName + "-enter-active " + this.transitionName + "-enter";
     }
 
     beforeLeave(element: HTMLElement) {
-        var current = this.previousScrollPosition;
-        element.className = this.transitionName + "-leave";
-        (element.firstElementChild as HTMLElement).scrollTop = current;
+        if (this.transitionName == "none") {
+            return;
+        }
+        // Do nothing here. Is is important to finish the enter transitions first!
+        // Do not even set a class! That will cause flickering on Webkit!
     }
 
     enter(element: HTMLElement, done) {
@@ -213,78 +202,82 @@ export default class NavigationController extends Vue {
 
         const w = (element.firstChild as HTMLElement).offsetWidth;
         const h = (element.firstChild as HTMLElement).offsetHeight;
-        console.log("Entered element size: " + w + "x" + h);
-        var next = this.nextScrollPosition;
-        // We need this animation frame! Else the browser will not be able to correctly animate translate 100%
-        // due to the width and height not calculated correctly if it contains flex children
+        const next = this.nextScrollPosition;
+
+        // Lock position if needed
+        // This happens before the beforeLeave animation frame!
+        this.setSize(w, h);
+
         requestAnimationFrame(() => {
-            // Lock position if needed
-            this.setSize(w, h);
+            // Wait and execute immediately after beforeLeave's animation frame
+            // Let the OS rerender once so all the positions are okay after dom insertion
+            this.getScrollElement().scrollTop = next;
 
-            // Set initial position
-            element.className = this.transitionName + "-enter";
-
-            // Enable animation only in the next frame (to prevent animating to the initial frame)
+            // Start animation in the next frame
             requestAnimationFrame(() => {
-                element.className = this.transitionName + "-enter-active";
+                // We've reached our initial positioning and can start our animation
+                element.className = this.transitionName + "-enter-active " + this.transitionName + "-enter-to";
 
-                // Start animation in the next frame
-                requestAnimationFrame(() => {
-                    (element.firstChild as HTMLElement).style.transform = "";
-                    element.className = this.transitionName + "-enter-active " + this.transitionName + "-enter-to";
-
-                    setTimeout(() => {
-                        done();
-                    }, 350);
-                });
+                setTimeout(() => {
+                    done();
+                }, 350);
             });
         });
     }
 
     leave(element: HTMLElement, done) {
-        console.log("leave");
+        if (this.transitionName == "none") {
+            done();
+            return;
+        }
 
         // Prevent blinking due to slow rerender after scrollTop changes
         // Create a clone and offset the clone first. After that, adjust the scroll position
         var current = this.previousScrollPosition;
         var next = this.nextScrollPosition;
-        console.log("Set scroll position of leaving frame: " + current);
 
-        //Vue.nextTick(() => {
-        //Vue.nextTick(() => {
         var height = element.offsetHeight;
-        // Adjust original
 
-        //if (this.isModalRoot()) {
-        // Still blinks sometimes in Safari (macOS only) if current > 0. So we combine the following
-        // lines in one animation frame to prevent rerendering between them.
-
+        // This animation frame is super important to prevent flickering on Safari and Webkit!
+        // This is also one of the reasons why we cannot use the default Vue class additions
+        // We do this to improve the timing of the classes and scroll positions
         requestAnimationFrame(() => {
-            // Set initial position
-            element.className = this.transitionName + "-leave";
+            // Setting the class has to happen in one go.
+            // First we need to make our element fixed / absolute positioned, and pinned to all the edges
+            // In the same frame, we need to update the scroll position.
+            // If we switch the ordering, this won't work!
+            element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave";
+
+            // Now scroll!
             (element.firstElementChild as HTMLElement).scrollTop = current;
 
             requestAnimationFrame(() => {
-                element.className = this.transitionName + "-leave-active";
-                requestAnimationFrame(() => {
-                    this.getScrollElement().scrollTop = next;
+                // We've reached our initial positioning and can start our animation
+                element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
 
-                    element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
-
-                    setTimeout(() => {
-                        done();
-                    }, 350);
-                });
+                setTimeout(() => {
+                    done();
+                }, 350);
             });
         });
     }
 
     afterLeave(element: HTMLElement) {
+        if (this.transitionName == "none") {
+            return;
+        }
+
+        debugger;
         console.log("After leave");
         element.className = "";
     }
 
     afterEnter(element: HTMLElement) {
+        if (this.transitionName == "none") {
+            return;
+        }
+
+        debugger;
         this.unfreezeSize();
         console.log("After enter");
         element.className = "";
