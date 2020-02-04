@@ -82,7 +82,7 @@
         <label class="style-label">Verminderd lidgeld</label>
         <PriceInput></PriceInput>
 
-        <button class="button primary" v-on:click="$emit('next')" id="next-button">
+        <button class="button primary" @click="next" id="next-button">
             Verder
         </button>
 
@@ -105,6 +105,7 @@ import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithP
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
 import Step from "../Step.vue";
 import EditGroupDetail from "../EditGroupDetail.vue";
+import Groups from "./Groups.vue";
 
 @Component({
     // All component options are allowed in here
@@ -135,17 +136,15 @@ export default class General extends Vue {
 
     mounted() {
         // Focus first input automatically
-        document.addEventListener("transitionend", this.focus, { passive: true });
-    }
-
-    beforeDestroy() {
-        document.removeEventListener("transitionend", this.focus);
+        setTimeout(() => {
+            this.focus();
+        }, 400);
     }
 
     focus() {
         // Carefull about focussing, can cause transition bugs
-        //let input = this.$refs.firstInput as HTMLElement;
-        //input.focus();
+        let input = this.$refs.firstInput as HTMLElement;
+        input.focus();
     }
 
     editGroup() {
@@ -157,6 +156,10 @@ export default class General extends Vue {
                 })
             })
         );
+    }
+
+    next() {
+        this.$emit("push", new ComponentWithProperties(Groups, {}));
     }
 }
 </script>

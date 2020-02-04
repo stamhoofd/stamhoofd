@@ -18,7 +18,7 @@ export default class Step extends Vue {}
 $header-height: 50px;
 
 .step {
-    /*overflow: hidden;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -42,6 +42,6 @@ $header-height: 50px;
         @media (max-width: 500px) {
             padding: 30px 20px;
         }
-    }*/
+    }
 }
 </style>

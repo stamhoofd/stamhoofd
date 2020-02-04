@@ -26,7 +26,15 @@ export default class Header extends Vue {
     @Prop()
     progress!: number;
 
-    mounted() {
+    mounted() {}
+
+    deactivated() {
+        console.log("Header deactivated");
+        document.removeEventListener("scroll", this.onScroll);
+    }
+
+    activated() {
+        console.log("Header activated");
         document.addEventListener("scroll", this.onScroll, { passive: true });
     }
 
