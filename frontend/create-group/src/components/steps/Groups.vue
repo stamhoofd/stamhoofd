@@ -1,5 +1,5 @@
 <template>
-    <article>
+    <Step>
         <h1>Groepindeling</h1>
         <p>
             Om je wat werk te besparen hebben we een voorstel gemaakt als groepindeling. Selecteer de groepen die je
@@ -68,7 +68,7 @@
         <button class="button primary" v-on:click="$emit('next')" id="next-button">
             Verder
         </button>
-    </article>
+    </Step>
 </template>
 
 <script lang="ts">
@@ -84,11 +84,13 @@ import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponent
 import EditGroup from "../EditGroup.vue";
 import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import Step from "../Step.vue";
 
 @Component({
     // All component options are allowed in here
     components: {
         Slider,
+        Step,
         CheckboxList,
         CheckboxItem,
         GenderSelector,

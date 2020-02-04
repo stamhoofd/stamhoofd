@@ -19,6 +19,8 @@
             ref="navigationController"
             :root="firstStep"
             :scroll-document="true"
+            @didPop="updateProgress"
+            @didPush="updateProgress"
         ></NavigationController>
 
         <!--<main>
@@ -41,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Ref } from "vue-property-decorator";
 import Header from "./Header.vue";
 import GroupSettingsStep from "./steps/GroupSettings.vue";
 import GeneralStep from "./steps/General.vue";
@@ -56,12 +58,17 @@ import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithP
     }
 })
 export default class Steps extends Vue {
-    step: number = 2;
+    step: number = 1;
     firstStep = new ComponentWithProperties(GeneralStep, {});
+    @Ref("navigationController") readonly navigationController!: NavigationController;
 
     goBack() {
         //this.step--;
-        (this.$refs.navigationController as NavigationController).pop();
+        this.navigationController.pop();
+    }
+
+    updateProgress() {
+        this.step = this.navigationController.components.length;
     }
 }
 </script>

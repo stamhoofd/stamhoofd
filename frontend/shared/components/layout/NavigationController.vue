@@ -150,6 +150,7 @@ export default class NavigationController extends Vue {
         Vue.nextTick(() => {
             this.components.push(component);
             this.mainComponent = component;
+            this.$emit("didPush");
         });
     }
 
@@ -172,10 +173,11 @@ export default class NavigationController extends Vue {
             this.nextScrollPosition = this.savedScrollPositions.pop() as number;
 
             this.mainComponent = this.components[this.components.length - 1];
+            this.$emit("didPop");
 
             // Remove popped component from memory
             setTimeout(() => {
-                //componentRef.$destroy();
+                componentRef.$destroy();
             }, 400);
         });
     }
