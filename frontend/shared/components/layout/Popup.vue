@@ -59,8 +59,6 @@ export default class Popup extends Vue {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
-
-            // Remove scroll blinks
         }
 
         box-sizing: border-box;
