@@ -14,7 +14,7 @@ import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
-import Modal from "stamhoofd-shared/components/layout/Modal.vue";
+import Modal from "shared/components/layout/Modal.vue";
 import NavigationController from "./NavigationController.vue";
 
 @Component({

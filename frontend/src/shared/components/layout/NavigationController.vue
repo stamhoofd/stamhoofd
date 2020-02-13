@@ -15,22 +15,23 @@
             v-on:enter-cancelled="enterCancelled"
             v-bind:css="false"
         >
-            <keep-alive>
-                <FramedComponent
-                    :root="mainComponent"
-                    :name="mainComponent.key"
-                    :key="mainComponent.key"
-                    @push="push"
-                    @pop="pop"
-                    ref="child"
-                ></FramedComponent>
-            </keep-alive>
+            <!--<keep-alive>-->
+            <FramedComponent
+                :root="mainComponent"
+                :name="mainComponent.key"
+                :key="mainComponent.key"
+                @push="push"
+                @show="push"
+                @pop="pop"
+                ref="child"
+            ></FramedComponent>
+            <!--</keep-alive>-->
         </transition>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Ref } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
@@ -59,6 +60,9 @@ export default class NavigationController extends Vue {
 
     @Prop({ default: "default" })
     animationType!: string;
+
+    @Ref()
+    child!: FramedComponent;
 
     mounted() {
         this.root.key = this.counter++;
@@ -131,9 +135,14 @@ export default class NavigationController extends Vue {
         return ((this.$refs.child as FramedComponent).$el as HTMLElement).firstElementChild as HTMLElement;
     }
 
-    push(component: ComponentWithProperties) {
+    push(component: ComponentWithProperties, animated: boolean = true) {
         component.key = this.counter++;
-        this.transitionName = this.animationType == "modal" ? "modal-push" : "push";
+
+        if (!animated) {
+            this.transitionName = "none";
+        } else {
+            this.transitionName = this.animationType == "modal" ? "modal-push" : "push";
+        }
 
         // Save scroll position
         this.previousScrollPosition = this.getScrollElement().scrollTop;
@@ -147,34 +156,44 @@ export default class NavigationController extends Vue {
 
         // Make sure the transition name changed, so wait for a rerender
         this.components.push(component);
+
+        if (this.mainComponent) {
+            this.mainComponent.keepAlive = true;
+        }
+
         this.mainComponent = component;
         this.$emit("didPush");
     }
 
-    pop() {
+    pop(animated: boolean = true, destroy: boolean = true): ComponentWithProperties | null {
         if (this.components.length <= 1) {
             this.$emit("pop");
-            return;
+            return null;
         }
 
-        const componentRef = this.$refs.child as any;
         this.previousScrollPosition = this.getScrollElement().scrollTop;
 
-        this.transitionName = this.animationType == "modal" ? "modal-pop" : "pop";
-
+        if (!animated) {
+            this.transitionName = "none";
+        } else {
+            this.transitionName = this.animationType == "modal" ? "modal-pop" : "pop";
+        }
         console.log("Prepared previous scroll positoin: " + this.previousScrollPosition);
 
         this.freezeSize();
-        this.components.splice(this.components.length - 1, 1);
+        const popped = this.components.splice(this.components.length - 1, 1);
+
+        if (!destroy) {
+            // Stop destroy
+            popped[0].keepAlive = true;
+        }
+
         this.nextScrollPosition = this.savedScrollPositions.pop() as number;
 
         this.mainComponent = this.components[this.components.length - 1];
         this.$emit("didPop");
 
-        // Remove popped component from memory
-        setTimeout(() => {
-            componentRef.$destroy();
-        }, 400);
+        return popped[0];
     }
 
     beforeEnter(insertedElement: HTMLElement) {
@@ -196,6 +215,7 @@ export default class NavigationController extends Vue {
 
     enter(element: HTMLElement, done) {
         if (this.transitionName == "none") {
+            this.getScrollElement().scrollTop = this.nextScrollPosition;
             done();
             return;
         }
@@ -271,11 +291,12 @@ export default class NavigationController extends Vue {
     }
 
     afterEnter(element: HTMLElement) {
+        this.unfreezeSize();
+
         if (this.transitionName == "none") {
             return;
         }
 
-        this.unfreezeSize();
         element.className = "";
     }
 

@@ -12,7 +12,7 @@
         "baseUrl": ".",
         "types": ["webpack-env"],
         "paths": {
-            "stamhoofd-shared/*": ["src/shared/*"]
+            "shared/*": ["src/shared/*"]
         },
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },

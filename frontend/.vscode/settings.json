@@ -1,0 +1,17 @@
+{
+    "protoc": {
+        "options": [
+            // This makes the "vscode-proto3" extension correctly detect imports.
+            "--proto_path=${workspaceRoot}/backend"
+        ]
+    },
+    "go.useLanguageServer": true,
+    "vetur.format.options.tabSize": 4,
+    "prettier.tabWidth": 4,
+    "prettier.packageManager": "yarn",
+    "editor.formatOnSave": true,
+    "javascript.format.enable": false,
+    "vetur.format.defaultFormatter.html": "prettier",
+    "prettier.printWidth": 120,
+    "prettier.ignorePath": "frontend/.prettierignore"
+}

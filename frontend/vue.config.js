@@ -13,11 +13,8 @@ module.exports = {
     configureWebpack: {
         resolve: {
             alias: {
-                "@shared": path.resolve(__dirname, 'src/shared/'),
-                "stamhoofd-shared": path.resolve(__dirname, 'src/shared/'),
-                "create-group": path.resolve(__dirname, 'src/create-group/'),
+                "shared": path.resolve(__dirname, 'src/shared/'),
                 "scss": path.resolve(__dirname, 'scss/'),
-                "public": path.resolve(__dirname, 'public/'),
                 "assets": path.resolve(__dirname, 'assets/')
             }
         },
