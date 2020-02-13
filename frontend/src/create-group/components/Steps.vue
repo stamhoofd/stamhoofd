@@ -48,8 +48,8 @@ import Header from "./Header.vue";
 import GroupSettingsStep from "./steps/GroupSettings.vue";
 import GeneralStep from "./steps/General.vue";
 import GroupsStep from "./steps/Groups.vue";
-import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
-import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
+import NavigationController from "shared/components/layout/NavigationController.vue";
+import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 
 @Component({
     components: {

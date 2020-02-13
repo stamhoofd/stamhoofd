@@ -4,26 +4,33 @@
         <!-- Element that will take over the document scroll position during transitions -->
         <div>
             <!-- Actual content with padding -->
-            <component
+            <ComponentWithPropertiesInstance :component="root"></ComponentWithPropertiesInstance>
+            <!--<component
                 :name="root.key"
                 :key="root.key"
                 :is="root.component"
                 v-bind="root.properties"
+                ref="component"
                 @push="push"
                 @pop="pop"
-            ></component>
+            ></component>-->
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Ref } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
+import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 
-@Component
+@Component({
+    components: {
+        ComponentWithPropertiesInstance
+    }
+})
 export default class NavigationController extends Vue {
     @Prop()
     root!: ComponentWithProperties;
