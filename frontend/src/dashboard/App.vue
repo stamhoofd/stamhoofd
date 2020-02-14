@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <!-- To display things that cover everything else and require document scrolling on mobile -->
-        <ModalStackComponent :root="root"></ModalStackComponent>
+        <ModalStackComponent v-if="stop" :root="root"></ModalStackComponent>
 
         <!-- To display temporary messages, popups and everything that covers other modals-->
         <StackComponent></StackComponent>
@@ -14,8 +14,8 @@ import ModalStackComponent from "shared/components/layout/ModalStackComponent.vu
 import { eventBus } from "shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import StackComponent from "shared/components/layout/StackComponent.vue";
-import SplitViewController from '../shared/components/layout/SplitViewController.vue';
-import Menu from './components/Menu.vue';
+import SplitViewController from "../shared/components/layout/SplitViewController.vue";
+import Menu from "./components/Menu.vue";
 
 @Component({
     components: {
@@ -27,8 +27,18 @@ export default class App extends Vue {
     public root = new ComponentWithProperties(SplitViewController, {
         root: new ComponentWithProperties(Menu, {})
     });
+    public stop: boolean = true;
 
-    mounted() {}
+    mounted() {
+        setTimeout(() => {
+            this.root.keepAlive = true;
+            this.stop = false;
+
+            setTimeout(() => {
+                this.stop = true;
+            }, 5000);
+        }, 5000);
+    }
 }
 </script>
 
