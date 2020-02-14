@@ -18,12 +18,11 @@ export default Vue.extend({
     },
 
     beforeMount() {
-        //this.component.beforeMount();
+        this.component.beforeMount();
     },
 
     mounted() {
-        console.log(this.$el);
-        this.component.beforeMount();
+        this.component.mounted();
     },
 
     render(createElement): VNode {
@@ -34,7 +33,6 @@ export default Vue.extend({
             return this.component.vnode;
         }
 
-        console.log("Created new vnode " + this.component.component.name);
         this.component.vnode = createElement(this.component.component, {
             props: this.component.properties,
             key: this.component.key
