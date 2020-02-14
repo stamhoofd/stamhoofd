@@ -7,18 +7,9 @@
                 :root="root"
                 @showDetail="showDetail"
             ></NavigationController>
-
-            <button
-                class="button primary"
-                v-if="!detail && navigationController && navigationController.components.length > 1"
-                @click="expand"
-            >
-                Expand
-            </button>
         </div>
         <div class="detail" v-if="detail">
             <FramedComponent :key="detail.key" :root="detail"></FramedComponent>
-            <button class="button primary" v-if="detail" @click="collapse">Collapse</button>
         </div>
     </div>
 </template>
@@ -70,13 +61,13 @@ export default class SplitViewController extends Vue {
     }
 
     showDetail(component: ComponentWithProperties) {
+        if (this.lastIsDetail || this.detail) {
+            console.warn("Showing detail when a detail is already presented");
+        }
+
         this.detailKey = component.key;
 
         if (window.innerWidth < 600) {
-            if (this.lastIsDetail) {
-                // todo: will never trigger
-                console.warn("Todo: replace!");
-            }
             this.navigationController.push(component);
         } else {
             this.detail = component;
@@ -85,7 +76,8 @@ export default class SplitViewController extends Vue {
 
     collapse() {
         if (this.lastIsDetail) {
-            console.warn("Todo: replace!");
+            console.error("Cannot collapse when the detail is already collaped");
+            return;
         }
         this.detail.keepAlive = true;
         const detail = this.detail;
@@ -95,10 +87,12 @@ export default class SplitViewController extends Vue {
 
     expand() {
         if (this.detail) {
+            console.error("Cannot expand when detail is already visible");
             return;
         }
         if (!this.lastIsDetail) {
-            console.warn("Warning: expanding last is not detail");
+            console.error("Cannot expand when there is no detail");
+            return;
         }
         const popped = this.navigationController.pop(false, false);
 
