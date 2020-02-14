@@ -17,10 +17,12 @@ export class ComponentWithProperties {
 
     // Counter for debugging. Count of components that are kept alive but are not mounted.
     static keepAliveCounter: number = 0;
+    static keyCounter: number = 0;
 
     constructor(component: any, properties: Object = {}) {
         this.component = component;
         this.properties = properties;
+        this.key = ComponentWithProperties.keyCounter++;
     }
 
     beforeMount() {
