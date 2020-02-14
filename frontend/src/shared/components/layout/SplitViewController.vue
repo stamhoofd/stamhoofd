@@ -43,17 +43,23 @@ export default class SplitViewController extends Vue {
     detailKey: number | null = null;
 
     mounted() {
-        window.addEventListener("resize", () => {
-            if (window.innerWidth < 600) {
-                if (this.detail) {
-                    this.collapse();
-                }
-            } else {
-                if (this.lastIsDetail && !this.detail) {
-                    this.expand();
-                }
+        window.addEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
+    }
+
+    destoyed() {
+        window.removeEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
+    }
+
+    onResize() {
+        if (this.shouldCollapse()) {
+            if (this.detail) {
+                this.collapse();
             }
-        });
+        } else {
+            if (this.lastIsDetail && !this.detail) {
+                this.expand();
+            }
+        }
     }
 
     get lastIsDetail() {
@@ -67,11 +73,15 @@ export default class SplitViewController extends Vue {
 
         this.detailKey = component.key;
 
-        if (window.innerWidth < 600) {
+        if (this.shouldCollapse()) {
             this.navigationController.push(component);
         } else {
             this.detail = component;
         }
+    }
+
+    shouldCollapse() {
+        return window.innerWidth < 600;
     }
 
     collapse() {
