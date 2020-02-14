@@ -13,7 +13,10 @@ export class ComponentWithProperties {
 
     // Keep the vnode alive when it is removed from the VDOM
     public keepAlive: boolean = false;
-    public mounted: boolean = false;
+    public isMounted: boolean = false;
+
+    // Counter for debugging. Count of components that are kept alive but are not mounted.
+    static keepAliveCounter: number = 0;
 
     constructor(component: any, properties: Object = {}) {
         this.component = component;
@@ -21,18 +24,27 @@ export class ComponentWithProperties {
     }
 
     beforeMount() {
-        console.log("Component mounted: " + this.component.name);
+        if (this.vnode) {
+            ComponentWithProperties.keepAliveCounter--;
+            console.log("Total components kept alive: " + ComponentWithProperties.keepAliveCounter);
+        }
+    }
 
-        this.mounted = true;
+    mounted() {
+        console.log("Component mounted: " + this.component.name);
+        this.isMounted = true;
     }
 
     destroy() {
-        this.mounted = false;
+        this.isMounted = false;
 
         if (this.vnode) {
             if (this.keepAlive) {
-                console.log("Kept component alive " + this.component.name);
                 this.keepAlive = false;
+                ComponentWithProperties.keepAliveCounter++;
+                console.log("Kept component alive " + this.component.name);
+                console.log("Total components kept alive: " + ComponentWithProperties.keepAliveCounter);
+
                 return;
             }
             console.log("Destroyed component " + this.component.name);

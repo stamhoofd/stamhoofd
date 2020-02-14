@@ -14,14 +14,7 @@ import EditGroupDetail from "./EditGroupDetail.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 
 @Component({})
-export default class GroupList extends Mixins(NavigationMixin) {
-    activated() {
-        console.log("Group list activated");
-        if (this.canPop) {
-            console.log("Can pop!");
-        }
-    }
-}
+export default class GroupList extends Mixins(NavigationMixin) {}
 </script>
 
 <style scoped lang="scss">

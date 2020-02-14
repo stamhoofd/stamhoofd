@@ -4,10 +4,10 @@ import { EventBusListener } from "./EventBusListener";
 class EventBus {
     private listeners: EventBusListener[] = [];
     send(type: string, data: any): void {
-        console.log("Send message: "+type);
+        //console.log("Send message: "+type);
         this.listeners.forEach(listener => {
             if (listener.shouldReceive(type)) {
-                console.log("Received message");
+                //console.log("Received message");
                 listener.receive(data);
             }
         });
@@ -15,7 +15,7 @@ class EventBus {
 
     /// Convenience method
     listen(type: string, callback: (data: any) => void): EventBusListener {
-        console.log("Listening for "+type);
+        //console.log("Listening for "+type);
         const listener = new EventBusListener(type, callback);
         this.addListener(listener);
         return listener;

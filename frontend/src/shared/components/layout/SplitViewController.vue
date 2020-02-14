@@ -50,25 +50,57 @@ export default class SplitViewController extends Vue {
     detailKeepAlive!: Vue; // = KeepAlive internal class
     counter: number = 0;
 
+    lastIsDetail: boolean = false;
+
+    mounted() {
+        window.addEventListener("resize", () => {
+            if (window.innerWidth < 600) {
+                if (this.detail) {
+                    this.collapse();
+                }
+            } else {
+                if (this.lastIsDetail && !this.detail) {
+                    this.expand();
+                }
+            }
+        });
+    }
+
     showDetail(component: ComponentWithProperties) {
         component.key = this.counter++;
-        this.detail = component;
+
+        if (window.innerWidth < 600) {
+            if (this.lastIsDetail) {
+                console.warn("Todo: replace!");
+            }
+            this.lastIsDetail = true;
+            this.navigationController.push(component);
+        } else {
+            this.detail = component;
+        }
     }
 
     collapse() {
-        console.log(this.detailKeepAlive);
-
+        if (this.lastIsDetail) {
+            console.warn("Todo: replace!");
+        }
         this.detail.keepAlive = true;
         const detail = this.detail;
         this.detail = null;
         this.navigationController.push(detail, false);
+
+        this.lastIsDetail = true;
     }
 
     expand() {
         if (this.detail) {
             return;
         }
+        if (!this.lastIsDetail) {
+            console.warn("Warning: expanding last is not detail");
+        }
         const popped = this.navigationController.pop(false, false);
+        this.lastIsDetail = false;
 
         // We need to wait until it is removed from the vnode
         this.$nextTick(() => {
@@ -87,15 +119,26 @@ export default class SplitViewController extends Vue {
 
 .split-view-controller {
     display: flex;
-    height: 500px;
+    height: 100vh;
+    background: $color-white-shade;
 
     & > .master {
-        flex-basis: 40%;
-        flex-shrink: 0;
+        flex-basis: 340px;
         flex-grow: 0;
+        flex-shrink: 0;
+
+        &:last-child {
+            background: $color-white;
+            flex-basis: 100%;
+        }
     }
 
     & > .detail {
+        flex-grow: 1;
+        background: $color-white;
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+        @extend .style-side-view-shadow;
     }
 }
 </style>

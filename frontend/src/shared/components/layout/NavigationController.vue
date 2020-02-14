@@ -67,10 +67,7 @@ export default class NavigationController extends Vue {
     mounted() {
         this.root.key = this.counter++;
         this.mainComponent = this.root;
-        console.log(this.mainComponent);
         this.components = [this.root];
-
-        console.log("scroll document: " + this.scrollDocument);
     }
 
     freezeSize() {
@@ -158,6 +155,7 @@ export default class NavigationController extends Vue {
         this.components.push(component);
 
         if (this.mainComponent) {
+            // Keep the component alive while it is removed from the DOM
             this.mainComponent.keepAlive = true;
         }
 
@@ -220,7 +218,7 @@ export default class NavigationController extends Vue {
             return;
         }
 
-        const w = (element.firstChild as HTMLElement).offsetWidth;
+        const w = ((element.firstChild as HTMLElement).firstChild as HTMLElement).offsetWidth;
         const h = (element.firstChild as HTMLElement).offsetHeight;
         const next = this.nextScrollPosition;
 
