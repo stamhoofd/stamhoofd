@@ -47,7 +47,6 @@ export default class NavigationController extends Vue {
     components: ComponentWithProperties[] = [];
     mainComponent: ComponentWithProperties | null = null;
     transitionName: string = "none";
-    counter: number = 0;
     savedScrollPositions: number[] = [];
     nextScrollPosition: number = 0;
     previousScrollPosition: number = 0;
@@ -65,7 +64,6 @@ export default class NavigationController extends Vue {
     child!: FramedComponent;
 
     mounted() {
-        this.root.key = this.counter++;
         this.mainComponent = this.root;
         this.components = [this.root];
     }
@@ -133,8 +131,6 @@ export default class NavigationController extends Vue {
     }
 
     push(component: ComponentWithProperties, animated: boolean = true) {
-        component.key = this.counter++;
-
         if (!animated) {
             this.transitionName = "none";
         } else {

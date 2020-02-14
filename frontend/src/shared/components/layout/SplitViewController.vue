@@ -48,9 +48,8 @@ export default class SplitViewController extends Vue {
 
     @Ref()
     detailKeepAlive!: Vue; // = KeepAlive internal class
-    counter: number = 0;
 
-    lastIsDetail: boolean = false;
+    detailKey: number | null = null;
 
     mounted() {
         window.addEventListener("resize", () => {
@@ -66,14 +65,18 @@ export default class SplitViewController extends Vue {
         });
     }
 
+    get lastIsDetail() {
+        return this.detailKey != null && this.navigationController.mainComponent.key == this.detailKey;
+    }
+
     showDetail(component: ComponentWithProperties) {
-        component.key = this.counter++;
+        this.detailKey = component.key;
 
         if (window.innerWidth < 600) {
             if (this.lastIsDetail) {
+                // todo: will never trigger
                 console.warn("Todo: replace!");
             }
-            this.lastIsDetail = true;
             this.navigationController.push(component);
         } else {
             this.detail = component;
@@ -88,8 +91,6 @@ export default class SplitViewController extends Vue {
         const detail = this.detail;
         this.detail = null;
         this.navigationController.push(detail, false);
-
-        this.lastIsDetail = true;
     }
 
     expand() {
@@ -100,7 +101,6 @@ export default class SplitViewController extends Vue {
             console.warn("Warning: expanding last is not detail");
         }
         const popped = this.navigationController.pop(false, false);
-        this.lastIsDetail = false;
 
         // We need to wait until it is removed from the vnode
         this.$nextTick(() => {
