@@ -24,6 +24,10 @@ export class NavigationMixin extends Vue {
         this.emitParents("show", component);
     }
 
+    present(component: ComponentWithProperties) {
+        this.emitParents("present", component);
+    }
+
     showDetail(component: ComponentWithProperties) {
         this.emitParents("showDetail", component);
     }

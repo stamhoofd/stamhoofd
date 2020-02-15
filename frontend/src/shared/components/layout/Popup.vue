@@ -51,6 +51,12 @@ export default class Popup extends Vue {
         // Rounded corners need overflow hidden on scroll
         overflow: hidden;
 
+        max-height: 100vh;
+        max-height: calc(var(--vh, 1vh) * 100);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+
         & > .navigation-controller > * > * {
             // Restrict the height of FramedComponents scroll div
             max-height: 100vh;

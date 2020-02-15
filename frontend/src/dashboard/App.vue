@@ -2,9 +2,6 @@
     <div id="app">
         <!-- To display things that cover everything else and require document scrolling on mobile -->
         <ModalStackComponent v-if="stop" :root="root"></ModalStackComponent>
-
-        <!-- To display temporary messages, popups and everything that covers other modals-->
-        <StackComponent></StackComponent>
     </div>
 </template>
 

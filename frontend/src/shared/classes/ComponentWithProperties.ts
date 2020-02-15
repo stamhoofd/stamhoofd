@@ -19,6 +19,9 @@ export class ComponentWithProperties {
     static keepAliveCounter: number = 0;
     static keyCounter: number = 0;
 
+    /// Cover whole screen. Other style = popup
+    public modalDisplayStyle = "cover";
+
     constructor(component: any, properties: Object = {}) {
         this.component = component;
         this.properties = properties;
