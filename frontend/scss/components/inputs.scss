@@ -13,8 +13,10 @@
 .input {
     @extend .input-spacing;
     @extend .style-input;
+    @extend .style-input-shadow;
     color: $color-dark;
     border: $border-width solid $color-gray-light;
+    background: white;
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 44px;
@@ -31,7 +33,7 @@
         border-color: $color-primary;
     }
 
-    ::placeholder {
+    &::placeholder {
         color: $color-gray;
     }
 
@@ -58,8 +60,7 @@ select.input {
     cursor: pointer;
 
     // Add a background arrow to our selection field.
-    background: url(~assets/images/icons/gray/arrow-down-small.svg)
-        no-repeat right 10px center;
+    background: url(~assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
 
     // Increase the right padding just a little.
     padding-right: 35px;
@@ -93,4 +94,12 @@ select.input {
             margin: 0;
         }
     }
+}
+
+// Icons and other things
+.input.search {
+    padding-left: 43px;
+    background-image: url(~assets/images/icons/gray/search.svg);
+    background-position: 8px center;
+    background-repeat: no-repeat;
 }

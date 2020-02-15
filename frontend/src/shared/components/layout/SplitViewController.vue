@@ -127,7 +127,7 @@ export default class SplitViewController extends Vue {
     background: $color-white-shade;
 
     & > .master {
-        flex-basis: 340px;
+        flex-basis: 320px;
         flex-grow: 0;
         flex-shrink: 0;
 
