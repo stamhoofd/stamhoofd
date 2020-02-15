@@ -30,14 +30,14 @@ export default class App extends Vue {
     public stop: boolean = true;
 
     mounted() {
-        setTimeout(() => {
+        /*setTimeout(() => {
             this.root.keepAlive = true;
             this.stop = false;
 
             setTimeout(() => {
                 this.stop = true;
             }, 5000);
-        }, 5000);
+        }, 5000);*/
     }
 }
 </script>

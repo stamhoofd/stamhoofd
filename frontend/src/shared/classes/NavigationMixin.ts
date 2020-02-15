@@ -2,6 +2,7 @@
 import { Component, Vue, Prop, Ref, Watch } from "vue-property-decorator";
 import { ComponentWithProperties } from "./ComponentWithProperties";
 import NavigationController from "../components/layout/NavigationController.vue";
+import SplitViewController from "../components/layout/SplitViewController.vue";
 
 // You can declare mixins as the same style as components.
 @Component
@@ -34,6 +35,30 @@ export class NavigationMixin extends Vue {
         } else {
             console.warn("No navigation controller to pop");
         }
+    }
+
+    get navigationController(): NavigationController | null {
+        var start: any = this.$parent;
+        while (start) {
+            if (start instanceof NavigationController) {
+                return start;
+            }
+
+            start = start.$parent;
+        }
+        return null;
+    }
+
+    get splitViewController(): SplitViewController | null {
+        var start: any = this.$parent;
+        while (start) {
+            if (start instanceof SplitViewController) {
+                return start;
+            }
+
+            start = start.$parent;
+        }
+        return null;
     }
 
     getPoppableNavigationController(): NavigationController | null {

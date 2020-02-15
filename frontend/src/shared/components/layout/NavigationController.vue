@@ -525,5 +525,16 @@ export default class NavigationController extends Vue {
             }
         }
     }
+
+    &[data-scroll-document="false"] {
+        & > * > * {
+            max-height: 100vh;
+            max-height: calc(var(--vh, 1vh) * 100);
+            overflow: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+    }
 }
 </style>
