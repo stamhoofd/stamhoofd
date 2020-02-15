@@ -3,7 +3,7 @@
         <div class="master">
             <NavigationController
                 ref="navigationController"
-                :scroll-document="false"
+                :scroll-document="!detail"
                 :root="root"
                 @showDetail="showDetail"
             ></NavigationController>
@@ -42,6 +42,8 @@ export default class SplitViewController extends Vue {
 
     detailKey: number | null = null;
 
+    scrollDocument: boolean = true;
+
     mounted() {
         window.addEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
     }
@@ -76,6 +78,9 @@ export default class SplitViewController extends Vue {
         if (this.shouldCollapse()) {
             this.navigationController.push(component);
         } else {
+            if (this.scrollDocument) {
+                document.documentElement.scrollTop = 0;
+            }
             this.detail = component;
         }
     }
@@ -114,7 +119,7 @@ export default class SplitViewController extends Vue {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 @use '~scss/layout/split-inputs.scss';
 @use '~scss/base/text-styles.scss';
@@ -122,27 +127,37 @@ export default class SplitViewController extends Vue {
 @use '~scss/components/buttons.scss';
 
 .split-view-controller {
-    display: flex;
-    height: 100vh;
     background: $color-white-shade;
+    overflow: hidden;
+    position: relative;
+    padding-left: 320px;
 
     & > .master {
-        flex-basis: 320px;
-        flex-grow: 0;
-        flex-shrink: 0;
+        position: fixed;
+        left: 0;
+        top: 0;
+        max-height: 100vh;
+        max-height: calc(var(--vh, 1vh) * 100);
+        width: 320px;
 
         &:last-child {
-            background: $color-white;
-            flex-basis: 100%;
+            position: relative;
+            width: auto;
         }
     }
 
     & > .detail {
-        flex-grow: 1;
+        min-height: 100vh;
+        min-height: calc(var(--vh, 1vh) * 100);
+
         background: $color-white;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
         @extend .style-side-view-shadow;
     }
+}
+
+body {
+    background-color: $color-white-shade;
 }
 </style>

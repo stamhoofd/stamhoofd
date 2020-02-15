@@ -2,7 +2,7 @@
     <!-- Element that will get displayed fixed left, top, right bottom during transitions -->
     <div>
         <!-- Element that will take over the document scroll position during transitions -->
-        <div>
+        <div ref="scrollContainer">
             <!-- Actual content with padding -->
             <ComponentWithPropertiesInstance :component="root"></ComponentWithPropertiesInstance>
             <!--<component
@@ -35,6 +35,10 @@ export default class NavigationController extends Vue {
     @Prop()
     root!: ComponentWithProperties;
 
+    @Ref()
+    scrollContainer!: HTMLElement;
+
+    mounted() {}
     pop(data) {
         this.$emit("pop", data);
     }

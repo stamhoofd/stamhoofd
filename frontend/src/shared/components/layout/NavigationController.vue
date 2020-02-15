@@ -533,7 +533,11 @@ export default class NavigationController extends Vue {
             overflow: hidden;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+
+            // do not start scrolling parents if we reached the edge of this view
             overscroll-behavior-y: contain;
+            // we'll add a polyfill for Safari in JS to disable overscroll
         }
     }
 }

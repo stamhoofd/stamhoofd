@@ -1,25 +1,32 @@
 <template>
     <!-- Components taking up the whole document. Listens to show-modal -->
-    <NavigationController
-        :scroll-document="true"
-        animation-type="modal"
-        ref="navigationController"
-        :root="root"
-    ></NavigationController>
+    <div>
+        <NavigationController
+            :scroll-document="true"
+            animation-type="modal"
+            ref="navigationController"
+            :root="root"
+            @present="show"
+        ></NavigationController>
+        <StackComponent ref="stackComponent"></StackComponent>
+    </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Ref } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import Modal from "shared/components/layout/Modal.vue";
 import NavigationController from "./NavigationController.vue";
+import StackComponent from "./StackComponent.vue";
+import Popup from "./Popup.vue";
 
 @Component({
     components: {
-        NavigationController
+        NavigationController,
+        StackComponent
     }
 })
 export default class ModalStackComponent extends Vue {
@@ -29,7 +36,14 @@ export default class ModalStackComponent extends Vue {
     listener: EventBusListener | null = null;
     counter: number = 0;
 
+    @Ref()
+    stackComponent!: StackComponent;
+
     show(component: ComponentWithProperties) {
+        if (component.modalDisplayStyle == "popup") {
+            this.stackComponent.show(new ComponentWithProperties(Popup, { root: component }));
+            return;
+        }
         if (component.component === NavigationController) {
             (component.properties as any).scrollDocument = true;
         }

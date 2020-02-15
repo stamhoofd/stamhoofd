@@ -1,7 +1,57 @@
 <template>
     <div style="padding: 40px 40px">
         <p><button class="button" v-if="canPop" @click="pop">Terug</button></p>
-        This is the group list Tekst: <input class="input" type="text" />
+
+        <h1>Kapoenen</h1>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
+        <p>Dit is een test</p>
     </div>
 </template>
 
@@ -23,4 +73,8 @@ export default class GroupList extends Mixins(NavigationMixin) {}
 @use '~scss/base/text-styles.scss';
 @use '~scss/components/inputs.scss';
 @use '~scss/components/buttons.scss';
+
+h1 {
+    @extend .style-title-1;
+}
 </style>

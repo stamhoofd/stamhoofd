@@ -12,10 +12,10 @@
                 <button>Iedereen</button>
             </button>
 
-            <button class="menu-button">Kapoenen</button>
-            <button class="menu-button">Kabouters</button>
-            <button class="menu-button">Welpen</button>
-            <button class="menu-button">Jonggidsen</button>
+            <button class="menu-button" @click="kapoenen">Kapoenen</button>
+            <button class="menu-button" @click="wouters">Wouters</button>
+            <button class="menu-button" @click="woutersShow">Welpen</button>
+            <button class="menu-button" @click="jonggidsen">Jonggidsen</button>
             <button class="menu-button">Jongverkenners</button>
             <button class="menu-button">Gidsen</button>
             <button class="menu-button">Verkenners</button>
@@ -43,6 +43,7 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import EditGroupDetail from "./EditGroupDetail.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import GroupList from "./GroupList.vue";
+import GroupListShort from "./GroupListShort.vue";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -50,12 +51,22 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!this.splitViewController.shouldCollapse()) this.showDetail(new ComponentWithProperties(GroupList, {}));
     }
 
-    link1() {
+    kapoenen() {
         this.showDetail(new ComponentWithProperties(GroupList, {}));
     }
 
-    link2() {
-        this.show(new ComponentWithProperties(GroupList, {}));
+    wouters() {
+        this.showDetail(new ComponentWithProperties(GroupListShort, {}));
+    }
+
+    woutersShow() {
+        this.show(new ComponentWithProperties(GroupListShort, {}));
+    }
+
+    jonggidsen() {
+        const comp = new ComponentWithProperties(GroupList, {});
+        comp.modalDisplayStyle = "popup";
+        this.present(comp);
     }
 }
 </script>
