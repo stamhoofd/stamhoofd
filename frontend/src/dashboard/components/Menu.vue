@@ -44,6 +44,8 @@ import EditGroupDetail from "./EditGroupDetail.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import GroupList from "./GroupList.vue";
 import GroupListShort from "./GroupListShort.vue";
+import NavigationController from "../../shared/components/layout/NavigationController.vue";
+import SplitViewController from "../../shared/components/layout/SplitViewController.vue";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -64,7 +66,10 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     jonggidsen() {
-        const comp = new ComponentWithProperties(GroupList, {});
+        const comp = new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(Menu, {}),
+            scrollDocument: false
+        });
         comp.modalDisplayStyle = "popup";
         this.present(comp);
     }

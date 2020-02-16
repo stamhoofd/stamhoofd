@@ -53,14 +53,12 @@ export default class Popup extends Vue {
 
         max-height: 100vh;
         max-height: calc(var(--vh, 1vh) * 100);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
+        height: calc(var(--vh, 1vh) * 100 - 80px);
 
         & > .navigation-controller > * > * {
             // Restrict the height of FramedComponents scroll div
-            max-height: 100vh;
-            max-height: calc(var(--vh, 1vh) * 100);
+            /*max-height: 100vh;
+            max-height: calc(var(--vh, 1vh) * 100);*/
             overflow: hidden;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
