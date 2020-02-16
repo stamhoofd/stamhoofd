@@ -1,15 +1,19 @@
 <template>
-    <div class="split-view-controller">
-        <div class="master">
+    <div
+        class="split-view-controller"
+        :data-scroll-document="scrollDocument ? 'true' : 'false'"
+        :data-has-detail="detail ? 'true' : 'false'"
+    >
+        <div class="master" ref="masterElement">
             <NavigationController
                 ref="navigationController"
-                :scroll-document="!detail"
+                :scroll-document="!detail && scrollDocument"
                 :root="root"
                 @showDetail="showDetail"
             ></NavigationController>
         </div>
         <div class="detail" v-if="detail">
-            <FramedComponent :key="detail.key" :root="detail"></FramedComponent>
+            <FramedComponent ref="detailFrame" :key="detail.key" :root="detail"></FramedComponent>
         </div>
     </div>
 </template>
@@ -40,9 +44,13 @@ export default class SplitViewController extends Vue {
     @Ref()
     detailKeepAlive!: Vue; // = KeepAlive internal class
 
+    @Ref()
+    masterElement!: HTMLElement; // = KeepAlive internal class
+
     detailKey: number | null = null;
 
-    scrollDocument: boolean = true;
+    @Prop({ default: true })
+    scrollDocument!: boolean;
 
     mounted() {
         window.addEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
@@ -78,15 +86,23 @@ export default class SplitViewController extends Vue {
         if (this.shouldCollapse()) {
             this.navigationController.push(component);
         } else {
-            if (this.scrollDocument) {
-                document.documentElement.scrollTop = 0;
+            if (this.$refs.detailFrame) {
+                (((this.$refs.detailFrame as FramedComponent).$el as HTMLElement)
+                    .firstElementChild as HTMLElement).scrollTop = 0;
             }
+
+            if (this.scrollDocument) {
+                // Disable body overflow
+                //document.body.style.overflow = "hidden";
+                // Todo: also transfer body scroll to navigation controller
+            }
+
             this.detail = component;
         }
     }
 
     shouldCollapse() {
-        return window.innerWidth < 600;
+        return (this.$el as HTMLElement).offsetWidth < 800;
     }
 
     collapse() {
@@ -98,6 +114,11 @@ export default class SplitViewController extends Vue {
         const detail = this.detail;
         this.detail = null;
         this.navigationController.push(detail, false);
+
+        if (this.scrollDocument) {
+            // Reenable body overflow
+            //document.body.style.overflow = "";
+        }
     }
 
     expand() {
@@ -113,6 +134,10 @@ export default class SplitViewController extends Vue {
 
         // We need to wait until it is removed from the vnode
         this.$nextTick(() => {
+            if (this.scrollDocument) {
+                // Disable body overflow
+                //document.body.style.overflow = "hidden";
+            }
             this.detail = popped;
         });
     }
@@ -128,36 +153,76 @@ export default class SplitViewController extends Vue {
 
 .split-view-controller {
     background: $color-white-shade;
-    overflow: hidden;
+    //overflow: hidden;
     position: relative;
     padding-left: 320px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
 
     & > .master {
         position: fixed;
         left: 0;
         top: 0;
-        max-height: 100vh;
-        max-height: calc(var(--vh, 1vh) * 100);
         width: 320px;
+        height: 100vh;
+        height: calc(var(--vh, 1vh) * 100);
 
         &:last-child {
             position: relative;
-            width: auto;
+            width: 100%;
+            height: 100%;
         }
     }
 
     & > .detail {
-        min-height: 100vh;
-        min-height: calc(var(--vh, 1vh) * 100);
+        overflow: hidden;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+
+        // do not start scrolling parents if we reached the edge of this view
+        overscroll-behavior-y: contain;
+        // we'll add a polyfill for Safari in JS to disable overscroll
 
         background: $color-white;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
+        height: 100%;
+        width: 100%;
+
         @extend .style-side-view-shadow;
+    }
+
+    &[data-scroll-document="false"] {
+        min-height: auto;
+        height: 100%;
+
+        & > .master {
+            position: absolute;
+            height: 100%;
+        }
+
+        & > .detail {
+            position: absolute;
+            top: 0;
+            left: 320px;
+            bottom: 0;
+            right: 0;
+        }
+    }
+
+    &[data-has-detail="true"][data-scroll-document="true"] {
+        height: 100vh;
+        height: calc(var(--vh, 1vh) * 100);
+    }
+
+    &[data-has-detail="false"] {
+        padding-left: 0;
     }
 }
 
 body {
     background-color: $color-white-shade;
+    //overflow: hidden;
 }
 </style>

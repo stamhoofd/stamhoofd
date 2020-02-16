@@ -312,6 +312,7 @@ export default class NavigationController extends Vue {
     // Scrolling should happen inside the children!
     overflow: hidden;
     position: relative;
+    height: 100%;
 
     &[data-animation-type="modal"] {
         & > * {
@@ -514,6 +515,14 @@ export default class NavigationController extends Vue {
         }
     }
 
+    > * {
+        height: 100%;
+
+        > * {
+            height: 100%;
+        }
+    }
+
     &[data-scroll-document="true"] {
         > .pop,
         > .push,
@@ -528,12 +537,9 @@ export default class NavigationController extends Vue {
 
     &[data-scroll-document="false"] {
         & > * > * {
-            max-height: 100vh;
-            max-height: calc(var(--vh, 1vh) * 100);
             overflow: hidden;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
 
             // do not start scrolling parents if we reached the edge of this view
             overscroll-behavior-y: contain;

@@ -13,6 +13,7 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import StackComponent from "shared/components/layout/StackComponent.vue";
 import SplitViewController from "../shared/components/layout/SplitViewController.vue";
 import Menu from "./components/Menu.vue";
+import Popup from "../shared/components/layout/Popup.vue";
 
 @Component({
     components: {
@@ -21,6 +22,12 @@ import Menu from "./components/Menu.vue";
     }
 })
 export default class App extends Vue {
+    /*public root = new ComponentWithProperties(Popup, {
+        root: new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(Menu, {}),
+            scrollDocument: false
+        })
+    });*/
     public root = new ComponentWithProperties(SplitViewController, {
         root: new ComponentWithProperties(Menu, {})
     });
