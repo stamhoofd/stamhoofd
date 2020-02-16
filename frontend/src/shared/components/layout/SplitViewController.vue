@@ -212,8 +212,13 @@ export default class SplitViewController extends Vue {
     }
 
     &[data-has-detail="true"][data-scroll-document="true"] {
-        height: 100vh;
-        height: calc(var(--vh, 1vh) * 100);
+        min-height: 100vh;
+        min-height: calc(var(--vh, 1vh) * 100);
+
+        & > .detail {
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+        }
     }
 
     &[data-has-detail="false"] {
