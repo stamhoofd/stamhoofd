@@ -314,12 +314,6 @@ export default class NavigationController extends Vue {
     overflow: visible;
     position: relative;
 
-    &[data-animation-type="default"] {
-        & > * {
-            //overflow: hidden;
-        }
-    }
-
     > .modal {
         &-push {
             &-enter-active {
