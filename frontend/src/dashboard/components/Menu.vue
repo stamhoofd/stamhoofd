@@ -16,7 +16,7 @@
             <button class="menu-button" @click="wouters">Wouters</button>
             <button class="menu-button" @click="woutersShow">Welpen</button>
             <button class="menu-button" @click="jonggidsen">Jonggidsen</button>
-            <button class="menu-button">Jongverkenners</button>
+            <button class="menu-button" @click="jongverkenners">Jongverkenners</button>
             <button class="menu-button">Gidsen</button>
             <button class="menu-button">Verkenners</button>
             <button class="menu-button">Jin</button>
@@ -77,6 +77,13 @@ export default class Menu extends Mixins(NavigationMixin) {
             scrollDocument: false
         });
         comp.modalDisplayStyle = "popup";
+        this.present(comp);
+    }
+
+    jongverkenners() {
+        const comp = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(GroupList, {})
+        });
         this.present(comp);
     }
 }
