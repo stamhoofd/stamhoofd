@@ -5,15 +5,6 @@
         <div ref="scrollContainer">
             <!-- Actual content with padding -->
             <ComponentWithPropertiesInstance :component="root"></ComponentWithPropertiesInstance>
-            <!--<component
-                :name="root.key"
-                :key="root.key"
-                :is="root.component"
-                v-bind="root.properties"
-                ref="component"
-                @push="push"
-                @pop="pop"
-            ></component>-->
         </div>
     </div>
 </template>

@@ -12,17 +12,14 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
+import { NavigationMixin } from "../../classes/NavigationMixin";
 
 @Component({
     props: {
         root: ComponentWithProperties
     }
 })
-export default class Popup extends Vue {
-    pop() {
-        this.$emit("pop");
-    }
-}
+export default class Popup extends NavigationMixin {}
 </script>
 
 <style lang="scss">
