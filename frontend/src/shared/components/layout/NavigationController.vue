@@ -1,9 +1,5 @@
 <template>
-    <div
-        class="navigation-controller"
-        :data-animation-type="animationType"
-        :data-scroll-document="scrollDocument ? 'true' : 'false'"
-    >
+    <div class="navigation-controller" :data-animation-type="animationType">
         <transition
             v-if="mainComponent"
             v-on:before-enter="beforeEnter"
@@ -15,7 +11,6 @@
             v-on:enter-cancelled="enterCancelled"
             v-bind:css="false"
         >
-            <!--<keep-alive>-->
             <FramedComponent
                 :root="mainComponent"
                 :name="mainComponent.key"
@@ -25,7 +20,6 @@
                 @pop="pop"
                 ref="child"
             ></FramedComponent>
-            <!--</keep-alive>-->
         </transition>
     </div>
 </template>
@@ -54,9 +48,6 @@ export default class NavigationController extends Vue {
     @Prop()
     root!: ComponentWithProperties;
 
-    @Prop({ default: false })
-    scrollDocument!: boolean;
-
     @Prop({ default: "default" })
     animationType!: string;
 
@@ -69,58 +60,23 @@ export default class NavigationController extends Vue {
     }
 
     freezeSize() {
-        if (this.isModalRoot()) {
-            //return;
-        }
         const el = this.$el as HTMLElement;
-
-        console.log("Freeze size: " + el.offsetWidth + "x" + el.offsetHeight);
 
         el.style.width = el.offsetWidth + "px";
         el.style.height = el.offsetHeight + "px";
     }
 
-    setSize(width: number, height: number) {
-        if (this.isModalRoot()) {
-            // Only resize if larger
-            //return;
-        }
+    growSize(width: number, height: number) {
         const el = this.$el as HTMLElement;
 
-        console.log("Set height: " + height);
-
-        if (!this.isModalRoot() && height >= window.innerHeight) {
-            // Respect max height + improve animation durations
-            el.style.height = "100vh";
-            el.style.height = "calc(var(--vh, 1vh) * 100)";
-        } else {
-            el.style.height = height + "px";
-        }
-
-        el.style.width = width + "px";
+        el.style.height = Math.max(el.offsetHeight, height) + "px";
+        el.style.width = Math.max(el.offsetWidth, width) + "px";
     }
 
     unfreezeSize() {
-        if (this.isModalRoot()) {
-            //el.style.width = "auto";
-            //el.style.height = "auto";
-            //return;
-        }
         const el = this.$el as HTMLElement;
         el.style.width = "";
         el.style.height = "";
-        if (this.isModalRoot()) {
-            //el.style.width = "auto";
-            //el.style.height = "auto";
-            return;
-        }
-
-        //el.style.width = "auto";
-        //el.style.height = "auto";
-    }
-
-    isModalRoot(): boolean {
-        return true;
     }
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
@@ -153,12 +109,10 @@ export default class NavigationController extends Vue {
 
         // Save scroll position
         this.previousScrollPosition = this.getScrollElement().scrollTop;
-        console.log("Saved scroll position: " + this.previousScrollPosition);
         this.savedScrollPositions.push(this.previousScrollPosition);
         this.nextScrollPosition = 0;
 
         // Save width and height
-
         this.freezeSize();
 
         // Make sure the transition name changed, so wait for a rerender
@@ -236,7 +190,7 @@ export default class NavigationController extends Vue {
 
         // Lock position if needed
         // This happens before the beforeLeave animation frame!
-        this.setSize(w, h);
+        this.growSize(w, h);
 
         // Disable scroll during animation (this is to fix overflow elements)
         // We can only allow scroll during transitions when all browser support overflow: clip, which they don't atm
@@ -257,7 +211,7 @@ export default class NavigationController extends Vue {
                     scrollElement.style.overflow = "";
 
                     done();
-                }, 1000);
+                }, 350);
             });
         });
     }
@@ -270,8 +224,8 @@ export default class NavigationController extends Vue {
 
         // Prevent blinking due to slow rerender after scrollTop changes
         // Create a clone and offset the clone first. After that, adjust the scroll position
-        var current = this.previousScrollPosition;
-        var next = this.nextScrollPosition;
+        const current = this.previousScrollPosition;
+        const next = this.nextScrollPosition;
 
         const scrollElement = this.getScrollElement();
 
@@ -280,15 +234,7 @@ export default class NavigationController extends Vue {
         // to add padding in order to adjust the scrollTop (without reaching it's maximum value)
         const fixPadding = 300;
         const h = scrollElement.clientHeight + fixPadding;
-        var height = h + "px";
-
-        console.log("Client height: " + scrollElement.clientHeight);
-        console.log("Offset height: " + scrollElement.offsetHeight);
-
-        if (scrollElement === document.documentElement) {
-            // iOS fix: clientHeight is too small
-            //height = "200px";
-        }
+        const height = h + "px";
 
         // This animation frame is super important to prevent flickering on Safari and Webkit!
         // This is also one of the reasons why we cannot use the default Vue class additions
@@ -312,21 +258,21 @@ export default class NavigationController extends Vue {
 
             (element.firstElementChild as HTMLElement).scrollTop = current;
 
-            debugger;
-
             requestAnimationFrame(() => {
                 // We've reached our initial positioning and can start our animation
                 element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
 
                 setTimeout(() => {
                     element.style.overflow = "";
-                    (element.firstElementChild as HTMLElement).style.overflow = "";
                     element.style.top = "";
                     element.style.height = "";
                     element.style.bottom = "";
 
+                    (element.firstElementChild as HTMLElement).style.paddingBottom = "";
+                    (element.firstElementChild as HTMLElement).style.overflow = "";
+
                     done();
-                }, 1000);
+                }, 350);
             });
         });
     }
@@ -367,20 +313,6 @@ export default class NavigationController extends Vue {
     // Scrolling should happen inside the children!
     overflow: visible;
     position: relative;
-    //height: 100%;
-
-    //transform: translate3d(0, 0, 0);
-
-    &[data-animation-type="modal"] {
-        & > * {
-            // Fix: apply this background color permanently, else it won't work during transition for some strange reason
-            // background-color: rgba(0, 0, 0, 0.7);
-        }
-    }
-
-    &[data-scroll-document="false"] {
-        transition: width 1s, height 1s;
-    }
 
     &[data-animation-type="default"] {
         & > * {
@@ -392,7 +324,7 @@ export default class NavigationController extends Vue {
         &-push {
             &-enter-active {
                 & > div {
-                    transition: transform 1s;
+                    transition: transform 0.35s;
                 }
             }
 
@@ -436,7 +368,7 @@ export default class NavigationController extends Vue {
         &-pop {
             &-leave-active {
                 & > div {
-                    transition: transform 1s;
+                    transition: transform 0.35s;
                 }
             }
 
@@ -476,10 +408,10 @@ export default class NavigationController extends Vue {
     > .push {
         &-enter-active,
         &-leave-active {
-            transition: opacity 1s;
+            transition: opacity 0.35s;
 
             & > div {
-                transition: transform 1s;
+                transition: transform 0.35s;
             }
         }
 
@@ -529,10 +461,10 @@ export default class NavigationController extends Vue {
     > .pop {
         &-enter-active,
         &-leave-active {
-            transition: opacity 1s;
+            transition: opacity 0.35s;
 
             & > div {
-                transition: transform 1s;
+                transition: transform 0.35s;
             }
         }
 
@@ -573,37 +505,5 @@ export default class NavigationController extends Vue {
             }
         }
     }
-
-    > * {
-        height: 100%;
-
-        > * {
-            height: 100%;
-        }
-    }
-
-    /*&[data-scroll-document="true"] {
-        > .pop,
-        > .push,
-        > .modal-pop,
-        > .modal-push {
-            &-leave,
-            &-leave-active {
-                //position: fixed;
-            }
-        }
-    }
-
-    &[data-scroll-document="false"] {
-        & > * > * {
-            overflow: hidden;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-
-            // do not start scrolling parents if we reached the edge of this view
-            overscroll-behavior-y: contain;
-            // we'll add a polyfill for Safari in JS to disable overscroll
-        }
-    }*/
 }
 </style>
