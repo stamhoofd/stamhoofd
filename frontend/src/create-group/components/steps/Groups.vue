@@ -100,7 +100,7 @@ import Step from "../Step.vue";
 export default class Groups extends Vue {
     editGroup() {
         eventBus.send(
-            "show-modal",
+            "present",
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(EditGroup, {
                     text: "Custom text"

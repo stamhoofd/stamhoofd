@@ -149,7 +149,7 @@ export default class General extends Vue {
 
     editGroup() {
         eventBus.send(
-            "show-modal",
+            "present",
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(EditGroupDetail, {
                     text: "Custom text"
