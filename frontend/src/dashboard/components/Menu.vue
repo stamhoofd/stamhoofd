@@ -50,7 +50,13 @@ import SplitViewController from "../../shared/components/layout/SplitViewControl
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
     mounted() {
-        if (!this.splitViewController.shouldCollapse()) this.showDetail(new ComponentWithProperties(GroupList, {}));
+        if (!this.splitViewController.shouldCollapse())
+            this.showDetail(
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(GroupList, {}),
+                    scrollDocument: true
+                })
+            );
     }
 
     kapoenen() {
@@ -62,7 +68,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     woutersShow() {
-        this.show(new ComponentWithProperties(GroupListShort, {}));
+        this.show(new ComponentWithProperties(GroupList, {}));
     }
 
     jonggidsen() {
