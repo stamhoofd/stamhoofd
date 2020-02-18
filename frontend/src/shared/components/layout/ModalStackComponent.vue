@@ -6,7 +6,7 @@
             animation-type="modal"
             ref="navigationController"
             :root="root"
-            @present="show"
+            @present="present"
         ></NavigationController>
         <StackComponent ref="stackComponent"></StackComponent>
     </div>
@@ -39,19 +39,21 @@ export default class ModalStackComponent extends Vue {
     @Ref()
     stackComponent!: StackComponent;
 
-    show(component: ComponentWithProperties) {
+    present(component: ComponentWithProperties) {
         if (component.modalDisplayStyle == "popup") {
             this.stackComponent.show(new ComponentWithProperties(Popup, { root: component }));
             return;
         }
-        if (component.component === NavigationController) {
-            (component.properties as any).scrollDocument = true;
+
+        if (component.modalDisplayStyle == "overlay") {
+            this.stackComponent.show(component);
+            return;
         }
         (this.$refs.navigationController as NavigationController).push(component);
     }
 
     mounted() {
-        this.listener = eventBus.listen("show-modal", this.show.bind(this));
+        this.listener = eventBus.listen("present", this.present.bind(this));
     }
 
     beforeDestroy() {

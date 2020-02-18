@@ -26,7 +26,6 @@ export default class App extends Vue {
     /*public root = new ComponentWithProperties(Popup, {
         root: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(Menu, {}),
-            scrollDocument: false
         })
     });*/
     public root = new ComponentWithProperties(SplitViewController, {

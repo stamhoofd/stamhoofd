@@ -53,8 +53,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!this.splitViewController.shouldCollapse())
             this.showDetail(
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(GroupList, {}),
-                    scrollDocument: true
+                    root: new ComponentWithProperties(GroupList, {})
                 })
             );
     }
@@ -73,8 +72,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     jonggidsen() {
         const comp = new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(Menu, {}),
-            scrollDocument: false
+            root: new ComponentWithProperties(Menu, {})
         });
         comp.modalDisplayStyle = "popup";
         this.present(comp);
