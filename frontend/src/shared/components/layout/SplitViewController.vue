@@ -19,6 +19,7 @@ import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import NavigationController from "./NavigationController.vue";
 import FramedComponent from "./FramedComponent.vue";
 
+// Credits https://codeburst.io/throttling-and-debouncing-in-javascript-b01cad5c8edf
 const throttle = (func, limit) => {
     let lastFunc;
     let lastRan;
