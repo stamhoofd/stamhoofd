@@ -46,7 +46,6 @@ export default Vue.extend({
     destroyed() {
         // This component got removed (with v-if, v-for, ...) in some way.
         // This doesn't mean we want to destroy it
-        // this.component.vnode.componentInstance.$parent = null;
         this.component.destroy();
     }
 });

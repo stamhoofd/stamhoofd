@@ -2,13 +2,12 @@
     <!-- Components taking up the whole document. Listens to show-modal -->
     <div>
         <NavigationController
-            :scroll-document="true"
             animation-type="modal"
             ref="navigationController"
             :root="root"
             @present="present"
         ></NavigationController>
-        <StackComponent ref="stackComponent"></StackComponent>
+        <StackComponent ref="stackComponent" @present="present"></StackComponent>
     </div>
 </template>
 
@@ -34,7 +33,6 @@ export default class ModalStackComponent extends Vue {
     readonly root!: ComponentWithProperties;
 
     listener: EventBusListener | null = null;
-    counter: number = 0;
 
     @Ref()
     stackComponent!: StackComponent;
