@@ -240,7 +240,7 @@ export default class NavigationController extends Vue {
 
         // Disable scroll during animation (this is to fix overflow elements)
         // We can only allow scroll during transitions when all browser support overflow: clip, which they don't atm
-        // This does not work on iOS Safari on body due to a bug
+        // This sometimes doesn't work on iOS Safari on body due to a bug
         scrollElement.style.overflow = "hidden";
 
         requestAnimationFrame(() => {
@@ -257,7 +257,7 @@ export default class NavigationController extends Vue {
                     scrollElement.style.overflow = "";
 
                     done();
-                }, 350);
+                }, 1000);
             });
         });
     }
@@ -273,41 +273,60 @@ export default class NavigationController extends Vue {
         var current = this.previousScrollPosition;
         var next = this.nextScrollPosition;
 
-        var height = element.offsetHeight;
+        const scrollElement = this.getScrollElement();
+
+        // we add some extra padding below to fix iOS bug that reports wront clientHeight
+        // We need to show some extra area below of the leaving frame, but to do this, we also need
+        // to add padding in order to adjust the scrollTop (without reaching it's maximum value)
+        const fixPadding = 300;
+        const h = scrollElement.clientHeight + fixPadding;
+        var height = h + "px";
+
+        console.log("Client height: " + scrollElement.clientHeight);
+        console.log("Offset height: " + scrollElement.offsetHeight);
+
+        if (scrollElement === document.documentElement) {
+            // iOS fix: clientHeight is too small
+            //height = "200px";
+        }
 
         // This animation frame is super important to prevent flickering on Safari and Webkit!
         // This is also one of the reasons why we cannot use the default Vue class additions
         // We do this to improve the timing of the classes and scroll positions
         requestAnimationFrame(() => {
-            debugger;
-
             // Setting the class has to happen in one go.
             // First we need to make our element fixed / absolute positioned, and pinned to all the edges
             // In the same frame, we need to update the scroll position.
             // If we switch the ordering, this won't work!
             element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave";
 
-            if (this.isModalRoot()) {
-                const offset = -current + next;
-                element.style.top = offset + "px";
-                element.style.height = height + "px";
-                element.style.bottom = "auto";
-            }
+            element.style.top = next + "px";
+            element.style.height = height;
+            element.style.bottom = "auto";
+            element.style.overflow = "hidden";
 
             // Now scroll!
-            //(element.firstElementChild as HTMLElement).scrollTop = current;
+            (element.firstElementChild as HTMLElement).style.overflow = "hidden";
+            (element.firstElementChild as HTMLElement).style.height = h - fixPadding + "px";
+            (element.firstElementChild as HTMLElement).style.paddingBottom = fixPadding + "px";
+
+            (element.firstElementChild as HTMLElement).scrollTop = current;
+
+            debugger;
 
             requestAnimationFrame(() => {
                 // We've reached our initial positioning and can start our animation
                 element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
 
                 setTimeout(() => {
+                    element.style.overflow = "";
+                    (element.firstElementChild as HTMLElement).style.overflow = "";
                     element.style.top = "";
                     element.style.height = "";
                     element.style.bottom = "";
 
                     done();
-                }, 350);
+                }, 1000);
             });
         });
     }
@@ -360,7 +379,7 @@ export default class NavigationController extends Vue {
     }
 
     &[data-scroll-document="false"] {
-        transition: width 0.35s, height 0.35s;
+        transition: width 1s, height 1s;
     }
 
     &[data-animation-type="default"] {
@@ -373,7 +392,7 @@ export default class NavigationController extends Vue {
         &-push {
             &-enter-active {
                 & > div {
-                    transition: transform 0.35s;
+                    transition: transform 1s;
                 }
             }
 
@@ -417,7 +436,7 @@ export default class NavigationController extends Vue {
         &-pop {
             &-leave-active {
                 & > div {
-                    transition: transform 0.35s;
+                    transition: transform 1s;
                 }
             }
 
@@ -457,10 +476,10 @@ export default class NavigationController extends Vue {
     > .push {
         &-enter-active,
         &-leave-active {
-            transition: opacity 0.35s;
+            transition: opacity 1s;
 
             & > div {
-                transition: transform 0.35s;
+                transition: transform 1s;
             }
         }
 
@@ -510,10 +529,10 @@ export default class NavigationController extends Vue {
     > .pop {
         &-enter-active,
         &-leave-active {
-            transition: opacity 0.35s;
+            transition: opacity 1s;
 
             & > div {
-                transition: transform 0.35s;
+                transition: transform 1s;
             }
         }
 
