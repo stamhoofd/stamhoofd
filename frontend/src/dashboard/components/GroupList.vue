@@ -56,6 +56,7 @@
         <p>Dit is een test</p>
 
         <p><button class="button primary" @click="next">Volgende</button></p>
+        <p><button class="button" v-if="canPop" @click="pop">Terug</button></p>
     </div>
 </template>
 

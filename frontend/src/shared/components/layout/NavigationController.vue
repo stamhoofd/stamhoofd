@@ -142,11 +142,6 @@ export default class NavigationController extends Vue {
             }
             return this.getScrollElement(element.parentElement);
         }
-
-        /*if (this.isModalRoot()) {
-            return document.documentElement;
-        }
-        return ((this.$refs.child as FramedComponent).$el as HTMLElement).firstElementChild as HTMLElement;*/
     }
 
     push(component: ComponentWithProperties, animated: boolean = true) {

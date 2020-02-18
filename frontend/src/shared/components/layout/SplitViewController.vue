@@ -76,11 +76,25 @@ export default class SplitViewController extends Vue {
         return this.detailKey != null && this.navigationController.mainComponent.key == this.detailKey;
     }
 
-    getScrollElement(): HTMLElement {
-        if (this.scrollDocument || !this.$refs.detailFrame) {
-            return document.documentElement;
+    getScrollElement(element: HTMLElement | null = null): HTMLElement {
+        if (!element) {
+            element = this.$el as HTMLElement;
         }
-        return ((this.$refs.detailFrame as FramedComponent).$el as HTMLElement).firstElementChild as HTMLElement;
+
+        const style = window.getComputedStyle(element);
+        if (
+            style.overflowY == "scroll" ||
+            style.overflow == "scroll" ||
+            style.overflow == "auto" ||
+            style.overflowY == "auto"
+        ) {
+            return element;
+        } else {
+            if (!element.parentElement) {
+                return document.documentElement;
+            }
+            return this.getScrollElement(element.parentElement);
+        }
     }
 
     showDetail(component: ComponentWithProperties) {
@@ -159,16 +173,17 @@ export default class SplitViewController extends Vue {
     background: $color-white-shade;
     //overflow: hidden;
     position: relative;
-    padding-left: 320px;
     width: 100%;
     //height: 100%;
     box-sizing: border-box;
 
     & > .master {
-        position: fixed;
+        flex-shrink: 0;
+        flex-grow: 0;
+        position: sticky;
         left: 0;
         top: 0;
-        width: 320px;
+        flex-basis: 320px;
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
 
@@ -192,7 +207,7 @@ export default class SplitViewController extends Vue {
         background: $color-white;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
-        width: 100%;
+        flex-basis: 100%;
         //overflow: hidden;
         overflow: -moz-hidden-unscrollable;
         overflow: clip;
@@ -201,7 +216,7 @@ export default class SplitViewController extends Vue {
         @extend .style-side-view-shadow;
     }
 
-    &[data-scroll-document="false"] {
+    /* &[data-scroll-document="false"] {
         min-height: auto;
         height: 100%;
 
@@ -226,9 +241,10 @@ export default class SplitViewController extends Vue {
             right: 0;
             width: auto;
         }
-    }
+    }*/
 
-    &[data-has-detail="true"][data-scroll-document="true"] {
+    &[data-has-detail="true"] {
+        display: flex;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
 
