@@ -7,7 +7,7 @@
         <div class="master" ref="masterElement">
             <NavigationController
                 ref="navigationController"
-                :scroll-document="!detail && scrollDocument"
+                :scroll-document="true"
                 :root="root"
                 @showDetail="showDetail"
             ></NavigationController>
@@ -76,6 +76,13 @@ export default class SplitViewController extends Vue {
         return this.detailKey != null && this.navigationController.mainComponent.key == this.detailKey;
     }
 
+    getScrollElement(): HTMLElement {
+        if (this.scrollDocument || !this.$refs.detailFrame) {
+            return document.documentElement;
+        }
+        return ((this.$refs.detailFrame as FramedComponent).$el as HTMLElement).firstElementChild as HTMLElement;
+    }
+
     showDetail(component: ComponentWithProperties) {
         if (this.lastIsDetail || this.detail) {
             console.warn("Showing detail when a detail is already presented");
@@ -86,10 +93,7 @@ export default class SplitViewController extends Vue {
         if (this.shouldCollapse()) {
             this.navigationController.push(component);
         } else {
-            if (this.$refs.detailFrame) {
-                (((this.$refs.detailFrame as FramedComponent).$el as HTMLElement)
-                    .firstElementChild as HTMLElement).scrollTop = 0;
-            }
+            this.getScrollElement().scrollTop = 0;
 
             if (this.scrollDocument) {
                 // Disable body overflow
@@ -157,7 +161,7 @@ export default class SplitViewController extends Vue {
     position: relative;
     padding-left: 320px;
     width: 100%;
-    height: 100%;
+    //height: 100%;
     box-sizing: border-box;
 
     & > .master {
@@ -168,14 +172,6 @@ export default class SplitViewController extends Vue {
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
 
-        &:last-child {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-    }
-
-    & > .detail {
         overflow: hidden;
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
@@ -184,11 +180,23 @@ export default class SplitViewController extends Vue {
         overscroll-behavior-y: contain;
         // we'll add a polyfill for Safari in JS to disable overscroll
 
+        &:last-child {
+            position: relative;
+            overflow: visible;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    & > .detail {
         background: $color-white;
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
-        height: 100%;
         width: 100%;
+        //overflow: hidden;
+        overflow: -moz-hidden-unscrollable;
+        overflow: clip;
+        clip-path: inset(0px 0px);
 
         @extend .style-side-view-shadow;
     }
@@ -203,11 +211,20 @@ export default class SplitViewController extends Vue {
         }
 
         & > .detail {
+            overflow: hidden;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+
+            // do not start scrolling parents if we reached the edge of this view
+            overscroll-behavior-y: contain;
+            // we'll add a polyfill for Safari in JS to disable overscroll
+
             position: absolute;
             top: 0;
             left: 320px;
             bottom: 0;
             right: 0;
+            width: auto;
         }
     }
 
@@ -227,7 +244,7 @@ export default class SplitViewController extends Vue {
 }
 
 body {
-    background-color: $color-white-shade;
+    //background-color: $color-white-shade;
     //overflow: hidden;
 }
 </style>

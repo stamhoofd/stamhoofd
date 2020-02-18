@@ -31,7 +31,7 @@ import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
         ComponentWithPropertiesInstance
     }
 })
-export default class NavigationController extends Vue {
+export default class FramedComponent extends Vue {
     @Prop()
     root!: ComponentWithProperties;
 

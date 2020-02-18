@@ -14,6 +14,7 @@ import StackComponent from "shared/components/layout/StackComponent.vue";
 import SplitViewController from "../shared/components/layout/SplitViewController.vue";
 import Menu from "./components/Menu.vue";
 import Popup from "../shared/components/layout/Popup.vue";
+import NavigationController from "../shared/components/layout/NavigationController.vue";
 
 @Component({
     components: {
