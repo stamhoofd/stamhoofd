@@ -19,6 +19,27 @@ import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import NavigationController from "./NavigationController.vue";
 import FramedComponent from "./FramedComponent.vue";
 
+const throttle = (func, limit) => {
+    let lastFunc;
+    let lastRan;
+    return function() {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(function() {
+                if (Date.now() - lastRan >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - lastRan));
+        }
+    };
+};
+
 @Component({
     components: {
         NavigationController,
@@ -44,12 +65,13 @@ export default class SplitViewController extends Vue {
 
     detailKey: number | null = null;
 
-    mounted() {
-        window.addEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
+    activated() {
+        (this as any).listener = throttle(this.onResize, 200);
+        window.addEventListener("resize", (this as any).listener, { passive: true } as EventListenerOptions);
     }
 
-    destoyed() {
-        window.removeEventListener("resize", this.onResize, { passive: true } as EventListenerOptions);
+    deactivated() {
+        window.removeEventListener("resize", (this as any).listener, { passive: true } as EventListenerOptions);
     }
 
     onResize() {
@@ -65,7 +87,10 @@ export default class SplitViewController extends Vue {
     }
 
     get lastIsDetail() {
-        return this.detailKey != null && this.navigationController.mainComponent.key == this.detailKey;
+        return (
+            this.detailKey != null &&
+            (this.$refs.navigationController as NavigationController).mainComponent.key == this.detailKey
+        );
     }
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
