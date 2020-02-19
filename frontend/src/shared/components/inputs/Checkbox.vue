@@ -29,7 +29,6 @@ export default class Checkbox extends Vue {
     value!: boolean;
 
     onChange(event) {
-        console.log(event.target.checked);
         this.$emit("input", event.target.checked);
     }
 }
