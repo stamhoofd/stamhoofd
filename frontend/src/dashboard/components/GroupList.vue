@@ -162,30 +162,35 @@ h1 {
         }
 
         tr {
-            transition: background-color 0.2s;
+            transition: background-color 0.15s;
             cursor: pointer;
             touch-action: manipulation;
 
             td {
-                border-bottom: $border-width solid $color-gray-lighter;
+                border-top: $border-width-thin solid $color-white-shade;
+                transition: border-top-color 0.15s;
 
                 &:first-child {
-                    border-bottom: 0;
+                    border-top: 0;
                 }
+
+                @extend .style-normal;
 
                 &.minor {
-                    color: $color-gray;
+                    @extend .style-description;
                 }
             }
 
-            &:last-child {
+            &:first-child {
                 td {
-                    border-bottom: 0;
+                    border-top: 0;
                 }
             }
 
-            &:hover {
-                background-color: $color-primary-lighter;
+            @media (hover: hover) {
+                &:hover {
+                    background-color: $color-primary-lighter;
+                }
             }
 
             &:active {
