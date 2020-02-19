@@ -9,11 +9,7 @@
         font-weight: 600;
         color: white;
         padding: 12px 40px;
-        background: linear-gradient(
-            to right,
-            $color-primary,
-            $color-primary-destination
-        );
+        background: linear-gradient(to right, $color-primary, $color-primary-destination);
         text-align: center;
         word-wrap: nowrap;
         overflow: hidden;
@@ -22,6 +18,7 @@
         transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
         cursor: pointer;
         box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
+        touch-action: manipulation;
 
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
@@ -32,6 +29,24 @@
 
         &:hover {
             opacity: 0.7;
+        }
+    }
+
+    &.more {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~assets/images/icons/gray/more.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
         }
     }
 }

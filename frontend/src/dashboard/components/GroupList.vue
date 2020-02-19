@@ -1,7 +1,10 @@
 <template>
     <div style="padding: 40px 40px">
         <div class="navigation-bar">
-            <h1>Kapoenen</h1>
+            <h1>
+                Kapoenen
+                <button class="button more"></button>
+            </h1>
 
             <div>
                 <input class="input search" placeholder="Zoeken" />
