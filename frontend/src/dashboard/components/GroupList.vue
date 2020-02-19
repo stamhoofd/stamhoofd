@@ -19,7 +19,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th><Checkbox /></th>
+                    <th><Checkbox :value="isAllSelected" @input="selectAll($event)" /></th>
                     <th>Naam</th>
                     <th>Info</th>
                     <th>Status</th>
@@ -28,9 +28,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(n, index) in 50" :key="index">
-                    <td><Checkbox /></td>
-                    <td>Rodolphus Lestrange</td>
+                <tr v-for="(member, index) in members" :key="index">
+                    <td><Checkbox v-model="member.selected" @input="onChanged(member)" /></td>
+                    <td>{{ member.member.name }}</td>
                     <td>16 jaar</td>
                     <td>Nog niet betaald</td>
                     <td>Bewerken</td>
@@ -48,6 +48,16 @@ import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
+import { Member } from "shared/models/Member";
+
+class SelectableMember {
+    member: Member;
+    selected: boolean = false;
+
+    constructor(member: Member) {
+        this.member = member;
+    }
+}
 
 @Component({
     components: {
@@ -55,8 +65,29 @@ import Checkbox from "shared/components/inputs/Checkbox.vue";
     }
 })
 export default class GroupList extends Mixins(NavigationMixin) {
+    members: SelectableMember[] = [];
+    isAllSelected: boolean = false;
+
+    mounted() {
+        for (let index = 0; index < 50; index++) {
+            this.members.push(new SelectableMember(new Member("Rodolphus Lestrange")));
+        }
+    }
     next() {
         this.show(new ComponentWithProperties(GroupList, {}));
+    }
+
+    onChanged(selectableMember: SelectableMember) {
+        if (!selectableMember.selected) {
+            this.isAllSelected = false;
+        }
+    }
+
+    selectAll(selected: boolean) {
+        this.isAllSelected = selected;
+        this.members.forEach(member => {
+            member.selected = selected;
+        });
     }
 }
 </script>
@@ -70,6 +101,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
 .group-list {
     padding: 40px 0;
+    background: $color-white;
 }
 
 h1 {
@@ -81,7 +113,7 @@ h1 {
     border-collapse: separate;
 
     thead {
-        background: white;
+        background: $color-white;
         text-align: left;
         font-weight: 600;
         position: sticky;
@@ -89,7 +121,6 @@ h1 {
 
         th {
             border-bottom: $border-width solid $color-gray-lighter;
-            vertical-align: middle;
             @extend .style-table-head;
             padding: 10px;
 
@@ -101,7 +132,7 @@ h1 {
 
     tbody {
         td {
-            padding: 5px 10px;
+            padding: 15px 10px;
 
             &:first-child {
                 padding-left: 0;
@@ -109,6 +140,10 @@ h1 {
         }
 
         tr {
+            transition: background-color 0.2s;
+            cursor: pointer;
+            touch-action: manipulation;
+
             td {
                 border-bottom: $border-width solid $color-gray-lighter;
 
@@ -126,6 +161,10 @@ h1 {
             &:hover {
                 background-color: $color-primary-lighter;
             }
+
+            &:active {
+                background-color: $color-primary-light;
+            }
         }
     }
 
@@ -133,10 +172,18 @@ h1 {
     tbody {
         th,
         td {
+            vertical-align: middle;
+
             &:first-child {
+                padding: 0;
                 padding-left: 40px;
                 white-space: nowrap;
                 width: 1px;
+
+                .checkbox {
+                    margin: 0;
+                    padding: 10px;
+                }
             }
             &:last-child {
                 padding-right: 40px;
