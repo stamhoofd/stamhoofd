@@ -1,5 +1,5 @@
 <template>
-    <div style="padding: 40px 40px">
+    <div class="group-list">
         <div class="navigation-bar">
             <h1>
                 Kapoenen
@@ -19,7 +19,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th></th>
+                    <th><Checkbox /></th>
                     <th>Naam</th>
                     <th>Info</th>
                     <th>Status</th>
@@ -28,32 +28,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>O</td>
-                    <td>Rodolphus Lestrange</td>
-                    <td>16 jaar</td>
-                    <td>Nog niet betaald</td>
-                    <td>Bewerken</td>
-                    <td>-></td>
-                </tr>
-                <tr>
-                    <td>O</td>
-                    <td>Rodolphus Lestrange</td>
-                    <td>16 jaar</td>
-                    <td>Nog niet betaald</td>
-                    <td>Bewerken</td>
-                    <td>-></td>
-                </tr>
-                <tr>
-                    <td>O</td>
-                    <td>Rodolphus Lestrange</td>
-                    <td>16 jaar</td>
-                    <td>Nog niet betaald</td>
-                    <td>Bewerken</td>
-                    <td>-></td>
-                </tr>
-                <tr>
-                    <td>O</td>
+                <tr v-for="(n, index) in 50" :key="index">
+                    <td><Checkbox /></td>
                     <td>Rodolphus Lestrange</td>
                     <td>16 jaar</td>
                     <td>Nog niet betaald</td>
@@ -71,8 +47,13 @@ import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
 import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
+import Checkbox from "shared/components/inputs/Checkbox.vue";
 
-@Component({})
+@Component({
+    components: {
+        Checkbox
+    }
+})
 export default class GroupList extends Mixins(NavigationMixin) {
     next() {
         this.show(new ComponentWithProperties(GroupList, {}));
@@ -87,20 +68,30 @@ export default class GroupList extends Mixins(NavigationMixin) {
 @use '~scss/components/inputs.scss';
 @use '~scss/components/buttons.scss';
 
+.group-list {
+    padding: 40px 0;
+}
+
 h1 {
     @extend .style-title-1;
 }
 
 .data-table {
     width: 100%;
+    border-collapse: separate;
 
     thead {
-        border-bottom: $border-width solid $color-gray-lighter;
+        background: white;
         text-align: left;
         font-weight: 600;
+        position: sticky;
+        top: 0;
 
         th {
-            padding: 5px;
+            border-bottom: $border-width solid $color-gray-lighter;
+            vertical-align: middle;
+            @extend .style-table-head;
+            padding: 10px;
 
             &:first-child {
                 padding-left: 0;
@@ -110,10 +101,45 @@ h1 {
 
     tbody {
         td {
-            padding: 5px;
+            padding: 5px 10px;
 
             &:first-child {
                 padding-left: 0;
+            }
+        }
+
+        tr {
+            td {
+                border-bottom: $border-width solid $color-gray-lighter;
+
+                &:first-child {
+                    border-bottom: 0;
+                }
+            }
+
+            &:last-child {
+                td {
+                    border-bottom: 0;
+                }
+            }
+
+            &:hover {
+                background-color: $color-primary-lighter;
+            }
+        }
+    }
+
+    thead,
+    tbody {
+        th,
+        td {
+            &:first-child {
+                padding-left: 40px;
+                white-space: nowrap;
+                width: 1px;
+            }
+            &:last-child {
+                padding-right: 40px;
             }
         }
     }
@@ -123,6 +149,8 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 40px;
+    margin-bottom: 20px;
 
     & > div {
         text-align: right;

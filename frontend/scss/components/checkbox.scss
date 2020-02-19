@@ -1,10 +1,11 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
-.radio, .checkbox {
+.radio,
+.checkbox {
     margin: 10px 0;
 
-    + label.style-label  {
+    + label.style-label {
         margin-top: 30px;
     }
 
@@ -22,6 +23,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
+        padding: 5px;
 
         > div:first-child {
             width: 20px;
@@ -32,8 +34,6 @@
             border: $border-width solid $color-gray-light;
             background: transparent;
             box-sizing: border-box;
-
-            margin-right: 15px;
             transition: background-color 0.2s, border-color 0.2s;
             display: flex;
             align-items: center;
@@ -44,21 +44,27 @@
                 stroke-dashoffset: 30;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
-        }
-    
 
+            ~ div {
+                margin-left: 10px;
+
+                &:empty {
+                    margin: 0;
+                }
+            }
+        }
     }
 
-    > input[type=radio] + div {
+    > input[type="radio"] + div {
         > div:first-child {
             border-radius: 11px;
 
             &::after {
-                content: '';
-                height: 20px - $border-width*2;
-                width: 20px - $border-width*2;
+                content: "";
+                height: 20px - $border-width * 2;
+                width: 20px - $border-width * 2;
                 background: white;
-                border-radius: (20px - $border-width*2)/2;
+                border-radius: (20px - $border-width * 2)/2;
                 transition: transform 0.2s;
                 transform: scale(1, 1);
             }
@@ -76,21 +82,19 @@
         }
     }
 
-    > input[type=radio]:checked + div {
+    > input[type="radio"]:checked + div {
         > div:first-child {
             &::after {
                 transform: scale(0.4, 0.4);
             }
         }
     }
-
-    
-
 }
 
 // Extra padding on first
 label.style-label {
-    +.checkbox, + .radio {
+    + .checkbox,
+    + .radio {
         margin-top: 20px;
     }
 }
