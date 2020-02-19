@@ -87,7 +87,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @use "scss/components/logo.scss";
 @use '~scss/components/inputs.scss';
 @use '~scss/components/buttons.scss';
