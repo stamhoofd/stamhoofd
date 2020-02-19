@@ -231,8 +231,10 @@ export default class NavigationController extends Vue {
 
         // we add some extra padding below to fix iOS bug that reports wront clientHeight
         // We need to show some extra area below of the leaving frame, but to do this, we also need
-        // to add padding in order to adjust the scrollTop (without reaching it's maximum value)
-        const fixPadding = 300;
+        // to check if there is still content left below the visible client height. So we calculate the area underneath the client height
+        // and limit to 300px maximum extra padding
+        const fixPadding = Math.min(300, Math.max(0, element.offsetHeight - current - scrollElement.clientHeight));
+        console.log("Fix padding: " + fixPadding);
         const h = scrollElement.clientHeight + fixPadding;
         const height = h + "px";
 
@@ -253,8 +255,7 @@ export default class NavigationController extends Vue {
 
             // Now scroll!
             (element.firstElementChild as HTMLElement).style.overflow = "hidden";
-            (element.firstElementChild as HTMLElement).style.height = h - fixPadding + "px";
-            (element.firstElementChild as HTMLElement).style.paddingBottom = fixPadding + "px";
+            (element.firstElementChild as HTMLElement).style.height = h + "px";
 
             (element.firstElementChild as HTMLElement).scrollTop = current;
 
@@ -267,8 +268,6 @@ export default class NavigationController extends Vue {
                     element.style.top = "";
                     element.style.height = "";
                     element.style.bottom = "";
-
-                    (element.firstElementChild as HTMLElement).style.paddingBottom = "";
                     (element.firstElementChild as HTMLElement).style.overflow = "";
 
                     done();
