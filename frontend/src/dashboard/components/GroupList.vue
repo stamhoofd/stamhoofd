@@ -19,7 +19,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th><Checkbox :value="isAllSelected" @input="selectAll($event)" /></th>
+                    <th><Checkbox :value="this.selectionCount == this.members.length" @input="selectAll($event)" /></th>
                     <th>Naam</th>
                     <th>Info</th>
                     <th>Status</th>
@@ -28,16 +28,26 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(member, index) in members" :key="index">
-                    <td><Checkbox v-model="member.selected" @input="onChanged(member)" /></td>
+                <tr v-for="(member, index) in members" :key="index" @click="showMember(member)">
+                    <td @click.stop="">
+                        <Checkbox v-model="member.selected" @input="onChanged(member)" />
+                    </td>
                     <td>{{ member.member.name }}</td>
-                    <td>16 jaar</td>
+                    <td class="minor">16 jaar</td>
                     <td>Nog niet betaald</td>
                     <td>Bewerken</td>
                     <td>-></td>
                 </tr>
             </tbody>
         </table>
+
+        <div class="toolbar">
+            <div>{{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd</div>
+            <div>
+                <button class="button secundary">Exporteren</button
+                ><button class="button primary">Mail iedereen</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -49,6 +59,8 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
+import GroupListShort from "./GroupListShort.vue";
+import NavigationController from "shared/components/layout/NavigationController.vue";
 
 class SelectableMember {
     member: Member;
@@ -66,7 +78,7 @@ class SelectableMember {
 })
 export default class GroupList extends Mixins(NavigationMixin) {
     members: SelectableMember[] = [];
-    isAllSelected: boolean = false;
+    selectionCount: number = 0;
 
     mounted() {
         for (let index = 0; index < 50; index++) {
@@ -79,12 +91,22 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     onChanged(selectableMember: SelectableMember) {
         if (!selectableMember.selected) {
-            this.isAllSelected = false;
+            this.selectionCount--;
+        } else {
+            this.selectionCount++;
         }
     }
 
+    showMember(selectableMember: SelectableMember) {
+        const component = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(GroupListShort, {})
+        });
+        component.modalDisplayStyle = "popup";
+        this.present(component);
+    }
+
     selectAll(selected: boolean) {
-        this.isAllSelected = selected;
+        this.selectionCount = selected ? this.members.length : 0;
         this.members.forEach(member => {
             member.selected = selected;
         });
@@ -150,6 +172,10 @@ h1 {
                 &:first-child {
                     border-bottom: 0;
                 }
+
+                &.minor {
+                    color: $color-gray;
+                }
             }
 
             &:last-child {
@@ -176,7 +202,7 @@ h1 {
 
             &:first-child {
                 padding: 0;
-                padding-left: 40px;
+                padding-left: 40px - 10px - 5px;
                 white-space: nowrap;
                 width: 1px;
 
@@ -189,6 +215,21 @@ h1 {
                 padding-right: 40px;
             }
         }
+    }
+}
+
+.toolbar {
+    padding: 10px 40px;
+    background: $color-white;
+    position: sticky;
+    bottom: 0;
+    border-top: $border-width solid $color-gray-lighter;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    > div:first-child {
+        @extend .style-description;
     }
 }
 
