@@ -4,6 +4,7 @@
 .radio,
 .checkbox {
     margin: 10px 0;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
     + label.style-label {
         margin-top: 30px;
