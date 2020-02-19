@@ -1,62 +1,17 @@
 <template>
     <div style="padding: 40px 40px">
-        <div class="sticky">Sticky me!</div>
+        <div class="navigation-bar">
+            <h1>Kapoenen</h1>
 
-        <p><button class="button" v-if="canPop" @click="pop">Terug</button></p>
+            <div>
+                <input class="input search" placeholder="Zoeken" />
 
-        <h1>Kapoenen</h1>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-        <p>Dit is een test</p>
-
-        <p><button class="button primary" @click="next">Volgende</button></p>
-        <p><button class="button" v-if="canPop" @click="pop">Terug</button></p>
+                <select class="input">
+                    <option>Alle leden</option>
+                    <option>Niet betaald</option>
+                </select>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -84,6 +39,24 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
 h1 {
     @extend .style-title-1;
+}
+
+.navigation-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & > div {
+        .input {
+            width: 220px;
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        select.input {
+            width: auto;
+        }
+    }
 }
 
 .sticky {
