@@ -24,7 +24,6 @@
                     <th>Info</th>
                     <th>Status</th>
                     <th>Acties</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -35,8 +34,7 @@
                     <td>{{ member.member.name }}</td>
                     <td class="minor">16 jaar</td>
                     <td>Nog niet betaald</td>
-                    <td>Bewerken</td>
-                    <td>-></td>
+                    <td><button class="button more"></button></td>
                 </tr>
             </tbody>
         </table>
@@ -135,14 +133,14 @@ h1 {
     border-collapse: separate;
 
     thead {
-        background: $color-white;
         text-align: left;
         font-weight: 600;
-        position: sticky;
-        top: 0;
 
         th {
-            border-bottom: $border-width solid $color-gray-lighter;
+            background: $color-white;
+            position: sticky;
+            top: 0;
+            border-bottom: $border-width solid $color-white-shade;
             @extend .style-table-head;
             padding: 10px;
 
@@ -218,6 +216,7 @@ h1 {
             }
             &:last-child {
                 padding-right: 40px;
+                text-align: right;
             }
         }
     }
@@ -228,13 +227,17 @@ h1 {
     background: $color-white;
     position: sticky;
     bottom: 0;
-    border-top: $border-width solid $color-gray-lighter;
+    border-top: $border-width solid $color-white-shade;
     display: flex;
     align-items: center;
     justify-content: space-between;
 
     > div:first-child {
         @extend .style-description;
+    }
+
+    > div .button {
+        margin-left: 10px;
     }
 }
 

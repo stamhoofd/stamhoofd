@@ -8,7 +8,7 @@
         font-size: 18px;
         font-weight: 600;
         color: white;
-        padding: 12px 40px;
+        padding: 12px 30px;
         background: linear-gradient(to right, $color-primary, $color-primary-destination);
         text-align: center;
         word-wrap: nowrap;
@@ -25,6 +25,31 @@
         &:active {
             transform: scale(0.95, 0.95);
             box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+        }
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+
+    &.secundary {
+        font-size: 18px;
+        font-weight: 600;
+        color: $color-gray;
+        padding: 12px 30px;
+        background: $color-gray-lighter;
+        text-align: center;
+        word-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: $border-radius;
+        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+        &:active {
+            transform: scale(0.95, 0.95);
         }
 
         &:hover {
