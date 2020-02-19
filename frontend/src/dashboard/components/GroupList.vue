@@ -15,6 +15,53 @@
                 </select>
             </div>
         </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Naam</th>
+                    <th>Info</th>
+                    <th>Status</th>
+                    <th>Acties</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>O</td>
+                    <td>Rodolphus Lestrange</td>
+                    <td>16 jaar</td>
+                    <td>Nog niet betaald</td>
+                    <td>Bewerken</td>
+                    <td>-></td>
+                </tr>
+                <tr>
+                    <td>O</td>
+                    <td>Rodolphus Lestrange</td>
+                    <td>16 jaar</td>
+                    <td>Nog niet betaald</td>
+                    <td>Bewerken</td>
+                    <td>-></td>
+                </tr>
+                <tr>
+                    <td>O</td>
+                    <td>Rodolphus Lestrange</td>
+                    <td>16 jaar</td>
+                    <td>Nog niet betaald</td>
+                    <td>Bewerken</td>
+                    <td>-></td>
+                </tr>
+                <tr>
+                    <td>O</td>
+                    <td>Rodolphus Lestrange</td>
+                    <td>16 jaar</td>
+                    <td>Nog niet betaald</td>
+                    <td>Bewerken</td>
+                    <td>-></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </template>
 
@@ -44,16 +91,50 @@ h1 {
     @extend .style-title-1;
 }
 
+.data-table {
+    width: 100%;
+
+    thead {
+        border-bottom: $border-width solid $color-gray-lighter;
+        text-align: left;
+        font-weight: 600;
+
+        th {
+            padding: 5px;
+
+            &:first-child {
+                padding-left: 0;
+            }
+        }
+    }
+
+    tbody {
+        td {
+            padding: 5px;
+
+            &:first-child {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
 .navigation-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
 
     & > div {
+        text-align: right;
+
+        h1 {
+            flex-shrink: 0;
+        }
+
         .input {
             width: 220px;
             display: inline-block;
-            margin: 0 10px;
+            margin: 5px 5px;
         }
 
         select.input {
