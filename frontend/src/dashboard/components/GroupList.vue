@@ -1,25 +1,25 @@
 <template>
     <div class="group-list">
-        <div class="navigation-bar">
-            <h1>
-                Kapoenen
-                <button class="button more"></button>
-            </h1>
-
-            <div>
+        <STNavigationBar :sticky="false">
+            <template v-slot:left>
+                <STNavigationTitle>Kapoenen<button class="button more"></button></STNavigationTitle>
+            </template>
+            <template v-slot:right>
                 <input class="input search" placeholder="Zoeken" />
 
                 <select class="input">
                     <option>Alle leden</option>
                     <option>Niet betaald</option>
                 </select>
-            </div>
-        </div>
+            </template>
+        </STNavigationBar>
 
         <table class="data-table">
             <thead>
                 <tr>
-                    <th><Checkbox :value="this.selectionCount == this.members.length" @input="selectAll($event)" /></th>
+                    <th>
+                        <Checkbox :value="selectionCount == members.length" @input="selectAll($event)" />
+                    </th>
                     <th>Naam</th>
                     <th>Info</th>
                     <th>Status</th>
@@ -59,6 +59,9 @@ import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
 import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
+import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
+import MemberView from "./member/MemberView.vue";
+import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 
 class SelectableMember {
     member: Member;
@@ -71,7 +74,9 @@ class SelectableMember {
 
 @Component({
     components: {
-        Checkbox
+        Checkbox,
+        STNavigationBar,
+        STNavigationTitle
     }
 })
 export default class GroupList extends Mixins(NavigationMixin) {
@@ -97,7 +102,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     showMember(selectableMember: SelectableMember) {
         const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(GroupListShort, {})
+            root: new ComponentWithProperties(MemberView, {})
         });
         component.modalDisplayStyle = "popup";
         this.present(component);
@@ -112,7 +117,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 @use '~scss/layout/split-inputs.scss';
 @use '~scss/base/text-styles.scss';
@@ -120,16 +125,14 @@ export default class GroupList extends Mixins(NavigationMixin) {
 @use '~scss/components/buttons.scss';
 
 .group-list {
-    padding: 40px 0;
+    padding: 40px var(--st-horizontal-padding, 40px);
     background: $color-white;
 }
 
-h1 {
-    @extend .style-title-1;
-}
-
 .data-table {
+    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     width: 100%;
+    width: calc(100% + 2 * var(--st-horizontal-padding, 40px));
     border-collapse: separate;
 
     thead {
@@ -239,38 +242,5 @@ h1 {
     > div .button {
         margin-left: 10px;
     }
-}
-
-.navigation-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 40px;
-    margin-bottom: 20px;
-
-    & > div {
-        text-align: right;
-
-        h1 {
-            flex-shrink: 0;
-        }
-
-        .input {
-            width: 220px;
-            display: inline-block;
-            margin: 5px 5px;
-        }
-
-        select.input {
-            width: auto;
-        }
-    }
-}
-
-.sticky {
-    background: white;
-    top: 0;
-    padding: 20px;
-    position: sticky;
 }
 </style>

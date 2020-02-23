@@ -17,6 +17,11 @@
     font-weight: 600;
 }
 
+.style-title-small {
+    font-size: 16px;
+    font-weight: 600;
+}
+
 .style-normal {
     font-size: 16px;
     line-height: 1.4;
@@ -38,8 +43,7 @@
 }
 
 .style-label {
-    font-size: 16px;
-    font-weight: 600;
+    @extend .style-title-small;
     display: block;
     margin-top: 20px;
 }

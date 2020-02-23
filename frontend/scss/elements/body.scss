@@ -14,4 +14,6 @@ html {
     // Always force scroll availability on mobile browsers, this is to fix glitches when
     // the tabbars should become visible after transitioning from a long to a short modal
     // min-height: 100vh;
+
+    --st-horizontal-padding: 40px;
 }
