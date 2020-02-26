@@ -31,7 +31,7 @@ import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vu
 import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
-import MemberViewHistory from "./MemberViewDetails.vue";
+import MemberViewHistory from "./MemberViewHistory.vue";
 
 @Component({
     components: {

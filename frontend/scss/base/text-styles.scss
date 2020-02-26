@@ -74,3 +74,15 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+.style-definition-term {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+.style-definition-description {
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-gray;
+    line-height: 1.5;
+}
