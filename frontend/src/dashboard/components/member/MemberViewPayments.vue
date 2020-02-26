@@ -1,6 +1,6 @@
 <template>
     <div class="root">
-        <p v-for="n in 100" :key="n">Dit is een test</p>
+        <p v-for="n in 100" :key="n">Payments</p>
     </div>
 </template>
 
@@ -8,7 +8,7 @@
 import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
 
 @Component({})
-export default class MemberViewDetails extends Vue {}
+export default class MemberViewPayments extends Vue {}
 </script>
 
 <style scoped lang="scss">

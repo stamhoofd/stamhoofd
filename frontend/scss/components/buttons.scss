@@ -1,4 +1,5 @@
 @use '../base/variables' as *;
+@use '../base/text-styles';
 
 .button {
     touch-action: manipulation;
@@ -72,6 +73,65 @@
 
         &:active {
             opacity: 0.4;
+        }
+    }
+
+    &.close {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~assets/images/icons/gray/close.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
+
+    &.icon {
+        cursor: pointer;
+
+        &:active {
+            opacity: 0.4;
+        }
+
+        &.gray {
+            color: $color-gray;
+            box-sizing: content-box;
+            @extend .style-button-small;
+            vertical-align: middle;
+
+            &.arrow-left {
+                background-image: url(~assets/images/icons/gray/arrow-left-big.svg);
+                background-position: left center;
+                background-repeat: no-repeat;
+                padding-left: 30px;
+                padding-right: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            &.arrow-right {
+                background-image: url(~assets/images/icons/gray/arrow-right-big.svg);
+                background-position: right center;
+                background-repeat: no-repeat;
+                padding-right: 30px;
+                padding-left: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
         }
     }
 }
