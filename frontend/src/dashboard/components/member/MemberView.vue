@@ -1,24 +1,25 @@
 <template>
-    <div class="root">
+    <div class="member-view">
         <STNavigationBar title="Rodolphus Lestrange">
             <template v-slot:left>
-                <button>Vorige</button>
+                <button class="button icon gray arrow-left">Vorige</button>
             </template>
             <template v-slot:right>
-                <button>Volgende</button>
-                <button>Sluiten</button>
+                <button class="button icon gray arrow-right">Volgende</button>
+                <button class="button icon close" @click="pop"></button>
             </template>
         </STNavigationBar>
         <STNavigationTitle>Rodolphus Lestrange<button class="button more"></button></STNavigationTitle>
 
-        <p v-for="(n, index) in 100" :key="index">Dit is een test</p>
+        <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
+
+        <component :is="tab" />
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
 
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
@@ -27,19 +28,28 @@ import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
+import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
+import MemberViewDetails from "./MemberViewDetails.vue";
+import MemberViewPayments from "./MemberViewPayments.vue";
+import MemberViewHistory from "./MemberViewDetails.vue";
 
 @Component({
     components: {
         STNavigationBar,
-        STNavigationTitle
+        STNavigationTitle,
+        SegmentedControl
     }
 })
-export default class MemberView extends Mixins(NavigationMixin) {}
+export default class MemberView extends Mixins(NavigationMixin) {
+    tabs = [MemberViewDetails, MemberViewPayments, MemberViewHistory];
+    tab = this.tabs[0];
+    tabLabels = ["Steekkaart", "Betaling", "Geschiedenis"];
+}
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
-.root {
+.member-view {
     padding: 0 var(--st-horizontal-padding, 40px);
 }
 </style>

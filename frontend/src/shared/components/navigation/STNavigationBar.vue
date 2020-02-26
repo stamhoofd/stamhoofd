@@ -87,7 +87,8 @@ export default class STNavigationBar extends Vue {
     // Todo: replace padding with variable padding
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     padding: 0 var(--st-horizontal-padding, 40px);
-    height: 70px;
+    margin-top: 20px;
+    height: 60px;
 
     &.sticky {
         position: sticky;
@@ -106,8 +107,26 @@ export default class STNavigationBar extends Vue {
         flex-direction: row;
         align-items: center;
 
+        &:first-child {
+            > * {
+                margin: 0 10px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+            }
+        }
+
         &:last-child {
             justify-content: flex-end;
+
+            > * {
+                margin: 0 10px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
         }
     }
 

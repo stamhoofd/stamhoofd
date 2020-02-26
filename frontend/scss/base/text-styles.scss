@@ -42,6 +42,10 @@
     line-height: 1.2;
 }
 
+.style-button-small {
+    @extend .style-title-small;
+}
+
 .style-label {
     @extend .style-title-small;
     display: block;

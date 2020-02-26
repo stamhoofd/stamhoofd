@@ -2,11 +2,11 @@
     <div class="segmented-control">
         <div
             v-for="(item, index) in items"
-            :key="item"
+            :key="index"
             :class="{ selected: item == value }"
             @click="selectItem(index)"
         >
-            <span :data-text="item"></span>
+            <span :data-text="labels ? labels[index] : item"></span>
         </div>
         <span
             ><span
@@ -18,7 +18,6 @@
         ></span>
     </div>
 </template>
-
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
@@ -32,10 +31,12 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 export default class SegmentedControl extends Vue {
     public selectedIndex: number = 0;
     @Prop({ type: Array })
-    public items!: string[];
+    public items!: any[];
+    @Prop({ default: null })
+    public labels!: string[] | null;
 
-    @Prop({ type: String })
-    public value!: string;
+    @Prop()
+    public value!: any;
 
     mounted() {
         this.selectedIndex = this.items.indexOf(this.value);
