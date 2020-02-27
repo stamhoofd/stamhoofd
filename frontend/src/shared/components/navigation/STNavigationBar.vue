@@ -90,7 +90,6 @@ export default class STNavigationBar extends Vue {
     // Todo: replace padding with variable padding
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     padding: 0 var(--st-horizontal-padding, 40px);
-    margin-top: 20px;
     height: 60px;
 
     &.sticky {
