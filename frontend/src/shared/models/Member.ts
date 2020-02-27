@@ -5,6 +5,7 @@ import { EmergencyContact } from "./EmergencyContact";
 import { Record } from "./Record";
 
 export class Member {
+    id: number = 0;
     firstName: string = "";
     lastName: string = "";
     gender: Gender = Gender.Other;

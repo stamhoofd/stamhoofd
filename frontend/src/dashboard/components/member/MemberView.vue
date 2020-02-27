@@ -2,10 +2,10 @@
     <div class="member-view">
         <STNavigationBar :title="member.name">
             <template v-slot:left>
-                <button class="button icon gray arrow-left">Vorige</button>
+                <button class="button icon gray arrow-left" v-if="hasPreviousMember" @click="goBack">Vorige</button>
             </template>
             <template v-slot:right>
-                <button class="button icon gray arrow-right">Volgende</button>
+                <button class="button icon gray arrow-right" v-if="hasNextMember" @click="goNext">Volgende</button>
                 <button class="button icon close" @click="pop"></button>
             </template>
         </STNavigationBar>
@@ -52,6 +52,40 @@ export default class MemberView extends Mixins(NavigationMixin) {
     @Prop()
     member!: Member;
 
+    @Prop()
+    getNextMember!: (Member) => Member | null;
+
+    @Prop()
+    getPreviousMember!: (Member) => Member | null;
+
+    get hasNextMember(): boolean {
+        return !!this.getNextMember(this.member);
+    }
+
+    get hasPreviousMember(): boolean {
+        return !!this.getPreviousMember(this.member);
+    }
+
+    goBack() {
+        var member = this.getPreviousMember(this.member);
+        var component = new ComponentWithProperties(MemberView, {
+            member: member,
+            getNextMember: this.getNextMember,
+            getPreviousMember: this.getPreviousMember
+        });
+        this.navigationController.push(component, true, true, true);
+    }
+
+    goNext() {
+        var member = this.getNextMember(this.member);
+        var component = new ComponentWithProperties(MemberView, {
+            member: member,
+            getNextMember: this.getNextMember,
+            getPreviousMember: this.getPreviousMember
+        });
+        this.navigationController.push(component, true, true, false);
+    }
+
     showContextMenu(event) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
@@ -65,6 +99,6 @@ export default class MemberView extends Mixins(NavigationMixin) {
 <style lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 .member-view {
-    padding: 0 var(--st-horizontal-padding, 40px);
+    padding: 20px var(--st-horizontal-padding, 40px);
 }
 </style>

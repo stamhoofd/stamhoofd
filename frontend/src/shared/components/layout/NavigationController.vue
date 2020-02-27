@@ -100,11 +100,16 @@ export default class NavigationController extends Vue {
         }
     }
 
-    push(component: ComponentWithProperties, animated: boolean = true) {
+    push(
+        component: ComponentWithProperties,
+        animated: boolean = true,
+        replace: boolean = false,
+        reverse: boolean = false
+    ) {
         if (!animated) {
             this.transitionName = "none";
         } else {
-            this.transitionName = this.animationType == "modal" ? "modal-push" : "push";
+            this.transitionName = this.animationType == "modal" ? "modal-push" : reverse ? "pop" : "push";
         }
 
         // Save scroll position
@@ -116,11 +121,15 @@ export default class NavigationController extends Vue {
         this.freezeSize();
 
         // Make sure the transition name changed, so wait for a rerender
-        this.components.push(component);
+        if (replace) {
+            this.components.splice(this.components.length - 1, 1, component);
+        } else {
+            this.components.push(component);
+        }
 
         if (this.mainComponent) {
             // Keep the component alive while it is removed from the DOM
-            this.mainComponent.keepAlive = true;
+            this.mainComponent.keepAlive = !replace;
         }
 
         this.mainComponent = component;
@@ -237,6 +246,17 @@ export default class NavigationController extends Vue {
         console.log("Fix padding: " + fixPadding);
         const h = scrollElement.clientHeight + fixPadding;
         const height = h + "px";
+
+        if (process.env.NODE_ENV === "development") {
+            var rect = element.getBoundingClientRect();
+            var rect2 = scrollElement.getBoundingClientRect();
+            // Check margins: is not allowed and show warning
+            if (rect.top != rect2.top || rect.left != rect2.left || rect.right != rect2.right) {
+                console.warn(
+                    "The views of a navigation controller should not have margins! Animations will get glitched."
+                );
+            }
+        }
 
         // This animation frame is super important to prevent flickering on Safari and Webkit!
         // This is also one of the reasons why we cannot use the default Vue class additions

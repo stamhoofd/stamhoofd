@@ -105,10 +105,38 @@ export default class GroupList extends Mixins(NavigationMixin) {
         }
     }
 
+    getPreviousMember(member: Member): Member | null {
+        for (let index = 0; index < this.members.length; index++) {
+            const _member = this.members[index];
+            if (_member.member.id == member.id) {
+                if (index == 0) {
+                    return null;
+                }
+                return this.members[index - 1].member;
+            }
+        }
+        return null;
+    }
+
+    getNextMember(member: Member): Member | null {
+        for (let index = 0; index < this.members.length; index++) {
+            const _member = this.members[index];
+            if (_member.member.id == member.id) {
+                if (index == this.members.length - 1) {
+                    return null;
+                }
+                return this.members[index + 1].member;
+            }
+        }
+        return null;
+    }
+
     showMember(selectableMember: SelectableMember) {
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberView, {
-                member: selectableMember.member
+                member: selectableMember.member,
+                getNextMember: this.getNextMember,
+                getPreviousMember: this.getPreviousMember
             })
         });
         component.modalDisplayStyle = "popup";
