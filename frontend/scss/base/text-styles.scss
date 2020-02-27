@@ -78,7 +78,7 @@
     text-overflow: ellipsis;
 }
 
-.style-description {
+.style-description-small {
     font-size: 14px;
     font-weight: 500;
     line-height: 1.5;
@@ -94,6 +94,6 @@
     line-height: 1.5;
 }
 .style-definition-description {
-    @extend .style-description;
+    @extend .style-description-small;
     color: $color-gray;
 }

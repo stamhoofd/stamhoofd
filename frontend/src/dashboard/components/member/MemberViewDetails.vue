@@ -112,10 +112,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {}
 <style lang="scss">
 @use '~scss/base/text-styles.scss';
 
-.icon-spacer {
-    margin-right: 5px;
-}
-
 .member-view-details {
     padding: 10px 0;
     display: grid;

@@ -2,7 +2,10 @@
     <div class="group-list">
         <STNavigationBar :sticky="false">
             <template v-slot:left>
-                <STNavigationTitle>Kapoenen<button class="button more"></button></STNavigationTitle>
+                <STNavigationTitle>
+                    <span class="icon-spacer">Kapoenen</span>
+                    <button class="button more"></button>
+                </STNavigationTitle>
             </template>
             <template v-slot:right>
                 <input class="input search" placeholder="Zoeken" />
@@ -34,7 +37,7 @@
                     <td>{{ member.member.name }}</td>
                     <td class="minor">16 jaar</td>
                     <td>Nog niet betaald</td>
-                    <td><button class="button more"></button></td>
+                    <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
                 </tr>
             </tbody>
         </table>
@@ -62,6 +65,8 @@ import NavigationController from "shared/components/layout/NavigationController.
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import MemberView from "./member/MemberView.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
+import MemberContextMenu from "./member/MemberContextMenu.vue";
+import { MemberFactory } from "shared/factories/MemberFactory";
 
 class SelectableMember {
     member: Member;
@@ -85,7 +90,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     mounted() {
         for (let index = 0; index < 50; index++) {
-            this.members.push(new SelectableMember(new Member("Rodolphus Lestrange")));
+            this.members.push(new SelectableMember(MemberFactory.create()));
         }
     }
     next() {
@@ -113,6 +118,14 @@ export default class GroupList extends Mixins(NavigationMixin) {
         this.members.forEach(member => {
             member.selected = selected;
         });
+    }
+
+    showMemberContextMenu(event) {
+        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+            x: event.clientX,
+            y: event.clientY + 10
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 }
 </script>

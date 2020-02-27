@@ -9,9 +9,10 @@
                 <button class="button icon close" @click="pop"></button>
             </template>
         </STNavigationBar>
-        <STNavigationTitle
-            >Rodolphus Lestrange<button class="button more" @click="showContextMenu"></button
-        ></STNavigationTitle>
+        <STNavigationTitle>
+            <span class="icon-spacer">Rodolphus Lestrange</span>
+            <button class="button more" @click="showContextMenu"></button>
+        </STNavigationTitle>
 
         <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
 
