@@ -22,7 +22,7 @@ export default class ContextMenuItem extends Vue {
 
             setTimeout(() => {
                 this.$emit("click", event);
-                this.$parent.pop();
+                (this.$parent as any).pop();
             }, 80);
         }, 80);
     }

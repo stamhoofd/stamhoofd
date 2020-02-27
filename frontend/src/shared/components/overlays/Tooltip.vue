@@ -60,7 +60,7 @@ export default class Checkbox extends Vue {
     background: $color-dark;
     padding: 15px;
     border-radius: $border-radius;
-    @extend .style-description;
+    @extend .style-description-small;
     @extend .style-overlay-shadow;
     color: $color-white;
     width: 100vw;

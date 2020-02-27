@@ -11,6 +11,7 @@
         "lint-group": "vue-cli-service lint --name create-group src/create-group/main.ts"
     },
     "dependencies": {
+        "faker": "^4.1.0",
         "vue": "^2.6.10",
         "vue-class-component": "^7.0.2",
         "vue-property-decorator": "^8.3.0"

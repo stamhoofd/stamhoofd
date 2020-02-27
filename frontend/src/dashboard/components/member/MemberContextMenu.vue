@@ -1,7 +1,14 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem>Toegang wijzigen</ContextMenuItem>
-        <ContextMenuItem>Mailen</ContextMenuItem>
+        <ContextMenuItem>Groep wijzigen</ContextMenuItem>
+        <ContextMenuLine></ContextMenuLine>
+        <ContextMenuItem @click="callParents">Mama bellen</ContextMenuItem>
+        <ContextMenuItem @click="callParents">Papa bellen</ContextMenuItem>
+        <ContextMenuItem>Ouders SMS'en</ContextMenuItem>
+        <ContextMenuItem>Ouders mailen</ContextMenuItem>
+        <ContextMenuLine></ContextMenuLine>
+        <ContextMenuItem>Lid bellen</ContextMenuItem>
+        <ContextMenuItem>Lid SMS'en</ContextMenuItem>
         <ContextMenuLine></ContextMenuLine>
         <ContextMenuItem>Uitschrijven</ContextMenuItem>
         <ContextMenuItem>Data verwijderen</ContextMenuItem>
@@ -30,5 +37,9 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     y!: number;
 
     mounted() {}
+
+    callParents() {
+        window.location.href = "tel://+32479427866";
+    }
 }
 </script>
