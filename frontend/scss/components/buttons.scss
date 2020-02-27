@@ -112,6 +112,10 @@
         }
     }
 
+    &.tooltip-only {
+        cursor: help;
+    }
+
     &.icon {
         cursor: pointer;
 

@@ -69,7 +69,7 @@
             <h2>
                 <span class="icon-spacer">Steekkaart</span
                 ><button
-                    class="button privacy"
+                    class="button privacy tooltip-only"
                     v-tooltip="
                         'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
                     "
