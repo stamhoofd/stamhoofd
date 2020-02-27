@@ -1,4 +1,5 @@
 import { Member } from "../models/Member";
+import { ParentFactory } from "./ParentFactory";
 
 var faker = require("faker");
 console.log(faker);
@@ -15,6 +16,10 @@ export class MemberFactory {
         var member = new Member();
         member.firstName = faker.name.firstName();
         member.lastName = faker.name.lastName();
+
+        member.parents.push(ParentFactory.create());
+        member.parents.push(ParentFactory.create());
+
         return member;
     }
 }

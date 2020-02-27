@@ -4,7 +4,7 @@
             <h2>Algemeen</h2>
             <dl class="details-grid">
                 <dt>Verjaardag</dt>
-                <dd>16 september 2006 (12 jaar)</dd>
+                <dd>{{ member.birthDayFormatted }} ({{ member.age }} jaar)</dd>
 
                 <dt>Lidnummer</dt>
                 <dd>12598711546216</dd>
@@ -15,41 +15,26 @@
 
             <hr />
 
-            <h2>Mama</h2>
-            <dl class="details-grid">
-                <dt>Naam</dt>
-                <dd>Linda De Grootte</dd>
+            <div v-for="(parent, index) in member.parents" :key="index">
+                <h2>{{ ParentTypeHelper.getName(parent.type) }}</h2>
+                <dl class="details-grid">
+                    <dt>Naam</dt>
+                    <dd>{{ parent.name }}</dd>
 
-                <dt>GSM-nummer</dt>
-                <dd>+32 456 76 32 22</dd>
+                    <dt>GSM-nummer</dt>
+                    <dd>+32 456 76 32 22</dd>
 
-                <dt>E-mailadres</dt>
-                <dd>linda.de.grootte@gmail.com</dd>
+                    <dt>E-mailadres</dt>
+                    <dd>linda.de.grootte@gmail.com</dd>
 
-                <dt>Adres</dt>
-                <dd>Tulplaan 435<br />9000 Gent</dd>
-            </dl>
+                    <dt>Adres</dt>
+                    <dd>Tulplaan 435<br />9000 Gent</dd>
+                </dl>
 
-            <hr />
+                <hr />
+            </div>
 
-            <h2>Mama</h2>
-            <dl class="details-grid">
-                <dt>Naam</dt>
-                <dd>Linda De Grootte</dd>
-
-                <dt>GSM-nummer</dt>
-                <dd>+32 456 76 32 22</dd>
-
-                <dt>E-mailadres</dt>
-                <dd>linda.de.grootte@gmail.com</dd>
-
-                <dt>Adres</dt>
-                <dd>Tulplaan 435<br />9000 Gent</dd>
-            </dl>
-
-            <hr />
-
-            <h2>Mama</h2>
+            <h2>Oma</h2>
             <dl class="details-grid">
                 <dt>Naam</dt>
                 <dd>Linda De Grootte</dd>
@@ -102,11 +87,20 @@
 import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
 import Tooltip from "shared/directives/Tooltip";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
+import { Member } from "shared/models/Member";
+import { ParentType, ParentTypeHelper } from "shared/models/ParentType";
 
 @Component({
     directives: { Tooltip }
 })
-export default class MemberViewDetails extends Mixins(NavigationMixin) {}
+export default class MemberViewDetails extends Mixins(NavigationMixin) {
+    @Prop()
+    member!: Member;
+
+    created() {
+        (this as any).ParentTypeHelper = ParentTypeHelper;
+    }
+}
 </script>
 
 <style lang="scss">
@@ -122,7 +116,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {}
         grid-template-columns: 100%;
     }
 
-    > div {
+    > div,
+    > div > div {
         > h2 {
             @extend .style-title-2;
             margin: 20px 0;

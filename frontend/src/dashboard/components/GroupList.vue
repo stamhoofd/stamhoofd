@@ -107,7 +107,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     showMember(selectableMember: SelectableMember) {
         const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberView, {})
+            root: new ComponentWithProperties(MemberView, {
+                member: selectableMember.member
+            })
         });
         component.modalDisplayStyle = "popup";
         this.present(component);

@@ -1,15 +1,17 @@
 import { Gender } from "./Gender";
 import { Address } from "./Address";
+import { ParentType } from "./ParentType";
 
 export class Parent {
-    firstname: string = "";
-    lastname: string = "";
+    type: ParentType = ParentType.Mother;
+    firstName: string = "";
+    lastName: string = "";
     phone: string | null = null;
     mail: string | null = null;
     address: Address | null;
 
     get name() {
-        return this.firstname + " " + this.lastname;
+        return this.firstName + " " + this.lastName;
     }
 
     constructor() {}
