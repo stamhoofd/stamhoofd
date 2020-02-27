@@ -9,7 +9,9 @@
                 <button class="button icon close" @click="pop"></button>
             </template>
         </STNavigationBar>
-        <STNavigationTitle>Rodolphus Lestrange<button class="button more"></button></STNavigationTitle>
+        <STNavigationTitle
+            >Rodolphus Lestrange<button class="button more" @click="showContextMenu"></button
+        ></STNavigationTitle>
 
         <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
 
@@ -32,6 +34,7 @@ import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
+import MemberContextMenu from "./MemberContextMenu.vue";
 
 @Component({
     components: {
@@ -44,6 +47,14 @@ export default class MemberView extends Mixins(NavigationMixin) {
     tabs = [MemberViewDetails, MemberViewPayments, MemberViewHistory];
     tab = this.tabs[0];
     tabLabels = ["Steekkaart", "Betaling", "Geschiedenis"];
+
+    showContextMenu(event) {
+        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+            x: event.clientX,
+            y: event.clientY
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
 }
 </script>
 
