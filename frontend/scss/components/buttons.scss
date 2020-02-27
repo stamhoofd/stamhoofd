@@ -76,6 +76,24 @@
         }
     }
 
+    &.privacy {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~assets/images/icons/gray/privacy.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
+
     &.close {
         width: 24px;
         height: 24px;
