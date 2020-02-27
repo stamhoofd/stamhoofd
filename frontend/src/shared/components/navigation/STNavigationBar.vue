@@ -50,10 +50,13 @@ export default class STNavigationBar extends Vue {
     }
 
     deactivated() {
+        if (!this.scrollElement) {
+            return;
+        }
         if (this.scrollElement === document.documentElement) {
             window.removeEventListener("scroll", this.onScroll);
         } else {
-            this.scrollElement.addEventListener("scroll", this.onScroll, { passive: true });
+            this.scrollElement.removeEventListener("scroll", this.onScroll);
         }
     }
 

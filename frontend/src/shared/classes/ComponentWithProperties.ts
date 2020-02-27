@@ -57,4 +57,9 @@ export class ComponentWithProperties {
             this.vnode = null;
         }
     }
+
+    setDisplayStyle(style: string): ComponentWithProperties {
+        this.modalDisplayStyle = style;
+        return this;
+    }
 }

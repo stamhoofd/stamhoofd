@@ -66,41 +66,61 @@
         </div>
 
         <div>
-            <h2>Steekkaart</h2>
+            <h2>
+                <span class="icon-spacer">Steekkaart</span
+                ><button
+                    class="button privacy"
+                    v-tooltip="
+                        'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
+                    "
+                />
+            </h2>
 
             <ul class="member-records">
-                <li class="important">Gezin met financiële moeilijkheden</li>
+                <li class="important more">Gezin met financiële moeilijkheden</li>
                 <li class="important">Geen medicatie toedienen</li>
-                <li class="important">Geen foto’s maken</li>
+                <li class="important more">Geen foto’s maken</li>
                 <li class="warning">Kan niet zwemmen</li>
-                <li class="warning">Geneesmiddelen nemen</li>
+                <li class="warning more">Geneesmiddelen nemen</li>
                 <li class="warning">Bedwateren</li>
                 <li class="warning">Hartkwaal</li>
-                <li class="warning">Allergisch voor noten</li>
+                <li class="warning more">Allergisch voor noten</li>
                 <li class="warning">Allergisch voor verf</li>
                 <li class="warning">Niet ingeënt tegen tetanus</li>
-                <li class="info">Vegetarisch</li>
+                <li class="info more">Vegetarisch</li>
                 <li class="info">Tetanus inenting in 2009</li>
             </ul>
+
+            <hr />
+
+            <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import Tooltip from "shared/directives/Tooltip";
+import { NavigationMixin } from "shared/classes/NavigationMixin";
 
-@Component({})
-export default class MemberViewDetails extends Vue {}
+@Component({
+    directives: { Tooltip }
+})
+export default class MemberViewDetails extends Mixins(NavigationMixin) {}
 </script>
 
 <style lang="scss">
 @use '~scss/base/text-styles.scss';
 
+.icon-spacer {
+    margin-right: 5px;
+}
+
 .member-view-details {
     padding: 10px 0;
     display: grid;
     grid-template-columns: 60% 40%;
-    gap: 15px;
+    gap: 20px;
 
     @media (max-width: 700px) {
         grid-template-columns: 100%;
@@ -119,7 +139,7 @@ export default class MemberViewDetails extends Vue {}
             width: 100%;
             background: $color-gray-lighter;
             border-radius: $border-width/2;
-            margin: 30px 0;
+            margin: 20px 0;
         }
     }
 }
@@ -168,6 +188,46 @@ export default class MemberViewDetails extends Vue {}
             background-image: url(~assets/images/icons/color/exclamation.svg);
             background-position: 10px center;
             background-repeat: no-repeat;
+        }
+
+        &.more {
+            cursor: pointer;
+            position: relative;
+            padding-right: 40px;
+
+            &::after {
+                content: "";
+                position: absolute;
+                right: 10px;
+                top: 0;
+                bottom: 0;
+                width: 24px;
+                background-image: url(~assets/images/icons/gray/arrow-right-small.svg);
+                background-position: left center;
+                background-repeat: no-repeat;
+                transform: translate(0, 0);
+                opacity: 0.5;
+                transition: transform 0.2s, opacity 0.2s;
+            }
+
+            &.important {
+                &::after {
+                    background-image: url(~assets/images/icons/error-dark/arrow-right-small.svg);
+                }
+            }
+
+            &.warning {
+                &::after {
+                    background-image: url(~assets/images/icons/warning-dark/arrow-right-small.svg);
+                }
+            }
+
+            &:hover {
+                &::after {
+                    transform: translate(5px, 0);
+                    opacity: 1;
+                }
+            }
         }
     }
 }
