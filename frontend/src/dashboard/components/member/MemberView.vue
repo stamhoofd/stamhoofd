@@ -1,6 +1,6 @@
 <template>
     <div class="member-view">
-        <STNavigationBar title="Rodolphus Lestrange">
+        <STNavigationBar :title="member.name">
             <template v-slot:left>
                 <button class="button icon gray arrow-left">Vorige</button>
             </template>
@@ -10,13 +10,13 @@
             </template>
         </STNavigationBar>
         <STNavigationTitle>
-            <span class="icon-spacer">Rodolphus Lestrange</span>
+            <span class="icon-spacer">{{ member.name }}</span>
             <button class="button more" @click="showContextMenu"></button>
         </STNavigationTitle>
 
         <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
 
-        <component :is="tab" />
+        <component :is="tab" :member="member" />
     </div>
 </template>
 
@@ -48,6 +48,9 @@ export default class MemberView extends Mixins(NavigationMixin) {
     tabs = [MemberViewDetails, MemberViewPayments, MemberViewHistory];
     tab = this.tabs[0];
     tabLabels = ["Steekkaart", "Betaling", "Geschiedenis"];
+
+    @Prop()
+    member!: Member;
 
     showContextMenu(event) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
