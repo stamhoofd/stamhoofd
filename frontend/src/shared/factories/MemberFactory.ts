@@ -1,8 +1,8 @@
 import { Member } from "../models/Member";
 import { ParentFactory } from "./ParentFactory";
+import { AddressFactory } from "./AddressFactory";
 
 var faker = require("faker");
-console.log(faker);
 
 export class MemberFactory {
     static createMultiple(amount: number = 40) {
@@ -17,6 +17,9 @@ export class MemberFactory {
         member.id = Math.floor(Math.random() * 99999999999);
         member.firstName = faker.name.firstName();
         member.lastName = faker.name.lastName();
+
+        // For now only generate -18
+        member.address = null;
 
         member.parents.push(ParentFactory.create());
 

@@ -28,7 +28,10 @@
                     <dd>linda.de.grootte@gmail.com</dd>
 
                     <dt>Adres</dt>
-                    <dd>Tulplaan 435<br />9000 Gent</dd>
+                    <dd>
+                        {{ parent.address.street }} {{ parent.address.number }}<br />{{ parent.address.postalCode }}
+                        {{ parent.address.city }}
+                    </dd>
                 </dl>
 
                 <hr />
