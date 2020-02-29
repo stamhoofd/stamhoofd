@@ -20,7 +20,7 @@ export class MemberFactory {
         member.lastName = faker.name.lastName();
         member.paid = Math.random() >= 0.1;
         member.gender = Math.random() >= 0.05 ? (Math.random() >= 0.5 ? Gender.Male : Gender.Female) : Gender.Other;
-
+        member.createdOn = Math.random() >= 0.5 ? "2020-02-01" : "2019-09-26";
         // For now only generate -18
         member.address = null;
 

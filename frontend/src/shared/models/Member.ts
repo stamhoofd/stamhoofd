@@ -19,6 +19,7 @@ export class Member {
     records: Record[] = [];
 
     paid: boolean = false;
+    createdOn: string = "1970-01-01";
 
     get name() {
         return this.firstName + " " + this.lastName;
@@ -26,6 +27,10 @@ export class Member {
 
     get info(): string {
         return this.paid ? "" : "Lidgeld nog niet betaald";
+    }
+
+    get isNew(): boolean {
+        return this.createdOn > "2020-01-01";
     }
 
     get age() {
