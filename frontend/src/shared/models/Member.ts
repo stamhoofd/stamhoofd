@@ -11,7 +11,7 @@ export class Member {
     gender: Gender = Gender.Other;
     phone: string | null = null;
     mail: string | null = null;
-    birthDay: string = "1970-01-01";
+    birthDay: Date = new Date("1970-01-01");
     address: Address | null;
 
     parents: Parent[] = [];
@@ -19,7 +19,7 @@ export class Member {
     records: Record[] = [];
 
     paid: boolean = false;
-    createdOn: string = "1970-01-01";
+    createdOn: Date = new Date("1970-01-01");
 
     get name() {
         return this.firstName + " " + this.lastName;
@@ -30,15 +30,14 @@ export class Member {
     }
 
     get isNew(): boolean {
-        return this.createdOn > "2020-01-01";
+        return this.createdOn.getTime() > new Date().getTime() - 24 * 60 * 60 * 14 * 1000;
     }
 
     get age() {
         var today = new Date();
-        var birthDate = new Date(this.birthDay);
-        var age = today.getFullYear() - birthDate.getFullYear();
-        var m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        var age = today.getFullYear() - this.birthDay.getFullYear();
+        var m = today.getMonth() - this.birthDay.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < this.birthDay.getDate())) {
             age--;
         }
         return age;

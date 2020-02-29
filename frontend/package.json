@@ -11,7 +11,6 @@
         "lint-group": "vue-cli-service lint --name create-group src/create-group/main.ts"
     },
     "dependencies": {
-        "faker": "^4.1.0",
         "tiptap": "^1.26.6",
         "tiptap-extensions": "^1.28.6",
         "vue": "^2.6.10",

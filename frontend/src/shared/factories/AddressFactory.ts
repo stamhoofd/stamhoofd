@@ -1,13 +1,26 @@
 import { Address } from "../models/Address";
+import { Factory } from "./Factory";
+import StreetNames from "./data/streets";
 
-var faker = require("faker");
+interface Options {}
 
-export class AddressFactory {
-    static create(): Address {
+export class AddressFactory extends Factory<Address> {
+    options: Options;
+
+    constructor(options: Options) {
+        super(options);
+        this.options = options;
+    }
+
+    randomStreet(): string {
+        return this.randomArray(StreetNames);
+    }
+
+    create(): Address {
         var address = new Address();
-        address.street = faker.address.streetName();
+        address.street = this.randomStreet();
         address.number = Math.floor(Math.random() * 300) + 1 + "";
-        address.city = AddressFactory.randomArray(["Wetteren", "Schellebelle", "Wichelen", "Massemen", "Laarne"]);
+        address.city = this.randomArray(["Wetteren", "Schellebelle", "Wichelen", "Massemen", "Laarne"]);
         switch (address.city) {
             case "Wetteren":
                 address.postalCode = "9230";
@@ -32,10 +45,5 @@ export class AddressFactory {
         address.country = "BE";
 
         return address;
-    }
-
-    static randomArray(arr: Array<any>): any {
-        var int = Math.floor(Math.random() * arr.length);
-        return arr[int];
     }
 }

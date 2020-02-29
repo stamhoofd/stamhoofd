@@ -85,7 +85,7 @@ import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import MemberView from "./member/MemberView.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 import MemberContextMenu from "./member/MemberContextMenu.vue";
-import { MemberFactory } from "shared/factories/MemberFactory";
+import { MemberFactory, MemberFactoryOptions } from "shared/factories/MemberFactory";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
@@ -150,8 +150,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        const factory = new MemberFactory(new MemberFactoryOptions());
         for (let index = 0; index < 50; index++) {
-            this.members.push(new SelectableMember(MemberFactory.create()));
+            this.members.push(new SelectableMember(factory.create()));
         }
     }
     next() {
