@@ -23,7 +23,10 @@
                 <thead>
                     <tr>
                         <th>
-                            <Checkbox :value="selectionCount >= filteredMembers.length" @input="selectAll($event)" />
+                            <Checkbox
+                                :value="selectionCount >= filteredMembers.length && filteredMembers.length"
+                                @input="selectAll($event)"
+                            />
                         </th>
                         <th>Naam</th>
                         <th>Info</th>
@@ -32,7 +35,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(member, index) in filteredMembers" :key="index" @click="showMember(member)">
+                    <tr v-for="member in filteredMembers" :key="member.id" @click="showMember(member)">
                         <td @click.stop="">
                             <Checkbox v-model="member.selected" @input="onChanged(member)" />
                         </td>
@@ -120,7 +123,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
             if (this.filters[this.selectedFilter].doesMatch(member.member)) {
                 return true;
             }
-            this.selectionCountHidden += 1;
+            this.selectionCountHidden += member.selected ? 1 : 0;
             return false;
         });
 
@@ -131,7 +134,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
             if (member.member.matchQuery(this.searchQuery)) {
                 return true;
             }
-            this.selectionCountHidden += 1;
+            this.selectionCountHidden += member.selected ? 1 : 0;
             return false;
         });
     }
@@ -210,7 +213,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     getSelectedMembers(): Member[] {
-        return this.members
+        return this.filteredMembers
             .filter((member: SelectableMember) => {
                 return member.selected;
             })
