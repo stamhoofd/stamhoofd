@@ -6,21 +6,15 @@
             <input class="input search" placeholder="Zoeken" />
         </div>
 
-        <div class="">
+        <div class="" v-if="organization">
             <button class="menu-button icon user">
                 <span>Leden</span>
                 <button>Iedereen</button>
             </button>
 
-            <button class="menu-button" @click="kapoenen">Kapoenen</button>
-            <button class="menu-button" @click="wouters">Wouters</button>
-            <button class="menu-button" @click="woutersShow">Welpen</button>
-            <button class="menu-button" @click="jonggidsen">Jonggidsen</button>
-            <button class="menu-button" @click="jongverkenners">Jongverkenners</button>
-            <button class="menu-button">Gidsen</button>
-            <button class="menu-button">Verkenners</button>
-            <button class="menu-button">Jin</button>
-            <button class="menu-button">Akabe</button>
+            <button v-for="group in organization.groups" :key="group.id" class="menu-button" @click="openGroup(group)">
+                {{ group.name }}
+            </button>
         </div>
         <hr />
         <div class="">
@@ -46,20 +40,32 @@ import GroupList from "./GroupList.vue";
 import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "../../shared/components/layout/NavigationController.vue";
 import SplitViewController from "../../shared/components/layout/SplitViewController.vue";
+import { Organization } from "shared/models/Organization";
+import { OrganizationFactory } from "shared/factories/OrganizationFactory";
+import { Group } from "shared/models/Group";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
+    organization: Organization | null = null;
+
     mounted() {
-        if (!this.splitViewController.shouldCollapse())
+        var factory = new OrganizationFactory({
+            type: "chiro"
+        });
+        this.organization = factory.create();
+        if (!this.splitViewController.shouldCollapse()) {
             this.showDetail(
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(GroupList, {})
+                    root: new ComponentWithProperties(GroupList, {
+                        group: this.organization.groups[0]
+                    })
                 })
             );
+        }
     }
 
-    kapoenen() {
-        this.showDetail(new ComponentWithProperties(GroupList, {}));
+    openGroup(group: Group) {
+        this.showDetail(new ComponentWithProperties(GroupList, { group }));
     }
 
     wouters() {

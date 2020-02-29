@@ -3,7 +3,7 @@
         <STNavigationBar :sticky="false">
             <template v-slot:left>
                 <STNavigationTitle>
-                    <span class="icon-spacer">Leden</span>
+                    <span class="icon-spacer">{{ group.name }}</span>
                     <button class="button more"></button>
                 </STNavigationTitle>
             </template>
@@ -96,6 +96,7 @@ import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
 import { NoFilter, NotPaidFilter } from "shared/classes/member-filters";
 import Tooltip from "shared/directives/Tooltip";
+import { Group } from "../../shared/models/Group";
 
 class SelectableMember {
     member: Member;
@@ -116,6 +117,9 @@ class SelectableMember {
     directives: { Tooltip }
 })
 export default class GroupList extends Mixins(NavigationMixin) {
+    @Prop()
+    group!: Group;
+
     members: SelectableMember[] = [];
     searchQuery: string = "";
     filters = [new NoFilter(), new NotPaidFilter()];
@@ -155,10 +159,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        const factory = new MemberFactory(new MemberFactoryOptions());
-        for (let index = 0; index < 50; index++) {
-            this.members.push(new SelectableMember(factory.create()));
-        }
+        this.members = this.group.members.map(member => {
+            return new SelectableMember(member);
+        });
     }
     next() {
         this.show(new ComponentWithProperties(GroupList, {}));

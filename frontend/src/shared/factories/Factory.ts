@@ -35,7 +35,7 @@ export abstract class Factory<Model> {
         return this.randomArray(FamilyNames);
     }
 
-    createMultiple(amount: number = 40) {
+    createMultiple(amount: number = 40): Array<Model> {
         var arr = [];
         for (let index = 0; index < amount; index++) {
             arr.push(this.create());
