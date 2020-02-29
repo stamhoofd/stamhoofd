@@ -61,7 +61,7 @@ export default class MailEditor extends Vue {
                 new Underline(),
                 new History()
             ],
-            content: "<p>This is just a boring paragraph</p>"
+            content: "<p></p>"
         });
     }
 

@@ -40,4 +40,16 @@ export class Member {
     }
 
     constructor() {}
+
+    matchQuery(query: string): boolean {
+        var query = query.toLowerCase();
+        if (
+            this.firstName.toLowerCase().includes(query) ||
+            this.lastName.toLowerCase().includes(query) ||
+            this.name.toLowerCase().includes(query)
+        ) {
+            return true;
+        }
+        return false;
+    }
 }

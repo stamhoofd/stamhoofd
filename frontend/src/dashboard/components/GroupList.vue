@@ -8,7 +8,7 @@
                 </STNavigationTitle>
             </template>
             <template v-slot:right>
-                <input class="input search" placeholder="Zoeken" />
+                <input class="input search" placeholder="Zoeken" v-model="searchQuery" />
 
                 <select class="input">
                     <option>Alle leden</option>
@@ -31,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(member, index) in members" :key="index" @click="showMember(member)">
+                    <tr v-for="(member, index) in filteredMembers" :key="index" @click="showMember(member)">
                         <td @click.stop="">
                             <Checkbox v-model="member.selected" @input="onChanged(member)" />
                         </td>
@@ -96,6 +96,16 @@ class SelectableMember {
 export default class GroupList extends Mixins(NavigationMixin) {
     members: SelectableMember[] = [];
     selectionCount: number = 0;
+    searchQuery: string = "";
+
+    get filteredMembers(): SelectableMember[] {
+        if (this.searchQuery == "") {
+            return this.members;
+        }
+        return this.members.filter((member: SelectableMember) => {
+            return member.member.matchQuery(this.searchQuery);
+        });
+    }
 
     mounted() {
         for (let index = 0; index < 10; index++) {
@@ -115,28 +125,26 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     getPreviousMember(member: Member): Member | null {
-        // todo: take filters into account
-        for (let index = 0; index < this.members.length; index++) {
-            const _member = this.members[index];
+        for (let index = 0; index < this.filteredMembers.length; index++) {
+            const _member = this.filteredMembers[index];
             if (_member.member.id == member.id) {
                 if (index == 0) {
                     return null;
                 }
-                return this.members[index - 1].member;
+                return this.filteredMembers[index - 1].member;
             }
         }
         return null;
     }
 
     getNextMember(member: Member): Member | null {
-        // todo: take filters into account
-        for (let index = 0; index < this.members.length; index++) {
-            const _member = this.members[index];
+        for (let index = 0; index < this.filteredMembers.length; index++) {
+            const _member = this.filteredMembers[index];
             if (_member.member.id == member.id) {
-                if (index == this.members.length - 1) {
+                if (index == this.filteredMembers.length - 1) {
                     return null;
                 }
-                return this.members[index + 1].member;
+                return this.filteredMembers[index + 1].member;
             }
         }
         return null;
@@ -155,8 +163,8 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     selectAll(selected: boolean) {
-        this.selectionCount = selected ? this.members.length : 0;
-        this.members.forEach(member => {
+        this.selectionCount = selected ? this.filteredMembers.length : 0;
+        this.filteredMembers.forEach(member => {
             member.selected = selected;
         });
     }
