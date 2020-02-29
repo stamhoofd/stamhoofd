@@ -53,7 +53,9 @@ export class MemberFactory extends Factory<Member> {
                 Math.floor(Math.random() * 10);
         }
 
-        var parentFactory = new ParentFactory({});
+        var parentFactory = new ParentFactory({
+            type: null
+        });
 
         member.parents.push(parentFactory.create());
 
@@ -82,6 +84,9 @@ export class MemberFactory extends Factory<Member> {
         if (Math.random() >= 0.9) {
             member.emergencyContacts.push(emergencyContactFactory.create());
         }
+
+        member.doctor = emergencyContactFactory.create();
+        member.doctor.name = "Dr. " + member.doctor.name;
         return member;
     }
 }

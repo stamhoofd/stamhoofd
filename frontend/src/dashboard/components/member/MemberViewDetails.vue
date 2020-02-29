@@ -54,6 +54,19 @@
 
                 <hr v-if="index < member.emergencyContacts.length - 1" />
             </div>
+
+            <template v-if="member.doctor">
+                <hr />
+
+                <h2>Huisarts</h2>
+                <dl class="details-grid">
+                    <dt>Naam</dt>
+                    <dd>{{ member.doctor.name }}</dd>
+
+                    <dt>Telefoonnummer</dt>
+                    <dd>{{ member.doctor.phone }}</dd>
+                </dl>
+            </template>
         </div>
 
         <div>
