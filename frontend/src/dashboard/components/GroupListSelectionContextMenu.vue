@@ -1,6 +1,6 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem>Exporteer als Excel</ContextMenuItem>
+        <ContextMenuItem @click="excel">Exporteer als Excel</ContextMenuItem>
         <ContextMenuItem @click="sms">SMS'en</ContextMenuItem>
     </ContextMenu>
 </template>
@@ -14,6 +14,7 @@ import { NavigationMixin } from "shared/classes/NavigationMixin";
 import { Member } from "shared/models/Member";
 import SMSView from "./sms/SMSView.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import { MemberExcelExport } from "../classes/MemberExcelExport";
 
 @Component({
     components: {
@@ -39,6 +40,10 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
             members: this.members
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    excel() {
+        MemberExcelExport.export(this.members);
     }
 }
 </script>
