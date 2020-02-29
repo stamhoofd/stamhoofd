@@ -23,7 +23,7 @@
                 <thead>
                     <tr>
                         <th>
-                            <Checkbox :value="selectionCount == members.length" @input="selectAll($event)" />
+                            <Checkbox :value="selectionCount >= filteredMembers.length" @input="selectAll($event)" />
                         </th>
                         <th>Naam</th>
                         <th>Info</th>
@@ -46,7 +46,10 @@
         </main>
 
         <STToolbar>
-            <template v-slot:left>{{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd</template>
+            <template v-slot:left>
+                {{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd
+                <template v-if="selectionCountHidden"> ({{ selectionCountHidden }} verborgen) </template>
+            </template>
             <template v-slot:right>
                 <button class="button secundary">Samenvatting</button
                 ><button class="button primary" @click="openMail">
@@ -97,22 +100,41 @@ class SelectableMember {
 })
 export default class GroupList extends Mixins(NavigationMixin) {
     members: SelectableMember[] = [];
-    selectionCount: number = 0;
     searchQuery: string = "";
     filters = [new NoFilter(), new NotPaidFilter()];
     selectedFilter = 0;
+    selectionCountHidden = 0;
 
     get filteredMembers(): SelectableMember[] {
+        this.selectionCountHidden = 0;
         var filtered = this.members.filter((member: SelectableMember) => {
-            return this.filters[this.selectedFilter].doesMatch(member.member);
+            if (this.filters[this.selectedFilter].doesMatch(member.member)) {
+                return true;
+            }
+            this.selectionCountHidden += 1;
+            return false;
         });
 
         if (this.searchQuery == "") {
             return filtered;
         }
         return filtered.filter((member: SelectableMember) => {
-            return member.member.matchQuery(this.searchQuery);
+            if (member.member.matchQuery(this.searchQuery)) {
+                return true;
+            }
+            this.selectionCountHidden += 1;
+            return false;
         });
+    }
+
+    get selectionCount(): number {
+        var val = 0;
+        this.filteredMembers.forEach(member => {
+            if (member.selected) {
+                val++;
+            }
+        });
+        return val;
     }
 
     mounted() {
@@ -124,13 +146,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
         this.show(new ComponentWithProperties(GroupList, {}));
     }
 
-    onChanged(selectableMember: SelectableMember) {
-        if (!selectableMember.selected) {
-            this.selectionCount--;
-        } else {
-            this.selectionCount++;
-        }
-    }
+    onChanged(selectableMember: SelectableMember) {}
 
     getPreviousMember(member: Member): Member | null {
         for (let index = 0; index < this.filteredMembers.length; index++) {
@@ -171,7 +187,6 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     selectAll(selected: boolean) {
-        this.selectionCount = selected ? this.filteredMembers.length : 0;
         this.filteredMembers.forEach(member => {
             member.selected = selected;
         });
