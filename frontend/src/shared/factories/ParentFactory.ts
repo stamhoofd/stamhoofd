@@ -37,7 +37,7 @@ export class ParentFactory extends Factory<Parent> {
         parent.mail =
             (Math.random() >= 0.5 ? parent.firstName.toLowerCase() : parent.firstName.toLowerCase()[0]) +
             (Math.random() >= 0.5 ? "." : Math.random() >= 0.5 ? "_" : "") +
-            parent.lastName.toLowerCase() +
+            parent.lastName.toLowerCase().replace(" ", "") +
             "@" +
             this.randomArray([
                 "hotmail.com",
