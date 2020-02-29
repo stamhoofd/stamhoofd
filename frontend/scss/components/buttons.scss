@@ -171,6 +171,19 @@
                 overflow: hidden;
                 white-space: nowrap;
             }
+
+            &.clock {
+                background-image: url(~assets/images/icons/gray/clock.svg);
+                background-position: left center;
+                background-repeat: no-repeat;
+                padding-left: 30px;
+                padding-right: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
         }
     }
 }
