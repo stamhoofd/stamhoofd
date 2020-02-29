@@ -60,6 +60,27 @@ export default class ContextMenu extends Vue {
         console.log("pop");
         this.$parent.$parent.$emit("pop");
     }
+
+    activated() {
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        var key = event.key || event.keyCode;
+
+        if (key === "Escape" || key === "Esc" || key === 27) {
+            this.pop();
+            event.preventDefault();
+        }
+    }
 }
 </script>
 
