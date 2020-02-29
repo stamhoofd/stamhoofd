@@ -63,10 +63,13 @@ export default class Checkbox extends Vue {
     @extend .style-description-small;
     @extend .style-overlay-shadow;
     color: $color-white;
-    width: 100vw;
-    width: calc(100vw - 30px);
     box-sizing: border-box;
     max-width: 350px;
+
+    @media (max-width: 350px + 30px) {
+        max-width: 100vw;
+        max-width: calc(100vw - 30px);
+    }
 
     &.show-enter-active,
     &.show-leave-active {

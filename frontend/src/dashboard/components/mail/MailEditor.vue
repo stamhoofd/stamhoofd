@@ -13,7 +13,7 @@
                 </button>
             </div>
         </editor-menu-bubble>
-        <editor-content :editor="editor" />
+        <editor-content :editor="editor" class="editor-content" />
     </div>
 </template>
 

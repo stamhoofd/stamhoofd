@@ -66,4 +66,32 @@ export default class MailView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use '~scss/layout/view.scss';
+
+.mail-view {
+    > main {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+
+        & > .editor {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+
+            justify-content: stretch;
+            align-items: stretch;
+            padding-bottom: 20px;
+
+            & > .editor-content {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+
+                & > .ProseMirror {
+                    flex-grow: 1;
+                }
+            }
+        }
+    }
+}
 </style>
