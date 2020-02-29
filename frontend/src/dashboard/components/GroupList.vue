@@ -46,7 +46,10 @@
             <div>{{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd</div>
             <div>
                 <button class="button secundary">Exporteren</button
-                ><button class="button primary">Mail iedereen</button>
+                ><button class="button primary" @click="openMail">
+                    Mail iedereen
+                    <div class="dropdown" @click.stop="openMailDropdown"></div>
+                </button>
             </div>
         </div>
     </div>
@@ -151,6 +154,18 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     showMemberContextMenu(event) {
+        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+            x: event.clientX,
+            y: event.clientY + 10
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    openMail(event) {
+        // todo
+    }
+
+    openMailDropdown(event) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY + 10
