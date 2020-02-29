@@ -3,7 +3,7 @@
         <STNavigationBar :sticky="false">
             <template v-slot:left>
                 <STNavigationTitle>
-                    <span class="icon-spacer">Kapoenen</span>
+                    <span class="icon-spacer">Leden</span>
                     <button class="button more"></button>
                 </STNavigationTitle>
             </template>

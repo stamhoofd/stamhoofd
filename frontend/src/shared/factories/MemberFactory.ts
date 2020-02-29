@@ -1,6 +1,7 @@
 import { Member } from "../models/Member";
 import { ParentFactory } from "./ParentFactory";
 import { AddressFactory } from "./AddressFactory";
+import { Gender } from "../models/Gender";
 
 var faker = require("faker");
 
@@ -18,6 +19,7 @@ export class MemberFactory {
         member.firstName = faker.name.firstName();
         member.lastName = faker.name.lastName();
         member.paid = Math.random() >= 0.1;
+        member.gender = Math.random() >= 0.05 ? (Math.random() >= 0.5 ? Gender.Male : Gender.Female) : Gender.Other;
 
         // For now only generate -18
         member.address = null;
