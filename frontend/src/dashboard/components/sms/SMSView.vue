@@ -65,4 +65,17 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use '~scss/layout/view.scss';
+
+.sms-view {
+    > main {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        padding-bottom: 20px;
+
+        & > textarea {
+            flex-grow: 1;
+        }
+    }
+}
 </style>
