@@ -77,6 +77,11 @@ export class MemberFactory extends Factory<Member> {
                 // 10% chance to have divorced parents
                 member.parents[1].address = member.parents[0].address;
             }
+
+            if (Math.random() >= 0.5) {
+                // 50% chance no e-mail
+                member.parents[1].mail = null;
+            }
         }
 
         if (member.parents.length == 2 && Math.random() >= 0.9) {
