@@ -1,30 +1,31 @@
 <template>
-    <div class="st-view mail-view">
-        <STNavigationBar title="Mail versturen">
+    <div class="st-view sms-view">
+        <STNavigationBar title="SMS'en">
             <template v-slot:right>
                 <button class="button icon gray clock">Geschiedenis</button>
                 <button class="button icon close" @click="pop"></button>
             </template>
         </STNavigationBar>
         <STNavigationTitle>
-            <span class="icon-spacer">Mail versturen</span>
+            <span class="icon-spacer">SMS'en</span>
         </STNavigationTitle>
 
         <main>
-            <label class="style-label" for="mail-subject">Onderwerp</label>
-            <input class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" id="mail-subject" />
+            <label class="style-label" for="sms-who">Naar wie?</label>
+            <select class="input" id="sms-who">
+                <option>Enkel naar ouders</option>
+                <option>Enkel naar leden</option>
+                <option>Ouders en leden</option>
+            </select>
 
-            <label class="style-label" for="mail-text">Bericht</label>
-            <MailEditor />
+            <label class="style-label" for="sms-text">Bericht</label>
+            <textarea class="input" id="sms-text" placeholder="Typ hier je SMS-bericht"></textarea>
         </main>
 
         <STToolbar>
             <template v-slot:left>{{ members.length ? members.length : "Geen" }} ontvangers</template>
             <template v-slot:right>
-                <button class="button primary">
-                    Versturen
-                    <div class="dropdown" @click.stop=""></div>
-                </button>
+                <button class="button primary">Versturen</button>
             </template>
         </STToolbar>
     </div>
@@ -47,18 +48,16 @@ import MemberViewPayments from "./MemberViewPayments.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberContextMenu from "./MemberContextMenu.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
-import MailEditor from "./MailEditor.vue";
 
 @Component({
     components: {
         STNavigationBar,
         STNavigationTitle,
         SegmentedControl,
-        STToolbar,
-        MailEditor
+        STToolbar
     }
 })
-export default class MailView extends Mixins(NavigationMixin) {
+export default class SMSView extends Mixins(NavigationMixin) {
     @Prop()
     members!: Member[];
 }
