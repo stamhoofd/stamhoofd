@@ -26,11 +26,15 @@
                     <dt>Naam</dt>
                     <dd>{{ parent.name }}</dd>
 
-                    <dt>GSM-nummer</dt>
-                    <dd>{{ parent.phone }}</dd>
+                    <template v-if="parent.phone">
+                        <dt>GSM-nummer</dt>
+                        <dd>{{ parent.phone }}</dd>
+                    </template>
 
-                    <dt>E-mailadres</dt>
-                    <dd>{{ parent.mail }}</dd>
+                    <template v-if="parent.mail">
+                        <dt>E-mailadres</dt>
+                        <dd>{{ parent.mail }}</dd>
+                    </template>
 
                     <dt>Adres</dt>
                     <dd>
