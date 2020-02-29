@@ -2,14 +2,18 @@
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem>Groep wijzigen</ContextMenuItem>
         <ContextMenuLine></ContextMenuLine>
-        <ContextMenuItem v-for="(parent, index) in member.parents" :key="index" click="call(parent.phone)"
+        <ContextMenuItem v-for="(parent, index) in member.parents" :key="index" @click="call(parent.phone)"
             >{{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen</ContextMenuItem
         >
         <ContextMenuItem>Ouders SMS'en</ContextMenuItem>
         <ContextMenuItem>Ouders mailen</ContextMenuItem>
-        <ContextMenuLine></ContextMenuLine>
-        <ContextMenuItem>{{ member.firstName }} bellen</ContextMenuItem>
-        <ContextMenuItem>{{ member.firstName }} SMS'en</ContextMenuItem>
+
+        <template v-if="member.phone">
+            <ContextMenuLine></ContextMenuLine>
+            <ContextMenuItem @click="call(member.phone)">{{ member.firstName }} bellen</ContextMenuItem>
+            <ContextMenuItem @click="sms(member.phone)">{{ member.firstName }} SMS'en</ContextMenuItem>
+        </template>
+
         <ContextMenuLine></ContextMenuLine>
         <ContextMenuItem>Uitschrijven</ContextMenuItem>
         <ContextMenuItem>Data verwijderen</ContextMenuItem>
@@ -49,6 +53,10 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     mounted() {}
 
     call(phone) {
+        window.location.href = "tel://" + phone.replace(" ", "");
+    }
+
+    sms(phone) {
         window.location.href = "tel://" + phone.replace(" ", "");
     }
 }
