@@ -211,7 +211,7 @@ export default class SplitViewController extends Vue {
 
         // Clip contents (during animations)
         // Sometimes not working on iOS (need to fix)
-        clip-path: inset(0px 0px);
+        // clip-path: inset(0px 0px);
 
         @extend .style-side-view-shadow;
     }

@@ -1,7 +1,7 @@
 <template>
     <transition appear name="fade">
-        <div class="popup" @click="pop">
-            <div @click.stop="">
+        <div class="popup" @mousedown="pop" @touchdown="pop">
+            <div @mousedown.stop="" @touchdown.stop="">
                 <component :key="root.key" :is="root.component" v-bind="root.properties" @pop="pop"></component>
             </div>
         </div>
