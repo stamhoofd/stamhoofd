@@ -40,15 +40,11 @@ export default {
 
                 if (displayedComponent && displayedComponent.vnode) {
                     // Todo: hide component again
-                    console.log("Pop");
                     displayedComponent.vnode.componentInstance.$parent.$emit("pop");
                     displayedComponent = null;
                 }
             },
             { passive: true }
         );
-    },
-    componentUpdated(el, binding, vnode) {
-        console.log(vnode);
     }
 };
