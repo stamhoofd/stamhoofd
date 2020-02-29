@@ -189,7 +189,8 @@ export default class GroupList extends Mixins(NavigationMixin) {
     openMailDropdown(event) {
         var displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: event.clientX,
-            y: event.clientY + 10
+            y: event.clientY + 10,
+            members: this.getSelectedMembers()
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
