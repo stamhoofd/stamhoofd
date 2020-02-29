@@ -10,9 +10,10 @@
             <template v-slot:right>
                 <input class="input search" placeholder="Zoeken" v-model="searchQuery" />
 
-                <select class="input">
-                    <option>Alle leden</option>
-                    <option>Niet betaald</option>
+                <select class="input" v-model="selectedFilter">
+                    <option :value="index" :key="index" v-for="(filter, index) in filters">{{
+                        filter.getName()
+                    }}</option>
                 </select>
             </template>
         </STNavigationBar>
@@ -37,7 +38,7 @@
                         </td>
                         <td>{{ member.member.name }}</td>
                         <td class="minor">{{ member.member.age }} jaar</td>
-                        <td>Nog niet betaald</td>
+                        <td>{{ member.member.info }}</td>
                         <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
                     </tr>
                 </tbody>
@@ -75,6 +76,7 @@ import { MemberFactory } from "shared/factories/MemberFactory";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
+import { NoFilter, NotPaidFilter } from "shared/classes/member-filters";
 
 class SelectableMember {
     member: Member;
@@ -97,18 +99,24 @@ export default class GroupList extends Mixins(NavigationMixin) {
     members: SelectableMember[] = [];
     selectionCount: number = 0;
     searchQuery: string = "";
+    filters = [new NoFilter(), new NotPaidFilter()];
+    selectedFilter = 0;
 
     get filteredMembers(): SelectableMember[] {
+        var filtered = this.members.filter((member: SelectableMember) => {
+            return this.filters[this.selectedFilter].doesMatch(member.member);
+        });
+
         if (this.searchQuery == "") {
-            return this.members;
+            return filtered;
         }
-        return this.members.filter((member: SelectableMember) => {
+        return filtered.filter((member: SelectableMember) => {
             return member.member.matchQuery(this.searchQuery);
         });
     }
 
     mounted() {
-        for (let index = 0; index < 10; index++) {
+        for (let index = 0; index < 50; index++) {
             this.members.push(new SelectableMember(MemberFactory.create()));
         }
     }
