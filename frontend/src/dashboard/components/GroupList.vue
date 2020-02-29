@@ -1,5 +1,5 @@
 <template>
-    <div class="group-list">
+    <div class="st-view group-list">
         <STNavigationBar :sticky="false">
             <template v-slot:left>
                 <STNavigationTitle>
@@ -17,41 +17,43 @@
             </template>
         </STNavigationBar>
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>
-                        <Checkbox :value="selectionCount == members.length" @input="selectAll($event)" />
-                    </th>
-                    <th>Naam</th>
-                    <th>Info</th>
-                    <th>Status</th>
-                    <th>Acties</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(member, index) in members" :key="index" @click="showMember(member)">
-                    <td @click.stop="">
-                        <Checkbox v-model="member.selected" @input="onChanged(member)" />
-                    </td>
-                    <td>{{ member.member.name }}</td>
-                    <td class="minor">16 jaar</td>
-                    <td>Nog niet betaald</td>
-                    <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
-                </tr>
-            </tbody>
-        </table>
+        <main>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <Checkbox :value="selectionCount == members.length" @input="selectAll($event)" />
+                        </th>
+                        <th>Naam</th>
+                        <th>Info</th>
+                        <th>Status</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(member, index) in members" :key="index" @click="showMember(member)">
+                        <td @click.stop="">
+                            <Checkbox v-model="member.selected" @input="onChanged(member)" />
+                        </td>
+                        <td>{{ member.member.name }}</td>
+                        <td class="minor">{{ member.member.age }} jaar</td>
+                        <td>Nog niet betaald</td>
+                        <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
 
-        <div class="toolbar">
-            <div>{{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd</div>
-            <div>
-                <button class="button secundary">Exporteren</button
+        <STToolbar>
+            <template v-slot:left>{{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd</template>
+            <template v-slot:right>
+                <button class="button secundary">Samenvatting</button
                 ><button class="button primary" @click="openMail">
-                    Mail iedereen
+                    Mailen
                     <div class="dropdown" @click.stop="openMailDropdown"></div>
                 </button>
-            </div>
-        </div>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
@@ -70,6 +72,9 @@ import MemberView from "./member/MemberView.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 import MemberContextMenu from "./member/MemberContextMenu.vue";
 import { MemberFactory } from "shared/factories/MemberFactory";
+import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
+import MailView from "./mail/MailView.vue";
+import STToolbar from "shared/components/navigation/STToolbar.vue";
 
 class SelectableMember {
     member: Member;
@@ -84,7 +89,8 @@ class SelectableMember {
     components: {
         Checkbox,
         STNavigationBar,
-        STNavigationTitle
+        STNavigationTitle,
+        STToolbar
     }
 })
 export default class GroupList extends Mixins(NavigationMixin) {
@@ -92,7 +98,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     selectionCount: number = 0;
 
     mounted() {
-        for (let index = 0; index < 50; index++) {
+        for (let index = 0; index < 10; index++) {
             this.members.push(new SelectableMember(MemberFactory.create()));
         }
     }
@@ -109,6 +115,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     getPreviousMember(member: Member): Member | null {
+        // todo: take filters into account
         for (let index = 0; index < this.members.length; index++) {
             const _member = this.members[index];
             if (_member.member.id == member.id) {
@@ -122,6 +129,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     getNextMember(member: Member): Member | null {
+        // todo: take filters into account
         for (let index = 0; index < this.members.length; index++) {
             const _member = this.members[index];
             if (_member.member.id == member.id) {
@@ -161,12 +169,25 @@ export default class GroupList extends Mixins(NavigationMixin) {
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
+    getSelectedMembers(): Member[] {
+        return this.members
+            .filter((member: SelectableMember) => {
+                return member.selected;
+            })
+            .map((member: SelectableMember) => {
+                return member.member;
+            });
+    }
+
     openMail(event) {
-        // todo
+        var displayedComponent = new ComponentWithProperties(MailView, {
+            members: this.getSelectedMembers()
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     openMailDropdown(event) {
-        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+        var displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: event.clientX,
             y: event.clientY + 10
         });
@@ -181,9 +202,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
 @use '~scss/base/text-styles.scss';
 @use '~scss/components/inputs.scss';
 @use '~scss/components/buttons.scss';
+@use '~scss/layout/view.scss';
 
 .group-list {
-    padding: 40px var(--st-horizontal-padding, 40px);
     background: $color-white;
 }
 
@@ -280,26 +301,6 @@ export default class GroupList extends Mixins(NavigationMixin) {
                 text-align: right;
             }
         }
-    }
-}
-
-.toolbar {
-    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-    padding: 10px var(--st-horizontal-padding, 40px);
-    background: $color-white;
-    position: sticky;
-    bottom: 0;
-    border-top: $border-width solid $color-white-shade;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    > div:first-child {
-        @extend .style-description;
-    }
-
-    > div .button {
-        margin-left: 10px;
     }
 }
 </style>
