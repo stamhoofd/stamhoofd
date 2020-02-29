@@ -269,7 +269,8 @@ export default class GroupList extends Mixins(NavigationMixin) {
 }
 
 .toolbar {
-    padding: 10px 40px;
+    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    padding: 10px var(--st-horizontal-padding, 40px);
     background: $color-white;
     position: sticky;
     bottom: 0;
