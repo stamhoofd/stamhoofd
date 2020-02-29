@@ -26,7 +26,11 @@ export class MemberExcelExport {
                 member.firstName,
                 member.lastName,
                 member.gender,
-                member.birthDay,
+                member.birthDay.getDate() +
+                    "/" +
+                    (member.birthDay.getMonth() + 1) +
+                    "/" +
+                    member.birthDay.getFullYear(),
                 member.phone ? member.phone : "",
                 firstParent ? firstParent.name : "/",
                 firstParent && firstParent.phone ? firstParent.phone : "/",

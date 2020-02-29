@@ -11,6 +11,11 @@
 
                 <dt>Groep</dt>
                 <dd>Kapoenen</dd>
+
+                <template v-if="member.phone">
+                    <dt>GSM-nummer</dt>
+                    <dd>{{ member.phone }}</dd>
+                </template>
             </dl>
 
             <hr />
@@ -22,10 +27,10 @@
                     <dd>{{ parent.name }}</dd>
 
                     <dt>GSM-nummer</dt>
-                    <dd>+32 456 76 32 22</dd>
+                    <dd>{{ parent.phone }}</dd>
 
                     <dt>E-mailadres</dt>
-                    <dd>linda.de.grootte@gmail.com</dd>
+                    <dd>{{ parent.mail }}</dd>
 
                     <dt>Adres</dt>
                     <dd>
