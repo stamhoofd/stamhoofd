@@ -11,6 +11,8 @@
         </STNavigationBar>
         <STNavigationTitle>
             <span class="icon-spacer">{{ member.name }}</span>
+            <MaleIcon class="icon-spacer" v-if="member.gender == Gender.Male" />
+            <FemaleIcon class="icon-spacer" v-if="member.gender == Gender.Female" />
             <button class="button more" @click="showContextMenu"></button>
         </STNavigationTitle>
 
@@ -36,12 +38,17 @@ import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberContextMenu from "./MemberContextMenu.vue";
+import MaleIcon from "shared/components/icons/MaleIcon.vue";
+import FemaleIcon from "shared/components/icons/FemaleIcon.vue";
+import { Gender } from "shared/models/Gender";
 
 @Component({
     components: {
         STNavigationBar,
         STNavigationTitle,
-        SegmentedControl
+        SegmentedControl,
+        MaleIcon,
+        FemaleIcon
     }
 })
 export default class MemberView extends Mixins(NavigationMixin) {
@@ -57,6 +64,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     @Prop()
     getPreviousMember!: (Member) => Member | null;
+
+    created() {
+        (this as any).Gender = Gender;
+    }
 
     get hasNextMember(): boolean {
         return !!this.getNextMember(this.member);
