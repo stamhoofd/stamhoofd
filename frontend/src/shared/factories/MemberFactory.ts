@@ -59,10 +59,22 @@ export class MemberFactory extends Factory<Member> {
 
         member.parents.push(parentFactory.create());
 
-        if (Math.random() >= 0.1) {
+        // 90% chance to have 2 parents if not guardian
+        if (Math.random() >= 0.1 && member.parents[0].type != ParentType.Other) {
+            // 90% chance to have parents of different gender
+            parentFactory = new ParentFactory({
+                type:
+                    Math.random() >= 0.1
+                        ? member.parents[0].type == ParentType.Mother
+                            ? ParentType.Father
+                            : ParentType.Mother
+                        : null
+            });
+
             member.parents.push(parentFactory.create());
 
             if (Math.random() >= 0.1) {
+                // 10% chance to have divorced parents
                 member.parents[1].address = member.parents[0].address;
             }
         }

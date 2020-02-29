@@ -37,6 +37,8 @@ import {
     History
 } from "tiptap-extensions";
 
+import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
+
 @Component({
     components: { EditorContent, EditorMenuBubble, EditorFloatingMenu }
 })
@@ -59,9 +61,10 @@ export default class MailEditor extends Vue {
                 new Italic(),
                 new Strike(),
                 new Underline(),
-                new History()
+                new History(),
+                new ReplacePlaceholderMark()
             ],
-            content: "<p>Typ hier je bericht</p>"
+            content: '<p>Dag <span data-replace-type="firstName"></span>,</p>'
         });
     }
 
@@ -136,6 +139,14 @@ export default class MailEditor extends Vue {
         }
         h2 {
             @extend .style-title-2;
+        }
+        .replace-placeholder {
+            background: $color-gray-lighter;
+            padding: 3px 5px;
+            font-weight: 600;
+            color: $color-gray;
+            border-radius: $border-radius;
+            display: inline-block;
         }
     }
 }
