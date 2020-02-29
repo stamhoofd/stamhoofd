@@ -4,6 +4,7 @@ import { AddressFactory } from "./AddressFactory";
 import { Gender } from "../models/Gender";
 import { Factory } from "./Factory";
 import { ParentType } from "../models/ParentType";
+import { EmergencyContactFactory } from "./EmergencyContactFactory";
 
 export class MemberFactoryOptions {
     minAge: number = 6;
@@ -76,6 +77,11 @@ export class MemberFactory extends Factory<Member> {
             }
         }
 
+        var emergencyContactFactory = new EmergencyContactFactory({});
+        member.emergencyContacts.push(emergencyContactFactory.create());
+        if (Math.random() >= 0.9) {
+            member.emergencyContacts.push(emergencyContactFactory.create());
+        }
         return member;
     }
 }

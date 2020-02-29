@@ -42,20 +42,18 @@
                 <hr />
             </div>
 
-            <h2>Oma</h2>
-            <dl class="details-grid">
-                <dt>Naam</dt>
-                <dd>Linda De Grootte</dd>
+            <div v-for="(contact, index) in member.emergencyContacts" :key="'contact-' + index">
+                <h2>{{ contact.title }}</h2>
+                <dl class="details-grid">
+                    <dt>Naam</dt>
+                    <dd>{{ contact.name }}</dd>
 
-                <dt>GSM-nummer</dt>
-                <dd>+32 456 76 32 22</dd>
+                    <dt>GSM-nummer</dt>
+                    <dd>{{ contact.phone }}</dd>
+                </dl>
 
-                <dt>E-mailadres</dt>
-                <dd>linda.de.grootte@gmail.com</dd>
-
-                <dt>Adres</dt>
-                <dd>Tulplaan 435<br />9000 Gent</dd>
-            </dl>
+                <hr v-if="index < member.emergencyContacts.length - 1" />
+            </div>
         </div>
 
         <div>
@@ -138,7 +136,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             width: 100%;
             background: $color-gray-lighter;
             border-radius: $border-width/2;
-            margin: 20px 0;
+            margin: 30px 0;
         }
     }
 }

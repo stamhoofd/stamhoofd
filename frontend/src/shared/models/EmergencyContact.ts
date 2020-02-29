@@ -4,7 +4,7 @@ import { Address } from "./Address";
 export class EmergencyContact {
     name: string = "";
     phone: string | null = null;
-    type: string = "family"; // Todo
+    title: string = "Oma"; // Todo
 
     constructor() {}
 }
