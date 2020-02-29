@@ -17,6 +17,7 @@ export class MemberFactory {
         member.id = Math.floor(Math.random() * 99999999999);
         member.firstName = faker.name.firstName();
         member.lastName = faker.name.lastName();
+        member.paid = Math.random() >= 0.1;
 
         // For now only generate -18
         member.address = null;

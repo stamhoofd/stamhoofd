@@ -18,8 +18,14 @@ export class Member {
     emergencyContacts: EmergencyContact[] = [];
     records: Record[] = [];
 
+    paid: boolean = false;
+
     get name() {
         return this.firstName + " " + this.lastName;
+    }
+
+    get info(): string {
+        return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
     get age() {
@@ -42,11 +48,11 @@ export class Member {
     constructor() {}
 
     matchQuery(query: string): boolean {
-        var query = query.toLowerCase();
+        var lowerQuery = query.toLowerCase();
         if (
-            this.firstName.toLowerCase().includes(query) ||
-            this.lastName.toLowerCase().includes(query) ||
-            this.name.toLowerCase().includes(query)
+            this.firstName.toLowerCase().includes(lowerQuery) ||
+            this.lastName.toLowerCase().includes(lowerQuery) ||
+            this.name.toLowerCase().includes(lowerQuery)
         ) {
             return true;
         }
