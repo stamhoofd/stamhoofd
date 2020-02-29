@@ -130,7 +130,8 @@ export default class MemberView extends Mixins(NavigationMixin) {
     showContextMenu(event) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
-            y: event.clientY
+            y: event.clientY,
+            member: this.member
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
