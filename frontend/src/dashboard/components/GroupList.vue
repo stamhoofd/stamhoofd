@@ -36,7 +36,14 @@
                         <td @click.stop="">
                             <Checkbox v-model="member.selected" @input="onChanged(member)" />
                         </td>
-                        <td>{{ member.member.name }}</td>
+                        <td>
+                            <div
+                                class="new-member-bubble"
+                                v-if="member.member.isNew"
+                                v-tooltip="'Ingeschreven op ' + member.member.createdOn"
+                            ></div>
+                            {{ member.member.name }}
+                        </td>
                         <td class="minor">{{ member.member.age }} jaar</td>
                         <td>{{ member.member.info }}</td>
                         <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
@@ -80,6 +87,7 @@ import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
 import { NoFilter, NotPaidFilter } from "shared/classes/member-filters";
+import Tooltip from "shared/directives/Tooltip";
 
 class SelectableMember {
     member: Member;
@@ -96,7 +104,8 @@ class SelectableMember {
         STNavigationBar,
         STNavigationTitle,
         STToolbar
-    }
+    },
+    directives: { Tooltip }
 })
 export default class GroupList extends Mixins(NavigationMixin) {
     members: SelectableMember[] = [];
@@ -238,6 +247,17 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
 .group-list {
     background: $color-white;
+
+    .new-member-bubble {
+        display: inline-block;
+        vertical-align: middle;
+        width: 5px;
+        height: 5px;
+        border-radius: 2.5px;
+        background: $color-primary;
+        margin-left: -10px;
+        margin-right: 5px;
+    }
 }
 
 .data-table {
