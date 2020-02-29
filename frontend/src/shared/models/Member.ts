@@ -17,6 +17,7 @@ export class Member {
     parents: Parent[] = [];
     emergencyContacts: EmergencyContact[] = [];
     records: Record[] = [];
+    doctor: EmergencyContact | null = null;
 
     paid: boolean = false;
     createdOn: Date = new Date("1970-01-01");

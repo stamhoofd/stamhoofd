@@ -2,7 +2,9 @@ import { Parent } from "../models/Parent";
 import { ParentType } from "../models/ParentType";
 import { AddressFactory } from "./AddressFactory";
 import { Factory } from "./Factory";
-interface Options {}
+interface Options {
+    type: ParentType | null;
+}
 import { Gender } from "../models/Gender";
 
 export class ParentFactory extends Factory<Parent> {
@@ -15,7 +17,7 @@ export class ParentFactory extends Factory<Parent> {
 
     create(): Parent {
         var parent = new Parent();
-        parent.type = Math.random() >= 0.5 ? ParentType.Mother : ParentType.Father;
+        parent.type = this.options.type ?? Math.random() >= 0.5 ? ParentType.Mother : ParentType.Father;
 
         parent.firstName = this.randomFirstName(parent.type == ParentType.Mother ? Gender.Female : Gender.Male);
         parent.lastName = this.randomLastName();

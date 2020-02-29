@@ -49,7 +49,12 @@
                         </td>
                         <td class="minor">{{ member.member.age }} jaar</td>
                         <td>{{ member.member.info }}</td>
-                        <td><button class="button more" @click.stop="showMemberContextMenu"></button></td>
+                        <td>
+                            <button
+                                class="button more"
+                                @click.stop="showMemberContextMenu($event, member.member)"
+                            ></button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -205,10 +210,11 @@ export default class GroupList extends Mixins(NavigationMixin) {
         });
     }
 
-    showMemberContextMenu(event) {
+    showMemberContextMenu(event, member: Member) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
-            y: event.clientY + 10
+            y: event.clientY + 10,
+            member: member
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
