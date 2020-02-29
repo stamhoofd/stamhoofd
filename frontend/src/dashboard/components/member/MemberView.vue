@@ -79,6 +79,9 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     goBack() {
         var member = this.getPreviousMember(this.member);
+        if (!member) {
+            return;
+        }
         var component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
@@ -89,12 +92,39 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     goNext() {
         var member = this.getNextMember(this.member);
+        if (!member) {
+            return;
+        }
         var component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember
         });
         this.navigationController.push(component, true, true, false);
+    }
+
+    activated() {
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        var key = event.key || event.keyCode;
+
+        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+            this.goBack();
+            event.preventDefault();
+        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+            this.goNext();
+            event.preventDefault();
+        }
     }
 
     showContextMenu(event) {
