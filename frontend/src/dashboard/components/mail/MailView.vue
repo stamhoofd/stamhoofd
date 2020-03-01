@@ -19,7 +19,13 @@
         </main>
 
         <STToolbar>
-            <template v-slot:left>{{ members.length ? members.length : "Geen" }} ontvangers</template>
+            <template v-slot:left>{{
+                mailaddresses.length
+                    ? mailaddresses.length > 1
+                        ? mailaddresses.length + " ontvangers"
+                        : "Eén ontvanger"
+                    : "Geen ontvangers"
+            }}</template>
             <template v-slot:right>
                 <button class="button primary">
                     Versturen
@@ -61,6 +67,17 @@ import MailEditor from "./MailEditor.vue";
 export default class MailView extends Mixins(NavigationMixin) {
     @Prop()
     members!: Member[];
+
+    get mailaddresses(): string[] {
+        return this.members.flatMap(member => {
+            return member.parents.flatMap(parent => {
+                if (parent.mail) {
+                    return [parent.mail];
+                }
+                return [];
+            });
+        });
+    }
 }
 </script>
 

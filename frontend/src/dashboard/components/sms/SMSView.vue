@@ -12,20 +12,26 @@
 
         <main>
             <label class="style-label" for="sms-who">Naar wie?</label>
-            <select class="input" id="sms-who">
-                <option>Enkel naar ouders</option>
-                <option>Enkel naar leden</option>
-                <option>Ouders en leden</option>
+            <select class="input" id="sms-who" v-model="smsFilter">
+                <option value="parents">Enkel naar ouders</option>
+                <option value="members">Enkel naar leden</option>
+                <option value="all">Ouders en leden</option>
             </select>
 
             <label class="style-label" for="sms-text">Bericht</label>
-            <textarea class="input" id="sms-text" placeholder="Typ hier je SMS-bericht"></textarea>
+            <textarea class="input" id="sms-text" placeholder="Typ hier je SMS-bericht" v-model="message"></textarea>
         </main>
 
         <STToolbar>
-            <template v-slot:left>{{ members.length ? members.length : "Geen" }} ontvangers</template>
+            <template v-slot:left>{{
+                phones.length
+                    ? phones.length > 1
+                        ? phones.length + " ontvangers"
+                        : "Eén ontvanger"
+                    : "Geen ontvangers"
+            }}</template>
             <template v-slot:right>
-                <button class="button primary">Versturen</button>
+                <button class="button primary" @click="send">Versturen</button>
             </template>
         </STToolbar>
     </div>
@@ -60,6 +66,87 @@ import STToolbar from "shared/components/navigation/STToolbar.vue";
 export default class SMSView extends Mixins(NavigationMixin) {
     @Prop()
     members!: Member[];
+
+    smsFilter = "parents";
+    message = "";
+
+    getOS() {
+        return "macOS";
+    }
+
+    get phones(): string[] {
+        return this.members.flatMap(member => {
+            var arr = [];
+            if (this.smsFilter == "parents" || this.smsFilter == "all") {
+                arr = member.parents.flatMap(parent => {
+                    if (parent.phone) {
+                        return [parent.phone];
+                    }
+                    return [];
+                });
+            }
+
+            if (member.phone && (this.smsFilter == "members" || this.smsFilter == "all")) {
+                arr.push(member.phone);
+            }
+            return arr;
+        });
+    }
+
+    send() {
+        if (this.phones.length == 0) {
+            return;
+        }
+        var url = "";
+        switch (this.getOS()) {
+            case "macOS-old":
+                url = "imessage:";
+                break;
+            case "android":
+                url = "sms:";
+                break;
+            case "whatsapp":
+                url = "https://wa.me/";
+                break;
+            case "macOS":
+            case "iOS":
+                url = "sms:/open?addresses=";
+                break;
+        }
+
+        // Add message
+        /*if ($Mac) {
+                            // werkt niet
+                        } elseif ($Android) {
+                            $url .= "?body=" . rawurlencode($data['message']);
+                        } else {
+                            $url .= "&body=" . rawurlencode($data['message']);
+                        }*/
+        if (this.getOS() == "whatsapp") {
+            // Not working yet for multpile recipients
+            url += this.phones.map(phone => phone.replace(/(\s|\+)+/g, "")).join(",");
+        } else {
+            url += this.phones.map(phone => phone.replace(/(\s)+/g, "")).join(",");
+        }
+
+        switch (this.getOS()) {
+            case "macOS-old":
+                // werkt niet
+                break;
+            case "android":
+                url += "?body=" + encodeURIComponent(this.message);
+                break;
+            case "whatsapp":
+                url += "?text=" + encodeURIComponent(this.message);
+                break;
+            case "macOS":
+            case "iOS":
+                url += "&body=" + encodeURIComponent(this.message);
+                break;
+        }
+
+        window.location.href = url;
+    }
 }
 </script>
 
