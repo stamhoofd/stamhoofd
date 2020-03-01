@@ -39,14 +39,12 @@ export class OrganizationFactory extends Factory<Organization> {
                 break;
             case "chiro":
                 groupNames = [
-                    { name: "Kapoenen", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Wouters", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Welpen", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Jonggidsen", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Gidsen", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Verkenners", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Jin", options: { minAge: 6, maxAge: 8 } },
-                    { name: "Akabe", options: { minAge: 6, maxAge: 8 } }
+                    { name: "Ribbels", options: { minAge: 6, maxAge: 8 } },
+                    { name: "Speelclub", options: { minAge: 8, maxAge: 10 } },
+                    { name: "Rakwi's", options: { minAge: 10, maxAge: 12 } },
+                    { name: "Tito's", options: { minAge: 12, maxAge: 14 } },
+                    { name: "Keti's", options: { minAge: 14, maxAge: 16 } },
+                    { name: "Aspi's", options: { minAge: 16, maxAge: 18 } }
                 ];
                 break;
             default:
