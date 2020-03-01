@@ -3,6 +3,7 @@ import { Address } from "./Address";
 import { Parent } from "./Parent";
 import { EmergencyContact } from "./EmergencyContact";
 import { Record } from "./Record";
+import { Group } from "./Group";
 
 export class Member {
     id: number = 0;
@@ -18,6 +19,8 @@ export class Member {
     emergencyContacts: EmergencyContact[] = [];
     records: Record[] = [];
     doctor: EmergencyContact | null = null;
+
+    group: Group | null = null;
 
     paid: boolean = false;
     createdOn: Date = new Date("1970-01-01");

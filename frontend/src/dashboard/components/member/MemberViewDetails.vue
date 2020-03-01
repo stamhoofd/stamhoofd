@@ -7,10 +7,10 @@
                 <dd>{{ member.birthDayFormatted }} ({{ member.age }} jaar)</dd>
 
                 <dt>Lidnummer</dt>
-                <dd>12598711546216</dd>
+                <dd>{{ member.id }}</dd>
 
                 <dt>Groep</dt>
-                <dd>Kapoenen</dd>
+                <dd>{{ member.group.name }}</dd>
 
                 <template v-if="member.phone">
                     <dt>GSM-nummer</dt>
@@ -102,6 +102,7 @@
             <hr />
 
             <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
+            <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
         </div>
     </div>
 </template>
@@ -144,6 +145,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         > h2 {
             @extend .style-title-2;
             margin: 20px 0;
+        }
+
+        > p {
+            @extend .style-definition-description;
         }
 
         > hr {
