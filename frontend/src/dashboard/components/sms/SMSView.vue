@@ -67,7 +67,9 @@ export default class SMSView extends Mixins(NavigationMixin) {
     @Prop()
     members!: Member[];
 
-    smsFilter = "parents";
+    @Prop({ default: "parents" })
+    smsFilter!: string;
+
     message = "";
 
     getOS() {
@@ -114,14 +116,6 @@ export default class SMSView extends Mixins(NavigationMixin) {
                 break;
         }
 
-        // Add message
-        /*if ($Mac) {
-                            // werkt niet
-                        } elseif ($Android) {
-                            $url .= "?body=" . rawurlencode($data['message']);
-                        } else {
-                            $url .= "&body=" . rawurlencode($data['message']);
-                        }*/
         if (this.getOS() == "whatsapp") {
             // Not working yet for multpile recipients
             url += this.phones.map(phone => phone.replace(/(\s|\+)+/g, "")).join(",");
