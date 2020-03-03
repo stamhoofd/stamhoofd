@@ -5,13 +5,13 @@
         <ContextMenuItem v-for="(parent, index) in member.parents" :key="index" @click="call(parent.phone)"
             >{{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen</ContextMenuItem
         >
-        <ContextMenuItem>Ouders SMS'en</ContextMenuItem>
-        <ContextMenuItem>Ouders mailen</ContextMenuItem>
+        <ContextMenuItem @click="openSMS('parents')">Ouders SMS'en</ContextMenuItem>
+        <ContextMenuItem @click="openMail">Ouders mailen</ContextMenuItem>
 
         <template v-if="member.phone">
             <ContextMenuLine></ContextMenuLine>
             <ContextMenuItem @click="call(member.phone)">{{ member.firstName }} bellen</ContextMenuItem>
-            <ContextMenuItem @click="sms(member.phone)">{{ member.firstName }} SMS'en</ContextMenuItem>
+            <ContextMenuItem @click="openSMS('members')">{{ member.firstName }} SMS'en</ContextMenuItem>
         </template>
 
         <ContextMenuLine></ContextMenuLine>
@@ -28,6 +28,9 @@ import ContextMenuLine from "shared/components/overlays/ContextMenuLine.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import { Member } from "shared/models/Member";
 import { ParentTypeHelper } from "shared/models/ParentType";
+import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import MailView from "../mail/MailView.vue";
+import SMSView from "../sms/SMSView.vue";
 
 @Component({
     components: {
@@ -56,8 +59,19 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         window.location.href = "tel://" + phone.replace(" ", "");
     }
 
-    sms(phone) {
-        window.location.href = "tel://" + phone.replace(" ", "");
+    openMail() {
+        var displayedComponent = new ComponentWithProperties(MailView, {
+            members: [this.member]
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    openSMS(smsFilter: string = "parents") {
+        var displayedComponent = new ComponentWithProperties(SMSView, {
+            members: [this.member],
+            smsFilter: smsFilter
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 }
 </script>
