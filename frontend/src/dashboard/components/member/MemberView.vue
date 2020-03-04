@@ -1,5 +1,5 @@
 <template>
-    <div class="member-view">
+    <div class="st-view member-view">
         <STNavigationBar :title="member.name">
             <template v-slot:left>
                 <button class="button icon gray arrow-left" v-if="hasPreviousMember" @click="goBack">Vorige</button>
@@ -18,7 +18,9 @@
 
         <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
 
-        <component :is="tab" :member="member" />
+        <main>
+            <component :is="tab" :member="member" />
+        </main>
     </div>
 </template>
 
@@ -139,8 +141,18 @@ export default class MemberView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-// This should be @use, but this won't work with webpack for an unknown reason? #bullshit
+@use '~scss/layout/view.scss';
+
 .member-view {
-    padding: 20px var(--st-horizontal-padding, 40px);
+    > main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        > * {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    }
 }
 </style>

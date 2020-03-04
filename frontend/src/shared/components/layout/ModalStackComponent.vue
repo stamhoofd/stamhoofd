@@ -38,7 +38,7 @@ export default class ModalStackComponent extends Vue {
     stackComponent!: StackComponent;
 
     present(component: ComponentWithProperties) {
-        if (component.modalDisplayStyle == "popup") {
+        if (component.modalDisplayStyle == "popup" && (this.$el as HTMLElement).offsetWidth > 800) {
             this.stackComponent.show(new ComponentWithProperties(Popup, { root: component }));
             return;
         }
