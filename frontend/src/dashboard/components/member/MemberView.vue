@@ -148,11 +148,6 @@ export default class MemberView extends Mixins(NavigationMixin) {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        > * {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
     }
 }
 </style>

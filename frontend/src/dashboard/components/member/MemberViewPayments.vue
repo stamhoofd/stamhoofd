@@ -51,11 +51,9 @@ export default class MemberViewPayments extends Vue {
 
 .view-payments {
     padding: 10px 0;
-
-    main {
-        display: flex;
-        flex-direction: column;
-    }
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 
     > h2 {
         @extend .style-title-2;
