@@ -16,4 +16,8 @@ html {
     // min-height: 100vh;
 
     --st-horizontal-padding: 40px;
+
+    @media (max-width: 800px) {
+        --st-horizontal-padding: 20px;
+    }
 }
