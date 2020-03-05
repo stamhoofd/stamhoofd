@@ -31,25 +31,31 @@
                         <th @click="toggleSort('name')">
                             Naam
                             <span
-                                v-if="sortBy == 'name'"
                                 class="sort-arrow"
-                                :class="{ up: sortDirection == 'ASC' }"
+                                :class="{
+                                    up: sortBy == 'name' && sortDirection == 'ASC',
+                                    down: sortBy == 'name' && sortDirection == 'DESC'
+                                }"
                             ></span>
                         </th>
                         <th @click="toggleSort('info')">
-                            Info
+                            Leeftijd
                             <span
-                                v-if="sortBy == 'info'"
                                 class="sort-arrow"
-                                :class="{ up: sortDirection == 'ASC' }"
+                                :class="{
+                                    up: sortBy == 'info' && sortDirection == 'ASC',
+                                    down: sortBy == 'info' && sortDirection == 'DESC'
+                                }"
                             ></span>
                         </th>
                         <th @click="toggleSort('status')">
                             Status
                             <span
-                                v-if="sortBy == 'status'"
                                 class="sort-arrow"
-                                :class="{ up: sortDirection == 'ASC' }"
+                                :class="{
+                                    up: sortBy == 'status' && sortDirection == 'ASC',
+                                    down: sortBy == 'status' && sortDirection == 'DESC'
+                                }"
                             ></span>
                         </th>
                         <th>Acties</th>
@@ -394,6 +400,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            cursor: pointer;
 
             &:first-child {
                 padding-left: 0;
@@ -404,10 +411,13 @@ export default class GroupList extends Mixins(NavigationMixin) {
                 width: 24px;
                 height: 24px;
                 display: inline-block;
-                background: url(~assets/images/icons/gray/arrow-down-small.svg) no-repeat center center;
+                background: transparent;
 
                 &.up {
-                    background-image: url(~assets/images/icons/gray/arrow-up-small.svg);
+                    background: url(~assets/images/icons/gray/arrow-up-small.svg) no-repeat center center;
+                }
+                &.down {
+                    background: url(~assets/images/icons/gray/arrow-down-small.svg) no-repeat center center;
                 }
             }
         }
