@@ -1,7 +1,6 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="excel">Etiketten maken</ContextMenuItem>
-        <ContextMenuItem @click="excel"></ContextMenuItem>
 
         <ContextMenuLine />
         <ContextMenuItem @click="excel">Exporteer als Excel</ContextMenuItem>
