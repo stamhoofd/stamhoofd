@@ -172,6 +172,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         button {
             color: $color-gray-light;
+            cursor: pointer;
         }
         background-position: var(--horizontal-padding, 30px) center;
 
