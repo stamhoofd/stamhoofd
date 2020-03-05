@@ -3,7 +3,7 @@
         <STNavigationBar :sticky="false">
             <template v-slot:left>
                 <STNavigationTitle>
-                    <span class="icon-spacer">{{ group.name }}</span>
+                    <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
                     <button class="button more"></button>
                 </STNavigationTitle>
             </template>
@@ -28,14 +28,35 @@
                                 @input="selectAll($event)"
                             />
                         </th>
-                        <th>Naam</th>
-                        <th>Info</th>
-                        <th>Status</th>
+                        <th @click="toggleSort('name')">
+                            Naam
+                            <span
+                                v-if="sortBy == 'name'"
+                                class="sort-arrow"
+                                :class="{ up: sortDirection == 'ASC' }"
+                            ></span>
+                        </th>
+                        <th @click="toggleSort('info')">
+                            Info
+                            <span
+                                v-if="sortBy == 'info'"
+                                class="sort-arrow"
+                                :class="{ up: sortDirection == 'ASC' }"
+                            ></span>
+                        </th>
+                        <th @click="toggleSort('status')">
+                            Status
+                            <span
+                                v-if="sortBy == 'status'"
+                                class="sort-arrow"
+                                :class="{ up: sortDirection == 'ASC' }"
+                            ></span>
+                        </th>
                         <th>Acties</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="member in filteredMembers" :key="member.id" @click="showMember(member)">
+                    <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)">
                         <td @click.stop="">
                             <Checkbox v-model="member.selected" @input="onChanged(member)" />
                         </td>
@@ -97,6 +118,7 @@ import STToolbar from "shared/components/navigation/STToolbar.vue";
 import { NoFilter, NotPaidFilter } from "shared/classes/member-filters";
 import Tooltip from "shared/directives/Tooltip";
 import { Group } from "../../shared/models/Group";
+import { Organization } from "../../shared/models/Organization";
 
 class SelectableMember {
     member: Member;
@@ -118,13 +140,72 @@ class SelectableMember {
 })
 export default class GroupList extends Mixins(NavigationMixin) {
     @Prop()
-    group!: Group;
+    group!: Group | null;
+
+    @Prop()
+    organization!: Organization | null;
 
     members: SelectableMember[] = [];
     searchQuery: string = "";
     filters = [new NoFilter(), new NotPaidFilter()];
     selectedFilter = 0;
     selectionCountHidden = 0;
+    sortBy = "info";
+    sortDirection = "ASC";
+
+    get sortedMembers(): SelectableMember[] {
+        if (this.sortBy == "info") {
+            return this.filteredMembers.sort((a, b) => {
+                if (this.sortDirection == "ASC") {
+                    return a.member.age - b.member.age;
+                }
+                return b.member.age - a.member.age;
+            });
+        }
+
+        if (this.sortBy == "name") {
+            return this.filteredMembers.sort((a, b) => {
+                if (this.sortDirection == "ASC") {
+                    if (a.member.name.toLowerCase() > b.member.name.toLowerCase()) {
+                        return 1;
+                    }
+                    if (a.member.name.toLowerCase() < b.member.name.toLowerCase()) {
+                        return -1;
+                    }
+                    return 0;
+                }
+                if (a.member.name.toLowerCase() > b.member.name.toLowerCase()) {
+                    return -1;
+                }
+                if (a.member.name.toLowerCase() < b.member.name.toLowerCase()) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+
+        if (this.sortBy == "status") {
+            return this.filteredMembers.sort((a, b) => {
+                if (this.sortDirection == "ASC") {
+                    if (a.member.info.toLowerCase() > b.member.info.toLowerCase()) {
+                        return 1;
+                    }
+                    if (a.member.info.toLowerCase() < b.member.info.toLowerCase()) {
+                        return -1;
+                    }
+                    return 0;
+                }
+                if (a.member.info.toLowerCase() > b.member.info.toLowerCase()) {
+                    return -1;
+                }
+                if (a.member.info.toLowerCase() < b.member.info.toLowerCase()) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        return this.filteredMembers;
+    }
 
     get filteredMembers(): SelectableMember[] {
         this.selectionCountHidden = 0;
@@ -158,10 +239,30 @@ export default class GroupList extends Mixins(NavigationMixin) {
         return val;
     }
 
+    toggleSort(field: string) {
+        if (this.sortBy == field) {
+            if (this.sortDirection == "ASC") {
+                this.sortDirection = "DESC";
+            } else {
+                this.sortDirection = "ASC";
+            }
+            return;
+        }
+        this.sortBy = field;
+    }
+
     mounted() {
-        this.members = this.group.members.map(member => {
-            return new SelectableMember(member);
-        });
+        if (this.group) {
+            this.members = this.group.members.map(member => {
+                return new SelectableMember(member);
+            });
+        } else {
+            this.members = this.organization.groups.flatMap(group => {
+                return group.members.map(member => {
+                    return new SelectableMember(member);
+                });
+            });
+        }
     }
     next() {
         this.show(new ComponentWithProperties(GroupList, {}));
@@ -170,26 +271,26 @@ export default class GroupList extends Mixins(NavigationMixin) {
     onChanged(selectableMember: SelectableMember) {}
 
     getPreviousMember(member: Member): Member | null {
-        for (let index = 0; index < this.filteredMembers.length; index++) {
-            const _member = this.filteredMembers[index];
+        for (let index = 0; index < this.sortedMembers.length; index++) {
+            const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
                 if (index == 0) {
                     return null;
                 }
-                return this.filteredMembers[index - 1].member;
+                return this.sortedMembers[index - 1].member;
             }
         }
         return null;
     }
 
     getNextMember(member: Member): Member | null {
-        for (let index = 0; index < this.filteredMembers.length; index++) {
-            const _member = this.filteredMembers[index];
+        for (let index = 0; index < this.sortedMembers.length; index++) {
+            const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
-                if (index == this.filteredMembers.length - 1) {
+                if (index == this.sortedMembers.length - 1) {
                     return null;
                 }
-                return this.filteredMembers[index + 1].member;
+                return this.sortedMembers[index + 1].member;
             }
         }
         return null;
@@ -290,9 +391,24 @@ export default class GroupList extends Mixins(NavigationMixin) {
             border-bottom: $border-width solid $color-white-shade;
             @extend .style-table-head;
             padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             &:first-child {
                 padding-left: 0;
+            }
+
+            .sort-arrow {
+                vertical-align: middle;
+                width: 24px;
+                height: 24px;
+                display: inline-block;
+                background: url(~assets/images/icons/gray/arrow-down-small.svg) no-repeat center center;
+
+                &.up {
+                    background-image: url(~assets/images/icons/gray/arrow-up-small.svg);
+                }
             }
         }
     }

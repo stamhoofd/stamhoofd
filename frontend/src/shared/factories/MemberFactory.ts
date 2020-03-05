@@ -5,6 +5,8 @@ import { Gender } from "../models/Gender";
 import { Factory } from "./Factory";
 import { ParentType } from "../models/ParentType";
 import { EmergencyContactFactory } from "./EmergencyContactFactory";
+import { RecordFactory } from "./RecordFactory";
+import { RecordType, RecordTypePriority, RecordTypeHelper } from "../models/RecordType";
 
 export class MemberFactoryOptions {
     minAge: number = 6;
@@ -59,12 +61,12 @@ export class MemberFactory extends Factory<Member> {
 
         member.parents.push(parentFactory.create());
 
-        // 90% chance to have 2 parents if not guardian
-        if (Math.random() >= 0.1 && member.parents[0].type != ParentType.Other) {
+        // 80% chance to have 2 parents if not guardian
+        if (Math.random() >= 0.2 && member.parents[0].type != ParentType.Other) {
             // 90% chance to have parents of different gender
             parentFactory = new ParentFactory({
                 type:
-                    Math.random() >= 0.1
+                    Math.random() >= 0.2
                         ? member.parents[0].type == ParentType.Mother
                             ? ParentType.Father
                             : ParentType.Mother
@@ -83,6 +85,50 @@ export class MemberFactory extends Factory<Member> {
                 member.parents[1].mail = null;
             }
         }
+        var recordFactory = new RecordFactory({});
+        member.records = recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
+
+        // Remove duplicates
+        let unique = {};
+        member.records.forEach(function(i) {
+            if (!unique[i.type]) {
+                unique[i.type] = i;
+            }
+        });
+        member.records = Object.values(unique);
+
+        member.records = member.records.filter(i => {
+            return i.type != "NoData";
+        });
+
+        member.records.sort((a, b) => {
+            var pA = RecordTypeHelper.getPriority(a.type);
+            var pB = RecordTypeHelper.getPriority(b.type);
+            if (pA == pB) {
+                if (a.getText() < b.getText()) {
+                    return -1;
+                }
+                if (a.getText() > b.getText()) {
+                    return 1;
+                }
+                return 0;
+            }
+            if (pA == RecordTypePriority.High && pB != RecordTypePriority.High) {
+                return -1;
+            }
+            if (pB == RecordTypePriority.High && pA != RecordTypePriority.High) {
+                return 1;
+            }
+            if (pA == RecordTypePriority.Medium && pB != RecordTypePriority.Medium) {
+                return -1;
+            }
+            if (pB == RecordTypePriority.Medium && pA != RecordTypePriority.Medium) {
+                return 1;
+            }
+            // Not possible
+        });
+
+        // Sort
 
         if (member.parents.length == 2 && Math.random() >= 0.9) {
             member.lastName = member.parents[0].lastName + "-" + member.parents[1].lastName;
