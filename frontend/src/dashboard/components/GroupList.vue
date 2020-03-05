@@ -2,7 +2,8 @@
     <div class="st-view group-list">
         <STNavigationBar :sticky="false">
             <template v-slot:left>
-                <STNavigationTitle>
+                <button v-if="canPop" class="button icon gray arrow-left" @click="pop">Terug</button>
+                <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
                     <button class="button more"></button>
                 </STNavigationTitle>
@@ -17,6 +18,11 @@
                 </select>
             </template>
         </STNavigationBar>
+
+        <STNavigationTitle v-if="canPop">
+            <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
+            <button class="button more"></button>
+        </STNavigationTitle>
 
         <main>
             <table class="data-table">

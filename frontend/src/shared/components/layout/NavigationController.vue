@@ -344,6 +344,7 @@ export default class NavigationController extends Vue {
             &-enter,
             &-enter-active {
                 position: relative;
+                z-index: 100;
 
                 & > div {
                     min-height: 100vh;
