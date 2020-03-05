@@ -85,18 +85,14 @@
             </h2>
 
             <ul class="member-records">
-                <li class="important more">Gezin met financiële moeilijkheden</li>
-                <li class="important">Geen medicatie toedienen</li>
-                <li class="important more">Geen foto’s maken</li>
-                <li class="warning">Kan niet zwemmen</li>
-                <li class="warning more">Geneesmiddelen nemen</li>
-                <li class="warning">Bedwateren</li>
-                <li class="warning">Hartkwaal</li>
-                <li class="warning more">Allergisch voor noten</li>
-                <li class="warning">Allergisch voor verf</li>
-                <li class="warning">Niet ingeënt tegen tetanus</li>
-                <li class="info more">Vegetarisch</li>
-                <li class="info">Tetanus inenting in 2009</li>
+                <li
+                    class="more"
+                    :class="RecordTypeHelper.getPriority(record.type)"
+                    v-for="(record, index) in member.records"
+                    :key="index"
+                >
+                    {{ record.getText() }}
+                </li>
             </ul>
 
             <hr />
@@ -113,6 +109,7 @@ import Tooltip from "shared/directives/Tooltip";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import { Member } from "shared/models/Member";
 import { ParentType, ParentTypeHelper } from "shared/models/ParentType";
+import { RecordType, RecordTypeHelper } from "shared/models/RecordType";
 
 @Component({
     directives: { Tooltip }
@@ -123,6 +120,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
+        (this as any).RecordTypeHelper = RecordTypeHelper;
     }
 }
 </script>
@@ -132,6 +130,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
 .member-view-details {
     padding: 10px 0;
+    padding-bottom: 30px;
     display: grid;
     grid-template-columns: 60% 40%;
     gap: 20px;
@@ -186,13 +185,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         margin: 6px 0;
         @extend .style-definition-description;
 
-        &.info {
+        &.Low {
             background-image: url(~assets/images/icons/gray/info.svg);
             background-position: 10px center;
             background-repeat: no-repeat;
         }
 
-        &.important {
+        &.High {
             background: $color-error-background;
             color: $color-error-dark;
 
@@ -201,7 +200,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             background-repeat: no-repeat;
         }
 
-        &.warning {
+        &.Medium {
             background: $color-warning-background;
             color: $color-warning-dark;
             background-image: url(~assets/images/icons/color/exclamation.svg);

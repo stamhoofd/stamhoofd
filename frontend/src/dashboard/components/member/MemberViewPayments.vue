@@ -21,7 +21,7 @@
             </dl>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="!member.paid">
             <template v-slot:left></template>
             <template v-slot:right>
                 <button class="button primary">

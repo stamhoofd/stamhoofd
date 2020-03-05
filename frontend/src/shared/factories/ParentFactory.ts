@@ -18,6 +18,10 @@ export class ParentFactory extends Factory<Parent> {
     create(): Parent {
         var parent = new Parent();
         parent.type = this.options.type ?? this.randomArray(Object.keys(ParentType));
+        if (parent.type == ParentType.Other) {
+            // Second spin
+            parent.type = this.options.type ?? this.randomArray(Object.keys(ParentType));
+        }
 
         parent.firstName = this.randomFirstName(parent.type == ParentType.Mother ? Gender.Female : Gender.Male);
         parent.lastName = this.randomLastName();

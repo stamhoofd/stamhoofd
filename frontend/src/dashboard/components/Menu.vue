@@ -9,7 +9,7 @@
         <div class="" v-if="organization">
             <button class="menu-button icon user">
                 <span>Leden</span>
-                <button>Iedereen</button>
+                <button @click="openAll()">Iedereen</button>
             </button>
 
             <button
@@ -85,6 +85,13 @@ export default class Menu extends Mixins(NavigationMixin) {
                 })
             );
         }
+    }
+
+    openAll() {
+        if (this.selectedGroup) {
+            this.selectedGroup.selected = false;
+        }
+        this.showDetail(new ComponentWithProperties(GroupList, { organization: this.organization }));
     }
 
     openGroup(group: SelectableGroup) {
