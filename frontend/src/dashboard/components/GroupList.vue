@@ -127,7 +127,7 @@ import { MemberFactory, MemberFactoryOptions } from "shared/factories/MemberFact
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
-import { NoFilter, NotPaidFilter } from "shared/classes/member-filters";
+import { NoFilter, NotPaidFilter, FoodAllergyFilter, CanNotSwimFilter } from "shared/classes/member-filters";
 import Tooltip from "shared/directives/Tooltip";
 import { Group } from "../../shared/models/Group";
 import { Organization } from "../../shared/models/Organization";
@@ -159,7 +159,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     members: SelectableMember[] = [];
     searchQuery: string = "";
-    filters = [new NoFilter(), new NotPaidFilter()];
+    filters = [new NoFilter(), new NotPaidFilter(), new FoodAllergyFilter(), new CanNotSwimFilter()];
     selectedFilter = 0;
     selectionCountHidden = 0;
     sortBy = "info";
