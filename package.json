@@ -1,0 +1,16 @@
+{
+    "name": "stamhoofd-backend",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "license": "UNLICENCED",
+    "private": true,
+    "scripts": {
+        "start": "ts-node .",
+        "watch": "nodemon"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.2",
+        "ts-node": "^8.6.2",
+        "typescript": "^3.8.3"
+    }
+}
