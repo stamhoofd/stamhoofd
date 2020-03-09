@@ -1,0 +1,30 @@
+type Member {
+    id: ID!
+
+    user: User!
+    groups: [Group!]!
+    contacts: [Contact!]!
+
+    first_name: String!
+    last_name: String!
+    phone: String
+
+    gender: Gender!
+    # TODO: Perhaps change to a Date.
+    # But it remains unclear how to best handle this on the frontend end backend.
+    # Also unclear how to share parsing logic across services.
+    birthdate: String!
+
+    additional_info: String!
+    address: Address
+}
+
+input MemberInput {
+    first_name: String!
+    last_name: String!
+    phone: String
+    gender: Gender!
+    birthdate: String!
+    additional_info: String!
+    address: Address
+}

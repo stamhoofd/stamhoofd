@@ -1,0 +1,4 @@
+type CareInfo {
+    # Allergies can still be null to indicate it hasn't been set.
+    allergies: [String!]
+}

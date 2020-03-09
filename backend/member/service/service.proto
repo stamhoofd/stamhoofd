@@ -12,6 +12,89 @@ service Member {
   rpc Get(GetRequest) returns (GetResponse) {}
 }
 
+message Organization {
+  string id = 1;
+  string name = 2;
+
+  repeated Admin administrators = 3;
+}
+
+message Admin {
+
+}
+
+message Member {
+  string id = 1;
+  string organization_id = 7;
+
+  string first_name = 2;
+  string last_name = 3;
+  Gender gender = 4;
+  google.type.Date birthdate = 5;
+
+  // Phone number, can be empty (only asked for 16+ members)
+  string phone = 6;
+
+  // User ID that created this member. This user always has access to the resources of this member
+  string user_id = 7;
+
+  // Additional information like family situation.
+  string additional_information = 8;
+
+  // Parents or contacts of this member.
+  repeated MemberContact contacts = 9;
+}
+
+message MemberContact {
+  // Whether this contact can manage this member
+  bool has_access = 1;
+
+  // The assosiated contact (can get reused for multiple members of the same family)
+  // We'll provide a method to get all the contacts the signed in user has access to
+  Contact contact = 2;
+}
+
+message Contact {
+  string id = 1;
+
+  ContactType type = 2;
+
+  string first_name = 2;
+  string last_name = 3;
+
+  // Phone number, can be empty
+  string phone = 6;
+  string email = 7;
+
+  // User ID that has been linked to this contact via email or invite. Assign the ID only when this user is signed in.
+  string user_id = 7;
+
+  // Additional information
+  string additional_information = 8;
+
+  // Parents or contacts of this member.
+  repeated Contact contacts = 9;
+}
+
+
+enum ContactType {
+  MOTHER = 0;
+  FATHER = 1;
+  GUARDIAN = 2;
+  GRANDPARENT = 3;
+  FAMILY = 4;
+  FRIEND = 5;
+}
+
+enum Gender {
+  MALE = 0;
+  FEMALE = 1;
+  OTHER = 2;
+}
+
+
+
+
 message Member {
   string id = 1;
   MemberDetails details = 2;
@@ -33,11 +116,6 @@ message MemberDetails {
   string additional_information = 7;
 }
 
-enum Gender {
-  MALE = 0;
-  FEMALE = 1;
-  OTHER = 2;
-}
 
 enum MemberType {
   // This member manages itself, no parent does this.

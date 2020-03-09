@@ -1,0 +1,13 @@
+type Contact {
+    id: ID!
+
+    user: User
+    type: ContactType!
+    first_name: String!
+    last_name: String!
+    phone: String
+    email: String
+    additional_info: String!
+    address: Address
+    member_contacts: [MemberContact!]!
+}

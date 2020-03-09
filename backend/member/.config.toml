@@ -1,0 +1,6 @@
+protos = []
+
+[env]
+GRPC_PORT=":9002"
+HTTP_PORT=":8002"
+

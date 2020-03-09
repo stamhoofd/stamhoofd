@@ -1,0 +1,4 @@
+enum JoinType {
+    ALLOWED
+    INVITATION
+}

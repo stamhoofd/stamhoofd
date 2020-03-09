@@ -1,0 +1,10 @@
+type Query {
+    # All members you have access to.
+    members: [Member!]!
+    # All members of an organization you have access to.
+    organizationMembers(organization_id: ID!): [Member!]!
+    # Request a specific organization.
+    organization(id: ID!): [Organization!]!
+}
+
+scalar User

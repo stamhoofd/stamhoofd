@@ -1,0 +1,16 @@
+type Address {
+    id: ID!
+
+    street: String!
+    # Street number.
+    number: String!
+    # Box, apartment, or flat number.
+    premise: String!
+
+    city: String!
+    postcode: String!
+    country: String!
+
+    # Home phone number.
+    phone: String
+}

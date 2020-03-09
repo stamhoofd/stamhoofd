@@ -1,0 +1,6 @@
+type MemberContact {
+    id: ID!
+    member: Member!
+    contact: Contact!
+    can_manage_member: Boolean!
+}

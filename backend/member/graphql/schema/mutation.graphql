@@ -1,0 +1,14 @@
+type Mutation {
+    # Create a new member.
+    createMember(member: MemberInput!): Member!
+    # # Edit a member.
+    # editMember(member: Member!): Member!
+
+    # # Create an organization.
+    # createOrganization(info: OrganizationInfo!): Organization!
+    # # Edit an organization.
+    # editOrganization(organization: Organization!): Organization!
+
+    # # Edit a member's organization membership.
+    # editMembership(membership: Membership!): Membership!
+}

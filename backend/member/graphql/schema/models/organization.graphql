@@ -1,0 +1,11 @@
+type Organization {
+    id: ID!
+
+    memberships: [Membership!]!
+    info: OrganizationInfo!
+}
+
+type OrganizationInfo {
+    name: String!
+    address: Address!
+}

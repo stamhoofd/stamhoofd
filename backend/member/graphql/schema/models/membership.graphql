@@ -1,0 +1,6 @@
+type Membership {
+    member: Member!
+    organization: Organization!
+
+    care_info: CareInfo!
+}

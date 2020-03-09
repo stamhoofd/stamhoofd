@@ -1,0 +1,9 @@
+enum ContactType {
+    MOTHER
+    FATHER
+    GUARDIAN
+    GRANDPARENT
+    FAMILY
+    FRIEND
+    PARTNER
+}

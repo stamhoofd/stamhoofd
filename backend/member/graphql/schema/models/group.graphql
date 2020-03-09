@@ -1,0 +1,16 @@
+type Group {
+    id: ID!
+
+    organization: Organization!
+    name: String!
+    description: String!
+
+    join_type: JoinType!
+
+    age_range: AgeRange
+    max_members: Int
+
+    permissions: [Permission!]!
+
+    price: Int
+}

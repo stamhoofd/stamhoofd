@@ -1,0 +1,4 @@
+type AgeRange {
+    start: Int!
+    end: Int!
+}
