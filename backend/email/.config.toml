@@ -1,1 +1,4 @@
 protos = ["email.proto"]
+
+[env]
+HTTP_PORT=":8001"
