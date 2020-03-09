@@ -1,10 +1,12 @@
-package watch
+package service
 
 import (
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/sirupsen/logrus"
 )
 
 var ignoredFiles []string = []string{
@@ -16,10 +18,21 @@ var ignoredFiles []string = []string{
 
 type OnChange func(event fsnotify.Event)
 type OnError func(err error)
+type watcher struct {
+	// A debouncer is used to group together rapid saves caused by editors.
+	// Editors save a new file and do a rename to make it atomic.
+	debouncer *debouncer
+}
+
+func Watcher(logger *logrus.Entry) *watcher {
+	return &watcher{
+		debouncer: Debouncer(logger, time.Millisecond*5),
+	}
+}
 
 // Watch watches the service's files and automatically restarts the service
 // when a file changes.
-func watchPaths(onChange OnChange, onError OnError, paths ...string) error {
+func (w *watcher) watchPaths(onChange OnChange, onError OnError, paths ...string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -59,7 +72,9 @@ func watchPaths(onChange OnChange, onError OnError, paths ...string) error {
 					continue
 				}
 
-				onChange(event)
+				w.debouncer.Debounce(event.Name, func() {
+					onChange(event)
+				})
 
 			case err, ok := <-watcher.Errors:
 				if !ok {

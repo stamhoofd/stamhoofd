@@ -1,4 +1,4 @@
-package watch
+package service
 
 import (
 	"path/filepath"

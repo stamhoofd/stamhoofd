@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stamhoofd/stamhoofd/backend/cmd/stamhoofd/watch/service"
 	"github.com/urfave/cli/v2"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -24,23 +25,27 @@ func Command(c *cli.Context) error {
 
 	log := logrus.New()
 	log.Formatter = new(prefixed.TextFormatter)
-	log.Level = logrus.DebugLevel
-	services := GetServices(log, backendDir, serviceNames)
+	if c.Bool("verbose") {
+		log.Level = logrus.DebugLevel
+	} else {
+		log.Level = logrus.InfoLevel
+	}
+	services := service.GetServices(log, backendDir, serviceNames)
 
 	// Gracefully stop all of the services when it receives a SIGTERM signal.
 	terminate := make(chan os.Signal, 1)
 	signal.Notify(terminate, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-terminate
-		log.Println("Stopping all services...")
+		log.Println("Ending all services...")
 		for _, service := range services {
-			service.Stop()
+			service.End()
 		}
 		os.Exit(0)
 	}()
 
 	for _, service := range services {
-		go service.Watch()
+		go service.Start()
 	}
 
 	done := make(chan bool)
