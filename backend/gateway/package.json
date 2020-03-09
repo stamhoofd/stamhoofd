@@ -1,0 +1,20 @@
+{
+    "name": "stamhoofd-gateway",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "author": "stamhoofd",
+    "license": "copyrighted",
+    "dependencies": {
+        "@apollo/gateway": "latest",
+        "apollo-server": "latest",
+        "graphql": "latest"
+    },
+    "devDependencies": {
+        "nodemon": "latest",
+        "prettier": "latest"
+    }
+}
