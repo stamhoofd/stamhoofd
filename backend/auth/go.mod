@@ -2,24 +2,21 @@ module github.com/stamhoofd/stamhoofd/backend/auth
 
 go 1.13
 
+replace github.com/ory/fosite => ../../../fosite
+
 require (
-	github.com/99designs/gqlgen v0.10.3-0.20191128123652-f869f5a85385
-	github.com/agnivade/levenshtein v1.0.3 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
-	github.com/go-chi/chi v4.0.2+incompatible
-	github.com/golang/protobuf v1.3.2
+	github.com/99designs/gqlgen v0.11.2
+	github.com/go-chi/chi v4.0.3+incompatible
+	github.com/golang/protobuf v1.3.3
+	github.com/google/martian v2.1.0+incompatible
 	github.com/google/uuid v1.1.1
-	github.com/gorilla/websocket v1.4.1 // indirect
-	github.com/hashicorp/golang-lru v0.5.3 // indirect
-	github.com/jinzhu/gorm v1.9.11
-	github.com/mitchellh/mapstructure v1.1.2 // indirect
-	github.com/pkg/errors v0.8.1
-	github.com/sirupsen/logrus v1.2.0
-	github.com/urfave/cli v1.22.2 // indirect
-	github.com/vektah/dataloaden v0.3.0 // indirect
-	github.com/vektah/gqlparser v1.2.0
-	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
-	golang.org/x/tools v0.0.0-20191230190742-6c68fec0bcec // indirect
-	google.golang.org/grpc v1.26.0
-	gopkg.in/yaml.v2 v2.2.7 // indirect
+	github.com/jinzhu/gorm v1.9.12
+	github.com/ory/fosite v0.30.2
+	github.com/ory/fosite-example v0.0.0-20191125094722-21823512273f
+	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.4.2
+	github.com/vektah/gqlparser/v2 v2.0.1
+	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d
+	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
+	google.golang.org/grpc v1.27.1
 )

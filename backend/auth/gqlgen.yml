@@ -1,18 +1,16 @@
-# .gqlgen.yml example
-#
-# Refer to https://gqlgen.com/config/
-# for detailed .gqlgen.yml documentation.
-
 schema:
-- graphql/schema.graphql
+    - graphql/schema.graphql
 exec:
-  filename: graphql/exec.gql.go
-  package: graphql
+    filename: graphql/exec.gql.go
+    package: graphql
+federation:
+    filename: graphql/federation.gql.go
+    package: graphql
 model:
-  filename: graphql/models.gql.go
-  package: graphql
+    filename: graphql/models.gql.go
+    package: graphql
 resolver:
-  filename: graphql/resolver.go
-  type: Resolver
-  package: graphql
+    filename: graphql/resolver.go
+    type: Resolver
+    package: graphql
 autobind: []

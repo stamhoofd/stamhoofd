@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(db *gorm.DB, email, password string) (*models.User, error) {
+func Login(db *gorm.DB, email, password string) (*models.LoggedInResponse, error) {
 	user := &models.User{}
 	err := db.Where(&models.User{
 		Email: email,
@@ -23,11 +23,25 @@ func Login(db *gorm.DB, email, password string) (*models.User, error) {
 		return nil, fmt.Errorf("login failed: %w", err)
 	}
 
-	err = db.Model(user).Update("registration_token", nil).Error
+	return saveLogin(db, user)
+}
+
+func saveLogin(db *gorm.DB, user *models.User) (*models.LoggedInResponse, error) {
+	token, err := GenerateToken()
 	if err != nil {
-		return nil, fmt.Errorf("could not update registration token for user %s: %w", email, err)
+		return nil, err
 	}
 
-	logrus.Infof("confirmed user registration: %v", user)
-	return user, nil
+	user.RegistrationToken = ""
+	user.AuthenticationToken = token
+	err = db.Model(user).Update(user).Error
+	if err != nil {
+		return nil, fmt.Errorf("could not update registration token for user %v: %w", user, err)
+	}
+
+	logrus.Infof("logged user in: %v", user)
+	return &models.LoggedInResponse{
+		User:  *user,
+		Token: token,
+	}, nil
 }

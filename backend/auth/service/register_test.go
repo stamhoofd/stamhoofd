@@ -16,37 +16,37 @@ func TestRegister(t *testing.T) {
 	password := "password"
 	registeredUser, err := Register(db, email, password)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	var users []models.User
 	db.Find(&users)
 
 	if len(users) != 1 {
-		t.Errorf("No user was created.")
+		t.Fatalf("No user was created.")
 	}
 
 	user := users[0]
 
 	if user.Email != email {
-		t.Errorf("Incorrect email address was saved.")
+		t.Fatalf("Incorrect email address was saved.")
 	}
 
 	if registeredUser.Email != email {
-		t.Errorf("Incorrect email was returned.")
+		t.Fatalf("Incorrect email was returned.")
 	}
 
 	_, err = uuid.FromBytes([]byte(user.ID.String()))
 	if err == nil {
-		t.Errorf("Invalid UUID saved in database.")
+		t.Fatalf("Invalid UUID saved in database.")
 	}
 
 	if registeredUser.ID != user.ID {
-		t.Errorf("UUID %v was returned, expected %v", registeredUser.ID, user.ID)
+		t.Fatalf("UUID %v was returned, expected %v", registeredUser.ID, user.ID)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		t.Errorf("Stored hash does not match given password.")
+		t.Fatalf("Stored hash does not match given password.")
 	}
 }

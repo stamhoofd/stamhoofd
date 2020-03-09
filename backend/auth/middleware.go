@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 	"net/http"
+
+	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 
 	"github.com/jinzhu/gorm"
 )
@@ -26,7 +27,7 @@ func Authentication(db *gorm.DB) func(http.Handler) http.Handler {
 			err := db.Where(&models.User{
 				Email:             email,
 				RegistrationToken: token,
-			}).First(user)
+			}).First(user).Error
 
 			if err != nil {
 				http.Error(w, "Invalid token", http.StatusForbidden)

@@ -1,5 +1,4 @@
-
-type User {
+type User @key(fields: "id") {
     id: ID!
     email: String!
 }
@@ -11,10 +10,10 @@ type LoggedInResponse {
 
 # You cannot have empty types in GraphQL.
 type ResetPasswordResponse {
-    email: String!
+    user: User!
 }
 
-type Query {
+extend type Query {
     me: User!
 }
 
@@ -31,7 +30,11 @@ type Mutation {
     # Send an email to the user with a link that has the token that needs to be
     # passed to the ResetPassword endpoint.
     resetPassword(email: String!): ResetPasswordResponse!
-    # Reset the password the the token that has been sent to the user in an
+    # Reset the password with the token that has been sent to the user in an
     # email.
-    resetPasswordConfirm(email: String!, token: String!): LoggedInResponse!
+    resetPasswordConfirm(
+        email: String!
+        token: String!
+        password: String!
+    ): LoggedInResponse!
 }
