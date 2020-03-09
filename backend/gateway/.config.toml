@@ -1,1 +1,9 @@
-dependencies = ["auth"]
+dependencies=["auth"]
+run_command=["yarn", "start"]
+restart_with_dependencies=true
+
+[env]
+AUTH_SERVICE="localhost:8000"
+EMAIL_SERVICE="localhost:8001"
+MEMBER_SERVICE="localhost:8002"
+

@@ -1,7 +1,7 @@
 protos = ["auth.proto", "email.proto"]
 
 [env]
-GRPC_PORT=":8000"
-GRAPHQL_PORT=":9000"
-STATUS_PORT=":10000"
-
+GRPC_PORT=":9000"
+HTTP_PORT=":8000"
+# Must be 32 characters long.
+SECRET="my super secret signing password"

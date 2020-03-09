@@ -1,0 +1,7 @@
+protos = []
+
+[env]
+GRPC_PORT=":8002"
+GRAPHQL_PORT=":9002"
+STATUS_PORT=":10002"
+
