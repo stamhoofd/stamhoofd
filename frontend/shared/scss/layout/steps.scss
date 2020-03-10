@@ -9,9 +9,7 @@ $header-height: 50px;
         background: $color-white;
     }
 
-	> header {
-        
-        
+    > header {
         > div {
             position: fixed;
             left: 0;
@@ -30,7 +28,7 @@ $header-height: 50px;
             }
 
             &::before {
-                content: '';
+                content: "";
                 left: 0;
                 right: 0;
                 top: $header-height;
@@ -45,8 +43,8 @@ $header-height: 50px;
                     background: linear-gradient($color-white, rgba($color-white, 0));
                 }
             }
-            
-            >.progress {
+
+            > .progress {
                 position: absolute;
                 left: 0;
                 top: 0;
@@ -65,7 +63,7 @@ $header-height: 50px;
                 }
             }
 
-            >.left {
+            > .left {
                 flex-grow: 1;
                 flex-basis: 0;
                 flex-shrink: 10;
@@ -76,7 +74,7 @@ $header-height: 50px;
                 justify-content: flex-start;
             }
 
-            >.right {
+            > .right {
                 flex-grow: 1;
                 flex-basis: 0;
                 flex-shrink: 10;
@@ -86,7 +84,7 @@ $header-height: 50px;
                 justify-content: flex-end;
             }
 
-            >.center {
+            > .center {
                 padding: 10px;
                 flex-basis: 0;
                 flex-shrink: 0;
@@ -99,115 +97,11 @@ $header-height: 50px;
         }
 
         &[data-scrolled="true"] {
-            &> div {
+            & > div {
                 &::before {
                     opacity: 1;
                 }
             }
         }
-	}
-
-	&> main {
-        overflow: hidden;
-
-        // Div is used for animations
-        &> div {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding-top: $header-height;
-            box-sizing: border-box;
-
-            &> article {
-                box-sizing: content-box;
-                flex-basis: 800px;
-                padding: 50px;
-                background: $color-white;
-                border-radius: $border-radius;
-    
-                @media (max-width: 800px + 50px*2) {
-                    border-radius: 0;
-                }
-    
-                @media (max-width: 500px) {
-                    padding: 30px 20px;
-                }
-            }
-        }
-        
-       
-
-        // During animation, the incoming frame is rendered fixed
-        .right-to-left-enter {
-            transform: translateX(50%);
-            opacity: 0;
-        }
-        .right-to-left-leave-to {
-            transform: translateX(-50%);
-            opacity: 0;
-        }
-
-        .right-to-left-enter-active {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-        }
-    
-        .right-to-left-enter-active, .right-to-left-leave-active {
-            transition: transform 0.3s, opacity 0.3s;
-        }
-    
-        .right-to-left-enter-to, .right-to-left-leave /* .fade-leave-active below version 2.1.8 */ {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        // During animation, the incoming frame is rendered fixed
-        .left-to-right-enter {
-            transform: translateX(-50%);
-            opacity: 0;
-        }
-        .left-to-right-leave-to {
-            transform: translateX(50%);
-            opacity: 0;
-        }
-
-        .left-to-right-enter-active {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-        }
-    
-        .left-to-right-enter-active, .left-to-right-leave-active {
-            transition: transform 0.3s, opacity 0.3s;
-        }
-    
-        .left-to-right-enter-to, .left-to-right-leave /* .fade-leave-active below version 2.1.8 */ {
-            transform: translateX(0);
-            opacity: 1;
-        }
-	}
-}
-
-.steps-layout {
-    .move-enter {
-        transform: translateX(-50%);
-        opacity: 0;
-    }
-    .move-leave-to {
-        transform: translateX(50%);
-        opacity: 0;
-    }
-
-    .move-enter-active, .move-leave-active {
-        transition: transform 0.2s, opacity 0.2s;
-    }
-
-    .move-enter-to, .move-leave /* .fade-leave-active below version 2.1.8 */ {
-        transform: translateX(0);
-        opacity: 1;
     }
 }

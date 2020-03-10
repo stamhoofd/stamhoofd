@@ -1,11 +1,18 @@
 <template>
-    <article>
+    <Step>
         <h1>Jouw vereniging aansluiten</h1>
 
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Naam van je vereniging</label>
-                <input class="input" type="text" placeholder="De naam van je vereniging" autocomplete="organization" id="organization-name" ref="firstInput">
+                <input
+                    class="input"
+                    type="text"
+                    placeholder="De naam van je vereniging"
+                    autocomplete="organization"
+                    id="organization-name"
+                    ref="firstInput"
+                />
 
                 <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
                 <Slider></Slider>
@@ -13,13 +20,13 @@
 
             <div>
                 <label class="style-label">Adres van je vereniging</label>
-                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
+                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" />
                 <div class="input-group">
                     <div>
-                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code">
+                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code" />
                     </div>
                     <div>
-                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city">
+                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city" />
                     </div>
                 </div>
 
@@ -27,25 +34,34 @@
                     <option>België</option>
                     <option>Nederland</option>
                 </select>
-                
             </div>
-           
         </div>
 
-        <button class="button primary" v-on:click="$emit('next')" id="next-button">Verder</button>
-        
-    </article>
+        <button class="button primary" v-on:click="next" id="next-button">
+            Verder
+        </button>
+        <button class="button secundary" @click="editGroup">Test</button>
+    </Step>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import Slider from '@shared/components/inputs/Slider.vue';
+import { Component, Prop, Vue } from "vue-property-decorator";
+import Slider from "stamhoofd-shared/components/inputs/Slider.vue";
+import { eventBus } from "stamhoofd-shared/classes/event-bus/EventBus";
+import { PresentComponentEvent } from "stamhoofd-shared/classes/PresentComponentEvent";
+import EditGroupDetail from "../EditGroupDetail.vue";
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
+import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import Popup from "stamhoofd-shared/components/layout/Popup.vue";
+import Step from "../Step.vue";
+import GroupSettings from "./GroupSettings.vue";
 
 @Component({
-  // All component options are allowed in here
-  components: {
-      Slider
-  }
+    // All component options are allowed in here
+    components: {
+        Slider,
+        Step
+    }
 })
 export default class General extends Vue {
     mounted() {
@@ -53,22 +69,38 @@ export default class General extends Vue {
         let input = this.$refs.firstInput as HTMLElement;
         input.focus();
     }
+    editGroup() {
+        eventBus.send(
+            "show",
+            new ComponentWithProperties(Popup, {
+                root: new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditGroupDetail, {
+                        text: "Custom text"
+                    })
+                })
+            })
+        );
+    }
+
+    next() {
+        this.$emit("push", new ComponentWithProperties(GroupSettings, {}));
+    }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-    @use '~@shared/scss/layout/split-inputs.scss';
-    @use '~@shared/scss/base/text-styles.scss';
-    @use '~@shared/scss/components/inputs.scss';
-    @use '~@shared/scss/components/buttons.scss';
+@use '~@shared/scss/layout/split-inputs.scss';
+@use '~@shared/scss/base/text-styles.scss';
+@use '~@shared/scss/components/inputs.scss';
+@use '~@shared/scss/components/buttons.scss';
 
-    h1 {
-        @extend .style-title-1;
-        margin-bottom: 20px;
-    }
+h1 {
+    @extend .style-title-1;
+    margin-bottom: 20px;
+}
 
-    #next-button {
-        margin-top: 30px;
-    }
+#next-button {
+    margin-top: 30px;
+}
 </style>

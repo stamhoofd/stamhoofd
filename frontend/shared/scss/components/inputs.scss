@@ -5,7 +5,7 @@
     margin: 10px 0;
     max-width: 500px;
 
-    + label.style-label  {
+    + label.style-label {
         margin-top: 30px;
     }
 }
@@ -14,141 +14,62 @@
     @extend .input-spacing;
     @extend .style-input;
     color: $color-dark;
-    border: $border-width solid $color-gray-lighter;
+    border: $border-width solid $color-gray-light;
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 44px;
-    line-height: 44px - 10px - 2*$border-width;
+    line-height: 44px - 10px - 2 * $border-width;
     margin: 10px 0;
     width: 100%;
     box-sizing: border-box;
     display: block;
     transition: border-color 0.2s;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-    &:focus, &:focus-within {
+    &:focus,
+    &:focus-within {
         border-color: $color-primary;
     }
 
-    ::placeholder { color: $color-gray; }
+    ::placeholder {
+        color: $color-gray;
+    }
 
     &.error {
         border-color: $color-error;
 
-        &:focus, &:focus-within {
+        &:focus,
+        &:focus-within {
             border-color: $color-error-focus;
         }
     }
+}
+textarea.input {
+    max-width: none;
+    padding: 12px 15px;
+    // 3 lines height
+    line-height: 44px - 18px - 2 * $border-width;
+
+    height: 44px + 4px + 10px + (44px - 18px - 2 * $border-width) * 2;
+    resize: none;
 }
 
 select.input {
     cursor: pointer;
 
     // Add a background arrow to our selection field.
-    background: url(~@shared/assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
+    background: url(~@shared/assets/images/icons/gray/arrow-down-small.svg)
+        no-repeat right 10px center;
 
     // Increase the right padding just a little.
     padding-right: 35px;
 
     // Remove dotted line in Firefox
-    &:-moz-focusring { color: transparent;
-        text-shadow: 0 0 0 #000; }
-}
-
-.radio, .checkbox {
-    margin: 10px 0;
-
-    + label.style-label  {
-        margin-top: 30px;
-    }
-
-    display: block;
-    cursor: pointer;
-
-    > input {
-        display: none;
-    }
-
-    > div {
-        @extend .style-input;
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-
-        > div {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-            flex-basis: 20px;
-            border-radius: $border-radius;
-            border: $border-width solid $color-gray-lighter;
-            background: transparent;
-            box-sizing: border-box;
-
-            margin-right: 15px;
-            transition: background-color 0.2s, border-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg > path {
-                stroke-dasharray: 30;
-                stroke-dashoffset: 30;
-                transition: stroke-dashoffset 0.4s 0.1s;
-            }
-        }
-    
-
-    }
-
-    > input[type=radio] + div {
-        > div {
-            border-radius: 11px;
-
-            &::after {
-                content: '';
-                height: 20px - $border-width*2;
-                width: 20px - $border-width*2;
-                background: white;
-                border-radius: (20px - $border-width*2)/2;
-                transition: transform 0.2s;
-                transform: scale(1, 1);
-            }
-        }
-    }
-
-    > input:checked + div {
-        > div {
-            border: $border-width solid $color-primary;
-            background: $color-primary;
-
-            svg > path {
-                stroke-dashoffset: 0;
-            }
-        }
-    }
-
-    > input[type=radio]:checked + div {
-        > div {
-            &::after {
-                transform: scale(0.4, 0.4);
-            }
-        }
-    }
-
-    
-
-}
-
-// Extra padding on first
-label.style-label {
-    +.checkbox, + .radio {
-        margin-top: 20px;
+    &:-moz-focusring {
+        color: transparent;
+        text-shadow: 0 0 0 #000;
     }
 }
-
 
 // Used to put multiple inputs next to each other
 .input-group {
@@ -156,7 +77,7 @@ label.style-label {
     flex-direction: row;
     @extend .input-spacing;
 
-    &>* {
+    & > * {
         flex-grow: 1;
         margin: 0 5px;
 

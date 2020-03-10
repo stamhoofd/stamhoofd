@@ -1,7 +1,12 @@
 # create-group
 
 ## Project setup
+
 ```
+cd ../shared
+yarn link
+cd ../create-group
+yarn link stamhoofd-shared
 yarn install
 ```
 

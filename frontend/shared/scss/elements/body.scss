@@ -1,11 +1,17 @@
 @use "~@shared/scss/base/fonts.scss";
 @use "~@shared/scss/base/variables.scss" as *;
 
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
-    font-family: 'Metropolis', Helvetica, Arial, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	color: $color-dark;
+    font-family: "Metropolis", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: $color-dark;
+    -webkit-overflow-scrolling: auto;
+
+    // Always force scroll availability on mobile browsers, this is to fix glitches when
+    // the tabbars should become visible after transitioning from a long to a short modal
+    min-height: 100vh;
 }

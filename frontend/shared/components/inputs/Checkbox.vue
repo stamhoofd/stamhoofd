@@ -1,6 +1,6 @@
 <template>
     <label class="checkbox">
-        <input type="checkbox" name="gender" value="mixed">
+        <input type="checkbox" name="test" value="mixed">
         <div>
             <div>
                 <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,3 +22,7 @@ export default class Checkbox extends Vue {
 
 }
 </script>
+
+<style lang="scss">
+    @use "~@shared/scss/components/checkbox.scss";
+</style>
