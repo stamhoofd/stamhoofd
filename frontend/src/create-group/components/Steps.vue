@@ -48,8 +48,8 @@ import Header from "./Header.vue";
 import GroupSettingsStep from "./steps/GroupSettings.vue";
 import GeneralStep from "./steps/General.vue";
 import GroupsStep from "./steps/Groups.vue";
-import NavigationController from "shared/components/layout/NavigationController.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import NavigationController from "stamhoofd-shared/components/layout/NavigationController.vue";
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 
 @Component({
     components: {
@@ -74,5 +74,5 @@ export default class Steps extends Vue {
 </script>
 
 <style lang="scss">
-@use "~scss/layout/steps.scss";
+@use "~@shared/scss/layout/steps.scss";
 </style>

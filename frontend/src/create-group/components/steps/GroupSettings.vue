@@ -7,7 +7,9 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name">Soort vereniging</label>
+                <label class="style-label" for="organization-name"
+                    >Soort vereniging</label
+                >
                 <select class="input" ref="firstInput">
                     <option>Scoutsgroep</option>
                     <option>Chirogroep</option>
@@ -15,7 +17,9 @@
             </div>
 
             <div>
-                <label class="style-label" for="organization-name">Koepelorganisatie</label>
+                <label class="style-label" for="organization-name"
+                    >Koepelorganisatie</label
+                >
                 <select class="input">
                     <option>Scouts & Gidsen Vlaanderen</option>
                     <option>FOS</option>
@@ -39,21 +43,40 @@
 
         <div class="split-inputs">
             <div>
-                <label class="style-label" for="organization-name">Start werkjaar</label>
+                <label class="style-label" for="organization-name"
+                    >Start werkjaar</label
+                >
                 <select class="input">
-                    <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                    <option
+                        v-for="(month, index) in months"
+                        :value="index"
+                        :key="index"
+                        >{{ month }}</option
+                    >
                 </select>
             </div>
 
             <div>
-                <label class="style-label" for="organization-name">Inschrijvingsperiode</label>
+                <label class="style-label" for="organization-name"
+                    >Inschrijvingsperiode</label
+                >
                 <div class="mixed-input">
                     <select>
-                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                        <option
+                            v-for="(month, index) in months"
+                            :value="index"
+                            :key="index"
+                            >{{ month }}</option
+                        >
                     </select>
                     <span>tot</span>
                     <select>
-                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                        <option
+                            v-for="(month, index) in months"
+                            :value="index"
+                            :key="index"
+                            >{{ month }}</option
+                        >
                     </select>
                 </div>
             </div>
@@ -62,7 +85,8 @@
         <hr />
         <h2>Prijzen</h2>
         <p>
-            Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende stap.
+            Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende
+            stap.
         </p>
 
         <div class="split-inputs">
@@ -77,7 +101,10 @@
             </div>
         </div>
 
-        <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
+        <Checkbox
+            >Verminder het lidgeld voor leden met financiële
+            moeilijkheden</Checkbox
+        >
 
         <label class="style-label">Verminderd lidgeld</label>
         <PriceInput></PriceInput>
@@ -164,9 +191,7 @@ export default class General extends Vue {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-// This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 @use 'scss/layout/split-inputs.scss';
 @use 'scss/base/text-styles.scss';
 @use 'scss/components/inputs.scss';

@@ -76,8 +76,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import SegmentedControl from "@shared/components/inputs/SegmentedControl.vue";
+import { ComponentWithProperties } from "stamhoofd-shared/classes/ComponentWithProperties";
 import EditGroup from "./EditGroup.vue";
 
 @Component({
@@ -108,10 +108,10 @@ export default class EditGroupDetail extends Vue {
 
 <style scoped lang="scss">
 // This should be @use, but this won't work with webpack for an unknown reason? #bullshit
-@use '~scss/layout/split-inputs.scss';
-@use '~scss/base/text-styles.scss';
-@use '~scss/components/inputs.scss';
-@use '~scss/components/buttons.scss';
+@use '~@shared/scss/layout/split-inputs.scss';
+@use '~@shared/scss/base/text-styles.scss';
+@use '~@shared/scss/components/inputs.scss';
+@use '~@shared/scss/components/buttons.scss';
 
 h1 {
     @extend .style-title-1;

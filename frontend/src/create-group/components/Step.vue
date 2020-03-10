@@ -13,7 +13,7 @@ export default class Step extends Vue {}
 </script>
 
 <style lang="scss">
-@use 'scss/base/variables' as *;
+@use 'stamhoofd-shared/scss/base/variables' as *;
 
 $header-height: 50px;
 
