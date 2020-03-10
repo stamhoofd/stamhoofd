@@ -1,0 +1,48 @@
+@use 'variables' as *;
+
+.style-title-1 {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.style-title-2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.style-description {
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: $color-gray;
+}
+
+.style-input {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.style-label {
+    font-size: 16px;
+    font-weight: 600;
+    display: block;
+    margin-top: 20px;
+}
+
+.style-placeholder {
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-gray;
+}
+
+.style-caption {
+    font-size: 14px;
+    font-weight: 600;
+    color: $color-gray;
+    text-transform: uppercase;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

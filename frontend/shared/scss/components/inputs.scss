@@ -1,0 +1,96 @@
+@use '../base/variables' as *;
+@use '../base/text-styles';
+
+.input-spacing {
+    margin: 10px 0;
+    max-width: 500px;
+
+    + label.style-label {
+        margin-top: 30px;
+    }
+}
+
+.input {
+    @extend .input-spacing;
+    @extend .style-input;
+    color: $color-dark;
+    border: $border-width solid $color-gray-light;
+    border-radius: $border-radius;
+    padding: 5px 15px;
+    height: 44px;
+    line-height: 44px - 10px - 2 * $border-width;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+    transition: border-color 0.2s;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+    &:focus,
+    &:focus-within {
+        border-color: $color-primary;
+    }
+
+    ::placeholder {
+        color: $color-gray;
+    }
+
+    &.error {
+        border-color: $color-error;
+
+        &:focus,
+        &:focus-within {
+            border-color: $color-error-focus;
+        }
+    }
+}
+textarea.input {
+    max-width: none;
+    padding: 12px 15px;
+    // 3 lines height
+    line-height: 44px - 18px - 2 * $border-width;
+
+    height: 44px + 4px + 10px + (44px - 18px - 2 * $border-width) * 2;
+    resize: none;
+}
+
+select.input {
+    cursor: pointer;
+
+    // Add a background arrow to our selection field.
+    background: url(~@shared/assets/images/icons/gray/arrow-down-small.svg)
+        no-repeat right 10px center;
+
+    // Increase the right padding just a little.
+    padding-right: 35px;
+
+    // Remove dotted line in Firefox
+    &:-moz-focusring {
+        color: transparent;
+        text-shadow: 0 0 0 #000;
+    }
+}
+
+// Used to put multiple inputs next to each other
+.input-group {
+    display: flex;
+    flex-direction: row;
+    @extend .input-spacing;
+
+    & > * {
+        flex-grow: 1;
+        margin: 0 5px;
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        .input {
+            margin: 0;
+        }
+    }
+}
