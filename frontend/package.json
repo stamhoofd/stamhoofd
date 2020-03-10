@@ -1,0 +1,41 @@
+{
+    "name": "create-group",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve --name dashboard src/dashboard/main.ts",
+        "build": "vue-cli-service build --name dashboard src/dashboard/main.ts",
+        "lint": "vue-cli-service lint --name cdashboard src/dashboard/main.ts",
+        "build-group": "vue-cli-service build --name create-group src/create-group/main.ts",
+        "lint-group": "vue-cli-service lint --name create-group src/create-group/main.ts",
+        "serve-group": "vue-cli-service serve --name create-group src/create-group/main.ts"
+    },
+    "dependencies": {
+        "core-js": "^3.6.4",
+        "tiptap": "^1.26.6",
+        "tiptap-extensions": "^1.28.6",
+        "vue": "^2.6.10",
+        "vue-class-component": "^7.0.2",
+        "vue-property-decorator": "^8.3.0",
+        "xlsx": "^0.15.5"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^4.2.3",
+        "@vue/cli-plugin-eslint": "^4.1.0",
+        "@vue/cli-plugin-typescript": "^4.1.0",
+        "@vue/cli-service": "^4.1.0",
+        "@vue/eslint-config-typescript": "^4.0.0",
+        "eslint": "^5.16.0",
+        "eslint-plugin-vue": "^5.0.0",
+        "sass": "^1.23.7",
+        "sass-loader": "^8.0.0",
+        "typescript": "~3.7.5",
+        "vue-template-compiler": "^2.6.10"
+    },
+    "eslintConfig": {
+        "no-console": "off"
+    },
+    "resolutions": {
+        "prosemirror-model": "1.8.2"
+    }
+}

@@ -2,7 +2,7 @@
     "protoc": {
         "options": [
             // This makes the "vscode-proto3" extension correctly detect imports.
-            "--proto_path=${workspaceRoot}/backend",
+            "--proto_path=${workspaceRoot}/backend"
         ]
     },
     "go.useLanguageServer": true,
@@ -13,5 +13,8 @@
     "javascript.format.enable": false,
     "vetur.format.defaultFormatter.html": "prettier",
     "prettier.printWidth": 120,
-    "prettier.ignorePath": "frontend/.prettierignore"
+    "prettier.ignorePath": "frontend/.prettierignore",
+    "search.exclude": {
+        "**/dist": true
+    }
 }
