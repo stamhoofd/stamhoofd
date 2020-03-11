@@ -5,21 +5,35 @@ import (
 )
 
 func NewUser(user *models.User) *User {
+	if user == nil {
+		return nil
+	}
 	return &User{
 		ID:    user.ID.String(),
 		Email: user.Email,
 	}
 }
 
-func NewResetPasswordResponse(passwordReset *models.PasswordReset) *ResetPasswordResponse {
-	return &ResetPasswordResponse{
-		User: NewUser(&passwordReset.User),
+func NewRegisterResponse(user *models.User) *RegisterResponse {
+	return &RegisterResponse{
+		User: NewUser(user),
 	}
 }
 
-func NewLoggedInResponse(loggedInResponse *models.LoggedInResponse) *LoggedInResponse {
-	return &LoggedInResponse{
-		User:  NewUser(&loggedInResponse.User),
-		Token: loggedInResponse.Token,
+func NewRegisterConfirmResponse(user *models.User) *RegisterConfirmResponse {
+	return &RegisterConfirmResponse{
+		User: NewUser(user),
+	}
+}
+
+func NewResetPasswordResponse(passwordReset *models.PasswordReset) *ResetPasswordResponse {
+	return &ResetPasswordResponse{
+		Email: &passwordReset.User.Email,
+	}
+}
+
+func NewResetPasswordConfirmResponse(user *models.User) *ResetPasswordConfirmResponse {
+	return &ResetPasswordConfirmResponse{
+		User: NewUser(user),
 	}
 }

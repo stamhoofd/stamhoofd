@@ -8,42 +8,34 @@ import (
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) Register(ctx context.Context, email, password string) (*User, error) {
-	user, err := service.Register(r.DB, email, password)
+func (r *mutationResolver) Register(ctx context.Context, request RegisterRequest) (*RegisterResponse, error) {
+	user, err := service.Register(r.DB, request.Email, request.Password)
 	if err != nil {
 		return nil, err
 	}
-	return NewUser(user), nil
+	return NewRegisterResponse(user), nil
 }
 
-func (r *mutationResolver) RegisterConfirm(ctx context.Context, email, token string) (*LoggedInResponse, error) {
-	loggedInResponse, err := service.RegisterConfirm(r.DB, email, token)
+func (r *mutationResolver) RegisterConfirm(ctx context.Context, request RegisterConfirmRequest) (*RegisterConfirmResponse, error) {
+	user, err := service.RegisterConfirm(r.DB, request.Email, request.Token)
 	if err != nil {
 		return nil, err
 	}
-	return NewLoggedInResponse(loggedInResponse), nil
+	return NewRegisterConfirmResponse(user), nil
 }
 
-func (r *mutationResolver) Login(ctx context.Context, email, password string) (*LoggedInResponse, error) {
-	loggedInResponse, err := service.Login(r.DB, email, password)
-	if err != nil {
-		return nil, err
-	}
-	return NewLoggedInResponse(loggedInResponse), nil
-}
-
-func (r *mutationResolver) ResetPassword(ctx context.Context, email string) (*ResetPasswordResponse, error) {
-	passwordReset, err := service.ResetPassword(r.DB, email)
+func (r *mutationResolver) ResetPassword(ctx context.Context, request ResetPasswordRequest) (*ResetPasswordResponse, error) {
+	passwordReset, err := service.ResetPassword(r.DB, request.Email)
 	if err != nil {
 		return nil, err
 	}
 	return NewResetPasswordResponse(passwordReset), nil
 }
 
-func (r *mutationResolver) ResetPasswordConfirm(ctx context.Context, email, token, password string) (*LoggedInResponse, error) {
-	loggedInResponse, err := service.ResetPasswordConfirm(r.DB, email, token, password)
+func (r *mutationResolver) ResetPasswordConfirm(ctx context.Context, request ResetPasswordConfirmRequest) (*ResetPasswordConfirmResponse, error) {
+	user, err := service.ResetPasswordConfirm(r.DB, request.Email, request.Token, request.Password)
 	if err != nil {
 		return nil, err
 	}
-	return NewLoggedInResponse(loggedInResponse), nil
+	return NewResetPasswordConfirmResponse(user), nil
 }

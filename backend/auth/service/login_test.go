@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/base64"
 	"testing"
 )
 
@@ -16,17 +15,17 @@ func TestLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	response, err := Login(db, email, password)
+	_, err = RegisterConfirm(db, email, registeredUser.RegistrationToken)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if response.User.ID != registeredUser.ID {
-		t.Fatalf("UUID %v was returned, expected %v", response.User.ID, registeredUser.ID)
+	user, err := Login(db, email, password)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	_, err = base64.URLEncoding.DecodeString(response.Token)
-	if err != nil {
-		t.Fatalf("no valid token generated: %v", err)
+	if user.ID != registeredUser.ID {
+		t.Fatalf("UUID %v was returned, expected %v", user.ID, registeredUser.ID)
 	}
 }

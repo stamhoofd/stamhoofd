@@ -3,8 +3,6 @@ package service
 import (
 	"testing"
 
-	"encoding/base64"
-
 	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 )
 
@@ -19,13 +17,18 @@ func TestResetPasswordConfirm(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	_, err = RegisterConfirm(db, email, registeredUser.RegistrationToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	pr, err := ResetPassword(db, email)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	newPassword := "newPassword"
-	response, err := ResetPasswordConfirm(db, email, pr.User.AuthenticationToken, newPassword)
+	user, err := ResetPasswordConfirm(db, email, pr.Token, newPassword)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,13 +40,8 @@ func TestResetPasswordConfirm(t *testing.T) {
 		t.Fatal("password reset was not deleted")
 	}
 
-	if response.User.Email != registeredUser.Email {
-		t.Fatalf("Email %v was returned, expected %v", response.User.Email, registeredUser.Email)
-	}
-
-	_, err = base64.URLEncoding.DecodeString(response.Token)
-	if err != nil {
-		t.Fatalf("no valid token generated: %v", err)
+	if user.Email != registeredUser.Email {
+		t.Fatalf("Email %v was returned, expected %v", user.Email, registeredUser.Email)
 	}
 
 	_, err = Login(db, email, newPassword)

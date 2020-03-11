@@ -1,14 +1,13 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 )
 
-func RegisterConfirm(db *gorm.DB, email, token string) (*models.LoggedInResponse, error) {
+func RegisterConfirm(db *gorm.DB, email, token string) (*models.User, error) {
 	user := &models.User{}
 	err := db.Where(&models.User{
 		Email:             email,
@@ -18,9 +17,9 @@ func RegisterConfirm(db *gorm.DB, email, token string) (*models.LoggedInResponse
 		return nil, fmt.Errorf("could not retrieve user %s: %w", email, err)
 	}
 
-	if user.RegistrationToken != token {
-		return nil, errors.New("invalid registration token")
+	err = db.Model(user).Update("registration_token", "").Error
+	if err != nil {
+		return nil, fmt.Errorf("could not update registration token for user %v: %w", user, err)
 	}
-
-	return saveLogin(db, user)
+	return user, nil
 }

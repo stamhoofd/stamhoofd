@@ -248,7 +248,7 @@ func (s *service) GenerateGraphQL() {
 
 		s.logger.Info("Generating graphql code...")
 
-		cmd := exec.Command("go", "run", "scripts/gqlgen.go", "-v")
+		cmd := exec.Command("go", "run", "scripts/gqlgen.go", "--verbose")
 		cmd.Dir = s.Dir()
 		s.runCommand(cmd, true, nil)
 	})
