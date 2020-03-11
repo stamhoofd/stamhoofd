@@ -7,4 +7,5 @@ type PasswordReset struct {
 
 	UserID uuid.UUID
 	User   User
+	Token  string
 }

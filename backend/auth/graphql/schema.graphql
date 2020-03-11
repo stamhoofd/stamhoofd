@@ -1,37 +1,63 @@
-
-type User {
+type User @key(fields: "id") {
     id: ID!
     email: String!
 }
 
-type LoggedInResponse {
+input RegisterRequest {
+    email: String!
+    password: String!
+}
+
+type RegisterResponse {
     user: User!
+}
+
+input RegisterConfirmRequest {
+    email: String!
     token: String!
 }
 
-# You cannot have empty types in GraphQL.
-type ResetPasswordResponse {
+type RegisterConfirmResponse {
+    user: User!
+}
+
+input ResetPasswordRequest {
     email: String!
 }
 
-type Query {
+type ResetPasswordResponse {
+    # This is simply here because GraphQL doesn't support empty types.
+    # But this specific type is used for future backwards-compatibility.
+    email: String
+}
+
+input ResetPasswordConfirmRequest {
+    email: String!
+    token: String!
+    password: String!
+}
+
+type ResetPasswordConfirmResponse {
+    user: User!
+}
+
+extend type Query {
     me: User!
 }
 
 type Mutation {
     # Register a user and send an email to his account with a confirm token.
-    register(email: String!, password: String!): User!
+    register(request: RegisterRequest!): RegisterResponse!
     # Confirm the user creation with the email sent to the account.
-    registerConfirm(email: String!, token: String!): LoggedInResponse!
-
-    # Log a user in with its credentials and return an auth token.
-    login(email: String!, password: String!): LoggedInResponse!
+    registerConfirm(request: RegisterConfirmRequest!): RegisterConfirmResponse!
 
     # Request a password reset.
     # Send an email to the user with a link that has the token that needs to be
     # passed to the ResetPassword endpoint.
-    resetPassword(email: String!): ResetPasswordResponse!
-    # Reset the password the the token that has been sent to the user in an
+    resetPassword(request: ResetPasswordRequest!): ResetPasswordResponse!
+    # Reset the password with the token that has been sent to the user in an
     # email.
-    resetPasswordConfirm(email: String!, token: String!): LoggedInResponse!
+    resetPasswordConfirm(
+        request: ResetPasswordConfirmRequest!
+    ): ResetPasswordConfirmResponse!
 }

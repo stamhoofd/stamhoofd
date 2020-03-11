@@ -11,9 +11,6 @@ service Auth {
   rpc RegisterConfirm(RegisterConfirmRequest)
       returns (RegisterConfirmResponse) {}
 
-  // Log a user in with its credentials and return an auth token.
-  rpc Login(LoginRequest) returns (LoginResponse) {}
-
   // Request a password reset.
   // Send an email to the user with a link that has the token that needs to be
   // passed to the ResetPassword endpoint.

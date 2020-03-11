@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
 	"github.com/stamhoofd/stamhoofd/backend/auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,11 +22,9 @@ func Login(db *gorm.DB, email, password string) (*models.User, error) {
 		return nil, fmt.Errorf("login failed: %w", err)
 	}
 
-	err = db.Model(user).Update("registration_token", nil).Error
-	if err != nil {
-		return nil, fmt.Errorf("could not update registration token for user %s: %w", email, err)
+	if user.RegistrationToken != "" {
+		return nil, fmt.Errorf("user has not been confirmed")
 	}
 
-	logrus.Infof("confirmed user registration: %v", user)
 	return user, nil
 }
