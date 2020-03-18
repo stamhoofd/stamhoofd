@@ -1,4 +1,4 @@
-# Nodemon
+# How to run
 
-`yarn add global nodemon`
-`yarn add global ts-node`
+`yarn start`
+`yarn watch`

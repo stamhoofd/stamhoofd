@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "baseUrl": ".",
+        "strictNullChecks": true,
+        "types": [
+            "node"
+        ],
+        "paths": {
+            "@src/*": [
+                "src/*"
+            ],
+        },
+        "lib": [
+            "esnext"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.tsx",
+        "index-def-test.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

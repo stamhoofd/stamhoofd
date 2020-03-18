@@ -1,7 +1,7 @@
 {
     "name": "stamhoofd-backend",
     "version": "1.0.0",
-    "main": "src/index.ts",
+    "main": "index-def-test.ts",
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
@@ -12,5 +12,9 @@
         "nodemon": "^2.0.2",
         "ts-node": "^8.6.2",
         "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "@types/node": "^13.9.0",
+        "tslib": "^1.11.1"
     }
 }
