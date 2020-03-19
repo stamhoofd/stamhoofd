@@ -2,10 +2,12 @@ import { Endpoint, ResponseEncoder, RequestDecoder } from '../classes/routing/En
 import { DecodedRequest } from '../classes/routing/DecodedRequest';
 import { Request } from '../classes/routing/Request';
 import { Response } from '../classes/routing/Response';
-import { ContentEncoder, JSONContentEncoder } from '../classes/routing/Encoder';
-import { ContentDecoder, Data, ObjectData, JSONContentDecoder, EmptyDecoder } from '../classes/routing/Decoder';
-import { EncodedResponse } from '@src/classes/routing/EncodedResponse';
-
+import { JSONContentEncoder } from '../classes/encoding/JSONContentEncoder';
+import { ObjectData } from '../classes/decoding/ObjectData';
+import { Data } from '../classes/decoding/Data';
+import { EmptyDecoder } from '../classes/decoding/EmptyDecoder';
+import { JSONContentDecoder } from '../classes/decoding/JSONContentDecoder';
+import { Member, Record } from '../generated/structs';
 
 // Shared between front and back-end
 // input types
@@ -29,103 +31,45 @@ class MemberModel /* static implements ContentEncoder<MemberModel> */ {
     firstName: string
     lastName: string
     phone: string
+    records: string[]
 
     static getContentTypes(): string[] {
         // todo: detect supported content types
-        return [MemberStructV1, MemberStructV2, CreatedMemberStructV2].flatMap(el => el.getContentTypes());
+        return Member.all.flatMap(el => el.getContentTypes());
     }
 
-    static encodeContent(contentType: string, data: MemberModel): MemberStructV1 | MemberStructV2 | CreatedMemberStructV2 {
-        if (MemberStructV1.getContentTypes().includes(contentType)) {
-            return new MemberStructV1();
+    static encodeContent(contentType: string, data: MemberModel): Member.All {
+        var s: Member.All;
+
+        if (Member.Version1.getContentTypes().includes(contentType)) {
+            s = new Member.Version1();
+            s.name = data.firstName + " " + data.lastName
+        } else if (Member.Version2.getContentTypes().includes(contentType)) {
+            s = new Member.Version2();
+            s.firstName = data.firstName
+            s.lastName = data.lastName
+        } else {
+            throw new Error("Could not encode MemberModel to " + contentType + ". Not supported");
         }
-        if (MemberStructV2.getContentTypes().includes(contentType)) {
-            return new MemberStructV2();
-        }
-        if (CreatedMemberStructV2.getContentTypes().includes(contentType)) {
-            // Hacky way to do decoding
-            return CreatedMemberStructV2.decodeContent(contentType, new ObjectData(data));
-        }
-        throw new Error("Could not encode MemberModel to " + contentType + ". Not supported");
-    }
 
-}
-
-class MemberStructV1 /* static implements ContentEncoder<MemberStructV1, any>, MemberStructV1 */ {
-    name: string
-    phone: string
-
-    static getContentTypes(): string[] {
-        return ["application/MemberStructV1"];
-    }
-
-    static decodeContent(contentType: string, data: Data): MemberStructV1 {
-        var t = new MemberStructV1()
-        t.name = data.field("name").string
-        return t;
-    }
-
-    static encodeContent(contentType: string, data: MemberStructV1): any {
-        return {
-            "name": data.name
-        }
-    }
-}
+        s.records = data.records.map(r => {
+            var record = new Record()
+            record.name = r
+            return record
+        })
+        return s;
 
 
-class MemberStructV2 {
-    firstName: string = ""
-    lastName: string = ""
-    phone: string | null
-
-    static getContentTypes(): string[] {
-        return ["application/MemberStructV2"];
-    }
-
-    static decodeContent(contentType: string, data: Data): MemberStructV2 {
-        var t = new MemberStructV2()
-        t.firstName = data.field("firstName").string
-        t.lastName = data.field("lastName").string
-        t.phone = data.field("phone").string
-        return t;
-    }
-
-    static encodeContent(contentType: string, data: MemberStructV2): any {
-        return {
-            "firstName": data.firstName,
-            "lastName": data.lastName,
-            "phone": data.phone
-        }
-    }
-}
-
-class CreatedMemberStructV2 extends MemberStructV2 {
-    id: number;
-
-    static getContentTypes(): string[] {
-        return ["application/CreatedMemberStructV2"];
-    }
-
-    static decodeContent(contentType: string, data: Data): CreatedMemberStructV2 {
-        var t = Object.assign(new CreatedMemberStructV2(), super.decodeContent(contentType, data))
-        t.id = data.field("id").number
-        return t;
-    }
-
-    static encodeContent(contentType: string, data: CreatedMemberStructV2): any {
-        return Object.assign({
-            id: data.id
-        }, super.encodeContent(contentType, data))
     }
 }
 
 type Params = {}
 type Query = {}
-type RequestBody = MemberStructV1 | MemberStructV2
+type RequestBody = Member.All
 type ResponseBody = MemberModel
 
 export class CreateMember extends Endpoint<Params, Query, RequestBody, ResponseBody> {
-    requestDecoder: RequestDecoder<Params, Query, RequestBody> = new RequestDecoder(EmptyDecoder, EmptyDecoder, new JSONContentDecoder<RequestBody>(MemberStructV1, MemberStructV2))
+    requestDecoder: RequestDecoder<Params, Query, RequestBody> = new RequestDecoder(EmptyDecoder, EmptyDecoder, new JSONContentDecoder<RequestBody>(...Member.all))
     responseEncoder: ResponseEncoder<ResponseBody> = new ResponseEncoder(new JSONContentEncoder<ResponseBody>(MemberModel))
 
     protected doesMatch(request: Request): boolean {
@@ -137,17 +81,19 @@ export class CreateMember extends Endpoint<Params, Query, RequestBody, ResponseB
         var model = new MemberModel();
 
         model.id = 123
-        model.phone = request.body.phone || "onbekend"
+        model.phone = "onbekend"
 
-        if (request.body instanceof MemberStructV2) {
+        if (request.body instanceof Member.Version2) {
             model.firstName = request.body.firstName
             model.lastName = request.body.lastName
         }
-        else if (request.body instanceof MemberStructV1) {
+        else if (request.body instanceof Member.Version1) {
             model.firstName = request.body.name
         } else {
             throw new Error("Unsupported input");
         }
+
+        model.records = request.body.records.map(r => r.name)
 
         return new Response(model);
     }

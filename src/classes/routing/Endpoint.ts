@@ -1,9 +1,10 @@
 import { Request } from "./Request";
-import { ContentDecoder } from "./Decoder";
+import { ContentDecoder } from "../decoding/ContentDecoder";
 import { DecodedRequest } from './DecodedRequest';
 import { Response } from "./Response";
 import { EncodedResponse } from './EncodedResponse';
-import { ContentEncoder } from './Encoder';
+import { ContentEncoder } from '../encoding/ContentEncoder';
+import { Decoder } from '../decoding/Decoder';
 
 export class ResponseEncoder<Body> {
     bodyEncoder: ContentEncoder<Body, string>
@@ -25,11 +26,11 @@ export class ResponseEncoder<Body> {
 }
 
 export class RequestDecoder<Params, Query, Body> {
-    parametersDecoder: ContentDecoder<object, Params>
-    queryDecoder: ContentDecoder<object, Query>
+    parametersDecoder: Decoder<Params>
+    queryDecoder: Decoder<Query>
     bodyDecoder: ContentDecoder<string, Body>
 
-    constructor(parametersDecoder: ContentDecoder<object, Params>, queryDecoder: ContentDecoder<object, Query>, bodyDecoder: ContentDecoder<string, Body>) {
+    constructor(parametersDecoder: Decoder<Params>, queryDecoder: Decoder<Query>, bodyDecoder: ContentDecoder<string, Body>) {
         this.parametersDecoder = parametersDecoder
         this.queryDecoder = queryDecoder
         this.bodyDecoder = bodyDecoder
@@ -42,8 +43,8 @@ export class RequestDecoder<Params, Query, Body> {
 
         // Todo: augment thrown errors here by indicating if they origin in body, params or query
         decoded.body = this.bodyDecoder.decodeContent(contentType, request.body as string)
-        decoded.params = this.parametersDecoder.decodeContent("", request.params)
-        decoded.query = this.queryDecoder.decodeContent("", request.query)
+        decoded.params = this.parametersDecoder.decode(request.params)
+        decoded.query = this.queryDecoder.decode(request.query)
         return decoded
     }
 }

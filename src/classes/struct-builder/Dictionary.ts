@@ -57,7 +57,7 @@ export class Dictionary extends Struct {
 
     definition() {
         var defOther = "";
-        var def = "class " + this.internalName(true) + " /* static implements ContentEncoder<" + this.internalName(true) + ", any>, ContentDecoder<Data, " + this.internalName(true) + "> */{\n"
+        var def = "export class " + this.internalName(true) + " /* static implements ContentEncoder<" + this.internalName(true) + ", any>, ContentDecoder<Data, " + this.internalName(true) + "> */{\n"
 
         for (const key in this.keys) {
             if (this.keys.hasOwnProperty(key)) {
@@ -71,18 +71,23 @@ export class Dictionary extends Struct {
         def += "\n    " + "static getContentTypes(): string[] {\n" + "    " + "    " + "return [\"" + this.getContentType() + "\"];\n" + "    " + "}\n";
 
         // decodeContent
-        def += "\n    " + "static decodeContent(contentType: string, data: Data): " + this.internalName(true) + " {\n"
+        def += "\n    " + "static decode(data: Data): " + this.internalName(true) + " {\n"
         def += "    " + "    " + "const d = new " + this.internalName(true) + "();\n";
 
         for (const key in this.keys) {
             if (this.keys.hasOwnProperty(key)) {
                 const struct = this.keys[key];
 
-                def += "    " + "    " + "d." + key + " = data.field(\"" + key + "\").cast(" + struct.externalName(false, this.namespace) + ");\n";
+                def += "    " + "    " + "d." + key + " = data.field(\"" + key + "\").decode(" + struct.externalName(false, this.namespace) + ");\n";
             }
         }
         def += "    " + "    " + "return d;\n";
         def += "    " + "}\n";
+
+        def += "\n    " + "static decodeContent(contentType: string, data: Data): " + this.internalName(true) + " {\n"
+        def += "    " + "    " + "return " + this.internalName(true) + ".decode(data);\n";
+        def += "    " + "}\n";
+
 
         // encodeContent
         def += "\n    " + "static encodeContent(contentType: string, data: " + this.internalName(true) + "): any {\n"

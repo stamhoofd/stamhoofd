@@ -9,14 +9,14 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "baseUrl": ".",
+        "baseUrl": "./src",
         "strictNullChecks": true,
         "types": [
             "node"
         ],
         "paths": {
             "@src/*": [
-                "src/*"
+                "*"
             ],
         },
         "lib": [

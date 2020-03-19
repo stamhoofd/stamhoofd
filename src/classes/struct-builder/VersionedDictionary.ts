@@ -31,10 +31,16 @@ export class VersionedDictionary extends Struct {
     }
 
     definition() {
-        var defOther = "";
-        return "type " + this.internalName(true) + " = " + this.versions.map((type) => {
-            defOther += type.externalDefinition(this.namespace);
-            return type.externalName(true, this.namespace);
-        }).join(" | ") + ";\n" + defOther;
+        var def = "";
+
+        def += this.versions.map((type) => {
+            return type.externalDefinition(this.namespace);
+        }).join("\n")
+
+        def += "\n";
+        def += "export type " + this.internalName(true) + " = " + this.versions.map(type => type.externalName(true, this.namespace)).join(" | ") + ";\n";
+        def += "export const all = [" + this.versions.map(type => type.externalName(true, this.namespace)) + "];\n";
+
+        return def;
     }
 }

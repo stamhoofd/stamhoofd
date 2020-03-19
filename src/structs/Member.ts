@@ -1,19 +1,16 @@
-import { Dictionary } from "../classes/structs/Dictionary";
-import { String } from "../classes/structs/String";
-import { Array } from "../classes/structs/Array";
-import { VersionedDictionary } from '../classes/structs/VersionedDictionary';
+import { Dictionary } from "../classes/struct-builder/Dictionary";
+import { String } from "../classes/struct-builder/String";
+import { Array } from "../classes/struct-builder/Array";
+import { VersionedDictionary } from '../classes/struct-builder/VersionedDictionary';
 
 export { String };
-export const field = new Dictionary("Field", {
-    firstName: new String(),
-    lastName: new String(),
-    phone: new String(),
+export const record = new Dictionary("Record", {
+    name: new String(),
 });
 
-export const member = new VersionedDictionary(new Dictionary("MemberStruct", {
+export const member = new VersionedDictionary(new Dictionary("Member", {
     name: new String(),
-    records: new Array(field),
-    names: new Array(new String())
+    records: new Array(record)
 }));
 
 member.addVersion(
@@ -24,12 +21,6 @@ member.addVersion(
             lastName: new String(),
         })
 );
-
-member.addVersion(
-    member.last
-        .remove(["names"])
-);
-
 /*
 export const MemberV2 = Dictionary("Member", {
     firstName: String,

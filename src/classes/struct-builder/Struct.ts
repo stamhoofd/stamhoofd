@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 
 export abstract class Struct {
     didExport: boolean = false;
@@ -15,7 +17,7 @@ export abstract class Struct {
     protected abstract definition(): string;
     externalDefinition(otherNamespace: string | null = null): string {
         if (this.namespace && (!otherNamespace || otherNamespace != this.namespace)) {
-            return "namespace " + this.namespace + " {\n" + this.definition() + "}\n";
+            return "export namespace " + this.namespace + " {\n    " + this.definition().replace(/\n(?!$)/g, "\n    ") + "}\n";
         }
         return this.definition();
     }
@@ -26,5 +28,10 @@ export abstract class Struct {
         }
         this.didExport = true;
         return this.externalDefinition();
+    }
+
+    static save(structs: Struct[], file: string) {
+        const header = fs.readFileSync(path.join(__dirname, 'template.ts'), "utf8");
+        fs.writeFileSync(file, header + "\n" + structs.map(struct => struct.export()).join("\n"));
     }
 }

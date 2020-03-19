@@ -1,8 +1,4 @@
-/// Encode type A to type T, that implements Encodeable or is any
-export interface ContentEncoder<T, D> {
-    getContentTypes(): string[]
-    encodeContent(contentType: string, data: T): D
-}
+import { ContentEncoder } from './ContentEncoder';
 
 /// Support encoding multiple types (not needed yet)
 export class ContentEncoderGroup<T> implements ContentEncoder<T, any> {
@@ -25,20 +21,5 @@ export class ContentEncoderGroup<T> implements ContentEncoder<T, any> {
         }
 
         return encoder.encodeContent(contentType, data)
-    }
-}
-
-export class JSONContentEncoder<T> implements ContentEncoder<T, string>{
-    encoder: ContentEncoder<T, any>
-    constructor(encoder: ContentEncoder<T, any>) {
-        this.encoder = encoder
-    }
-
-    getContentTypes(): string[] {
-        return this.encoder.getContentTypes();
-    }
-
-    encodeContent(contentType: string, data: T): string {
-        return JSON.stringify(this.encoder.encodeContent(contentType, data))
     }
 }
