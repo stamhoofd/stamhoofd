@@ -1,4 +1,5 @@
 import { ContentEncoder } from './ContentEncoder';
+import { ContentType } from '../routing/ContentType';
 
 export class JSONContentEncoder<T> implements ContentEncoder<T, string>{
     encoder: ContentEncoder<T, any>
@@ -6,11 +7,14 @@ export class JSONContentEncoder<T> implements ContentEncoder<T, string>{
         this.encoder = encoder
     }
 
-    getContentTypes(): string[] {
+    getContentTypes(): ContentType[] {
         return this.encoder.getContentTypes();
     }
 
-    encodeContent(contentType: string, data: T): string {
+    encodeContent(contentType: ContentType, data: T): string {
+        if (contentType.suffix != "json" && contentType.name != "application/json") {
+            throw new Error("Expected JSON");
+        }
         return JSON.stringify(this.encoder.encodeContent(contentType, data))
     }
 }

@@ -14,7 +14,7 @@ export class Dictionary extends Struct {
         super();
         this.name = name;
         this.keys = keys;
-        this.contentType = "application/vnd.stamhoofd." + this.name + "+json";
+        this.contentType = "application/vnd.stamhoofd." + this.name;
     }
 
     upgrade(): Dictionary {
@@ -68,7 +68,7 @@ export class Dictionary extends Struct {
         }
 
         // getContentTypes
-        def += "\n    " + "static getContentTypes(): string[] {\n" + "    " + "    " + "return [\"" + this.getContentType() + "\"];\n" + "    " + "}\n";
+        def += "\n    " + "static getContentTypes(): ContentType[] {\n" + "    " + "    " + "return [ContentType.fromString(\"" + this.getContentType() + "\")];\n" + "    " + "}\n";
 
         // decodeContent
         def += "\n    " + "static decode(data: Data): " + this.internalName(true) + " {\n"
@@ -84,13 +84,13 @@ export class Dictionary extends Struct {
         def += "    " + "    " + "return d;\n";
         def += "    " + "}\n";
 
-        def += "\n    " + "static decodeContent(contentType: string, data: Data): " + this.internalName(true) + " {\n"
+        def += "\n    " + "static decodeContent(contentType: ContentType, data: Data): " + this.internalName(true) + " {\n"
         def += "    " + "    " + "return " + this.internalName(true) + ".decode(data);\n";
         def += "    " + "}\n";
 
 
         // encodeContent
-        def += "\n    " + "static encodeContent(contentType: string, data: " + this.internalName(true) + "): any {\n"
+        def += "\n    " + "static encodeContent(contentType: ContentType, data: " + this.internalName(true) + "): any {\n"
         def += "    " + "    " + "return this;\n";
         def += "    " + "}\n";
 

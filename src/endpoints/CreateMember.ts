@@ -1,13 +1,14 @@
-import { Endpoint, ResponseEncoder, RequestDecoder } from '../classes/routing/Endpoint';
+import { Endpoint } from '../classes/routing/Endpoint';
 import { DecodedRequest } from '../classes/routing/DecodedRequest';
 import { Request } from '../classes/routing/Request';
 import { Response } from '../classes/routing/Response';
 import { JSONContentEncoder } from '../classes/encoding/JSONContentEncoder';
-import { ObjectData } from '../classes/decoding/ObjectData';
-import { Data } from '../classes/decoding/Data';
 import { EmptyDecoder } from '../classes/decoding/EmptyDecoder';
 import { JSONContentDecoder } from '../classes/decoding/JSONContentDecoder';
 import { Member, Record } from '../generated/structs';
+import { ContentType } from '../classes/routing/ContentType';
+import { RequestDecoder } from '../classes/decoding/RequestDecoder';
+import { ResponseEncoder } from '../classes/encoding/ResponseEncoder';
 
 // Shared between front and back-end
 // input types
@@ -33,18 +34,18 @@ class MemberModel /* static implements ContentEncoder<MemberModel> */ {
     phone: string
     records: string[]
 
-    static getContentTypes(): string[] {
+    static getContentTypes(): ContentType[] {
         // todo: detect supported content types
         return Member.all.flatMap(el => el.getContentTypes());
     }
 
-    static encodeContent(contentType: string, data: MemberModel): Member.All {
+    static encodeContent(contentType: ContentType, data: MemberModel): Member.All {
         var s: Member.All;
 
-        if (Member.Version1.getContentTypes().includes(contentType)) {
+        if (Member.Version1.getContentTypes().some(type => type.matches(contentType))) {
             s = new Member.Version1();
             s.name = data.firstName + " " + data.lastName
-        } else if (Member.Version2.getContentTypes().includes(contentType)) {
+        } else if (Member.Version2.getContentTypes().some(type => type.matches(contentType))) {
             s = new Member.Version2();
             s.firstName = data.firstName
             s.lastName = data.lastName

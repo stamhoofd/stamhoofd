@@ -1,13 +1,13 @@
 import { Data } from '../classes/decoding/Data';
 import { StringDecoder } from '../classes/decoding/StringDecoder';
 import { ArrayDecoder } from '../classes/decoding/ArrayDecoder';
-
+import { ContentType } from '../classes/routing/ContentType';
 /* generated content inserted here */
 export class Record /* static implements ContentEncoder<Record, any>, ContentDecoder<Data, Record> */{
     name: string
 
-    static getContentTypes(): string[] {
-        return ["application/vnd.stamhoofd.Record+json"];
+    static getContentTypes(): ContentType[] {
+        return [ContentType.fromString("application/vnd.stamhoofd.Record")];
     }
 
     static decode(data: Data): Record {
@@ -16,11 +16,11 @@ export class Record /* static implements ContentEncoder<Record, any>, ContentDec
         return d;
     }
 
-    static decodeContent(contentType: string, data: Data): Record {
+    static decodeContent(contentType: ContentType, data: Data): Record {
         return Record.decode(data);
     }
 
-    static encodeContent(contentType: string, data: Record): any {
+    static encodeContent(contentType: ContentType, data: Record): any {
         return this;
     }
 }
@@ -30,8 +30,8 @@ export namespace Member {
         name: string
         records: Record[]
     
-        static getContentTypes(): string[] {
-            return ["application/vnd.stamhoofd.Member+json;version=1"];
+        static getContentTypes(): ContentType[] {
+            return [ContentType.fromString("application/vnd.stamhoofd.Member;version=1")];
         }
     
         static decode(data: Data): Version1 {
@@ -41,11 +41,11 @@ export namespace Member {
             return d;
         }
     
-        static decodeContent(contentType: string, data: Data): Version1 {
+        static decodeContent(contentType: ContentType, data: Data): Version1 {
             return Version1.decode(data);
         }
     
-        static encodeContent(contentType: string, data: Version1): any {
+        static encodeContent(contentType: ContentType, data: Version1): any {
             return this;
         }
     }
@@ -55,8 +55,8 @@ export namespace Member {
         firstName: string
         lastName: string
     
-        static getContentTypes(): string[] {
-            return ["application/vnd.stamhoofd.Member+json;version=2"];
+        static getContentTypes(): ContentType[] {
+            return [ContentType.fromString("application/vnd.stamhoofd.Member;version=2")];
         }
     
         static decode(data: Data): Version2 {
@@ -67,11 +67,11 @@ export namespace Member {
             return d;
         }
     
-        static decodeContent(contentType: string, data: Data): Version2 {
+        static decodeContent(contentType: ContentType, data: Data): Version2 {
             return Version2.decode(data);
         }
     
-        static encodeContent(contentType: string, data: Version2): any {
+        static encodeContent(contentType: ContentType, data: Version2): any {
             return this;
         }
     }

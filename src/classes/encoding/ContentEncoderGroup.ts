@@ -1,4 +1,5 @@
 import { ContentEncoder } from './ContentEncoder';
+import { ContentType } from '../routing/ContentType';
 
 /// Support encoding multiple types (not needed yet)
 export class ContentEncoderGroup<T> implements ContentEncoder<T, any> {
@@ -7,13 +8,13 @@ export class ContentEncoderGroup<T> implements ContentEncoder<T, any> {
         this.encoders = encoders
     }
 
-    getContentTypes(): string[] {
+    getContentTypes(): ContentType[] {
         return this.encoders.flatMap(el => el.getContentTypes());
     }
 
-    encodeContent(contentType: string, data: T): any {
+    encodeContent(contentType: ContentType, data: T): any {
         const encoder = this.encoders.find((encoder) => {
-            return encoder.getContentTypes().includes(contentType)
+            return encoder.getContentTypes().some(type => type.matches(contentType))
         });
 
         if (!encoder) {

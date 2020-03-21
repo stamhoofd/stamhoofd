@@ -1,54 +1,9 @@
 import { Request } from "./Request";
-import { ContentDecoder } from "../decoding/ContentDecoder";
 import { DecodedRequest } from './DecodedRequest';
 import { Response } from "./Response";
 import { EncodedResponse } from './EncodedResponse';
-import { ContentEncoder } from '../encoding/ContentEncoder';
-import { Decoder } from '../decoding/Decoder';
-
-export class ResponseEncoder<Body> {
-    bodyEncoder: ContentEncoder<Body, string>
-
-    constructor(bodyEncoder: ContentEncoder<Body, string>) {
-        this.bodyEncoder = bodyEncoder
-    }
-
-    encode(request: Request, response: Response<Body>): EncodedResponse {
-        var encoded = new EncodedResponse();
-        encoded.headers = response.headers
-
-        const contentType = request.headers['Accept'];
-        encoded.body = this.bodyEncoder.encodeContent(contentType, response.body)
-        encoded.headers['Content-Type'] = contentType;
-
-        return encoded;
-    }
-}
-
-export class RequestDecoder<Params, Query, Body> {
-    parametersDecoder: Decoder<Params>
-    queryDecoder: Decoder<Query>
-    bodyDecoder: ContentDecoder<string, Body>
-
-    constructor(parametersDecoder: Decoder<Params>, queryDecoder: Decoder<Query>, bodyDecoder: ContentDecoder<string, Body>) {
-        this.parametersDecoder = parametersDecoder
-        this.queryDecoder = queryDecoder
-        this.bodyDecoder = bodyDecoder
-    }
-
-    decode(request: Request): DecodedRequest<Params, Query, Body> {
-        var decoded = new DecodedRequest<Params, Query, Body>();
-        decoded.headers = request.headers
-        const contentType = request.headers['Content-Type'];
-
-        // Todo: augment thrown errors here by indicating if they origin in body, params or query
-        decoded.body = this.bodyDecoder.decodeContent(contentType, request.body as string)
-        decoded.params = this.parametersDecoder.decode(request.params)
-        decoded.query = this.queryDecoder.decode(request.query)
-        return decoded
-    }
-}
-
+import { RequestDecoder } from '../decoding/RequestDecoder';
+import { ResponseEncoder } from '../encoding/ResponseEncoder';
 
 export abstract class Endpoint<Params, Query, RequestBody, ResponseBody> {
     requestDecoder: RequestDecoder<Params, Query, RequestBody>

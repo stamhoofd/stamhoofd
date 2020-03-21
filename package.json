@@ -6,6 +6,7 @@
     "private": true,
     "scripts": {
         "start": "ts-node .",
+        "generate": "ts-node generate.ts",
         "watch": "nodemon"
     },
     "devDependencies": {

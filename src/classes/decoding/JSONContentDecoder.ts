@@ -1,6 +1,7 @@
 import { ContentDecoder } from './ContentDecoder';
 import { Data } from './Data';
 import { ObjectData } from './ObjectData';
+import { ContentType } from '../routing/ContentType';
 
 export class JSONContentDecoder<T> implements ContentDecoder<any, T> {
     decoders: ContentDecoder<Data, T>[]
@@ -8,13 +9,13 @@ export class JSONContentDecoder<T> implements ContentDecoder<any, T> {
         this.decoders = decoders
     }
 
-    getContentTypes(): string[] {
+    getContentTypes(): ContentType[] {
         return this.decoders.flatMap(el => el.getContentTypes());
     }
 
-    decodeContent(contentType: string, data: any): T {
+    decodeContent(contentType: ContentType, data: any): T {
         const decoder = this.decoders.find((decoder) => {
-            return decoder.getContentTypes().includes(contentType)
+            return decoder.getContentTypes().some(type => type.matches(contentType))
         });
         if (!decoder) {
             throw new Error("Could not decode JSON to contentType " + contentType);
