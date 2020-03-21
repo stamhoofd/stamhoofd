@@ -15,6 +15,10 @@ export class JSONContentEncoder<T> implements ContentEncoder<T, string>{
         if (contentType.suffix != "json" && contentType.name != "application/json") {
             throw new Error("Expected JSON");
         }
+
+        if (process.env.NODE_ENV == "development") {
+            return JSON.stringify(this.encoder.encodeContent(contentType, data), null, 4);
+        }
         return JSON.stringify(this.encoder.encodeContent(contentType, data))
     }
 }

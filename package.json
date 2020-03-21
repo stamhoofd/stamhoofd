@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "start": "ts-node .",
+        "start": "NODE_ENV=development ts-node .",
         "generate": "ts-node generate.ts",
         "watch": "nodemon"
     },

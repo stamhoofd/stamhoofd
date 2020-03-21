@@ -1,6 +1,7 @@
 import { CreateMember } from './src/endpoints/CreateMember';
 import { Request } from './src/classes/routing/Request';
 
+console.log("Start");
 // Test endpoint
 const createMemberEndpoint = new CreateMember()
 var r = new Request();
