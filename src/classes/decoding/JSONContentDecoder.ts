@@ -10,10 +10,15 @@ export class JSONContentDecoder<T> implements ContentDecoder<any, T> {
     }
 
     getContentTypes(): ContentType[] {
+        // todo: add json suffix
         return this.decoders.flatMap(el => el.getContentTypes());
     }
 
     decodeContent(contentType: ContentType, data: any): T {
+        if (contentType.suffix != "json" && contentType.name != "application/json") {
+            throw new Error("Expected JSON");
+        }
+
         const decoder = this.decoders.find((decoder) => {
             return decoder.getContentTypes().some(type => type.matches(contentType))
         });
