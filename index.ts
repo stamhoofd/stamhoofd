@@ -1,11 +1,5 @@
 import { Member } from "./src/database/models/Member"
 
-process.on('unhandledRejection', error => {
-    // Will print "unhandledRejection err is not defined"
-    console.error('unhandledRejection', error);
-});
-
-
 
 const start = async () => {
     try {
@@ -14,7 +8,7 @@ const start = async () => {
         member.id = 123;
         member.firstName = "Simon";
 
-        member.save();
+        await member.save();
         member.firstName = "Simon";
         member.lastName = "Backx";
 
@@ -26,4 +20,4 @@ const start = async () => {
 
 };
 
-start();
+start().catch((error) => { console.error('unhandledRejection', error); });

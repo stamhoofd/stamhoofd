@@ -4,7 +4,6 @@
     "main": "index.ts",
     "license": "UNLICENCED",
     "private": true,
-    "type": "module",
     "scripts": {
         "start": "NODE_ENV=development ts-node .",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
