@@ -16,12 +16,12 @@ export class RequestDecoder<Params, Query, Body> {
     }
 
     decode(request: Request): DecodedRequest<Params, Query, Body> {
-        var decoded = new DecodedRequest<Params, Query, Body>();
+        const decoded = new DecodedRequest<Params, Query, Body>();
         decoded.headers = request.headers
         const contentType = ContentType.fromString(request.headers['Content-Type']);
 
         // Todo: augment thrown errors here by indicating if they origin in body, params or query
-        decoded.body = this.bodyDecoder.decodeContent(contentType, request.body as string)
+        decoded.body = this.bodyDecoder.decodeContent(contentType, request.body)
         decoded.params = this.parametersDecoder.decode(request.params)
         decoded.query = this.queryDecoder.decode(request.query)
         return decoded

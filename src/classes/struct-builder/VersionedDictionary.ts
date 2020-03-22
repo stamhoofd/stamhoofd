@@ -26,12 +26,12 @@ export class VersionedDictionary extends Struct {
         base.name = "Version" + this.versions.length;
     }
 
-    internalName(type: boolean): string {
+    internalName(_: boolean): string {
         return this.name;
     }
 
     definition() {
-        var def = "";
+        let def = "";
 
         def += this.versions.map((type) => {
             return type.externalDefinition(this.namespace);

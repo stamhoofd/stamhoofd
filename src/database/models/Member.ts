@@ -13,7 +13,7 @@ export class Member extends Model {
     firstName: string;
 
     @column()
-    lastName: string = "";
+    lastName = "";
 
     @column()
     gender: Gender = Gender.Other;
@@ -42,7 +42,7 @@ export class Member extends Model {
     group: Group | null = null;*/
 
     @column()
-    paid: boolean = false;
+    paid = false;
 
     @column()
     createdOn: Date = new Date("1970-01-01");

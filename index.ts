@@ -9,7 +9,7 @@ process.on('unhandledRejection', error => {
 
 const start = async () => {
     try {
-        var member = new Member();
+        const member = new Member();
 
         member.id = 123;
         member.firstName = "Simon";

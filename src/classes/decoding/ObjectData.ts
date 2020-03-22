@@ -32,12 +32,12 @@ export class ObjectData implements Data {
 
     index(number: number): Data {
         // todo: throw
-        return new ObjectData((this.data as any)[number])
+        return new ObjectData((this.data)[number])
     }
 
     field(field: string): Data {
         if (this.data && this.data[field]) {
-            return new ObjectData((this.data as any)[field])
+            return new ObjectData((this.data)[field])
         }
         throw new Error(`Field ${field} expected`);
     }

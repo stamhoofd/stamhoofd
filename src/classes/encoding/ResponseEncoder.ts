@@ -12,7 +12,7 @@ export class ResponseEncoder<Body> {
     }
 
     encode(request: Request, response: Response<Body>): EncodedResponse {
-        var encoded = new EncodedResponse();
+        const encoded = new EncodedResponse();
         encoded.headers = response.headers
 
         const contentType = ContentType.fromString(request.headers['Accept']);

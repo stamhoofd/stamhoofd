@@ -9,7 +9,7 @@ export class ArrayDecoder<T> implements Decoder<T[]> {
 
     decode(data: any): T[] {
         if (Array.isArray(data)) {
-            return (data as (any[])).map(el => this.decoder.decode(el))
+            return data.map(el => this.decoder.decode(el))
         } else {
             if (data.value && Array.isArray(data.value)) {
                 // Data

@@ -14,14 +14,14 @@ server.listen(8080);
 
 // Test endpoint
 const createMemberEndpoint = new CreateMember()
-var r = new Request();
+const r = new Request();
 r.body = JSON.stringify({
     name: "Simon",
 });
 r.headers['Content-Type'] = "application/MemberStructV1";
 r.headers['Accept'] = "application/CreatedMemberStructV2";
 
-var response = createMemberEndpoint.run(r);
+const response = createMemberEndpoint.run(r);
 if (response) {
     console.log(response.body)
 }

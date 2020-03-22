@@ -1,7 +1,7 @@
 import { Model } from "../classes/Model";
 
-export function manyToOne(field: string) {
-    return (target: Model, key) => {
+export function manyToOne(_field: string) {
+    return (_target: Model, _key) => {
         //target.relations.push(key)
     };
 }

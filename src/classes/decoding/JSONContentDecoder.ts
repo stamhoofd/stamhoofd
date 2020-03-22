@@ -27,7 +27,7 @@ export class JSONContentDecoder<T> implements ContentDecoder<any, T> {
         }
 
         // todo: implement
-        var d = new ObjectData(JSON.parse(data));
+        const d = new ObjectData(JSON.parse(data));
         return decoder.decodeContent(contentType, d)
     }
 }

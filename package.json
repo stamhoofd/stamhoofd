@@ -7,6 +7,7 @@
     "type": "module",
     "scripts": {
         "start": "NODE_ENV=development ts-node .",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "generate": "ts-node generate.ts",
         "watch": "nodemon"
     },

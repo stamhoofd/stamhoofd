@@ -12,9 +12,9 @@ export class Model {
 
     /// Load this model from a DB response
     static fromRow<T extends typeof Model>(row: object): InstanceType<T> {
-        var model = new this() as InstanceType<T>
+        const model = new this() as InstanceType<T>
         for (const key in row) {
-            if (row.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(row, key)) {
                 const value = row[key];
 
                 // todo: check column mapping here!
@@ -48,7 +48,7 @@ export class Model {
             console.log(`Updating ${this.constructor.name} where ${this.primaryKey} = ${id}`);
         }
 
-        var set = {}
+        const set = {}
 
         for (const key in this.updatedProperties) {
             console.log("Saved property " + key + " to " + this[key]);
@@ -58,11 +58,11 @@ export class Model {
 
         // todo: save here
         if (!id) {
-            const [result, _] = await Database.insert("insert into `members` SET ?", [set])
+            const [result] = await Database.insert("insert into `members` SET ?", [set])
             this[this.primaryKey] = result.insertId
             console.log(`New id = ${this[this.primaryKey]}`);
         } else {
-            const [result, _] = await Database.update("update `members` SET ? where `" + this.primaryKey + "` = ?", [set, id])
+            const [result] = await Database.update("update `members` SET ? where `" + this.primaryKey + "` = ?", [set, id])
             if (result.changedRows != 1) {
                 console.warn(`Updated ${this.constructor.name}, but it didn't change a row. Check if ID exists.`)
             }

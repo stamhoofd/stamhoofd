@@ -9,7 +9,6 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "baseUrl": "./src",
         "strictNullChecks": true,
         "types": [
             "node"
@@ -28,7 +27,7 @@
         "src/**/*.tsx",
         "tests/**/*.ts",
         "tests/**/*.tsx",
-        "index-def-test.ts"
+        "*.ts"
     ],
     "exclude": [
         "node_modules"

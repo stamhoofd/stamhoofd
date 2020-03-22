@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export abstract class Struct {
-    didExport: boolean = false;
+    didExport = false;
     namespace: string | null = null;
 
     abstract internalName(type: boolean): string

@@ -22,9 +22,9 @@ export class Dictionary extends Struct {
     }
 
     remove(removedKeys: string[]): Dictionary {
-        var keys = {};
+        const keys = {};
         for (const key in this.keys) {
-            if (this.keys.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
                 if (!removedKeys.includes(key)) {
                     const struct = this.keys[key];
                     keys[key] = struct;
@@ -36,10 +36,10 @@ export class Dictionary extends Struct {
     }
 
     add(addedKeys: Keys): Dictionary {
-        var keys = Object.assign({}, this.keys);
+        const keys = Object.assign({}, this.keys);
 
         for (const key in addedKeys) {
-            if (addedKeys.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(addedKeys, key)) {
                 const struct = addedKeys[key];
                 keys[key] = struct;
             }
@@ -47,6 +47,7 @@ export class Dictionary extends Struct {
         return new Dictionary(this.name, keys)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     internalName(type: boolean): string {
         return this.name;
     }
@@ -56,13 +57,11 @@ export class Dictionary extends Struct {
     }
 
     definition() {
-        var defOther = "";
-        var def = "export class " + this.internalName(true) + " /* static implements ContentEncoder<" + this.internalName(true) + ", any>, ContentDecoder<Data, " + this.internalName(true) + "> */{\n"
+        let def = "export class " + this.internalName(true) + " /* static implements ContentEncoder<" + this.internalName(true) + ", any>, ContentDecoder<Data, " + this.internalName(true) + "> */{\n"
 
         for (const key in this.keys) {
-            if (this.keys.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
                 const struct = this.keys[key];
-                defOther += struct.export();
                 def += "    " + key + ": " + struct.externalName(true) + "\n";
             }
         }
@@ -75,7 +74,7 @@ export class Dictionary extends Struct {
         def += "    " + "    " + "const d = new " + this.internalName(true) + "();\n";
 
         for (const key in this.keys) {
-            if (this.keys.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.keys, key)) {
                 const struct = this.keys[key];
 
                 def += "    " + "    " + "d." + key + " = data.field(\"" + key + "\").decode(" + struct.externalName(false, this.namespace) + ");\n";

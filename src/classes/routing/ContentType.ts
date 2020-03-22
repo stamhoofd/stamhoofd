@@ -17,21 +17,19 @@ export class ContentType {
     }
 
     toString(): string {
-        var params = "";
+        let params = "";
         for (const attribute in this.parameters) {
-            if (this.parameters.hasOwnProperty(attribute)) {
-                // todo: fix encoding here!
-                params += ";" + attribute + "=" + this.parameters[attribute];
-            }
+            // todo: fix encoding here!
+            params += ";" + attribute + "=" + this.parameters[attribute];
         }
         return this.name + (this.suffix ? "+" + this.suffix : "") + params;
     }
 
     static fromString(text: string): ContentType {
-        var split = text.split(";");
-        var name = (split[0] || "").trim().toLowerCase();
-        var suffix: string | null = null;
-        var parameters: Parameters = {};
+        const split = text.split(";");
+        let name = (split[0] || "").trim().toLowerCase();
+        let suffix: string | null = null;
+        const parameters: Parameters = {};
 
         const last = name.lastIndexOf("+");
         if (last != -1) {
@@ -74,7 +72,7 @@ export class ContentType {
         }
 
         for (const attribute in this.parameters) {
-            if (this.parameters.hasOwnProperty(attribute)) {
+            if (Object.prototype.hasOwnProperty.call(this.parameters, attribute)) {
                 if (contentType.parameters[attribute] != this.parameters[attribute]) {
                     return false;
                 }

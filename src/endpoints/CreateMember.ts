@@ -40,7 +40,7 @@ class MemberModel /* static implements ContentEncoder<MemberModel> */ {
     }
 
     static encodeContent(contentType: ContentType, data: MemberModel): Member.All {
-        var s: Member.All;
+        let s: Member.All;
 
         if (Member.Version1.getContentTypes().some(type => type.matches(contentType))) {
             s = new Member.Version1();
@@ -54,7 +54,7 @@ class MemberModel /* static implements ContentEncoder<MemberModel> */ {
         }
 
         s.records = data.records.map(r => {
-            var record = new Record()
+            const record = new Record()
             record.name = r
             return record
         })
@@ -79,7 +79,7 @@ export class CreateMember extends Endpoint<Params, Query, RequestBody, ResponseB
 
     protected handle(request: DecodedRequest<Params, Query, RequestBody>): Response<ResponseBody> {
         // Create the member model here
-        var model = new MemberModel();
+        const model = new MemberModel();
 
         model.id = 123
         model.phone = "onbekend"
