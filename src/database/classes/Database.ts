@@ -1,0 +1,101 @@
+import mysql from 'mysql'
+
+// create the connection to database
+// Create the connection pool. The pool-specific settings are the defaults
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'stamhoofd',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+});
+
+pool.on('acquire', function (connection) {
+    console.log('Connection %d acquired', connection.threadId);
+});
+
+pool.on('connection', function (connection) {
+    console.log('Connection %d created', connection.threadId);
+});
+
+pool.on('enqueue', function () {
+    console.log('Waiting for available connection slot');
+});
+
+pool.on('release', function (connection) {
+    console.log('Connection %d released', connection.threadId);
+});
+
+/// Database is a wrapper arround mysql, because we want to use promises + types
+export const Database = {
+    async getConnection(): Promise<mysql.PoolConnection> {
+        // Todo: use the settings here to provide a good connection pool
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection) => {
+                if (err) {
+                    console.error("connection failed")
+                    return reject(err)
+                }
+                return resolve(connection)
+            })
+        });
+    },
+
+    async select(query: string, values: any): Promise<[any[], mysql.FieldInfo[]]> {
+        const connection = await this.getConnection();
+        return new Promise((resolve, reject) => {
+            connection.query(query, values, (err, results, fields) => {
+                connection.release();
+
+                if (err) {
+                    return reject(err)
+                }
+                return resolve([results, fields])
+            })
+        });
+    },
+
+    async insert(query: string, values: any): Promise<[{ insertId: any }, mysql.FieldInfo[]]> {
+        const connection = await this.getConnection();
+        return new Promise((resolve, reject) => {
+            connection.query(query, values, (err, results, fields) => {
+                connection.release();
+
+                if (err) {
+                    return reject(err)
+                }
+                return resolve([results, fields])
+            })
+        });
+    },
+
+    async update(query: string, values: any): Promise<[{ changedRows: number }, mysql.FieldInfo[]]> {
+        const connection = await this.getConnection();
+        return new Promise((resolve, reject) => {
+            connection.query(query, values, (err, results, fields) => {
+                connection.release();
+
+                if (err) {
+                    return reject(err)
+                }
+                return resolve([results, fields])
+            })
+        });
+    },
+
+    async delete(query: string, values: any): Promise<[{ affectedRows: number }, mysql.FieldInfo[]]> {
+        const connection = await this.getConnection();
+        return new Promise((resolve, reject) => {
+            connection.query(query, values, (err, results, fields) => {
+                connection.release();
+
+                if (err) {
+                    return reject(err)
+                }
+                return resolve([results, fields])
+            })
+        });
+    }
+};

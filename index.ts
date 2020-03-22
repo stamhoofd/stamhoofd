@@ -1,41 +1,29 @@
-import http from "http";
-import { CreateMember } from './src/endpoints/CreateMember';
-import { Request } from './src/classes/routing/Request';
+import { Member } from "./src/database/models/Member"
 
-const requestListener = function (req: http.IncomingMessage, res: http.ServerResponse) {
-    res.writeHead(200);
-    res.end("Hello, World!");
+process.on('unhandledRejection', error => {
+    // Will print "unhandledRejection err is not defined"
+    console.error('unhandledRejection', error);
+});
+
+
+
+const start = async () => {
+    try {
+        var member = new Member();
+
+        member.id = 123;
+        member.firstName = "Simon";
+
+        member.save();
+        member.firstName = "Simon";
+        member.lastName = "Backx";
+
+        await member.save();
+
+    } catch (e) {
+        console.error("Failed to save member: ", e);
+    }
+
 };
 
-const server = http.createServer(requestListener);
-
-console.log("Starting server...");
-server.listen(8080);
-
-// Test endpoint
-const createMemberEndpoint = new CreateMember()
-var r = new Request();
-r.body = JSON.stringify({
-    name: "Simon",
-});
-r.headers['Content-Type'] = "application/MemberStructV1";
-r.headers['Accept'] = "application/CreatedMemberStructV2";
-
-var response = createMemberEndpoint.run(r);
-if (response) {
-    console.log(response.body)
-}
-
-/*
-console.log("Start benchmarking");
-const requestCount = 10000000
-const begin = process.hrtime();
-
-for (let index = 0; index < requestCount; index++) {
-    var response = createMemberEndpoint.run(r);
-}
-const nanoSeconds = process.hrtime(begin).reduce((sec, nano) => sec * 1e9 + nano)
-const seconds = nanoSeconds / 1000 / 1000 / 1000
-console.log("Total duration: ", nanoSeconds, seconds);
-console.log("Requests per second: ", requestCount / seconds);
-*/
+start();
