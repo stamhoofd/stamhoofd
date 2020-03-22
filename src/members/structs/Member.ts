@@ -1,7 +1,7 @@
-import { Dictionary } from "../classes/struct-builder/Dictionary";
-import { String } from "../classes/struct-builder/String";
-import { Array } from "../classes/struct-builder/Array";
-import { VersionedDictionary } from '../classes/struct-builder/VersionedDictionary';
+import { Dictionary } from "../../classes/struct-builder/Dictionary";
+import { String } from "../../classes/struct-builder/String";
+import { Array } from "../../classes/struct-builder/Array";
+import { VersionedDictionary } from '../../classes/struct-builder/VersionedDictionary';
 
 export { String };
 export const record = new Dictionary("Record", {

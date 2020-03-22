@@ -1,4 +1,4 @@
-import { member, record } from './src/structs/Member';
+import { member, record } from './src/members/structs/Member';
 import path from 'path';
 import { Struct } from './src/classes/struct-builder/Struct';
 

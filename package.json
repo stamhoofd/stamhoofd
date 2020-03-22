@@ -7,7 +7,7 @@
     "scripts": {
         "start": "NODE_ENV=development ts-node .",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "generate": "ts-node generate.ts",
+        "generate": "TZ=utc ts-node generate.ts",
         "watch": "nodemon"
     },
     "devDependencies": {

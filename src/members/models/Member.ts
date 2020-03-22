@@ -1,8 +1,8 @@
 import { Gender } from './Gender';
 import { Address } from './Address';
-import { Model } from '../classes/Model';
-import { column } from '../decorators/Column';
-import { manyToOne } from '../decorators/manyToOne';
+import { Model } from '../../database/classes/Model';
+import { column } from '../../database/decorators/Column';
+import { manyToOne } from '../../database/decorators/manyToOne';
 
 export class Member extends Model {
     // All columns
@@ -25,13 +25,13 @@ export class Member extends Model {
     mail: string | null = null;
 
     @column()
-    birthDay: Date = new Date("1970-01-01");
+    birthDay: Date | null = null;
 
     @column()
-    address_id: number | null = null; // null = no address
+    addressId: number | null = null; // null = no address
 
     /// Relations
-    @manyToOne("address_id")
+    @manyToOne("addressId")
     address: Address | null; // undefined = relation not loaded
 
     /*parents: Parent[] = [];
@@ -41,9 +41,7 @@ export class Member extends Model {
 
     group: Group | null = null;*/
 
-    @column()
-    paid = false;
 
     @column()
-    createdOn: Date = new Date("1970-01-01");
+    createdOn: Date = new Date();
 }

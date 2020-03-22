@@ -2,9 +2,6 @@ import { Model } from "../classes/Model"
 
 export function column(settings?: { primary: boolean }) {
     return (target: Model, key) => {
-        console.log(target);
-        console.log(key);
-
         if (!target.properties) {
             target.properties = []
         }
@@ -26,7 +23,9 @@ export function column(settings?: { primary: boolean }) {
                 if (target["_" + key] !== val) {
                     target["_" + key] = val;
                     this.updatedProperties[key] = true;
-                    console.log("Updated property " + key + " to " + this[key]);
+
+                    if (target.debug)
+                        console.log("Updated property " + key + " to " + this[key]);
                 }
             }
         });
