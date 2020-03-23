@@ -5,16 +5,51 @@ import { ToOneRelation } from './ToOneRelation'
 
 export class Model {
     static primaryKey: string
+
+    /**
+     * Properties that are stored in the table (including foreign keys, but without mapped relations!)
+     */
     static properties: string[]
     static debug = true
     static table: string // override this!
-    static relations: ToOneRelation[]
+    static relations: ToOneRelation<string, typeof Model>[]
 
     existsInDatabase = false
     updatedProperties = {}
 
     constructor() {
         // Read values
+        if (!this.static.relations) {
+            this.static.relations = []
+        }
+    }
+
+    /**
+     * 
+     * @param relation name of the relation you want to load
+     * @param sameFetch Whether you also want to load this relation on other models that were fetched from the database in the same query as the current model
+     */
+    isLoaded<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>): this is (this & Record<Key, InstanceType<T> | null>) {
+        if (!this.existsInDatabase) {
+            /// Can't have a relation by any chance
+            // Set the relation to null if not set = no relation
+            (this as any)[relation.modelKey] = (this as any)[relation.modelKey] || null
+            return true
+        }
+        return (this as any)[relation.modelKey] !== undefined
+    }
+
+    /**
+     * Same as isLoaded, but also requires the relation to be already set
+     */
+    hasRelation<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>): this is (this & Record<Key, InstanceType<T>>) {
+        return (this as any)[relation.modelKey] !== undefined && (this as any)[relation.modelKey] !== null
+    }
+
+    setRelation<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>, value: InstanceType<T>): this is (this & Record<Key, InstanceType<T>>) {
+        (this as any)[relation.modelKey] = value
+        // Maybe also set the foreign key?
+        return true
     }
 
     /// Load this model from a DB response (it is possible to not load all fields)
@@ -47,11 +82,20 @@ export class Model {
         return this.constructor as typeof Model;
     }
 
+    getPrimaryKey(): number | null {
+        return this[this.static.primaryKey]
+    }
+
+
     /**
      * 
      * @param force: Save all defined properties, even when no propery is modified. This is enabled by default is the model is not yet inserted in the database yet.
      */
     async save(force = false): Promise<void> {
+        if (!this.static.table) {
+            throw new Error("Table name not set")
+        }
+        console.log("Saving to table ", this.static.table)
 
         if (!this.static.primaryKey) {
             throw new Error("Primary key not set for model " + this.constructor.name + " " + this.static);
@@ -84,13 +128,24 @@ export class Model {
             // Only check if all updated properties are defined
         }
 
+        // Check if relation models were modified
+        this.static.relations.forEach(relation => {
+            if (this.hasRelation(relation) && !this.updatedProperties[relation.foreignKey]) {
+                if (this[relation.modelKey]) {
+                    const model = this[relation.modelKey]
+                    if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as any as number) {
+                        this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
+                    }
+                }
+
+            }
+        })
+
         if (Object.keys(this.updatedProperties).length == 0) {
             if (!force) {
                 console.warn("Tried to update model without any properties modified")
                 return;
             }
-
-
         }
 
         if (force) {
@@ -109,8 +164,7 @@ export class Model {
         const set = {}
 
         for (const key in this.updatedProperties) {
-            if (this.static.debug)
-                console.log("Saved property " + key + " to " + this[key]);
+
             set[key] = this[key];
 
             if (set[key] === undefined) {
@@ -118,15 +172,18 @@ export class Model {
             }
         }
 
+        if (this.static.debug)
+            console.log("Saving " + this.constructor.name + " to...", set);
+
 
         // todo: save here
         if (!id) {
-            const [result] = await Database.insert("insert into `members` SET ?", [set])
+            const [result] = await Database.insert("insert into `" + this.static.table + "` SET ?", [set])
             this[this.static.primaryKey] = result.insertId
             if (this.static.debug)
                 console.log(`New id = ${this[this.static.primaryKey]}`);
         } else {
-            const [result] = await Database.update("update `members` SET ? where `" + this.static.primaryKey + "` = ?", [set, id])
+            const [result] = await Database.update("update `" + this.static.table + "` SET ? where `" + this.static.primaryKey + "` = ?", [set, id])
             if (result.changedRows != 1) {
                 try {
                     console.log(Stack.parentFile)

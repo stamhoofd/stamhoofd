@@ -3,6 +3,7 @@ import { Address } from './Address';
 import { Model } from '../../database/classes/Model';
 import { column } from '../../database/decorators/Column';
 import { manyToOne } from '../../database/decorators/manyToOne';
+import { ToOneRelation } from '../../database/classes/ToOneRelation';
 
 export class Member extends Model {
     static table = "members"
@@ -29,12 +30,14 @@ export class Member extends Model {
     @column()
     birthDay: Date | null = null;
 
-    @column()
+    @column({ relation: Member.address })
     addressId: number | null = null; // null = no address
 
     /// Relations
-    @manyToOne({ key: "addressId", model: Address })
-    address: Address | null; // undefined = relation not loaded
+    /*@manyToOne({ key: "addressId", model: Address })
+    address: Address | null; // undefined = relation not loaded*/
+
+    static address = new ToOneRelation(Address, "address")
 
     /*parents: Parent[] = [];
     emergencyContacts: EmergencyContact[] = [];

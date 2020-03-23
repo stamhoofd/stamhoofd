@@ -10,7 +10,7 @@ export class Query<T extends typeof Model> {
     table: string; // trusted
     select: string[] | null = null // trusted
     _where: Where[] | null = null
-    _with: ToOneRelation[] | null = null
+    _with: ToOneRelation<string, typeof Model>[] | null = null
 
     cast: T | undefined;
 
@@ -37,12 +37,13 @@ export class Query<T extends typeof Model> {
     }
 
     /// Join a * to one relation
-    with(...relations: ToOneRelation[]): this {
+    // todo: make sure the return type now also contains key Key
+    with<Key extends string, M extends typeof Model>(relation: ToOneRelation<Key, M>): this {
         if (!this._with) {
-            this._with = relations;
+            this._with = [relation];
             return this
         }
-        this._with?.push(...relations)
+        this._with?.push(relation)
         return this
     }
 
@@ -85,9 +86,9 @@ export class Query<T extends typeof Model> {
 
         console.log(results)
         if (this.cast) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const cast = this.cast
             return results.map(row => {
-                const model = this.cast!.fromRow(row["this"]) as any
+                const model = cast.fromRow(row["this"])
                 if (this._with) {
                     this._with.forEach(w => {
                         // Check if relation has been loaded
@@ -102,8 +103,6 @@ export class Query<T extends typeof Model> {
                         }
                     });
                 }
-
-                console.log(model)
                 return model;
             })
         }
