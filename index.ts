@@ -1,4 +1,5 @@
 import { Member } from "./src/members/models/Member"
+import { Model } from './src/database/classes/Model';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error("unhandledRejection")
@@ -16,15 +17,20 @@ if (new Date().getTimezoneOffset() != 0) {
 
 const start = async () => {
     try {
-        const member = new Member();
+        const [found] = await Member.where({ key: "id", value: 9999 }).get()
+        let member: Member
+        if (found) {
+            console.log("Found member " + found.firstName)
+            member = found
+        } else {
+            console.log("Didn't find member")
+            member = new Member();
+        }
 
-        member.firstName = "Simon";
-
-        await member.save();
         member.firstName = "Simon";
         member.lastName = "Backx";
 
-        await member.save();
+        await member.save(true);
         member.lastName = "";
         member.lastName = "Backx";
         await member.save();
