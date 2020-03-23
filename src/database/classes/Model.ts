@@ -1,16 +1,17 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
 import { Query, Where } from './Query'
+import { ToOneRelation } from './ToOneRelation'
 
 export class Model {
     static primaryKey: string
     static properties: string[]
     static debug = true
-    static table = "members"
+    static table: string // override this!
+    static relations: ToOneRelation[]
 
     existsInDatabase = false
     updatedProperties = {}
-    relations: string[] = []
 
     constructor() {
         // Read values

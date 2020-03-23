@@ -5,6 +5,8 @@ import { column } from '../../database/decorators/Column';
 import { manyToOne } from '../../database/decorators/manyToOne';
 
 export class Member extends Model {
+    static table = "members"
+
     // All columns
     @column({ primary: true })
     id: number | null = null;
@@ -31,7 +33,7 @@ export class Member extends Model {
     addressId: number | null = null; // null = no address
 
     /// Relations
-    @manyToOne("addressId")
+    @manyToOne({ key: "addressId", model: Address })
     address: Address | null; // undefined = relation not loaded
 
     /*parents: Parent[] = [];

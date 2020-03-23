@@ -17,7 +17,7 @@ if (new Date().getTimezoneOffset() != 0) {
 
 const start = async () => {
     try {
-        const [found] = await Member.where({ key: "id", value: 9999 }).get()
+        const [found] = await Member.where({ key: "id", value: 1 }).with(Member.relations[0]).get()
         let member: Member
         if (found) {
             console.log("Found member " + found.firstName)

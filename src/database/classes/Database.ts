@@ -50,7 +50,7 @@ export const Database = {
     async select(query: string, values?: any): Promise<[any[], mysql.FieldInfo[]]> {
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
-            connection.query(query, values, (err, results, fields) => {
+            connection.query({ sql: query, nestTables: true, values: values }, (err, results, fields) => {
                 connection.release();
 
                 if (err) {
