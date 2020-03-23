@@ -1,10 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Model } from './Model'
-import { RelationWithForeignKey } from './Relation'
+import { ToOneRelation } from './Relation'
 import { OptionalRelation } from './OptionalRelation'
+import { Query, RowInitiable } from './Query'
 
 
-export class ManyToOneRelation<Key extends string, T extends typeof Model> implements RelationWithForeignKey<Key, InstanceType<T>> {
+export class ManyToOneRelation<Key extends string, A, B extends Model> implements ToOneRelation<Key, A, B> {
     /** The key where the referenced primary key is saved */
     foreignKey: string
 
@@ -12,29 +13,36 @@ export class ManyToOneRelation<Key extends string, T extends typeof Model> imple
     modelKey: Key
 
     /** Model of the referenced table */
-    model: T
+    modelA: A
+    modelB: B
 
-    constructor(model: T, modelKey: Key, foreignKey?: string) {
-        this.model = model
+    constructor(modelA: A, modelB: B, modelKey: Key, foreignKey?: string) {
+        this.modelA = modelA
+        this.modelB = modelB
         this.modelKey = modelKey
         if (foreignKey) {
             this.foreignKey = foreignKey
         }
     }
 
-    fromRow(row: any): InstanceType<T> {
-        if (row[this.modelKey][this.model.primaryKey] !== null) {
-            return this.model.fromRow(row[this.modelKey])
+    query(model: A & Model): Query<B> {
+        throw new Error("Method not implemented.")
+    }
+
+    fromRow(row: any): B {
+        const copy = Object.assign({}, this.modelB) as B;
+        if (row[this.modelKey][this.modelB.static.primaryKey] !== null) {
+            return copy.fromRow(row[this.modelKey])
         }
         throw new Error("Expected relation to be loaded");
     }
 
-    getQuery(): string {
+    getJoin(): string {
         if (this.foreignKey === undefined) {
             throw new Error("ToOneRelation " + this.modelKey + " has no foreign key set. Please make sure you added a @column which references this relation!")
         }
 
-        return `JOIN \`${this.model.table}\` as \`${this.modelKey}\` ON \`${this.modelKey}\`.\`${this.model.primaryKey}\` = \`this\`.\`${this.foreignKey}\``;
+        return `JOIN \`${this.modelB.static.table}\` as \`${this.modelKey}\` ON \`${this.modelKey}\`.\`${this.modelB.static.primaryKey}\` = \`this\`.\`${this.foreignKey}\``;
     }
 
     prepare?(target: any, key) {
@@ -45,7 +53,7 @@ export class ManyToOneRelation<Key extends string, T extends typeof Model> imple
         this.foreignKey = key
     }
 
-    optional(): OptionalRelation<Key, T> {
+    optional(): OptionalRelation<Key, A, B> {
         return new OptionalRelation(this)
     }
 }

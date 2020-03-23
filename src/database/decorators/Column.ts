@@ -1,7 +1,7 @@
 import { Model } from '../classes/Model';
-import { RelationWithForeignKey } from '../classes/Relation';
+import { ToOneRelation } from '../classes/Relation';
 
-export function column<K extends string | never>(settings?: { primary?: boolean; foreignKey?: RelationWithForeignKey<K, any> }) {
+export function column<K extends string | never>(settings?: { primary?: boolean; foreignKey?: ToOneRelation<K, any> }) {
     return (target: any /* future typeof Model */, key) => {
         if (!target.constructor.properties) {
             target.constructor.properties = []

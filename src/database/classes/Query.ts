@@ -1,5 +1,6 @@
 import { Database } from './Database';
-import { Relation } from './Relation';
+import { Relation, ToOneRelation, isToOneRelation, isToManyRelation } from './Relation';
+import { Model } from './Model';
 
 type Types = "select" | "update"
 export type Where = { key: string; value: any; type?: string }
@@ -12,7 +13,7 @@ export class Query<I> {
     table: string; // trusted
     select: string[] | null = null // trusted
     _where: Where[] | null = null
-    _with: Relation<string, any>[] | null = null
+    _with: ToOneRelation<string, any, any>[] | null = null
 
     cast: RowInitiable<I> | undefined;
 
@@ -32,6 +33,12 @@ export class Query<I> {
         return query
     }
 
+    doSelect<Keys>(keys: Keys[]): QueryWithKeys<I, Keys>
+    doSelect<Keys, M>(keys: Keys[], relation?: Relation<any, any, M>): QueryWithKeys<M, Keys>
+    doSelect<Keys, M>(keys: Keys[], relation?: Relation<any, any, M>): QueryWithKeys<I, Keys> | QueryWithKeys<M, Keys> {
+        return this as any
+    }
+
     where(...where: Where[]): this {
         if (!this._where) {
             this._where = where;
@@ -43,7 +50,7 @@ export class Query<I> {
 
     /// Join a * to one relation
     // todo: make sure the return type now also contains key Key
-    with<Key extends string, M>(relation: Relation<Key, M>): QueryWithKey<I, Key, M> {
+    with<Key extends string, M>(relation: ToOneRelation<Key, any, M>): QueryWithKey<I, Key, M> {
         if (!this._with) {
             this._with = [relation];
             return this as any
@@ -68,7 +75,8 @@ export class Query<I> {
         // Join
         if (this._with) {
             this._with.forEach(w => {
-                query += "\n\t" + w.getQuery()
+                if (isToOneRelation(w))
+                    query += "\n\t" + w.getJoin()
             })
         }
 
@@ -95,25 +103,23 @@ export class Query<I> {
                 const model = cast.fromRow(row["this"])
                 if (this._with) {
                     this._with.forEach(w => {
-                        model[w.modelKey] = w.fromRow(row)
-                        /*
-                        // Check if relation has been loaded
-                        if (row[w.modelKey][w.model.primaryKey] !== null) {
-                            model[w.modelKey] = w.model.fromRow(row[w.modelKey])
-                        } else {
-                            console.log("Relation " + w.modelKey + " not set")
+                        if (isToOneRelation(w))
+                            model[w.modelKey] = w.fromRow(row)
 
-                            // Mark the relation as loaded (by setting it to null, since it is an optional relation)
-                            // undefined = not loaded, null = loaded but not set
-                            model[w.modelKey] = null;
-                        }*/
                     });
                 }
                 return model;
             })
+
+
+
+        } else {
+            throw new Error("Cannot run query when cast is undefined")
         }
         return results
     }
 }
 
 type QueryWithKey<I, Key extends keyof any, KeyType> = Query<I & Record<Key, KeyType>>
+
+type QueryWithKeys<I, Keys> = Query<Extract<I, Keys>>

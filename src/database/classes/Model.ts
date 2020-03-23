@@ -1,7 +1,7 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
 import { Query, Where, RowInitiable } from './Query'
-import { Relation, RelationWithForeignKey } from './Relation'
+import { Relation, ToOneRelation } from './Relation'
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string
@@ -12,7 +12,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     static properties: string[]
     static debug = true
     static table: string // override this!
-    static relations: RelationWithForeignKey<string, any>[]
+    static relations: ToOneRelation<string, Model, any>[]
 
     existsInDatabase = false
     updatedProperties = {}
@@ -29,38 +29,36 @@ export class Model /* static implements RowInitiable<Model> */ {
      * @param relation name of the relation you want to load
      * @param sameFetch Whether you also want to load this relation on other models that were fetched from the database in the same query as the current model
      */
-    isLoaded<Key extends string, T>(relation: Relation<Key, T>): this is (this & Record<Key, T>) {
+    isLoaded<Key extends string, T>(relation: Relation<Key, this, T>): this is (this & Record<Key, T>) {
         return (this as any)[relation.modelKey] !== undefined
     }
 
     /**
      * Same as isLoaded, but also requires the relation to be already set and not equal null
      */
-    hasRelation<Key extends string, T>(relation: Relation<Key, T>): this is (this & Record<Key, NonNullable<T>>) {
+    hasRelation<Key extends string, T>(relation: Relation<Key, this, T>): this is (this & Record<Key, NonNullable<T>>) {
         return (this as any)[relation.modelKey] !== undefined && (this as any)[relation.modelKey] !== null
     }
 
-    setRelation<Key extends string, T, V extends T>(relation: Relation<Key, T>, value: V): this & Record<Key, V> {
+    setRelation<Key extends string, T, V extends T>(relation: Relation<Key, this, T>, value: V): this & Record<Key, V> {
         (this as any)[relation.modelKey] = value
         // Maybe also set the foreign key?
         return this as any
     }
 
     /// Load this model from a DB response (it is possible to not load all fields)
-    static fromRow<T extends typeof Model>(this: T, row: object): InstanceType<T> {
-        const model = new this() as InstanceType<T>
-
-        this.properties.forEach(key => {
+    fromRow(row: any): this {
+        this.static.properties.forEach(key => {
             if (row[key] !== undefined) {
                 const value = row[key];
 
                 // todo: check column name mapping here
-                model[key] = value;
+                this[key] = value;
             }
         })
 
-        model.markSaved()
-        return model;
+        this.markSaved()
+        return this;
     }
 
     private markSaved() {
@@ -72,7 +70,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         return new Query("select", this.table, this as any as RowInitiable<InstanceType<T>>).where(...where)
     }
 
-    private get static(): typeof Model {
+    get static(): typeof Model {
         return this.constructor as typeof Model;
     }
 
