@@ -1,5 +1,6 @@
 import { Member } from "./src/members/models/Member"
 import { Address } from './src/members/models/Address';
+import { RelationLoaded, RelationSet } from './src/database/classes/ToOneRelation';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error("unhandledRejection")
@@ -18,26 +19,40 @@ if (new Date().getTimezoneOffset() != 0) {
 const start = async () => {
     try {
         const [found] = await Member.where({ key: "id", value: 67 }).with(Member.address).get()
-        let member: Member
+        let member: Member & RelationSet<typeof Member.address>;
+
         if (found) {
             console.log("Found member " + found.firstName)
-            member = found
-        } else {
-            console.log("Didn't find member")
-            member = new Member();
-        }
 
-        if (!member.isLoaded(Member.address)) {
-            throw new Error("Member addresss should have been loaded by now");
-        }
-
-        if (!member.hasRelation(Member.address)) {
-            member.address = new Address()
-
-            if (!member.hasRelation(Member.address)) {
-                throw new Error("Failed to set address");
+            // Move address of Simon
+            if (!found.hasRelation(Member.address)) {
+                const address = new Address()
+                address.city = "Moved"
+                address.country = "BE"
+                address.street = "Straatnaam"
+                address.number = "123"
+                address.postalCode = "9000"
+                await address.save()
+                member = found.setRelation(Member.address, address)
+            } else {
+                member = found
             }
 
+        } else {
+            console.log("Didn't find member")
+            const address = new Address()
+            address.city = "Demo"
+            address.country = "BE"
+            address.street = "Straatnaam"
+            address.number = "123"
+            address.postalCode = "9000"
+            await address.save()
+
+            member = new Member().setRelation(Member.address, address);
+        }
+
+        /*if (!member.hasRelation(Member.address)) {
+            member = member.setRelation(Member.address, new Address())
             member.address.city = "Demo"
             member.address.country = "BE"
             member.address.street = "Straatnaam"
@@ -54,7 +69,9 @@ const start = async () => {
             member.address.number = "123"
             member.address.postalCode = "9000"
             await member.address.save()
-        }
+        }*/
+
+        member.logCountry()
 
         console.log(`${member.firstName} woont in ${member.address.city}`);
 

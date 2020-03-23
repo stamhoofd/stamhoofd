@@ -1,27 +1,32 @@
 import { Database } from './Database';
-import { Model } from './Model';
-import { ToOneRelation } from './ToOneRelation';
+import { Relation } from './ToOneRelation';
 
 type Types = "select" | "update"
 export type Where = { key: string; value: any; type?: string }
 
-export class Query<T extends typeof Model> {
+export type RowInitiable<T> = { fromRow(row: any): T }
+
+
+export class Query<I> {
     type: Types = "select"
     table: string; // trusted
     select: string[] | null = null // trusted
     _where: Where[] | null = null
-    _with: ToOneRelation<string, typeof Model>[] | null = null
+    _with: Relation<string, any>[] | null = null
 
-    cast: T | undefined;
+    cast: RowInitiable<I> | undefined;
 
-    constructor(type: Types, table: string, cast?: T) {
+    constructor(type: Types, table: string, cast?: RowInitiable<I>) {
         this.type = type
         this.table = table
         this.cast = cast
     }
 
-    as<B extends typeof Model>(cast: B) {
-        const query = new Query<B>(this.type, this.table, cast)
+    /**
+     * @param cast Modify the casted value to use this RowInitiable value
+     */
+    as<I2>(cast: RowInitiable<I2>): Query<I2> {
+        const query = new Query<I2>(this.type, this.table, cast)
         query._where = this._where
         query.select = this.select
         return query
@@ -38,13 +43,13 @@ export class Query<T extends typeof Model> {
 
     /// Join a * to one relation
     // todo: make sure the return type now also contains key Key
-    with<Key extends string, M extends typeof Model>(relation: ToOneRelation<Key, M>): this {
+    with<Key extends string, M>(relation: Relation<Key, M>): QueryWithKey<I, Key, M> {
         if (!this._with) {
             this._with = [relation];
-            return this
+            return this as any
         }
         this._with?.push(relation)
-        return this
+        return this as any
     }
 
     build(): [string, any] {
@@ -62,9 +67,8 @@ export class Query<T extends typeof Model> {
 
         // Join
         if (this._with) {
-            query += "\nLEFT JOIN";
             this._with.forEach(w => {
-                query += `\n\`${w.model.table}\` as \`${w.modelKey}\` ON \`${w.modelKey}\`.\`${w.model.primaryKey}\` = \`this\`.\`${w.foreignKey}\``;
+                query += "\n\t" + w.getQuery()
             })
         }
 
@@ -81,7 +85,7 @@ export class Query<T extends typeof Model> {
         return [query, values]
     }
 
-    async get(): Promise<InstanceType<T>[]> {
+    async get(): Promise<I[]> {
         const [results] = await Database.select(...this.build())
 
         console.log(results)
@@ -91,6 +95,8 @@ export class Query<T extends typeof Model> {
                 const model = cast.fromRow(row["this"])
                 if (this._with) {
                     this._with.forEach(w => {
+                        model[w.modelKey] = w.fromRow(row)
+                        /*
                         // Check if relation has been loaded
                         if (row[w.modelKey][w.model.primaryKey] !== null) {
                             model[w.modelKey] = w.model.fromRow(row[w.modelKey])
@@ -100,7 +106,7 @@ export class Query<T extends typeof Model> {
                             // Mark the relation as loaded (by setting it to null, since it is an optional relation)
                             // undefined = not loaded, null = loaded but not set
                             model[w.modelKey] = null;
-                        }
+                        }*/
                     });
                 }
                 return model;
@@ -109,3 +115,5 @@ export class Query<T extends typeof Model> {
         return results
     }
 }
+
+type QueryWithKey<I, Key extends keyof any, KeyType> = Query<I & Record<Key, KeyType>>

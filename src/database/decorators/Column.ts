@@ -1,7 +1,7 @@
 import { Model } from '../classes/Model';
-import { ToOneRelation } from '../classes/ToOneRelation';
+import { RelationWithForeignKey } from '../classes/ToOneRelation';
 
-export function column(settings?: { primary?: boolean; relation?: ToOneRelation<string, typeof Model> }) {
+export function column<K extends string | never>(settings?: { primary?: boolean; foreignKey?: RelationWithForeignKey<K, any> }) {
     return (target: any /* future typeof Model */, key) => {
         if (!target.constructor.properties) {
             target.constructor.properties = []
@@ -11,17 +11,14 @@ export function column(settings?: { primary?: boolean; relation?: ToOneRelation<
             target.constructor.primaryKey = key;
         }
 
-        if (settings?.relation) {
-            if (settings.relation.foreignKey && settings.relation.foreignKey != key) {
-                throw new Error("Cannot set relation when foreign key is already in use for " + settings.relation.foreignKey)
-            }
-            settings.relation.foreignKey = key
+        if (settings?.foreignKey) {
+            settings.foreignKey.prepare?.(target, key);
 
             if (!target.constructor.relations) {
                 target.constructor.relations = []
             }
 
-            target.constructor.relations.push(settings.relation)
+            target.constructor.relations.push(settings.foreignKey)
         }
 
         target.constructor.properties.push(key)
@@ -30,18 +27,18 @@ export function column(settings?: { primary?: boolean; relation?: ToOneRelation<
         // Override the getter and setter
         Object.defineProperty(target, key, {
             get(this: Model) {
-                if (settings?.relation) {
-                    if (this.hasRelation(settings?.relation)) {
-                        return this[settings?.relation.modelKey].getPrimaryKey()
+                if (settings?.foreignKey) {
+                    if (this.hasRelation(settings?.foreignKey)) {
+                        return this[settings?.foreignKey.modelKey].getPrimaryKey()
                     }
                 }
                 return this["_" + key];
             },
             set(this: Model, val) {
-                if (settings?.relation) {
-                    if (this.hasRelation(settings?.relation) && this[key] !== val) {
-                        console.log(this[settings?.relation.modelKey])
-                        throw new Error("You cannot modify foreign key " + settings?.relation.foreignKey + " directly unless the relation is not set or the value is not changed! (setting " + key + " to " + val + ", currently is " + this[key] + ")")
+                if (settings?.foreignKey) {
+                    if (this.hasRelation(settings?.foreignKey) && this[key] !== val) {
+                        console.log(this[settings?.foreignKey.modelKey])
+                        throw new Error("You cannot modify foreign key " + settings?.foreignKey.foreignKey + " directly unless the relation is not set or the value is not changed! (setting " + key + " to " + val + ", currently is " + this[key] + ")")
                     }
                 }
 

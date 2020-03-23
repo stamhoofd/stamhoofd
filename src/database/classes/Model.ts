@@ -1,9 +1,9 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
-import { Query, Where } from './Query'
-import { ToOneRelation } from './ToOneRelation'
+import { Query, Where, RowInitiable } from './Query'
+import { Relation, RelationWithForeignKey } from './ToOneRelation'
 
-export class Model {
+export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string
 
     /**
@@ -12,7 +12,7 @@ export class Model {
     static properties: string[]
     static debug = true
     static table: string // override this!
-    static relations: ToOneRelation<string, typeof Model>[]
+    static relations: RelationWithForeignKey<string, any>[]
 
     existsInDatabase = false
     updatedProperties = {}
@@ -29,27 +29,21 @@ export class Model {
      * @param relation name of the relation you want to load
      * @param sameFetch Whether you also want to load this relation on other models that were fetched from the database in the same query as the current model
      */
-    isLoaded<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>): this is (this & Record<Key, InstanceType<T> | null>) {
-        if (!this.existsInDatabase) {
-            /// Can't have a relation by any chance
-            // Set the relation to null if not set = no relation
-            (this as any)[relation.modelKey] = (this as any)[relation.modelKey] || null
-            return true
-        }
+    isLoaded<Key extends string, T>(relation: Relation<Key, T>): this is (this & Record<Key, T>) {
         return (this as any)[relation.modelKey] !== undefined
     }
 
     /**
-     * Same as isLoaded, but also requires the relation to be already set
+     * Same as isLoaded, but also requires the relation to be already set and not equal null
      */
-    hasRelation<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>): this is (this & Record<Key, InstanceType<T>>) {
+    hasRelation<Key extends string, T>(relation: Relation<Key, T>): this is (this & Record<Key, NonNullable<T>>) {
         return (this as any)[relation.modelKey] !== undefined && (this as any)[relation.modelKey] !== null
     }
 
-    setRelation<Key extends string, T extends typeof Model>(relation: ToOneRelation<Key, T>, value: InstanceType<T>): this is (this & Record<Key, InstanceType<T>>) {
+    setRelation<Key extends string, T, V extends T>(relation: Relation<Key, T>, value: V): this & Record<Key, V> {
         (this as any)[relation.modelKey] = value
         // Maybe also set the foreign key?
-        return true
+        return this as any
     }
 
     /// Load this model from a DB response (it is possible to not load all fields)
@@ -74,8 +68,8 @@ export class Model {
         this.existsInDatabase = true
     }
 
-    static where<T extends typeof Model>(this: T, ...where: Where[]): Query<T> {
-        return new Query("select", this.table).as(this).where(...where)
+    static where<T extends typeof Model>(this: T, ...where: Where[]): Query<InstanceType<T>> {
+        return new Query("select", this.table, this as any as RowInitiable<InstanceType<T>>).where(...where)
     }
 
     private get static(): typeof Model {
@@ -133,7 +127,7 @@ export class Model {
             if (this.hasRelation(relation) && !this.updatedProperties[relation.foreignKey]) {
                 if (this[relation.modelKey]) {
                     const model = this[relation.modelKey]
-                    if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as any as number) {
+                    if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as number) {
                         this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
                     }
                 }
@@ -168,6 +162,7 @@ export class Model {
             set[key] = this[key];
 
             if (set[key] === undefined) {
+                console.log(this)
                 throw new Error("Tried to update model " + this.constructor.name + " with undefined property " + key)
             }
         }

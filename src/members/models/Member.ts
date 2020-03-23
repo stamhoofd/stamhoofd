@@ -3,7 +3,7 @@ import { Address } from './Address';
 import { Model } from '../../database/classes/Model';
 import { column } from '../../database/decorators/Column';
 import { manyToOne } from '../../database/decorators/manyToOne';
-import { ToOneRelation } from '../../database/classes/ToOneRelation';
+import { ToOneRelation, RelationLoaded } from '../../database/classes/ToOneRelation';
 
 export class Member extends Model {
     static table = "members"
@@ -30,14 +30,14 @@ export class Member extends Model {
     @column()
     birthDay: Date | null = null;
 
-    @column({ relation: Member.address })
+    @column({ foreignKey: Member.address })
     addressId: number | null = null; // null = no address
 
     /// Relations
     /*@manyToOne({ key: "addressId", model: Address })
     address: Address | null; // undefined = relation not loaded*/
 
-    static address = new ToOneRelation(Address, "address")
+    static address = new ToOneRelation(Address, "address").optional()
 
     /*parents: Parent[] = [];
     emergencyContacts: EmergencyContact[] = [];
@@ -49,4 +49,9 @@ export class Member extends Model {
 
     @column()
     createdOn: Date = new Date();
+
+
+    logCountry(this: Member & RelationLoaded<typeof Member.address>) {
+        console.log(this.address?.country)
+    }
 }
