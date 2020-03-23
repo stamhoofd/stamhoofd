@@ -1,6 +1,6 @@
 import { Member } from "./src/members/models/Member"
 import { Address } from './src/members/models/Address';
-import { RelationLoaded, RelationSet } from './src/database/classes/ToOneRelation';
+import { RelationSet } from './src/database/classes/Relation';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error("unhandledRejection")

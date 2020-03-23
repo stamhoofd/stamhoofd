@@ -1,5 +1,5 @@
 import { Model } from '../classes/Model';
-import { RelationWithForeignKey } from '../classes/ToOneRelation';
+import { RelationWithForeignKey } from '../classes/Relation';
 
 export function column<K extends string | never>(settings?: { primary?: boolean; foreignKey?: RelationWithForeignKey<K, any> }) {
     return (target: any /* future typeof Model */, key) => {

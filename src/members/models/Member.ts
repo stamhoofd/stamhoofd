@@ -2,8 +2,8 @@ import { Gender } from './Gender';
 import { Address } from './Address';
 import { Model } from '../../database/classes/Model';
 import { column } from '../../database/decorators/Column';
-import { manyToOne } from '../../database/decorators/manyToOne';
-import { ToOneRelation, RelationLoaded } from '../../database/classes/ToOneRelation';
+import { RelationLoaded } from '../../database/classes/Relation';
+import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
 
 export class Member extends Model {
     static table = "members"
@@ -37,7 +37,7 @@ export class Member extends Model {
     /*@manyToOne({ key: "addressId", model: Address })
     address: Address | null; // undefined = relation not loaded*/
 
-    static address = new ToOneRelation(Address, "address").optional()
+    static address = new ManyToOneRelation(Address, "address").optional()
 
     /*parents: Parent[] = [];
     emergencyContacts: EmergencyContact[] = [];

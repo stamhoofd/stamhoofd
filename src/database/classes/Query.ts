@@ -1,5 +1,5 @@
 import { Database } from './Database';
-import { Relation } from './ToOneRelation';
+import { Relation } from './Relation';
 
 type Types = "select" | "update"
 export type Where = { key: string; value: any; type?: string }

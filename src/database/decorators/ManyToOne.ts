@@ -1,5 +1,5 @@
 import { Model } from "../classes/Model";
-import { ToOneRelation } from '../classes/ToOneRelation';
+import { ManyToOneRelation } from '../classes/ManyToOneRelation';
 
 /**
  * 
@@ -8,7 +8,7 @@ import { ToOneRelation } from '../classes/ToOneRelation';
 export function manyToOne(settings: { key: string; model: typeof Model }) {
     return (target: any, key) => {
 
-        const relation = new ToOneRelation(settings.model, key, settings.key);
+        const relation = new ManyToOneRelation(settings.model, key, settings.key);
 
         if (!target.constructor.relations) {
             target.constructor.relations = []

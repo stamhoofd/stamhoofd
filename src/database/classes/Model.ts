@@ -1,7 +1,7 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
 import { Query, Where, RowInitiable } from './Query'
-import { Relation, RelationWithForeignKey } from './ToOneRelation'
+import { Relation, RelationWithForeignKey } from './Relation'
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string
