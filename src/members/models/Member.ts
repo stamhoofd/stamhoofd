@@ -2,13 +2,11 @@ import { Gender } from './Gender';
 import { Address } from './Address';
 import { Model } from '../../database/classes/Model';
 import { column } from '../../database/decorators/Column';
-import { RelationLoaded } from '../../database/classes/Relation';
+import { Database } from '../../database/classes/Database';
 import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
-import { Parent } from './Parent';
-import { ManyToManyRelation } from '../../database/classes/ManyToManyRelation';
-import { RowInitiable } from '../../database/classes/Query';
 
-const a = Address as RowInitiable<Address> & typeof Model
+/// Loaded types
+export type FullyLoadedMember = Member & { address: Address }
 
 export class Member extends Model {
     static table = "members"
@@ -37,13 +35,30 @@ export class Member extends Model {
 
     @column({ foreignKey: Member.address })
     addressId: number | null = null; // null = no address
+    static address = new ManyToOneRelation(Address, "address")
 
-    /// Relations
-    /*@manyToOne({ key: "addressId", model: Address })
-    address: Address | null; // undefined = relation not loaded*/
+    static async getByID(id: number): Promise<FullyLoadedMember | undefined> {
+        const [[row]] = await Database.select(`
+            SELECT * 
+            FROM ${this.table} as m 
+            LEFT JOIN ${Member.address.model.table} as a on a.${Member.address.model.primaryKey} = m.${Member.address.foreignKey}
+            WHERE m.${this.primaryKey} = ?
+            LIMIT 1
+        `, [id])
 
-    static address = new ManyToOneRelation(new Member(), new Address(), "address").optional()
-    //static parents = new ManyToManyRelation(Parent, "parents", "member_parents")
+        if (!row) {
+            return undefined
+        }
+
+        console.log(row)
+        const member = this.fromRow(row['m'])
+        const address = Address.fromRow(row['a'])
+        member["address"] = address
+
+        // Set relation
+        return member as any
+    }
+
 
     /*parents: Parent[] = [];
     emergencyContacts: EmergencyContact[] = [];
@@ -52,12 +67,11 @@ export class Member extends Model {
 
     group: Group | null = null;*/
 
-
     @column()
     createdOn: Date = new Date();
 
 
-    logCountry(this: Member & RelationLoaded<typeof Member.address>) {
-        console.log(this.address?.country)
+    logCountry(this: FullyLoadedMember) {
+        console.log(this.address.country)
     }
 }

@@ -1,6 +1,5 @@
-import { Member } from "./src/members/models/Member"
+import { Member, FullyLoadedMember } from "./src/members/models/Member"
 import { Address } from './src/members/models/Address';
-import { RelationSet } from './src/database/classes/Relation';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error("unhandledRejection")
@@ -18,25 +17,22 @@ if (new Date().getTimezoneOffset() != 0) {
 
 const start = async () => {
     try {
-        const [found] = await Member.where({ key: "id", value: 67 }).with(Member.address).get()
-        let member: Member & RelationSet<typeof Member.address>;
+        const found = await Member.getByID(123)
+        let member: FullyLoadedMember
 
         if (found) {
             console.log("Found member " + found.firstName)
+            member = found
 
             // Move address of Simon
-            if (!found.hasRelation(Member.address)) {
-                const address = new Address()
-                address.city = "Moved"
-                address.country = "BE"
-                address.street = "Straatnaam"
-                address.number = "123"
-                address.postalCode = "9000"
-                await address.save()
-                member = found.setRelation(Member.address, address)
-            } else {
-                member = found
-            }
+            const address = new Address()
+            address.city = "Moved"
+            address.country = "BE"
+            address.street = "Straatnaam"
+            address.number = "123"
+            address.postalCode = "9000"
+            await address.save()
+            found.address = address
 
         } else {
             console.log("Didn't find member")
@@ -48,28 +44,8 @@ const start = async () => {
             address.postalCode = "9000"
             await address.save()
 
-            member = new Member().setRelation(Member.address, address);
+            member = new Member().setRelation("address", address)
         }
-
-        /*if (!member.hasRelation(Member.address)) {
-            member = member.setRelation(Member.address, new Address())
-            member.address.city = "Demo"
-            member.address.country = "BE"
-            member.address.street = "Straatnaam"
-            member.address.number = "123"
-            member.address.postalCode = "9000"
-            await member.address.save()
-        } else {
-            // Move address of Simon
-
-            member.address = new Address()
-            member.address.city = "Moved"
-            member.address.country = "BE"
-            member.address.street = "Straatnaam"
-            member.address.number = "123"
-            member.address.postalCode = "9000"
-            await member.address.save()
-        }*/
 
         member.logCountry()
 

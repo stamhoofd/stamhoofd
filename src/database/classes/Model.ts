@@ -1,7 +1,6 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
-import { Query, Where, RowInitiable } from './Query'
-import { Relation, ToOneRelation } from './Relation'
+import { ManyToOneRelation } from './ManyToOneRelation'
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string
@@ -12,7 +11,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     static properties: string[]
     static debug = true
     static table: string // override this!
-    static relations: ToOneRelation<string, Model, any>[]
+    static relations: ManyToOneRelation[]
 
     existsInDatabase = false
     updatedProperties = {}
@@ -24,50 +23,31 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
     }
 
-    /**
-     * 
-     * @param relation name of the relation you want to load
-     * @param sameFetch Whether you also want to load this relation on other models that were fetched from the database in the same query as the current model
-     */
-    isLoaded<Key extends string, T>(relation: Relation<Key, this, T>): this is (this & Record<Key, T>) {
-        return (this as any)[relation.modelKey] !== undefined
-    }
-
-    /**
-     * Same as isLoaded, but also requires the relation to be already set and not equal null
-     */
-    hasRelation<Key extends string, T>(relation: Relation<Key, this, T>): this is (this & Record<Key, NonNullable<T>>) {
-        return (this as any)[relation.modelKey] !== undefined && (this as any)[relation.modelKey] !== null
-    }
-
-    setRelation<Key extends string, T, V extends T>(relation: Relation<Key, this, T>, value: V): this & Record<Key, V> {
-        (this as any)[relation.modelKey] = value
-        // Maybe also set the foreign key?
-        return this as any
+    setRelation<Name extends keyof any, Value>(name: Name, value: Value): this & Record<Name, Value> {
+        const t = this as any
+        t[name] = value
+        return t
     }
 
     /// Load this model from a DB response (it is possible to not load all fields)
-    fromRow(row: any): this {
-        this.static.properties.forEach(key => {
+    static fromRow<T extends typeof Model>(this: T, row: any): InstanceType<T> {
+        const model = new this() as InstanceType<T>
+        this.properties.forEach(key => {
             if (row[key] !== undefined) {
                 const value = row[key];
 
                 // todo: check column name mapping here
-                this[key] = value;
+                model[key] = value;
             }
         })
 
-        this.markSaved()
-        return this;
+        model.markSaved()
+        return model;
     }
 
     private markSaved() {
         this.updatedProperties = {};
         this.existsInDatabase = true
-    }
-
-    static where<T extends typeof Model>(this: T, ...where: Where[]): Query<InstanceType<T>> {
-        return new Query("select", this.table, this as any as RowInitiable<InstanceType<T>>).where(...where)
     }
 
     get static(): typeof Model {
@@ -77,7 +57,6 @@ export class Model /* static implements RowInitiable<Model> */ {
     getPrimaryKey(): number | null {
         return this[this.static.primaryKey]
     }
-
 
     /**
      * 
@@ -122,14 +101,11 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         // Check if relation models were modified
         this.static.relations.forEach(relation => {
-            if (this.hasRelation(relation) && !this.updatedProperties[relation.foreignKey]) {
-                if (this[relation.modelKey]) {
-                    const model = this[relation.modelKey]
-                    if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as number) {
-                        this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
-                    }
+            if (relation.isLoaded(this) && !this.updatedProperties[relation.foreignKey]) {
+                const model = this[relation.modelKey] as Model
+                if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as any as number) {
+                    this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
                 }
-
             }
         })
 

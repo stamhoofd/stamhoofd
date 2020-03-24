@@ -1,8 +1,8 @@
 import { Model } from '../classes/Model';
-import { ToOneRelation } from '../classes/Relation';
+import { ManyToOneRelation } from '../classes/ManyToOneRelation';
 
-export function column<K extends string | never>(settings?: { primary?: boolean; foreignKey?: ToOneRelation<K, any> }) {
-    return (target: any /* future typeof Model */, key) => {
+export function column(settings?: { primary?: boolean; foreignKey?: ManyToOneRelation }) {
+    return (target: any /* future typeof Model */, key: string) => {
         if (!target.constructor.properties) {
             target.constructor.properties = []
         }
@@ -12,7 +12,7 @@ export function column<K extends string | never>(settings?: { primary?: boolean;
         }
 
         if (settings?.foreignKey) {
-            settings.foreignKey.prepare?.(target, key);
+            settings.foreignKey.foreignKey = key
 
             if (!target.constructor.relations) {
                 target.constructor.relations = []
@@ -27,17 +27,16 @@ export function column<K extends string | never>(settings?: { primary?: boolean;
         // Override the getter and setter
         Object.defineProperty(target, key, {
             get(this: Model) {
-                if (settings?.foreignKey) {
-                    if (this.hasRelation(settings?.foreignKey)) {
-                        return this[settings?.foreignKey.modelKey].getPrimaryKey()
-                    }
+                if (settings?.foreignKey && settings?.foreignKey.isLoaded(this)) {
+                    // If the relation is loaded (even when it is null)
+                    // Always return the ID of the loaded relation or null
+                    return this[settings?.foreignKey.modelKey]?.getPrimaryKey() || null
                 }
                 return this["_" + key];
             },
             set(this: Model, val) {
                 if (settings?.foreignKey) {
-                    if (this.hasRelation(settings?.foreignKey) && this[key] !== val) {
-                        console.log(this[settings?.foreignKey.modelKey])
+                    if (settings?.foreignKey.isLoaded(this) && this[key] !== val) {
                         throw new Error("You cannot modify foreign key " + settings?.foreignKey.foreignKey + " directly unless the relation is not set or the value is not changed! (setting " + key + " to " + val + ", currently is " + this[key] + ")")
                     }
                 }
