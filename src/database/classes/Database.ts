@@ -62,7 +62,7 @@ export const Database = {
         });
     },
 
-    async insert(query: string, values?: any): Promise<[{ insertId: any }, mysql.FieldInfo[]]> {
+    async insert(query: string, values?: any): Promise<[{ insertId: any; affectedRows: number }, mysql.FieldInfo[]]> {
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
             const q = connection.query(query, values, (err, results, fields) => {

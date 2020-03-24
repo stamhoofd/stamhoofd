@@ -64,10 +64,19 @@ const start = async () => {
 
             await Promise.all([parent1.save(), parent2.save()])
             await Member.parents.link(member, parent1, parent2)
+
+            if (member.parents.length == 0) {
+                throw new Error("Link didn't update parents")
+            }
         } else {
             console.log(`${member.firstName} already has parents`)
 
+            const cb = member.parents.length
             await Member.parents.unlink(member, member.parents[0])
+
+            if (member.parents.length == cb) {
+                throw new Error("unlink didn't update parents")
+            }
         }
 
         console.log("Done.")

@@ -59,21 +59,52 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
         const query = `INSERT INTO ${this.linkTable} (${this.linkKeyA}, ${this.linkKeyB}) VALUES ?`;
 
         // Nested arrays are turned into grouped lists (for bulk inserts), e.g. [['a', 'b'], ['c', 'd']] turns into ('a', 'b'), ('c', 'd')
-        await Database.insert(query, [
+        const [result] = await Database.insert(query, [
             modelsB.map(modelB => [
                 modelA.getPrimaryKey(),
                 modelB.getPrimaryKey()
             ])
         ])
+
+        // If the relation is loaded, also modify the value of the relation
+        if (this.isLoaded(modelA)) {
+            if (result.affectedRows == modelsB.length) {
+                const arr: B[] = (modelA as any)[this.modelKey]
+                arr.push(...modelsB)
+            } else {
+                console.warn('Warning: linking expected to affect ' + modelsB.length + ' rows, but only affected ' + result.affectedRows + ' rows')
+
+                // TODO: Manually correct by doing a query (safest)
+                throw new Error("Fallback behaviour net yet implemented")
+            }
+
+        }
     }
 
     async unlink(modelA: A, ...modelsB: B[]): Promise<void> {
         const query = `DELETE FROM ${this.linkTable} WHERE ${this.linkKeyA} = ? AND ${this.linkKeyB} IN (?)`;
 
         // Arrays are turned into list, e.g. ['a', 'b'] turns into 'a', 'b'
-        await Database.delete(query, [
+        const [result] = await Database.delete(query, [
             modelA.getPrimaryKey(),
             modelsB.map(modelB => modelB.getPrimaryKey())
         ])
+
+        if (this.isLoaded(modelA)) {
+            if (result.affectedRows == modelsB.length) {
+                const arr: B[] = (modelA as any)[this.modelKey];
+                const idMap = modelsB.map(model => model.getPrimaryKey());
+                (modelA as any)[this.modelKey] = arr.filter((model) => {
+                    return !idMap.includes(model.getPrimaryKey())
+                });
+            } else {
+                console.warn('Warning: unlinking expected to affect ' + modelsB.length + ' rows, but only affected ' + result.affectedRows + ' rows')
+
+                // TODO: Manually correct by doing a query (safest)
+                throw new Error("Fallback behaviour net yet implemented")
+            }
+
+        }
+
     }
 }
