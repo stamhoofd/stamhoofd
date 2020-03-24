@@ -1,7 +1,7 @@
 import { Model } from '../classes/Model';
 import { ManyToOneRelation } from '../classes/ManyToOneRelation';
 
-export function column(settings?: { primary?: boolean; foreignKey?: ManyToOneRelation }) {
+export function column<Key extends keyof any, Value extends Model>(settings?: { primary?: boolean; foreignKey?: ManyToOneRelation<Key, Value> }) {
     return (target: any /* future typeof Model */, key: string) => {
         if (!target.constructor.properties) {
             target.constructor.properties = []
@@ -30,13 +30,13 @@ export function column(settings?: { primary?: boolean; foreignKey?: ManyToOneRel
                 if (settings?.foreignKey && settings?.foreignKey.isLoaded(this)) {
                     // If the relation is loaded (even when it is null)
                     // Always return the ID of the loaded relation or null
-                    return this[settings?.foreignKey.modelKey]?.getPrimaryKey() || null
+                    return (this as any)[settings?.foreignKey.modelKey]?.getPrimaryKey() || null
                 }
                 return this["_" + key];
             },
             set(this: Model, val) {
                 if (settings?.foreignKey) {
-                    if (settings?.foreignKey.isLoaded(this) && this[key] !== val) {
+                    if (settings?.foreignKey.isSet(this) && this[key] !== val) {
                         throw new Error("You cannot modify foreign key " + settings?.foreignKey.foreignKey + " directly unless the relation is not set or the value is not changed! (setting " + key + " to " + val + ", currently is " + this[key] + ")")
                     }
                 }

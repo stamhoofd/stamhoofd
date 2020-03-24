@@ -1,7 +1,7 @@
 import { Model } from './Model'
 
-export class ManyToOneRelation {
-    model: typeof Model
+export class ManyToOneRelation<Key extends keyof any, M extends Model> {
+    model: { new(): M } & typeof Model
 
     /**
      * E.g. addressId
@@ -11,15 +11,25 @@ export class ManyToOneRelation {
     /**
      * E.g. address
      */
-    modelKey: string
+    modelKey: Key
 
-    constructor(model: typeof Model, modelKey: string) {
+    constructor(model: { new(): M } & typeof Model, modelKey: Key) {
         this.model = model
         this.modelKey = modelKey
     }
 
     /// Whether this relation is loaded
-    isLoaded(model: Model): boolean {
-        return model[this.modelKey] !== undefined
+    isLoaded(model: Model): boolean /*model is Model & Record<Key, M>*/ {
+        return (model as any)[this.modelKey] !== undefined
+    }
+
+    /// Whether this relation is set
+    isSet(model: Model): boolean /*model is Model & Record<Key, M>*/ {
+        return (model as any)[this.modelKey] !== undefined && (model as any)[this.modelKey] !== null
+    }
+
+    /// Generate a join query
+    joinQuery(namespaceA: string, namespaceB: string): string {
+        return `LEFT JOIN ${this.model.table} as ${namespaceB} on ${namespaceB}.${this.model.primaryKey} = ${namespaceA}.${this.foreignKey}\n`
     }
 }

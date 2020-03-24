@@ -1,6 +1,7 @@
 import { Database } from './Database'
 import Stack from '../../debug/Stack'
 import { ManyToOneRelation } from './ManyToOneRelation'
+import { ManyToManyRelation } from './ManyToManyRelation'
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string
@@ -9,9 +10,9 @@ export class Model /* static implements RowInitiable<Model> */ {
      * Properties that are stored in the table (including foreign keys, but without mapped relations!)
      */
     static properties: string[]
-    static debug = true
+    static debug = false
     static table: string // override this!
-    static relations: ManyToOneRelation[]
+    static relations: ManyToOneRelation<string, Model>[]
 
     existsInDatabase = false
     updatedProperties = {}
@@ -23,14 +24,49 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
     }
 
-    setRelation<Name extends keyof any, Value>(name: Name, value: Value): this & Record<Name, Value> {
+    /**
+     * Set a relation to undefined, marking it as not loaded (so it won't get saved in the next save)
+     * @param relation 
+     */
+    unloadRelation<Key extends keyof any, Value extends Model>(this: this & Record<Key, Value>, relation: ManyToOneRelation<Key, any>): this & Record<Key, undefined> {
+        // Todo: check if relation is nullable?
         const t = this as any
-        t[name] = value
+        t[relation.modelKey] = undefined
         return t
     }
 
-    /// Load this model from a DB response (it is possible to not load all fields)
-    static fromRow<T extends typeof Model>(this: T, row: any): InstanceType<T> {
+    /**
+     * Set a relation to null, deleting it on the next save (unless unloadRelation is called)
+     * @param relation 
+     */
+    unsetRelation<Key extends keyof any, Value extends Model>(this: this & Record<Key, Value>, relation: ManyToOneRelation<Key, any>): this & Record<Key, null> {
+        // Todo: check if relation is nullable?
+        const t = this as any
+        t[relation.modelKey] = null
+        return t
+    }
+
+    setRelation<Key extends keyof any, Value extends Model>(relation: ManyToOneRelation<Key, Value>, value: Value | null): this & Record<Key, Value | null> {
+        const t = this as any
+        t[relation.modelKey] = value
+        return t
+    }
+
+    setManyRelation<Key extends keyof any, Value extends Model>(relation: ManyToManyRelation<Key, any, Value>, value: Value[]): this & Record<Key, Value[]> {
+        const t = this as any
+        t[relation.modelKey] = value
+        return t
+    }
+
+    /**
+     * Load the returned properties from a DB response row into the model
+     * If the row's primary key is null, undefined is returned
+     */
+    static fromRow<T extends typeof Model>(this: T, row: any): InstanceType<T> | undefined {
+        if (row[this.primaryKey] === null || row[this.primaryKey] === undefined) {
+            return undefined
+        }
+
         const model = new this() as InstanceType<T>
         this.properties.forEach(key => {
             if (row[key] !== undefined) {
@@ -48,6 +84,18 @@ export class Model /* static implements RowInitiable<Model> */ {
     private markSaved() {
         this.updatedProperties = {};
         this.existsInDatabase = true
+
+        /// Save relation foreign keys (so we can check if the id has changed)
+        this.static.relations.forEach(relation => {
+            if (relation.isLoaded(this)) {
+                if (relation.isSet(this)) {
+                    const model = this[relation.modelKey]
+                    this["_" + relation.foreignKey] = model.getPrimaryKey()
+                } else {
+                    this["_" + relation.foreignKey] = null
+                }
+            }
+        })
     }
 
     get static(): typeof Model {
@@ -102,9 +150,17 @@ export class Model /* static implements RowInitiable<Model> */ {
         // Check if relation models were modified
         this.static.relations.forEach(relation => {
             if (relation.isLoaded(this) && !this.updatedProperties[relation.foreignKey]) {
-                const model = this[relation.modelKey] as Model
-                if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as any as number) {
-                    this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
+                if (relation.isSet(this)) {
+                    const model = this[relation.modelKey]
+                    if (model.getPrimaryKey() !== this["_" + relation.foreignKey] as number) {
+                        this.updatedProperties[relation.foreignKey] = this[relation.foreignKey]
+                    }
+                } else {
+                    if (this["_" + relation.foreignKey] !== null) {
+                        // Relation has been cleared by unsetting the relation without clearing the foreign key
+                        // So we clear the foreign key manually
+                        this.updatedProperties[relation.foreignKey] = null
+                    }
                 }
             }
         })

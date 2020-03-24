@@ -4,14 +4,16 @@ import { Model } from '../../database/classes/Model';
 import { column } from '../../database/decorators/Column';
 import { Database } from '../../database/classes/Database';
 import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
+import { ManyToManyRelation } from '../../database/classes/ManyToManyRelation';
+import { Parent } from './Parent';
 
 /// Loaded types
-export type FullyLoadedMember = Member & { address: Address }
+export type FullyLoadedMember = Member & { address: Address | null; parents: Parent[] }
 
 export class Member extends Model {
     static table = "members"
 
-    // All columns
+    // Columns
     @column({ primary: true })
     id: number | null = null;
 
@@ -35,28 +37,46 @@ export class Member extends Model {
 
     @column({ foreignKey: Member.address })
     addressId: number | null = null; // null = no address
-    static address = new ManyToOneRelation(Address, "address")
 
+    // Relations
+    static address = new ManyToOneRelation(Address, "address")
+    static parents = new ManyToManyRelation(Member, Parent, "parents")
+
+    // Methods
     static async getByID(id: number): Promise<FullyLoadedMember | undefined> {
-        const [[row]] = await Database.select(`
+        const [rows] = await Database.select(`
             SELECT * 
-            FROM ${this.table} as m 
-            LEFT JOIN ${Member.address.model.table} as a on a.${Member.address.model.primaryKey} = m.${Member.address.foreignKey}
-            WHERE m.${this.primaryKey} = ?
+            FROM ${this.table} 
+            ${Member.address.joinQuery("members", "addresses")}
+            ${Member.parents.joinQuery("members", "parents")}
+            WHERE members.${this.primaryKey} = ?
             LIMIT 1
         `, [id])
 
-        if (!row) {
+        if (rows.length == 0) {
             return undefined
         }
 
-        console.log(row)
-        const member = this.fromRow(row['m'])
-        const address = Address.fromRow(row['a'])
-        member["address"] = address
+        // Read member + address from first row
+        const member = this.fromRow(rows[0]['members'])
 
-        // Set relation
-        return member as any
+        if (!member) {
+            return undefined
+        }
+        const address = Address.fromRow(rows[0]['addresses']) || null
+
+        // Get parents from other rows
+        const parents = rows.flatMap(row => {
+            const parent = Parent.fromRow(row['parents'])
+            if (parent) {
+                return [parent]
+            }
+            return []
+        })
+
+        return member
+            .setRelation(Member.address, address)
+            .setManyRelation(Member.parents, parents)
     }
 
 
@@ -72,6 +92,6 @@ export class Member extends Model {
 
 
     logCountry(this: FullyLoadedMember) {
-        console.log(this.address.country)
+        console.log(this.address?.country ?? "unknown")
     }
 }

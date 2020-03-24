@@ -50,7 +50,7 @@ export const Database = {
     async select(query: string, values?: any): Promise<[any[], mysql.FieldInfo[]]> {
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
-            connection.query({ sql: query, nestTables: true, values: values }, (err, results, fields) => {
+            const q = connection.query({ sql: query, nestTables: true, values: values }, (err, results, fields) => {
                 connection.release();
 
                 if (err) {
@@ -58,11 +58,11 @@ export const Database = {
                 }
                 return resolve([results, fields])
             })
+            console.log(q.sql.replace(/\n+ +/g, '\n'))
         });
     },
 
     async insert(query: string, values?: any): Promise<[{ insertId: any }, mysql.FieldInfo[]]> {
-        console.log(query, values)
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
             const q = connection.query(query, values, (err, results, fields) => {
@@ -78,10 +78,9 @@ export const Database = {
     },
 
     async update(query: string, values?: any): Promise<[{ changedRows: number }, mysql.FieldInfo[]]> {
-        console.log(query, values)
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
-            connection.query(query, values, (err, results, fields) => {
+            const q = connection.query(query, values, (err, results, fields) => {
                 connection.release();
 
                 if (err) {
@@ -89,14 +88,14 @@ export const Database = {
                 }
                 return resolve([results, fields])
             })
+            console.log(q.sql)
         });
     },
 
     async delete(query: string, values?: any): Promise<[{ affectedRows: number }, mysql.FieldInfo[]]> {
-        console.log(query, values)
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
-            connection.query(query, values, (err, results, fields) => {
+            const q = connection.query(query, values, (err, results, fields) => {
                 connection.release();
 
                 if (err) {
@@ -104,14 +103,14 @@ export const Database = {
                 }
                 return resolve([results, fields])
             })
+            console.log(q.sql)
         });
     },
 
     async statement(query: string, values?: any): Promise<void> {
-        console.log(query, values)
         const connection = await this.getConnection();
         return new Promise((resolve, reject) => {
-            connection.query(query, values, (err, results, fields) => {
+            const q = connection.query(query, values, (err, results, fields) => {
                 connection.release();
 
                 if (err) {
@@ -120,6 +119,8 @@ export const Database = {
                 console.log("Statement result: ", results, fields);
                 return resolve()
             })
+            console.log(q.sql)
+
         });
     }
 };

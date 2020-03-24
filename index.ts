@@ -1,5 +1,6 @@
 import { Member, FullyLoadedMember } from "./src/members/models/Member"
 import { Address } from './src/members/models/Address';
+import { Parent } from './src/members/models/Parent';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error("unhandledRejection")
@@ -17,23 +18,12 @@ if (new Date().getTimezoneOffset() != 0) {
 
 const start = async () => {
     try {
-        const found = await Member.getByID(123)
+        const found = await Member.getByID(82)
         let member: FullyLoadedMember
 
         if (found) {
             console.log("Found member " + found.firstName)
             member = found
-
-            // Move address of Simon
-            const address = new Address()
-            address.city = "Moved"
-            address.country = "BE"
-            address.street = "Straatnaam"
-            address.number = "123"
-            address.postalCode = "9000"
-            await address.save()
-            found.address = address
-
         } else {
             console.log("Didn't find member")
             const address = new Address()
@@ -44,20 +34,42 @@ const start = async () => {
             address.postalCode = "9000"
             await address.save()
 
-            member = new Member().setRelation("address", address)
+            member = new Member().setRelation(Member.address, address).setManyRelation(Member.parents, [])
+
+            member.firstName = "Simon";
+            member.lastName = "Backx";
+            await member.save();
         }
 
         member.logCountry()
 
-        console.log(`${member.firstName} woont in ${member.address.city}`);
+        if (member.address) {
+            console.log(`${member.firstName} woont in ${member.address.city}`);
+        } else {
+            console.log(`${member.firstName} heeft geen adres`);
+        }
 
-        member.firstName = "Simon";
-        member.lastName = "Backx";
+        if (member.parents.length == 0) {
+            console.log("Linking some parents...")
 
-        await member.save();
-        member.lastName = "";
-        member.lastName = "Backx";
-        await member.save();
+            const parent1 = new Parent()
+            parent1.firstName = "Linda"
+            parent1.lastName = "De Mol"
+            parent1.mail = "linda.demol@gmail.com"
+
+            const parent2 = new Parent()
+            parent2.firstName = "Peter"
+            parent2.lastName = "De Vis"
+            parent2.mail = "peter.devis@gmail.com"
+
+            await Promise.all([parent1.save(), parent2.save()])
+            await Member.parents.link(member, parent1, parent2)
+        } else {
+            console.log(`${member.firstName} already has parents`)
+
+            await Member.parents.unlink(member, member.parents[0])
+        }
+
         console.log("Done.")
     } catch (e) {
         console.error("Failed to save member: ", e);

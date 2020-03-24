@@ -24,5 +24,5 @@ export class Parent extends Model {
     @column({ foreignKey: Parent.address })
     addressId: number | null = null; // null = no address
 
-    static address = new ManyToOneRelation(Address, "address").optional()
+    static address = new ManyToOneRelation(Address, "address")
 }
