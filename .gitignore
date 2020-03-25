@@ -1,153 +1,215 @@
-
-# Created by https://www.gitignore.io/api/go,git,vuejs,linux,macos,dotenv,windows,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=go,git,vuejs,linux,macos,dotenv,windows,visualstudiocode
-
-### dotenv ###
-.env
-
-### Git ###
-# Created by git for backups. To disable backups in Git:
-# $ git config --global mergetool.keepBackup false
-*.orig
-
-# Created by git when using merge tools for conflicts
-*.BACKUP.*
-*.BASE.*
-*.LOCAL.*
-*.REMOTE.*
-*_BACKUP_*.txt
-*_BASE_*.txt
-*_LOCAL_*.txt
-*_REMOTE_*.txt
-
-### Go ###
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-### Go Patch ###
-/vendor/
-/Godeps/
-
-### Linux ###
-*~
-
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
-
-### macOS ###
-# General
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
-
-### Vuejs ###
-# Recommended template: Node.gitignore
-
 node_modules/
-dist/
-npm-debug.log
+.node_modules/
+built/*
+tests/cases/rwc/*
+tests/cases/test262/*
+tests/cases/perf/*
+!tests/cases/webharness/compilerToString.js
+test-args.txt
+~*.docx
+\#*\#
+.\#*
+tests/baselines/local/*
+tests/baselines/local.old/*
+tests/services/baselines/local/*
+tests/baselines/prototyping/local/*
+tests/baselines/rwc/*
+tests/baselines/test262/*
+tests/baselines/reference/projectOutput/*
+tests/baselines/local/projectOutput/*
+tests/baselines/reference/testresults.tap
+tests/services/baselines/prototyping/local/*
+tests/services/browser/typescriptServices.js
+src/harness/*.js
+src/compiler/diagnosticInformationMap.generated.ts
+src/compiler/diagnosticMessages.generated.json
+src/parser/diagnosticInformationMap.generated.ts
+src/parser/diagnosticMessages.generated.json
+rwc-report.html
+*.swp
+build.json
+*.actual
+tests/webTestServer.js
+tests/webTestServer.js.map
+tests/webhost/*.d.ts
+tests/webhost/webtsc.js
+tests/cases/**/*.js
+!tests/cases/docker/*.js/
+tests/cases/**/*.js.map
+*.config
+scripts/eslint/built/
+scripts/debug.bat
+scripts/run.bat
+scripts/word2md.js
+scripts/buildProtocol.js
+scripts/ior.js
+scripts/authors.js
+scripts/configurePrerelease.js
+scripts/configureLanguageServiceBuild.js
+scripts/open-user-pr.js
+scripts/open-cherry-pick-pr.js
+scripts/processDiagnosticMessages.d.ts
+scripts/processDiagnosticMessages.js
+scripts/produceLKG.js
+scripts/importDefinitelyTypedTests/importDefinitelyTypedTests.js
+scripts/generateLocalizedDiagnosticMessages.js
+scripts/request-pr-review.js
+scripts/*.js.map
+scripts/typings/
+coverage/
+internal/
+**/.DS_Store
+.settings
+**/.vs
+**/.vscode/*
+!**/.vscode/tasks.json
+!**/.vscode/settings.template.json
+!**/.vscode/launch.template.json
+!**/.vscode/extensions.json
+!tests/cases/projects/projectOption/**/node_modules
+!tests/cases/projects/NodeModulesSearch/**/*
+!tests/baselines/reference/project/nodeModules*/**/*
+.idea
+yarn.lock
 yarn-error.log
+.parallelperf.*
+tests/cases/user/*/package-lock.json
+tests/cases/user/*/node_modules/
+tests/cases/user/*/**/*.js
+tests/cases/user/*/**/*.js.map
+tests/cases/user/*/**/*.d.ts
+!tests/cases/user/zone.js/
+!tests/cases/user/bignumber.js/
+!tests/cases/user/discord.js/
+tests/baselines/reference/dt
+.failed-tests
+TEST-results.xml
+package-lock.json
+tests/cases/user/TypeScript-React-Starter/TypeScript-React-Starter
+tests/cases/user/TypeScript-Node-Starter/TypeScript-Node-Starter
+tests/cases/user/TypeScript-React-Native-Starter/TypeScript-React-Native-Starter
+tests/cases/user/TypeScript-Vue-Starter/TypeScript-Vue-Starter
+tests/cases/user/TypeScript-WeChat-Starter/TypeScript-WeChat-Starter
+tests/cases/user/create-react-app/create-react-app
+tests/cases/user/fp-ts/fp-ts
+tests/cases/user/webpack/webpack
+tests/cases/user/puppeteer/puppeteer
+tests/cases/user/axios-src/axios-src
+tests/cases/user/prettier/prettier
+.eslintcache
 
-# local env files
-.env.local
-.env.*.local
-
-# Log files
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-### Windows ###
-# Windows thumbnail cache files
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Dump file
-*.stackdump
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Folder config file
-[Dd]esktop.ini
+# Directory for instrumented libs generated by jscoverage/JSCover
+lib-cov
 
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
 
-# Windows Installer files
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
+# nyc test coverage
+.nyc_output
 
-# Windows shortcuts
-*.lnk
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
 
-# End of https://www.gitignore.io/api/go,git,vuejs,linux,macos,dotenv,windows,visualstudiocode
+# Bower dependency directory (https://bower.io/)
+bower_components
 
-# Ignore SQLite databases.
-*.db
+# node-waf configuration
+.lock-wscript
 
-# Go protobuf generated code.
-*.pb.go
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
 
-# Go GraphQL generated code.
-*.gql.go
+# Dependency directories
+node_modules/
+jspm_packages/
 
-# Temporary files.
-*.tmp
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# public
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.pnp.*

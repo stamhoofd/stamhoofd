@@ -1,9 +1,6 @@
 {
     "recommendations": [
         "esbenp.prettier-vscode",
-        "kumar-harsh.graphql-for-vscode",
-        "ms-vscode.go",
-        "octref.vetur",
-        "zxh404.vscode-proto3"
+        "octref.vetur"
     ]
 }
