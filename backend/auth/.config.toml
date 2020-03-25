@@ -1,8 +1,0 @@
-protos = ["auth.proto", "email.proto"]
-
-[env]
-GRPC_PORT=":9000"
-HTTP_PORT=":8000"
-# Must be 32 characters long.
-SECRET="my super secret signing password"
-OAUTH2_BACKEND_SECRET="my super secret signing password"
