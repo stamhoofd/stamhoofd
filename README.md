@@ -2,15 +2,11 @@
 
 ## Development environment
 
-Recommended development environment is VS Code. It should automatically ask you to install the recommended extensions. These are defined in `.vscode/extensions.json`.
+Recommended development environment is VS Code. It should automatically ask you to install the recommended extensions. These are defined in `.vscode/extensions.json`. You'll get a popup from VS Code to install these.
 
 ## Project setup
 
 ```
-cd ../shared
-yarn link
-cd ../create-group
-yarn link stamhoofd-shared
 yarn install
 ```
 
@@ -31,8 +27,6 @@ yarn lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
-
-# Frontend
 
 ## Structure
 
