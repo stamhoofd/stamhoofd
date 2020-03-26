@@ -81,6 +81,23 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
         }
     }
 
+    /**
+     * Delete all the links from modelA for this relation
+     * @param modelA 
+     */
+    async clear(modelA: A): Promise<void> {
+        const query = `DELETE FROM ${this.linkTable} WHERE ${this.linkKeyA} = ?`;
+
+        // Arrays are turned into list, e.g. ['a', 'b'] turns into 'a', 'b'
+        const [result] = await Database.delete(query, [
+            modelA.getPrimaryKey()
+        ])
+
+        if (this.isLoaded(modelA)) {
+            (modelA as any)[this.modelKey] = []
+        }
+    }
+
     async unlink(modelA: A, ...modelsB: B[]): Promise<void> {
         const query = `DELETE FROM ${this.linkTable} WHERE ${this.linkKeyA} = ? AND ${this.linkKeyB} IN (?)`;
 

@@ -81,6 +81,16 @@ export class Model /* static implements RowInitiable<Model> */ {
         return model;
     }
 
+    static fromRows<T extends typeof Model>(this: T, rows: any[], namespace: string): InstanceType<T>[] {
+        return rows.flatMap(row => {
+            const model = this.fromRow(row[namespace])
+            if (model) {
+                return [model]
+            }
+            return []
+        })
+    }
+
     private markSaved() {
         this.updatedProperties = {};
         this.existsInDatabase = true

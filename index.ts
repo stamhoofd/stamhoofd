@@ -72,7 +72,7 @@ const start = async () => {
             console.log(`${member.firstName} already has parents`)
 
             const cb = member.parents.length
-            await Member.parents.unlink(member, member.parents[0])
+            await Member.parents.clear(member)
 
             if (member.parents.length == cb) {
                 throw new Error("unlink didn't update parents")

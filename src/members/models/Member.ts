@@ -47,8 +47,8 @@ export class Member extends Model {
         const [rows] = await Database.select(`
             SELECT * 
             FROM ${this.table} 
-            ${Member.address.joinQuery("members", "addresses")}
-            ${Member.parents.joinQuery("members", "parents")}
+            ${Member.address.joinQuery(this.table, "addresses")}
+            ${Member.parents.joinQuery(this.table, "parents")}
             WHERE members.${this.primaryKey} = ?
             LIMIT 1
         `, [id])
@@ -58,7 +58,7 @@ export class Member extends Model {
         }
 
         // Read member + address from first row
-        const member = this.fromRow(rows[0]['members'])
+        const member = this.fromRow(rows[0][this.table])
 
         if (!member) {
             return undefined
@@ -66,13 +66,7 @@ export class Member extends Model {
         const address = Address.fromRow(rows[0]['addresses']) || null
 
         // Get parents from other rows
-        const parents = rows.flatMap(row => {
-            const parent = Parent.fromRow(row['parents'])
-            if (parent) {
-                return [parent]
-            }
-            return []
-        })
+        const parents = Parent.fromRows(rows, 'parents')
 
         return member
             .setRelation(Member.address, address)
@@ -84,7 +78,7 @@ export class Member extends Model {
     emergencyContacts: EmergencyContact[] = [];
     records: Record[] = [];
     doctor: EmergencyContact | null = null;
-
+    
     group: Group | null = null;*/
 
     @column()
