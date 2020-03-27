@@ -11,13 +11,10 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "types": [
-            "node"
+            "node",
+            "jest"
         ],
-        "paths": {
-            "@src/*": [
-                "*"
-            ],
-        },
+        "baseUrl": ".",
         "lib": [
             "es2019"
         ]

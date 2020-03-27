@@ -1,26 +1,23 @@
-import { CreateMember } from './src/endpoints/CreateMember';
 import { Request } from './src/routing/classes/Request';
+import { GetMember } from './src/members/endpoints/GetMember';
 
 console.log("Start");
 // Test endpoint
-const createMemberEndpoint = new CreateMember()
-const r = new Request();
-r.body = JSON.stringify({
-    firstName: "Simon",
-    lastName: "Backx",
-    records: [{
-        name: "hallo"
-    }]
-});
-r.headers['Content-Type'] = "application/vnd.stamhoofd.Member+json;version=2";
-r.headers['Accept'] = "application/vnd.stamhoofd.Member+json;version=1";
+const getMemberEndpoint = new GetMember()
+const r = Request.buildJson("GET", "/members/67");
 
-try {
-    const response = createMemberEndpoint.run(r);
+const start = async () => {
+    const response = await getMemberEndpoint.run(r);
     if (response) {
         console.log(response.body)
+    } else {
+        console.log("no response")
     }
+};
 
-} catch (err) {
-    console.error(err);
-}
+start().catch((error) => {
+    console.error('unhandledRejection', error);
+    process.exit(1);
+}).finally(() => {
+    process.exit();
+});

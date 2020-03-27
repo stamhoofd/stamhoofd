@@ -11,6 +11,6 @@ export class EncodedResponse {
 
     constructor(response: Response<Encodeable>) {
         this.headers = response.headers
-        this.body = response.body.encode()
+        this.body = JSON.stringify(response.body.encode())
     }
 }

@@ -58,7 +58,7 @@ export const Database = {
 
     finishQuery(q, hrstart: [number, number]) {
         const hrend = process.hrtime(hrstart)
-        console.log(q.sql.replace(/\n+ +/g, '\n'), "in " + (hrend[0] * 1000 + hrend[1] / 1000000) + "ms")
+        console.log(q.sql.replace(/\s+/g, ' '), "in " + (hrend[0] * 1000 + hrend[1] / 1000000) + "ms")
     },
 
     async select(query: string, values?: any): Promise<[any[], mysql.FieldInfo[]]> {
