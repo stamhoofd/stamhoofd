@@ -1,6 +1,6 @@
 import http from "http";
 import { CreateMember } from './src/endpoints/CreateMember';
-import { Request } from './src/classes/routing/Request';
+import { Request } from './src/routing/classes/Request';
 
 const requestListener = function (req: http.IncomingMessage, res: http.ServerResponse) {
     res.writeHead(200);

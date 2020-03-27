@@ -1,5 +1,5 @@
 import { CreateMember } from './src/endpoints/CreateMember';
-import { Request } from './src/classes/routing/Request';
+import { Request } from './src/routing/classes/Request';
 
 console.log("Start");
 // Test endpoint

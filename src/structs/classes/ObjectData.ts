@@ -1,8 +1,5 @@
 import { Data } from './Data'
 import { Decoder } from './Decoder'
-import { ContentDecoder } from './ContentDecoder'
-import { ArrayDecoder } from './ArrayDecoder'
-import { ContentType } from '../routing/ContentType'
 
 /// Implementation of Data that reads an already existing tree of data. 
 export class ObjectData implements Data {
@@ -43,14 +40,6 @@ export class ObjectData implements Data {
     }
 
     decode<T>(decoder: Decoder<T>): T {
-        // tmp hack for arrays
-        if (decoder instanceof ArrayDecoder) {
-            return decoder.decode(this);
-        }
-        return decoder.decode(this.data);
-    }
-
-    decodeContent<T>(contentType: ContentType, decoder: ContentDecoder<Data, T>): T {
-        return decoder.decodeContent(contentType, this);
+        return decoder.decode(this);
     }
 }
