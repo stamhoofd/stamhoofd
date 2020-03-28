@@ -1,6 +1,5 @@
 import path from "path"
 const appDir = path.join(__dirname, '../../')
-console.log('appdir', appDir)
 
 export default {
     get stack() {

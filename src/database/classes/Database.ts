@@ -47,6 +47,22 @@ export const Database = {
         });
     },
 
+    async end(): Promise<mysql.MysqlError | undefined> {
+        return new Promise((resolve, reject) => {
+            pool.end(function (err) {
+                if (err) {
+                    console.error(err)
+                    return reject(err)
+                }
+
+                if (debug) {
+                    console.log('All connections have ended in the pool');
+                }
+                return resolve()
+            });
+        });
+    },
+
     startQuery(): [number, number] {
         return process.hrtime()
     },
