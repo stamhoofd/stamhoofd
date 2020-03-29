@@ -2,7 +2,6 @@ import { Encodeable } from '../../structs/classes/Encodeable';
 import { Data } from '../../structs/classes/Data';
 import { StringDecoder } from '../../classes/decoding/StringDecoder';
 import { Member } from '../models/Member';
-import { member } from './_old_Member';
 
 export class MemberStruct implements Encodeable {
     firstName: string
