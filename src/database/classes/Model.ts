@@ -28,11 +28,11 @@ export class Model /* static implements RowInitiable<Model> */ {
      * Returns the default select to select the needed properties of this table
      * @param namespace: optional namespace of this select
      */
-    static getDefaultSelect(namespace?: string): string {
-        return "`" + (namespace || this.table) + "`.*";
+    static getDefaultSelect(namespace: string = this.table): string {
+        return "`" + namespace + "`.*";
     }
 
-    static selectPropertiesWithout(namespace?: string, ...exclude: string[]): string {
+    static selectPropertiesWithout(namespace: string = this.table, ...exclude: string[]): string {
         const properties = this.properties.flatMap(p => (exclude.includes(p) ? [] : [p]));
 
         if (properties.length == 0) {
