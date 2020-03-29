@@ -7,20 +7,23 @@ describe("Model", () => {
     class TestModel extends Model {
         static table = "test_models";
 
-        @column({ primary: true })
+        @column({ primary: true, type: "integer" })
         id: number | null = null;
 
-        @column()
+        @column({ type: "string" })
         name: string;
 
-        @column()
+        @column({ type: "integer" })
         count: number;
 
-        @column()
+        @column({ type: "boolean" })
         isActive: boolean;
 
-        @column()
+        @column({ type: "datetime" })
         createdOn: Date;
+
+        @column({ type: "date", nullable: true })
+        birthDay: Date | null = null;
     }
 
     test("Not possible to choose own primary key", async () => {
@@ -30,6 +33,7 @@ describe("Model", () => {
         m.count = 1;
         m.isActive = true;
         m.createdOn = new Date();
+        m.birthDay = new Date(1990, 0, 1);
         try {
             await m.save();
             throw new Error("Should not be allowed to choose own primary key");
@@ -57,6 +61,10 @@ describe("Model", () => {
         m.isActive = true;
         m.count = 1;
         m.createdOn = new Date();
+        // MySQL cannot save milliseconds. Data is rounded if not set to zero.
+        m.createdOn.setMilliseconds(0);
+
+        m.birthDay = new Date(1990, 0, 1);
         await m.save();
         expect(m.id).toBeGreaterThanOrEqual(1);
 

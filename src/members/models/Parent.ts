@@ -1,28 +1,28 @@
-import { Model } from '../../database/classes/Model';
-import { column } from '../../database/decorators/Column';
-import { Address } from './Address';
-import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
+import { Model } from "../../database/classes/Model";
+import { column } from "../../database/decorators/Column";
+import { Address } from "./Address";
+import { ManyToOneRelation } from "../../database/classes/ManyToOneRelation";
 
 export class Parent extends Model {
-    static table = "parents"
+    static table = "parents";
 
-    @column({ primary: true })
+    @column({ primary: true, type: "integer" })
     id: number | null = null;
 
-    @column()
+    @column({ type: "string" })
     firstName: string;
 
-    @column()
+    @column({ type: "string" })
     lastName = "";
 
-    @column()
+    @column({ type: "string" })
     phone: string | null = null;
 
-    @column()
+    @column({ type: "string" })
     mail: string | null = null;
 
-    @column({ foreignKey: Parent.address })
+    @column({ foreignKey: Parent.address, type: "integer" })
     addressId: number | null = null; // null = no address
 
-    static address = new ManyToOneRelation(Address, "address")
+    static address = new ManyToOneRelation(Address, "address");
 }

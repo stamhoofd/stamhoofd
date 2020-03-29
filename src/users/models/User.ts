@@ -7,17 +7,17 @@ export class User extends Model {
     static table = "users";
 
     // Columns
-    @column({ primary: true })
+    @column({ primary: true, type: "integer" })
     id: number | null = null;
 
-    @column()
+    @column({ type: "string" })
     email: string;
 
     // Password is never selected, unless a login has to happen
-    @column()
+    @column({ type: "string" })
     protected password: string | undefined;
 
-    @column()
+    @column({ type: "datetime" })
     createdOn: Date;
 
     /**
@@ -25,7 +25,7 @@ export class User extends Model {
      * @override@override@override@override@override
      */
     static getDefaultSelect(namespace?: string): string {
-        return this.selectPropertiesWithout(namespace, "password");
+        return this.selectColumnsWithout(namespace, "password");
     }
 
     // Methods

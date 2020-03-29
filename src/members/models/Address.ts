@@ -1,24 +1,24 @@
-import { Model } from '../../database/classes/Model';
-import { column } from '../../database/decorators/Column';
+import { Model } from "../../database/classes/Model";
+import { column } from "../../database/decorators/Column";
 
 export class Address extends Model {
-    static table = "addresses"
+    static table = "addresses";
 
-    @column({ primary: true })
+    @column({ primary: true, type: "integer" })
     id: number | null = null;
 
-    @column()
+    @column({ type: "string" })
     street = "";
 
-    @column()
+    @column({ type: "string" })
     number = "";
 
-    @column()
+    @column({ type: "string" })
     postalCode = "";
 
-    @column()
+    @column({ type: "string" })
     city = "";
 
-    @column()
+    @column({ type: "string" })
     country = "BE";
 }

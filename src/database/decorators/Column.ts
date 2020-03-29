@@ -1,20 +1,21 @@
 import { Model } from "../classes/Model";
 import { ManyToOneRelation } from "../classes/ManyToOneRelation";
+import { Column } from "../classes/Column";
 
-export function column<Key extends keyof any, Value extends Model>(settings?: {
+export type ColumnType = "integer" | "string" | "date" | "datetime" | "boolean";
+
+export function column<Key extends keyof any, Value extends Model>(settings: {
+    type: ColumnType;
     primary?: boolean;
+    nullable?: boolean;
     foreignKey?: ManyToOneRelation<Key, Value>;
 }) {
     return (target: any /* future typeof Model */, key: string) => {
-        if (!target.constructor.properties) {
-            target.constructor.properties = [];
+        if (!target.constructor.columns) {
+            target.constructor.columns = [];
         }
 
-        if (settings?.primary) {
-            target.constructor.primaryKey = key;
-        }
-
-        if (settings?.foreignKey) {
+        if (settings.foreignKey) {
             settings.foreignKey.foreignKey = key;
 
             if (!target.constructor.relations) {
@@ -24,7 +25,19 @@ export function column<Key extends keyof any, Value extends Model>(settings?: {
             target.constructor.relations.push(settings.foreignKey);
         }
 
-        target.constructor.properties.push(key);
+        const column = new Column(settings.type, key);
+        if (settings.nullable) {
+            column.nullable = true;
+        }
+        if (settings.primary) {
+            if (target.constructor.primaryKey) {
+                throw new Error("Duplicate primary key " + key);
+            }
+            target.constructor.primaryKey = key;
+            column.primary = true;
+        }
+
+        target.constructor.columns.push(column);
 
         // Override the getter and setter
         Object.defineProperty(target, key, {

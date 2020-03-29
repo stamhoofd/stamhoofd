@@ -2,6 +2,7 @@ import { Database } from "./Database";
 import Stack from "../../debug/Stack";
 import { ManyToOneRelation } from "./ManyToOneRelation";
 import { ManyToManyRelation } from "./ManyToManyRelation";
+import { Column } from "./Column";
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primaryKey: string;
@@ -9,7 +10,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     /**
      * Properties that are stored in the table (including foreign keys, but without mapped relations!)
      */
-    static properties: string[];
+    static columns: Column[];
     static debug = false;
     static table: string; // override this!
     static relations: ManyToOneRelation<string, Model>[];
@@ -22,6 +23,10 @@ export class Model /* static implements RowInitiable<Model> */ {
         if (!this.static.relations) {
             this.static.relations = [];
         }
+
+        if (!this.static.columns) {
+            this.static.columns = [];
+        }
     }
 
     /**
@@ -32,8 +37,10 @@ export class Model /* static implements RowInitiable<Model> */ {
         return "`" + namespace + "`.*";
     }
 
-    static selectPropertiesWithout(namespace: string = this.table, ...exclude: string[]): string {
-        const properties = this.properties.flatMap(p => (exclude.includes(p) ? [] : [p]));
+    static selectColumnsWithout(namespace: string = this.table, ...exclude: string[]): string {
+        const properties = this.columns
+            .map(column => column.name)
+            .flatMap(name => (exclude.includes(name) ? [] : [name]));
 
         if (properties.length == 0) {
             // todo: check what to do in this case.
@@ -98,12 +105,10 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
 
         const model = new this() as InstanceType<T>;
-        this.properties.forEach(key => {
-            if (row[key] !== undefined) {
-                const value = row[key];
-
-                // todo: check column name mapping here
-                model[key] = value;
+        this.columns.forEach(column => {
+            if (row[column.name] !== undefined) {
+                const value = column.from(row[column.name]);
+                model[column.name] = value;
             }
         });
 
@@ -174,10 +179,13 @@ export class Model /* static implements RowInitiable<Model> */ {
             if (this.static.debug) console.log(`Creating new ${this.constructor.name}`);
 
             // Check if all properties are defined
-            this.static.properties.forEach(key => {
-                if (this[key] === undefined) {
+            this.static.columns.forEach(column => {
+                if (this[column.name] === undefined) {
                     throw new Error(
-                        "Tried to save model " + this.constructor.name + " without defining required property " + key
+                        "Tried to save model " +
+                            this.constructor.name +
+                            " without defining required property " +
+                            column.name
                     );
                 }
             });
@@ -221,9 +229,9 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         if (force) {
             /// Mark all properties as updated
-            this.static.properties.forEach(key => {
-                if (this[key] !== undefined) {
-                    this.updatedProperties[key] = true;
+            this.static.columns.forEach(column => {
+                if (this[column.name] !== undefined) {
+                    this.updatedProperties[column.name] = true;
                 }
             });
 
@@ -234,14 +242,20 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         const set = {};
 
-        for (const key in this.updatedProperties) {
-            set[key] = this[key];
-
-            if (set[key] === undefined) {
-                console.log(this);
-                throw new Error("Tried to update model " + this.constructor.name + " with undefined property " + key);
+        this.static.columns.forEach(column => {
+            if (column.primary) {
+                return;
             }
-        }
+            if (this.updatedProperties[column.name]) {
+                if (this[column.name] === undefined) {
+                    console.log(this);
+                    throw new Error(
+                        "Tried to update model " + this.constructor.name + " with undefined property " + column.name
+                    );
+                }
+                set[column.name] = column.to(this[column.name]);
+            }
+        });
 
         if (this.static.debug) console.log("Saving " + this.constructor.name + " to...", set);
 
