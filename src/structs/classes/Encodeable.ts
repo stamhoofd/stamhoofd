@@ -1,3 +1,3 @@
 export interface Encodeable {
-    encode(): any
+    encode(): any;
 }

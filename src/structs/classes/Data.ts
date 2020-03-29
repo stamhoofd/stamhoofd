@@ -1,4 +1,4 @@
-import { Decoder } from './Decoder';
+import { Decoder } from "./Decoder";
 
 /// Decode data that is structured in maps and arrays
 export interface Data {
@@ -9,4 +9,5 @@ export interface Data {
     field(field: string): Data;
     index(number: number): Data;
     decode<T>(decoder: Decoder<T>): T;
+    array<T>(decoder: Decoder<T>): T[];
 }

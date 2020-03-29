@@ -1,42 +1,52 @@
-import { Data } from './Data'
-import { Decoder } from './Decoder'
+import { Data } from "./Data";
+import { Decoder } from "./Decoder";
+import StringDecoder from "../structs/StringDecoder";
+import NumberDecoder from "../structs/NumberDecoder";
+import ArrayDecoder from "../structs/ArrayDecoder";
 
-/// Implementation of Data that reads an already existing tree of data. 
+/// Implementation of Data that reads an already existing tree of data.
 export class ObjectData implements Data {
-    data: any
+    data: any;
 
     constructor(data: any) {
-        this.data = data
+        this.data = data;
     }
 
     get value(): any {
-        return this.data
+        return this.data;
     }
 
     get string(): string {
-        // todo: throw
-        return this.data as string
+        return this.decode(StringDecoder);
     }
 
     get number(): number {
-        // todo: throw
-        return this.data as number
-    }
-
-    get array(): Data[] {
-        return (this.value as any[]).map(v => new ObjectData(v))
+        return this.decode(NumberDecoder);
     }
 
     index(number: number): Data {
-        // todo: throw
-        return new ObjectData((this.data)[number])
+        if (Array.isArray(this.value)) {
+            if (!Number.isInteger(number)) {
+                throw new Error("Invalid index " + number);
+            }
+            if (this.data[number] !== undefined) {
+                throw new Error("Expected an item at index " + number);
+            }
+            return new ObjectData(this.data[number]);
+        }
+        throw new Error("Expected an array");
     }
 
     field(field: string): Data {
         if (this.data && this.data[field]) {
-            return new ObjectData((this.data)[field])
+            return new ObjectData(this.data[field]);
         }
         throw new Error(`Field ${field} expected`);
+    }
+
+    array<T>(decoder: Decoder<T>): T[] {
+        const array = ArrayDecoder.decode(this);
+        return array.map(v => decoder.decode(v));
     }
 
     decode<T>(decoder: Decoder<T>): T {
