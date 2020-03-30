@@ -1,6 +1,16 @@
-import { promises as fs } from "fs"
+import { promises as fs } from "fs";
+import { Migration as MigrationModel } from "../models/Migration";
+import path from "path";
 
-type MigrationFunction = () => Promise<void>
+type MigrationFunction = () => Promise<void>;
+
+async function directoryExists(filePath): Promise<boolean> {
+    try {
+        return (await fs.stat(filePath)).isDirectory();
+    } catch (err) {
+        return false;
+    }
+}
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -9,12 +19,27 @@ async function asyncForEach(array, callback) {
 }
 
 export class Migration {
-    up: MigrationFunction
-    down: MigrationFunction | undefined
+    up: MigrationFunction;
+    down: MigrationFunction | undefined;
 
     constructor(up: MigrationFunction, down?: MigrationFunction) {
-        this.up = up
-        this.down = down
+        this.up = up;
+        this.down = down;
+    }
+
+    /***
+     * Given a folder, loop all the folders in that folder and run the migrations in the 'migrations' folder
+     */
+    static async runAll(folder: string) {
+        const folders = (await fs.readdir(folder, { withFileTypes: true })).filter(dirent => dirent.isDirectory());
+
+        await asyncForEach(folders, async dirent => {
+            const p = folder + "/" + dirent.name + "/migrations";
+            if (await directoryExists(p)) {
+                console.log("Migrations from " + dirent.name);
+                await this.run(p);
+            }
+        });
     }
 
     /// Run migrations in the given folder
@@ -23,10 +48,14 @@ export class Migration {
         const files = await fs.readdir(folder);
 
         await asyncForEach(files, async file => {
-            console.log(file);
-            const imported = await import(file);
-            const migration: Migration = imported.default;
-            await migration.up();
+            const p = folder + "/" + file;
+            const relative = path.relative(__dirname + "/../..", p);
+            if (!(await MigrationModel.isExecuted(relative))) {
+                const imported = await import(p);
+                const migration: Migration = imported.default;
+                await migration.up();
+                await MigrationModel.markAsExecuted(relative);
+            }
         });
     }
 }
