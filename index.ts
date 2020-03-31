@@ -1,6 +1,8 @@
 import { Member, FullyLoadedMember } from "./src/members/models/Member";
 import { Address } from "./src/members/models/Address";
 import { Parent } from "./src/members/models/Parent";
+import { Router } from "./src/routing/classes/Router";
+import { Request } from "./src/routing/classes/Request";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -17,7 +19,15 @@ if (new Date().getTimezoneOffset() != 0) {
 }
 
 const start = async () => {
-    try {
+    const router = new Router();
+    await router.loadAllEndpoints(__dirname + "/src");
+
+    const request = Request.buildJson("GET", "/members/67");
+
+    console.log(await router.run(request));
+
+    /*try {
+        
         const found = await Member.getByID(82);
         let member: FullyLoadedMember;
 
@@ -84,7 +94,7 @@ const start = async () => {
         console.log("Done.");
     } catch (e) {
         console.error("Failed to save member: ", e);
-    }
+    }*/
 };
 
 start()
