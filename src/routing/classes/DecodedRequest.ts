@@ -1,29 +1,35 @@
-import { Decoder } from '../../structs/classes/Decoder'
-import { Request } from './Request'
-import { ObjectData } from '../../structs/classes/ObjectData'
+import { Decoder } from "../../structs/classes/Decoder";
+import { Request, HttpMethod } from "./Request";
+import { ObjectData } from "../../structs/classes/ObjectData";
+import http from "http";
 
-interface Headers {
-    [key: string]: string;
-}
 export class DecodedRequest<Params, Query, Body> {
-    method: "GET" | "POST" | "PATCH" | "DELETE"
-    url: string
-    headers: Headers
-    params: Params
-    body: Body
-    query: Query
+    method: HttpMethod;
+    url: string;
+    headers: http.IncomingHttpHeaders;
+    params: Params;
+    body: Body;
+    query: Query;
 
-    constructor(request: Request, params: Params, queryDecoder: Decoder<Query> | undefined, bodyDecoder: Decoder<Body> | undefined) {
-        this.method = request.method
-        this.url = request.url
-        this.headers = request.headers
-
+    static async fromRequest<Params, Query, Body>(
+        request: Request,
+        params: Params,
+        queryDecoder: Decoder<Query> | undefined,
+        bodyDecoder: Decoder<Body> | undefined
+    ): Promise<DecodedRequest<Params, Query, Body>> {
+        const r = new DecodedRequest<Params, Query, Body>();
+        r.method = request.method;
+        r.url = request.url;
+        r.headers = request.headers;
 
         const query = queryDecoder !== undefined ? queryDecoder.decode(new ObjectData(request.query)) : undefined;
-        const body = bodyDecoder !== undefined ? bodyDecoder.decode(new ObjectData(JSON.parse(request.body))) : undefined;
+        const body =
+            bodyDecoder !== undefined ? bodyDecoder.decode(new ObjectData(JSON.parse(await request.body))) : undefined;
 
-        this.params = params
-        this.query = query as Query
-        this.body = body as Body
+        r.params = params;
+        r.query = query as Query;
+        r.body = body as Body;
+
+        return r;
     }
 }

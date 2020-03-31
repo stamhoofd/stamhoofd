@@ -1,11 +1,10 @@
-interface Headers {
-    [key: string]: string;
-}
+import http from "http";
+
 export class Response<Body> {
-    headers: Headers = {}
-    body: Body
+    headers: http.OutgoingHttpHeaders = {};
+    body: Body;
 
     constructor(body: Body) {
-        this.body = body
+        this.body = body;
     }
 }

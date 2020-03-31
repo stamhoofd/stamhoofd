@@ -1,16 +1,13 @@
-import { Encodeable } from '../../structs/classes/Encodeable'
-import { Response } from './Response'
-
-interface Headers {
-    [key: string]: string;
-}
+import { Encodeable } from "../../structs/classes/Encodeable";
+import { Response } from "./Response";
+import http from "http";
 
 export class EncodedResponse {
-    headers: Headers = {}
-    body: any
+    headers: http.OutgoingHttpHeaders = {};
+    body: any;
 
     constructor(response: Response<Encodeable>) {
-        this.headers = response.headers
-        this.body = JSON.stringify(response.body.encode())
+        this.headers = response.headers;
+        this.body = JSON.stringify(response.body.encode());
     }
 }

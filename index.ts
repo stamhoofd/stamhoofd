@@ -3,6 +3,8 @@ import { Address } from "./src/members/models/Address";
 import { Parent } from "./src/members/models/Parent";
 import { Router } from "./src/routing/classes/Router";
 import { Request } from "./src/routing/classes/Request";
+import { RouterServer } from "./src/routing/classes/RouterServer";
+import { Database } from "./src/database/classes/Database";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -22,9 +24,29 @@ const start = async () => {
     const router = new Router();
     await router.loadAllEndpoints(__dirname + "/src");
 
-    const request = Request.buildJson("GET", "/members/67");
+    const routerServer = new RouterServer(router);
+    routerServer.listen(8080);
 
-    console.log(await router.run(request));
+    process.on("SIGTERM", () => {
+        console.info("SIGTERM signal received.");
+
+        routerServer
+            .close()
+            .then(() => {
+                console.log("Server stopped");
+
+                Database.end()
+                    .then(() => {
+                        console.log("MySQL connections closed");
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    });
 
     /*try {
         
@@ -103,5 +125,5 @@ start()
         process.exit(1);
     })
     .finally(() => {
-        process.exit();
+        //process.exit();
     });
