@@ -23,7 +23,7 @@ export class RouterServer {
         try {
             const response = await this.router.run(request);
             if (!response) {
-                console.log("Endpoint not found");
+                console.log("Endpoint not found!");
                 res.writeHead(404);
                 res.end("Endpoint not found.");
             } else {
@@ -63,6 +63,7 @@ export class RouterServer {
                 }
                 resolve();
             });
+            this.server = undefined;
         });
     }
 }

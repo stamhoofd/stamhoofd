@@ -51,6 +51,13 @@ export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends 
                 if (params[param]) {
                     // Found a param
                     resultParams[param] = params[param](part);
+
+                    if (typeof resultParams[param] === "number") {
+                        // Force integers
+                        if (!Number.isInteger(resultParams[param])) {
+                            return;
+                        }
+                    }
                     continue;
                 }
                 // no match
