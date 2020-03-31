@@ -27,8 +27,8 @@ const start = async () => {
     const routerServer = new RouterServer(router);
     routerServer.listen(8080);
 
-    process.on("SIGTERM", () => {
-        console.info("SIGTERM signal received.");
+    process.on("SIGINT", () => {
+        console.info("SIGINT signal received.");
 
         routerServer
             .close()
@@ -38,6 +38,9 @@ const start = async () => {
                 Database.end()
                     .then(() => {
                         console.log("MySQL connections closed");
+
+                        // Should not be needed, but added for security
+                        process.exit();
                     })
                     .catch(err => {
                         console.error(err);
