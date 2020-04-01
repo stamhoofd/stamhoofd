@@ -269,12 +269,12 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         // todo: save here
         if (!id) {
-            const [result] = await Database.insert("insert into `" + this.static.table + "` SET ?", [set]);
+            const [result] = await Database.insert("INSERT INTO `" + this.static.table + "` SET ?", [set]);
             this[this.static.primaryKey] = result.insertId;
             if (this.static.debug) console.log(`New id = ${this[this.static.primaryKey]}`);
         } else {
             const [result] = await Database.update(
-                "update `" + this.static.table + "` SET ? where `" + this.static.primaryKey + "` = ?",
+                "UPDATE `" + this.static.table + "` SET ? WHERE `" + this.static.primaryKey + "` = ?",
                 [set, id]
             );
             if (result.changedRows != 1) {
