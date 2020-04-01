@@ -81,6 +81,9 @@ export class Model /* static implements RowInitiable<Model> */ {
         relation: ManyToOneRelation<Key, Value>,
         value: Value | null
     ): this & Record<Key, Value | null> {
+        if (value !== null && !value.existsInDatabase) {
+            throw new Error("You cannot set a relation to a model that are not yet saved in the database.");
+        }
         const t = this as any;
         t[relation.modelKey] = value;
         return t;
@@ -90,6 +93,11 @@ export class Model /* static implements RowInitiable<Model> */ {
         relation: ManyToManyRelation<Key, any, Value>,
         value: Value[]
     ): this & Record<Key, Value[]> {
+        value.forEach(v => {
+            if (!v.existsInDatabase) {
+                throw new Error("You cannot set a relation to models that are not yet saved in the database.");
+            }
+        });
         const t = this as any;
         t[relation.modelKey] = value;
         return t;

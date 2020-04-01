@@ -87,6 +87,36 @@ describe("Model", () => {
         expect(selected.id).toEqual(m.id);
     });
 
+    test("Save before setting a many to one relation directly", async () => {
+        const other = new TestModel();
+        other.name = "My partner";
+        other.isActive = true;
+        other.count = 1;
+        other.createdOn = new Date();
+
+        const m = new TestModel();
+        m.name = "My name";
+        m.isActive = true;
+        m.count = 1;
+        m.createdOn = new Date();
+        // MySQL cannot save milliseconds. Data is rounded if not set to zero.
+        m.createdOn.setMilliseconds(0);
+
+        m.birthDay = new Date(1990, 0, 1);
+
+        // setRelation is the correct way to do it (it would throw now):
+        //m.setRelation(TestModel.partner, other);
+        // but we test what happens if we set the relation the wrong way
+        (m as any).partner = other;
+
+        expect.assertions(1);
+        try {
+            await m.save();
+        } catch (e) {
+            expect(e.message).toMatch(/partner/);
+        }
+    });
+
     test("Save before setting a many to one relation", async () => {
         const other = new TestModel();
         other.name = "My partner";
@@ -103,13 +133,13 @@ describe("Model", () => {
         m.createdOn.setMilliseconds(0);
 
         m.birthDay = new Date(1990, 0, 1);
-        m.setRelation(TestModel.partner, other);
 
         expect.assertions(1);
         try {
+            m.setRelation(TestModel.partner, other);
             await m.save();
         } catch (e) {
-            expect(e.message).toMatch(/partner/);
+            expect(e.message).toMatch(/not yet saved/);
         }
     });
 
