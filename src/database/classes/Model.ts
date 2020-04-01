@@ -204,9 +204,17 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         // Check if relation models were modified
         this.static.relations.forEach(relation => {
-            if (relation.isLoaded(this) && !this.updatedProperties[relation.foreignKey]) {
+            if (
+                relation.isLoaded(this) &&
+                (!this.updatedProperties[relation.foreignKey] ||
+                    (!this.existsInDatabase &&
+                        (this[relation.foreignKey] === undefined || this[relation.foreignKey] === null)))
+            ) {
                 if (relation.isSet(this)) {
                     const model = this[relation.modelKey];
+                    if (!model.existsInDatabase) {
+                        throw new Error("Relation " + relation.modelKey + " set that doesn't exist in database");
+                    }
                     if (model.getPrimaryKey() !== (this["_" + relation.foreignKey] as number)) {
                         this.updatedProperties[relation.foreignKey] = this[relation.foreignKey];
                     }
