@@ -2,6 +2,7 @@ import { Endpoint } from "./Endpoint";
 import { promises as fs } from "fs";
 import { Request } from "./Request";
 import { EncodedResponse } from "./EncodedResponse";
+import { Response } from "./Response";
 
 async function directoryExists(filePath): Promise<boolean> {
     try {
@@ -67,6 +68,7 @@ export class Router {
                 return response;
             }
         }
+
         return null;
     }
 }

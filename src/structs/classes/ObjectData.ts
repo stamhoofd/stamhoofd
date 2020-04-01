@@ -3,13 +3,23 @@ import { Decoder } from "./Decoder";
 import StringDecoder from "../structs/StringDecoder";
 import NumberDecoder from "../structs/NumberDecoder";
 import ArrayDecoder from "../structs/ArrayDecoder";
+import { ClientError } from "../../routing/classes/ClientError";
 
 /// Implementation of Data that reads an already existing tree of data.
 export class ObjectData implements Data {
     data: any;
+    currentField: string;
 
-    constructor(data: any) {
+    constructor(data: any, currentField = "") {
         this.data = data;
+        this.currentField = currentField;
+    }
+
+    private addToCurrentField(field: string | number): string {
+        if (this.currentField == "") {
+            return field + "";
+        }
+        return this.currentField + "." + field;
     }
 
     get value(): any {
@@ -24,24 +34,56 @@ export class ObjectData implements Data {
         return this.decode(NumberDecoder);
     }
 
+    /**
+     * Request an item at a given index. Expects a defined, non null value
+     * @param number index
+     */
     index(number: number): Data {
         if (Array.isArray(this.value)) {
-            if (!Number.isInteger(number)) {
-                throw new Error("Invalid index " + number);
+            if (!Number.isSafeInteger(number)) {
+                throw new ClientError({
+                    code: "invalid_index",
+                    message: `Invalid index`,
+                    field: this.currentField
+                });
             }
             if (this.data[number] !== undefined) {
-                throw new Error("Expected an item at index " + number);
+                throw new ClientError({
+                    code: "invalid_field",
+                    message: `Expected value at ${this.addToCurrentField(number)}`,
+                    field: this.addToCurrentField(number)
+                });
             }
-            return new ObjectData(this.data[number]);
+            return new ObjectData(this.data[number], this.addToCurrentField(number));
         }
-        throw new Error("Expected an array");
+        throw new ClientError({
+            code: "invalid_field",
+            message: `Expected an array at ${this.currentField}`,
+            field: this.currentField
+        });
     }
 
-    field(field: string): Data {
-        if (this.data && this.data[field]) {
-            return new ObjectData(this.data[field]);
+    /**
+     * Expects an optional field that could be null. Always returns undefined if the field is null or undefined.
+     */
+    optionalField(field: string): Data | undefined {
+        if (this.data && this.data[field] !== undefined && this.data[field] !== null) {
+            return new ObjectData(this.data[field], this.addToCurrentField(field));
         }
-        throw new Error(`Field ${field} expected`);
+    }
+
+    /**
+     * Expects an existing field that is defined and not null
+     */
+    field(field: string): Data {
+        if (this.data && this.data[field] !== undefined && this.data[field] !== null) {
+            return new ObjectData(this.data[field], this.addToCurrentField(field));
+        }
+        throw new ClientError({
+            code: "missing_field",
+            message: `Field ${field} is expected at ${this.currentField}`,
+            field: this.currentField
+        });
     }
 
     array<T>(decoder: Decoder<T>): T[] {

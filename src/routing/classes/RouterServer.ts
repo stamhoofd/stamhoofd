@@ -23,12 +23,10 @@ export class RouterServer {
         try {
             const response = await this.router.run(request);
             if (!response) {
-                console.log("Endpoint not found!");
                 res.writeHead(404);
                 res.end("Endpoint not found.");
             } else {
-                // Todo: implement status code from endpoint
-                res.writeHead(200, response.headers);
+                res.writeHead(response.status, response.headers);
                 res.end(response.body);
             }
         } catch (e) {

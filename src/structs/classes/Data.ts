@@ -6,6 +6,9 @@ export interface Data {
     readonly number: number;
     readonly value: any;
 
+    /// Contains the path where we are reading
+    readonly currentField: string;
+
     field(field: string): Data;
     index(number: number): Data;
     decode<T>(decoder: Decoder<T>): T;

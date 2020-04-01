@@ -1,13 +1,18 @@
 import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
+import { ClientError } from "../../routing/classes/ClientError";
 
 class NumberDecoder implements Decoder<number> {
     decode(data: Data): number {
-        if (typeof data.value == "number") {
+        if (typeof data.value == "number" && !Number.isNaN(data.value) && Number.isFinite(data.value)) {
             return data.value;
         }
 
-        throw new Error("Expected a number");
+        throw new ClientError({
+            code: "invalid_field",
+            message: `Expected a number at ${data.currentField}`,
+            field: data.currentField
+        });
     }
 }
 
