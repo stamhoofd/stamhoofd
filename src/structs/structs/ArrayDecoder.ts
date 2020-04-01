@@ -1,7 +1,7 @@
 import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
 import { ObjectData } from "../classes/ObjectData";
-import { ClientError } from "../../routing/classes/ClientError";
+import { DecodingError } from "../classes/DecodingError";
 
 class ArrayDecoder implements Decoder<Data[]> {
     decode(data: Data): Data[] {
@@ -9,7 +9,7 @@ class ArrayDecoder implements Decoder<Data[]> {
             return data.value.map(v => new ObjectData(v));
         }
 
-        throw new ClientError({
+        throw new DecodingError({
             code: "invalid_field",
             message: `Expected an array at ${data.currentField}`,
             field: data.currentField

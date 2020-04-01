@@ -3,7 +3,7 @@ import { Decoder } from "./Decoder";
 import StringDecoder from "../structs/StringDecoder";
 import NumberDecoder from "../structs/NumberDecoder";
 import ArrayDecoder from "../structs/ArrayDecoder";
-import { ClientError } from "../../routing/classes/ClientError";
+import { DecodingError } from "../classes/DecodingError";
 
 /// Implementation of Data that reads an already existing tree of data.
 export class ObjectData implements Data {
@@ -41,14 +41,14 @@ export class ObjectData implements Data {
     index(number: number): Data {
         if (Array.isArray(this.value)) {
             if (!Number.isSafeInteger(number)) {
-                throw new ClientError({
+                throw new DecodingError({
                     code: "invalid_index",
                     message: `Invalid index`,
                     field: this.currentField
                 });
             }
             if (this.data[number] !== undefined) {
-                throw new ClientError({
+                throw new DecodingError({
                     code: "invalid_field",
                     message: `Expected value at ${this.addToCurrentField(number)}`,
                     field: this.addToCurrentField(number)
@@ -56,7 +56,7 @@ export class ObjectData implements Data {
             }
             return new ObjectData(this.data[number], this.addToCurrentField(number));
         }
-        throw new ClientError({
+        throw new DecodingError({
             code: "invalid_field",
             message: `Expected an array at ${this.currentField}`,
             field: this.currentField
@@ -79,7 +79,7 @@ export class ObjectData implements Data {
         if (this.data && this.data[field] !== undefined && this.data[field] !== null) {
             return new ObjectData(this.data[field], this.addToCurrentField(field));
         }
-        throw new ClientError({
+        throw new DecodingError({
             code: "missing_field",
             message: `Field ${field} is expected at ${this.currentField}`,
             field: this.currentField

@@ -1,6 +1,6 @@
 import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
-import { ClientError } from "../../routing/classes/ClientError";
+import { DecodingError } from "../classes/DecodingError";
 
 class IntegerDecoder implements Decoder<number> {
     decode(data: Data): number {
@@ -8,7 +8,7 @@ class IntegerDecoder implements Decoder<number> {
             return data.value;
         }
 
-        throw new ClientError({
+        throw new DecodingError({
             code: "invalid_field",
             message: `Expected an integer at ${data.currentField}`,
             field: data.currentField

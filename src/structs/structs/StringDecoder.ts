@@ -1,13 +1,13 @@
 import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
-import { ClientError } from "../../routing/classes/ClientError";
+import { DecodingError } from "../classes/DecodingError";
 
 class StringDecoder implements Decoder<string> {
     decode(data: Data): string {
         if (typeof data.value == "string") {
             return data.value;
         }
-        throw new ClientError({
+        throw new DecodingError({
             code: "invalid_field",
             message: `Expected a string at ${data.currentField}`,
             field: data.currentField
