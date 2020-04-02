@@ -67,7 +67,7 @@ export const Database = {
         return process.hrtime();
     },
 
-    logQuery(q, hrstart: [number, number]) {
+    logQuery(_q, _hrstart: [number, number]) {
         //const hrend = process.hrtime(hrstart)
         //console.log(q.sql.replace(/\n+ +/g, '\n'), "started at " + (hrend[0] * 1000 + hrend[1] / 1000000) + "ms")
     },

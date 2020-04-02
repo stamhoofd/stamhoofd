@@ -197,6 +197,64 @@ describe("Model", () => {
         expect(selected.partnerId).toEqual(other.id);
     });
 
+    test("Clearing a many to one relation", async () => {
+        const other = new TestModel();
+        other.name = "My partner";
+        other.isActive = true;
+        other.count = 1;
+        other.createdOn = new Date();
+        await other.save();
+
+        const m = new TestModel() as any;
+        m.name = "My name";
+        m.isActive = true;
+        m.count = 1;
+        m.createdOn = new Date();
+        m.partnerId = other.id;
+        await m.save();
+        expect(m.partnerId).toEqual(other.id);
+
+        m.setRelation(TestModel.partner, null);
+        await m.save();
+        expect(m.partnerId).toEqual(null);
+
+        const [rows] = await Database.select("SELECT * from test_models where id = ?", [m.id]);
+        expect(rows).toHaveLength(1);
+        const row = rows[0];
+        expect(row).toHaveProperty("test_models");
+        const selected = TestModel.fromRow(row["test_models"]) as any;
+        expect(selected.partnerId).toEqual(null);
+    });
+
+    test("Clearing a many to one relation", async () => {
+        const other = new TestModel();
+        other.name = "My partner";
+        other.isActive = true;
+        other.count = 1;
+        other.createdOn = new Date();
+        await other.save();
+
+        const m = new TestModel() as any;
+        m.name = "My name";
+        m.isActive = true;
+        m.count = 1;
+        m.createdOn = new Date();
+        m.partnerId = other.id;
+        await m.save();
+        expect(m.partnerId).toEqual(other.id);
+
+        m.partnerId = null;
+        await m.save();
+        expect(m.partnerId).toEqual(null);
+
+        const [rows] = await Database.select("SELECT * from test_models where id = ?", [m.id]);
+        expect(rows).toHaveLength(1);
+        const row = rows[0];
+        expect(row).toHaveProperty("test_models");
+        const selected = TestModel.fromRow(row["test_models"]) as any;
+        expect(selected.partnerId).toEqual(null);
+    });
+
     test("No query if no changes", async () => {
         const other = new TestModel();
         other.name = "My partner";

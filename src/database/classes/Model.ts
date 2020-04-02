@@ -281,6 +281,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             this[this.static.primaryKey] = result.insertId;
             if (this.static.debug) console.log(`New id = ${this[this.static.primaryKey]}`);
         } else {
+            console.warn("update", set);
             const [result] = await Database.update(
                 "UPDATE `" + this.static.table + "` SET ? WHERE `" + this.static.primaryKey + "` = ?",
                 [set, id]
