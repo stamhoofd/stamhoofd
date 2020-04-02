@@ -77,11 +77,23 @@ export class Model /* static implements RowInitiable<Model> */ {
         return t;
     }
 
-    setRelation<Key extends keyof any, Value extends Model>(
+    setOptionalRelation<Key extends keyof any, Value extends Model>(
         relation: ManyToOneRelation<Key, Value>,
         value: Value | null
     ): this & Record<Key, Value | null> {
         if (value !== null && !value.existsInDatabase) {
+            throw new Error("You cannot set a relation to a model that are not yet saved in the database.");
+        }
+        const t = this as any;
+        t[relation.modelKey] = value;
+        return t;
+    }
+
+    setRelation<Key extends keyof any, Value extends Model>(
+        relation: ManyToOneRelation<Key, Value>,
+        value: Value
+    ): this & Record<Key, Value> {
+        if (!value.existsInDatabase) {
             throw new Error("You cannot set a relation to a model that are not yet saved in the database.");
         }
         const t = this as any;
@@ -236,13 +248,6 @@ export class Model /* static implements RowInitiable<Model> */ {
             }
         });
 
-        if (Object.keys(this.updatedProperties).length == 0) {
-            if (!force) {
-                console.warn("Tried to update model without any properties modified");
-                return;
-            }
-        }
-
         if (force) {
             /// Mark all properties as updated
             this.static.columns.forEach(column => {
@@ -272,6 +277,11 @@ export class Model /* static implements RowInitiable<Model> */ {
                 set[column.name] = column.to(this[column.name]);
             }
         });
+
+        if (Object.keys(set).length == 0) {
+            console.warn("Tried to update model without any properties modified");
+            return;
+        }
 
         if (this.static.debug) console.log("Saving " + this.constructor.name + " to...", set);
 

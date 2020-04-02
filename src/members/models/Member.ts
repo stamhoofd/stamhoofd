@@ -81,7 +81,7 @@ export class Member extends Model {
         // Get parents from other rows
         const parents = Parent.fromRows(rows, "parents");
 
-        return member.setRelation(Member.address, address).setManyRelation(Member.parents, parents);
+        return member.setOptionalRelation(Member.address, address).setManyRelation(Member.parents, parents);
     }
 
     logCountry(this: FullyLoadedMember) {

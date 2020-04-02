@@ -214,7 +214,7 @@ describe("Model", () => {
         await m.save();
         expect(m.partnerId).toEqual(other.id);
 
-        m.setRelation(TestModel.partner, null);
+        m.setOptionalRelation(TestModel.partner, null);
         await m.save();
         expect(m.partnerId).toEqual(null);
 
