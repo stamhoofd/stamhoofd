@@ -71,6 +71,7 @@ export class User extends Model {
         const hash = await argon2.hash(password);
         user.password = hash;
         user.createdOn = new Date();
+        user.createdOn.setMilliseconds(0);
 
         try {
             await user.save();

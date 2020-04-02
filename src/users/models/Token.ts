@@ -52,10 +52,9 @@ export class Token extends Model {
     // Methods
     static async getByAccessToken(accessToken: string): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()}, \`user\`.*  FROM ${this.table} ${Token.user.joinQuery(
-                this.table,
-                "user"
-            )} WHERE ${this.primaryKey} = ? LIMIT 1 `,
+            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
+                this.table
+            } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primaryKey} = ? LIMIT 1 `,
             [accessToken]
         );
 
@@ -85,10 +84,10 @@ export class Token extends Model {
 
         // First search if we already have a token for this deviceId.
         // In case we already have a token for that deviceId, we'll delete it first.
-        const [rows] = await Database.delete(`DELETE FROM ${this.table} WHERE ?`, {
-            userId: user.id,
-            deviceId: deviceId
-        });
+        const [rows] = await Database.delete(`DELETE FROM ${this.table} WHERE \`userId\` = ? AND \`deviceId\` = ?`, [
+            user.id,
+            deviceId
+        ]);
 
         if (rows.affectedRows > 0) {
             console.log(`Deleted ${rows.affectedRows} old tokens first`);
@@ -98,8 +97,16 @@ export class Token extends Model {
         token.deviceId = deviceId;
         token.deviceName = deviceName;
         token.accessTokenValidUntil = new Date();
+        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);
+        token.accessTokenValidUntil.setMilliseconds(0);
+
         token.refreshTokenValidUntil = new Date();
+        token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + 3600 * 1000 * 24 * 365);
+        token.refreshTokenValidUntil.setMilliseconds(0);
+
         token.createdOn = new Date();
+        token.createdOn.setMilliseconds(0);
+
         token.accessToken = (await randomBytes(192)).toString("base64").toUpperCase();
         token.refreshToken = (await randomBytes(192)).toString("base64").toUpperCase();
 

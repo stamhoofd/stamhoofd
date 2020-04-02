@@ -10,7 +10,9 @@ export class Model /* static implements RowInitiable<Model> */ {
     /**
      * Properties that are stored in the table (including foreign keys, but without mapped relations!)
      */
-    static columns: Column[];
+    static columns: {
+        [key: string]: Column;
+    };
     static debug = false;
     static table: string; // override this!
     static relations: ManyToOneRelation<string, Model>[];
@@ -25,7 +27,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
 
         if (!this.static.columns) {
-            this.static.columns = [];
+            this.static.columns = {};
         }
     }
 
@@ -38,9 +40,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     }
 
     static selectColumnsWithout(namespace: string = this.table, ...exclude: string[]): string {
-        const properties = this.columns
-            .map(column => column.name)
-            .flatMap(name => (exclude.includes(name) ? [] : [name]));
+        const properties = Object.keys(this.columns).flatMap(name => (exclude.includes(name) ? [] : [name]));
 
         if (properties.length == 0) {
             // todo: check what to do in this case.
@@ -125,7 +125,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
 
         const model = new this() as InstanceType<T>;
-        this.columns.forEach(column => {
+        Object.values(this.columns).forEach(column => {
             if (row[column.name] !== undefined) {
                 const value = column.from(row[column.name]);
                 model[column.name] = value;
@@ -196,10 +196,8 @@ export class Model /* static implements RowInitiable<Model> */ {
             }
             force = true;
 
-            if (this.static.debug) console.log(`Creating new ${this.constructor.name}`);
-
             // Check if all properties are defined
-            this.static.columns.forEach(column => {
+            Object.values(this.static.columns).forEach(column => {
                 if (this[column.name] === undefined) {
                     throw new Error(
                         "Tried to save model " +
@@ -210,14 +208,11 @@ export class Model /* static implements RowInitiable<Model> */ {
                 }
             });
         } else {
-            if (!this.existsInDatabase) {
+            if (!this.existsInDatabase && this.static.columns[this.static.primaryKey].type == "integer") {
                 throw new Error(
-                    `PrimaryKey was set programmatically without fetching the model ${this.constructor.name} from the database`
+                    `PrimaryKey was set programmatically without fetching the model ${this.constructor.name} from the database. This is not allowed for integer primary keys.`
                 );
             }
-
-            if (this.static.debug)
-                console.log(`Updating ${this.constructor.name} where ${this.static.primaryKey} = ${id}`);
 
             // Only check if all updated properties are defined
         }
@@ -250,7 +245,7 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         if (force) {
             /// Mark all properties as updated
-            this.static.columns.forEach(column => {
+            Object.values(this.static.columns).forEach(column => {
                 if (this[column.name] !== undefined) {
                     this.updatedProperties[column.name] = true;
                 }
@@ -263,8 +258,9 @@ export class Model /* static implements RowInitiable<Model> */ {
 
         const set = {};
 
-        this.static.columns.forEach(column => {
-            if (column.primary) {
+        Object.values(this.static.columns).forEach(column => {
+            if (column.primary && column.type == "integer") {
+                // Auto increment: not allowed to set
                 return;
             }
             if (this.updatedProperties[column.name]) {
@@ -286,11 +282,21 @@ export class Model /* static implements RowInitiable<Model> */ {
         if (this.static.debug) console.log("Saving " + this.constructor.name + " to...", set);
 
         // todo: save here
-        if (!id) {
+        if (!this.existsInDatabase) {
+            if (this.static.debug) console.log(`Creating new ${this.constructor.name}`);
+
             const [result] = await Database.insert("INSERT INTO `" + this.static.table + "` SET ?", [set]);
-            this[this.static.primaryKey] = result.insertId;
+
+            if (this.static.columns[this.static.primaryKey].type == "integer") {
+                // Auto increment value
+                this[this.static.primaryKey] = result.insertId;
+            }
+
             if (this.static.debug) console.log(`New id = ${this[this.static.primaryKey]}`);
         } else {
+            if (this.static.debug)
+                console.log(`Updating ${this.constructor.name} where ${this.static.primaryKey} = ${id}`);
+
             console.warn("update", set);
             const [result] = await Database.update(
                 "UPDATE `" + this.static.table + "` SET ? WHERE `" + this.static.primaryKey + "` = ?",

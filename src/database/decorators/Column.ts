@@ -12,7 +12,7 @@ export function column<Key extends keyof any, Value extends Model>(settings: {
 }) {
     return (target: any /* future typeof Model */, key: string) => {
         if (!target.constructor.columns) {
-            target.constructor.columns = [];
+            target.constructor.columns = {};
         }
 
         if (settings.foreignKey) {
@@ -37,7 +37,7 @@ export function column<Key extends keyof any, Value extends Model>(settings: {
             column.primary = true;
         }
 
-        target.constructor.columns.push(column);
+        target.constructor.columns[key] = column;
 
         // Override the getter and setter
         Object.defineProperty(target, key, {

@@ -42,4 +42,28 @@ describe("Model.Token", () => {
         expect(token.accessToken).toEqual(existingToken);
         expect(token.userId).toEqual(userId);
     });
+
+    test("Create a token", async () => {
+        const user = await User.register("test-create-token@domain.com", "my password");
+        expect(user).toBeDefined();
+        if (!user) return;
+
+        const token = await Token.createToken(user, "My device id", "My device name");
+        expect(token).toBeDefined();
+        if (!token) return;
+        expect(token).toBeInstanceOf(Token);
+        expect(token.user.id).toEqual(user.id);
+        expect(token.accessToken).toHaveLength(256);
+        expect(token.refreshToken).toHaveLength(256);
+        expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(new Date().getTime() + (3600 * 1000) / 2 - 1);
+        expect(token.accessTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
+
+        expect(token.refreshTokenValidUntil.getTime()).toBeGreaterThan(token.accessTokenValidUntil.getTime());
+        expect(token.refreshTokenValidUntil.getTime()).toBeLessThan(new Date().getTime() + 3600 * 1000 * 24 * 365);
+
+        expect(token.userId).toEqual(user.id);
+
+        const search: any = await Token.getByAccessToken(token.accessToken);
+        expect(search).toEqual(token);
+    });
 });
