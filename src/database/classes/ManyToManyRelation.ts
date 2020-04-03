@@ -1,11 +1,7 @@
 import { Model } from "./Model";
 import { Database } from "./Database";
 
-export class ManyToManyRelation<
-    Key extends keyof any,
-    A extends Model,
-    B extends Model
-> {
+export class ManyToManyRelation<Key extends keyof any, A extends Model, B extends Model> {
     modelA: { new (): A } & typeof Model;
     modelB: { new (): B } & typeof Model;
 
@@ -26,9 +22,7 @@ export class ManyToManyRelation<
      */
     get linkKeyA(): string {
         return (
-            this.modelA.table +
-            this.modelA.primaryKey.charAt(0).toUpperCase() +
-            this.modelA.primaryKey.substring(1)
+            this.modelA.table + this.modelA.primary.name.charAt(0).toUpperCase() + this.modelA.primary.name.substring(1)
         );
     }
 
@@ -37,25 +31,19 @@ export class ManyToManyRelation<
      */
     get linkKeyB(): string {
         return (
-            this.modelB.table +
-            this.modelB.primaryKey.charAt(0).toUpperCase() +
-            this.modelB.primaryKey.substring(1)
+            this.modelB.table + this.modelB.primary.name.charAt(0).toUpperCase() + this.modelB.primary.name.substring(1)
         );
     }
 
     /// Generate a join query
     joinQuery(namespaceA: string, namespaceB: string): string {
         const linkNamespace = namespaceA + "_" + namespaceB;
-        let str = `LEFT JOIN ${this.linkTable} as ${linkNamespace} on ${linkNamespace}.${this.linkKeyA} = ${namespaceA}.${this.modelA.primaryKey}\n`;
-        str += `LEFT JOIN ${this.modelB.table} as ${namespaceB} on ${linkNamespace}.${this.linkKeyB} = ${namespaceB}.${this.modelB.primaryKey}`;
+        let str = `LEFT JOIN ${this.linkTable} as ${linkNamespace} on ${linkNamespace}.${this.linkKeyA} = ${namespaceA}.${this.modelA.primary.name}\n`;
+        str += `LEFT JOIN ${this.modelB.table} as ${namespaceB} on ${linkNamespace}.${this.linkKeyB} = ${namespaceB}.${this.modelB.primary.name}`;
         return str;
     }
 
-    constructor(
-        modelA: { new (): A } & typeof Model,
-        modelB: { new (): B } & typeof Model,
-        modelKey: Key
-    ) {
+    constructor(modelA: { new (): A } & typeof Model, modelB: { new (): B } & typeof Model, modelKey: Key) {
         this.modelA = modelA;
         this.modelB = modelB;
         this.modelKey = modelKey;
@@ -76,10 +64,7 @@ export class ManyToManyRelation<
 
         // Nested arrays are turned into grouped lists (for bulk inserts), e.g. [['a', 'b'], ['c', 'd']] turns into ('a', 'b'), ('c', 'd')
         const [result] = await Database.insert(query, [
-            modelsB.map(modelB => [
-                modelA.getPrimaryKey(),
-                modelB.getPrimaryKey()
-            ])
+            modelsB.map(modelB => [modelA.getPrimaryKey(), modelB.getPrimaryKey()])
         ]);
 
         // If the relation is loaded, also modify the value of the relation

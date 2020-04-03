@@ -22,6 +22,7 @@ describe("Model.User", () => {
         expect(user).toBeDefined();
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
+        expect(user.savedProperties.get("password")).toBeUndefined();
         expect(user.id).toBeGreaterThanOrEqual(1);
     });
 
@@ -30,6 +31,7 @@ describe("Model.User", () => {
         expect(user).toBeDefined();
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
+        expect(user.savedProperties.get("password")).toBeUndefined();
         expect(user.id).toBeGreaterThanOrEqual(1);
     });
 
@@ -42,6 +44,7 @@ describe("Model.User", () => {
         const user: any = await User.login("existing@domain.com", "myPassword");
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
+        expect(user.savedProperties.get("password")).toBeUndefined();
         expect(user.id).toBeGreaterThanOrEqual(1);
     });
 

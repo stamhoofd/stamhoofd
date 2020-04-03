@@ -5,20 +5,19 @@ import { ManyToManyRelation } from "./ManyToManyRelation";
 import { Column } from "./Column";
 
 export class Model /* static implements RowInitiable<Model> */ {
-    static primaryKey: string;
+    static primary: Column;
 
     /**
      * Properties that are stored in the table (including foreign keys, but without mapped relations!)
      */
-    static columns: {
-        [key: string]: Column;
-    };
+    static columns: Map<string, Column>;
     static debug = false;
     static table: string; // override this!
     static relations: ManyToOneRelation<string, Model>[];
 
     existsInDatabase = false;
-    updatedProperties = {};
+
+    private savedProperties = new Map<string, any>();
 
     constructor() {
         // Read values
@@ -27,8 +26,20 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
 
         if (!this.static.columns) {
-            this.static.columns = {};
+            this.static.columns = new Map<string, Column>();
         }
+    }
+
+    /**
+     * Delete the value of a key from memory
+     */
+    eraseProperty(key: string) {
+        const column = this.static.columns.get(key);
+        if (!column) {
+            throw new Error("Unknown property " + key);
+        }
+        this[key] = undefined;
+        this.savedProperties.delete(key);
     }
 
     /**
@@ -40,7 +51,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     }
 
     static selectColumnsWithout(namespace: string = this.table, ...exclude: string[]): string {
-        const properties = Object.keys(this.columns).flatMap(name => (exclude.includes(name) ? [] : [name]));
+        const properties = Array.from(this.columns.keys()).flatMap(name => (exclude.includes(name) ? [] : [name]));
 
         if (properties.length == 0) {
             // todo: check what to do in this case.
@@ -72,20 +83,21 @@ export class Model /* static implements RowInitiable<Model> */ {
         relation: ManyToOneRelation<Key, any>
     ): this & Record<Key, null> {
         // Todo: check if relation is nullable?
-        const t = this as any;
-        t[relation.modelKey] = null;
-        return t;
+        return this.setOptionalRelation(relation, null);
     }
 
     setOptionalRelation<Key extends keyof any, Value extends Model>(
         relation: ManyToOneRelation<Key, Value>,
         value: Value | null
     ): this & Record<Key, Value | null> {
+        // Todo: check if relation is nullable?
+
         if (value !== null && !value.existsInDatabase) {
             throw new Error("You cannot set a relation to a model that are not yet saved in the database.");
         }
         const t = this as any;
         t[relation.modelKey] = value;
+        t[relation.foreignKey] = value ? value.getPrimaryKey() : null;
         return t;
     }
 
@@ -98,6 +110,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
         const t = this as any;
         t[relation.modelKey] = value;
+        t[relation.foreignKey] = value.getPrimaryKey();
         return t;
     }
 
@@ -120,17 +133,17 @@ export class Model /* static implements RowInitiable<Model> */ {
      * If the row's primary key is null, undefined is returned
      */
     static fromRow<T extends typeof Model>(this: T, row: any): InstanceType<T> | undefined {
-        if (row[this.primaryKey] === null || row[this.primaryKey] === undefined) {
+        if (row[this.primary.name] === null || row[this.primary.name] === undefined) {
             return undefined;
         }
 
         const model = new this() as InstanceType<T>;
-        Object.values(this.columns).forEach(column => {
+        for (const column of this.columns.values()) {
             if (row[column.name] !== undefined) {
                 const value = column.from(row[column.name]);
                 model[column.name] = value;
             }
-        });
+        }
 
         model.markSaved();
         return model;
@@ -147,45 +160,76 @@ export class Model /* static implements RowInitiable<Model> */ {
     }
 
     private markSaved() {
-        this.updatedProperties = {};
         this.existsInDatabase = true;
 
+        this.savedProperties.clear();
+        for (const column of this.static.columns.values()) {
+            if (this[column.name] !== undefined) {
+                // If undefined: do not update, since we didn't save the value
+                this.savedProperties.set(column.name, this[column.name]);
+            }
+        }
+
         /// Save relation foreign keys (so we can check if the id has changed)
-        this.static.relations.forEach(relation => {
+        for (const relation of this.static.relations) {
             if (relation.isLoaded(this)) {
                 if (relation.isSet(this)) {
                     const model = this[relation.modelKey];
-                    this["_" + relation.foreignKey] = model.getPrimaryKey();
+                    this[relation.foreignKey] = model.getPrimaryKey();
                 } else {
-                    this["_" + relation.foreignKey] = null;
+                    this[relation.foreignKey] = null;
                 }
             }
-        });
+        }
     }
 
     get static(): typeof Model {
         return this.constructor as typeof Model;
     }
 
-    getPrimaryKey(): number | null {
-        return this[this.static.primaryKey];
+    getPrimaryKey(): number | string | null {
+        return this[this.static.primary.name];
     }
 
-    /**
-     *
-     * @param force: Save all defined properties, even when no propery is modified. This is enabled by default is the model is not yet inserted in the database yet.
-     */
-    async save(force = false): Promise<void> {
+    async save(): Promise<boolean> {
         if (!this.static.table) {
             throw new Error("Table name not set");
         }
-        console.log("Saving to table ", this.static.table);
 
-        if (!this.static.primaryKey) {
+        if (!this.static.primary) {
             throw new Error("Primary key not set for model " + this.constructor.name + " " + this.static);
         }
 
-        const id = this[this.static.primaryKey];
+        // Check if relation models were modified
+        for (const relation of this.static.relations) {
+            // If a relation is loaded, we can check if it changed the value of the foreign key
+            if (relation.isLoaded(this)) {
+                // The foreign key is modified (set, changed or cleared)
+                if (relation.isSet(this)) {
+                    const model = this[relation.modelKey] as Model;
+
+                    if (!model.existsInDatabase) {
+                        throw new Error("You cannot set a relation that is not yet saved in the database.");
+                    }
+
+                    if (this[relation.foreignKey] !== model.getPrimaryKey()) {
+                        // Should always match because setRelation will make it match on setting it.
+                        throw new Error(
+                            "You cannot modify the value of a foreign key when the relation is loaded. Unload the relation first or modify the relation with setRelation"
+                        );
+                    }
+                } else {
+                    if (this[relation.foreignKey] !== null) {
+                        // Should always match because setRelation will make it match on setting it.
+                        throw new Error(
+                            "You cannot set a foreign key when the relation is loaded. Unload the relation first or modify the relation with setRelation"
+                        );
+                    }
+                }
+            }
+        }
+
+        const id = this.getPrimaryKey();
         if (!id) {
             if (this.existsInDatabase) {
                 throw new Error(
@@ -194,21 +238,8 @@ export class Model /* static implements RowInitiable<Model> */ {
                         " was loaded from the Database, but didn't select the ID. Saving not possible."
                 );
             }
-            force = true;
-
-            // Check if all properties are defined
-            Object.values(this.static.columns).forEach(column => {
-                if (this[column.name] === undefined) {
-                    throw new Error(
-                        "Tried to save model " +
-                            this.constructor.name +
-                            " without defining required property " +
-                            column.name
-                    );
-                }
-            });
         } else {
-            if (!this.existsInDatabase && this.static.columns[this.static.primaryKey].type == "integer") {
+            if (!this.existsInDatabase && this.static.primary.type == "integer") {
                 throw new Error(
                     `PrimaryKey was set programmatically without fetching the model ${this.constructor.name} from the database. This is not allowed for integer primary keys.`
                 );
@@ -217,66 +248,30 @@ export class Model /* static implements RowInitiable<Model> */ {
             // Only check if all updated properties are defined
         }
 
-        // Check if relation models were modified
-        this.static.relations.forEach(relation => {
-            if (
-                relation.isLoaded(this) &&
-                (!this.updatedProperties[relation.foreignKey] ||
-                    (!this.existsInDatabase &&
-                        (this[relation.foreignKey] === undefined || this[relation.foreignKey] === null)))
-            ) {
-                if (relation.isSet(this)) {
-                    const model = this[relation.modelKey];
-                    if (!model.existsInDatabase) {
-                        throw new Error("Relation " + relation.modelKey + " set that doesn't exist in database");
-                    }
-                    if (model.getPrimaryKey() !== (this["_" + relation.foreignKey] as number)) {
-                        this.updatedProperties[relation.foreignKey] = this[relation.foreignKey];
-                    }
-                } else {
-                    if (this["_" + relation.foreignKey] !== null) {
-                        // Relation has been cleared by unsetting the relation without clearing the foreign key
-                        // So we clear the foreign key manually
-                        this.updatedProperties[relation.foreignKey] = null;
-                    }
-                }
+        const set = {};
+
+        for (const column of this.static.columns.values()) {
+            if (column.primary && column.type == "integer") {
+                // Auto increment: not allowed to set
+                continue;
             }
-        });
 
-        if (force) {
-            /// Mark all properties as updated
-            Object.values(this.static.columns).forEach(column => {
-                if (this[column.name] !== undefined) {
-                    this.updatedProperties[column.name] = true;
-                }
-            });
+            if (!this.existsInDatabase && this[column.name] === undefined) {
+                // In the future we might make some columns optional because they have a default value in the database.
+                // But that could cause inconsitent state, so it would be better to generate default values in code.
+                throw new Error(
+                    "Tried to create model " + this.constructor.name + " with undefined property " + column.name
+                );
+            }
 
-            if (Object.keys(this.updatedProperties).length == 0) {
-                throw new Error("Nothing to save! All properties are undefined.");
+            if (this[column.name] !== undefined && this.savedProperties.get(column.name) !== this[column.name]) {
+                set[column.name] = column.to(this[column.name]);
             }
         }
 
-        const set = {};
-
-        Object.values(this.static.columns).forEach(column => {
-            if (column.primary && column.type == "integer") {
-                // Auto increment: not allowed to set
-                return;
-            }
-            if (this.updatedProperties[column.name]) {
-                if (this[column.name] === undefined) {
-                    console.log(this);
-                    throw new Error(
-                        "Tried to update model " + this.constructor.name + " with undefined property " + column.name
-                    );
-                }
-                set[column.name] = column.to(this[column.name]);
-            }
-        });
-
         if (Object.keys(set).length == 0) {
             console.warn("Tried to update model without any properties modified");
-            return;
+            return false;
         }
 
         if (this.static.debug) console.log("Saving " + this.constructor.name + " to...", set);
@@ -287,24 +282,21 @@ export class Model /* static implements RowInitiable<Model> */ {
 
             const [result] = await Database.insert("INSERT INTO `" + this.static.table + "` SET ?", [set]);
 
-            if (this.static.columns[this.static.primaryKey].type == "integer") {
+            if (this.static.primary.type == "integer") {
                 // Auto increment value
-                this[this.static.primaryKey] = result.insertId;
+                this[this.static.primary.name] = result.insertId;
+                if (this.static.debug) console.log(`New id = ${this[this.static.primary.name]}`);
             }
-
-            if (this.static.debug) console.log(`New id = ${this[this.static.primaryKey]}`);
         } else {
             if (this.static.debug)
-                console.log(`Updating ${this.constructor.name} where ${this.static.primaryKey} = ${id}`);
+                console.log(`Updating ${this.constructor.name} where ${this.static.primary.name} = ${id}`);
 
-            console.warn("update", set);
             const [result] = await Database.update(
-                "UPDATE `" + this.static.table + "` SET ? WHERE `" + this.static.primaryKey + "` = ?",
+                "UPDATE `" + this.static.table + "` SET ? WHERE `" + this.static.primary.name + "` = ?",
                 [set, id]
             );
             if (result.changedRows != 1) {
                 try {
-                    console.log(Stack.parentFile);
                     console.warn(
                         `Updated ${this.constructor.name}, but it didn't change a row. Check if ID exists. At ${Stack.parentFile}:${Stack.parentLine}`
                     );
@@ -314,14 +306,8 @@ export class Model /* static implements RowInitiable<Model> */ {
             }
         }
 
-        // Relations
-
-        // Next
-        for (const key in this.updatedProperties) {
-            if (this.static.debug) console.log("Saved property " + key + " to " + this[key]);
-        }
-
         // Mark everything as saved
         this.markSaved();
+        return true;
     }
 }

@@ -54,7 +54,7 @@ export class Token extends Model {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
                 this.table
-            } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primaryKey} = ? LIMIT 1 `,
+            } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken]
         );
 

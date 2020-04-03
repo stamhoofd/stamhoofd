@@ -31,7 +31,7 @@ export class User extends Model {
     // Methods
     static async getByID(id: number): Promise<User | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE ${this.primaryKey} = ? LIMIT 1`,
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE ${this.primary.name} = ? LIMIT 1`,
             [id]
         );
 
@@ -60,7 +60,7 @@ export class User extends Model {
         }
 
         if (await argon2.verify(user.password, password)) {
-            user.password = undefined;
+            user.eraseProperty("password");
             return user;
         }
     }
@@ -82,7 +82,7 @@ export class User extends Model {
             }
             throw e;
         }
-        user.password = undefined;
+        user.eraseProperty("password");
         return user;
     }
 }

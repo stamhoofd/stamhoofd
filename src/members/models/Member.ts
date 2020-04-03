@@ -60,7 +60,7 @@ export class Member extends Model {
             FROM ${this.table} 
             ${Member.address.joinQuery(this.table, "addresses")}
             ${Member.parents.joinQuery(this.table, "parents")}
-            WHERE members.${this.primaryKey} = ?
+            WHERE members.${this.primary.name} = ?
             LIMIT 1
         `,
             [id]

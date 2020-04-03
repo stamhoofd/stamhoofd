@@ -12,7 +12,7 @@ export function column<Key extends keyof any, Value extends Model>(settings: {
 }) {
     return (target: any /* future typeof Model */, key: string) => {
         if (!target.constructor.columns) {
-            target.constructor.columns = {};
+            target.constructor.columns = new Map<string, Column>();
         }
 
         if (settings.foreignKey) {
@@ -30,17 +30,17 @@ export function column<Key extends keyof any, Value extends Model>(settings: {
             column.nullable = true;
         }
         if (settings.primary) {
-            if (target.constructor.primaryKey) {
-                throw new Error("Duplicate primary key " + key);
+            if (target.constructor.primary) {
+                throw new Error("Duplicate primary column " + key);
             }
-            target.constructor.primaryKey = key;
+            target.constructor.primary = column;
             column.primary = true;
         }
 
-        target.constructor.columns[key] = column;
+        target.constructor.columns.set(key, column);
 
         // Override the getter and setter
-        Object.defineProperty(target, key, {
+        /*Object.defineProperty(target, key, {
             get(this: Model) {
                 if (settings?.foreignKey && settings?.foreignKey.isLoaded(this)) {
                     // If the relation is loaded (even when it is null)
@@ -83,6 +83,6 @@ export function column<Key extends keyof any, Value extends Model>(settings: {
                     }
                 }
             }
-        });
+        });*/
     };
 }

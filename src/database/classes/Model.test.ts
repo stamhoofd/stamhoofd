@@ -35,7 +35,7 @@ describe("Model", () => {
         static friends = new ManyToManyRelation(TestModel, TestModel, "friends");
     }
 
-    test("Not possible to choose own primary key", async () => {
+    test("Not possible to choose own primary key for integer type primary", async () => {
         const m = new TestModel();
         m.id = 123;
         m.name = "My name";
@@ -75,6 +75,7 @@ describe("Model", () => {
 
         m.birthDay = new Date(1990, 0, 1);
         await m.save();
+        expect(m.existsInDatabase).toEqual(true);
         expect(m.id).toBeGreaterThanOrEqual(1);
 
         const [rows] = await Database.select("SELECT * from test_models where id = ?", [m.id]);
@@ -87,12 +88,14 @@ describe("Model", () => {
         expect(selected.id).toEqual(m.id);
     });
 
-    test("Save before setting a many to one relation directly", async () => {
+    test("You cannot set a relation directly", async () => {
         const other = new TestModel();
         other.name = "My partner";
         other.isActive = true;
         other.count = 1;
         other.createdOn = new Date();
+        await other.save();
+        expect(other.existsInDatabase).toEqual(true);
 
         const m = new TestModel();
         m.name = "My name";
@@ -109,11 +112,11 @@ describe("Model", () => {
         // but we test what happens if we set the relation the wrong way
         (m as any).partner = other;
 
-        expect.assertions(1);
         try {
             await m.save();
+            expect("Save didn't fail").toEqual("Save should fail");
         } catch (e) {
-            expect(e.message).toMatch(/partner/);
+            expect(e.message).toMatch(/foreign key/);
         }
     });
 
@@ -134,10 +137,10 @@ describe("Model", () => {
 
         m.birthDay = new Date(1990, 0, 1);
 
-        expect.assertions(1);
         try {
             m.setRelation(TestModel.partner, other);
             await m.save();
+            expect("Save didn't fail").toEqual("Save should fail");
         } catch (e) {
             expect(e.message).toMatch(/not yet saved/);
         }
@@ -150,6 +153,7 @@ describe("Model", () => {
         other.count = 1;
         other.createdOn = new Date();
         await other.save();
+        expect(other.existsInDatabase).toEqual(true);
 
         const m = new TestModel() as any;
         m.name = "My name";
@@ -163,6 +167,7 @@ describe("Model", () => {
         m.setRelation(TestModel.partner, other);
 
         await m.save();
+        expect(m.existsInDatabase).toEqual(true);
         expect(m.partnerId).toEqual(other.id);
         expect(m.partner.id).toEqual(other.id);
     });
@@ -174,6 +179,9 @@ describe("Model", () => {
         other.count = 1;
         other.createdOn = new Date();
         await other.save();
+        expect(other.existsInDatabase).toEqual(true);
+        expect(other.partnerId).toEqual(null);
+        expect(other.birthDay).toEqual(null);
 
         const m = new TestModel() as any;
         m.name = "My name";
@@ -187,6 +195,7 @@ describe("Model", () => {
         m.partnerId = other.id;
 
         await m.save();
+        expect(m.existsInDatabase).toEqual(true);
         expect(m.partnerId).toEqual(other.id);
 
         const [rows] = await Database.select("SELECT * from test_models where id = ?", [m.id]);
@@ -204,6 +213,7 @@ describe("Model", () => {
         other.count = 1;
         other.createdOn = new Date();
         await other.save();
+        expect(other.existsInDatabase).toEqual(true);
 
         const m = new TestModel() as any;
         m.name = "My name";
@@ -212,6 +222,7 @@ describe("Model", () => {
         m.createdOn = new Date();
         m.partnerId = other.id;
         await m.save();
+        expect(m.existsInDatabase).toEqual(true);
         expect(m.partnerId).toEqual(other.id);
 
         m.setOptionalRelation(TestModel.partner, null);
@@ -232,7 +243,8 @@ describe("Model", () => {
         other.isActive = true;
         other.count = 1;
         other.createdOn = new Date();
-        await other.save();
+        expect(await other.save()).toEqual(true);
+        expect(other.existsInDatabase).toEqual(true);
 
         const m = new TestModel() as any;
         m.name = "My name";
@@ -240,11 +252,13 @@ describe("Model", () => {
         m.count = 1;
         m.createdOn = new Date();
         m.partnerId = other.id;
-        await m.save();
+        expect(await m.save()).toEqual(true);
+
+        expect(m.existsInDatabase).toEqual(true);
         expect(m.partnerId).toEqual(other.id);
 
         m.partnerId = null;
-        await m.save();
+        expect(await m.save()).toEqual(true);
         expect(m.partnerId).toEqual(null);
 
         const [rows] = await Database.select("SELECT * from test_models where id = ?", [m.id]);
@@ -257,54 +271,36 @@ describe("Model", () => {
 
     test("No query if no changes", async () => {
         const other = new TestModel();
-        other.name = "My partner";
+        other.name = "No query if no changes";
         other.isActive = true;
         other.count = 1;
         other.createdOn = new Date();
 
-        const spyInsert = jest.spyOn(Database, "insert");
-        const spyUpdate = jest.spyOn(Database, "update");
-        await other.save();
+        const firstSave = await other.save();
+        expect(firstSave).toEqual(true);
 
-        expect(spyInsert).toHaveBeenCalled();
-        expect(spyUpdate).not.toHaveBeenCalled();
-
-        spyInsert.mockReset();
-        spyUpdate.mockReset();
+        expect(other.existsInDatabase).toEqual(true);
+        expect(other.partnerId).toEqual(null);
+        expect(other.birthDay).toEqual(null);
 
         other.count = 1;
-        await other.save();
-        expect(spyInsert).not.toHaveBeenCalled();
-        expect(spyUpdate).not.toHaveBeenCalled();
-
-        spyInsert.mockRestore();
-        spyUpdate.mockRestore();
+        const saved = await other.save();
+        expect(saved).toEqual(false);
     });
 
     test("Update a model", async () => {
         const other = new TestModel();
-        other.name = "My partner";
+        other.name = "Update a model";
         other.isActive = true;
         other.count = 1;
         other.createdOn = new Date();
-        const spyInsert = jest.spyOn(Database, "insert");
-        //const spyUpdate = jest.spyOn(Database, "update");
-        // We cannot spy on update for now, because that causes a weird error, probably because something is wrong in the spy logic
 
-        await other.save();
-        expect(spyInsert).toHaveBeenCalled();
-        // expect(spyUpdate).not.toHaveBeenCalled();
-
-        spyInsert.mockReset();
-        //spyUpdate.mockReset();
+        expect(other.existsInDatabase).toEqual(false);
+        expect(await other.save()).toEqual(true);
+        expect(other.existsInDatabase).toEqual(true);
 
         other.count = 2;
-        await other.save();
-
-        expect(spyInsert).not.toHaveBeenCalled();
-        //expect(spyUpdate).toHaveBeenCalled();
-
-        spyInsert.mockRestore();
-        //spyUpdate.mockRestore();
+        expect(await other.save()).toEqual(true);
+        expect(other.existsInDatabase).toEqual(true);
     });
 });
