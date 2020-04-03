@@ -64,7 +64,13 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
     /// isSet doesn't make sens for many to many. It is always set because it isn't optional
     async link(modelA: A, ...modelsB: B[]): Promise<void> {
         if (!modelA.getPrimaryKey()) {
-            throw new Error("Cannot link if model isn't saved yet");
+            throw new Error("Cannot link if model is not saved yet");
+        }
+
+        for (const modelB of modelsB) {
+            if (!modelB.getPrimaryKey()) {
+                throw new Error("Cannot link to a model that is not saved yet");
+            }
         }
         const query = `INSERT INTO ${this.linkTable} (${this.linkKeyA}, ${this.linkKeyB}) VALUES ?`;
 

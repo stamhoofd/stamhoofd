@@ -365,4 +365,35 @@ describe("Model", () => {
         expect(friends[0].id).toEqual(friend1.id);
         expect(friends[1].id).toEqual(friend2.id);
     });
+
+    test("You can't set many to many if not yet saved", async () => {
+        const friend1 = new TestModel();
+        friend1.name = "Friend 1";
+        friend1.isActive = true;
+        friend1.count = 1;
+        friend1.createdOn = new Date();
+
+        expect(await friend1.save()).toEqual(true);
+
+        const friend2 = new TestModel();
+        friend2.name = "Friend 2";
+        friend2.isActive = true;
+        friend2.count = 1;
+        friend2.createdOn = new Date();
+
+        const other = new TestModel().setManyRelation(TestModel.friends, []);
+        other.name = "Me";
+        other.isActive = true;
+        other.count = 1;
+        other.createdOn = new Date();
+
+        expect(await other.save()).toEqual(true);
+
+        try {
+            await TestModel.friends.link(other, friend1, friend2);
+            expect("Link didn't fail").toEqual("Link should fail");
+        } catch (e) {
+            expect(e.message).toMatch(/not saved yet/);
+        }
+    });
 });
