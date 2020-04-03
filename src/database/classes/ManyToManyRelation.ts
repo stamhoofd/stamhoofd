@@ -22,7 +22,10 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
      */
     get linkKeyA(): string {
         return (
-            this.modelA.table + this.modelA.primary.name.charAt(0).toUpperCase() + this.modelA.primary.name.substring(1)
+            this.modelA.table +
+            this.modelA.primary.name.charAt(0).toUpperCase() +
+            this.modelA.primary.name.substring(1) +
+            ((this.modelA as any) === this.modelB ? "A" : "")
         );
     }
 
@@ -31,7 +34,10 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
      */
     get linkKeyB(): string {
         return (
-            this.modelB.table + this.modelB.primary.name.charAt(0).toUpperCase() + this.modelB.primary.name.substring(1)
+            this.modelB.table +
+            this.modelB.primary.name.charAt(0).toUpperCase() +
+            this.modelB.primary.name.substring(1) +
+            ((this.modelA as any) === this.modelB ? "B" : "")
         );
     }
 
@@ -50,7 +56,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
     }
 
     /// Whether this relation is loaded
-    isLoaded(model: Model): boolean /*model is Model & Record<Key, M>*/ {
+    isLoaded(model: A): model is A & Record<Key, B[]> {
         // Also not loaded if null, since it should be an empty array or an array if it is loaded
         return Array.isArray((model as any)[this.modelKey]);
     }
