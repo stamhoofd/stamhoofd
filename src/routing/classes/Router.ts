@@ -2,7 +2,6 @@ import { Endpoint } from "./Endpoint";
 import { promises as fs } from "fs";
 import { Request } from "./Request";
 import { EncodedResponse } from "./EncodedResponse";
-import { Response } from "./Response";
 
 async function directoryExists(filePath): Promise<boolean> {
     try {
@@ -61,8 +60,7 @@ export class Router {
     }
 
     async run(request: Request): Promise<EncodedResponse | null> {
-        for (let index = 0; index < this.endpoints.length; index++) {
-            const endpoint = this.endpoints[index];
+        for (const endpoint of this.endpoints) {
             const response = await endpoint.run(request);
             if (response !== null) {
                 return response;

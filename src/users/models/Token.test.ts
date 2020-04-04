@@ -18,7 +18,7 @@ describe("Model.Token", () => {
         ]);
         userId = userData.insertId;
 
-        const [data] = await Database.insert("INSERT INTO " + Token.table + " SET ?", [
+        await Database.insert("INSERT INTO " + Token.table + " SET ?", [
             {
                 accessToken: existingToken,
                 refreshToken: "refreshtoken",
