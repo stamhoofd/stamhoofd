@@ -105,7 +105,7 @@ describe("Model", () => {
         await expect(m.save()).rejects.toThrow(/foreign key/i);
     });
 
-    test("Save before setting a many to one relation", async () => {
+    test("Save before setting a many to one relation", () => {
         const other = new TestModel();
         other.name = "My partner";
         other.isActive = true;
