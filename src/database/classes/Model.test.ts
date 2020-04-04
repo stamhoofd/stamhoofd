@@ -454,6 +454,22 @@ describe("Model", () => {
         expect(friendsAgain.map(f => f.id)).toIncludeSameMembers([friend2.id, friend1.id]);
     });
 
+    test("Load a M2M relation", async () => {
+        // Get a clean one, because we don't want to affect the other tests
+        const [rows] = await Database.select("SELECT * from testModels where id = ? LIMIT 1", [meWithFriends.id]);
+        expect(rows).toHaveLength(1);
+        const row = rows[0];
+        expect(row).toHaveProperty("testModels");
+        const selected = TestModel.fromRow(row["testModels"]) as any;
+        expect(selected).toBeDefined();
+
+        expect(TestModel.friends.isLoaded(selected)).toEqual(false);
+        const friends = await TestModel.friends.load(selected);
+        expect(TestModel.friends.isLoaded(selected)).toEqual(true);
+        expect(selected.friends).toEqual(friends);
+        expect(friends.map(f => f.id)).toIncludeSameMembers([friend2.id, friend1.id]);
+    });
+
     test("Clear a not loaded many to many relation", async () => {
         // Now unlink one
         await TestModel.friends.clear(meWithoutFriends);
@@ -474,6 +490,22 @@ describe("Model", () => {
 
         const friendsAgain = TestModel.fromRows(rows, "friends");
         expect(friendsAgain).toHaveLength(0);
+    });
+
+    test("Load an empty M2M relation", async () => {
+        // Get a clean one, because we don't want to affect the other tests
+        const [rows] = await Database.select("SELECT * from testModels where id = ? LIMIT 1", [meWithFriends.id]);
+        expect(rows).toHaveLength(1);
+        const row = rows[0];
+        expect(row).toHaveProperty("testModels");
+        const selected = TestModel.fromRow(row["testModels"]) as any;
+        expect(selected).toBeDefined();
+
+        expect(TestModel.friends.isLoaded(selected)).toEqual(false);
+        const friends = await TestModel.friends.load(selected);
+        expect(TestModel.friends.isLoaded(selected)).toEqual(true);
+        expect(selected.friends).toEqual(friends);
+        expect(friends).toBeEmpty();
     });
 
     test("You can't set many to many if not yet saved", async () => {

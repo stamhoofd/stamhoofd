@@ -49,6 +49,19 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
         return str;
     }
 
+    /// Load the relation of a model and return the loaded models
+    async load(modelA: A): Promise<B[]> {
+        const namespaceB = "B";
+        const linkNamespace = "AB";
+        let str = `SELECT ${this.modelB.getDefaultSelect(namespaceB)} FROM ${this.linkTable} as ${linkNamespace}\n`;
+        str += `JOIN ${this.modelB.table} as ${namespaceB} on ${linkNamespace}.${this.linkKeyB} = ${namespaceB}.${this.modelB.primary.name}\n`;
+        str += `WHERE ${linkNamespace}.${this.linkKeyA} = ?`;
+        const [rows] = await Database.select(str, [modelA.getPrimaryKey()]);
+        const modelsB = this.modelB.fromRows(rows, namespaceB) as B[];
+        modelA.setManyRelation(this, modelsB);
+        return modelsB;
+    }
+
     constructor(modelA: { new (): A } & typeof Model, modelB: { new (): B } & typeof Model, modelKey: Key) {
         this.modelA = modelA;
         this.modelB = modelB;
@@ -85,6 +98,8 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
                 const arr: B[] = (modelA as any)[this.modelKey];
                 arr.push(...modelsB);
             } else {
+                // This could happen in race conditions and simultanious requests
+
                 console.warn(
                     "Warning: linking expected to affect " +
                         modelsB.length +
@@ -136,6 +151,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
                     })
                 );
             } else {
+                // This could happen in race conditions and simultanious requests
                 console.warn(
                     "Warning: unlinking expected to affect " +
                         modelsB.length +
