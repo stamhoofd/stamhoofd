@@ -20,7 +20,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 }
 
 export class Token extends Model {
-    static table = "user_tokens";
+    static table = "tokens";
 
     // Columns
     @column({ primary: true, type: "string" })
