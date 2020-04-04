@@ -345,6 +345,26 @@ describe("Model", () => {
         expect(friends).toHaveLength(2);
         expect(friends[0].id).toEqual(friend1.id);
         expect(friends[1].id).toEqual(friend2.id);
+
+        // Now unlink one
+        await TestModel.friends.unlink(other, friend1);
+        if (TestModel.friends.isLoaded(other)) {
+            expect(other.friends).toHaveLength(1);
+            expect(other.friends[0].id).toEqual(friend2.id);
+        } else {
+            expect("other friends not loaded").toEqual("other friends loaded");
+        }
+
+        const [rowsAgain] = await Database.select(
+            "SELECT * from testModels " +
+                TestModel.friends.joinQuery("testModels", "friends") +
+                " where testModels.id = ?",
+            [other.id]
+        );
+
+        const friendsAgain = TestModel.fromRows(rowsAgain, "friends");
+        expect(friendsAgain).toHaveLength(1);
+        expect(friendsAgain[0].id).toEqual(friend2.id);
     });
 
     test("You can't set many to many if not yet saved", async () => {
