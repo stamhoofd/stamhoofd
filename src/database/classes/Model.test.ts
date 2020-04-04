@@ -43,12 +43,7 @@ describe("Model", () => {
         m.isActive = true;
         m.createdOn = new Date();
         m.birthDay = new Date(1990, 0, 1);
-        expect.assertions(1);
-        try {
-            await m.save();
-        } catch (e) {
-            expect(e.message).toMatch(/primary/i);
-        }
+        await expect(m.save()).rejects.toThrow(/primary/i);
     });
 
     test("Creating a model requires to set all properties", async () => {
@@ -56,12 +51,7 @@ describe("Model", () => {
         m.name = "My name";
         m.isActive = true;
         m.createdOn = new Date();
-        expect.assertions(1);
-        try {
-            await m.save();
-        } catch (e) {
-            expect(e.message).toMatch(/count/);
-        }
+        await expect(m.save()).rejects.toThrow(/count/i);
     });
 
     test("Saving a new instance", async () => {
@@ -112,12 +102,7 @@ describe("Model", () => {
         // but we test what happens if we set the relation the wrong way
         (m as any).partner = other;
 
-        try {
-            await m.save();
-            expect("Save didn't fail").toEqual("Save should fail");
-        } catch (e) {
-            expect(e.message).toMatch(/foreign key/);
-        }
+        await expect(m.save()).rejects.toThrow(/foreign key/i);
     });
 
     test("Save before setting a many to one relation", async () => {
@@ -137,13 +122,9 @@ describe("Model", () => {
 
         m.birthDay = new Date(1990, 0, 1);
 
-        try {
+        expect(() => {
             m.setRelation(TestModel.partner, other);
-            await m.save();
-            expect("Save didn't fail").toEqual("Save should fail");
-        } catch (e) {
-            expect(e.message).toMatch(/not yet saved/);
-        }
+        }).toThrow(/not yet saved/i);
     });
 
     test("Setting a many to one relation", async () => {
@@ -247,7 +228,7 @@ describe("Model", () => {
         expect(selected.partnerId).toEqual(null);
     });
 
-    test("Clearing a many to one relation", async () => {
+    test("Clearing a many to one relation by ID", async () => {
         const other = new TestModel();
         other.name = "My partner";
         other.isActive = true;
@@ -388,12 +369,6 @@ describe("Model", () => {
         other.createdOn = new Date();
 
         expect(await other.save()).toEqual(true);
-
-        try {
-            await TestModel.friends.link(other, friend1, friend2);
-            expect("Link didn't fail").toEqual("Link should fail");
-        } catch (e) {
-            expect(e.message).toMatch(/not saved yet/);
-        }
+        await expect(TestModel.friends.link(other, friend1, friend2)).rejects.toThrow(/not saved yet/);
     });
 });
