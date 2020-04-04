@@ -113,9 +113,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
             console.warn("Cleared many to many relation, but didn't deleted any entries");
         }
 
-        if (this.isLoaded(modelA)) {
-            (modelA as any)[this.modelKey] = [];
-        }
+        modelA.setManyRelation(this, []);
     }
 
     async unlink(modelA: A, ...modelsB: B[]): Promise<void> {
@@ -131,9 +129,12 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
             if (result.affectedRows == modelsB.length) {
                 const arr: B[] = (modelA as any)[this.modelKey];
                 const idMap = modelsB.map(model => model.getPrimaryKey());
-                (modelA as any)[this.modelKey] = arr.filter(model => {
-                    return !idMap.includes(model.getPrimaryKey());
-                });
+                modelA.setManyRelation(
+                    this,
+                    arr.filter(model => {
+                        return !idMap.includes(model.getPrimaryKey());
+                    })
+                );
             } else {
                 console.warn(
                     "Warning: unlinking expected to affect " +

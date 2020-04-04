@@ -295,8 +295,10 @@ describe("Model", () => {
         expect(other.existsInDatabase).toEqual(true);
     });
 
+    let friend1, friend2, friend3, meWithoutFriends: TestModel;
+    let meWithFriends: TestModel & { friends: TestModel[] };
     test("Set a many to many relationship", async () => {
-        const friend1 = new TestModel();
+        friend1 = new TestModel();
         friend1.name = "Friend 1";
         friend1.isActive = true;
         friend1.count = 1;
@@ -304,27 +306,65 @@ describe("Model", () => {
 
         expect(await friend1.save()).toEqual(true);
 
-        const friend2 = new TestModel();
+        friend2 = new TestModel();
         friend2.name = "Friend 2";
         friend2.isActive = true;
-        friend2.count = 1;
+        friend2.count = 2;
         friend2.createdOn = new Date();
 
         expect(await friend2.save()).toEqual(true);
 
-        const other = new TestModel().setManyRelation(TestModel.friends, []);
-        other.name = "Me";
-        other.isActive = true;
-        other.count = 1;
-        other.createdOn = new Date();
+        friend3 = new TestModel();
+        friend3.name = "Friend 3";
+        friend3.isActive = true;
+        friend3.count = 3;
+        friend3.createdOn = new Date();
 
-        expect(await other.save()).toEqual(true);
+        expect(await friend3.save()).toEqual(true);
 
-        await TestModel.friends.link(other, friend1, friend2);
-        if (TestModel.friends.isLoaded(other)) {
-            expect(other.friends).toHaveLength(2);
-            expect(other.friends[0].id).toEqual(friend1.id);
-            expect(other.friends[1].id).toEqual(friend2.id);
+        meWithFriends = new TestModel().setManyRelation(TestModel.friends, []);
+        meWithFriends.name = "Me";
+        meWithFriends.isActive = true;
+        meWithFriends.count = 1;
+        meWithFriends.createdOn = new Date();
+
+        expect(await meWithFriends.save()).toEqual(true);
+
+        await TestModel.friends.link(meWithFriends, friend1, friend2);
+        if (TestModel.friends.isLoaded(meWithFriends)) {
+            expect(meWithFriends.friends).toHaveLength(2);
+            expect(meWithFriends.friends[0].id).toEqual(friend1.id);
+            expect(meWithFriends.friends[1].id).toEqual(friend2.id);
+        } else {
+            expect("other friends not loaded").toEqual("other friends loaded");
+        }
+
+        // Check also saved in database
+        const [rows] = await Database.select(
+            "SELECT * from testModels " +
+                TestModel.friends.joinQuery("testModels", "friends") +
+                " where testModels.id = ?",
+            [meWithFriends.id]
+        );
+
+        const _meWithoutFriends = TestModel.fromRow(rows[0]["testModels"]);
+        expect(_meWithoutFriends).toBeDefined();
+        if (!_meWithoutFriends) return;
+        meWithoutFriends = _meWithoutFriends;
+        expect(meWithoutFriends.id).toEqual(meWithFriends.id);
+
+        const friends = TestModel.fromRows(rows, "friends");
+        expect(friends).toHaveLength(2);
+        expect(friends[0].id).toEqual(friend1.id);
+        expect(friends[1].id).toEqual(friend2.id);
+    });
+
+    test("Unlink a many to many relationship", async () => {
+        // Now unlink one
+        await TestModel.friends.unlink(meWithFriends, friend1);
+        if (TestModel.friends.isLoaded(meWithFriends)) {
+            expect(meWithFriends.friends).toHaveLength(1);
+            expect(meWithFriends.friends[0].id).toEqual(friend2.id);
         } else {
             expect("other friends not loaded").toEqual("other friends loaded");
         }
@@ -333,38 +373,107 @@ describe("Model", () => {
             "SELECT * from testModels " +
                 TestModel.friends.joinQuery("testModels", "friends") +
                 " where testModels.id = ?",
-            [other.id]
+            [meWithFriends.id]
         );
 
         const meAgain = TestModel.fromRow(rows[0]["testModels"]);
         expect(meAgain).toBeDefined();
         if (!meAgain) return;
-        expect(meAgain.id).toEqual(other.id);
+        expect(meAgain.id).toEqual(meWithFriends.id);
 
-        const friends = TestModel.fromRows(rows, "friends");
-        expect(friends).toHaveLength(2);
-        expect(friends[0].id).toEqual(friend1.id);
-        expect(friends[1].id).toEqual(friend2.id);
+        const friendsAgain = TestModel.fromRows(rows, "friends");
+        expect(friendsAgain).toHaveLength(1);
+        expect(friendsAgain[0].id).toEqual(friend2.id);
+    });
 
+    test("Clear a many to many relationship", async () => {
         // Now unlink one
-        await TestModel.friends.unlink(other, friend1);
-        if (TestModel.friends.isLoaded(other)) {
-            expect(other.friends).toHaveLength(1);
-            expect(other.friends[0].id).toEqual(friend2.id);
+        await TestModel.friends.clear(meWithFriends);
+        if (TestModel.friends.isLoaded(meWithFriends)) {
+            expect(meWithFriends.friends).toHaveLength(0);
         } else {
             expect("other friends not loaded").toEqual("other friends loaded");
         }
 
-        const [rowsAgain] = await Database.select(
+        const [rows] = await Database.select(
             "SELECT * from testModels " +
                 TestModel.friends.joinQuery("testModels", "friends") +
                 " where testModels.id = ?",
-            [other.id]
+            [meWithFriends.id]
         );
 
-        const friendsAgain = TestModel.fromRows(rowsAgain, "friends");
-        expect(friendsAgain).toHaveLength(1);
-        expect(friendsAgain[0].id).toEqual(friend2.id);
+        const meAgain = TestModel.fromRow(rows[0]["testModels"]);
+        expect(meAgain).toBeDefined();
+        if (!meAgain) return;
+        expect(meAgain.id).toEqual(meWithFriends.id);
+
+        const friendsAgain = TestModel.fromRows(rows, "friends");
+        expect(friendsAgain).toHaveLength(0);
+    });
+
+    test("Link a not loaded many to many relation", async () => {
+        // Now unlink one
+        await TestModel.friends.link(meWithoutFriends, friend3, friend2, friend1);
+        expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(false);
+
+        const [rows] = await Database.select(
+            "SELECT * from testModels " +
+                TestModel.friends.joinQuery("testModels", "friends") +
+                " where testModels.id = ?",
+            [meWithoutFriends.id]
+        );
+
+        const meAgain = TestModel.fromRow(rows[0]["testModels"]);
+        expect(meAgain).toBeDefined();
+        if (!meAgain) return;
+        expect(meAgain.id).toEqual(meWithoutFriends.id);
+
+        const friendsAgain = TestModel.fromRows(rows, "friends");
+        expect(friendsAgain).toHaveLength(3);
+        expect(friendsAgain.map(f => f.id)).toIncludeSameMembers([friend3.id, friend2.id, friend1.id]);
+    });
+
+    test("Unlink a not loaded many to many relation", async () => {
+        // Now unlink one
+        await TestModel.friends.unlink(meWithoutFriends, friend3);
+        expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(false);
+
+        const [rows] = await Database.select(
+            "SELECT * from testModels " +
+                TestModel.friends.joinQuery("testModels", "friends") +
+                " where testModels.id = ?",
+            [meWithoutFriends.id]
+        );
+
+        const meAgain = TestModel.fromRow(rows[0]["testModels"]);
+        expect(meAgain).toBeDefined();
+        if (!meAgain) return;
+        expect(meAgain.id).toEqual(meWithoutFriends.id);
+
+        const friendsAgain = TestModel.fromRows(rows, "friends");
+        expect(friendsAgain.map(f => f.id)).toIncludeSameMembers([friend2.id, friend1.id]);
+    });
+
+    test("Clear a not loaded many to many relation", async () => {
+        // Now unlink one
+        await TestModel.friends.clear(meWithoutFriends);
+        expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(true); // should be true, because we can automatically load the relation if it is not yet loaded
+        expect((meWithoutFriends as any).friends).toHaveLength(0);
+
+        const [rows] = await Database.select(
+            "SELECT * from testModels " +
+                TestModel.friends.joinQuery("testModels", "friends") +
+                " where testModels.id = ?",
+            [meWithoutFriends.id]
+        );
+
+        const meAgain = TestModel.fromRow(rows[0]["testModels"]);
+        expect(meAgain).toBeDefined();
+        if (!meAgain) return;
+        expect(meAgain.id).toEqual(meWithoutFriends.id);
+
+        const friendsAgain = TestModel.fromRows(rows, "friends");
+        expect(friendsAgain).toHaveLength(0);
     });
 
     test("You can't set many to many if not yet saved", async () => {
