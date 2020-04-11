@@ -10,6 +10,7 @@ export interface Data {
     readonly currentField: string;
 
     field(field: string): Data;
+    optionalField(field: string): Data | undefined;
     index(number: number): Data;
     decode<T>(decoder: Decoder<T>): T;
     array<T>(decoder: Decoder<T>): T[];

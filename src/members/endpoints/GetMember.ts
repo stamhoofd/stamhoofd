@@ -11,9 +11,6 @@ type Body = undefined;
 type ResponseBody = MemberStruct;
 
 export class GetMember extends Endpoint<Params, Query, Body, ResponseBody> {
-    protected query = undefined;
-    protected body = undefined;
-
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
