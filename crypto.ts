@@ -40,7 +40,7 @@ import sodium from "libsodium-wrappers";
     // Clear private key
     memberPair.privateKey = new Uint8Array();
 
-    const original = "Sensitive user data??";
+    const original = "Sensitive user data??".repeat(50);
     console.log(original);
 
     // Encrypt the sensitive data with the member's key
@@ -58,17 +58,21 @@ import sodium from "libsodium-wrappers";
         console.error("Invalid public and/or private key. Could not decrypt the data.");
     }
 
-    // Recover private key using user key
-    const memberPrivateKey = sodium.crypto_box_seal_open(sealedMemberKey, keyPair.publicKey, keyPair.privateKey);
-    console.log(keyPair);
+    for (let index = 0; index < 1000; index++) {
+        // Recover private key using user key
+        const memberPrivateKey = sodium.crypto_box_seal_open(sealedMemberKey, keyPair.publicKey, keyPair.privateKey);
+        //console.log(keyPair);
 
 
-    try {
-        const plainText = sodium.crypto_box_seal_open(sealed, memberPair.publicKey, memberPrivateKey, 'text');
-        console.log(plainText);
-    } catch (e) {
-        console.error("Invalid public and/or private key. Could not decrypt the data.");
+        try {
+            const plainText = sodium.crypto_box_seal_open(sealed, memberPair.publicKey, memberPrivateKey, 'text');
+            //console.log(plainText);
+        } catch (e) {
+            console.error("Invalid public and/or private key. Could not decrypt the data.");
+        }
     }
+
+
 
 
 
