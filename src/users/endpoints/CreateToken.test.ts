@@ -39,7 +39,7 @@ describe("Endpoint.CreateToken", () => {
             password: "my test passwor",
         });
 
-        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);;
+        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
     });
 
     test('Login with non existing email', async () => {

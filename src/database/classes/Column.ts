@@ -1,10 +1,14 @@
 import { ColumnType } from "../decorators/Column";
+import { Decoder } from '../../structs/classes/Decoder';
+import { ObjectData } from '../../structs/classes/ObjectData';
+import { isEncodeable } from '../../structs/classes/Encodeable';
 
 export class Column {
     type: ColumnType;
     name: string;
     nullable = false;
     primary = false;
+    decoder: Decoder<any> | undefined;
 
     constructor(type: ColumnType, name: string) {
         this.type = type;
@@ -45,6 +49,26 @@ export class Column {
                 // Mapped correctly by node MySQL
                 return data;
 
+            case "json": {
+                // Mapped correctly by node MySQL
+                let parsed: any
+                try {
+                    parsed = JSON.parse(data);
+                } catch (e) {
+                    // Syntax error. Mark this in the future.
+                    console.error(e);
+                    parsed = {}
+                }
+
+                if (this.decoder) {
+                    return this.decoder.decode(new ObjectData(parsed, this.name));
+                } else {
+                    console.warn("It is recommended to always use a decoder for JSON columns");
+                }
+
+                return parsed;
+            }
+
             default: {
                 // If we get a compile error heres, a type is missing in the switch
                 const t: never = this.type;
@@ -80,6 +104,16 @@ export class Column {
             case "datetime":
                 // Mapped correctly by node MySQL
                 return data;
+
+            case "json": {
+                let d = data
+                if (isEncodeable(data)) {
+                    d = data.encode();
+                } else {
+                    console.warn("A non encodeable value has been set for " + this.name + " this is not recommended and might become deprecated in the future.");
+                }
+                return JSON.stringify(d);
+            }
 
             default: {
                 // If we get a compile error heres, a type is missing in the switch
