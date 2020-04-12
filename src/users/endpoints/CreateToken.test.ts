@@ -30,4 +30,26 @@ describe("Endpoint.CreateToken", () => {
         expect(response.body.refreshToken.length).toBeGreaterThan(40);
         expect(response.body.accessTokenValidUntil).toBeValidDate()
     });
+
+    test('Login with a wrong password', async () => {
+        const r = Request.buildJson("POST", "/oauth/token", {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "password",
+            username: "create-token@domain.com",
+            password: "my test passwor",
+        });
+
+        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);;
+    });
+
+    test('Login with non existing email', async () => {
+        const r = Request.buildJson("POST", "/oauth/token", {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "password",
+            username: "create-token95959451218181@domain.com",
+            password: "my test password",
+        });
+
+        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
+    });
 });
