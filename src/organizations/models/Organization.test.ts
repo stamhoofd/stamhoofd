@@ -40,8 +40,8 @@ describe("Model.Organization", () => {
         if (!clean) return
         expect(clean).toBeInstanceOf(Organization);
         expect(clean.id).toEqual(organization.id);
-        expect(organization.meta.type).toEqual(OrganizationType.Youth)
-        expect(organization.meta.umbrellaOrganization).toEqual(UmbrellaOrganization.ChiroNationaal)
+        expect(clean.meta.type).toEqual(OrganizationType.Youth)
+        expect(clean.meta.umbrellaOrganization).toEqual(UmbrellaOrganization.ChiroNationaal)
 
     });
 
