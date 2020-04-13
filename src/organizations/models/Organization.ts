@@ -17,6 +17,14 @@ export class Organization extends Model {
     @column({ type: "string" })
     website: string;
 
+
+    @column({ type: "string" })
+    domainName: string;
+
+    @column({ type: "string" })
+    uri: string;
+
+
     @column({ foreignKey: Organization.address, type: "integer", nullable: true })
     addressId: number | null = null; // null = no address
 
