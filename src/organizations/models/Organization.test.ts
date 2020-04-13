@@ -1,5 +1,6 @@
-import { Organization } from "./Organization";
 import { Database } from "../../database/classes/Database";
+import { Organization } from "./Organization";
+import { OrganizationType, UmbrellaOrganization } from '../structs/OrganizationMetaStruct';
 
 describe("Model.Organization", () => {
     let existingOrganizationId: number;
@@ -24,6 +25,24 @@ describe("Model.Organization", () => {
         expect(organization).toBeInstanceOf(Organization);
         expect(organization.id).toBeGreaterThanOrEqual(1);
         expect(organization.meta.type).toEqual("other")
+    });
+
+    test("Save organization meta data", async () => {
+        const organization = await Organization.getByID(existingOrganizationId);
+        expect(organization).toBeDefined();
+        if (!organization) return
+        organization.meta.type = OrganizationType.Youth;
+        organization.meta.umbrellaOrganization = UmbrellaOrganization.ChiroNationaal;
+        await organization.save();
+
+        const clean = await Organization.getByID(existingOrganizationId);
+        expect(clean).toBeDefined();
+        if (!clean) return
+        expect(clean).toBeInstanceOf(Organization);
+        expect(clean.id).toEqual(organization.id);
+        expect(organization.meta.type).toEqual(OrganizationType.Youth)
+        expect(organization.meta.umbrellaOrganization).toEqual(UmbrellaOrganization.ChiroNationaal)
+
     });
 
 });

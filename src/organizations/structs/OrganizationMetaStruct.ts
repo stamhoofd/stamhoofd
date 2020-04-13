@@ -1,7 +1,7 @@
 import { Data } from "../../structs/classes/Data";
 import { EnumDecoder } from '../../structs/structs/EnumDecoder';
 
-enum OrganizationType {
+export enum OrganizationType {
     Youth = "youth",
     Football = "football",
     Tennis = "football",
@@ -9,7 +9,7 @@ enum OrganizationType {
     Other = "other",
 }
 
-enum UmbrellaOrganization {
+export enum UmbrellaOrganization {
     ScoutsEnGidsenVlaanderen = "Scouts & Gidsen Vlaanderen",
     ChiroNationaal = "Chiro",
 }
