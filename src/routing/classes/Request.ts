@@ -5,6 +5,7 @@ export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
 export class Request {
     method: HttpMethod;
     url: string;
+    host: string;
     body: Promise<string>;
 
     headers: http.IncomingHttpHeaders;
@@ -13,20 +14,23 @@ export class Request {
     constructor(req: {
         method: HttpMethod;
         url: string;
+        host: string;
         headers?: http.IncomingHttpHeaders;
         body?: Promise<string>;
         query?: {};
     }) {
         this.method = req.method;
         this.url = req.url;
+        this.host = req.host;
         this.headers = req.headers ?? {};
         this.body = req.body ?? Promise.resolve("");
     }
 
-    static buildJson(method: HttpMethod, url: string, body?: any): Request {
+    static buildJson(method: HttpMethod, url: string, host?: string, body?: any): Request {
         return new Request({
             method: method,
             url: url,
+            host: host || "",
             body: Promise.resolve(JSON.stringify(body) || "")
         });
     }
@@ -64,6 +68,7 @@ export class Request {
         return new Request({
             method: req.method as HttpMethod,
             url: parsedUrl.pathname ?? "",
+            host: parsedUrl.hostname ?? "",
             query: parsedUrl.query,
             body: body
         });

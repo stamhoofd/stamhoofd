@@ -12,7 +12,8 @@ describe("Model.Organization", () => {
                 website: "https://www.domain.com",
                 addressId: null,
                 meta: "{}",
-                createdOn: "2020-03-29 14:30:15"
+                createdOn: "2020-03-29 14:30:15",
+                uri: "model-organization-test",
             }
         ]);
         existingOrganizationId = data.insertId;

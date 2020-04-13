@@ -4,6 +4,7 @@ import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
 import { Address } from '../../members/models/Address';
 import { OrganizationMetaStruct } from '../structs/OrganizationMetaStruct';
 import { Database } from '../../database/classes/Database';
+import { ClientError } from '../../routing/classes/ClientError';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -14,16 +15,19 @@ export class Organization extends Model {
     @column({ type: "string" })
     name: string;
 
+    /// URL to a website page or a Facebook page
     @column({ type: "string" })
     website: string;
 
+    /// A custom domain name that is used to host the register application (should be unique)
+    // E.g. inschrijven.scoutswetteren.be
+    @column({ type: "string", nullable: true })
+    registerDomain: string | null = null;
 
-    @column({ type: "string" })
-    domainName: string;
-
+    // Unique representation of this organization from a string, that is used to provide the default domains
+    // in uri.stamhoofd.be
     @column({ type: "string" })
     uri: string;
-
 
     @column({ foreignKey: Organization.address, type: "integer", nullable: true })
     addressId: number | null = null; // null = no address
@@ -49,5 +53,66 @@ export class Organization extends Model {
 
         // Read member + address from first row
         return this.fromRow(rows[0][this.table]);
+    }
+
+    // Methods
+    private static async getByURI(uri: string): Promise<Organization | undefined> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`uri\` = ? LIMIT 1`,
+            [uri]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]);
+    }
+
+    // Methods
+    private static async getByRegisterDomain(host: string): Promise<Organization | undefined> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`registerDomain\` = ? LIMIT 1`,
+            [host]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]);
+    }
+
+    /** 
+     * Get an Organization by looking at the host of a request
+     * Throws if the organization could not be found
+     */
+    static async fromHost(host: string): Promise<Organization> {
+        // Todo: we need to read this from a config or environment file
+        const defaultDomain = ".stamhoofd.be";
+
+        if (host.endsWith(defaultDomain)) {
+            // Search by URI
+            const uri = host.substring(0, host.length - defaultDomain.length);
+            const organization = await this.getByURI(uri)
+            if (!organization) {
+                throw new ClientError({
+                    code: "invalid_organization",
+                    message: "Unknown organization " + uri
+                })
+            }
+            return organization
+        }
+
+        const organization = await this.getByRegisterDomain(host)
+        if (!organization) {
+            throw new ClientError({
+                code: "invalid_organization",
+                message: "No organization known for host " + host
+            })
+        }
+        return organization
     }
 }

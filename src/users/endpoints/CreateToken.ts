@@ -8,6 +8,7 @@ import { User } from '../models/User';
 import { ClientError } from '../../routing/classes/ClientError';
 import { Token } from '../models/Token';
 import { ServerError } from '../../routing/classes/ServerError';
+import { Organization } from '../../organizations/models/Organization';
 
 type Params = {};
 type Query = undefined;
@@ -31,7 +32,8 @@ export class CreateToken extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const user = await User.login(request.body.username, request.body.password)
+        const organization = await Organization.fromHost(request.host)
+        const user = await User.login(organization, request.body.username, request.body.password)
         if (!user) {
             throw new ClientError({
                 code: "invalid_data",

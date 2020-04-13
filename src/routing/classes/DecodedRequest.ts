@@ -6,6 +6,7 @@ import http from "http";
 export class DecodedRequest<Params, Query, Body> {
     method: HttpMethod;
     url: string;
+    host: string;
     headers: http.IncomingHttpHeaders;
     params: Params;
     body: Body;
@@ -20,6 +21,7 @@ export class DecodedRequest<Params, Query, Body> {
         const r = new DecodedRequest<Params, Query, Body>();
         r.method = request.method;
         r.url = request.url;
+        r.host = request.host;
         r.headers = request.headers;
 
         const query = queryDecoder !== undefined ? queryDecoder.decode(new ObjectData(request.query)) : undefined;

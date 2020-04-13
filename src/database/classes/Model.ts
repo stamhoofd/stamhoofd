@@ -38,7 +38,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         if (!column) {
             throw new Error("Unknown property " + key);
         }
-        this[key] = undefined;
+        delete this[key];
         this.savedProperties.delete(key);
     }
 
@@ -70,7 +70,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     ): this & Record<Key, undefined> {
         // Todo: check if relation is nullable?
         const t = this as any;
-        t[relation.modelKey] = undefined;
+        delete t[relation.modelKey];
         return t;
     }
 

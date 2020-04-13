@@ -1,7 +1,11 @@
 import { Model } from "../../database/classes/Model";
 import { column } from "../../database/decorators/Column";
 import { Database } from "../../database/classes/Database";
+import { Organization } from '../../organizations/models/Organization';
+import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
 import argon2 from "argon2";
+
+export type UserWithOrganization = User & { organization: Organization }
 
 export class User extends Model {
     static table = "users";
@@ -19,6 +23,11 @@ export class User extends Model {
 
     @column({ type: "datetime" })
     createdOn: Date;
+
+    @column({ foreignKey: User.organization, type: "integer" })
+    organizationId: number;
+
+    static organization = new ManyToOneRelation(Organization, "organization");
 
     /**
      * @param namespace
@@ -44,8 +53,8 @@ export class User extends Model {
     }
 
     // Methods
-    static async login(email: string, password: string): Promise<User | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE email = ? LIMIT 1`, [email]);
+    static async login(organization: Organization, email: string, password: string): Promise<UserWithOrganization | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE organizationId = ? AND email = ? LIMIT 1`, [organization.id, email]);
 
         if (rows.length == 0) {
             // todo: check timing attack?
@@ -61,12 +70,12 @@ export class User extends Model {
 
         if (await argon2.verify(user.password, password)) {
             user.eraseProperty("password");
-            return user;
+            return user.setRelation(User.organization, organization);
         }
     }
 
-    static async register(email: string, password: string): Promise<User | undefined> {
-        const user = new User();
+    static async register(organization: Organization, email: string, password: string): Promise<UserWithOrganization | undefined> {
+        const user = new User().setRelation(User.organization, organization);
         user.email = email;
         const hash = await argon2.hash(password);
         user.password = hash;
