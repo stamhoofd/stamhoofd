@@ -11,12 +11,12 @@ export class EnumDecoder<E extends { [key: number]: string | number }> implement
 
     decode(data: Data): E[keyof E] {
         const str = data.string;
-        if (Object.keys(this.enum).includes(str)) {
+        if (Object.values(this.enum).includes(str)) {
             return str as E[keyof E];
         }
         throw new DecodingError({
             code: "invalid_field",
-            message: "Unknown enum value for " + this.enum.constructor.name,
+            message: "Unknown enum value " + str + " expected " + Object.values(this.enum).join(", "),
             field: data.currentField
         })
     }

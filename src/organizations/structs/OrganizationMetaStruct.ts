@@ -1,5 +1,6 @@
 import { Data } from "../../structs/classes/Data";
 import { EnumDecoder } from '../../structs/structs/EnumDecoder';
+import { Encodeable } from '../../structs/classes/Encodeable';
 
 export enum OrganizationType {
     Youth = "youth",
@@ -17,7 +18,7 @@ export enum UmbrellaOrganization {
 const organizationTypeDecoder = new EnumDecoder(OrganizationType)
 const umbrellaOrganizationDecoder = new EnumDecoder(UmbrellaOrganization)
 
-export class OrganizationMetaStruct {
+export class OrganizationMetaStruct implements Encodeable {
     type: OrganizationType;
     umbrellaOrganization: UmbrellaOrganization | undefined;
 
@@ -26,5 +27,10 @@ export class OrganizationMetaStruct {
         s.type = data.optionalField("type")?.decode(organizationTypeDecoder) || OrganizationType.Other
         s.umbrellaOrganization = data.optionalField("umbrellaOrganization")?.decode(umbrellaOrganizationDecoder)
         return s;
+    }
+
+    encode(): any {
+        // No transformations needed right now
+        return this
     }
 }

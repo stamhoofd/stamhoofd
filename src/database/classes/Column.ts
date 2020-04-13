@@ -15,6 +15,14 @@ export class Column {
         this.name = name;
     }
 
+    saveProperty(data: any): any {
+        return this.to(data);
+    }
+
+    isChanged(old: any, now: any): boolean {
+        return this.saveProperty(now) !== old;
+    }
+
     /// Convert from database to javascript
     from(data: any): any {
         if (this.nullable && data === null) {

@@ -166,7 +166,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         for (const column of this.static.columns.values()) {
             if (this[column.name] !== undefined) {
                 // If undefined: do not update, since we didn't save the value
-                this.savedProperties.set(column.name, this[column.name]);
+                this.savedProperties.set(column.name, column.saveProperty(this[column.name]));
             }
         }
 
@@ -234,8 +234,8 @@ export class Model /* static implements RowInitiable<Model> */ {
             if (this.existsInDatabase) {
                 throw new Error(
                     "Model " +
-                        this.constructor.name +
-                        " was loaded from the Database, but didn't select the ID. Saving not possible."
+                    this.constructor.name +
+                    " was loaded from the Database, but didn't select the ID. Saving not possible."
                 );
             }
         } else {
@@ -264,8 +264,10 @@ export class Model /* static implements RowInitiable<Model> */ {
                 );
             }
 
-            if (this[column.name] !== undefined && this.savedProperties.get(column.name) !== this[column.name]) {
+            if (this[column.name] !== undefined && column.isChanged(this.savedProperties.get(column.name), this[column.name])) {
                 set[column.name] = column.to(this[column.name]);
+            } else {
+                // Check JSON fields. The reference could have stayed the same, but the value might have changed.
             }
         }
 
