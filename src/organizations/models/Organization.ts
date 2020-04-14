@@ -29,16 +29,11 @@ export class Organization extends Model {
     @column({ type: "string" })
     uri: string;
 
-    @column({ foreignKey: Organization.address, type: "integer", nullable: true })
-    addressId: number | null = null; // null = no address
-
     @column({ type: "json", decoder: OrganizationMetaStruct })
     meta: OrganizationMetaStruct;
 
     @column({ type: "datetime" })
     createdOn: Date;
-
-    static address = new ManyToOneRelation(Address, "address");
 
     // Methods
     static async getByID(id: number): Promise<Organization | undefined> {

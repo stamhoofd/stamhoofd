@@ -7,7 +7,7 @@
     "scripts": {
         "start": "NODE_ENV=development ts-node -r tsconfig-paths/register .",
         "test": "jest",
-        "migrations": "NODE_ENV=development ts-node ./migrations.ts",
+        "migrations": "NODE_ENV=development ts-node -r tsconfig-paths/register ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "watch": "nodemon"
     },
@@ -15,6 +15,7 @@
         "@types/jest": "^25.1.4",
         "@typescript-eslint/eslint-plugin": "^2.24.0",
         "@typescript-eslint/parser": "^2.24.0",
+        "colors": "^1.4.0",
         "eslint": "^6.8.0",
         "eslint-plugin-jest": "^23.8.2",
         "jest": "^25.2.3",

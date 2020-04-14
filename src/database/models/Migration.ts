@@ -24,13 +24,15 @@ export class Migration extends Model {
         if (rows.length == 0) {
             return false;
         }
-        console.log(rows);
 
         // Read member + address from first row
         return rows[0][""]["c"] == 1;
     }
 
     static async markAsExecuted(file: string) {
+        if (await this.isExecuted(file)) {
+            return;
+        }
         const migration = new Migration();
         migration.file = file;
         migration.executedOn = new Date();

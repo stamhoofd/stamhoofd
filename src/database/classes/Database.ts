@@ -15,19 +15,19 @@ const pool = mysql.createPool({
 const debug = false;
 
 if (debug) {
-    pool.on("acquire", function(connection) {
+    pool.on("acquire", function (connection) {
         console.log("Connection %d acquired", connection.threadId);
     });
 
-    pool.on("connection", function(connection) {
+    pool.on("connection", function (connection) {
         console.log("Connection %d created", connection.threadId);
     });
 
-    pool.on("enqueue", function() {
+    pool.on("enqueue", function () {
         console.log("Waiting for available connection slot");
     });
 
-    pool.on("release", function(connection) {
+    pool.on("release", function (connection) {
         console.log("Connection %d released", connection.threadId);
     });
 }
@@ -49,7 +49,7 @@ export const Database = {
 
     async end(): Promise<mysql.MysqlError | undefined> {
         return new Promise((resolve, reject) => {
-            pool.end(function(err) {
+            pool.end(function (err) {
                 if (err) {
                     console.error(err);
                     return reject(err);
@@ -73,8 +73,8 @@ export const Database = {
     },
 
     finishQuery(q, hrstart: [number, number]) {
-        const hrend = process.hrtime(hrstart);
-        console.log(q.sql.replace(/\s+/g, " "), "in " + (hrend[0] * 1000 + hrend[1] / 1000000) + "ms");
+        //const hrend = process.hrtime(hrstart);
+        //console.log(q.sql.replace(/\s+/g, " "), "in " + (hrend[0] * 1000 + hrend[1] / 1000000) + "ms");
     },
 
     async select(query: string, values?: any): Promise<[any[], mysql.FieldInfo[]]> {
