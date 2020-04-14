@@ -1,5 +1,5 @@
 import { User } from "./User";
-import { Database } from "../../database/classes/Database";
+import { Database } from "@/database/classes/Database";
 import { Organization } from '../../organizations/models/Organization';
 import { OrganizationMetaStruct, OrganizationType } from '../../organizations/structs/OrganizationMetaStruct';
 

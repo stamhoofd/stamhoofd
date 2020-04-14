@@ -1,6 +1,6 @@
-import { Decoder } from "../../structs/classes/Decoder";
+import { Decoder } from "@/structs/classes/Decoder";
 import { Request, HttpMethod } from "./Request";
-import { ObjectData } from "../../structs/classes/ObjectData";
+import { ObjectData } from "@/structs/classes/ObjectData";
 import http from "http";
 
 export class DecodedRequest<Params, Query, Body> {

@@ -1,8 +1,8 @@
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
-import { Database } from "../../database/classes/Database";
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
+import { Database } from "@/database/classes/Database";
 import { Organization } from '../../organizations/models/Organization';
-import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
+import { ManyToOneRelation } from '@/database/classes/ManyToOneRelation';
 import argon2 from "argon2";
 
 export type UserWithOrganization = User & { organization: Organization }

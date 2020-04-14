@@ -1,10 +1,10 @@
 import { Gender } from "./Gender";
 import { Address } from "./Address";
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
-import { Database } from "../../database/classes/Database";
-import { ManyToOneRelation } from "../../database/classes/ManyToOneRelation";
-import { ManyToManyRelation } from "../../database/classes/ManyToManyRelation";
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
+import { Database } from "@/database/classes/Database";
+import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
+import { ManyToManyRelation } from "@/database/classes/ManyToManyRelation";
 import { Parent } from "./Parent";
 
 /// Loaded types

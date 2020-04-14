@@ -1,5 +1,5 @@
 import { CreateToken } from "./CreateToken";
-import { Request } from '../../routing/classes/Request';
+import { Request } from '@/routing/classes/Request';
 import { User } from '../models/User';
 import { TokenStruct } from '../structs/TokenStruct';
 import { Organization } from '../../organizations/models/Organization';

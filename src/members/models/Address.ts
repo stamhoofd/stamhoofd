@@ -1,5 +1,5 @@
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
 
 export class Address extends Model {
     static table = "addresses";

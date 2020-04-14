@@ -1,8 +1,8 @@
-import { Request } from "../../routing/classes/Request";
-import { DecodedRequest } from "../../routing/classes/DecodedRequest";
+import { Request } from "@/routing/classes/Request";
+import { DecodedRequest } from "@/routing/classes/DecodedRequest";
 import { Member } from "../models/Member";
-import { Response } from "../../routing/classes/Response";
-import { Endpoint } from "../../routing/classes/Endpoint";
+import { Response } from "@/routing/classes/Response";
+import { Endpoint } from "@/routing/classes/Endpoint";
 import { MemberStruct } from "../structs/MemberStruct";
 
 type Params = { id: number };

@@ -1,3 +1,6 @@
+// For an unknown reason, the jest moduleDirectories etc is not working in global setup...
+// So we need to apply tsconfig-paths/register
+require("tsconfig-paths/register");
 import { User } from "../src/users/models/User";
 import { Database } from "../src/database/classes/Database";
 

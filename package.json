@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "start": "NODE_ENV=development ts-node .",
+        "start": "NODE_ENV=development ts-node -r tsconfig-paths/register .",
         "test": "jest",
         "migrations": "NODE_ENV=development ts-node ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
@@ -19,9 +19,11 @@
         "eslint-plugin-jest": "^23.8.2",
         "jest": "^25.2.3",
         "jest-extended": "^0.11.5",
+        "jest-module-name-mapper": "^0.1.3",
         "nodemon": "^2.0.2",
         "ts-jest": "^25.2.1",
         "ts-node": "^8.6.2",
+        "tsconfig-paths": "^3.9.0",
         "typescript": "^3.8.3"
     },
     "dependencies": {

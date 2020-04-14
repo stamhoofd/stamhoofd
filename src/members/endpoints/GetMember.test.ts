@@ -1,5 +1,5 @@
 import { GetMember } from "./GetMember";
-import { Request } from '../../routing/classes/Request';
+import { Request } from '@/routing/classes/Request';
 
 // Test endpoint
 const getMemberEndpoint = new GetMember()

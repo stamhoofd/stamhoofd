@@ -1,4 +1,4 @@
-import { Database } from "../../database/classes/Database";
+import { Database } from "@/database/classes/Database";
 import { Organization } from "./Organization";
 import { OrganizationType, UmbrellaOrganization } from '../structs/OrganizationMetaStruct';
 

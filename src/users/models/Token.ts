@@ -1,8 +1,8 @@
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
-import { ManyToOneRelation } from "../../database/classes/ManyToOneRelation";
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
+import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
 import { User } from "./User";
-import { Database } from "../../database/classes/Database";
+import { Database } from "@/database/classes/Database";
 import crypto from "crypto";
 
 export type TokenWithUser = Token & { user: User };
@@ -53,7 +53,7 @@ export class Token extends Model {
     static async getByAccessToken(accessToken: string): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
-                this.table
+            this.table
             } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken]
         );

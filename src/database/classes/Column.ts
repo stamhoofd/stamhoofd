@@ -1,7 +1,7 @@
 import { ColumnType } from "../decorators/Column";
-import { Decoder } from '../../structs/classes/Decoder';
-import { ObjectData } from '../../structs/classes/ObjectData';
-import { isEncodeable } from '../../structs/classes/Encodeable';
+import { Decoder } from '@/structs/classes/Decoder';
+import { ObjectData } from '@/structs/classes/ObjectData';
+import { isEncodeable } from '@/structs/classes/Encodeable';
 
 export class Column {
     type: ColumnType;

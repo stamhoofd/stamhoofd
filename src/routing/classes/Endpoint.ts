@@ -2,8 +2,8 @@ import { Request } from "./Request";
 import { DecodedRequest } from "./DecodedRequest";
 import { Response } from "./Response";
 import { EncodedResponse } from "./EncodedResponse";
-import { Decoder } from "../../structs/classes/Decoder";
-import { Encodeable } from "../../structs/classes/Encodeable";
+import { Decoder } from "@/structs/classes/Decoder";
+import { Encodeable } from "@/structs/classes/Encodeable";
 
 export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends Encodeable> {
     protected queryDecoder: Decoder<Query> | undefined;

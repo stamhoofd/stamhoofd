@@ -1,10 +1,10 @@
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
-import { ManyToOneRelation } from '../../database/classes/ManyToOneRelation';
-import { Address } from '../../members/models/Address';
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
+import { ManyToOneRelation } from '@/database/classes/ManyToOneRelation';
+import { Address } from '@/members/models/Address';
 import { OrganizationMetaStruct } from '../structs/OrganizationMetaStruct';
-import { Database } from '../../database/classes/Database';
-import { ClientError } from '../../routing/classes/ClientError';
+import { Database } from '@/database/classes/Database';
+import { ClientError } from '@/routing/classes/ClientError';
 
 export class Organization extends Model {
     static table = "organizations";

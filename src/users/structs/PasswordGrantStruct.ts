@@ -1,4 +1,4 @@
-import { Data } from 'src/structs/classes/Data';
+import { Data } from '@/structs/classes/Data';
 
 /// Only used as input
 export class PasswordGrantStruct {

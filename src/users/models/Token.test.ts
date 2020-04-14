@@ -1,4 +1,4 @@
-import { Database } from "../../database/classes/Database";
+import { Database } from "@/database/classes/Database";
 import { Token } from "./Token";
 import { User } from "./User";
 import { Organization } from '../../organizations/models/Organization';

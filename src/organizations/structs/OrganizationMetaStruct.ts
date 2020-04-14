@@ -1,6 +1,6 @@
-import { Data } from "../../structs/classes/Data";
-import { EnumDecoder } from '../../structs/structs/EnumDecoder';
-import { Encodeable } from '../../structs/classes/Encodeable';
+import { Data } from "@/structs/classes/Data";
+import { EnumDecoder } from '@/structs/structs/EnumDecoder';
+import { Encodeable } from '@/structs/classes/Encodeable';
 
 export enum OrganizationType {
     Youth = "youth",

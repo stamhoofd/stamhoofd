@@ -8,12 +8,31 @@
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
+        "sourceMap": false,
         "strictNullChecks": true,
-        "types": ["node", "jest"],
+        "types": [
+            "node",
+            "jest"
+        ],
         "baseUrl": ".",
-        "lib": ["es2019"]
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        },
+        "lib": [
+            "es2019"
+        ]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx", "*.ts"],
-    "exclude": ["node_modules"]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/**/*.ts",
+        "tests/**/*.tsx",
+        "**/*.ts",
+        "*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }

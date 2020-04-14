@@ -1,7 +1,7 @@
-import { Model } from "../../database/classes/Model";
-import { column } from "../../database/decorators/Column";
+import { Model } from "@/database/classes/Model";
+import { column } from "@/database/decorators/Column";
 import { Address } from "./Address";
-import { ManyToOneRelation } from "../../database/classes/ManyToOneRelation";
+import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
 
 export class Parent extends Model {
     static table = "parents";
