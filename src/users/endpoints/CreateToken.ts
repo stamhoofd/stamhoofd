@@ -8,7 +8,7 @@ import { User } from '../models/User';
 import { ClientError } from '@/routing/classes/ClientError';
 import { Token } from '../models/Token';
 import { ServerError } from '@/routing/classes/ServerError';
-import { Organization } from '../../organizations/models/Organization';
+import { Organization } from '@/organizations/models/Organization';
 
 type Params = {};
 type Query = undefined;

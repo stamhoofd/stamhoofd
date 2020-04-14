@@ -1,8 +1,8 @@
 import { Database } from "@/database/classes/Database";
 import { Token } from "./Token";
 import { User } from "./User";
-import { Organization } from '../../organizations/models/Organization';
-import { OrganizationMetaStruct, OrganizationType } from '../../organizations/structs/OrganizationMetaStruct';
+import { Organization } from '@/organizations/models/Organization';
+import { OrganizationMetaStruct, OrganizationType } from '@/organizations/structs/OrganizationMetaStruct';
 
 describe("Model.Token", () => {
     const existingToken = "ABCDEFG";

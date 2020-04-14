@@ -2,8 +2,8 @@ import { CreateToken } from "./CreateToken";
 import { Request } from '@/routing/classes/Request';
 import { User } from '../models/User';
 import { TokenStruct } from '../structs/TokenStruct';
-import { Organization } from '../../organizations/models/Organization';
-import { OrganizationMetaStruct, OrganizationType } from '../../organizations/structs/OrganizationMetaStruct';
+import { Organization } from '@/organizations/models/Organization';
+import { OrganizationMetaStruct, OrganizationType } from '@/organizations/structs/OrganizationMetaStruct';
 
 describe("Endpoint.CreateToken", () => {
     // Test endpoint
