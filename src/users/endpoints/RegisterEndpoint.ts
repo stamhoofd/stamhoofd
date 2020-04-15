@@ -15,7 +15,7 @@ type Query = undefined;
 type Body = RegisterStruct;
 type ResponseBody = TokenStruct;
 
-export class Register extends Endpoint<Params, Query, Body, ResponseBody> {
+export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = RegisterStruct;
 
     protected doesMatch(request: Request): [true, Params] | [false] {

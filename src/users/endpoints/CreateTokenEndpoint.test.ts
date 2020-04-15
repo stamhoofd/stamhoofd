@@ -1,24 +1,26 @@
-import { CreateToken } from "./CreateToken";
+import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
 import { Request } from "@/routing/classes/Request";
-import { User } from "../models/User";
+import { User, UserWithOrganization } from "../models/User";
 import { TokenStruct } from "../structs/TokenStruct";
 import { Organization } from "@/organizations/models/Organization";
-import { OrganizationMetaStruct, OrganizationType } from "@/organizations/structs/OrganizationMetaStruct";
 import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
+import { UserFactory } from "../factories/UserFactory";
 
 describe("Endpoint.CreateToken", () => {
     // Test endpoint
-    const endpoint = new CreateToken();
+    const endpoint = new CreateTokenEndpoint();
     let organization: Organization;
     let otherOrganization: Organization;
+    let user: UserWithOrganization;
+    const password = "my test password";
 
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
         otherOrganization = await new OrganizationFactory({}).create();
 
         // Create user
-        const t = await User.register(organization, "create-token@domain.com", "my test password", "public key");
-        if (!t) {
+        user = await new UserFactory({ organization, password }).create();
+        if (!user) {
             throw new Error("Could not register user for testing");
         }
     });
@@ -27,8 +29,8 @@ describe("Endpoint.CreateToken", () => {
         const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "password",
-            username: "create-token@domain.com",
-            password: "my test password",
+            username: user.email,
+            password: password,
         });
 
         const response = await endpoint.getResponse(r, {});
@@ -42,8 +44,8 @@ describe("Endpoint.CreateToken", () => {
         const r = Request.buildJson("POST", "/oauth/token", otherOrganization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "password",
-            username: "create-token@domain.com",
-            password: "my test password",
+            username: user.email,
+            password: password,
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
@@ -53,8 +55,8 @@ describe("Endpoint.CreateToken", () => {
         const r = Request.buildJson("POST", "/oauth/token", "invalid94558451sd5f65sd.stamhoofd.be", {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "password",
-            username: "create-token@domain.com",
-            password: "my test password",
+            username: user.email,
+            password: password,
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Unknown organization/);
@@ -64,7 +66,7 @@ describe("Endpoint.CreateToken", () => {
         const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "password",
-            username: "create-token@domain.com",
+            username: user.email,
             password: "my test passwor",
         });
 
@@ -76,7 +78,7 @@ describe("Endpoint.CreateToken", () => {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "password",
             username: "create-token95959451218181@domain.com",
-            password: "my test password",
+            password: password,
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);

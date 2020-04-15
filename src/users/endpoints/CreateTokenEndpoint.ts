@@ -2,20 +2,20 @@ import { Request } from "@/routing/classes/Request";
 import { DecodedRequest } from "@/routing/classes/DecodedRequest";
 import { Response } from "@/routing/classes/Response";
 import { Endpoint } from "@/routing/classes/Endpoint";
-import { TokenStruct } from '../structs/TokenStruct';
-import { PasswordGrantStruct } from '../structs/PasswordGrantStruct';
-import { User } from '../models/User';
-import { ClientError } from '@/routing/classes/ClientError';
-import { Token } from '../models/Token';
-import { ServerError } from '@/routing/classes/ServerError';
-import { Organization } from '@/organizations/models/Organization';
+import { TokenStruct } from "../structs/TokenStruct";
+import { PasswordGrantStruct } from "../structs/PasswordGrantStruct";
+import { User } from "../models/User";
+import { ClientError } from "@/routing/classes/ClientError";
+import { Token } from "../models/Token";
+import { ServerError } from "@/routing/classes/ServerError";
+import { Organization } from "@/organizations/models/Organization";
 
 type Params = {};
 type Query = undefined;
 type Body = PasswordGrantStruct;
 type ResponseBody = TokenStruct;
 
-export class CreateToken extends Endpoint<Params, Query, Body, ResponseBody> {
+export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = PasswordGrantStruct;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -32,14 +32,14 @@ export class CreateToken extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromHost(request.host)
-        const user = await User.login(organization, request.body.username, request.body.password)
+        const organization = await Organization.fromHost(request.host);
+        const user = await User.login(organization, request.body.username, request.body.password);
         if (!user) {
             throw new ClientError({
                 code: "invalid_data",
                 message: "Invalid username or password",
                 human: "Het ingevoerde e-mailadres of wachtwoord is onjuist.",
-            })
+            });
         }
 
         const token = await Token.createToken(user, "device id", "device name");
@@ -48,7 +48,7 @@ export class CreateToken extends Endpoint<Params, Query, Body, ResponseBody> {
                 code: "error",
                 message: "Could not generate token",
                 human: "Er ging iets mis tijdens het inloggen.",
-            })
+            });
         }
 
         const st = new TokenStruct(token);
