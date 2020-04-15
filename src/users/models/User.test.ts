@@ -1,14 +1,14 @@
 import { User } from "./User";
 import { Database } from "@/database/classes/Database";
-import { Organization } from '@/organizations/models/Organization';
-import { OrganizationFactory } from '@/organizations/factories/OrganizationFactory';
+import { Organization } from "@/organizations/models/Organization";
+import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
 
 describe("Model.User", () => {
     let existingUserId: number;
     let organization: Organization;
 
     beforeAll(async () => {
-        organization = await new OrganizationFactory({}).create()
+        organization = await new OrganizationFactory({}).create();
 
         const [data] = await Database.insert("INSERT INTO " + User.table + " SET ?", [
             {
@@ -16,9 +16,11 @@ describe("Model.User", () => {
                 email: "existing@domain.com",
                 password:
                     "$argon2i$v=19$m=4096,t=3,p=1$wQiDNFtEKm8mQsdqJGnhfg$V4hByYMRUA/H9DipmJRG8QOn12wa+feRhi/ocBxxc2k",
+                publicKey: "My public key here",
                 // = "myPassword"
-                createdOn: "2020-03-29 14:30:15"
-            }
+                createdOn: "2020-03-29 14:30:15",
+                updatedOn: "2020-03-29 14:30:15",
+            },
         ]);
         existingUserId = data.insertId;
     });
@@ -33,7 +35,7 @@ describe("Model.User", () => {
     });
 
     test("Create a user", async () => {
-        const user: any = await User.register(organization, "test@domain.com", "myPassword");
+        const user: any = await User.register(organization, "test@domain.com", "myPassword", "public key");
         expect(user).toBeDefined();
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
@@ -42,7 +44,7 @@ describe("Model.User", () => {
     });
 
     test("Create a user with an email that already exists", async () => {
-        const user: any = await User.register(organization, "existing@domain.com", "otherPassword123");
+        const user: any = await User.register(organization, "existing@domain.com", "otherPassword123", "my public key");
         expect(user).toBeUndefined();
     });
 

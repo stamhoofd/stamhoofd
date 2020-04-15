@@ -1,7 +1,7 @@
 import BoyNames from "./data/boys";
 import GirlNames from "./data/girls";
 import FamilyNames from "./data/family-names";
-import { Gender } from '@/members/models/Gender';
+import { Gender } from "@/members/models/Gender";
 
 export abstract class Factory<Options, Model> {
     options: Options;
@@ -16,11 +16,21 @@ export abstract class Factory<Options, Model> {
     }
 
     randomEnum<E extends { [key: number]: string | number }>(e: E): E[keyof E] {
-        return this.randomArray(Object.values(e))
+        return this.randomArray(Object.values(e));
+    }
+
+    randomString(length: number): string {
+        let result = "";
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
 
     randomFirstName(gender: Gender): string {
-        let names: string[]
+        let names: string[];
         switch (gender) {
             case Gender.Male:
                 names = BoyNames;

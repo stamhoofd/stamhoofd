@@ -1,28 +1,18 @@
 import { Database } from "@/database/classes/Database";
 import { Token } from "./Token";
-import { User } from "./User";
-import { Organization } from '@/organizations/models/Organization';
-import { OrganizationFactory } from '@/organizations/factories/OrganizationFactory';
+import { User, UserWithOrganization } from "./User";
+import { Organization } from "@/organizations/models/Organization";
+import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
+import { UserFactory } from "../factories/UserFactory";
 
 describe("Model.Token", () => {
     const existingToken = "ABCDEFG";
-    let userId: number;
+    let user: UserWithOrganization;
     let organization: Organization;
 
     beforeAll(async () => {
-        organization = await new OrganizationFactory({}).create()
-
-        const [userData] = await Database.insert("INSERT INTO " + User.table + " SET ?", [
-            {
-                organizationId: organization.id,
-                email: "existing2@domain.com",
-                password:
-                    "$argon2i$v=19$m=4096,t=3,p=1$wQiDNFtEKm8mQsdqJGnhfg$V4hByYMRUA/H9DipmJRG8QOn12wa+feRhi/ocBxxc2k",
-                // = "myPassword"
-                createdOn: "2020-03-29 14:30:15"
-            }
-        ]);
-        userId = userData.insertId;
+        organization = await new OrganizationFactory({}).create();
+        user = await new UserFactory({ organization }).create();
 
         await Database.insert("INSERT INTO " + Token.table + " SET ?", [
             {
@@ -31,12 +21,12 @@ describe("Model.Token", () => {
 
                 accessTokenValidUntil: "2050-08-29 14:30:15",
                 refreshTokenValidUntil: "2050-08-29 14:30:15",
-                userId: userId,
+                userId: user.id,
                 deviceId: "my device id",
                 deviceName: "my device",
                 // = "myPassword"
-                createdOn: "2020-03-29 14:30:15"
-            }
+                createdOn: "2020-03-29 14:30:15",
+            },
         ]);
     });
 
@@ -44,20 +34,14 @@ describe("Model.Token", () => {
         const token: any = await Token.getByAccessToken(existingToken);
         expect(token).toBeDefined();
         expect(token).toBeInstanceOf(Token);
-        expect(token.user.id).toEqual(userId);
+        expect(token.user.id).toEqual(user.id);
         expect(token.accessToken).toEqual(existingToken);
-        expect(token.userId).toEqual(userId);
+        expect(token.userId).toEqual(user.id);
     });
 
     test("Create a token", async () => {
-        const user = await User.register(organization, "test-create-token@domain.com", "my password");
-        expect(user).toBeDefined();
-        if (!user) return;
-
-        // We don't need the organization anymore, since fetching a token won't contain an organization, and we'll need to compare with it
-        user.unloadRelation(User.organization)
-
-        const token = await Token.createToken(user, "My device id", "My device name");
+        const cleanUser = user.unloadRelation(User.organization);
+        const token = await Token.createToken(cleanUser, "My device id", "My device name");
         expect(token).toBeDefined();
         if (!token) return;
         expect(token).toBeInstanceOf(Token);
@@ -73,6 +57,8 @@ describe("Model.Token", () => {
         expect(token.userId).toEqual(user.id);
 
         const search: any = await Token.getByAccessToken(token.accessToken);
+        // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token
+
         expect(search).toEqual(token);
     });
 });

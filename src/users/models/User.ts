@@ -1,11 +1,11 @@
 import { Model } from "@/database/classes/Model";
 import { column } from "@/database/decorators/Column";
 import { Database } from "@/database/classes/Database";
-import { Organization } from '@/organizations/models/Organization';
-import { ManyToOneRelation } from '@/database/classes/ManyToOneRelation';
+import { Organization } from "@/organizations/models/Organization";
+import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
 import argon2 from "argon2";
 
-export type UserWithOrganization = User & { organization: Organization }
+export type UserWithOrganization = User & { organization: Organization };
 
 export class User extends Model {
     static table = "users";
@@ -17,12 +17,32 @@ export class User extends Model {
     @column({ type: "string" })
     email: string;
 
-    // Password is never selected, unless a login has to happen
+    /**
+     * Passwords will automatically get set to undefined if it was selected for login
+     */
     @column({ type: "string" })
     protected password: string | undefined;
 
+    /**
+     * For now we only store one public key, but we might decide to allow the same user to have multiple keys.
+     */
+    @column({ type: "string" })
+    publicKey: string;
+
+    /**
+     * Contains the signature of the user's publicKey with the secret of the organization. A public key should only get signed if it is a administrator of the organization.
+     * It is used to derive trust from the organization to its administrators and add an extra layer of security that is only as strong as the security of how trust in the organization's public key is derived.
+     * In case of a hostile server takeover, the hostile server will not be able to emulate administrators to get other administrators and users to encrypt keys, as long as it is not able to get the user to trust its new key.
+     * Administrators with 'create user'-permission have access to the organization's secret and can sign other users. They are the only users that can give the 'create-user' permission to other users
+     */
+    @column({ type: "string", nullable: true })
+    adminSignature: string | null = null;
+
     @column({ type: "datetime" })
     createdOn: Date;
+
+    @column({ type: "datetime" })
+    updatedOn: Date;
 
     @column({ foreignKey: User.organization, type: "integer" })
     organizationId: number;
@@ -53,8 +73,17 @@ export class User extends Model {
     }
 
     // Methods
-    static async login(organization: Organization, email: string, password: string): Promise<UserWithOrganization | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE organizationId = ? AND email = ? LIMIT 1`, [organization.id, email]);
+    static async login(
+        organization: Organization,
+        email: string,
+        password: string
+    ): Promise<UserWithOrganization | undefined> {
+        const [
+            rows,
+        ] = await Database.select(`SELECT * FROM ${this.table} WHERE organizationId = ? AND email = ? LIMIT 1`, [
+            organization.id,
+            email,
+        ]);
 
         if (rows.length == 0) {
             // todo: check timing attack?
@@ -74,11 +103,17 @@ export class User extends Model {
         }
     }
 
-    static async register(organization: Organization, email: string, password: string): Promise<UserWithOrganization | undefined> {
+    static async register(
+        organization: Organization,
+        email: string,
+        password: string,
+        publicKey: string
+    ): Promise<UserWithOrganization | undefined> {
         const user = new User().setRelation(User.organization, organization);
         user.email = email;
         const hash = await argon2.hash(password);
         user.password = hash;
+        user.publicKey = publicKey;
         user.createdOn = new Date();
         user.createdOn.setMilliseconds(0);
 

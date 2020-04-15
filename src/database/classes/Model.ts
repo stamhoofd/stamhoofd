@@ -51,7 +51,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     }
 
     static selectColumnsWithout(namespace: string = this.table, ...exclude: string[]): string {
-        const properties = Array.from(this.columns.keys()).flatMap(name => (exclude.includes(name) ? [] : [name]));
+        const properties = Array.from(this.columns.keys()).flatMap((name) => (exclude.includes(name) ? [] : [name]));
 
         if (properties.length == 0) {
             // todo: check what to do in this case.
@@ -101,10 +101,10 @@ export class Model /* static implements RowInitiable<Model> */ {
         return t;
     }
 
-    setRelation<Key extends keyof any, Value extends Model>(
+    setRelation<Key extends keyof any, Value extends Model, V extends Value>(
         relation: ManyToOneRelation<Key, Value>,
-        value: Value
-    ): this & Record<Key, Value> {
+        value: V
+    ): this & Record<Key, V> {
         if (!value.existsInDatabase) {
             throw new Error("You cannot set a relation to a model that are not yet saved in the database.");
         }
@@ -118,7 +118,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         relation: ManyToManyRelation<Key, any, Value>,
         value: Value[]
     ): this & Record<Key, Value[]> {
-        value.forEach(v => {
+        value.forEach((v) => {
             if (!v.existsInDatabase) {
                 throw new Error("You cannot set a relation to models that are not yet saved in the database.");
             }
@@ -150,7 +150,7 @@ export class Model /* static implements RowInitiable<Model> */ {
     }
 
     static fromRows<T extends typeof Model>(this: T, rows: any[], namespace: string): InstanceType<T>[] {
-        return rows.flatMap(row => {
+        return rows.flatMap((row) => {
             const model = this.fromRow(row[namespace]);
             if (model) {
                 return [model];
@@ -234,12 +234,10 @@ export class Model /* static implements RowInitiable<Model> */ {
             if (this.existsInDatabase) {
                 throw new Error(
                     "Model " +
-                    this.constructor.name +
-                    " was loaded from the Database, but didn't select the ID. Saving not possible."
+                        this.constructor.name +
+                        " was loaded from the Database, but didn't select the ID. Saving not possible."
                 );
             }
-
-
         } else {
             if (!this.existsInDatabase && this.static.primary.type == "integer") {
                 throw new Error(
@@ -249,27 +247,27 @@ export class Model /* static implements RowInitiable<Model> */ {
         }
 
         if (!this.existsInDatabase) {
-            const col = this.static.columns.get("createdOn")
+            const col = this.static.columns.get("createdOn");
             if (col && col.type == "datetime" && this["createdOn"] === undefined) {
                 // Set createdOn automatically
-                this["createdOn"] = new Date()
-                this["createdOn"].setMilliseconds(0)
+                this["createdOn"] = new Date();
+                this["createdOn"].setMilliseconds(0);
             }
 
             // Set updatedOn if not nullable and not yet set
-            const up = this.static.columns.get("updatedOn")
+            const up = this.static.columns.get("updatedOn");
             if (up && up.type == "datetime" && !up.nullable && this["updatedOn"] === undefined) {
                 // Set updatedOn automatically
-                this["updatedOn"] = new Date()
-                this["updatedOn"].setMilliseconds(0)
+                this["updatedOn"] = new Date();
+                this["updatedOn"].setMilliseconds(0);
             }
         } else {
             // Only check if all updated properties are defined
-            const col = this.static.columns.get("updatedOn")
+            const col = this.static.columns.get("updatedOn");
             if (col && col.type == "datetime") {
                 // Set updatedOn automatically
-                this["updatedOn"] = new Date()
-                this["updatedOn"].setMilliseconds(0)
+                this["updatedOn"] = new Date();
+                this["updatedOn"].setMilliseconds(0);
             }
         }
 
@@ -289,7 +287,10 @@ export class Model /* static implements RowInitiable<Model> */ {
                 );
             }
 
-            if (this[column.name] !== undefined && column.isChanged(this.savedProperties.get(column.name), this[column.name])) {
+            if (
+                this[column.name] !== undefined &&
+                column.isChanged(this.savedProperties.get(column.name), this[column.name])
+            ) {
                 set[column.name] = column.to(this[column.name]);
             } else {
                 // Check JSON fields. The reference could have stayed the same, but the value might have changed.

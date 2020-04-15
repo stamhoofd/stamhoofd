@@ -53,7 +53,7 @@ export class Token extends Model {
     static async getByAccessToken(accessToken: string): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
-            this.table
+                this.table
             } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken]
         );
@@ -79,14 +79,18 @@ export class Token extends Model {
         return token.setRelation(Token.user, user);
     }
 
-    static async createToken(user: User, deviceId: string, deviceName: string): Promise<TokenWithUser | undefined> {
+    static async createToken<U extends User>(
+        user: U,
+        deviceId: string,
+        deviceName: string
+    ): Promise<(Token & { user: U }) | undefined> {
         // Todo: start a transaction here
 
         // First search if we already have a token for this deviceId.
         // In case we already have a token for that deviceId, we'll delete it first.
         const [rows] = await Database.delete(`DELETE FROM ${this.table} WHERE \`userId\` = ? AND \`deviceId\` = ?`, [
             user.id,
-            deviceId
+            deviceId,
         ]);
 
         if (rows.affectedRows > 0) {

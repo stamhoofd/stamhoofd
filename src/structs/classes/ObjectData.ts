@@ -4,6 +4,8 @@ import StringDecoder from "../structs/StringDecoder";
 import NumberDecoder from "../structs/NumberDecoder";
 import ArrayDecoder from "../structs/ArrayDecoder";
 import { DecodingError } from "../classes/DecodingError";
+import Base64Decoder from "../structs/Base64Decoder";
+import KeyDecoder from "../structs/KeyDecoder";
 
 /// Implementation of Data that reads an already existing tree of data.
 export class ObjectData implements Data {
@@ -30,6 +32,14 @@ export class ObjectData implements Data {
         return this.decode(StringDecoder);
     }
 
+    get base64(): string {
+        return this.decode(Base64Decoder);
+    }
+
+    get key(): string {
+        return this.decode(KeyDecoder);
+    }
+
     get number(): number {
         return this.decode(NumberDecoder);
     }
@@ -44,14 +54,14 @@ export class ObjectData implements Data {
                 throw new DecodingError({
                     code: "invalid_index",
                     message: `Invalid index`,
-                    field: this.currentField
+                    field: this.currentField,
                 });
             }
             if (this.data[number] !== undefined) {
                 throw new DecodingError({
                     code: "invalid_field",
                     message: `Expected value at ${this.addToCurrentField(number)}`,
-                    field: this.addToCurrentField(number)
+                    field: this.addToCurrentField(number),
                 });
             }
             return new ObjectData(this.data[number], this.addToCurrentField(number));
@@ -59,7 +69,7 @@ export class ObjectData implements Data {
         throw new DecodingError({
             code: "invalid_field",
             message: `Expected an array at ${this.currentField}`,
-            field: this.currentField
+            field: this.currentField,
         });
     }
 
@@ -82,13 +92,13 @@ export class ObjectData implements Data {
         throw new DecodingError({
             code: "missing_field",
             message: `Field ${field} is expected at ${this.currentField}`,
-            field: this.currentField
+            field: this.currentField,
         });
     }
 
     array<T>(decoder: Decoder<T>): T[] {
         const array = ArrayDecoder.decode(this);
-        return array.map(v => decoder.decode(v));
+        return array.map((v) => decoder.decode(v));
     }
 
     decode<T>(decoder: Decoder<T>): T {
