@@ -35,6 +35,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Organization.fromHost(request.host);
         const user = await User.login(organization, request.body.username, request.body.password);
         if (!user) {
+            // Todo: send security email containing the IP and device name
+
             throw new ClientError({
                 code: "invalid_data",
                 message: "Invalid username or password",
@@ -42,7 +44,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        const token = await Token.createToken(user, "device id", "device name");
+        const token = await Token.createToken(user);
         if (!token) {
             throw new ServerError({
                 code: "error",

@@ -21,6 +21,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 
 export class Token extends Model {
     static table = "tokens";
+    static MAX_DEVICES = 5;
 
     // Columns
     @column({ primary: true, type: "string" })
@@ -37,12 +38,6 @@ export class Token extends Model {
 
     @column({ type: "datetime" })
     createdOn: Date;
-
-    @column({ type: "string" })
-    deviceId: string;
-
-    @column({ type: "string" })
-    deviceName: string;
 
     @column({ type: "integer", foreignKey: Token.user })
     userId: number;
@@ -79,27 +74,23 @@ export class Token extends Model {
         return token.setRelation(Token.user, user);
     }
 
-    static async createToken<U extends User>(
-        user: U,
-        deviceId: string,
-        deviceName: string
-    ): Promise<(Token & { user: U }) | undefined> {
-        // Todo: start a transaction here
+    static async createToken<U extends User>(user: U): Promise<(Token & { user: U }) | undefined> {
+        // Get all the tokens of the user that are olde
 
-        // First search if we already have a token for this deviceId.
+        // First search if we already have more than 5 tokens (we only allow up to 5 devices)
         // In case we already have a token for that deviceId, we'll delete it first.
-        const [rows] = await Database.delete(`DELETE FROM ${this.table} WHERE \`userId\` = ? AND \`deviceId\` = ?`, [
-            user.id,
-            deviceId,
-        ]);
+        const [
+            rows,
+        ] = await Database.delete(
+            `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`refreshTokenValidUntil\` DESC LIMIT ? OFFSET ?) x)`,
+            [user.id, this.MAX_DEVICES, this.MAX_DEVICES]
+        );
 
         if (rows.affectedRows > 0) {
             console.log(`Deleted ${rows.affectedRows} old tokens first`);
         }
 
         const token = new Token().setRelation(Token.user, user);
-        token.deviceId = deviceId;
-        token.deviceName = deviceName;
         token.accessTokenValidUntil = new Date();
         token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);
         token.accessTokenValidUntil.setMilliseconds(0);

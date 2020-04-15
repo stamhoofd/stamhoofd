@@ -1,6 +1,6 @@
 import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
 import { Request } from "@/routing/classes/Request";
-import { User, UserWithOrganization } from "../models/User";
+import { UserWithOrganization } from "../models/User";
 import { TokenStruct } from "../structs/TokenStruct";
 import { Organization } from "@/organizations/models/Organization";
 import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
@@ -31,6 +31,7 @@ describe("Endpoint.CreateToken", () => {
             grant_type: "password",
             username: user.email,
             password: password,
+            deviceName: "iPhone of Tim",
         });
 
         const response = await endpoint.getResponse(r, {});
@@ -46,6 +47,7 @@ describe("Endpoint.CreateToken", () => {
             grant_type: "password",
             username: user.email,
             password: password,
+            deviceName: "iPhone of Tim",
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
@@ -57,6 +59,7 @@ describe("Endpoint.CreateToken", () => {
             grant_type: "password",
             username: user.email,
             password: password,
+            deviceName: "iPhone of Tim",
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Unknown organization/);
@@ -68,6 +71,7 @@ describe("Endpoint.CreateToken", () => {
             grant_type: "password",
             username: user.email,
             password: "my test passwor",
+            deviceName: "iPhone of Tim",
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
@@ -79,6 +83,7 @@ describe("Endpoint.CreateToken", () => {
             grant_type: "password",
             username: "create-token95959451218181@domain.com",
             password: password,
+            deviceName: "iPhone of Tim",
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);

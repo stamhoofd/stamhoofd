@@ -33,7 +33,12 @@ export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Organization.fromHost(request.host);
-        const user = await User.register(organization, request.body.email, request.body.password, "my key");
+        const user = await User.register(
+            organization,
+            request.body.email,
+            request.body.password,
+            request.body.publicKey
+        );
         if (!user) {
             // Todo: We should fail silently here to prevent user enumeration attacks
             throw new ClientError({
@@ -43,12 +48,12 @@ export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             });
         }
 
-        const token = await Token.createToken(user, "encrypted device id", "encrypted device name");
+        const token = await Token.createToken(user);
         if (!token) {
             throw new ServerError({
                 code: "error",
                 message: "Could not generate token",
-                human: "Er ging iets mis tijdens het inloggen.",
+                human: "Er ging iets mis tijdens het registreren.",
             });
         }
 

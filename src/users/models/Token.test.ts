@@ -22,8 +22,6 @@ describe("Model.Token", () => {
                 accessTokenValidUntil: "2050-08-29 14:30:15",
                 refreshTokenValidUntil: "2050-08-29 14:30:15",
                 userId: user.id,
-                deviceId: "my device id",
-                deviceName: "my device",
                 // = "myPassword"
                 createdOn: "2020-03-29 14:30:15",
             },
@@ -41,7 +39,7 @@ describe("Model.Token", () => {
 
     test("Create a token", async () => {
         const cleanUser = user.unloadRelation(User.organization);
-        const token = await Token.createToken(cleanUser, "My device id", "My device name");
+        const token = await Token.createToken(cleanUser);
         expect(token).toBeDefined();
         if (!token) return;
         expect(token).toBeInstanceOf(Token);
