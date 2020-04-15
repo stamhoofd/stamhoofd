@@ -10,7 +10,6 @@ describe("Model.Organization", () => {
             {
                 name: "Model Organization test",
                 website: "https://www.domain.com",
-                addressId: null,
                 meta: "{}",
                 createdOn: "2020-03-29 14:30:15",
                 uri: "model-organization-test",

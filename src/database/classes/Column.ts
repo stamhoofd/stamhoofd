@@ -29,7 +29,7 @@ export class Column {
             return null;
         }
         if (!this.nullable && data === null) {
-            throw new Error("Received null value from database. Expected a non-nullable value");
+            throw new Error("Received null value from database. Expected a non-nullable value for " + this.name);
         }
         switch (this.type) {
             case "integer":

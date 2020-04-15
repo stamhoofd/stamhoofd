@@ -1,7 +1,5 @@
 import { Model } from "@/database/classes/Model";
 import { column } from "@/database/decorators/Column";
-import { ManyToOneRelation } from '@/database/classes/ManyToOneRelation';
-import { Address } from '@/members/models/Address';
 import { OrganizationMetaStruct } from '../structs/OrganizationMetaStruct';
 import { Database } from '@/database/classes/Database';
 import { ClientError } from '@/routing/classes/ClientError';
@@ -34,6 +32,9 @@ export class Organization extends Model {
 
     @column({ type: "datetime" })
     createdOn: Date;
+
+    @column({ type: "datetime", nullable: true })
+    updatedOn: Date | null = null;
 
     // Methods
     static async getByID(id: number): Promise<Organization | undefined> {
@@ -88,6 +89,10 @@ export class Organization extends Model {
         // Todo: we need to read this from a config or environment file
         const defaultDomain = ".stamhoofd.be";
 
+        if (host.startsWith("api.")) {
+            host = host.substring(4)
+        }
+
         if (host.endsWith(defaultDomain)) {
             // Search by URI
             const uri = host.substring(0, host.length - defaultDomain.length);
@@ -109,5 +114,21 @@ export class Organization extends Model {
             })
         }
         return organization
+    }
+
+    getHost(): string {
+        if (this.registerDomain) {
+            return this.registerDomain
+        }
+        const defaultDomain = ".stamhoofd.be";
+        return this.uri + defaultDomain
+    }
+
+    getApiHost(): string {
+        if (this.registerDomain) {
+            return "api." + this.registerDomain
+        }
+        const defaultDomain = ".stamhoofd.be";
+        return "api." + this.uri + defaultDomain
     }
 }

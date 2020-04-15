@@ -3,8 +3,8 @@ import { Data } from "@/structs/classes/Data";
 import { Member } from "../models/Member";
 
 export class MemberStruct implements Encodeable {
-    firstName: string;
-    lastName: string;
+    organizationId: number;
+    encrypted: string;
 
     constructor(settings?: { member?: Member }) {
         if (settings?.member) {
@@ -13,14 +13,14 @@ export class MemberStruct implements Encodeable {
     }
 
     fromMember(member: Member) {
-        this.firstName = member.firstName;
-        this.lastName = member.lastName;
+        this.organizationId = member.organizationId;
+        this.encrypted = member.encrypted;
     }
 
     static decode(data: Data): MemberStruct {
         const struct = new MemberStruct();
-        struct.firstName = data.field("lastName").string;
-        struct.lastName = data.field("lastName").string;
+        struct.organizationId = data.field("organizationId").number;
+        struct.encrypted = data.field("encrypted").string;
 
         return struct;
     }

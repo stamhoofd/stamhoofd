@@ -26,6 +26,7 @@ export class GetMember extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        // TODO: Add authorization and authentication
         const id = request.params.id;
         const member = await Member.getByID(id);
 

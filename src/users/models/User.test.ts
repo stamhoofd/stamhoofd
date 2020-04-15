@@ -1,21 +1,14 @@
 import { User } from "./User";
 import { Database } from "@/database/classes/Database";
 import { Organization } from '@/organizations/models/Organization';
-import { OrganizationMetaStruct, OrganizationType } from '@/organizations/structs/OrganizationMetaStruct';
+import { OrganizationFactory } from '@/organizations/factories/OrganizationFactory';
 
 describe("Model.User", () => {
     let existingUserId: number;
     let organization: Organization;
 
     beforeAll(async () => {
-        organization = new Organization()
-        organization.name = "User test organization"
-        organization.uri = "user-test-organization"
-        organization.createdOn = new Date();
-        organization.website = "https://website.com"
-        organization.meta = new OrganizationMetaStruct()
-        organization.meta.type = OrganizationType.Other
-        await organization.save();
+        organization = await new OrganizationFactory({}).create()
 
         const [data] = await Database.insert("INSERT INTO " + User.table + " SET ?", [
             {

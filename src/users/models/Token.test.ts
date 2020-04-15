@@ -2,7 +2,7 @@ import { Database } from "@/database/classes/Database";
 import { Token } from "./Token";
 import { User } from "./User";
 import { Organization } from '@/organizations/models/Organization';
-import { OrganizationMetaStruct, OrganizationType } from '@/organizations/structs/OrganizationMetaStruct';
+import { OrganizationFactory } from '@/organizations/factories/OrganizationFactory';
 
 describe("Model.Token", () => {
     const existingToken = "ABCDEFG";
@@ -10,14 +10,7 @@ describe("Model.Token", () => {
     let organization: Organization;
 
     beforeAll(async () => {
-        organization = new Organization()
-        organization.name = "Token test organization"
-        organization.uri = "token-test-organization"
-        organization.createdOn = new Date();
-        organization.website = "https://website.com";
-        organization.meta = new OrganizationMetaStruct()
-        organization.meta.type = OrganizationType.Other
-        await organization.save();
+        organization = await new OrganizationFactory({}).create()
 
         const [userData] = await Database.insert("INSERT INTO " + User.table + " SET ?", [
             {
