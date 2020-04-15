@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "@types/jest": "^25.1.4",
+        "@types/libsodium-wrappers": "^0.7.7",
         "@typescript-eslint/eslint-plugin": "^2.24.0",
         "@typescript-eslint/parser": "^2.24.0",
         "colors": "^1.4.0",
@@ -31,6 +32,7 @@
         "@types/mysql": "^2.15.9",
         "@types/node": "^13.9.0",
         "argon2": "^0.26.1",
+        "libsodium-wrappers": "^0.7.6",
         "mysql": "^2.18.1",
         "tslib": "^1.11.1"
     }
