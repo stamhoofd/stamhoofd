@@ -2,16 +2,15 @@ import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
 import { DecodingError } from "../classes/DecodingError";
 
-class KeyDecoder implements Decoder<string> {
+class EmailDecoder implements Decoder<string> {
     decode(data: Data): string {
-        const str = data.base64;
+        const str = data.string;
+        const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-        const buffer = new Buffer(str, "base64");
-
-        if (buffer.length != 32) {
+        if (!regex.test(str)) {
             throw new DecodingError({
                 code: "invalid_field",
-                message: "Invalid key. Expected 32 byte key",
+                message: "Received an invalid email address",
                 field: data.currentField,
             });
         }
@@ -20,4 +19,4 @@ class KeyDecoder implements Decoder<string> {
 }
 
 // We export an instance to prevent creating a new instance every time we need to decode a number
-export default new KeyDecoder();
+export default new EmailDecoder();
