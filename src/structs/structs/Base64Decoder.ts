@@ -10,7 +10,7 @@ class Base64Decoder implements Decoder<string> {
         if (!base64regex.test(str)) {
             throw new DecodingError({
                 code: "invalid_field",
-                message: "Expected a valid base64 encoded string",
+                message: "Expected a valid base64 encoded string, received " + str,
                 field: data.currentField,
             });
         }

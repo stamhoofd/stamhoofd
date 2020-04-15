@@ -13,7 +13,7 @@ import { RegisterStruct } from "../structs/RegisterStruct";
 type Params = {};
 type Query = undefined;
 type Body = RegisterStruct;
-type ResponseBody = TokenStruct;
+type ResponseBody = undefined;
 
 export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = RegisterStruct;
@@ -40,12 +40,8 @@ export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             request.body.publicKey
         );
         if (!user) {
-            // Todo: We should fail silently here to prevent user enumeration attacks
-            throw new ClientError({
-                code: "invalid_data",
-                message: "Invalid username or password",
-                human: "Het ingevoerde e-mailadres of wachtwoord is onjuist.",
-            });
+            // Todo: Send password recovery email with registration notice
+            return new Response(undefined);
         }
 
         const token = await Token.createToken(user);
@@ -57,7 +53,7 @@ export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             });
         }
 
-        const st = new TokenStruct(token);
-        return new Response(st);
+        // An email has been send to confirm your email address
+        return new Response(undefined);
     }
 }

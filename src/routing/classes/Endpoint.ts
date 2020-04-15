@@ -5,7 +5,7 @@ import { EncodedResponse } from "./EncodedResponse";
 import { Decoder } from "@/structs/classes/Decoder";
 import { Encodeable } from "@/structs/classes/Encodeable";
 
-export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends Encodeable> {
+export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends Encodeable | undefined> {
     protected queryDecoder: Decoder<Query> | undefined;
     protected bodyDecoder: Decoder<RequestBody> | undefined;
 

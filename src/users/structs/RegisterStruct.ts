@@ -1,4 +1,5 @@
 import { Data } from "@/structs/classes/Data";
+import EmailDecoder from "@/structs/structs/EmailDecoder";
 
 /// Only used as input
 export class RegisterStruct {
@@ -17,7 +18,7 @@ export class RegisterStruct {
 
     static decode(data: Data): RegisterStruct {
         const struct = new RegisterStruct();
-        struct.email = data.field("email").string;
+        struct.email = data.field("email").decode(EmailDecoder);
         struct.password = data.field("password").string;
         struct.publicKey = data.field("publicKey").key;
 

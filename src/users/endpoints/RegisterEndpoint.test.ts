@@ -5,6 +5,7 @@ import { Organization } from "@/organizations/models/Organization";
 import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
 import { UserFactory } from "../factories/UserFactory";
 import { RegisterEndpoint } from "./RegisterEndpoint";
+import Sodium from "@/tools/classes/Sodium";
 
 describe("Endpoint.Register", () => {
     // Test endpoint
@@ -24,28 +25,44 @@ describe("Endpoint.Register", () => {
     });
 
     test("Create an account", async () => {
+        const keyPair = await Sodium.boxKeypair();
         const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
-            email: user.email,
+            email: "endpoint-register-email@domain.be",
             password: password,
-            publicKey: "TXkgcHVibGljIGtleQ==",
+            publicKey: keyPair.publicKey,
         });
 
         const response = await endpoint.getResponse(r, {});
-        expect(response.body).toBeInstanceOf(TokenStruct);
-        expect(response.body.accessToken.length).toBeGreaterThan(40);
-        expect(response.body.refreshToken.length).toBeGreaterThan(40);
-        expect(response.body.accessTokenValidUntil).toBeValidDate();
+        expect(response.body).toBeUndefined();
+        expect(response.status).toEqual(200);
     });
 
     test("Invalid email address", async () => {
+        const keyPair = await Sodium.boxKeypair();
         const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             email: "invali@demailaddre@s.be",
             password: password,
-            publicKey: "TXkgcHVibGljIGtleQ==",
+            publicKey: keyPair.publicKey,
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/email/);
+    });
+
+    test("User already exists returns success", async () => {
+        const keyPair = await Sodium.boxKeypair();
+        const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            email: user.email,
+            password: password,
+            publicKey: keyPair.publicKey,
+        });
+
+        // Exactly the same response, since a password recovery email will get send, instead of a registration
+        // This is to prevent user enumeration attacks
+        const response = await endpoint.getResponse(r, {});
+        expect(response.body).toBeUndefined();
+        expect(response.status).toEqual(200);
     });
 });

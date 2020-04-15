@@ -7,9 +7,14 @@ export class EncodedResponse {
     headers: http.OutgoingHttpHeaders = {};
     body: any;
 
-    constructor(response: Response<Encodeable>) {
+    constructor(response: Response<Encodeable | undefined>) {
         this.status = response.status;
         this.headers = response.headers;
-        this.body = JSON.stringify(response.body.encode());
+
+        if (response.body !== undefined) {
+            this.body = JSON.stringify(response.body.encode());
+        } else {
+            this.body = "";
+        }
     }
 }

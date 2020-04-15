@@ -6,7 +6,7 @@ class KeyDecoder implements Decoder<string> {
     decode(data: Data): string {
         const str = data.base64;
 
-        const buffer = new Buffer(str, "base64");
+        const buffer = Buffer.from(str, "base64");
 
         if (buffer.length != 32) {
             throw new DecodingError({

@@ -32,6 +32,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        // Todo: add some extra brute force measurements here
+        // - add random delay here, increased by the amount of failed attempts (used to slow down). Also on a successfull comparison!
+        // - add required CAPTCHA after x failed attempts for a given username (no matter if the username exists or not)
+        // - if, even after the CAPTCHAs, the account reaches a given count of failed attempts, the account should be locked out for an hour or even a day (only login endpoint)
+
         const organization = await Organization.fromHost(request.host);
         const user = await User.login(organization, request.body.username, request.body.password);
         if (!user) {
