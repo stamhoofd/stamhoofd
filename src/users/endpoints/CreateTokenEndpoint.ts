@@ -36,6 +36,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - add random delay here, increased by the amount of failed attempts (used to slow down). Also on a successfull comparison!
         // - add required CAPTCHA after x failed attempts for a given username (no matter if the username exists or not)
         // - if, even after the CAPTCHAs, the account reaches a given count of failed attempts, the account should be locked out for an hour or even a day (only login endpoint)
+        // - check if not multiple attempts for the same username are started in parallel
+        // - Limit the amount of failed attemps by IP (will only make it a bit harder)
+        // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
 
         const organization = await Organization.fromHost(request.host);
         const user = await User.login(organization, request.body.username, request.body.password);
