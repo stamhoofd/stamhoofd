@@ -1,6 +1,9 @@
 import { Request } from "@/routing/classes/Request";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 import Sodium from "@/tools/classes/Sodium";
+import { User } from "@/users/models/User";
+import { Organization } from "../models/Organization";
+import { Formatter } from "@/tools/classes/Formatter";
 
 describe("Endpoint.CreateOrganization", () => {
     // Test endpoint
@@ -28,6 +31,13 @@ describe("Endpoint.CreateOrganization", () => {
         const response = await endpoint.getResponse(r, {});
         expect(response.body).toBeUndefined();
         expect(response.status).toEqual(200);
+
+        const organization = await Organization.getByURI(Formatter.slug("My endpoint test organization"));
+        expect(organization).toBeDefined();
+        if (!organization) throw new Error("impossible");
+
+        const user = await User.login(organization, "admin@domain.com", "My user password");
+        expect(user).toBeDefined();
     });
 
     test("Organization already exists throws", async () => {
