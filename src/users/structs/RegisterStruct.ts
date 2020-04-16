@@ -16,11 +16,17 @@ export class RegisterStruct {
      */
     publicKey: string;
 
+    /**
+     * Optional. The signature of the public key when creating administrators. This will get verified immediately. If verification fails, it won't get saved to the database without any notification (brute force protection)
+     */
+    adminSignature?: string;
+
     static decode(data: Data): RegisterStruct {
         const struct = new RegisterStruct();
         struct.email = data.field("email").decode(EmailDecoder);
         struct.password = data.field("password").string;
         struct.publicKey = data.field("publicKey").key;
+        struct.adminSignature = data.optionalField("adminSignature")?.string;
 
         return struct;
     }

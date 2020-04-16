@@ -25,7 +25,7 @@ describe("Endpoint.Register", () => {
     });
 
     test("Create an account", async () => {
-        const keyPair = await Sodium.boxKeypair();
+        const keyPair = await Sodium.boxKeyPair();
         const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             email: "endpoint-register-email@domain.be",
@@ -39,7 +39,7 @@ describe("Endpoint.Register", () => {
     });
 
     test("Invalid email address", async () => {
-        const keyPair = await Sodium.boxKeypair();
+        const keyPair = await Sodium.boxKeyPair();
         const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             email: "invali@demailaddre@s.be",
@@ -51,7 +51,7 @@ describe("Endpoint.Register", () => {
     });
 
     test("User already exists returns success", async () => {
-        const keyPair = await Sodium.boxKeypair();
+        const keyPair = await Sodium.boxKeyPair();
         const r = Request.buildJson("POST", "/register", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             email: user.email,

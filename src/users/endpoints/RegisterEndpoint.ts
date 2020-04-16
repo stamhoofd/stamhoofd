@@ -3,8 +3,6 @@ import { DecodedRequest } from "@/routing/classes/DecodedRequest";
 import { Response } from "@/routing/classes/Response";
 import { Endpoint } from "@/routing/classes/Endpoint";
 import { User } from "../models/User";
-import { Token } from "../models/Token";
-import { ServerError } from "@/routing/classes/ServerError";
 import { Organization } from "@/organizations/models/Organization";
 import { RegisterStruct } from "../structs/RegisterStruct";
 
@@ -40,15 +38,6 @@ export class RegisterEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         if (!user) {
             // Todo: Send password recovery email with registration notice
             return new Response(undefined);
-        }
-
-        const token = await Token.createToken(user);
-        if (!token) {
-            throw new ServerError({
-                code: "error",
-                message: "Could not generate token",
-                human: "Er ging iets mis tijdens het registreren.",
-            });
         }
 
         // An email has been send to confirm your email address

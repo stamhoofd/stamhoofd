@@ -1,6 +1,7 @@
 import { Router } from "./Router";
 import http from "http";
 import { Request } from "./Request";
+import { ClientError } from "./ClientError";
 
 export class RouterServer {
     router: Router;
@@ -31,7 +32,11 @@ export class RouterServer {
             }
         } catch (e) {
             // Todo: implement special errors to send custom status codes
-            res.writeHead(400);
+            if (e instanceof ClientError) {
+                res.writeHead(400);
+            } else {
+                res.writeHead(500);
+            }
             res.end(e.message);
             return;
         }
@@ -54,7 +59,7 @@ export class RouterServer {
             if (!this.server) {
                 throw new Error("Already stopped.");
             }
-            this.server.close(err => {
+            this.server.close((err) => {
                 if (err) {
                     reject(err);
                     return;
