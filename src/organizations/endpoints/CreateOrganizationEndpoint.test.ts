@@ -14,11 +14,6 @@ describe("Endpoint.CreateOrganization", () => {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test organization",
             publicKey: organizationKeyPair.publicKey,
-            encryptedSecret: await Sodium.sealMessage(
-                organizationKeyPair.privateKey,
-                Buffer.from(userKeyPair.publicKey, "base64")
-            ),
-
             user: {
                 email: "admin@domain.com",
                 password: "My user password",
@@ -43,11 +38,6 @@ describe("Endpoint.CreateOrganization", () => {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test organization",
             publicKey: organizationKeyPair.publicKey,
-            encryptedSecret: await Sodium.sealMessage(
-                organizationKeyPair.privateKey,
-                Buffer.from(userKeyPair.publicKey, "base64")
-            ),
-
             user: {
                 email: "admin@domain.com",
                 password: "My user password",
@@ -70,11 +60,6 @@ describe("Endpoint.CreateOrganization", () => {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test 2 organization",
             publicKey: organizationKeyPair.publicKey,
-            encryptedSecret: await Sodium.sealMessage(
-                organizationKeyPair.privateKey,
-                Buffer.from(userKeyPair.publicKey, "base64")
-            ),
-
             user: {
                 email: "admin@domain.com",
                 password: "My user password",
@@ -94,11 +79,6 @@ describe("Endpoint.CreateOrganization", () => {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test 3 organization",
             publicKey: organizationKeyPair.publicKey,
-            encryptedSecret: await Sodium.sealMessage(
-                organizationKeyPair.privateKey,
-                Buffer.from(userKeyPair.publicKey, "base64")
-            ),
-
             user: {
                 email: "admin@domain.com",
                 password: "My user password",
