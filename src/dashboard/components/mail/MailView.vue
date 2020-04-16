@@ -43,7 +43,6 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
@@ -61,16 +60,16 @@ import MailEditor from "./MailEditor.vue";
         STNavigationTitle,
         SegmentedControl,
         STToolbar,
-        MailEditor
-    }
+        MailEditor,
+    },
 })
 export default class MailView extends Mixins(NavigationMixin) {
     @Prop()
     members!: Member[];
 
     get mailaddresses(): string[] {
-        return this.members.flatMap(member => {
-            return member.parents.flatMap(parent => {
+        return this.members.flatMap((member) => {
+            return member.parents.flatMap((parent) => {
                 if (parent.mail) {
                     return [parent.mail];
                 }

@@ -43,7 +43,6 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import EditGroupDetail from "./EditGroupDetail.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import GroupList from "./GroupList.vue";
-import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "../../shared/components/layout/NavigationController.vue";
 import SplitViewController from "../../shared/components/layout/SplitViewController.vue";
 import { Organization } from "shared/models/Organization";
@@ -67,11 +66,11 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     mounted() {
         var factory = new OrganizationFactory({
-            type: "chiro"
+            type: "chiro",
         });
         this.organization = factory.create();
 
-        this.groups = this.organization.groups.map(group => {
+        this.groups = this.organization.groups.map((group) => {
             return new SelectableGroup(group);
         });
         if (!this.splitViewController.shouldCollapse()) {
@@ -80,8 +79,8 @@ export default class Menu extends Mixins(NavigationMixin) {
             this.showDetail(
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(GroupList, {
-                        group: this.selectedGroup.group
-                    })
+                        group: this.selectedGroup.group,
+                    }),
                 })
             );
         }

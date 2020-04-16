@@ -31,7 +31,6 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
@@ -50,8 +49,8 @@ import { Gender } from "shared/models/Gender";
         STNavigationTitle,
         SegmentedControl,
         MaleIcon,
-        FemaleIcon
-    }
+        FemaleIcon,
+    },
 })
 export default class MemberView extends Mixins(NavigationMixin) {
     tabs = [MemberViewDetails, MemberViewPayments, MemberViewHistory];
@@ -87,7 +86,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
         var component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
-            getPreviousMember: this.getPreviousMember
+            getPreviousMember: this.getPreviousMember,
         });
         this.navigationController.push(component, true, true, true);
     }
@@ -100,7 +99,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
         var component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
-            getPreviousMember: this.getPreviousMember
+            getPreviousMember: this.getPreviousMember,
         });
         this.navigationController.push(component, true, true, false);
     }
@@ -133,7 +132,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY,
-            member: this.member
+            member: this.member,
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

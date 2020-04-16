@@ -44,7 +44,6 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
@@ -60,8 +59,8 @@ import STToolbar from "shared/components/navigation/STToolbar.vue";
         STNavigationBar,
         STNavigationTitle,
         SegmentedControl,
-        STToolbar
-    }
+        STToolbar,
+    },
 })
 export default class SMSView extends Mixins(NavigationMixin) {
     @Prop()
@@ -77,10 +76,10 @@ export default class SMSView extends Mixins(NavigationMixin) {
     }
 
     get phones(): string[] {
-        return this.members.flatMap(member => {
+        return this.members.flatMap((member) => {
             var arr = [];
             if (this.smsFilter == "parents" || this.smsFilter == "all") {
-                arr = member.parents.flatMap(parent => {
+                arr = member.parents.flatMap((parent) => {
                     if (parent.phone) {
                         return [parent.phone];
                     }
@@ -118,9 +117,9 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
         if (this.getOS() == "whatsapp") {
             // Not working yet for multpile recipients
-            url += this.phones.map(phone => phone.replace(/(\s|\+)+/g, "")).join(",");
+            url += this.phones.map((phone) => phone.replace(/(\s|\+)+/g, "")).join(",");
         } else {
-            url += this.phones.map(phone => phone.replace(/(\s)+/g, "")).join(",");
+            url += this.phones.map((phone) => phone.replace(/(\s)+/g, "")).join(",");
         }
 
         switch (this.getOS()) {

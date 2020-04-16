@@ -40,7 +40,7 @@
                                 class="sort-arrow"
                                 :class="{
                                     up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC'
+                                    down: sortBy == 'name' && sortDirection == 'DESC',
                                 }"
                             ></span>
                         </th>
@@ -50,7 +50,7 @@
                                 class="sort-arrow"
                                 :class="{
                                     up: sortBy == 'info' && sortDirection == 'ASC',
-                                    down: sortBy == 'info' && sortDirection == 'DESC'
+                                    down: sortBy == 'info' && sortDirection == 'DESC',
                                 }"
                             ></span>
                         </th>
@@ -60,7 +60,7 @@
                                 class="sort-arrow"
                                 :class="{
                                     up: sortBy == 'status' && sortDirection == 'ASC',
-                                    down: sortBy == 'status' && sortDirection == 'DESC'
+                                    down: sortBy == 'status' && sortDirection == 'DESC',
                                 }"
                             ></span>
                         </th>
@@ -117,7 +117,6 @@ import { ComponentWithProperties } from "shared/classes/ComponentWithProperties"
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import GroupListShort from "./GroupListShort.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import MemberView from "./member/MemberView.vue";
@@ -146,9 +145,9 @@ class SelectableMember {
         Checkbox,
         STNavigationBar,
         STNavigationTitle,
-        STToolbar
+        STToolbar,
     },
-    directives: { Tooltip }
+    directives: { Tooltip },
 })
 export default class GroupList extends Mixins(NavigationMixin) {
     @Prop()
@@ -243,7 +242,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     get selectionCount(): number {
         var val = 0;
-        this.filteredMembers.forEach(member => {
+        this.filteredMembers.forEach((member) => {
             if (member.selected) {
                 val++;
             }
@@ -265,12 +264,12 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     mounted() {
         if (this.group) {
-            this.members = this.group.members.map(member => {
+            this.members = this.group.members.map((member) => {
                 return new SelectableMember(member);
             });
         } else {
-            this.members = this.organization.groups.flatMap(group => {
-                return group.members.map(member => {
+            this.members = this.organization.groups.flatMap((group) => {
+                return group.members.map((member) => {
                     return new SelectableMember(member);
                 });
             });
@@ -313,15 +312,15 @@ export default class GroupList extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(MemberView, {
                 member: selectableMember.member,
                 getNextMember: this.getNextMember,
-                getPreviousMember: this.getPreviousMember
-            })
+                getPreviousMember: this.getPreviousMember,
+            }),
         });
         component.modalDisplayStyle = "popup";
         this.present(component);
     }
 
     selectAll(selected: boolean) {
-        this.filteredMembers.forEach(member => {
+        this.filteredMembers.forEach((member) => {
             member.selected = selected;
         });
     }
@@ -330,7 +329,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
         var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
-            member: member
+            member: member,
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -347,7 +346,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     openMail(event) {
         var displayedComponent = new ComponentWithProperties(MailView, {
-            members: this.getSelectedMembers()
+            members: this.getSelectedMembers(),
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
@@ -356,7 +355,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
         var displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
-            members: this.getSelectedMembers()
+            members: this.getSelectedMembers(),
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

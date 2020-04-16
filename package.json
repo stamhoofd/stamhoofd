@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "serve": "vue-cli-service serve --name dashboard src/dashboard/main.ts",
+        "serve": "vue-cli-service serve --name dashboard src/dashboard/main.ts --host dashboard.stamhoofd.be --https",
         "build": "vue-cli-service build --name dashboard src/dashboard/main.ts",
         "lint": "vue-cli-service lint --name cdashboard src/dashboard/main.ts",
         "build-group": "vue-cli-service build --name create-group src/create-group/main.ts",
@@ -34,8 +34,5 @@
     },
     "eslintConfig": {
         "no-console": "off"
-    },
-    "resolutions": {
-        "prosemirror-model": "1.8.2"
     }
 }
