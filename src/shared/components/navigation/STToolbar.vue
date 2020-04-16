@@ -1,10 +1,10 @@
 <template>
     <div class="st-toolbar">
         <div>
-            <slot name="left"></slot>
+            <slot name="left" />
         </div>
         <div>
-            <slot name="right"></slot>
+            <slot name="right" />
         </div>
     </div>
 </template>

@@ -17,7 +17,7 @@ export class AddressFactory extends Factory<Address> {
     }
 
     create(): Address {
-        var address = new Address();
+        const address = new Address();
         address.street = this.randomStreet();
         address.number = Math.floor(Math.random() * 300) + 1 + "";
         address.city = this.randomArray(["Wetteren", "Schellebelle", "Wichelen", "Massemen", "Laarne"]);

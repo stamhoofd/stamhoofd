@@ -1,28 +1,28 @@
-import Vue, { VNode } from "vue";
+import { VNode } from "vue";
 
 export class ComponentWithProperties {
     /// Name of component or component Options. Currently no way to force type
     public component: any;
-    public properties: Object;
+    public properties: Record<string, any>;
     public key: number | null = null;
     public type: string | null = null;
-    public hide: boolean = false;
+    public hide = false;
 
     /// Saved vnode of this instance
     public vnode: VNode | null = null;
 
     // Keep the vnode alive when it is removed from the VDOM
-    public keepAlive: boolean = false;
-    public isMounted: boolean = false;
+    public keepAlive = false;
+    public isMounted = false;
 
     // Counter for debugging. Count of components that are kept alive but are not mounted.
-    static keepAliveCounter: number = 0;
-    static keyCounter: number = 0;
+    static keepAliveCounter = 0;
+    static keyCounter = 0;
 
     /// Cover whole screen. Other style = popup
     public modalDisplayStyle = "cover";
 
-    constructor(component: any, properties: Object = {}) {
+    constructor(component: any, properties: Record<string, any> = {}) {
         this.component = component;
         this.properties = properties;
         this.key = ComponentWithProperties.keyCounter++;

@@ -1,15 +1,17 @@
 <template>
     <div class="menu">
         <div class="padding-group">
-            <figure id="logo"></figure>
+            <figure id="logo" />
 
-            <input class="input search" placeholder="Zoeken" />
+            <input class="input search" placeholder="Zoeken">
         </div>
 
-        <div class="" v-if="organization">
+        <div v-if="organization" class="">
             <button class="menu-button icon user">
                 <span>Leden</span>
-                <button @click="openAll()">Iedereen</button>
+                <button @click="openAll()">
+                    Iedereen
+                </button>
             </button>
 
             <button
@@ -22,15 +24,23 @@
                 {{ group.group.name }}
             </button>
         </div>
-        <hr />
+        <hr>
         <div class="">
-            <button class="menu-button icon groups">Groepen beheren</button>
-            <button class="menu-button icon payments">Overschrijvingen</button>
-            <button class="menu-button icon settings">Instellingen</button>
+            <button class="menu-button icon groups">
+                Groepen beheren
+            </button>
+            <button class="menu-button icon payments">
+                Overschrijvingen
+            </button>
+            <button class="menu-button icon settings">
+                Instellingen
+            </button>
         </div>
-        <hr />
+        <hr>
         <div class="">
-            <button class="menu-button icon logout">Uitloggen</button>
+            <button class="menu-button icon logout">
+                Uitloggen
+            </button>
         </div>
     </div>
 </template>
@@ -51,7 +61,7 @@ import { Group } from "shared/models/Group";
 
 class SelectableGroup {
     group: Group;
-    selected: boolean = false;
+    selected = false;
 
     constructor(group: Group) {
         this.group = group;
@@ -65,7 +75,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     selectedGroup: SelectableGroup | null = null;
 
     mounted() {
-        var factory = new OrganizationFactory({
+        const factory = new OrganizationFactory({
             type: "chiro",
         });
         this.organization = factory.create();

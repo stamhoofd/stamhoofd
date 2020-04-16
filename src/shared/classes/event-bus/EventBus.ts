@@ -5,7 +5,7 @@ class EventBus {
     private listeners: EventBusListener[] = [];
     send(type: string, data: any): void {
         //console.log("Send message: "+type);
-        this.listeners.forEach(listener => {
+        this.listeners.forEach((listener) => {
             if (listener.shouldReceive(type)) {
                 //console.log("Received message");
                 listener.receive(data);
@@ -36,4 +36,4 @@ class EventBus {
     }
 }
 
-export let eventBus = new EventBus();
+export const eventBus = new EventBus();

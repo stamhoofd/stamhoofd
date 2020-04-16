@@ -2,13 +2,13 @@
     <Step>
         <h1>Inschrijven & groepen</h1>
 
-        <hr />
+        <hr>
         <h2>Samenstelling</h2>
 
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Soort vereniging</label>
-                <select class="input" ref="firstInput">
+                <select ref="firstInput" class="input">
                     <option>Scoutsgroep</option>
                     <option>Chirogroep</option>
                 </select>
@@ -34,14 +34,16 @@
         <label class="style-label">Extra onderverdelingen</label>
         <Checkbox>Woutlopers</Checkbox>
 
-        <hr />
+        <hr>
         <h2>Werkjaar</h2>
 
         <div class="split-inputs">
             <div>
                 <label class="style-label" for="organization-name">Start werkjaar</label>
                 <select class="input">
-                    <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                    <option v-for="(month, index) in months" :key="index" :value="index">
+                        {{ month }}
+                    </option>
                 </select>
             </div>
 
@@ -49,17 +51,21 @@
                 <label class="style-label" for="organization-name">Inschrijvingsperiode</label>
                 <div class="mixed-input">
                     <select>
-                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                        <option v-for="(month, index) in months" :key="index" :value="index">
+                            {{ month }}
+                        </option>
                     </select>
                     <span>tot</span>
                     <select>
-                        <option v-for="(month, index) in months" :value="index" :key="index">{{ month }}</option>
+                        <option v-for="(month, index) in months" :key="index" :value="index">
+                            {{ month }}
+                        </option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <hr />
+        <hr>
         <h2>Prijzen</h2>
         <p>
             Je kan uitzonderingen voor bepaalde groepen toevoegen in de volgende stap.
@@ -68,25 +74,27 @@
         <div class="split-inputs">
             <div>
                 <label class="style-label">Lidgeld</label>
-                <PriceInput></PriceInput>
+                <PriceInput />
             </div>
 
             <div>
                 <label class="style-label">Lidgeld voor beheerders</label>
-                <PriceInput></PriceInput>
+                <PriceInput />
             </div>
         </div>
 
         <Checkbox>Verminder het lidgeld voor leden met financiële moeilijkheden</Checkbox>
 
         <label class="style-label">Verminderd lidgeld</label>
-        <PriceInput></PriceInput>
+        <PriceInput />
 
-        <button class="button primary" @click="next" id="next-button">
+        <button id="next-button" class="button primary" @click="next">
             Verder
         </button>
 
-        <button class="button secundary" @click="editGroup">Test</button>
+        <button class="button secundary" @click="editGroup">
+            Test
+        </button>
     </Step>
 </template>
 
@@ -115,8 +123,8 @@ import Groups from "./Groups.vue";
         Checkbox,
         Radio,
         RadioGroup,
-        PriceInput
-    }
+        PriceInput,
+    },
 })
 export default class General extends Vue {
     months: string[] = [
@@ -131,7 +139,7 @@ export default class General extends Vue {
         "September",
         "Oktober",
         "November",
-        "December"
+        "December",
     ];
 
     mounted() {
@@ -143,7 +151,7 @@ export default class General extends Vue {
 
     focus() {
         // Carefull about focussing, can cause transition bugs
-        let input = this.$refs.firstInput as HTMLElement;
+        const input = this.$refs.firstInput as HTMLElement;
         input.focus();
     }
 
@@ -152,8 +160,8 @@ export default class General extends Vue {
             "present",
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(EditGroupDetail, {
-                    text: "Custom text"
-                })
+                    text: "Custom text",
+                }),
             })
         );
     }

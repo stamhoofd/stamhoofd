@@ -3,18 +3,18 @@ import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 
 export default Vue.extend({
     props: {
-        component: ComponentWithProperties
-    },
-
-    created() {
-        /// Whether the node should be destroyed if it is removed from the dom
-        this.destroy = true;
+        component: ComponentWithProperties,
     },
 
     watch: {
         component(val) {
             throw new Error("Changing component during life is not yet supported");
-        }
+        },
+    },
+
+    created() {
+        /// Whether the node should be destroyed if it is removed from the dom
+        this.destroy = true;
     },
 
     beforeMount() {
@@ -23,6 +23,12 @@ export default Vue.extend({
 
     mounted() {
         this.component.mounted();
+    },
+
+    destroyed() {
+        // This component got removed (with v-if, v-for, ...) in some way.
+        // This doesn't mean we want to destroy it
+        this.component.destroy();
     },
 
     render(createElement): VNode {
@@ -35,17 +41,11 @@ export default Vue.extend({
 
         this.component.vnode = createElement(this.component.component, {
             props: this.component.properties,
-            key: this.component.key
+            key: this.component.key,
         });
 
         // Magic trick: we are now responsible for deallocating the component
         this.component.vnode.data.keepAlive = true;
         return this.component.vnode;
     },
-
-    destroyed() {
-        // This component got removed (with v-if, v-for, ...) in some way.
-        // This doesn't mean we want to destroy it
-        this.component.destroy();
-    }
 });

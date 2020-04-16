@@ -3,28 +3,28 @@ import Tooltip from "shared/components/overlays/Tooltip.vue";
 
 export default {
     inserted(el, binding, vnode) {
-        var isMouseHover = false;
-        var displayedComponent = null;
+        let isMouseHover = false;
+        let displayedComponent = null;
 
         // Add a hover listener
         el.addEventListener(
             "mouseenter",
-            event => {
+            (event) => {
                 if (!isMouseHover) {
-                    var parentComponent = vnode.context;
+                    const parentComponent = vnode.context;
 
                     isMouseHover = true;
 
                     setTimeout(() => {
                         if (isMouseHover && !displayedComponent) {
-                            var rect = el.getBoundingClientRect();
+                            const rect = el.getBoundingClientRect();
 
                             // Present
 
                             displayedComponent = new ComponentWithProperties(Tooltip, {
                                 text: binding.value,
                                 x: rect.left,
-                                y: rect.top + el.offsetHeight + 5
+                                y: rect.top + el.offsetHeight + 5,
                             });
                             parentComponent.present(displayedComponent.setDisplayStyle("overlay"));
                         }
@@ -35,7 +35,7 @@ export default {
         );
         el.addEventListener(
             "mouseleave",
-            event => {
+            (event) => {
                 isMouseHover = false;
 
                 if (displayedComponent && displayedComponent.vnode) {
@@ -46,5 +46,5 @@ export default {
             },
             { passive: true }
         );
-    }
+    },
 };

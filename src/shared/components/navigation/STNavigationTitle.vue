@@ -1,6 +1,6 @@
 <template>
     <h1 class="st-navigation-title">
-        <slot></slot>
+        <slot />
     </h1>
 </template>
 

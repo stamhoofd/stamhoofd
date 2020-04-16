@@ -1,6 +1,6 @@
 <template>
     <div class="editor">
-        <editor-menu-bubble class="menu-bubble" :editor="editor" v-slot="{ commands, isActive, menu }">
+        <editor-menu-bubble v-slot="{ commands, isActive, menu }" class="menu-bubble" :editor="editor">
             <div :class="{ 'is-active': menu.isActive }" :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`">
                 <button :class="{ 'is-active': isActive.bold() }" @click="commands.bold">
                     Bold
@@ -34,13 +34,13 @@ import {
     Link,
     Strike,
     Underline,
-    History
+    History,
 } from "tiptap-extensions";
 
 import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 
 @Component({
-    components: { EditorContent, EditorMenuBubble, EditorFloatingMenu }
+    components: { EditorContent, EditorMenuBubble, EditorFloatingMenu },
 })
 export default class MailEditor extends Vue {
     editor: Editor | null = null;
@@ -62,9 +62,9 @@ export default class MailEditor extends Vue {
                 new Strike(),
                 new Underline(),
                 new History(),
-                new ReplacePlaceholderMark()
+                new ReplacePlaceholderMark(),
             ],
-            content: '<p>Dag <span data-replace-type="firstName"></span>,</p>'
+            content: '<p>Dag <span data-replace-type="firstName"></span>,</p>',
         });
     }
 

@@ -1,7 +1,7 @@
 <template>
     <div class="st-navigation-bar" :class="{ scrolled: scrolled, sticky: sticky }">
         <div>
-            <slot name="left"></slot>
+            <slot name="left" />
         </div>
 
         <h1>
@@ -9,7 +9,7 @@
         </h1>
 
         <div>
-            <slot name="right"></slot>
+            <slot name="right" />
         </div>
     </div>
 </template>
@@ -25,7 +25,7 @@ export default class STNavigationBar extends Vue {
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
 
-    scrolled: boolean = false;
+    scrolled = false;
     scrollElement!: HTMLElement;
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
@@ -72,7 +72,7 @@ export default class STNavigationBar extends Vue {
     }
 
     onScroll() {
-        let scroll = this.scrollElement.scrollTop;
+        const scroll = this.scrollElement.scrollTop;
         if (scroll > 50) {
             this.scrolled = true;
         } else if (scroll < 15) {

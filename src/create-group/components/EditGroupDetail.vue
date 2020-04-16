@@ -1,8 +1,10 @@
 <template>
-    <div style="padding: 40px 40px; ">
-        <button @click="back">Terug</button>
+    <div style="padding: 40px 40px;">
+        <button @click="back">
+            Terug
+        </button>
         <h1>Nieuwe groep toevoegen</h1>
-        <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
+        <SegmentedControl v-model="tab" :items="tabs" />
 
         <p>Dit is een test!</p>
         <p>Dit is een test!</p>
@@ -57,18 +59,16 @@
         <p>Dit is een test!</p>
 
         <label class="style-label" for="group-description">Beschrijving</label>
-        <textarea
-            class="input"
-            id="group-description"
-            placeholder="Zichtbaar voor leden bij het inschrijven"
-        ></textarea>
+        <textarea id="group-description" class="input" placeholder="Zichtbaar voor leden bij het inschrijven" />
 
         <p>Dit is een test!</p>
 
-        <button class="button primary" v-on:click="next" id="save-button">
+        <button id="save-button" class="button primary" @click="next">
             Volgende
         </button>
-        <button @click="back">Terug</button>
+        <button @click="back">
+            Terug
+        </button>
     </div>
 </template>
 
@@ -82,11 +82,11 @@ import EditGroup from "./EditGroup.vue";
 
 @Component({
     props: {
-        text: String
+        text: String,
     },
     components: {
-        SegmentedControl
-    }
+        SegmentedControl,
+    },
 })
 export default class EditGroupDetail extends Vue {
     tabs = ["Algemeen", "Inschrijven", "Toegang", "Test"];

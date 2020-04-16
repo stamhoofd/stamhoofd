@@ -9,7 +9,7 @@ import StackComponent from "../components/layout/StackComponent.vue";
 @Component
 export class NavigationMixin extends Vue {
     emitParents(event: string, data: any) {
-        var start: any = this;
+        let start: any = this;
         while (start.$parent) {
             if (start.$listeners[event]) {
                 start.$emit(event, data);
@@ -48,7 +48,7 @@ export class NavigationMixin extends Vue {
     }
 
     get navigationController(): NavigationController | null {
-        var start: any = this.$parent;
+        let start: any = this.$parent;
         while (start) {
             if (start instanceof NavigationController) {
                 return start;
@@ -60,7 +60,7 @@ export class NavigationMixin extends Vue {
     }
 
     get splitViewController(): SplitViewController | null {
-        var start: any = this.$parent;
+        let start: any = this.$parent;
         while (start) {
             if (start instanceof SplitViewController) {
                 return start;
@@ -72,8 +72,8 @@ export class NavigationMixin extends Vue {
     }
 
     getPoppableParent(): any | null {
-        var prev = this;
-        var start: any = this.$parent;
+        let prev = this;
+        let start: any = this.$parent;
         while (start) {
             // Todo: need to replace this with a dynamic check of the method "canPop" on all parents
             // Instead of instanceof checks
@@ -91,7 +91,7 @@ export class NavigationMixin extends Vue {
         return null;
     }
 
-    canPop: boolean = false;
+    canPop = false;
 
     activated() {
         this.canPop = this.calculateCanPop();

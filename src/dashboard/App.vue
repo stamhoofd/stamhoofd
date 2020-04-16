@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <!-- To display things that cover everything else and require document scrolling on mobile -->
-        <ModalStackComponent v-if="stop" :root="root"></ModalStackComponent>
+        <ModalStackComponent v-if="stop" :root="root" />
     </div>
 </template>
 
@@ -19,8 +19,8 @@ import NavigationController from "../shared/components/layout/NavigationControll
 @Component({
     components: {
         ModalStackComponent,
-        StackComponent
-    }
+        StackComponent,
+    },
 })
 export default class App extends Vue {
     /*public root = new ComponentWithProperties(Popup, {
@@ -29,9 +29,9 @@ export default class App extends Vue {
         })
     });*/
     public root = new ComponentWithProperties(SplitViewController, {
-        root: new ComponentWithProperties(Menu, {})
+        root: new ComponentWithProperties(Menu, {}),
     });
-    public stop: boolean = true;
+    public stop = true;
 
     mounted() {
         /*setTimeout(() => {

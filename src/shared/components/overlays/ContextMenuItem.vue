@@ -1,6 +1,6 @@
 <template>
-    <div class="context-menu-item" @click="onClick" :class="{ clicked: clicked }">
-        <slot></slot>
+    <div class="context-menu-item" :class="{ clicked: clicked }" @click="onClick">
+        <slot />
     </div>
 </template>
 
@@ -9,7 +9,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class ContextMenuItem extends Vue {
-    clicked: boolean = false;
+    clicked = false;
 
     onClick(event) {
         if (this.clicked) {

@@ -1,33 +1,46 @@
 <template>
-    <label class="price-input" :class="{error: !valid}">
+    <label class="price-input" :class="{ error: !valid }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
             Also inputmode is more specific on mobile devices. 
             Only downside is that we lose the stepper input on desktop.
         -->
-        <input type="text" inputmode="decimal" step="any" v-model="valueString" ref="input" v-on:blur="clean" v-on:keydown.up.prevent="step(1)" v-on:keydown.down.prevent="step(-1)">
-        <div v-if="!valid"><span>{{ valueString }}</span></div>
-        <div v-else-if="valueString != ''"><span>{{ valueString }}</span> {{ currency }}</div>
+        <input
+            ref="input"
+            v-model="valueString"
+            type="text"
+            inputmode="decimal"
+            step="any"
+            @blur="clean"
+            @keydown.up.prevent="step(1)"
+            @keydown.down.prevent="step(-1)"
+        >
+        <div v-if="!valid">
+            <span>{{ valueString }}</span>
+        </div>
+        <div v-else-if="valueString != ''">
+            <span>{{ valueString }}</span> {{ currency }}
+        </div>
         <div v-else>{{ placeholder }}</div>
     </label>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class PriceInput extends Vue {
-    min: number = 0;
+    min = 0;
     max?: number = null;
-    valueString: string = "40";
-    valid: boolean = true;
-    value: number = 40;
-    currency: string = 'euro';
+    valueString = "40";
+    valid = true;
+    value = 40;
+    currency = "euro";
 
-    placeholder: string = "Gratis";
+    placeholder = "Gratis";
 
-    @Watch('valueString') 
+    @Watch("valueString")
     onValueChanged(value: string, oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
@@ -35,9 +48,9 @@ export default class PriceInput extends Vue {
             this.valid = true;
             this.value = Math.max(0, this.min);
         } else {
-            if (!value.includes('.')) {
+            if (!value.includes(".")) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
-                value = value.replace(',', '.');
+                value = value.replace(",", ".");
             }
             const v = parseFloat(value);
             if (isNaN(v)) {
@@ -47,7 +60,7 @@ export default class PriceInput extends Vue {
                 this.valid = true;
 
                 // Remove extra decimals
-                this.value = Math.round(v*100)/100;
+                this.value = Math.round(v * 100) / 100;
                 this.constrain();
             }
         }
@@ -72,10 +85,14 @@ export default class PriceInput extends Vue {
 
         if (decimals != 0) {
             // Include decimals
-            this.valueString = (this.value < 0 ? '-' : '')+Math.floor(abs)+this.whatDecimalSeparator()+Math.round(Math.abs(decimals)*100);
+            this.valueString =
+                (this.value < 0 ? "-" : "") +
+                Math.floor(abs) +
+                this.whatDecimalSeparator() +
+                Math.round(Math.abs(decimals) * 100);
         } else {
             // Hide decimals
-            this.valueString = this.value+"";
+            this.valueString = this.value + "";
         }
     }
 
@@ -94,56 +111,55 @@ export default class PriceInput extends Vue {
         this.clean();
         this.value += add;
         this.constrain();
-        
+
         this.clean();
     }
-   
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-    @use "~scss/base/variables.scss";
-    @use "~scss/components/inputs.scss";
+@use "~scss/base/variables.scss";
+@use "~scss/components/inputs.scss";
 
-    .price-input {
-        @extend .input;
-        position: relative;
+.price-input {
+    @extend .input;
+    position: relative;
 
-        &> div {
-            pointer-events: none;
-            user-select: none; 
-            white-space: nowrap;
+    & > div {
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
 
-            span {
-                white-space: pre;
-            }
+        span {
+            white-space: pre;
         }
-        
-        &> input {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            opacity: 0;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 5px 15px;
-            height: 44px - 2*$border-width;
-            line-height: 44px - 10px - 2*$border-width;
+    }
 
-            &:focus {
-                opacity: 1;
+    & > input {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 15px;
+        height: 44px - 2 * $border-width;
+        line-height: 44px - 10px - 2 * $border-width;
 
-                &+ div {
-                    opacity: 0.5;
+        &:focus {
+            opacity: 1;
 
-                    span {
-                        visibility: hidden;
-                    }
+            & + div {
+                opacity: 0.5;
+
+                span {
+                    visibility: hidden;
                 }
             }
         }
     }
+}
 </style>

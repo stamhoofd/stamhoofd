@@ -16,17 +16,21 @@
                 <dd>Lidgeld 123</dd>
 
                 <dt>Status</dt>
-                <dd v-if="member.paid">Betaald</dd>
-                <dd v-else>Nog niet betaald</dd>
+                <dd v-if="member.paid">
+                    Betaald
+                </dd>
+                <dd v-else>
+                    Nog niet betaald
+                </dd>
             </dl>
         </main>
 
         <STToolbar v-if="!member.paid">
-            <template v-slot:left></template>
-            <template v-slot:right>
+            <template #left />
+            <template #right>
                 <button class="button primary">
                     Markeer als betaald
-                    <div class="dropdown" @click.stop=""></div>
+                    <div class="dropdown" @click.stop="" />
                 </button>
             </template>
         </STToolbar>

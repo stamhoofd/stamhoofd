@@ -998,5 +998,5 @@ export default [
     "Samet",
     "Xian",
     "Yano",
-    "Yoren"
+    "Yoren",
 ];

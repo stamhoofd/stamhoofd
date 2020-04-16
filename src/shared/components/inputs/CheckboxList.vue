@@ -1,19 +1,14 @@
 <template>
     <div>
-        <slot></slot>
+        <slot />
     </div>
 </template>
 
-
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
-export default class CheckboxList extends Vue {
-   
-
-}
+export default class CheckboxList extends Vue {}
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

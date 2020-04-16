@@ -1,13 +1,8 @@
 <template>
     <!-- Components taking up the whole document. Listens to show-modal -->
     <div>
-        <NavigationController
-            animation-type="modal"
-            ref="navigationController"
-            :root="root"
-            @present="present"
-        ></NavigationController>
-        <StackComponent ref="stackComponent" @present="present"></StackComponent>
+        <NavigationController ref="navigationController" animation-type="modal" :root="root" @present="present" />
+        <StackComponent ref="stackComponent" @present="present" />
     </div>
 </template>
 
@@ -25,8 +20,8 @@ import Popup from "./Popup.vue";
 @Component({
     components: {
         NavigationController,
-        StackComponent
-    }
+        StackComponent,
+    },
 })
 export default class ModalStackComponent extends Vue {
     @Prop()

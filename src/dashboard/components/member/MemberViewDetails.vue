@@ -18,7 +18,7 @@
                 </template>
             </dl>
 
-            <hr />
+            <hr>
 
             <div v-for="(parent, index) in member.parents" :key="index">
                 <h2>{{ ParentTypeHelper.getName(parent.type) }}</h2>
@@ -38,12 +38,12 @@
 
                     <dt>Adres</dt>
                     <dd>
-                        {{ parent.address.street }} {{ parent.address.number }}<br />{{ parent.address.postalCode }}
+                        {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
                         {{ parent.address.city }}
                     </dd>
                 </dl>
 
-                <hr />
+                <hr>
             </div>
 
             <div v-for="(contact, index) in member.emergencyContacts" :key="'contact-' + index">
@@ -56,11 +56,11 @@
                     <dd>{{ contact.phone }}</dd>
                 </dl>
 
-                <hr v-if="index < member.emergencyContacts.length - 1" />
+                <hr v-if="index < member.emergencyContacts.length - 1">
             </div>
 
             <template v-if="member.doctor">
-                <hr />
+                <hr>
 
                 <h2>Huisarts</h2>
                 <dl class="details-grid">
@@ -75,27 +75,26 @@
 
         <div>
             <h2>
-                <span class="icon-spacer">Steekkaart</span
-                ><button
-                    class="button privacy tooltip-only"
+                <span class="icon-spacer">Steekkaart</span><button
                     v-tooltip="
                         'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
                     "
+                    class="button privacy tooltip-only"
                 />
             </h2>
 
             <ul class="member-records">
                 <li
-                    class="more"
-                    :class="RecordTypeHelper.getPriority(record.type)"
                     v-for="(record, index) in member.records"
                     :key="index"
+                    class="more"
+                    :class="RecordTypeHelper.getPriority(record.type)"
                 >
                     {{ record.getText() }}
                 </li>
             </ul>
 
-            <hr />
+            <hr>
 
             <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
             <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
@@ -112,7 +111,7 @@ import { ParentType, ParentTypeHelper } from "shared/models/ParentType";
 import { RecordType, RecordTypeHelper } from "shared/models/RecordType";
 
 @Component({
-    directives: { Tooltip }
+    directives: { Tooltip },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()

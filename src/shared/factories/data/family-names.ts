@@ -998,5 +998,5 @@ export default [
     "Beerens",
     "Kiekens",
     "Van Dorpe",
-    "Crabbé"
+    "Crabbé",
 ];

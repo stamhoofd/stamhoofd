@@ -2,7 +2,7 @@
     <transition appear name="fade">
         <div class="popup" @mousedown="pop" @touchdown="pop">
             <div @mousedown.stop="" @touchdown.stop="">
-                <component :key="root.key" :is="root.component" v-bind="root.properties" @pop="pop"></component>
+                <component :is="root.component" :key="root.key" v-bind="root.properties" @pop="pop" />
             </div>
         </div>
     </transition>
@@ -16,8 +16,8 @@ import { NavigationMixin } from "../../classes/NavigationMixin";
 
 @Component({
     props: {
-        root: ComponentWithProperties
-    }
+        root: ComponentWithProperties,
+    },
 })
 export default class Popup extends NavigationMixin {
     activated() {
@@ -33,7 +33,7 @@ export default class Popup extends NavigationMixin {
             return;
         }
 
-        var key = event.key || event.keyCode;
+        const key = event.key || event.keyCode;
 
         if (key === "Escape" || key === "Esc" || key === 27) {
             this.pop();

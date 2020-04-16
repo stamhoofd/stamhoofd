@@ -1,10 +1,6 @@
 import { Organization } from "../models/Organization";
 import { MemberFactory } from "./MemberFactory";
-import { AddressFactory } from "./AddressFactory";
-import { Gender } from "../models/Gender";
 import { Factory } from "./Factory";
-import { ParentType } from "../models/ParentType";
-import { EmergencyContactFactory } from "./EmergencyContactFactory";
 import { Group } from "../models/Group";
 
 export interface OrganizationFactoryOptions {
@@ -20,33 +16,33 @@ export class OrganizationFactory extends Factory<Organization> {
     }
 
     create(): Organization {
-        var organization = new Organization();
+        const organization = new Organization();
         organization.id = Math.floor(Math.random() * 99999999999);
 
-        var groupNames = [];
+        let groupNames = [];
         switch (this.options.type) {
             case "scouts":
                 groupNames = [
                     {
                         name: "Kapoenen",
                         options: { maxMembers: 50, minMembers: 30 },
-                        members: { minAge: 6, maxAge: 8 }
+                        members: { minAge: 6, maxAge: 8 },
                     },
                     { name: "Wouters", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } },
                     { name: "Welpen", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } },
                     {
                         name: "Jonggidsen",
                         options: { maxMembers: 50, minMembers: 30 },
-                        members: { minAge: 6, maxAge: 8 }
+                        members: { minAge: 6, maxAge: 8 },
                     },
                     { name: "Gidsen", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } },
                     {
                         name: "Verkenners",
                         options: { maxMembers: 50, minMembers: 30 },
-                        members: { minAge: 6, maxAge: 8 }
+                        members: { minAge: 6, maxAge: 8 },
                     },
                     { name: "Jin", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } },
-                    { name: "Akabe", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } }
+                    { name: "Akabe", options: { maxMembers: 50, minMembers: 30 }, members: { minAge: 6, maxAge: 8 } },
                 ];
                 break;
             case "chiro":
@@ -55,24 +51,28 @@ export class OrganizationFactory extends Factory<Organization> {
                     {
                         name: "Speelclub",
                         options: { maxMembers: 50, minMembers: 30 },
-                        members: { minAge: 8, maxAge: 10 }
+                        members: { minAge: 8, maxAge: 10 },
                     },
                     {
                         name: "Rakwi's",
                         options: { maxMembers: 40, minMembers: 20 },
-                        members: { minAge: 10, maxAge: 12 }
+                        members: { minAge: 10, maxAge: 12 },
                     },
                     {
                         name: "Tito's",
                         options: { maxMembers: 30, minMembers: 15 },
-                        members: { minAge: 12, maxAge: 14 }
+                        members: { minAge: 12, maxAge: 14 },
                     },
                     {
                         name: "Keti's",
                         options: { maxMembers: 30, minMembers: 10 },
-                        members: { minAge: 14, maxAge: 16 }
+                        members: { minAge: 14, maxAge: 16 },
                     },
-                    { name: "Aspi's", options: { maxMembers: 30, minMembers: 10 }, members: { minAge: 16, maxAge: 18 } }
+                    {
+                        name: "Aspi's",
+                        options: { maxMembers: 30, minMembers: 10 },
+                        members: { minAge: 16, maxAge: 18 },
+                    },
                 ];
                 break;
             default:
@@ -81,10 +81,10 @@ export class OrganizationFactory extends Factory<Organization> {
 
         organization.groups = [];
         groupNames.forEach(details => {
-            var group = new Group();
+            const group = new Group();
             group.name = details.name;
             group.id = Math.floor(Math.random() * 99999999999);
-            var factory = new MemberFactory(details.members);
+            const factory = new MemberFactory(details.members);
             group.members = factory.createMultiple(
                 Math.floor(
                     1 +

@@ -1,6 +1,8 @@
 <template>
     <div class="root">
-        <p v-for="n in 100" :key="n">History</p>
+        <p v-for="n in 100" :key="n">
+            History
+        </p>
     </div>
 </template>
 

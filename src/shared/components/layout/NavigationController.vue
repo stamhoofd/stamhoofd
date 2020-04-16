@@ -2,33 +2,30 @@
     <div class="navigation-controller" :data-animation-type="animationType">
         <transition
             v-if="mainComponent"
-            v-on:before-enter="beforeEnter"
-            v-on:before-leave="beforeLeave"
-            v-on:enter="enter"
-            v-on:leave="leave"
-            v-on:after-leave="afterLeave"
-            v-on:after-enter="afterEnter"
-            v-on:enter-cancelled="enterCancelled"
-            v-bind:css="false"
+            :css="false"
+            @before-enter="beforeEnter"
+            @before-leave="beforeLeave"
+            @enter="enter"
+            @leave="leave"
+            @after-leave="afterLeave"
+            @after-enter="afterEnter"
+            @enter-cancelled="enterCancelled"
         >
             <FramedComponent
+                :key="mainComponent.key"
+                ref="child"
                 :root="mainComponent"
                 :name="mainComponent.key"
-                :key="mainComponent.key"
                 @push="push"
                 @show="push"
                 @pop="pop"
-                ref="child"
-            ></FramedComponent>
+            />
         </transition>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Ref } from "vue-property-decorator";
-import { eventBus } from "../../classes/event-bus/EventBus";
-import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
-import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import FramedComponent from "./FramedComponent.vue";
 
@@ -40,10 +37,10 @@ import FramedComponent from "./FramedComponent.vue";
 export default class NavigationController extends Vue {
     components: ComponentWithProperties[] = [];
     mainComponent: ComponentWithProperties | null = null;
-    transitionName: string = "none";
+    transitionName = "none";
     savedScrollPositions: number[] = [];
-    nextScrollPosition: number = 0;
-    previousScrollPosition: number = 0;
+    nextScrollPosition = 0;
+    previousScrollPosition = 0;
 
     @Prop()
     root!: ComponentWithProperties;
@@ -102,9 +99,9 @@ export default class NavigationController extends Vue {
 
     push(
         component: ComponentWithProperties,
-        animated: boolean = true,
-        replace: boolean = false,
-        reverse: boolean = false
+        animated = true,
+        replace = false,
+        reverse = false
     ) {
         if (!animated) {
             this.transitionName = "none";
@@ -135,8 +132,7 @@ export default class NavigationController extends Vue {
         this.mainComponent = component;
         this.$emit("didPush");
     }
-
-    pop(animated: boolean = true, destroy: boolean = true): ComponentWithProperties | null {
+    pop(animated = true, destroy = true): ComponentWithProperties | null {
         if (this.components.length <= 1) {
             this.$emit("pop");
             return null;
@@ -159,7 +155,7 @@ export default class NavigationController extends Vue {
             popped[0].keepAlive = true;
         }
 
-        this.nextScrollPosition = this.savedScrollPositions.pop() as number;
+        this.nextScrollPosition = this.savedScrollPositions.pop();
 
         this.mainComponent = this.components[this.components.length - 1];
         this.$emit("didPop");
@@ -246,17 +242,6 @@ export default class NavigationController extends Vue {
         console.log("Fix padding: " + fixPadding);
         const h = scrollElement.clientHeight + fixPadding;
         const height = h + "px";
-
-        if (process.env.NODE_ENV === "development") {
-            var rect = element.getBoundingClientRect();
-            var rect2 = scrollElement.getBoundingClientRect();
-            // Check margins: is not allowed and show warning
-            if (rect.top != rect2.top || rect.left != rect2.left || rect.right != rect2.right) {
-                console.warn(
-                    "The views of a navigation controller should not have margins! Animations will get glitched."
-                );
-            }
-        }
 
         // This animation frame is super important to prevent flickering on Safari and Webkit!
         // This is also one of the reasons why we cannot use the default Vue class additions

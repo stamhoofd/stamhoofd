@@ -11,10 +11,10 @@ export default class ReplacePlaceholderMark extends Node {
             matcher: {
                 char: "@",
                 allowSpaces: false,
-                startOfLine: false
+                startOfLine: false,
             },
             mentionClass: "mention",
-            suggestionClass: "mention-suggestion"
+            suggestionClass: "mention-suggestion",
         };
     }
 
@@ -28,34 +28,34 @@ export default class ReplacePlaceholderMark extends Node {
     get schema() {
         return {
             attrs: {
-                type: { default: "firstName" }
+                type: { default: "firstName" },
             },
             group: "inline",
             inline: true,
             selectable: false,
             draggable: true,
             atom: true,
-            toDOM: node => [
+            toDOM: (node) => [
                 "span",
                 {
                     class: "replace-placeholder",
-                    "data-replace-type": node.attrs.type
+                    "data-replace-type": node.attrs.type,
                 },
-                this.labelNameForNode(node)
+                this.labelNameForNode(node),
             ],
             parseDOM: [
                 {
                     tag: "span[data-replace-type]",
-                    getAttrs: dom => {
+                    getAttrs: (dom) => {
                         const type = dom.getAttribute("data-replace-type");
                         return { type };
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         };
     }
 
     commands({ schema }) {
-        return attrs => replaceText(null, schema.nodes[this.name], attrs);
+        return (attrs) => replaceText(null, schema.nodes[this.name], attrs);
     }
 }

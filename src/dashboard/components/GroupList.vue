@@ -1,27 +1,29 @@
 <template>
     <div class="st-view group-list">
         <STNavigationBar :sticky="false">
-            <template v-slot:left>
-                <button v-if="canPop" class="button icon gray arrow-left" @click="pop">Terug</button>
+            <template #left>
+                <button v-if="canPop" class="button icon gray arrow-left" @click="pop">
+                    Terug
+                </button>
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
-                    <button class="button more"></button>
+                    <button class="button more" />
                 </STNavigationTitle>
             </template>
-            <template v-slot:right>
-                <input class="input search" placeholder="Zoeken" v-model="searchQuery" />
+            <template #right>
+                <input v-model="searchQuery" class="input search" placeholder="Zoeken">
 
-                <select class="input" v-model="selectedFilter">
-                    <option :value="index" :key="index" v-for="(filter, index) in filters">{{
-                        filter.getName()
-                    }}</option>
+                <select v-model="selectedFilter" class="input">
+                    <option v-for="(filter, index) in filters" :key="index" :value="index">
+                        {{ filter.getName() }}
+                    </option>
                 </select>
             </template>
         </STNavigationBar>
 
         <STNavigationTitle v-if="canPop">
             <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
-            <button class="button more"></button>
+            <button class="button more" />
         </STNavigationTitle>
 
         <main>
@@ -42,7 +44,7 @@
                                     up: sortBy == 'name' && sortDirection == 'ASC',
                                     down: sortBy == 'name' && sortDirection == 'DESC',
                                 }"
-                            ></span>
+                            />
                         </th>
                         <th @click="toggleSort('info')">
                             Leeftijd
@@ -52,7 +54,7 @@
                                     up: sortBy == 'info' && sortDirection == 'ASC',
                                     down: sortBy == 'info' && sortDirection == 'DESC',
                                 }"
-                            ></span>
+                            />
                         </th>
                         <th @click="toggleSort('status')">
                             Status
@@ -62,7 +64,7 @@
                                     up: sortBy == 'status' && sortDirection == 'ASC',
                                     down: sortBy == 'status' && sortDirection == 'DESC',
                                 }"
-                            ></span>
+                            />
                         </th>
                         <th>Acties</th>
                     </tr>
@@ -74,19 +76,18 @@
                         </td>
                         <td>
                             <div
-                                class="new-member-bubble"
                                 v-if="member.member.isNew"
                                 v-tooltip="'Ingeschreven op ' + member.member.createdOn"
-                            ></div>
+                                class="new-member-bubble"
+                            />
                             {{ member.member.name }}
                         </td>
-                        <td class="minor">{{ member.member.age }} jaar</td>
+                        <td class="minor">
+                            {{ member.member.age }} jaar
+                        </td>
                         <td>{{ member.member.info }}</td>
                         <td>
-                            <button
-                                class="button more"
-                                @click.stop="showMemberContextMenu($event, member.member)"
-                            ></button>
+                            <button class="button more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
                 </tbody>
@@ -94,15 +95,18 @@
         </main>
 
         <STToolbar>
-            <template v-slot:left>
+            <template #left>
                 {{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd
-                <template v-if="selectionCountHidden"> ({{ selectionCountHidden }} verborgen) </template>
+                <template v-if="selectionCountHidden">
+                    ({{ selectionCountHidden }} verborgen)
+                </template>
             </template>
-            <template v-slot:right>
-                <button class="button secundary">Samenvatting</button
-                ><button class="button primary" @click="openMail">
+            <template #right>
+                <button class="button secundary">
+                    Samenvatting
+                </button><button class="button primary" @click="openMail">
                     Mailen
-                    <div class="dropdown" @click.stop="openMailDropdown"></div>
+                    <div class="dropdown" @click.stop="openMailDropdown" />
                 </button>
             </template>
         </STToolbar>
@@ -110,9 +114,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
@@ -122,7 +125,6 @@ import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import MemberView from "./member/MemberView.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 import MemberContextMenu from "./member/MemberContextMenu.vue";
-import { MemberFactory, MemberFactoryOptions } from "shared/factories/MemberFactory";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import MailView from "./mail/MailView.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
@@ -133,7 +135,7 @@ import { Organization } from "../../shared/models/Organization";
 
 class SelectableMember {
     member: Member;
-    selected: boolean = false;
+    selected = false;
 
     constructor(member: Member) {
         this.member = member;
@@ -157,7 +159,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     organization!: Organization | null;
 
     members: SelectableMember[] = [];
-    searchQuery: string = "";
+    searchQuery = "";
     filters = [new NoFilter(), new NotPaidFilter(), new FoodAllergyFilter(), new CanNotSwimFilter()];
     selectedFilter = 0;
     selectionCountHidden = 0;
@@ -220,7 +222,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     get filteredMembers(): SelectableMember[] {
         this.selectionCountHidden = 0;
-        var filtered = this.members.filter((member: SelectableMember) => {
+        const filtered = this.members.filter((member: SelectableMember) => {
             if (this.filters[this.selectedFilter].doesMatch(member.member)) {
                 return true;
             }
@@ -241,7 +243,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     get selectionCount(): number {
-        var val = 0;
+        let val = 0;
         this.filteredMembers.forEach((member) => {
             if (member.selected) {
                 val++;
@@ -279,7 +281,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
         this.show(new ComponentWithProperties(GroupList, {}));
     }
 
-    onChanged(selectableMember: SelectableMember) {}
+    onChanged(_selectableMember: SelectableMember) {
+        // do nothing for now
+    }
 
     getPreviousMember(member: Member): Member | null {
         for (let index = 0; index < this.sortedMembers.length; index++) {
@@ -311,7 +315,9 @@ export default class GroupList extends Mixins(NavigationMixin) {
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberView, {
                 member: selectableMember.member,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getNextMember: this.getNextMember,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 getPreviousMember: this.getPreviousMember,
             }),
         });
@@ -326,7 +332,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
     }
 
     showMemberContextMenu(event, member: Member) {
-        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+        const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
             member: member,
@@ -344,15 +350,15 @@ export default class GroupList extends Mixins(NavigationMixin) {
             });
     }
 
-    openMail(event) {
-        var displayedComponent = new ComponentWithProperties(MailView, {
+    openMail(_event) {
+        const displayedComponent = new ComponentWithProperties(MailView, {
             members: this.getSelectedMembers(),
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     openMailDropdown(event) {
-        var displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
+        const displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
             members: this.getSelectedMembers(),

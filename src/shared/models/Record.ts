@@ -6,7 +6,7 @@ import { RecordType, RecordTypeHelper } from "./RecordType";
 
 export class Record {
     type: RecordType;
-    description: string = "";
+    description = "";
 
     constructor(type: RecordType) {
         this.type = type;

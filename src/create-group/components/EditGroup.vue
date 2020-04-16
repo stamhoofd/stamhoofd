@@ -1,23 +1,19 @@
 <template>
-    <div style="padding: 40px 40px">
+    <div style="padding: 40px 40px;">
         <button @click="back">
             Sluiten
         </button>
         <h1>Nieuwe groep toevoegen</h1>
-        <SegmentedControl :items="tabs" v-model="tab"></SegmentedControl>
+        <SegmentedControl v-model="tab" :items="tabs" />
         <p>{{ tab }}</p>
 
         <label class="style-label" for="group-name">Naam van de groep</label>
-        <input class="input" type="text" placeholder="De naam van de groep" id="group-name" ref="firstInput" />
+        <input id="group-name" ref="firstInput" class="input" type="text" placeholder="De naam van de groep">
 
         <label class="style-label" for="group-description">Beschrijving</label>
-        <textarea
-            class="input"
-            id="group-description"
-            placeholder="Zichtbaar voor leden bij het inschrijven"
-        ></textarea>
+        <textarea id="group-description" class="input" placeholder="Zichtbaar voor leden bij het inschrijven" />
 
-        <button class="button primary" v-on:click="next" id="save-button">
+        <button id="save-button" class="button primary" @click="next">
             Volgende
         </button>
     </div>
@@ -33,11 +29,11 @@ import EditGroupDetail from "./EditGroupDetail.vue";
 
 @Component({
     props: {
-        text: String
+        text: String,
     },
     components: {
-        SegmentedControl
-    }
+        SegmentedControl,
+    },
 })
 export default class EditGroup extends Vue {
     tabs = ["Algemeen", "Inschrijven", "Toegang", "Test"];

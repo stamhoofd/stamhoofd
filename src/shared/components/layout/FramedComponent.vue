@@ -4,23 +4,20 @@
         <!-- Element that will take over the document scroll position during transitions -->
         <div ref="scrollContainer">
             <!-- Actual content with padding -->
-            <ComponentWithPropertiesInstance :component="root"></ComponentWithPropertiesInstance>
+            <ComponentWithPropertiesInstance :component="root" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Ref } from "vue-property-decorator";
-import { eventBus } from "../../classes/event-bus/EventBus";
-import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
-import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 
 @Component({
     components: {
-        ComponentWithPropertiesInstance
-    }
+        ComponentWithPropertiesInstance,
+    },
 })
 export default class FramedComponent extends Vue {
     @Prop()
@@ -29,7 +26,6 @@ export default class FramedComponent extends Vue {
     @Ref()
     scrollContainer!: HTMLElement;
 
-    mounted() {}
     pop(data) {
         this.$emit("pop", data);
     }

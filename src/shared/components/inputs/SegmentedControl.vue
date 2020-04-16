@@ -6,16 +6,14 @@
             :class="{ selected: item == value }"
             @click="selectItem(index)"
         >
-            <span :data-text="labels ? labels[index] : item"></span>
+            <span :data-text="labels ? labels[index] : item" />
         </div>
-        <span
-            ><span
-                :style="{
-                    left: (selectedIndex / items.length) * 100 + '%',
-                    width: 100 / items.length + '%'
-                }"
-            ></span
-        ></span>
+        <span><span
+            :style="{
+                left: (selectedIndex / items.length) * 100 + '%',
+                width: 100 / items.length + '%',
+            }"
+        /></span>
     </div>
 </template>
 
@@ -25,11 +23,11 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component({
     props: {
         items: Array,
-        value: String
-    }
+        value: String,
+    },
 })
 export default class SegmentedControl extends Vue {
-    public selectedIndex: number = 0;
+    public selectedIndex = 0;
     @Prop({ type: Array })
     public items!: any[];
     @Prop({ default: null })

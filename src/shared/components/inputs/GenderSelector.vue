@@ -1,13 +1,13 @@
 <template>
     <div class="gender-selector">
         <label>
-            <input type="checkbox" name="male" class="male" />
+            <input type="checkbox" name="male" class="male">
             <div>
                 <MaleIcon />
             </div>
         </label>
         <label>
-            <input type="checkbox" name="female" class="female" />
+            <input type="checkbox" name="female" class="female">
             <div>
                 <FemaleIcon />
             </div>
@@ -23,8 +23,8 @@ import FemaleIcon from "shared/components/icons/FemaleIcon.vue";
 @Component({
     components: {
         MaleIcon,
-        FemaleIcon
-    }
+        FemaleIcon,
+    },
 })
 export default class GenderSelector extends Vue {}
 </script>

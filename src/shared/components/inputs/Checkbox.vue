@@ -1,6 +1,6 @@
 <template>
     <label class="checkbox">
-        <input type="checkbox" name="test" :checked="value" @input="onChange" />
+        <input type="checkbox" name="test" :checked="value" @input="onChange">
         <div>
             <div>
                 <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,7 +13,7 @@
                     />
                 </svg>
             </div>
-            <div><slot></slot></div>
+            <div><slot /></div>
         </div>
     </label>
 </template>
@@ -24,7 +24,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 @Component
 export default class Checkbox extends Vue {
     @Prop({
-        default: false
+        default: false,
     })
     value!: boolean;
 

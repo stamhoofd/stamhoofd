@@ -1,7 +1,7 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 export class PresentComponentEvent {
-    component: any
+    component: any;
 
     constructor(component: any) {
         this.component = component;

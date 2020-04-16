@@ -1,10 +1,10 @@
 <template>
     <div id="app">
         <!-- To display things that cover everything else and require document scrolling on mobile -->
-        <ModalStackComponent :root="root"></ModalStackComponent>
+        <ModalStackComponent :root="root" />
 
         <!-- To display temporary messages, popups and everything that covers other modals-->
-        <StackComponent></StackComponent>
+        <StackComponent />
     </div>
 </template>
 
@@ -12,7 +12,6 @@
 import { Component, Vue } from "vue-property-decorator";
 import Steps from "./components/Steps.vue";
 import ModalStackComponent from "shared/components/layout/ModalStackComponent.vue";
-import { eventBus } from "shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import StackComponent from "shared/components/layout/StackComponent.vue";
 
@@ -20,13 +19,11 @@ import StackComponent from "shared/components/layout/StackComponent.vue";
     components: {
         Steps,
         ModalStackComponent,
-        StackComponent
-    }
+        StackComponent,
+    },
 })
 export default class App extends Vue {
     public root = new ComponentWithProperties(Steps, {});
-
-    mounted() {}
 }
 </script>
 
@@ -35,7 +32,4 @@ export default class App extends Vue {
 @use "scss/base/text-styles.scss";
 @use "scss/elements/body.scss";
 @use "scss/components/logo.scss";
-
-body {
-}
 </style>

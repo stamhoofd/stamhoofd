@@ -7,7 +7,7 @@ export class FoodAllergyFilter implements Filter {
         return "Voedingsallergie";
     }
     doesMatch(member: Member): boolean {
-        return member.records.some(record => {
+        return member.records.some((record) => {
             return record.type == RecordType.FoodAllergies;
         });
     }

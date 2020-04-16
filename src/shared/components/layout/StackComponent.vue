@@ -3,10 +3,10 @@
         <ComponentWithPropertiesInstance
             v-for="(component, index) in components"
             :key="component.key"
-            @pop="removeAt(index, component.key)"
             ref="children"
             :component="component"
-        ></ComponentWithPropertiesInstance>
+            @pop="removeAt(index, component.key)"
+        />
     </div>
 </template>
 
@@ -18,8 +18,8 @@ import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 
 @Component({
     components: {
-        ComponentWithPropertiesInstance
-    }
+        ComponentWithPropertiesInstance,
+    },
 })
 export default class StackComponent extends Vue {
     components: ComponentWithProperties[] = [];

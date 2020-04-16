@@ -1,7 +1,7 @@
 export enum ParentType {
     Mother = "Mother",
     Father = "Father",
-    Other = "Other"
+    Other = "Other",
 }
 
 export class ParentTypeHelper {

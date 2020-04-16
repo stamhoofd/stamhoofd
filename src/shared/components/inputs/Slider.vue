@@ -1,65 +1,62 @@
 <template>
     <div class="slider-box">
         <div class="slider-container" @mousedown="dragStart" @touchstart="dragStart">
-            <div class="slider" ref="slider">
+            <div ref="slider" class="slider">
                 <div class="middle">
-                    <div
-                        class="fill"
-                        :style="{ width: this.handlePercentage + '%' }"
-                        :class="{ animate: animate }"
-                    ></div>
+                    <div class="fill" :style="{ width: this.handlePercentage + '%' }" :class="{ animate: animate }" />
                 </div>
                 <div
-                    class="handle"
                     ref="handle"
+                    class="handle"
                     :style="{ left: this.handlePercentage + '%' }"
                     :class="{ animate: animate }"
-                ></div>
+                />
             </div>
         </div>
 
         <div class="number">
             <input
+                v-model.number="value"
                 type="number"
                 pattern="[0-9]*"
-                v-model.number="value"
-                v-on:change="updateSlider"
+                @change="updateSlider"
                 @focus="delayedSelect"
-            />
+            >
         </div>
     </div>
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
 export default class Slider extends Vue {
-    min: number = 0;
-    max: number = 300;
+    min = 0;
+    max = 300;
 
     /// Offset from the center of the handle during drag.
-    startOffset: number = 0;
-    handlePercentage: number = 50;
+    startOffset = 0;
+    handlePercentage = 50;
     round?: number = 10;
 
     // if softBounds = true, maximum and minimum is overrideable by the user
     // when he manually enters a number. This is usefull if the maximum and
     // minimum is just a convenience.
-    softBounds: boolean = true;
-    animate: boolean = false;
+    softBounds = true;
+    animate = false;
 
-    value: number = 150;
-    dragging: boolean = false;
+    value = 150;
+    dragging = false;
 
     mounted() {}
 
     attach() {
         document.addEventListener("mousemove", this.mouseMove, {
-            passive: false
+            passive: false,
         });
         document.addEventListener("touchmove", this.mouseMove, {
-            passive: false
+            passive: false,
         });
 
         document.addEventListener("mouseup", this.mouseUp, { passive: false });
@@ -81,7 +78,7 @@ export default class Slider extends Vue {
         // Select all the text
         event.target.select();
 
-        const handler = event => {
+        const handler = (event) => {
             // Safari deselects the text on mouse up, we need to prevent this
             event.preventDefault();
             document.removeEventListener("mouseup", handler);
@@ -93,10 +90,10 @@ export default class Slider extends Vue {
     }
 
     getEventX(event: any) {
-        var x = 0;
+        let x = 0;
         if (event.changedTouches) {
-            var touches = event.changedTouches;
-            for (var i = 0; i < touches.length; i++) {
+            const touches = event.changedTouches;
+            for (let i = 0; i < touches.length; i++) {
                 x = touches[i].pageX;
             }
         } else {
@@ -119,7 +116,7 @@ export default class Slider extends Vue {
     }
 
     getHandleX() {
-        let handleWidth = this.getHandleWidth();
+        const handleWidth = this.getHandleWidth();
         return ((this.value - this.min) / (this.max - this.min)) * (this.getWidth() - handleWidth) + handleWidth / 2;
     }
 
@@ -168,11 +165,11 @@ export default class Slider extends Vue {
                 this.value = this.min;
             }
         }
-        var handleWidth = this.getHandleWidth();
-        var width = this.getWidth();
-        var percentage = (this.value - this.min) / (this.max - this.min);
-        var relativeWidth = width - handleWidth;
-        var percentageOffset = handleWidth / 2 / width;
+        const handleWidth = this.getHandleWidth();
+        const width = this.getWidth();
+        const percentage = (this.value - this.min) / (this.max - this.min);
+        const relativeWidth = width - handleWidth;
+        const percentageOffset = handleWidth / 2 / width;
 
         // Convert the percentage to the handle percentage
         this.animate = true;
@@ -180,19 +177,19 @@ export default class Slider extends Vue {
     }
 
     mouseMove(event) {
-        var handleWidth = this.getHandleWidth();
-        var width = this.getWidth();
-        var x = this.getEventX(event) - this.getXOffset() - this.startOffset - handleWidth / 2;
+        const handleWidth = this.getHandleWidth();
+        const width = this.getWidth();
+        const x = this.getEventX(event) - this.getXOffset() - this.startOffset - handleWidth / 2;
 
-        var relativeWidth = width - handleWidth;
-        var percentageOffset = handleWidth / 2 / width;
+        const relativeWidth = width - handleWidth;
+        const percentageOffset = handleWidth / 2 / width;
 
-        var percentage = Math.min(Math.max(0, x / relativeWidth), 1);
+        const percentage = Math.min(Math.max(0, x / relativeWidth), 1);
 
         // Convert the percentage to the handle percentage
         this.handlePercentage = ((percentage / width) * relativeWidth + percentageOffset) * 100;
 
-        let oldValue = this.value;
+        const oldValue = this.value;
         this.value = Math.round(percentage * (this.max - this.min)) + this.min;
         if (this.round) {
             this.value = Math.round(this.value / this.round) * this.round;

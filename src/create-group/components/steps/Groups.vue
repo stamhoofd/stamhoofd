@@ -6,66 +6,78 @@
             wilt toevoegen. Je kan nu wijzigingen maken, maar je kan alles op elk moment nog wijzigen.
         </p>
 
-        <h2 class="style-label" v-on:click="editGroup()">Leden</h2>
+        <h2 class="style-label" @click="editGroup()">
+            Leden
+        </h2>
         <CheckboxList>
             <CheckboxItem>
-                <template v-slot:left>Kapoenen</template>
-                <template v-slot:right>
+                <template #left>
+                    Kapoenen
+                </template>
+                <template #right>
                     6 - 8 jaar
                 </template>
 
-                <template v-slot:buttons>
-                    <GenderSelector></GenderSelector>
-                    <MoreButton></MoreButton>
+                <template #buttons>
+                    <GenderSelector />
+                    <MoreButton />
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Welpen</template>
-                <template v-slot:right>
+                <template #left>
+                    Welpen
+                </template>
+                <template #right>
                     6 - 8 jaar
                 </template>
 
-                <template v-slot:buttons>
-                    <GenderSelector></GenderSelector>
-                    <MoreButton></MoreButton>
+                <template #buttons>
+                    <GenderSelector />
+                    <MoreButton />
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Kaboutersmeteenhelelangenaamhierzo</template>
-                <template v-slot:right>
+                <template #left>
+                    Kaboutersmeteenhelelangenaamhierzo
+                </template>
+                <template #right>
                     6 - 8 jaar
                 </template>
 
-                <template v-slot:buttons>
-                    <GenderSelector></GenderSelector>
-                    <MoreButton></MoreButton>
+                <template #buttons>
+                    <GenderSelector />
+                    <MoreButton />
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Jongverkenners en nog wat tekst hierzo, om te testen</template>
-                <template v-slot:right>
+                <template #left>
+                    Jongverkenners en nog wat tekst hierzo, om te testen
+                </template>
+                <template #right>
                     6 - 8 jaar
                 </template>
 
-                <template v-slot:buttons>
-                    <GenderSelector></GenderSelector>
-                    <MoreButton></MoreButton>
+                <template #buttons>
+                    <GenderSelector />
+                    <MoreButton />
                 </template>
             </CheckboxItem>
             <CheckboxItem>
-                <template v-slot:left>Jonggidsen</template>
-                <template v-slot:right>
+                <template #left>
+                    Jonggidsen
+                </template>
+                <template #right>
                     6 - 8 jaar
                 </template>
 
-                <template v-slot:buttons>
-                    <GenderSelector></GenderSelector>
-                    <MoreButton></MoreButton>
+                <template #buttons>
+                    <GenderSelector />
+                    <MoreButton />
                 </template>
             </CheckboxItem>
         </CheckboxList>
 
-        <button class="button primary" v-on:click="$emit('next')" id="next-button">
+        <button id="next-button" class="button primary" @click="$emit('next')">
             Verder
         </button>
     </Step>
@@ -94,8 +106,8 @@ import Step from "../Step.vue";
         CheckboxList,
         CheckboxItem,
         GenderSelector,
-        MoreButton
-    }
+        MoreButton,
+    },
 })
 export default class Groups extends Vue {
     editGroup() {
@@ -103,8 +115,8 @@ export default class Groups extends Vue {
             "present",
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(EditGroup, {
-                    text: "Custom text"
-                })
+                    text: "Custom text",
+                }),
             })
         );
     }

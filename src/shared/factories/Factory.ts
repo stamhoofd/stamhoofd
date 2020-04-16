@@ -11,12 +11,12 @@ export abstract class Factory<Model> {
     abstract create(): Model;
 
     randomArray(arr: Array<any>): any {
-        var int = Math.floor(Math.random() * arr.length);
+        const int = Math.floor(Math.random() * arr.length);
         return arr[int];
     }
 
     randomFirstName(gender: Gender): string {
-        var names: string[] = [];
+        let names: string[] = [];
         switch (gender) {
             case Gender.Male:
                 names = BoyNames;
@@ -35,8 +35,8 @@ export abstract class Factory<Model> {
         return this.randomArray(FamilyNames);
     }
 
-    createMultiple(amount: number = 40): Array<Model> {
-        var arr = [];
+    createMultiple(amount = 40): Array<Model> {
+        const arr = [];
         for (let index = 0; index < amount; index++) {
             arr.push(this.create());
         }

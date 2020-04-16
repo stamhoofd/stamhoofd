@@ -289,5 +289,5 @@ export default [
     "Nieuwplein",
     "NieuwpleinWAS",
     "Wim De Craeneplein",
-    "Rode Heuvel"
+    "Rode Heuvel",
 ];

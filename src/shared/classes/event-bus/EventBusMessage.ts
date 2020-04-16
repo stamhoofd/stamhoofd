@@ -1,3 +1,1 @@
-export interface EventBusMessage {
-
-}
+export interface EventBusMessage {}

@@ -1,7 +1,7 @@
 <template>
     <main class="step">
         <article>
-            <slot></slot>
+            <slot />
         </article>
     </main>
 </template>

@@ -1,16 +1,18 @@
 <template>
     <div class="steps-layout">
         <Header :progress="(step - 1) / 3">
-            <template v-slot:left>
+            <template #left>
                 <transition name="move" mode="out-in">
-                    <a href="/" id="logo" alt="Stamhoofd" v-if="step <= 1"></a>
-                    <div v-else v-on:click.prevent="goBack()">Terug</div>
+                    <a v-if="step <= 1" id="logo" href="/" alt="Stamhoofd" />
+                    <div v-else @click.prevent="goBack()">
+                        Terug
+                    </div>
                 </transition>
             </template>
-            <template v-slot:center>
+            <template #center>
                 <span class="style-caption">Stap {{ step }} / 3</span>
             </template>
-            <template v-slot:right>
+            <template #right>
                 Right
             </template>
         </Header>
@@ -21,7 +23,7 @@
             :scroll-document="true"
             @didPop="updateProgress"
             @didPush="updateProgress"
-        ></NavigationController>
+        />
 
         <!--<main>
             <transition
@@ -45,20 +47,18 @@
 <script lang="ts">
 import { Component, Vue, Ref } from "vue-property-decorator";
 import Header from "./Header.vue";
-import GroupSettingsStep from "./steps/GroupSettings.vue";
 import GeneralStep from "./steps/General.vue";
-import GroupsStep from "./steps/Groups.vue";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 
 @Component({
     components: {
         Header,
-        NavigationController
-    }
+        NavigationController,
+    },
 })
 export default class Steps extends Vue {
-    step: number = 1;
+    step = 1;
     firstStep = new ComponentWithProperties(GeneralStep, {});
     @Ref("navigationController") readonly navigationController!: NavigationController;
 

@@ -1,14 +1,10 @@
 <template>
     <div class="split-view-controller" :data-has-detail="detail ? 'true' : 'false'">
-        <div class="master" ref="masterElement">
-            <NavigationController
-                ref="navigationController"
-                :root="root"
-                @showDetail="showDetail"
-            ></NavigationController>
+        <div ref="masterElement" class="master">
+            <NavigationController ref="navigationController" :root="root" @showDetail="showDetail" />
         </div>
-        <div class="detail" v-if="detail">
-            <FramedComponent ref="detailFrame" :key="detail.key" :root="detail"></FramedComponent>
+        <div v-if="detail" class="detail">
+            <FramedComponent ref="detailFrame" :key="detail.key" :root="detail" />
         </div>
     </div>
 </template>
@@ -23,7 +19,7 @@ import FramedComponent from "./FramedComponent.vue";
 const throttle = (func, limit) => {
     let lastFunc;
     let lastRan;
-    return function() {
+    return function () {
         const context = this;
         const args = arguments;
         if (!lastRan) {
@@ -31,7 +27,7 @@ const throttle = (func, limit) => {
             lastRan = Date.now();
         } else {
             clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
+            lastFunc = setTimeout(function () {
                 if (Date.now() - lastRan >= limit) {
                     func.apply(context, args);
                     lastRan = Date.now();
@@ -44,11 +40,11 @@ const throttle = (func, limit) => {
 @Component({
     components: {
         NavigationController,
-        FramedComponent
+        FramedComponent,
     },
     props: {
-        root: ComponentWithProperties
-    }
+        root: ComponentWithProperties,
+    },
 })
 export default class SplitViewController extends Vue {
     @Prop()

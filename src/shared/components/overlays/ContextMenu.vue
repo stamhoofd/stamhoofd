@@ -8,7 +8,7 @@
                 :style="{ top: top + 'px', left: left + 'px' }"
                 @click.stop=""
             >
-                <slot></slot>
+                <slot />
             </div>
         </div>
     </transition>
@@ -20,26 +20,26 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 @Component
 export default class ContextMenu extends Vue {
     @Prop({
-        default: 0
+        default: 0,
     })
     x!: number;
 
     @Prop({
-        default: 0
+        default: 0,
     })
     y!: number;
 
-    top: number = 0;
-    left: number = 0;
+    top = 0;
+    left = 0;
 
     mounted() {
         // Calculate position
-        var width = (this.$refs.context as HTMLElement).offsetWidth;
-        var height = (this.$refs.context as HTMLElement).offsetHeight;
+        const width = (this.$refs.context as HTMLElement).offsetWidth;
+        const height = (this.$refs.context as HTMLElement).offsetHeight;
 
-        var viewPadding = 15;
+        const viewPadding = 15;
 
-        var win = window,
+        const win = window,
             doc = document,
             docElem = doc.documentElement,
             body = doc.getElementsByTagName("body")[0],
@@ -74,7 +74,7 @@ export default class ContextMenu extends Vue {
             return;
         }
 
-        var key = event.key || event.keyCode;
+        const key = event.key || event.keyCode;
 
         if (key === "Escape" || key === "Esc" || key === 27) {
             this.pop();

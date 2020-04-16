@@ -6,27 +6,27 @@
             <div>
                 <label class="style-label" for="organization-name">Naam van je vereniging</label>
                 <input
+                    id="organization-name"
+                    ref="firstInput"
                     class="input"
                     type="text"
                     placeholder="De naam van je vereniging"
                     autocomplete="organization"
-                    id="organization-name"
-                    ref="firstInput"
-                />
+                >
 
                 <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
-                <Slider></Slider>
+                <Slider />
             </div>
 
             <div>
                 <label class="style-label">Adres van je vereniging</label>
-                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" />
+                <input class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
                 <div class="input-group">
                     <div>
-                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code" />
+                        <input class="input" type="text" placeholder="Postcode" autocomplete="postal-code">
                     </div>
                     <div>
-                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city" />
+                        <input class="input" type="text" placeholder="Gemeente" autocomplete="city">
                     </div>
                 </div>
 
@@ -37,18 +37,19 @@
             </div>
         </div>
 
-        <button class="button primary" v-on:click="next" id="next-button">
+        <button id="next-button" class="button primary" @click="next">
             Verder
         </button>
-        <button class="button secundary" @click="editGroup">Test</button>
+        <button class="button secundary" @click="editGroup">
+            Test
+        </button>
     </Step>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import Slider from "shared/components/inputs/Slider.vue";
 import { eventBus } from "shared/classes/event-bus/EventBus";
-import { PresentComponentEvent } from "shared/classes/PresentComponentEvent";
 import EditGroupDetail from "../EditGroupDetail.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import NavigationController from "shared/components/layout/NavigationController.vue";
@@ -60,13 +61,13 @@ import GroupSettings from "./GroupSettings.vue";
     // All component options are allowed in here
     components: {
         Slider,
-        Step
-    }
+        Step,
+    },
 })
 export default class General extends Vue {
     mounted() {
         // Focus first input automatically
-        let input = this.$refs.firstInput as HTMLElement;
+        const input = this.$refs.firstInput as HTMLElement;
         input.focus();
     }
     editGroup() {
@@ -75,9 +76,9 @@ export default class General extends Vue {
             new ComponentWithProperties(Popup, {
                 root: new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(EditGroupDetail, {
-                        text: "Custom text"
-                    })
-                })
+                        text: "Custom text",
+                    }),
+                }),
             })
         );
     }

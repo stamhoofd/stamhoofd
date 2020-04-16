@@ -1,18 +1,28 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem @click="excel">Etiketten maken</ContextMenuItem>
+        <ContextMenuItem @click="excel">
+            Etiketten maken
+        </ContextMenuItem>
 
         <ContextMenuLine />
-        <ContextMenuItem @click="excel">Exporteer als Excel</ContextMenuItem>
-        <ContextMenuItem @click="excel">Exporteer als CSV</ContextMenuItem>
+        <ContextMenuItem @click="excel">
+            Exporteer als Excel
+        </ContextMenuItem>
+        <ContextMenuItem @click="excel">
+            Exporteer als CSV
+        </ContextMenuItem>
         <ContextMenuLine />
-        <ContextMenuItem @click="sms">SMS'en</ContextMenuItem>
-        <ContextMenuItem @click="mail">Mailen</ContextMenuItem>
+        <ContextMenuItem @click="sms">
+            SMS'en
+        </ContextMenuItem>
+        <ContextMenuItem @click="mail">
+            Mailen
+        </ContextMenuItem>
     </ContextMenu>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 import ContextMenu from "shared/components/overlays/ContextMenu.vue";
 import ContextMenuItem from "shared/components/overlays/ContextMenuItem.vue";
 import ContextMenuLine from "shared/components/overlays/ContextMenuLine.vue";
@@ -27,8 +37,8 @@ import MailView from "./mail/MailView.vue";
     components: {
         ContextMenu,
         ContextMenuItem,
-        ContextMenuLine
-    }
+        ContextMenuLine,
+    },
 })
 export default class GroupListSelectionContextMenu extends Mixins(NavigationMixin) {
     @Prop({ default: 0 })
@@ -40,17 +50,15 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     @Prop()
     members!: Member[];
 
-    mounted() {}
-
     sms() {
-        var displayedComponent = new ComponentWithProperties(SMSView, {
-            members: this.members
+        const displayedComponent = new ComponentWithProperties(SMSView, {
+            members: this.members,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
     mail() {
-        var displayedComponent = new ComponentWithProperties(MailView, {
-            members: this.members
+        const displayedComponent = new ComponentWithProperties(MailView, {
+            members: this.members,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }

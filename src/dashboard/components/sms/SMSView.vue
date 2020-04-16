@@ -1,9 +1,11 @@
 <template>
     <div class="st-view sms-view">
         <STNavigationBar title="SMS'en">
-            <template v-slot:right>
-                <button class="button icon gray clock">Geschiedenis</button>
-                <button class="button icon close" @click="pop"></button>
+            <template #right>
+                <button class="button icon gray clock">
+                    Geschiedenis
+                </button>
+                <button class="button icon close" @click="pop" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
@@ -12,26 +14,36 @@
 
         <main>
             <label class="style-label" for="sms-who">Naar wie?</label>
-            <select class="input" id="sms-who" v-model="smsFilter">
-                <option value="parents">Enkel naar ouders</option>
-                <option value="members">Enkel naar leden</option>
-                <option value="all">Ouders en leden</option>
+            <select id="sms-who" v-model="smsFilter" class="input">
+                <option value="parents">
+                    Enkel naar ouders
+                </option>
+                <option value="members">
+                    Enkel naar leden
+                </option>
+                <option value="all">
+                    Ouders en leden
+                </option>
             </select>
 
             <label class="style-label" for="sms-text">Bericht</label>
-            <textarea class="input" id="sms-text" placeholder="Typ hier je SMS-bericht" v-model="message"></textarea>
+            <textarea id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
         </main>
 
         <STToolbar>
-            <template v-slot:left>{{
-                phones.length
-                    ? phones.length > 1
-                        ? phones.length + " ontvangers"
-                        : "Eén ontvanger"
-                    : "Geen ontvangers"
-            }}</template>
-            <template v-slot:right>
-                <button class="button primary" @click="send">Versturen</button>
+            <template #left>
+                {{
+                    phones.length
+                        ? phones.length > 1
+                            ? phones.length + " ontvangers"
+                            : "Eén ontvanger"
+                        : "Geen ontvangers"
+                }}
+            </template>
+            <template #right>
+                <button class="button primary" @click="send">
+                    Versturen
+                </button>
             </template>
         </STToolbar>
     </div>
@@ -77,7 +89,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
     get phones(): string[] {
         return this.members.flatMap((member) => {
-            var arr = [];
+            let arr = [];
             if (this.smsFilter == "parents" || this.smsFilter == "all") {
                 arr = member.parents.flatMap((parent) => {
                     if (parent.phone) {
@@ -98,7 +110,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
         if (this.phones.length == 0) {
             return;
         }
-        var url = "";
+        let url = "";
         switch (this.getOS()) {
             case "macOS-old":
                 url = "imessage:";

@@ -1,9 +1,11 @@
 <template>
     <div class="st-view mail-view">
         <STNavigationBar title="Mail versturen">
-            <template v-slot:right>
-                <button class="button icon gray clock">Geschiedenis</button>
-                <button class="button icon close" @click="pop"></button>
+            <template #right>
+                <button class="button icon gray clock">
+                    Geschiedenis
+                </button>
+                <button class="button icon close" @click="pop" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
@@ -12,24 +14,26 @@
 
         <main>
             <label class="style-label" for="mail-subject">Onderwerp</label>
-            <input class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" id="mail-subject" />
+            <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
 
             <label class="style-label" for="mail-text">Bericht</label>
             <MailEditor />
         </main>
 
         <STToolbar>
-            <template v-slot:left>{{
-                mailaddresses.length
-                    ? mailaddresses.length > 1
-                        ? mailaddresses.length + " ontvangers"
-                        : "Eén ontvanger"
-                    : "Geen ontvangers"
-            }}</template>
-            <template v-slot:right>
+            <template #left>
+                {{
+                    mailaddresses.length
+                        ? mailaddresses.length > 1
+                            ? mailaddresses.length + " ontvangers"
+                            : "Eén ontvanger"
+                        : "Geen ontvangers"
+                }}
+            </template>
+            <template #right>
                 <button class="button primary">
                     Versturen
-                    <div class="dropdown" @click.stop=""></div>
+                    <div class="dropdown" @click.stop="" />
                 </button>
             </template>
         </STToolbar>

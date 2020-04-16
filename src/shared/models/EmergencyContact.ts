@@ -2,9 +2,9 @@ import { Gender } from "./Gender";
 import { Address } from "./Address";
 
 export class EmergencyContact {
-    name: string = "";
+    name = "";
     phone: string | null = null;
-    title: string = "Oma"; // Todo
+    title = "Oma"; // Todo
 
     constructor() {}
 }

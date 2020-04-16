@@ -1,22 +1,26 @@
 <template>
     <div class="st-view member-view">
         <STNavigationBar :title="member.name">
-            <template v-slot:left>
-                <button class="button icon gray arrow-left" v-if="hasPreviousMember" @click="goBack">Vorige</button>
+            <template #left>
+                <button v-if="hasPreviousMember" class="button icon gray arrow-left" @click="goBack">
+                    Vorige
+                </button>
             </template>
-            <template v-slot:right>
-                <button class="button icon gray arrow-right" v-if="hasNextMember" @click="goNext">Volgende</button>
-                <button class="button icon close" @click="pop"></button>
+            <template #right>
+                <button v-if="hasNextMember" class="button icon gray arrow-right" @click="goNext">
+                    Volgende
+                </button>
+                <button class="button icon close" @click="pop" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
             <span class="icon-spacer">{{ member.name }}</span>
-            <MaleIcon class="icon-spacer" v-if="member.gender == Gender.Male" />
-            <FemaleIcon class="icon-spacer" v-if="member.gender == Gender.Female" />
-            <button class="button more" @click="showContextMenu"></button>
+            <MaleIcon v-if="member.gender == Gender.Male" class="icon-spacer" />
+            <FemaleIcon v-if="member.gender == Gender.Female" class="icon-spacer" />
+            <button class="button more" @click="showContextMenu" />
         </STNavigationTitle>
 
-        <SegmentedControl :items="tabs" :labels="tabLabels" v-model="tab" />
+        <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
 
         <main>
             <component :is="tab" :member="member" />
@@ -25,13 +29,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
-import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
@@ -79,11 +81,11 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     goBack() {
-        var member = this.getPreviousMember(this.member);
+        const member = this.getPreviousMember(this.member);
         if (!member) {
             return;
         }
-        var component = new ComponentWithProperties(MemberView, {
+        const component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
@@ -92,11 +94,11 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     goNext() {
-        var member = this.getNextMember(this.member);
+        const member = this.getNextMember(this.member);
         if (!member) {
             return;
         }
-        var component = new ComponentWithProperties(MemberView, {
+        const component = new ComponentWithProperties(MemberView, {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
@@ -105,10 +107,12 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     activated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
     }
 
     deactivated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("keydown", this.onKey);
     }
 
@@ -117,7 +121,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             return;
         }
 
-        var key = event.key || event.keyCode;
+        const key = event.key || event.keyCode;
 
         if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
             this.goBack();
@@ -129,7 +133,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     showContextMenu(event) {
-        var displayedComponent = new ComponentWithProperties(MemberContextMenu, {
+        const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY,
             member: this.member,

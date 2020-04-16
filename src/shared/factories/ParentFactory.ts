@@ -16,7 +16,7 @@ export class ParentFactory extends Factory<Parent> {
     }
 
     create(): Parent {
-        var parent = new Parent();
+        const parent = new Parent();
         parent.type = this.options.type ?? this.randomArray(Object.keys(ParentType));
         if (parent.type == ParentType.Other) {
             // Second spin
@@ -52,7 +52,7 @@ export class ParentFactory extends Factory<Parent> {
                 "proximus.be",
                 "live.com",
                 "gmail.com",
-                "icloud.com"
+                "icloud.com",
             ]);
         return parent;
     }

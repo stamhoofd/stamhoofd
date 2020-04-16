@@ -12,31 +12,31 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 @Component
 export default class Checkbox extends Vue {
     @Prop({
-        default: "No tooltip text set"
+        default: "No tooltip text set",
     })
     text!: string;
 
     @Prop({
-        default: 0
+        default: 0,
     })
     x!: number;
 
     @Prop({
-        default: 0
+        default: 0,
     })
     y!: number;
 
-    top: number = 0;
-    left: number = 0;
+    top = 0;
+    left = 0;
 
     mounted() {
         // Calculate position
-        var width = (this.$el as HTMLElement).offsetWidth;
-        var height = (this.$el as HTMLElement).offsetHeight;
+        const width = (this.$el as HTMLElement).offsetWidth;
+        const height = (this.$el as HTMLElement).offsetHeight;
 
-        var viewPadding = 15;
+        const viewPadding = 15;
 
-        var win = window,
+        const win = window,
             doc = document,
             docElem = doc.documentElement,
             body = doc.getElementsByTagName("body")[0],

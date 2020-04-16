@@ -9,8 +9,8 @@ import { RecordFactory } from "./RecordFactory";
 import { RecordType, RecordTypePriority, RecordTypeHelper } from "../models/RecordType";
 
 export class MemberFactoryOptions {
-    minAge: number = 6;
-    maxAge: number = 18;
+    minAge = 6;
+    maxAge = 18;
 }
 
 export class MemberFactory extends Factory<Member> {
@@ -22,7 +22,7 @@ export class MemberFactory extends Factory<Member> {
     }
 
     create(): Member {
-        var member = new Member();
+        const member = new Member();
         member.id = Math.floor(Math.random() * 99999999999);
 
         member.paid = Math.random() >= 0.1;
@@ -55,8 +55,8 @@ export class MemberFactory extends Factory<Member> {
                 Math.floor(Math.random() * 10);
         }
 
-        var parentFactory = new ParentFactory({
-            type: null
+        let parentFactory = new ParentFactory({
+            type: null,
         });
 
         member.parents.push(parentFactory.create());
@@ -70,7 +70,7 @@ export class MemberFactory extends Factory<Member> {
                         ? member.parents[0].type == ParentType.Mother
                             ? ParentType.Father
                             : ParentType.Mother
-                        : null
+                        : null,
             });
 
             member.parents.push(parentFactory.create());
@@ -85,25 +85,25 @@ export class MemberFactory extends Factory<Member> {
                 member.parents[1].mail = null;
             }
         }
-        var recordFactory = new RecordFactory({});
+        const recordFactory = new RecordFactory({});
         member.records = recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
 
         // Remove duplicates
-        let unique = {};
-        member.records.forEach(function(i) {
+        const unique = {};
+        member.records.forEach(function (i) {
             if (!unique[i.type]) {
                 unique[i.type] = i;
             }
         });
         member.records = Object.values(unique);
 
-        member.records = member.records.filter(i => {
+        member.records = member.records.filter((i) => {
             return i.type != "NoData";
         });
 
         member.records.sort((a, b) => {
-            var pA = RecordTypeHelper.getPriority(a.type);
-            var pB = RecordTypeHelper.getPriority(b.type);
+            const pA = RecordTypeHelper.getPriority(a.type);
+            const pB = RecordTypeHelper.getPriority(b.type);
             if (pA == pB) {
                 if (a.getText() < b.getText()) {
                     return -1;
@@ -142,7 +142,7 @@ export class MemberFactory extends Factory<Member> {
             }
         }
 
-        var emergencyContactFactory = new EmergencyContactFactory({});
+        const emergencyContactFactory = new EmergencyContactFactory({});
         member.emergencyContacts.push(emergencyContactFactory.create());
         if (Math.random() >= 0.9) {
             member.emergencyContacts.push(emergencyContactFactory.create());

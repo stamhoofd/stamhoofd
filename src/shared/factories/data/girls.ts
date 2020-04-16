@@ -997,5 +997,5 @@ export default [
     "Machteld",
     "Romaissa",
     "Zuzanna",
-    "Alessandra"
+    "Alessandra",
 ];

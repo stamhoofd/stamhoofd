@@ -14,7 +14,7 @@ export class EmergencyContactFactory extends Factory<EmergencyContact> {
     }
 
     create(): EmergencyContact {
-        var contact = new EmergencyContact();
+        const contact = new EmergencyContact();
         contact.title = this.randomArray([
             "Oma",
             "Opa",
@@ -29,7 +29,7 @@ export class EmergencyContactFactory extends Factory<EmergencyContact> {
             "Plusmama",
             "Pluspapa",
             "Stiefvader",
-            "Stiefmoeder"
+            "Stiefmoeder",
         ]);
         contact.name = this.randomFirstName(Gender.Other) + " " + this.randomLastName();
 
