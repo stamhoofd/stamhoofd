@@ -11,21 +11,25 @@ yarn install
 ```
 
 ### Compiles and hot-reloads for development
+
 ```
 yarn serve
 ```
 
 ### Compiles and minifies for production
+
 ```
 yarn build
 ```
 
 ### Lints and fixes files
+
 ```
 yarn lint
 ```
 
 ### Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Structure
@@ -86,13 +90,13 @@ src/
         vue.config.js
         # Versions of each dependency that was installed by yarn
         yarn.lock
-    
+
     # All shared scripts and assets
     shared/
         # Vue components used by multiple services, optionally grouped in folders
         components/
         classes/
-   
+
     tsconfig.json
 ```
 
@@ -100,36 +104,41 @@ src/
 
 Inside a services directory, run `yarn serve` to start a development server with hot reloading. Use `yarn build` to compile to the `dist/` folder.
 
-*Hot reloading sometimes stops working in Safari and iOS. Restarting the server, clearing caches and closing the tab might solve the problems.*
+### Linting and formatting
+
+We recommend to use VSCode. Please install the ESLint and Vetur extension. Prettier is optional, but recommended (disabled for Javascript, TypeScript and Vue files). ESLint is used as a formatter for JavaScript, TypeScript and Vue files. Prettier and ESLint do not work well together, so make sure you disable Prettier for these file types (these settings are already configured in the VSCode workspace settings).
+
+If you do not install the ESLint extension, you won't see linting errors during development. This will make it harder and annoying to develop changes because you'll get lots of warnings and errors when you try to run the code.
 
 ### Configuration with Vue CLI
 
 Configuration and development dependencies are managed by Vue CLI. Please refer to the [Configuration Reference](https://cli.vuejs.org/config/#global-cli-config). This makes the setup a bit easier, and we can always decide to move away from Vue CLI in the future.
 
 ### Single file components
+
 Single file components are used. These group the HTML, TypeScript/JavaScript and SCSS related to the same Vue component in a single file. [Check the official documentation](https://vuejs.org/v2/guide/single-file-components.html).
 
-* `src/shared/components/**/*.vue`: Components used by multiple services
-* `src/{service-name}/components/**/*.vue`: Components used by a single service
-* `src/{service-name}/App.vue`: Root vue component that is mounted to the #app element by main.ts
+-   `src/shared/components/**/*.vue`: Components used by multiple services
+-   `src/{service-name}/components/**/*.vue`: Components used by a single service
+-   `src/{service-name}/App.vue`: Root vue component that is mounted to the #app element by main.ts
 
 ### Styling with SCSS
 
 You can add styles on multiple places, but be careful where:
 
-* `scss/`
-    * Variables
-    * Styling used in multiple components
-    * Reused styles that have dedicated components
-* `src/shared/components/`
-    * Styles of a shared component, not used outside the component
-* `src/{service-name}/components/`
-    * Styles of a local component, not used outside the component
-    * Global styles specific to the service
-    * Local margins and paddings (try to keep too specific margin and paddings out of shared styles)
-* `src/{service-name}/App.vue`
-    * Inserting the used styles from the shared scss folders
-    * Global styles specific to the service
+-   `scss/`
+    -   Variables
+    -   Styling used in multiple components
+    -   Reused styles that have dedicated components
+-   `src/shared/components/`
+    -   Styles of a shared component, not used outside the component
+-   `src/{service-name}/components/`
+    -   Styles of a local component, not used outside the component
+    -   Global styles specific to the service
+    -   Local margins and paddings (try to keep too specific margin and paddings out of shared styles)
+-   `src/{service-name}/App.vue`
+    -   Inserting the used styles from the shared scss folders
+    -   Global styles specific to the service
 
 [SASS modules (@use)](https://sass-lang.com/documentation/at-rules/use) are used over imports, since imports will get removed from SASS in the future.
 
