@@ -76,8 +76,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import SegmentedControl from "@/shared/components/inputs/SegmentedControl.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
 import EditGroup from "./EditGroup.vue";
 
 @Component({

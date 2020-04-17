@@ -7,11 +7,11 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import ModalStackComponent from "shared/components/layout/ModalStackComponent.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import StackComponent from "shared/components/layout/StackComponent.vue";
+import ModalStackComponent from "@/shared/components/layout/ModalStackComponent.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import StackComponent from "@/shared/components/layout/StackComponent.vue";
 import SplitViewController from "../shared/components/layout/SplitViewController.vue";
-import Menu from "./components/Menu.vue";
+import Menu from "./views/dashboard/Menu.vue";
 
 @Component({
     components: {

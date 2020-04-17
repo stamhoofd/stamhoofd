@@ -116,22 +116,22 @@
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
 
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import Checkbox from "shared/components/inputs/Checkbox.vue";
-import { Member } from "shared/models/Member";
-import NavigationController from "shared/components/layout/NavigationController.vue";
-import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
-import MemberView from "./member/MemberView.vue";
-import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
-import MemberContextMenu from "./member/MemberContextMenu.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import Checkbox from "@/shared/components/inputs/Checkbox.vue";
+import { Member } from "@/shared/models/Member";
+import NavigationController from "@/shared/components/layout/NavigationController.vue";
+import STNavigationBar from "@/shared/components/navigation/STNavigationBar.vue";
+import MemberView from "../member/MemberView.vue";
+import STNavigationTitle from "@/shared/components/navigation/STNavigationTitle.vue";
+import MemberContextMenu from "../member/MemberContextMenu.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import MailView from "./mail/MailView.vue";
-import STToolbar from "shared/components/navigation/STToolbar.vue";
-import { NoFilter, NotPaidFilter, FoodAllergyFilter, CanNotSwimFilter } from "shared/classes/member-filters";
-import Tooltip from "shared/directives/Tooltip";
-import { Group } from "../../shared/models/Group";
-import { Organization } from "../../shared/models/Organization";
+import MailView from "../mail/MailView.vue";
+import STToolbar from "@/shared/components/navigation/STToolbar.vue";
+import { NoFilter, NotPaidFilter, FoodAllergyFilter, CanNotSwimFilter } from "@/shared/classes/member-filters";
+import Tooltip from "@/shared/directives/Tooltip";
+import { Group } from "@/shared/models/Group";
+import { Organization } from "@/shared/models/Organization";
 
 class SelectableMember {
     member: Member;

@@ -48,13 +48,13 @@
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
 
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import GroupList from "./GroupList.vue";
-import NavigationController from "../../shared/components/layout/NavigationController.vue";
-import { Organization } from "shared/models/Organization";
-import { OrganizationFactory } from "shared/factories/OrganizationFactory";
-import { Group } from "shared/models/Group";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import GroupList from "./groups/GroupList.vue";
+import NavigationController from "@/shared/components/layout/NavigationController.vue";
+import { Organization } from "@/shared/models/Organization";
+import { OrganizationFactory } from "@/shared/factories/OrganizationFactory";
+import { Group } from "@/shared/models/Group";
 
 class SelectableGroup {
     group: Group;

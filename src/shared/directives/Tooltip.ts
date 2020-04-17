@@ -1,5 +1,5 @@
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import Tooltip from "shared/components/overlays/Tooltip.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import Tooltip from "@/shared/components/overlays/Tooltip.vue";
 
 export default {
     inserted(el, binding, vnode) {

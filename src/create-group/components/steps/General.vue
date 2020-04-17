@@ -48,12 +48,12 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Slider from "shared/components/inputs/Slider.vue";
-import { eventBus } from "shared/classes/event-bus/EventBus";
+import Slider from "@/shared/components/inputs/Slider.vue";
+import { eventBus } from "@/shared/classes/event-bus/EventBus";
 import EditGroupDetail from "../EditGroupDetail.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import NavigationController from "shared/components/layout/NavigationController.vue";
-import Popup from "shared/components/layout/Popup.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import NavigationController from "@/shared/components/layout/NavigationController.vue";
+import Popup from "@/shared/components/layout/Popup.vue";
 import Step from "../Step.vue";
 import GroupSettings from "./GroupSettings.vue";
 

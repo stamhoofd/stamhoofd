@@ -30,13 +30,13 @@
 
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
-import ContextMenu from "shared/components/overlays/ContextMenu.vue";
-import ContextMenuItem from "shared/components/overlays/ContextMenuItem.vue";
-import ContextMenuLine from "shared/components/overlays/ContextMenuLine.vue";
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import { Member } from "shared/models/Member";
-import { ParentTypeHelper } from "shared/models/ParentType";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import ContextMenu from "@/shared/components/overlays/ContextMenu.vue";
+import ContextMenuItem from "@/shared/components/overlays/ContextMenuItem.vue";
+import ContextMenuLine from "@/shared/components/overlays/ContextMenuLine.vue";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import { Member } from "@/shared/models/Member";
+import { ParentTypeHelper } from "@/shared/models/ParentType";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 

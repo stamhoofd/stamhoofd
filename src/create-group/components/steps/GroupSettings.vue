@@ -100,15 +100,15 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Slider from "shared/components/inputs/Slider.vue";
-import Checkbox from "shared/components/inputs/Checkbox.vue";
-import Radio from "shared/components/inputs/Radio.vue";
-import RadioGroup from "shared/components/inputs/RadioGroup.vue";
-import PriceInput from "shared/components/inputs/PriceInput.vue";
+import Slider from "@/shared/components/inputs/Slider.vue";
+import Checkbox from "@/shared/components/inputs/Checkbox.vue";
+import Radio from "@/shared/components/inputs/Radio.vue";
+import RadioGroup from "@/shared/components/inputs/RadioGroup.vue";
+import PriceInput from "@/shared/components/inputs/PriceInput.vue";
 
-import { eventBus } from "shared/classes/event-bus/EventBus";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import NavigationController from "shared/components/layout/NavigationController.vue";
+import { eventBus } from "@/shared/classes/event-bus/EventBus";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import NavigationController from "@/shared/components/layout/NavigationController.vue";
 import Step from "../Step.vue";
 import EditGroupDetail from "../EditGroupDetail.vue";
 import Groups from "./Groups.vue";

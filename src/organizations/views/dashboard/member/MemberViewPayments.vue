@@ -39,8 +39,8 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { Member } from "shared/models/Member";
-import STToolbar from "shared/components/navigation/STToolbar.vue";
+import { Member } from "@/shared/models/Member";
+import STToolbar from "@/shared/components/navigation/STToolbar.vue";
 
 @Component({ components: { STToolbar } })
 export default class MemberViewPayments extends Vue {

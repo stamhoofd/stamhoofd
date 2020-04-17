@@ -1,5 +1,5 @@
 import XLSX from "xlsx";
-import { Member } from "shared/models/Member";
+import { Member } from "@/shared/models/Member";
 
 export class MemberExcelExport {
     static export(members: Member[]) {

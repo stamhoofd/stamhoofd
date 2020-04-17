@@ -1,6 +1,6 @@
-import { Member } from "shared/models/Member";
+import { Member } from "@/shared/models/Member";
 import { Filter } from "./Filter";
-import { RecordType } from "shared/models/RecordType";
+import { RecordType } from "@/shared/models/RecordType";
 
 export class CanNotSwimFilter implements Filter {
     getName(): string {

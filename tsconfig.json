@@ -12,10 +12,12 @@
         "baseUrl": ".",
         "types": ["webpack-env"],
         "paths": {
-            "shared/*": ["src/shared/*"]
+            "shared/*": ["src/shared/*"],
+            "@/*": ["src/*"]
         },
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+        "typeRoots": ["./node_modules/@types", "./@types"]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "@types/**/*.ts"],
     "exclude": ["node_modules"]
 }

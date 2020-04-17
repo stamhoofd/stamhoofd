@@ -17,8 +17,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import MaleIcon from "shared/components/icons/MaleIcon.vue";
-import FemaleIcon from "shared/components/icons/FemaleIcon.vue";
+import MaleIcon from "@/shared/components/icons/MaleIcon.vue";
+import FemaleIcon from "@/shared/components/icons/FemaleIcon.vue";
 
 @Component({
     components: {

@@ -31,19 +31,19 @@
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
 
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import { Member } from "shared/models/Member";
-import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
-import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import { Member } from "@/shared/models/Member";
+import STNavigationBar from "@/shared/components/navigation/STNavigationBar.vue";
+import STNavigationTitle from "@/shared/components/navigation/STNavigationTitle.vue";
+import SegmentedControl from "@/shared/components/inputs/SegmentedControl.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberContextMenu from "./MemberContextMenu.vue";
-import MaleIcon from "shared/components/icons/MaleIcon.vue";
-import FemaleIcon from "shared/components/icons/FemaleIcon.vue";
-import { Gender } from "shared/models/Gender";
+import MaleIcon from "@/shared/components/icons/MaleIcon.vue";
+import FemaleIcon from "@/shared/components/icons/FemaleIcon.vue";
+import { Gender } from "@/shared/models/Gender";
 
 @Component({
     components: {

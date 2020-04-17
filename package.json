@@ -3,8 +3,8 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "serve": "vue-cli-service serve --name dashboard src/dashboard/main.ts --host dashboard.stamhoofd.be --https",
-        "build": "vue-cli-service build --name dashboard src/dashboard/main.ts",
+        "serve": "vue-cli-service serve --name organizations src/organizations/main.ts --host dashboard.stamhoofd.be --https",
+        "build": "vue-cli-service build --name organizations src/organizations/main.ts",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "build-group": "vue-cli-service build --name create-group src/create-group/main.ts",

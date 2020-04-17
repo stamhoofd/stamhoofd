@@ -1,4 +1,4 @@
-import { Member } from "shared/models/Member";
+import { Member } from "@/shared/models/Member";
 
 export interface Filter {
     getName(): string;

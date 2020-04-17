@@ -43,12 +43,12 @@
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
 
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import { Member } from "shared/models/Member";
-import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
-import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
-import STToolbar from "shared/components/navigation/STToolbar.vue";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import { Member } from "@/shared/models/Member";
+import STNavigationBar from "@/shared/components/navigation/STNavigationBar.vue";
+import STNavigationTitle from "@/shared/components/navigation/STNavigationTitle.vue";
+import SegmentedControl from "@/shared/components/inputs/SegmentedControl.vue";
+import STToolbar from "@/shared/components/navigation/STToolbar.vue";
 import MailEditor from "./MailEditor.vue";
 
 @Component({

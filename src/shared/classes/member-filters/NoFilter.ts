@@ -1,4 +1,4 @@
-import { Member } from "shared/models/Member";
+import { Member } from "@/shared/models/Member";
 import { Filter } from "./Filter";
 
 export class NoFilter implements Filter {

@@ -11,9 +11,9 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import Steps from "./components/Steps.vue";
-import ModalStackComponent from "shared/components/layout/ModalStackComponent.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import StackComponent from "shared/components/layout/StackComponent.vue";
+import ModalStackComponent from "@/shared/components/layout/ModalStackComponent.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import StackComponent from "@/shared/components/layout/StackComponent.vue";
 
 @Component({
     components: {

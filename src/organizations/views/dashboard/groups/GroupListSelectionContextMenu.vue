@@ -23,15 +23,15 @@
 
 <script lang="ts">
 import { Component, Prop, Mixins } from "vue-property-decorator";
-import ContextMenu from "shared/components/overlays/ContextMenu.vue";
-import ContextMenuItem from "shared/components/overlays/ContextMenuItem.vue";
-import ContextMenuLine from "shared/components/overlays/ContextMenuLine.vue";
-import { NavigationMixin } from "shared/classes/NavigationMixin";
-import { Member } from "shared/models/Member";
-import SMSView from "./sms/SMSView.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import { MemberExcelExport } from "../classes/MemberExcelExport";
-import MailView from "./mail/MailView.vue";
+import ContextMenu from "@/shared/components/overlays/ContextMenu.vue";
+import ContextMenuItem from "@/shared/components/overlays/ContextMenuItem.vue";
+import ContextMenuLine from "@/shared/components/overlays/ContextMenuLine.vue";
+import { NavigationMixin } from "@/shared/classes/NavigationMixin";
+import { Member } from "@/shared/models/Member";
+import SMSView from "../sms/SMSView.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
+import { MemberExcelExport } from "@/organizations/classes/MemberExcelExport";
+import MailView from "../mail/MailView.vue";
 
 @Component({
     components: {

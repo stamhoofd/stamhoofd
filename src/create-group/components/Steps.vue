@@ -48,8 +48,8 @@
 import { Component, Vue, Ref } from "vue-property-decorator";
 import Header from "./Header.vue";
 import GeneralStep from "./steps/General.vue";
-import NavigationController from "shared/components/layout/NavigationController.vue";
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
+import NavigationController from "@/shared/components/layout/NavigationController.vue";
+import { ComponentWithProperties } from "@/shared/classes/ComponentWithProperties";
 
 @Component({
     components: {
