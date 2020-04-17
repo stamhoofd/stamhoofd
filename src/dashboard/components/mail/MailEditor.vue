@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { Editor, EditorContent, EditorMenuBubble, EditorFloatingMenu } from "tiptap";
 import {
     Blockquote,

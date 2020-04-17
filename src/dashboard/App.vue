@@ -8,13 +8,10 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import ModalStackComponent from "shared/components/layout/ModalStackComponent.vue";
-import { eventBus } from "shared/classes/event-bus/EventBus";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import StackComponent from "shared/components/layout/StackComponent.vue";
 import SplitViewController from "../shared/components/layout/SplitViewController.vue";
 import Menu from "./components/Menu.vue";
-import Popup from "../shared/components/layout/Popup.vue";
-import NavigationController from "../shared/components/layout/NavigationController.vue";
 
 @Component({
     components: {
@@ -51,7 +48,4 @@ export default class App extends Vue {
 @use "scss/base/text-styles.scss";
 @use "scss/elements/body.scss";
 @use "scss/components/logo.scss";
-
-body {
-}
 </style>

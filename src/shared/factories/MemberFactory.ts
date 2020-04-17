@@ -1,12 +1,11 @@
 import { Member } from "../models/Member";
 import { ParentFactory } from "./ParentFactory";
-import { AddressFactory } from "./AddressFactory";
 import { Gender } from "../models/Gender";
 import { Factory } from "./Factory";
 import { ParentType } from "../models/ParentType";
 import { EmergencyContactFactory } from "./EmergencyContactFactory";
 import { RecordFactory } from "./RecordFactory";
-import { RecordType, RecordTypePriority, RecordTypeHelper } from "../models/RecordType";
+import { RecordTypePriority, RecordTypeHelper } from "../models/RecordType";
 
 export class MemberFactoryOptions {
     minAge = 6;

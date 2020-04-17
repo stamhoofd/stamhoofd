@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import MaleIcon from "shared/components/icons/MaleIcon.vue";
 import FemaleIcon from "shared/components/icons/FemaleIcon.vue";
 
@@ -73,8 +73,6 @@ export default class GenderSelector extends Vue {}
         svg > path {
             stroke-dashoffset: 0;
         }
-    }
-    input.female:checked + div {
     }
 }
 </style>

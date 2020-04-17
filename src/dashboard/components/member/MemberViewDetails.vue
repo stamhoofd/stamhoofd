@@ -103,12 +103,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 import Tooltip from "shared/directives/Tooltip";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import { Member } from "shared/models/Member";
-import { ParentType, ParentTypeHelper } from "shared/models/ParentType";
-import { RecordType, RecordTypeHelper } from "shared/models/RecordType";
+import { ParentTypeHelper } from "shared/models/ParentType";
+import { RecordTypeHelper } from "shared/models/RecordType";
 
 @Component({
     directives: { Tooltip },

@@ -5,7 +5,7 @@ export class NoFilter implements Filter {
     getName(): string {
         return "Alle leden";
     }
-    doesMatch(member: Member): boolean {
+    doesMatch(_member: Member): boolean {
         return true;
     }
 }

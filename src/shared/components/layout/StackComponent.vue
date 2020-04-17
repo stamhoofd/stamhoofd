@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 

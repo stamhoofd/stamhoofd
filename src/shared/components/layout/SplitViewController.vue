@@ -21,6 +21,7 @@ const throttle = (func, limit) => {
     let lastRan;
     return function () {
         const context = this;
+        // eslint-disable-next-line prefer-rest-params
         const args = arguments;
         if (!lastRan) {
             func.apply(context, args);

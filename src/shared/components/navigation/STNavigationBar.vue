@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class STNavigationBar extends Vue {

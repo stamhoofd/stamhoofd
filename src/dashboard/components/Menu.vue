@@ -46,15 +46,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
-import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
-import EditGroupDetail from "./EditGroupDetail.vue";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
 import GroupList from "./GroupList.vue";
 import NavigationController from "../../shared/components/layout/NavigationController.vue";
-import SplitViewController from "../../shared/components/layout/SplitViewController.vue";
 import { Organization } from "shared/models/Organization";
 import { OrganizationFactory } from "shared/factories/OrganizationFactory";
 import { Group } from "shared/models/Group";

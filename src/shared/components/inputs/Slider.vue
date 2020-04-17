@@ -3,12 +3,12 @@
         <div class="slider-container" @mousedown="dragStart" @touchstart="dragStart">
             <div ref="slider" class="slider">
                 <div class="middle">
-                    <div class="fill" :style="{ width: this.handlePercentage + '%' }" :class="{ animate: animate }" />
+                    <div class="fill" :style="{ width: handlePercentage + '%' }" :class="{ animate: animate }" />
                 </div>
                 <div
                     ref="handle"
                     class="handle"
-                    :style="{ left: this.handlePercentage + '%' }"
+                    :style="{ left: handlePercentage + '%' }"
                     :class="{ animate: animate }"
                 />
             </div>
@@ -27,8 +27,7 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/unbound-method */
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
 @Component
 export default class Slider extends Vue {
@@ -48,8 +47,6 @@ export default class Slider extends Vue {
 
     value = 150;
     dragging = false;
-
-    mounted() {}
 
     attach() {
         document.addEventListener("mousemove", this.mouseMove, {
@@ -93,8 +90,8 @@ export default class Slider extends Vue {
         let x = 0;
         if (event.changedTouches) {
             const touches = event.changedTouches;
-            for (let i = 0; i < touches.length; i++) {
-                x = touches[i].pageX;
+            for (const touch of touches) {
+                x = touch.pageX;
             }
         } else {
             x = event.pageX;
@@ -147,7 +144,7 @@ export default class Slider extends Vue {
     }
 
     // Set the percentage and value based on a manual entered value
-    updateSlider(event) {
+    updateSlider(_event) {
         this.value = Math.round(this.value);
         if (this.value > this.max) {
             if (this.softBounds) {
@@ -205,7 +202,7 @@ export default class Slider extends Vue {
         return false;
     }
 
-    mouseUp(event) {
+    mouseUp(_event) {
         if (this.dragging) {
             this.detach();
             this.dragging = false;

@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class PriceInput extends Vue {
@@ -41,7 +41,7 @@ export default class PriceInput extends Vue {
     placeholder = "Gratis";
 
     @Watch("valueString")
-    onValueChanged(value: string, oldValue: string) {
+    onValueChanged(value: string, _oldValue: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
         if (value == "") {

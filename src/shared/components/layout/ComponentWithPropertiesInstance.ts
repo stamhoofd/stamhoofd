@@ -7,7 +7,7 @@ export default Vue.extend({
     },
 
     watch: {
-        component(val) {
+        component(_val) {
             throw new Error("Changing component during life is not yet supported");
         },
     },

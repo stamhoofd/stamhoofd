@@ -99,7 +99,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import Slider from "shared/components/inputs/Slider.vue";
 import Checkbox from "shared/components/inputs/Checkbox.vue";
 import Radio from "shared/components/inputs/Radio.vue";
@@ -107,8 +107,6 @@ import RadioGroup from "shared/components/inputs/RadioGroup.vue";
 import PriceInput from "shared/components/inputs/PriceInput.vue";
 
 import { eventBus } from "shared/classes/event-bus/EventBus";
-import { PresentComponentEvent } from "shared/classes/PresentComponentEvent";
-import EditGroup from "../EditGroup.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import NavigationController from "shared/components/layout/NavigationController.vue";
 import Step from "../Step.vue";

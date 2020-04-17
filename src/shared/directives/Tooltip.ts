@@ -9,7 +9,7 @@ export default {
         // Add a hover listener
         el.addEventListener(
             "mouseenter",
-            (event) => {
+            (_event) => {
                 if (!isMouseHover) {
                     const parentComponent = vnode.context;
 
@@ -35,7 +35,7 @@ export default {
         );
         el.addEventListener(
             "mouseleave",
-            (event) => {
+            (_event) => {
                 isMouseHover = false;
 
                 if (displayedComponent && displayedComponent.vnode) {

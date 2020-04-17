@@ -9,10 +9,8 @@
 <script lang="ts">
 import { Component, Vue, Prop, Ref } from "vue-property-decorator";
 import { eventBus } from "../../classes/event-bus/EventBus";
-import { PresentComponentEvent } from "../../classes/PresentComponentEvent";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
-import Modal from "shared/components/layout/Modal.vue";
 import NavigationController from "./NavigationController.vue";
 import StackComponent from "./StackComponent.vue";
 import Popup from "./Popup.vue";

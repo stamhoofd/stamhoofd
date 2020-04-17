@@ -1,4 +1,3 @@
-import { EventBusMessage } from "./EventBusMessage";
 import { EventBusListener } from "./EventBusListener";
 
 class EventBus {

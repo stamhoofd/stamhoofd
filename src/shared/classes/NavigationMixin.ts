@@ -1,9 +1,8 @@
 // mixins.js
-import { Component, Vue, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { ComponentWithProperties } from "./ComponentWithProperties";
 import NavigationController from "../components/layout/NavigationController.vue";
 import SplitViewController from "../components/layout/SplitViewController.vue";
-import StackComponent from "../components/layout/StackComponent.vue";
 
 // You can declare mixins as the same style as components.
 @Component

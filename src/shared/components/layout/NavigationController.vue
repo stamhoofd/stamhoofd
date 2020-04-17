@@ -172,7 +172,7 @@ export default class NavigationController extends Vue {
         insertedElement.className = this.transitionName + "-enter-active " + this.transitionName + "-enter";
     }
 
-    beforeLeave(element: HTMLElement) {
+    beforeLeave(_element: HTMLElement) {
         if (this.transitionName == "none") {
             return;
         }
@@ -299,7 +299,7 @@ export default class NavigationController extends Vue {
         element.className = "";
     }
 
-    enterCancelled(element: HTMLElement) {
+    enterCancelled(_element: HTMLElement) {
         this.unfreezeSize();
     }
 

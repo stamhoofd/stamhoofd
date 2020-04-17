@@ -53,8 +53,6 @@ export class Member {
         return date.toLocaleDateString("nl-BE", options);
     }
 
-    constructor() {}
-
     matchQuery(query: string): boolean {
         const lowerQuery = query.toLowerCase();
         if (

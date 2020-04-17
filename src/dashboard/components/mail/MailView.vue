@@ -41,20 +41,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 
-import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "shared/classes/NavigationMixin";
-import Checkbox from "shared/components/inputs/Checkbox.vue";
 import { Member } from "shared/models/Member";
-import NavigationController from "shared/components/layout/NavigationController.vue";
 import STNavigationBar from "shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "shared/components/navigation/STNavigationTitle.vue";
 import SegmentedControl from "shared/components/inputs/SegmentedControl.vue";
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
-import MemberContextMenu from "./MemberContextMenu.vue";
 import STToolbar from "shared/components/navigation/STToolbar.vue";
 import MailEditor from "./MailEditor.vue";
 

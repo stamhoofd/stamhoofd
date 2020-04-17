@@ -92,7 +92,6 @@ import CheckboxItem from "shared/components/inputs/CheckboxItem.vue";
 import GenderSelector from "shared/components/inputs/GenderSelector.vue";
 import MoreButton from "shared/components/buttons/MoreButton.vue";
 import { eventBus } from "shared/classes/event-bus/EventBus";
-import { PresentComponentEvent } from "shared/classes/PresentComponentEvent";
 import EditGroup from "../EditGroup.vue";
 import { ComponentWithProperties } from "shared/classes/ComponentWithProperties";
 import NavigationController from "shared/components/layout/NavigationController.vue";

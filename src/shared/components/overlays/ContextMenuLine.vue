@@ -3,13 +3,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 
 @Component
 export default class ContextMenuLine extends Vue {}
 </script>
-
-<style lang="scss">
-.context-menu-line {
-}
-</style>
