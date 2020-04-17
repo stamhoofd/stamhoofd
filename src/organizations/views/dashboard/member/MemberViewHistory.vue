@@ -14,5 +14,4 @@ export default class MemberViewHistory extends Vue {}
 </script>
 
 <style scoped lang="scss">
-// This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 </style>

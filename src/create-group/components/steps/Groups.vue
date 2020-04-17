@@ -123,7 +123,6 @@ export default class Groups extends Vue {
 </script>
 
 <style scoped lang="scss">
-// This should be @use, but this won't work with webpack for an unknown reason? #bullshit
 @use 'scss/layout/split-inputs.scss';
 @use 'scss/base/text-styles.scss';
 @use 'scss/components/inputs.scss';
