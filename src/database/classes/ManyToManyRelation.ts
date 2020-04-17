@@ -2,8 +2,8 @@ import { Model } from "./Model";
 import { Database } from "./Database";
 
 export class ManyToManyRelation<Key extends keyof any, A extends Model, B extends Model> {
-    modelA: { new (): A } & typeof Model;
-    modelB: { new (): B } & typeof Model;
+    modelA: { new(): A } & typeof Model;
+    modelB: { new(): B } & typeof Model;
 
     /**
      * E.g. parents
@@ -62,7 +62,7 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
         return modelsB;
     }
 
-    constructor(modelA: { new (): A } & typeof Model, modelB: { new (): B } & typeof Model, modelKey: Key) {
+    constructor(modelA: { new(): A } & typeof Model, modelB: { new(): B } & typeof Model, modelKey: Key) {
         this.modelA = modelA;
         this.modelB = modelB;
         this.modelKey = modelKey;
@@ -102,10 +102,10 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
 
                 console.warn(
                     "Warning: linking expected to affect " +
-                        modelsB.length +
-                        " rows, but only affected " +
-                        result.affectedRows +
-                        " rows"
+                    modelsB.length +
+                    " rows, but only affected " +
+                    result.affectedRows +
+                    " rows"
                 );
 
                 // TODO: Manually correct by doing a query (safest)
@@ -154,10 +154,10 @@ export class ManyToManyRelation<Key extends keyof any, A extends Model, B extend
                 // This could happen in race conditions and simultanious requests
                 console.warn(
                     "Warning: unlinking expected to affect " +
-                        modelsB.length +
-                        " rows, but only affected " +
-                        result.affectedRows +
-                        " rows"
+                    modelsB.length +
+                    " rows, but only affected " +
+                    result.affectedRows +
+                    " rows"
                 );
 
                 // TODO: Manually correct by doing a query (safest)

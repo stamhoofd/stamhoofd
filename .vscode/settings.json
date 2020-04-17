@@ -1,5 +1,6 @@
 {
     "prettier.tabWidth": 4,
     "editor.formatOnSave": true,
-    "prettier.printWidth": 120
+    "prettier.printWidth": 120,
+    "prettier.disableLanguages": ["typescript", "javascript"]
 }

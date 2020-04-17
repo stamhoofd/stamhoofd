@@ -4,5 +4,4 @@ node_modules
 dist
 # don't lint nyc coverage output
 coverage
-src/classes/struct-builder/template.ts
 jest.config.js
