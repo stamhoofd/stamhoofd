@@ -24,23 +24,6 @@
             @didPop="updateProgress"
             @didPush="updateProgress"
         />
-
-        <!--<main>
-            <transition
-                :name="pageTransition"
-                v-on:after-leave="resetScrollPosition()"
-            >
-                <div v-if="step == 1" key="general">
-                    <GeneralStep v-on:next="goNext()"></GeneralStep>
-                </div>
-                <div v-if="step == 2" key="group-settings">
-                    <GroupSettingsStep v-on:next="goNext()"></GroupSettingsStep>
-                </div>
-                <div v-if="step == 3" key="groups">
-                    <GroupsStep v-on:next="goNext()"></GroupsStep>
-                </div>
-            </transition>
-        </main>-->
     </div>
 </template>
 

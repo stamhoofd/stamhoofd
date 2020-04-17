@@ -24,6 +24,14 @@ module.exports = {
         // Remove for production
         devtool: "source-map"
     },
+    publicPath: "",
+    pages: {
+        index: {
+          entry: 'src/organizations/main.ts',
+          template: 'src/organizations/public/electron.html',
+          filename: 'index.html',
+        },
+    },
     // Fix external eslint config missing
     chainWebpack: config => {
         config.module

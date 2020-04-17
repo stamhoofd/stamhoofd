@@ -5,6 +5,7 @@
     "scripts": {
         "serve": "vue-cli-service serve --name organizations src/organizations/main.ts --host dashboard.stamhoofd.be --https",
         "build": "vue-cli-service build --name organizations src/organizations/main.ts",
+        "electron": "BUILD_FOR_ELECTRON=1 vue-cli-service build --name organizations src/organizations/main.ts --dest src/organizations/dist && electron src/organizations/electron.js",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "build-group": "vue-cli-service build --name create-group src/create-group/main.ts",
@@ -19,6 +20,7 @@
         "@vue/cli-plugin-typescript": "^4.1.0",
         "@vue/cli-service": "^4.1.0",
         "@vue/eslint-config-typescript": "^4.0.0",
+        "electron": "^8.2.3",
         "eslint": "^6.8.0",
         "eslint-config-prettier": "^6.10.1",
         "eslint-plugin-jest": "^23.8.2",
