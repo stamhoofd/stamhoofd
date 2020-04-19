@@ -9,15 +9,14 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "baseUrl": ".",
-        "types": ["webpack-env"],
-        "paths": {
-            "shared/*": ["src/shared/*"],
-            "@/*": ["src/*"]
-        },
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-        "typeRoots": ["./node_modules/@types", "./@types"]
+        // baseUrl and paths should match webpack aliases!
+        "baseUrl": "packages",
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "@types/**/*.ts"],
+    "include": [
+        "packages/**/*.ts",
+        "packages/**/*.vue",
+        "*.d.ts" // Include vue type definition for webpack
+    ],
     "exclude": ["node_modules"]
 }

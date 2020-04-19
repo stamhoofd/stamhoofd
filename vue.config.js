@@ -1,5 +1,7 @@
 // vue.config.js
 const path = require("path");
+
+throw new Error("Not used anymore");
 module.exports = {
     css: {
         loaderOptions: {

@@ -1,0 +1,190 @@
+@use '../base/variables' as *;
+@use '../base/text-styles';
+
+.icon-spacer {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+    &.primary {
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+
+        padding: 0 27px;
+        background: linear-gradient(to right, $color-primary, $color-primary-destination);
+        text-align: center;
+        word-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 42px;
+        line-height: 42px;
+
+        border-radius: $border-radius;
+        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
+        cursor: pointer;
+        box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
+        touch-action: manipulation;
+        display: inline-flex;
+
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+        &:active {
+            transform: scale(0.95, 0.95);
+            box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+        }
+
+        .dropdown {
+            border-left: $border-width solid rgba($color-white, 0.5);
+            background: url(~@stamhoofd/assets/images/icons/white/arrow-down-small.svg) no-repeat center center;
+            width: 40px;
+            align-self: stretch;
+            margin-right: -27px;
+            margin-left: 27px - $border-width;
+
+            &:hover {
+                background-color: rgba($color-white, 0.2);
+            }
+        }
+    }
+
+    &.secundary {
+        font-size: 18px;
+        font-weight: 600;
+        color: $color-gray;
+        padding: 0 27px;
+        background: $color-gray-lighter;
+        text-align: center;
+        word-wrap: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: $border-radius;
+        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        height: 42px;
+        line-height: 42px;
+        display: inline-flex;
+
+        &:active {
+            transform: scale(0.95, 0.95);
+        }
+    }
+
+    &.more {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~@stamhoofd/assets/images/icons/gray/more.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
+
+    &.privacy {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~@stamhoofd/assets/images/icons/gray/privacy.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
+
+    &.close {
+        width: 24px;
+        height: 24px;
+        padding: 10px;
+        display: inline-block;
+        vertical-align: middle;
+        cursor: pointer;
+        touch-action: manipulation;
+
+        background-image: url(~@stamhoofd/assets/images/icons/gray/close.svg);
+        background-position: center center;
+        background-repeat: no-repeat;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
+
+    &.tooltip-only {
+        cursor: help;
+    }
+
+    &.icon {
+        cursor: pointer;
+
+        &:active {
+            opacity: 0.4;
+        }
+
+        &.gray {
+            color: $color-gray;
+            box-sizing: content-box;
+            @extend .style-button-small;
+            vertical-align: middle;
+
+            &.arrow-left {
+                background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-left-big.svg);
+                background-position: left center;
+                background-repeat: no-repeat;
+                padding-left: 30px;
+                padding-right: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            &.arrow-right {
+                background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-right-big.svg);
+                background-position: right center;
+                background-repeat: no-repeat;
+                padding-right: 30px;
+                padding-left: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            &.clock {
+                background-image: url(~@stamhoofd/assets/images/icons/gray/clock.svg);
+                background-position: left center;
+                background-repeat: no-repeat;
+                padding-left: 30px;
+                padding-right: 10px;
+                height: 24px;
+                line-height: 24px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+        }
+    }
+}
