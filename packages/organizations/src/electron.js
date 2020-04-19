@@ -1,10 +1,11 @@
 const { app, BrowserWindow } = require('electron')
+require('./electron/menu');
 
 function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 800,
     webPreferences: {
       nodeIntegration: true
     },
@@ -12,7 +13,11 @@ function createWindow () {
   })
 
   // and load the index.html of the app.
-  win.loadFile('dist/index.html')
+  if (process.env.ELECTRON_WEBPACK_DEV_SERVER) {
+    win.loadURL('http://127.0.0.1:8080')
+  } else {
+    win.loadFile('dist/index.html')
+  }
 
   // Open the DevTools.
   //win.webContents.openDevTools()

@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "serve": "webpack-dev-server --hot",
+        "electron-serve": "ELECTRON_WEBPACK_DEV_SERVER=true electron src/electron.js",
         "build": "webpack"
     },
     "dependencies": {
@@ -15,6 +16,7 @@
         "xlsx": "^0.15.5"
     },
     "devDependencies": {
+        "electron": "^8.2.3",
         "html-webpack-plugin": "^4.2.0"
     }
 }
