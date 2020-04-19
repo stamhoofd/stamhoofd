@@ -7,15 +7,16 @@ systemPreferences.appLevelAppearance = "light"
 function createLoginWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 400,
-    height: 600,
+    width: 700,
+    height: 500,
     webPreferences: {
       nodeIntegration: true
     },
     titleBarStyle: 'hiddenInset'
   })
 
-  win.resizable = false;
+  // Todo: disable resize in production
+  //win.resizable = false;
   win.maximizable = false;
 
   if (process.env.ELECTRON_WEBPACK_DEV_SERVER) {

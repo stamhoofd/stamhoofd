@@ -4,6 +4,7 @@
         <main>
             <img src="@stamhoofd/assets/images/logo/logo-horizontal.svg" class="logo">
             <h1>Beheer je leden digitaal, zoals het hoort.</h1>
+            <p>Probeer Stamhoofd gratis uit voor je vereniging of log in bij je vereniging die al is aangesloten.</p>
         </main>
 
         <STToolbar>
@@ -44,13 +45,20 @@ export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
 @use '@stamhoofd/scss/layout/view.scss';
 
 #launch-window {
-    > main > h1 {
-        @extend .style-huge-title-1;
-    }
+    > main {
+        .logo {
+            display: block;
+            margin-bottom: 30px;
+        }
 
-    .logo {
-        display: block;
-        margin-bottom: 20px;
+        h1 {
+            @extend .style-title-1;
+            margin-bottom: 10px;;
+        }
+        
+        p {
+            @extend .style-description;
+        }
     }
 }
 </style>

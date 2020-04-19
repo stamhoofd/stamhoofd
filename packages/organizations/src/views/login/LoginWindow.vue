@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
-import ChooseOrganizationView from "./ChooseOrganizationView.vue";
+import LaunchView from "./LaunchView.vue";
 import Window from "../Window.vue";
 
 @Component({
@@ -14,6 +14,6 @@ import Window from "../Window.vue";
     },
 })
 export default class LoginWindow extends Vue {
-    public root = new ComponentWithProperties(ChooseOrganizationView);
+    public root = new ComponentWithProperties(LaunchView);
 }
 </script>
