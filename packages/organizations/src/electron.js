@@ -1,22 +1,21 @@
 const { app, BrowserWindow } = require('electron')
 require('./electron/menu');
 
-function createWindow () {
+function createLoginWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1000,
-    height: 800,
+    width: 800,
+    height: 550,
     webPreferences: {
       nodeIntegration: true
     },
     titleBarStyle: 'hiddenInset'
   })
 
-  // and load the index.html of the app.
   if (process.env.ELECTRON_WEBPACK_DEV_SERVER) {
-    win.loadURL('http://127.0.0.1:8080')
+    win.loadURL('http://127.0.0.1:8080/login.html')
   } else {
-    win.loadFile('dist/index.html')
+    win.loadFile('dist/login.html')
   }
 
   // Open the DevTools.
@@ -26,7 +25,7 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow)
+app.whenReady().then(createLoginWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -41,6 +40,6 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createLoginWindow()
   }
 })

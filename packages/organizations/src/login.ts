@@ -1,10 +1,10 @@
 import Vue from "vue";
-import DashboardWindow from "./views/dashboard/DashboardWindow.vue";
+import LoginWindow from "./views/login/LoginWindow.vue";
 
 Vue.config.productionTip = false;
 
 new Vue({
-    render: (h) => h(DashboardWindow),
+    render: (h) => h(LoginWindow),
 }).$mount("#app");
 
 // First we get the viewport height and we multiple it by 1% to get a value for a vh unit

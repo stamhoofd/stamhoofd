@@ -6,12 +6,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 import ModalStackComponent from "@stamhoofd/shared/components/layout/ModalStackComponent.vue";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import StackComponent from "@stamhoofd/shared/components/layout/StackComponent.vue";
-import SplitViewController from "@stamhoofd/shared/components/layout/SplitViewController.vue";
-import Menu from "./views/dashboard/Menu.vue";
 
 @Component({
     components: {
@@ -19,10 +17,8 @@ import Menu from "./views/dashboard/Menu.vue";
         StackComponent,
     },
 })
-export default class App extends Vue {
-    public root = new ComponentWithProperties(SplitViewController, {
-        root: new ComponentWithProperties(Menu, {}),
-    });
+export default class Window extends Vue {
+    @Prop(ComponentWithProperties) readonly root: ComponentWithProperties
 }
 </script>
 
