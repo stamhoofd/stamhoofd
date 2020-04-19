@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <!-- To display things that cover everything else and require document scrolling on mobile -->
-        <ModalStackComponent v-if="stop" :root="root" />
+        <ModalStackComponent :root="root" />
     </div>
 </template>
 
