@@ -1,16 +1,22 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, systemPreferences } = require('electron')
 require('./electron/menu');
+
+// For now, we do not support a dark mode yet
+systemPreferences.appLevelAppearance = "light"
 
 function createLoginWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 550,
+    width: 400,
+    height: 600,
     webPreferences: {
       nodeIntegration: true
     },
     titleBarStyle: 'hiddenInset'
   })
+
+  win.resizable = false;
+  win.maximizable = false;
 
   if (process.env.ELECTRON_WEBPACK_DEV_SERVER) {
     win.loadURL('http://127.0.0.1:8080/login.html')

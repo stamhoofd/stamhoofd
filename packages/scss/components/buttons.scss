@@ -6,6 +6,12 @@
     vertical-align: middle;
 }
 
+// Extend this property when you want to center a button and take the full width
+@mixin center {
+    width: 100%;
+    justify-content: center;
+}
+
 .button {
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);

@@ -20,6 +20,7 @@ export default class STToolbar extends Vue {}
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/layout/split-inputs.scss';
 @use '~@stamhoofd/scss/base/text-styles.scss';
+@use '~@stamhoofd/scss/components/buttons.scss';
 
 .st-toolbar {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
@@ -42,6 +43,28 @@ export default class STToolbar extends Vue {}
 
     > div .button {
         margin-left: 10px;
+    }
+
+    @media (max-width: 500px) {
+        > div:first-child {
+            display: none;
+        }
+
+        > div .button {
+            margin-left: 0px;
+            margin-bottom: 10px;
+            &:last-child {
+                margin-bottom: 0;;
+            }
+        }
+
+        > div:last-child {
+            flex-basis: 100%;
+
+            &> .button {
+                @include buttons.center;
+            }
+        }
     }
 }
 </style>
