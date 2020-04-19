@@ -20,26 +20,9 @@ import Menu from "./views/dashboard/Menu.vue";
     },
 })
 export default class App extends Vue {
-    /*public root = new ComponentWithProperties(Popup, {
-        root: new ComponentWithProperties(SplitViewController, {
-            root: new ComponentWithProperties(Menu, {}),
-        })
-    });*/
     public root = new ComponentWithProperties(SplitViewController, {
         root: new ComponentWithProperties(Menu, {}),
     });
-    public stop = true;
-
-    mounted() {
-        /*setTimeout(() => {
-            this.root.keepAlive = true;
-            this.stop = false;
-
-            setTimeout(() => {
-                this.stop = true;
-            }, 5000);
-        }, 5000);*/
-    }
 }
 </script>
 

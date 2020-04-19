@@ -1,4 +1,4 @@
-const { app, Menu, BrowserWindow } = require('electron')
+const { app, Menu } = require('electron')
 
 const isMac = process.platform === 'darwin'
 
@@ -22,16 +22,6 @@ const template = [
   {
     label: 'File',
     submenu: [
-        {
-            label: 'Open developer tools',
-            accelerator: process.platform === 'darwin' ? 'Alt+Cmd+C' : 'F12',
-            click: () => { 
-                const focussed = BrowserWindow.getFocusedWindow();
-                if (focussed) {
-                    focussed.webContents.openDevTools()
-                }
-             }
-        },
         isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
