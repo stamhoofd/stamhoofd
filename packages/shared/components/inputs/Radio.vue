@@ -3,7 +3,7 @@
         <input type="radio" name="gender" value="mixed">
         <div>
             <div />
-            <slot />
+            <div><slot /></div>
         </div>
     </label>
 </template>

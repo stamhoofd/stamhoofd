@@ -10,7 +10,7 @@
         <STNavigationTitle>
             Jouw vereniging aansluiten
         </STNavigationTitle>
-        
+
         <main>
             <div class="split-inputs">
                 <div>
@@ -53,7 +53,7 @@
                 Volledig gratis tot je de demo beïndigd
             </template>
             <template #right>
-                <button class="button primary">
+                <button class="button primary" @click="goNext">
                     Volgende
                 </button>
             </template>
@@ -68,6 +68,8 @@ import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
+import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
+import OrganizationStructureView from "./OrganizationStructureView.vue"
 
 @Component({
     components: {
@@ -78,6 +80,9 @@ import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
     }
 })
 export default class GeneralView extends Mixins(NavigationMixin) {
+    goNext() {
+        this.show(new ComponentWithProperties(OrganizationStructureView))
+    }
 }
 </script>
 

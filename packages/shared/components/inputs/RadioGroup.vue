@@ -12,7 +12,7 @@ export default class RadioGroup extends Vue {}
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/components/inputs.scss';
+@use '~@stamhoofd/scss/components/checkbox.scss';
 
 .radio-group {
     display: flex;

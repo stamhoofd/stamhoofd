@@ -27,6 +27,7 @@ import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import GeneralView from '../create-group/GeneralView.vue';
+import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue"
 
 @Component({
     components: {
@@ -36,7 +37,7 @@ import GeneralView from '../create-group/GeneralView.vue';
 })
 export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
     createNew() {
-        this.present(new ComponentWithProperties(GeneralView));
+        this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(GeneralView)}));
     }
 }
 </script>
