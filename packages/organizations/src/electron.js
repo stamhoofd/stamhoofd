@@ -7,7 +7,7 @@ systemPreferences.appLevelAppearance = "light"
 function createLoginWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 700,
+    width: 700 + 675, // dev console width = 675
     height: 500,
     webPreferences: {
       nodeIntegration: true
@@ -26,7 +26,7 @@ function createLoginWindow () {
   }
 
   // Open the DevTools.
-  //win.webContents.openDevTools()
+  win.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished

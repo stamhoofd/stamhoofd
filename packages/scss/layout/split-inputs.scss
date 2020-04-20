@@ -1,9 +1,8 @@
-
 .split-inputs {
     display: flex;
     flex-direction: row;
 
-    &> div {
+    & > div {
         flex-grow: 1;
         flex-shrink: 0;
         flex-basis: 0;
@@ -18,10 +17,10 @@
         }
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 699px) {
         display: block;
 
-        &> div {
+        & > div {
             margin: 0;
         }
     }

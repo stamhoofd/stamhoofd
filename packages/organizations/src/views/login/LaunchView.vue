@@ -9,7 +9,7 @@
 
         <STToolbar>
             <template #right>
-                <button class="button primary">
+                <button class="button primary" @click="createNew">
                     Nieuwe vereniging aansluiten
                 </button>
                 <button class="button secundary">
@@ -25,6 +25,8 @@ import { Component, Mixins } from "vue-property-decorator";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
+import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
+import GeneralView from '../create-group/GeneralView.vue';
 
 @Component({
     components: {
@@ -33,6 +35,9 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
     }
 })
 export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
+    createNew() {
+        this.present(new ComponentWithProperties(GeneralView));
+    }
 }
 </script>
 
