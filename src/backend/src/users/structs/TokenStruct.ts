@@ -1,5 +1,5 @@
-import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
 import { Token } from "../models/Token";
+import { Encodeable } from '@stamhoofd-common/encoding';
 
 /// Only used as output
 export class TokenStruct implements Encodeable {

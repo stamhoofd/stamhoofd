@@ -1,4 +1,4 @@
-import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
+import { Encodeable } from '@stamhoofd-common/encoding';
 import { Response } from "./Response";
 import http from "http";
 

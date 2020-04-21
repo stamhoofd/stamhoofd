@@ -1,5 +1,4 @@
-import { Data } from "@stamhoofd-common/encoding/src/classes/Data";
-import EmailDecoder from "@stamhoofd-common/encoding/src/structs/EmailDecoder";
+import { Data, EmailDecoder } from '@stamhoofd-common/encoding';
 
 /// Only used as input
 export class RegisterStruct {

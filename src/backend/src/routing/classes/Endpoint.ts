@@ -2,8 +2,7 @@ import { Request } from "./Request";
 import { DecodedRequest } from "./DecodedRequest";
 import { Response } from "./Response";
 import { EncodedResponse } from "./EncodedResponse";
-import { Decoder } from "@stamhoofd-common/encoding/src/classes/Decoder";
-import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
+import { Decoder, Encodeable } from '@stamhoofd-common/encoding';
 
 export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends Encodeable | undefined> {
     protected queryDecoder: Decoder<Query> | undefined;

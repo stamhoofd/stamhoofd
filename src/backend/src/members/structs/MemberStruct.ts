@@ -1,5 +1,4 @@
-import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
-import { Data } from "@stamhoofd-common/encoding/src/classes/Data";
+import { Encodeable, Data } from '@stamhoofd-common/encoding';
 import { Member } from "../models/Member";
 
 export class MemberStruct implements Encodeable {
