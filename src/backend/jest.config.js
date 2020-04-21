@@ -8,8 +8,5 @@ module.exports = {
         "<rootDir>", // support for tsconfig baseUrl, which is .
         "node_modules",
     ],
-    moduleNameMapper: {
-        "@/(.*)": "src/$1",
-    },
     //verbose: true,
 };
