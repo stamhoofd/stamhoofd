@@ -1,8 +1,8 @@
-import { Database } from "@/database/classes/Database";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
 import { Token } from "./Token";
 import { User, UserWithOrganization } from "./User";
-import { Organization } from "@/organizations/models/Organization";
-import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
+import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
+import { OrganizationFactory } from "@stamhoofd/backend/src/organizations/factories/OrganizationFactory";
 import { UserFactory } from "../factories/UserFactory";
 
 describe("Model.Token", () => {

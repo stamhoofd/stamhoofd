@@ -1,9 +1,9 @@
-import { Request } from "@/routing/classes/Request";
-import { DecodedRequest } from "@/routing/classes/DecodedRequest";
-import { Response } from "@/routing/classes/Response";
-import { Endpoint } from "@/routing/classes/Endpoint";
+import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
+import { DecodedRequest } from "@stamhoofd/backend/src/routing/classes/DecodedRequest";
+import { Response } from "@stamhoofd/backend/src/routing/classes/Response";
+import { Endpoint } from "@stamhoofd/backend/src/routing/classes/Endpoint";
 import { User } from "../models/User";
-import { Organization } from "@/organizations/models/Organization";
+import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
 import { RegisterStruct } from "../structs/RegisterStruct";
 
 type Params = {};

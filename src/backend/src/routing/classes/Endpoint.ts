@@ -2,8 +2,8 @@ import { Request } from "./Request";
 import { DecodedRequest } from "./DecodedRequest";
 import { Response } from "./Response";
 import { EncodedResponse } from "./EncodedResponse";
-import { Decoder } from "@/structs/classes/Decoder";
-import { Encodeable } from "@/structs/classes/Encodeable";
+import { Decoder } from "@stamhoofd/backend/src/structs/classes/Decoder";
+import { Encodeable } from "@stamhoofd/backend/src/structs/classes/Encodeable";
 
 export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends Encodeable | undefined> {
     protected queryDecoder: Decoder<Query> | undefined;
@@ -21,8 +21,11 @@ export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends 
     async run(request: Request): Promise<EncodedResponse | null> {
         const [match, params] = this.doesMatch(request);
         if (match) {
+            if (!params) {
+                throw new Error("Compiler doesn't optimize for this, but this should not be able to run")
+            }
             console.log("Endpoint matched");
-            return new EncodedResponse(await this.getResponse(request, params as Params));
+            return new EncodedResponse(await this.getResponse(request, params));
         }
         return null;
     }

@@ -1,5 +1,5 @@
 import { Database } from "./Database";
-import Stack from "@/debug/Stack";
+import Stack from "@stamhoofd/backend/src/debug/Stack";
 import { ManyToOneRelation } from "./ManyToOneRelation";
 import { ManyToManyRelation } from "./ManyToManyRelation";
 import { Column } from "./Column";

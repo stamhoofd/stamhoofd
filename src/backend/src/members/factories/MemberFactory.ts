@@ -1,6 +1,6 @@
 import { Member } from '../models/Member';
-import { Factory } from '@/database/classes/Factory';
-import { Organization } from '@/organizations/models/Organization';
+import { Factory } from '@stamhoofd/backend/src/database/classes/Factory';
+import { Organization } from '@stamhoofd/backend/src/organizations/models/Organization';
 
 class Options {
     organization: Organization

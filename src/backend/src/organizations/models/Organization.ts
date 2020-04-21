@@ -1,8 +1,8 @@
-import { Model } from "@/database/classes/Model";
-import { column } from "@/database/decorators/Column";
+import { Model } from "@stamhoofd/backend/src/database/classes/Model";
+import { column } from "@stamhoofd/backend/src/database/decorators/Column";
 import { OrganizationMetaStruct } from "../structs/OrganizationMetaStruct";
-import { Database } from "@/database/classes/Database";
-import { ClientError } from "@/routing/classes/ClientError";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
+import { ClientError } from "@stamhoofd/backend/src/routing/classes/ClientError";
 
 export class Organization extends Model {
     static table = "organizations";

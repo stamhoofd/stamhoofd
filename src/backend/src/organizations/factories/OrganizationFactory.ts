@@ -1,8 +1,8 @@
 import { Organization } from "../models/Organization";
-import { Factory } from "@/database/classes/Factory";
-import { Formatter } from "@/tools/classes/Formatter";
+import { Factory } from "@stamhoofd/backend/src/database/classes/Factory";
+import { Formatter } from "@stamhoofd/backend/src/tools/classes/Formatter";
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
-import Sodium from "@/tools/classes/Sodium";
+import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
 
 class Options {}
 

@@ -1,7 +1,7 @@
 import BoyNames from "./data/boys";
 import GirlNames from "./data/girls";
 import FamilyNames from "./data/family-names";
-import { Gender } from "@/members/models/Gender";
+import { Gender } from "@stamhoofd/backend/src/members/models/Gender";
 
 export abstract class Factory<Options, Model> {
     options: Options;

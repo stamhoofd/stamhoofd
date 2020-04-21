@@ -1,5 +1,5 @@
-import { Data } from "@/structs/classes/Data";
-import { RegisterStruct } from "@/users/structs/RegisterStruct";
+import { Data } from "@stamhoofd/backend/src/structs/classes/Data";
+import { RegisterStruct } from "@stamhoofd/backend/src/users/structs/RegisterStruct";
 
 export class CreateOrganizationStruct {
     name: string;

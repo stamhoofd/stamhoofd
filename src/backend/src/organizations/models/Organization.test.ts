@@ -1,7 +1,7 @@
-import { Database } from "@/database/classes/Database";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
 import { Organization } from "./Organization";
 import { OrganizationType, UmbrellaOrganization } from "../structs/OrganizationMetaStruct";
-import Sodium from "@/tools/classes/Sodium";
+import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
 
 describe("Model.Organization", () => {
     let existingOrganizationId: number;

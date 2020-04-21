@@ -1,8 +1,8 @@
-import { Model } from "@/database/classes/Model";
-import { column } from "@/database/decorators/Column";
-import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
+import { Model } from "@stamhoofd/backend/src/database/classes/Model";
+import { column } from "@stamhoofd/backend/src/database/decorators/Column";
+import { ManyToOneRelation } from "@stamhoofd/backend/src/database/classes/ManyToOneRelation";
 import { User } from "./User";
-import { Database } from "@/database/classes/Database";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
 import crypto from "crypto";
 
 export type TokenWithUser = Token & { user: User };

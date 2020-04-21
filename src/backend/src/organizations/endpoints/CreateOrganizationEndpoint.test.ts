@@ -1,9 +1,9 @@
-import { Request } from "@/routing/classes/Request";
+import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
-import Sodium from "@/tools/classes/Sodium";
-import { User } from "@/users/models/User";
+import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { User } from "@stamhoofd/backend/src/users/models/User";
 import { Organization } from "../models/Organization";
-import { Formatter } from "@/tools/classes/Formatter";
+import { Formatter } from "@stamhoofd/backend/src/tools/classes/Formatter";
 
 describe("Endpoint.CreateOrganization", () => {
     // Test endpoint

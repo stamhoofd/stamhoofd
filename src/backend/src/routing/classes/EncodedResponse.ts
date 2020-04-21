@@ -1,4 +1,4 @@
-import { Encodeable } from "@/structs/classes/Encodeable";
+import { Encodeable } from "@stamhoofd/backend/src/structs/classes/Encodeable";
 import { Response } from "./Response";
 import http from "http";
 

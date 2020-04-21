@@ -1,11 +1,11 @@
 {
-    "name": "stamhoofd-backend",
+    "name": "@stamhoofd/backend",
     "version": "1.0.0",
     "main": "index.ts",
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "start": "NODE_ENV=development ts-node -r tsconfig-paths/register .",
+        "start": "NODE_ENV=development ts-node .",
         "test": "jest",
         "migrations": "NODE_ENV=development ts-node -r tsconfig-paths/register ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

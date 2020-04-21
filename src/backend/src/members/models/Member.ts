@@ -1,8 +1,8 @@
-import { Model } from "@/database/classes/Model";
-import { column } from "@/database/decorators/Column";
-import { Database } from "@/database/classes/Database";
-import { ManyToOneRelation } from "@/database/classes/ManyToOneRelation";
-import { Organization } from '@/organizations/models/Organization';
+import { Model } from "@stamhoofd/backend/src/database/classes/Model";
+import { column } from "@stamhoofd/backend/src/database/decorators/Column";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
+import { ManyToOneRelation } from "@stamhoofd/backend/src/database/classes/ManyToOneRelation";
+import { Organization } from '@stamhoofd/backend/src/organizations/models/Organization';
 
 /// Loaded types
 export class Member extends Model {

@@ -1,7 +1,7 @@
 import { Model } from "../classes/Model";
 import { ManyToOneRelation } from "../classes/ManyToOneRelation";
 import { Column } from "../classes/Column";
-import { Decoder } from '@/structs/classes/Decoder';
+import { Decoder } from '@stamhoofd/backend/src/structs/classes/Decoder';
 
 export type ColumnType = "integer" | "string" | "date" | "datetime" | "boolean" | "json";
 

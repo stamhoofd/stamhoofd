@@ -1,5 +1,5 @@
-import { Data } from "@/structs/classes/Data";
-import EmailDecoder from "@/structs/structs/EmailDecoder";
+import { Data } from "@stamhoofd/backend/src/structs/classes/Data";
+import EmailDecoder from "@stamhoofd/backend/src/structs/structs/EmailDecoder";
 
 /// Only used as input
 export class RegisterStruct {

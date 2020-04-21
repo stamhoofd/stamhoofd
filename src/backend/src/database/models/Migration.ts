@@ -1,6 +1,6 @@
-import { Model } from "@/database/classes/Model";
-import { column } from "@/database/decorators/Column";
-import { Database } from "@/database/classes/Database";
+import { Model } from "@stamhoofd/backend/src/database/classes/Model";
+import { column } from "@stamhoofd/backend/src/database/decorators/Column";
+import { Database } from "@stamhoofd/backend/src/database/classes/Database";
 
 export class Migration extends Model {
     static table = "migrations";

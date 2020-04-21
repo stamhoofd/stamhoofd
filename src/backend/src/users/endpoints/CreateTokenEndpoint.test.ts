@@ -1,9 +1,9 @@
 import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
-import { Request } from "@/routing/classes/Request";
+import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
 import { UserWithOrganization } from "../models/User";
 import { TokenStruct } from "../structs/TokenStruct";
-import { Organization } from "@/organizations/models/Organization";
-import { OrganizationFactory } from "@/organizations/factories/OrganizationFactory";
+import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
+import { OrganizationFactory } from "@stamhoofd/backend/src/organizations/factories/OrganizationFactory";
 import { UserFactory } from "../factories/UserFactory";
 
 describe("Endpoint.CreateToken", () => {

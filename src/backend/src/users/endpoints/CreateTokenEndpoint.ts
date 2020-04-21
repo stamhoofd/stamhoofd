@@ -1,14 +1,14 @@
-import { Request } from "@/routing/classes/Request";
-import { DecodedRequest } from "@/routing/classes/DecodedRequest";
-import { Response } from "@/routing/classes/Response";
-import { Endpoint } from "@/routing/classes/Endpoint";
+import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
+import { DecodedRequest } from "@stamhoofd/backend/src/routing/classes/DecodedRequest";
+import { Response } from "@stamhoofd/backend/src/routing/classes/Response";
+import { Endpoint } from "@stamhoofd/backend/src/routing/classes/Endpoint";
 import { TokenStruct } from "../structs/TokenStruct";
 import { PasswordGrantStruct } from "../structs/PasswordGrantStruct";
 import { User } from "../models/User";
-import { ClientError } from "@/routing/classes/ClientError";
+import { ClientError } from "@stamhoofd/backend/src/routing/classes/ClientError";
 import { Token } from "../models/Token";
-import { ServerError } from "@/routing/classes/ServerError";
-import { Organization } from "@/organizations/models/Organization";
+import { ServerError } from "@stamhoofd/backend/src/routing/classes/ServerError";
+import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
 
 type Params = {};
 type Query = undefined;

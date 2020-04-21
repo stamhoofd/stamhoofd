@@ -1,5 +1,5 @@
-import { Encodeable } from "@/structs/classes/Encodeable";
-import { Data } from "@/structs/classes/Data";
+import { Encodeable } from "@stamhoofd/backend/src/structs/classes/Encodeable";
+import { Data } from "@stamhoofd/backend/src/structs/classes/Data";
 import { Member } from "../models/Member";
 
 export class MemberStruct implements Encodeable {

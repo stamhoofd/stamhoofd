@@ -9,7 +9,9 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+        "strictNullChecks": true,
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+        "types": ["node", "jest"]
     },
     "include": [
         "src/**/*.ts",

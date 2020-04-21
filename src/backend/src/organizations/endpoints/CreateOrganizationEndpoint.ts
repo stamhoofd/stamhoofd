@@ -1,15 +1,15 @@
-import { Request } from "@/routing/classes/Request";
-import { DecodedRequest } from "@/routing/classes/DecodedRequest";
-import { Response } from "@/routing/classes/Response";
-import { Endpoint } from "@/routing/classes/Endpoint";
-import { ServerError } from "@/routing/classes/ServerError";
-import { Organization } from "@/organizations/models/Organization";
+import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
+import { DecodedRequest } from "@stamhoofd/backend/src/routing/classes/DecodedRequest";
+import { Response } from "@stamhoofd/backend/src/routing/classes/Response";
+import { Endpoint } from "@stamhoofd/backend/src/routing/classes/Endpoint";
+import { ServerError } from "@stamhoofd/backend/src/routing/classes/ServerError";
+import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
 import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
-import { ClientError } from "@/routing/classes/ClientError";
-import Sodium from "@/tools/classes/Sodium";
-import { Formatter } from "@/tools/classes/Formatter";
+import { ClientError } from "@stamhoofd/backend/src/routing/classes/ClientError";
+import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { Formatter } from "@stamhoofd/backend/src/tools/classes/Formatter";
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
-import { User } from "@/users/models/User";
+import { User } from "@stamhoofd/backend/src/users/models/User";
 
 type Params = {};
 type Query = undefined;
