@@ -1,7 +1,10 @@
 {
     "private": true,
     "workspaces": [
-        "frontend/*"
+        "src/frontend/*",
+        "src/backend/*",
+        "src/common/*",
+        "targets/*"
     ],
     "scripts": {
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue"

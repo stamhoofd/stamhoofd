@@ -12,8 +12,8 @@
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
     "include": [
-        "frontend/**/*.ts",
-        "frontend/**/*.vue",
+        "src/**/*.ts",
+        "src/frontend/**/*.vue",
         "*.d.ts" // Include vue type definition for webpack
     ],
     "exclude": ["node_modules"]
