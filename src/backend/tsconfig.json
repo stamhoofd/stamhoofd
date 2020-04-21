@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es2019", // needs to be es2019 to support optional chaining. Node.js doesn't support optional chaining yet, so we need the transpiling
+        "module": "commonjs",
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "types": ["node", "jest"],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        },
+        "lib": ["es2019"]
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "tests/**/*.tsx", "**/*.ts", "*.ts"],
+    "exclude": ["node_modules"]
+}
