@@ -9,13 +9,11 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        // baseUrl and paths should match webpack aliases!
-        "baseUrl": "packages",
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
     "include": [
-        "packages/**/*.ts",
-        "packages/**/*.vue",
+        "frontend/**/*.ts",
+        "frontend/**/*.vue",
         "*.d.ts" // Include vue type definition for webpack
     ],
     "exclude": ["node_modules"]
