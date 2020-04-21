@@ -69,7 +69,7 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
-import OrganizationStructureView from "./OrganizationStructureView.vue"
+import CreateAccountView from "./CreateAccountView.vue"
 
 @Component({
     components: {
@@ -81,7 +81,7 @@ import OrganizationStructureView from "./OrganizationStructureView.vue"
 })
 export default class GeneralView extends Mixins(NavigationMixin) {
     goNext() {
-        this.show(new ComponentWithProperties(OrganizationStructureView))
+        this.show(new ComponentWithProperties(CreateAccountView))
     }
 }
 </script>
