@@ -1,6 +1,6 @@
-import { Data } from "../../structs/classes/Data";
-import { EnumDecoder } from "../../structs/structs/EnumDecoder";
-import { Encodeable } from "../../structs/classes/Encodeable";
+import { Data } from "@stamhoofd-common/encoding/src/classes/Data";
+import { EnumDecoder } from "@stamhoofd-common/encoding/src/structs/EnumDecoder";
+import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
 
 export enum OrganizationType {
     Youth = "youth",

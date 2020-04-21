@@ -1,4 +1,4 @@
-import { Encodeable } from "@stamhoofd/backend/src/structs/classes/Encodeable";
+import { Encodeable } from "@stamhoofd-common/encoding/src/classes/Encodeable";
 import { Token } from "../models/Token";
 
 /// Only used as output

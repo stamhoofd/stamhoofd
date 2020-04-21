@@ -1,6 +1,6 @@
-import { Decoder } from "@stamhoofd/backend/src/structs/classes/Decoder";
+import { Decoder } from "@stamhoofd-common/encoding/src/classes/Decoder";
 import { Request, HttpMethod } from "./Request";
-import { ObjectData } from "@stamhoofd/backend/src/structs/classes/ObjectData";
+import { ObjectData } from "@stamhoofd-common/encoding/src/classes/ObjectData";
 import http from "http";
 
 export class DecodedRequest<Params, Query, Body> {

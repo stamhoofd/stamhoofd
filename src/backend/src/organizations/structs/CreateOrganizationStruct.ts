@@ -1,4 +1,4 @@
-import { Data } from "@stamhoofd/backend/src/structs/classes/Data";
+import { Data } from "@stamhoofd-common/encoding/src/classes/Data";
 import { RegisterStruct } from "@stamhoofd/backend/src/users/structs/RegisterStruct";
 
 export class CreateOrganizationStruct {

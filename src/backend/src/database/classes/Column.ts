@@ -1,7 +1,7 @@
 import { ColumnType } from "../decorators/Column";
-import { Decoder } from '@stamhoofd/backend/src/structs/classes/Decoder';
-import { ObjectData } from '@stamhoofd/backend/src/structs/classes/ObjectData';
-import { isEncodeable } from '@stamhoofd/backend/src/structs/classes/Encodeable';
+import { Decoder } from '@stamhoofd-common/encoding/src/classes/Decoder';
+import { ObjectData } from '@stamhoofd-common/encoding/src/classes/ObjectData';
+import { isEncodeable } from '@stamhoofd-common/encoding/src/classes/Encodeable';
 
 export class Column {
     type: ColumnType;
