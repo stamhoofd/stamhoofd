@@ -1,8 +1,9 @@
 import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
-import { Member } from "../models/Member";
-import { Response } from "@stamhoofd-backend/routing";
 import { Endpoint } from "@stamhoofd-backend/routing";
+import { Response } from "@stamhoofd-backend/routing";
+
+import { Member } from "../models/Member";
 import { MemberStruct } from "../structs/MemberStruct";
 
 type Params = { id: number };

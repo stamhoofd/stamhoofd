@@ -11,9 +11,11 @@ module.exports = {
     extends: [
         "eslint:recommended",
     ],
+    plugins: ["simple-import-sort"],
     rules: {
         "no-console": "off",
         "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+        "simple-import-sort/sort": "warn"
     },
     overrides: [
         {
@@ -25,7 +27,7 @@ module.exports = {
                 project: ["./tsconfig.json"],
                 extraFileExtensions: [".vue"],
             },
-            plugins: ["@typescript-eslint", "jest"],
+            plugins: ["@typescript-eslint", "jest", "simple-import-sort"],
             extends: [
                 "eslint:recommended",
                 "plugin:@typescript-eslint/eslint-recommended",
@@ -37,6 +39,7 @@ module.exports = {
             rules: {
                 "no-console": "off",
                 "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+                "simple-import-sort/sort": "warn",
                 "@typescript-eslint/explicit-function-return-type": "off",
                 "@typescript-eslint/no-explicit-any": "off",
                 "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
