@@ -3,7 +3,7 @@ import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
 import { User } from "@stamhoofd/backend/src/users/models/User";
 import { Organization } from "../models/Organization";
-import { Formatter } from "@stamhoofd/backend/src/tools/classes/Formatter";
+import { Formatter } from "@stamhoofd-common/formatting"; 
 
 describe("Endpoint.CreateOrganization", () => {
     // Test endpoint

@@ -7,7 +7,7 @@ import { Organization } from "@stamhoofd/backend/src/organizations/models/Organi
 import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
 import { ClientError } from "@stamhoofd/backend/src/routing/classes/ClientError";
 import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
-import { Formatter } from "@stamhoofd/backend/src/tools/classes/Formatter";
+import { Formatter } from "@stamhoofd-common/formatting"; 
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
 import { User } from "@stamhoofd/backend/src/users/models/User";
 
