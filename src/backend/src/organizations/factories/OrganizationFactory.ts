@@ -2,7 +2,7 @@ import { Organization } from "../models/Organization";
 import { Factory } from "@stamhoofd/backend/src/database/classes/Factory";
 import { Formatter } from "@stamhoofd-common/formatting"; 
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
-import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { Sodium } from "@stamhoofd-common/crypto";
 
 class Options {}
 

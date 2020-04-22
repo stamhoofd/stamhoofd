@@ -1,6 +1,6 @@
 import sodium, { StringKeyPair } from "libsodium-wrappers";
 
-class Sodium {
+class SodiumStatic {
     loaded = false;
 
     async loadIfNeeded() {
@@ -47,4 +47,4 @@ class Sodium {
     }
 }
 
-export default new Sodium();
+export const Sodium = new SodiumStatic();

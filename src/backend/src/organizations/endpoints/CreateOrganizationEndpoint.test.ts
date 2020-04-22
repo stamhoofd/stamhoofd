@@ -1,6 +1,6 @@
 import { Request } from "@stamhoofd/backend/src/routing/classes/Request";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
-import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { Sodium } from "@stamhoofd-common/crypto";
 import { User } from "@stamhoofd/backend/src/users/models/User";
 import { Organization } from "../models/Organization";
 import { Formatter } from "@stamhoofd-common/formatting"; 

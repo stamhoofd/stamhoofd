@@ -5,7 +5,7 @@ import { Organization } from "@stamhoofd/backend/src/organizations/models/Organi
 import { OrganizationFactory } from "@stamhoofd/backend/src/organizations/factories/OrganizationFactory";
 import { UserFactory } from "../factories/UserFactory";
 import { RegisterEndpoint } from "./RegisterEndpoint";
-import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { Sodium } from "@stamhoofd-common/crypto";
 
 describe("Endpoint.Register", () => {
     // Test endpoint

@@ -6,7 +6,7 @@ import { ServerError } from "@stamhoofd/backend/src/routing/classes/ServerError"
 import { Organization } from "@stamhoofd/backend/src/organizations/models/Organization";
 import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
 import { ClientError } from "@stamhoofd/backend/src/routing/classes/ClientError";
-import Sodium from "@stamhoofd/backend/src/tools/classes/Sodium";
+import { Sodium } from "@stamhoofd-common/crypto";
 import { Formatter } from "@stamhoofd-common/formatting"; 
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
 import { User } from "@stamhoofd/backend/src/users/models/User";

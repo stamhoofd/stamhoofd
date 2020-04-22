@@ -21,6 +21,9 @@
         "argon2": "^0.26.1",
         "libsodium-wrappers": "^0.7.6",
         "mysql": "^2.18.1",
-        "tslib": "^1.11.1"
+        "tslib": "^1.11.1",
+        "@stamhoofd-common/formatting": "1.0.0",
+        "@stamhoofd-common/encoding": "1.0.0",
+        "@stamhoofd-common/crypto": "1.0.0"
     }
 }
