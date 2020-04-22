@@ -2,5 +2,8 @@
     "name": "@stamhoofd-backend/database",
     "main": "index.ts",
     "version": "1.0.0",
-    "private": true
+    "private": true,
+    "scripts": {
+        "test": "jest"
+    }
 }

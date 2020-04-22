@@ -3,8 +3,6 @@ import { Database } from "@stamhoofd-backend/database";
 
 export default async () => {
     await Database.delete("DELETE FROM " + User.table);
-    await Database.delete("DELETE FROM `_testModels_testModels`");
-    await Database.delete("DELETE FROM `testModels`");
     await Database.delete("DELETE FROM `tokens`");
     await Database.delete("DELETE FROM `users`");
     await Database.delete("DELETE FROM `members`");
