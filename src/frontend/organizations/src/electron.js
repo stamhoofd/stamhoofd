@@ -6,6 +6,9 @@ const development = !!process.env.ELECTRON_WEBPACK_DEV_SERVER
 // For now, we do not support a dark mode yet
 systemPreferences.appLevelAppearance = "light"
 
+// Fix for electron 8, set default same as electron 9
+app.allowRendererProcessReuse = true
+
 function createLoginWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
@@ -15,6 +18,8 @@ function createLoginWindow () {
       nodeIntegration: true,
       webSecurity: false, // disable CORS... This should not be a problem since we'll only load local files, never never load files from a remote server
       allowRunningInsecureContent: false,
+      enableRemoteModule: false,
+
     },
     titleBarStyle: 'hiddenInset'
   })
