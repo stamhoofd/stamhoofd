@@ -1,15 +1,16 @@
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
+import { User } from "@stamhoofd-backend/app/src/users/models/User";
 import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
 import { Response } from "@stamhoofd-backend/routing";
 import { Endpoint } from "@stamhoofd-backend/routing";
 import { ServerError } from "@stamhoofd-backend/routing";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
-import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
 import { ClientError } from "@stamhoofd-backend/routing";
 import { Sodium } from "@stamhoofd-common/crypto";
 import { Formatter } from "@stamhoofd-common/formatting"; 
+
+import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
 import { OrganizationMetaStruct, OrganizationType } from "../structs/OrganizationMetaStruct";
-import { User } from "@stamhoofd-backend/app/src/users/models/User";
 
 type Params = {};
 type Query = undefined;

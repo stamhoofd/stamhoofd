@@ -89,7 +89,7 @@ export default class GeneralView extends Mixins(NavigationMixin) {
 
         server.request({
             method: "GET",
-            path: "/",
+            path: "/status",
         }).then(data => {
             console.log(data)
         }).catch(e => {
