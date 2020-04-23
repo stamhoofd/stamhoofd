@@ -1,5 +1,6 @@
 
 // Requests use middleware to extend its behaviour
+import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 import { Decoder, Encodeable,isEncodeable,ObjectData } from "@stamhoofd-common/encoding";
 
 import { RequestMiddleware } from './RequestMiddleware';
@@ -141,14 +142,40 @@ export class Request<T> {
             return await this.start()
         }
 
-        const json = await response.json()
+        if (!response.ok) {
+            if (response.headers.get('Content-Type') == 'application/json') {
+                const json = await response.json()
+                let err: ClientErrors
+                try {
+                    err = ClientErrors.decode(new ObjectData(json))
+                } catch (e) {
+                    // Failed to decode
+                    console.error(json)
+                    console.error(e)
+                    throw new Error("Bad request with invalid json error")
+                }
+                throw err
+            }
 
-        // todo: add automatic decoding here, so we know we are receiving what we expected with typings
-        if (this.decoder) {
-            const decoded = this.decoder?.decode(new ObjectData(json))
-            return new RequestResult(decoded)
+            throw new Error("Bad request")
         }
 
-        return new RequestResult(json)
+        if (response.headers.get('Content-Type') == 'application/json') {
+            const json = await response.json()
+
+            // todo: add automatic decoding here, so we know we are receiving what we expected with typings
+            if (this.decoder) {
+                const decoded = this.decoder?.decode(new ObjectData(json))
+                return new RequestResult(decoded)
+            }
+
+            return new RequestResult(json)
+        }
+        if (this.decoder) {
+            // something went wrong
+            throw new Error("Received no decodeable content, but expected content")
+        }
+
+        return new RequestResult()
     }
 }

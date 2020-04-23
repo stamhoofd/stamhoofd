@@ -13,6 +13,9 @@ export class EncodedResponse {
         this.headers = response.headers;
 
         if (response.body !== undefined) {
+            if (!this.headers['Content-Type']) {
+                this.headers["Content-Type"] = "application/json";
+            }
             this.body = JSON.stringify(response.body.encode());
         } else {
             this.body = "";
