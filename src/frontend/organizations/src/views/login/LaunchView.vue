@@ -28,7 +28,7 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import { Component, Mixins } from "vue-property-decorator";
 
-import GeneralView from '../create-group/GeneralView.vue';
+import GeneralView from '../create-organization/GeneralView.vue';
 
 @Component({
     components: {
