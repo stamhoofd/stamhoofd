@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es2017",
         "module": "esnext",
         "jsx": "preserve",
         "importHelpers": true,
@@ -9,15 +9,14 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "baseUrl": ".",
-        "types": ["webpack-env"],
-        "paths": {
-            "shared/*": ["src/shared/*"],
-            "@/*": ["src/*"]
-        },
+        "strictNullChecks": true,
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-        "typeRoots": ["./node_modules/@types", "./@types"]
+        "types": ["node", "jest"]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "@types/**/*.ts"],
+    "include": [
+        "src/**/*.ts",
+        "src/frontend/**/*.vue",
+        "*.d.ts" // Include vue type definition for webpack
+    ],
     "exclude": ["node_modules"]
 }

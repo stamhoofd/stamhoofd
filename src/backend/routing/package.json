@@ -1,0 +1,9 @@
+{
+    "name": "@stamhoofd-backend/routing",
+    "main": "index.ts",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "test": "jest"
+    }
+}
