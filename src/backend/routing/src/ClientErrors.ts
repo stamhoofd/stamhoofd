@@ -19,4 +19,13 @@ export class ClientErrors extends Error {
             e.field = e.field ? e.field + "." + field : field;
         });
     }
+
+    /**
+     * Required to override the default toJSON behaviour of Error
+     */
+    toJSON() {
+        return {
+            errors: this.errors
+        }
+    }
 }

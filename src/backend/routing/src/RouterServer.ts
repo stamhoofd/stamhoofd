@@ -1,6 +1,7 @@
 import http from "http";
 
 import { ClientError } from "./ClientError";
+import { ClientErrors } from './ClientErrors';
 import { Request } from "./Request";
 import { Router } from "./Router";
 
@@ -34,6 +35,9 @@ export class RouterServer {
         } catch (e) {
             // Todo: implement special errors to send custom status codes
             if (e instanceof ClientError) {
+                res.writeHead(400);
+                res.end(JSON.stringify(new ClientErrors(e)));
+            } else if(e instanceof ClientErrors) {
                 res.writeHead(400);
                 res.end(JSON.stringify(e));
             } else {
