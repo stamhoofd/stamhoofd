@@ -1,5 +1,6 @@
 import { Decoder, Encodeable } from '@stamhoofd-common/encoding';
 
+import { ClientError } from './ClientError';
 import { DecodedRequest } from "./DecodedRequest";
 import { EncodedResponse } from "./EncodedResponse";
 import { Request } from "./Request";
@@ -13,7 +14,15 @@ export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends 
     protected abstract handle(request: DecodedRequest<Params, Query, RequestBody>): Promise<Response<ResponseBody>>;
 
     async getResponse(request: Request, params: Params): Promise<Response<ResponseBody>> {
-        const decodedRequest = await DecodedRequest.fromRequest(request, params, this.queryDecoder, this.bodyDecoder);
+        let decodedRequest: DecodedRequest<Params, Query, RequestBody>
+        try {
+            decodedRequest = await DecodedRequest.fromRequest(request, params, this.queryDecoder, this.bodyDecoder);
+        } catch (e) {
+            if (e.code) {
+                throw new ClientError(e)
+            }
+            throw e;
+        }
         console.log("Endpoint handling started");
         return await this.handle(decodedRequest);
     }

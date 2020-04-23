@@ -1,7 +1,7 @@
-import { Data, EmailDecoder } from '@stamhoofd-common/encoding';
+import { Data, EmailDecoder, Encodeable } from '@stamhoofd-common/encoding';
 
 /// Only used as input
-export class RegisterStruct {
+export class RegisterStruct implements Encodeable {
     /// Username
     email: string;
 
@@ -28,5 +28,14 @@ export class RegisterStruct {
         struct.adminSignature = data.optionalField("adminSignature")?.string;
 
         return struct;
+    }
+
+    encode() {
+        return {
+            email: this.email,
+            password: this.password,
+            publicKey: this.publicKey,
+            adminSignature: this.adminSignature
+        }
     }
 }

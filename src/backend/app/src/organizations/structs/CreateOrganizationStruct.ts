@@ -1,8 +1,8 @@
-import { Data } from '@stamhoofd-common/encoding';
+import { Data, Encodeable } from '@stamhoofd-common/encoding';
 
 import { RegisterStruct } from "../../users/structs/RegisterStruct";
 
-export class CreateOrganizationStruct {
+export class CreateOrganizationStruct implements Encodeable {
     name: string;
 
     /**
@@ -18,5 +18,13 @@ export class CreateOrganizationStruct {
         s.publicKey = data.field("publicKey").key;
         s.user = data.field("user").decode(RegisterStruct);
         return s;
+    }
+
+    encode() {
+        return {
+            name: this.name,
+            publicKey: this.publicKey,
+            user: this.user.encode()
+        }
     }
 }

@@ -35,10 +35,15 @@ export class RouterServer {
             // Todo: implement special errors to send custom status codes
             if (e instanceof ClientError) {
                 res.writeHead(400);
+                res.end(JSON.stringify(e));
             } else {
                 res.writeHead(500);
+                res.end(JSON.stringify({
+                    code: "internal_error",
+                    message: e.message
+                }));
             }
-            res.end(e.message);
+            
             return;
         }
     }

@@ -61,6 +61,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new ClientError({
                 code: "name_taken",
                 message: "An organization with the same name already exists",
+                human: "Er bestaat al een vereniging met dezelfde naam",
                 field: "name",
             });
         }

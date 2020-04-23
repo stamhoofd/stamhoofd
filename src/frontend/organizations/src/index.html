@@ -6,7 +6,11 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <title>Stamhoofd</title>
         <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+        <!-- We need wasm eval for wasm compilation, in older browsers we'll need unsafe-eval -->
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-eval';"
+        />
     </head>
 
     <body ontouchstart="">

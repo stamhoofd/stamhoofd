@@ -16,4 +16,16 @@ export class ClientError extends Error {
             Error.captureStackTrace(this, ClientError);
         }
     }
+
+    /**
+     * Required to override the default toJSON behaviour of Error
+     */
+    toJSON() {
+        return {
+            code: this.code,
+            message: this.message,
+            human: this.human, 
+            field: this.field
+        }
+    }
 }

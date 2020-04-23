@@ -18,6 +18,7 @@
             <input
                 id="email"
                 ref="firstInput"
+                v-model="email"
                 class="input"
                 type="email"
                 placeholder="Jouw persoonlijk e-mailadres"
@@ -27,6 +28,7 @@
             <label class="style-label" for="password">Kies je wachtwoord</label>
             <input
                 id="password"
+                v-model="password"
                 class="input"
                 type="password"
                 placeholder="Kies een veilig wachtwoord"
@@ -36,6 +38,7 @@
             <label class="style-label" for="password-repeat">Herhaal je wachtwoord</label>
             <input
                 id="password-repeat"
+                v-model="passwordRepeat"
                 class="input"
                 type="password"
                 placeholder="Herhaal je nieuw wachtwoord"
@@ -54,13 +57,17 @@
 </template>
 
 <script lang="ts">
+import { CreateOrganizationStruct } from '@stamhoofd-backend/app/src/organizations/structs/CreateOrganizationStruct';
+import { RegisterStruct } from '@stamhoofd-backend/app/src/users/structs/RegisterStruct';
+import { Sodium } from '@stamhoofd-common/crypto';
+import { Server } from "@stamhoofd-frontend/networking";
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import OrganizationStructureView from "./OrganizationStructureView.vue"
 
@@ -73,8 +80,39 @@ import OrganizationStructureView from "./OrganizationStructureView.vue"
     }
 })
 export default class CreateAccountView extends Mixins(NavigationMixin) {
-    goNext() {
-        this.show(new ComponentWithProperties(OrganizationStructureView))
+    @Prop() data: CreateOrganizationStruct;
+    email = ""
+    password = ""
+    passwordRepeat = ""
+
+    async goNext() {
+        const server = new Server()
+        server.host = "http://localhost:9090";
+
+        const userKeyPair = await Sodium.boxKeyPair();
+        const organizationKeyPair = await Sodium.signKeyPair();
+
+        const user = new RegisterStruct()
+        user.email = this.email
+        user.password = this.password
+        user.publicKey = userKeyPair.publicKey
+        user.adminSignature = await Sodium.signMessage(userKeyPair.publicKey, Buffer.from(organizationKeyPair.privateKey, "base64"))
+
+        this.data.user = user
+
+        this.data.publicKey = organizationKeyPair.publicKey
+
+        server.request({
+            method: "POST",
+            path: "/organizations",
+            body: this.data
+        }).then(data => {
+            console.log(data)
+        }).catch(e => {
+            console.error(e)
+        });
+
+        //this.show(new ComponentWithProperties(OrganizationStructureView))
     }
 }
 </script>

@@ -18,6 +18,7 @@
                     <input
                         id="organization-name"
                         ref="firstInput"
+                        v-model="name"
                         class="input"
                         type="text"
                         placeholder="De naam van je vereniging"
@@ -63,6 +64,7 @@
 </template>
 
 <script lang="ts">
+import { CreateOrganizationStruct } from '@stamhoofd-backend/app/src/organizations/structs/CreateOrganizationStruct';
 import { Server } from "@stamhoofd-frontend/networking";
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
@@ -83,6 +85,8 @@ import CreateAccountView from "./CreateAccountView.vue"
     }
 })
 export default class GeneralView extends Mixins(NavigationMixin) {
+    name = ""
+
     mounted() {
         const server = new Server()
         server.host = "http://localhost:9090";
@@ -98,7 +102,9 @@ export default class GeneralView extends Mixins(NavigationMixin) {
     }
 
     goNext() {
-        this.show(new ComponentWithProperties(CreateAccountView))
+        const data = new CreateOrganizationStruct()
+        data.name = this.name
+        this.show(new ComponentWithProperties(CreateAccountView, { data }))
     }
 }
 </script>

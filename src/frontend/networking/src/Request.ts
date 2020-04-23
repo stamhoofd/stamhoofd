@@ -1,6 +1,6 @@
 
 // Requests use middleware to extend its behaviour
-import { Decoder, ObjectData } from "@stamhoofd-common/encoding";
+import { Decoder, Encodeable,isEncodeable,ObjectData } from "@stamhoofd-common/encoding";
 
 import { RequestMiddleware } from './RequestMiddleware';
 import { Server } from './Server';
@@ -19,7 +19,7 @@ export interface RequestInitializer<T> {
     method: HTTPMethod;
     path: string;
     query?: any;
-    body?: any;
+    body?: any | Encodeable | FormData;
     headers?: any;
     decoder?: Decoder<T>;
 }
@@ -41,7 +41,7 @@ export class Request<T> {
      * Content that will get encoded in the body of the request (only for non GET requests)
      * Should be FormData (use this for uploading files) or it will get encoded as JSON
      */
-    body: any | FormData | undefined;
+    body: any | Encodeable | FormData | undefined;
 
     /// Shared middlewares that allows dependency injection here
     static sharedMiddlewares: RequestMiddleware[] = []
@@ -58,6 +58,7 @@ export class Request<T> {
         this.query = request.query
         this.body = request.body
         this.decoder = request.decoder
+        this.headers = request.headers ?? {}
     }
 
     getMiddlewares(): RequestMiddleware[] {
@@ -85,9 +86,16 @@ export class Request<T> {
                     body = this.body
                 } else {
                     this.headers['Content-Type'] = "application/json"
-                    body = JSON.stringify(this.body);
+
+                    if (isEncodeable(this.body)) {
+                        body = JSON.stringify(this.body.encode());
+                    } else {
+                        body = JSON.stringify(this.body);
+                    }
                 }
             }
+
+            console.log(this.method, this.path, this.body)
 
             response = await fetch(this.server.host + this.path, {
                 method: this.method,
