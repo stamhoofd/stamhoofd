@@ -50,14 +50,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
-
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import { Member } from "@stamhoofd/shared/models/Member";
+import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
-import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue";
+import { Member } from "@stamhoofd/shared/models/Member";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -82,7 +81,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
     get phones(): string[] {
         return this.members.flatMap((member) => {
-            let arr = [];
+            let arr: string[] = [];
             if (this.smsFilter == "parents" || this.smsFilter == "all") {
                 arr = member.parents.flatMap((parent) => {
                     if (parent.phone) {

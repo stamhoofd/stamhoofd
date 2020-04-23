@@ -1,11 +1,11 @@
-import { Member } from "../models/Member";
-import { ParentFactory } from "./ParentFactory";
 import { Gender } from "../models/Gender";
-import { Factory } from "./Factory";
+import { Member } from "../models/Member";
 import { ParentType } from "../models/ParentType";
+import { RecordTypeHelper,RecordTypePriority } from "../models/RecordType";
 import { EmergencyContactFactory } from "./EmergencyContactFactory";
+import { Factory } from "./Factory";
+import { ParentFactory } from "./ParentFactory";
 import { RecordFactory } from "./RecordFactory";
-import { RecordTypePriority, RecordTypeHelper } from "../models/RecordType";
 
 export class MemberFactoryOptions {
     minAge = 6;
@@ -124,7 +124,9 @@ export class MemberFactory extends Factory<Member> {
             if (pB == RecordTypePriority.Medium && pA != RecordTypePriority.Medium) {
                 return 1;
             }
+
             // Not possible
+            throw new Error("Method records sorting failure")
         });
 
         // Sort

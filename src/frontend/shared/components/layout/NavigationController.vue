@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref,Vue } from "vue-property-decorator";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import FramedComponent from "./FramedComponent.vue";
 
@@ -155,7 +156,7 @@ export default class NavigationController extends Vue {
             popped[0].keepAlive = true;
         }
 
-        this.nextScrollPosition = this.savedScrollPositions.pop();
+        this.nextScrollPosition = this.savedScrollPositions.pop() ?? 0;
 
         this.mainComponent = this.components[this.components.length - 1];
         this.$emit("didPop");

@@ -62,13 +62,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
+import { Server } from "@stamhoofd-frontend/networking";
+import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
+import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
-import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
-import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
+import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
+import { Component, Mixins } from "vue-property-decorator";
+
 import CreateAccountView from "./CreateAccountView.vue"
 
 @Component({
@@ -80,6 +82,20 @@ import CreateAccountView from "./CreateAccountView.vue"
     }
 })
 export default class GeneralView extends Mixins(NavigationMixin) {
+    mounted() {
+        const server = new Server()
+        server.host = "http://localhost:8080";
+
+        server.request({
+            method: "GET",
+            path: "/",
+        }).then(data => {
+            console.log(data)
+        }).catch(e => {
+            console.error(e)
+        });
+    }
+
     goNext() {
         this.show(new ComponentWithProperties(CreateAccountView))
     }

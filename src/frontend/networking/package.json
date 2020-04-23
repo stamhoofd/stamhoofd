@@ -1,0 +1,9 @@
+{
+    "name": "@stamhoofd-frontend/networking",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "private": true,
+    "dependencies": {
+        "@stamhoofd-common/encoding": "1.0.0"
+    }
+}

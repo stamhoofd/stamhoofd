@@ -29,21 +29,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
-
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import { Member } from "@stamhoofd/shared/models/Member";
+import FemaleIcon from "@stamhoofd/shared/components/icons/FemaleIcon.vue";
+import MaleIcon from "@stamhoofd/shared/components/icons/MaleIcon.vue";
+import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
-import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
-import MemberContextMenu from "./MemberContextMenu.vue";
-import MaleIcon from "@stamhoofd/shared/components/icons/MaleIcon.vue";
-import FemaleIcon from "@stamhoofd/shared/components/icons/FemaleIcon.vue";
 import { Gender } from "@stamhoofd/shared/models/Gender";
+import { Member } from "@stamhoofd/shared/models/Member";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import MemberContextMenu from "./MemberContextMenu.vue";
+import MemberViewDetails from "./MemberViewDetails.vue";
+import MemberViewHistory from "./MemberViewHistory.vue";
+import MemberViewPayments from "./MemberViewPayments.vue";
 
 @Component({
     components: {
@@ -90,7 +90,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
         });
-        this.navigationController.push(component, true, true, true);
+        this.navigationController?.push(component, true, true, true);
     }
 
     goNext() {
@@ -103,7 +103,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
         });
-        this.navigationController.push(component, true, true, false);
+        this.navigationController?.push(component, true, true, false);
     }
 
     activated() {

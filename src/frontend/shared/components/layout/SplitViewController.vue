@@ -10,10 +10,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref,Vue } from "vue-property-decorator";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
-import NavigationController from "./NavigationController.vue";
 import FramedComponent from "./FramedComponent.vue";
+import NavigationController from "./NavigationController.vue";
 
 // Credits https://codeburst.io/throttling-and-debouncing-in-javascript-b01cad5c8edf
 const throttle = (func, limit) => {
@@ -87,7 +88,7 @@ export default class SplitViewController extends Vue {
     get lastIsDetail() {
         return (
             this.detailKey != null &&
-            (this.$refs.navigationController as NavigationController).mainComponent.key == this.detailKey
+            (this.$refs.navigationController as NavigationController).mainComponent?.key == this.detailKey
         );
     }
 
@@ -136,6 +137,10 @@ export default class SplitViewController extends Vue {
     collapse() {
         if (this.lastIsDetail) {
             console.error("Cannot collapse when the detail is already collaped");
+            return;
+        }
+        if (!this.detail) {
+            console.error("Cannot collapse without detail");
             return;
         }
         this.detail.keepAlive = true;

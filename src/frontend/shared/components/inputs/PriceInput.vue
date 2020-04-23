@@ -32,7 +32,7 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 @Component
 export default class PriceInput extends Vue {
     min = 0;
-    max?: number = null;
+    max?: number;
     valueString = "40";
     valid = true;
     value = 40;

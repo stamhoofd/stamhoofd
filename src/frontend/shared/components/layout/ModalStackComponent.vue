@@ -7,13 +7,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref,Vue } from "vue-property-decorator";
+
+import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import { eventBus } from "../../classes/event-bus/EventBus";
 import { EventBusListener } from "../../classes/event-bus/EventBusListener";
-import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import NavigationController from "./NavigationController.vue";
-import StackComponent from "./StackComponent.vue";
 import Popup from "./Popup.vue";
+import StackComponent from "./StackComponent.vue";
 
 @Component({
     components: {
@@ -48,7 +49,7 @@ export default class ModalStackComponent extends Vue {
     }
 
     beforeDestroy() {
-        eventBus.removeListener(this.listener);
+        if (this.listener) eventBus.removeListener(this.listener);
     }
 }
 </script>

@@ -1,7 +1,7 @@
 import { Gender } from "../models/Gender";
 import BoyNames from "./data/boys";
-import GirlNames from "./data/girls";
 import FamilyNames from "./data/family-names";
+import GirlNames from "./data/girls";
 
 export abstract class Factory<Model> {
     options: object;
@@ -36,7 +36,7 @@ export abstract class Factory<Model> {
     }
 
     createMultiple(amount = 40): Array<Model> {
-        const arr = [];
+        const arr: Model[] = [];
         for (let index = 0; index < amount; index++) {
             arr.push(this.create());
         }

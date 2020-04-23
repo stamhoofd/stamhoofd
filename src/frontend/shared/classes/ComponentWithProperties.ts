@@ -53,7 +53,7 @@ export class ComponentWithProperties {
                 return;
             }
             console.log("Destroyed component " + this.component.name);
-            this.vnode.componentInstance.$destroy();
+            this.vnode.componentInstance?.$destroy();
             this.vnode = null;
         }
     }

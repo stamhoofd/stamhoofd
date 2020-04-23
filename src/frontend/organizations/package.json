@@ -10,6 +10,7 @@
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/shared": "1.0.0",
+        "@stamhoofd-frontend/networking": "1.0.0",
         "core-js": "^3.6.4",
         "tiptap": "^1.26.6",
         "tiptap-extensions": "^1.28.6",

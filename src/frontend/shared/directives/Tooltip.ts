@@ -4,7 +4,7 @@ import Tooltip from "@stamhoofd/shared/components/overlays/Tooltip.vue";
 export default {
     inserted(el, binding, vnode) {
         let isMouseHover = false;
-        let displayedComponent = null;
+        let displayedComponent: ComponentWithProperties | null = null;
 
         // Add a hover listener
         el.addEventListener(
@@ -40,7 +40,7 @@ export default {
 
                 if (displayedComponent && displayedComponent.vnode) {
                     // Todo: hide component again
-                    displayedComponent.vnode.componentInstance.$parent.$emit("pop");
+                    displayedComponent.vnode.componentInstance?.$parent.$emit("pop");
                     displayedComponent = null;
                 }
             },

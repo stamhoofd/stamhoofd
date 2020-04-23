@@ -1,7 +1,7 @@
-import { Organization } from "../models/Organization";
-import { MemberFactory } from "./MemberFactory";
-import { Factory } from "./Factory";
 import { Group } from "../models/Group";
+import { Organization } from "../models/Organization";
+import { Factory } from "./Factory";
+import { MemberFactory } from "./MemberFactory";
 
 export interface OrganizationFactoryOptions {
     type: string | null;
@@ -19,7 +19,7 @@ export class OrganizationFactory extends Factory<Organization> {
         const organization = new Organization();
         organization.id = Math.floor(Math.random() * 99999999999);
 
-        let groupNames = [];
+        let groupNames: any = [];
         switch (this.options.type) {
             case "scouts":
                 groupNames = [
@@ -95,7 +95,7 @@ export class OrganizationFactory extends Factory<Organization> {
             group.members.forEach(member => {
                 member.group = group;
             });
-            organization.groups.push(group);
+            organization.groups?.push(group);
         });
 
         return organization;

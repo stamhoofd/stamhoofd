@@ -1,20 +1,32 @@
 
 // Requests use middleware to extend its behaviour
+import { Decoder, ObjectData } from "@stamhoofd-common/encoding";
 
 import { RequestMiddleware } from './RequestMiddleware';
+import { Server } from './Server';
 
 export type HTTPMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT"
 
-export class RequestResult {
-    success: boolean;
+export class RequestResult<T> {
+    data?: T;
 
-    constructor(success: boolean) {
-        this.success = success
+    constructor(data?: T) {
+        this.data = data
     }
 }
 
-export class Request {
+export interface RequestInitializer<T> {
+    method: HTTPMethod;
+    path: string;
+    query?: any;
+    body?: any;
+    headers?: any;
+    decoder?: Decoder<T>;
+}
+
+export class Request<T> {
     /// Path, relative to API host
+    server: Server;
     path: string;
     method: HTTPMethod;
 
@@ -37,24 +49,22 @@ export class Request {
     /// Request specific middleware
     middlewares: RequestMiddleware[] = []
 
-    constructor(request: {
-        method: HTTPMethod;
-        path: string;
-        query?: any;
-        body?: any;
-        headers?: any;
-    }) {
+    decoder: Decoder<T> | undefined
+
+    constructor(server: Server, request: RequestInitializer<T>) {
+        this.server = server;
         this.method = request.method
         this.path = request.path
         this.query = request.query
         this.body = request.body
+        this.decoder = request.decoder
     }
 
     getMiddlewares(): RequestMiddleware[] {
         return Request.sharedMiddlewares.concat(this.middlewares)
     }
 
-    async start(): Promise<RequestResult> {
+    async start(): Promise<RequestResult<T>> {
         // todo: check if already running or not
 
         // todo: add query parameters
@@ -66,7 +76,7 @@ export class Request {
 
         try {
             let body: any;
-            
+
             // We only support application/json or FormData for now
             if (this.body === undefined) {
                 body = undefined;
@@ -78,7 +88,7 @@ export class Request {
                     body = JSON.stringify(this.body);
                 }
             }
-            
+
             response = await fetch(this.path, {
                 method: this.method,
                 headers: this.headers,
@@ -105,7 +115,7 @@ export class Request {
             // Failed and not caught
             throw error
         }
-        
+
         // A middleware might decide here to interrupt the callback
         // He might for example fire a timer to retry the request because of a network failure
         // Or it might decide to fetch a new access token because the current one is expired
@@ -124,7 +134,11 @@ export class Request {
         const json = await response.json()
 
         // todo: add automatic decoding here, so we know we are receiving what we expected with typings
+        if (this.decoder) {
+            const decoded = this.decoder?.decode(new ObjectData(json))
+            return new RequestResult(decoded)
+        }
 
-        return new RequestResult(true)
+        return new RequestResult(json)
     }
 }

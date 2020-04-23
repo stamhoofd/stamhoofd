@@ -114,24 +114,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
-
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { CanNotSwimFilter,FoodAllergyFilter, NoFilter, NotPaidFilter } from "@stamhoofd/shared/classes/member-filters";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import Checkbox from "@stamhoofd/shared/components/inputs/Checkbox.vue";
-import { Member } from "@stamhoofd/shared/models/Member";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue";
-import MemberView from "../member/MemberView.vue";
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
-import MemberContextMenu from "../member/MemberContextMenu.vue";
-import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import MailView from "../mail/MailView.vue";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue";
-import { NoFilter, NotPaidFilter, FoodAllergyFilter, CanNotSwimFilter } from "@stamhoofd/shared/classes/member-filters";
 import Tooltip from "@stamhoofd/shared/directives/Tooltip";
 import { Group } from "@stamhoofd/shared/models/Group";
+import { Member } from "@stamhoofd/shared/models/Member";
 import { Organization } from "@stamhoofd/shared/models/Organization";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import MailView from "../mail/MailView.vue";
+import MemberContextMenu from "../member/MemberContextMenu.vue";
+import MemberView from "../member/MemberView.vue";
+import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 
 class SelectableMember {
     member: Member;
@@ -266,15 +266,15 @@ export default class GroupList extends Mixins(NavigationMixin) {
 
     mounted() {
         if (this.group) {
-            this.members = this.group.members.map((member) => {
+            this.members = this.group.members?.map((member) => {
                 return new SelectableMember(member);
-            });
+            }) ?? [];
         } else {
-            this.members = this.organization.groups.flatMap((group) => {
-                return group.members.map((member) => {
+            this.members = this.organization?.groups?.flatMap((group) => {
+                return group.members?.map((member) => {
                     return new SelectableMember(member);
-                });
-            });
+                }) ?? [];
+            }) ?? [];
         }
     }
     next() {

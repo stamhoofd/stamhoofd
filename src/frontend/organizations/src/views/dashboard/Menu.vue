@@ -46,15 +46,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
-
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import GroupList from "./groups/GroupList.vue";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
-import { Organization } from "@stamhoofd/shared/models/Organization";
 import { OrganizationFactory } from "@stamhoofd/shared/factories/OrganizationFactory";
 import { Group } from "@stamhoofd/shared/models/Group";
+import { Organization } from "@stamhoofd/shared/models/Organization";
+import { Component, Mixins } from "vue-property-decorator";
+
+import GroupList from "./groups/GroupList.vue";
 
 class SelectableGroup {
     group: Group;
@@ -77,10 +77,11 @@ export default class Menu extends Mixins(NavigationMixin) {
         });
         this.organization = factory.create();
 
-        this.groups = this.organization.groups.map((group) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.groups = this.organization.groups!.map((group) => {
             return new SelectableGroup(group);
         });
-        if (!this.splitViewController.shouldCollapse()) {
+        if (!this.splitViewController?.shouldCollapse()) {
             this.selectedGroup = this.groups[0];
             this.selectedGroup.selected = true;
             this.showDetail(
