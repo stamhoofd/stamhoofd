@@ -1,6 +1,7 @@
-import { Request, HttpMethod } from "./Request";
 import { Decoder, ObjectData } from '@stamhoofd-common/encoding';
 import http from "http";
+
+import { HttpMethod,Request } from "./Request";
 
 export class DecodedRequest<Params, Query, Body> {
     method: HttpMethod;

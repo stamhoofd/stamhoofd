@@ -1,7 +1,7 @@
-import { Database } from "./Database";
-import { ManyToOneRelation } from "./ManyToOneRelation";
-import { ManyToManyRelation } from "./ManyToManyRelation";
 import { Column } from "./Column";
+import { Database } from "./Database";
+import { ManyToManyRelation } from "./ManyToManyRelation";
+import { ManyToOneRelation } from "./ManyToOneRelation";
 
 export class Model /* static implements RowInitiable<Model> */ {
     static primary: Column;

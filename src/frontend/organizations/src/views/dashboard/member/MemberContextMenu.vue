@@ -29,14 +29,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
+import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import ContextMenu from "@stamhoofd/shared/components/overlays/ContextMenu.vue";
 import ContextMenuItem from "@stamhoofd/shared/components/overlays/ContextMenuItem.vue";
 import ContextMenuLine from "@stamhoofd/shared/components/overlays/ContextMenuLine.vue";
-import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import { Member } from "@stamhoofd/shared/models/Member";
 import { ParentTypeHelper } from "@stamhoofd/shared/models/ParentType";
-import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 

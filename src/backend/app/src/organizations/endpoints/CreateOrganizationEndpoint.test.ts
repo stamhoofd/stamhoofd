@@ -1,9 +1,10 @@
-import { Request } from "@stamhoofd-backend/routing";
-import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
-import { Sodium } from "@stamhoofd-common/crypto";
 import { User } from "@stamhoofd-backend/app/src/users/models/User";
-import { Organization } from "../models/Organization";
+import { Request } from "@stamhoofd-backend/routing";
+import { Sodium } from "@stamhoofd-common/crypto";
 import { Formatter } from "@stamhoofd-common/formatting"; 
+
+import { Organization } from "../models/Organization";
+import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 describe("Endpoint.CreateOrganization", () => {
     // Test endpoint

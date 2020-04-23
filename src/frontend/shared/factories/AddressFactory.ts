@@ -1,6 +1,6 @@
 import { Address } from "../models/Address";
-import { Factory } from "./Factory";
 import StreetNames from "./data/streets";
+import { Factory } from "./Factory";
 
 interface Options {}
 

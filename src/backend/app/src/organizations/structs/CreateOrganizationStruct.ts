@@ -1,5 +1,6 @@
 import { Data } from '@stamhoofd-common/encoding';
-import { RegisterStruct } from "@stamhoofd-backend/app/src/users/structs/RegisterStruct";
+
+import { RegisterStruct } from "../../users/structs/RegisterStruct";
 
 export class CreateOrganizationStruct {
     name: string;

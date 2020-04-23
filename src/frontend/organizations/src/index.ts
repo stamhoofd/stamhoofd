@@ -1,4 +1,5 @@
 import Vue from "vue";
+
 import DashboardWindow from "./views/dashboard/DashboardWindow.vue";
 
 Vue.config.productionTip = false;

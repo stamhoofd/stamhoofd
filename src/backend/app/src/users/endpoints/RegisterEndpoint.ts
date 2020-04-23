@@ -1,9 +1,10 @@
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
 import { Response } from "@stamhoofd-backend/routing";
 import { Endpoint } from "@stamhoofd-backend/routing";
+
 import { User } from "../models/User";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { RegisterStruct } from "../structs/RegisterStruct";
 
 type Params = {};

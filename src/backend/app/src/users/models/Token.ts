@@ -1,9 +1,10 @@
 import { Model } from "@stamhoofd-backend/database";
 import { column } from "@stamhoofd-backend/database";
 import { ManyToOneRelation } from "@stamhoofd-backend/database";
-import { User } from "./User";
 import { Database } from "@stamhoofd-backend/database";
 import crypto from "crypto";
+
+import { User } from "./User";
 
 export type TokenWithUser = Token & { user: User };
 

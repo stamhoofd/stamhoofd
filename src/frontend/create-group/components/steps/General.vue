@@ -47,13 +47,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
-import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
-import EditGroupDetail from "../EditGroupDetail.vue";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
+import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
 import Popup from "@stamhoofd/shared/components/layout/Popup.vue";
+import { Component, Vue } from "vue-property-decorator";
+
+import EditGroupDetail from "../EditGroupDetail.vue";
 import Step from "../Step.vue";
 import GroupSettings from "./GroupSettings.vue";
 

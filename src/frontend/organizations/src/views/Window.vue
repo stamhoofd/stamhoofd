@@ -6,10 +6,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import ModalStackComponent from "@stamhoofd/shared/components/layout/ModalStackComponent.vue";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import ModalStackComponent from "@stamhoofd/shared/components/layout/ModalStackComponent.vue";
 import StackComponent from "@stamhoofd/shared/components/layout/StackComponent.vue";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 
 

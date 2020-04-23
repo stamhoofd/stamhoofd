@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Model } from "./Model";
 import { column } from "../decorators/Column";
 import { Database } from "./Database";
 import { ManyToManyRelation } from "./ManyToManyRelation";
 import { ManyToOneRelation } from "./ManyToOneRelation";
+import { Model } from "./Model";
 
 describe("Model", () => {
     // Create a new class

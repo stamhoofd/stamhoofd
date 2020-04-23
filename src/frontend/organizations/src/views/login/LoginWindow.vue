@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
-import LaunchView from "./LaunchView.vue";
+import { Component, Vue } from "vue-property-decorator";
+
 import Window from "../Window.vue";
+import LaunchView from "./LaunchView.vue";
 
 @Component({
     components: {

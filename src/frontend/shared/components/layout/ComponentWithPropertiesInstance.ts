@@ -1,4 +1,5 @@
 import Vue, { VNode } from "vue";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 
 export default Vue.extend({

@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 

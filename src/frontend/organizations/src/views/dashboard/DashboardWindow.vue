@@ -3,11 +3,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import SplitViewController from "@stamhoofd/shared/components/layout/SplitViewController.vue";
-import Menu from "./Menu.vue";
+import { Component, Vue } from "vue-property-decorator";
+
 import Window from "../Window.vue";
+import Menu from "./Menu.vue";
 
 @Component({
     components: {

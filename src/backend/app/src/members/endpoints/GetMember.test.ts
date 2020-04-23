@@ -1,7 +1,8 @@
-import { GetMember } from "./GetMember";
-import { Request } from '@stamhoofd-backend/routing';
 import { OrganizationFactory } from '@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory';
+import { Request } from '@stamhoofd-backend/routing';
+
 import { MemberFactory } from '../factories/MemberFactory';
+import { GetMember } from "./GetMember";
 
 // Test endpoint
 const getMemberEndpoint = new GetMember()

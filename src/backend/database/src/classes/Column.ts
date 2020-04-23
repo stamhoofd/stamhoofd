@@ -1,5 +1,6 @@
+import { Decoder, isEncodeable,ObjectData } from '@stamhoofd-common/encoding';
+
 import { ColumnType } from "../decorators/Column";
-import { Decoder, ObjectData, isEncodeable } from '@stamhoofd-common/encoding';
 
 export class Column {
     type: ColumnType;

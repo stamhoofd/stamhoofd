@@ -73,11 +73,11 @@
 </template>
 
 <script lang="ts">
+import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
-import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import EditGroup from "./EditGroup.vue";
 
 @Component({

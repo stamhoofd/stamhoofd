@@ -1,6 +1,7 @@
 import { Encodeable } from '@stamhoofd-common/encoding';
-import { Response } from "./Response";
 import http from "http";
+
+import { Response } from "./Response";
 
 export class EncodedResponse {
     status = 200;

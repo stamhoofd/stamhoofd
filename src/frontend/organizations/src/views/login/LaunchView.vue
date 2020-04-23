@@ -21,13 +21,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
-import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
-import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
-import GeneralView from '../create-group/GeneralView.vue';
+import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue"
+import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
+import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
+import { Component, Mixins } from "vue-property-decorator";
+
+import GeneralView from '../create-group/GeneralView.vue';
 
 @Component({
     components: {

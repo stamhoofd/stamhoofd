@@ -1,8 +1,9 @@
-import { promises as fs } from "fs";
-import { Migration as MigrationModel } from "../models/Migration";
-import path from "path";
-import { Database } from './Database';
 import colors from "colors";
+import { promises as fs } from "fs";
+import path from "path";
+
+import { Migration as MigrationModel } from "../models/Migration";
+import { Database } from './Database';
 
 type MigrationFunction = () => Promise<void>;
 

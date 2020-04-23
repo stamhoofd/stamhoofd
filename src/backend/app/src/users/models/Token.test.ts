@@ -1,9 +1,10 @@
+import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { Database } from "@stamhoofd-backend/database";
+
+import { UserFactory } from "../factories/UserFactory";
 import { Token } from "./Token";
 import { User, UserWithOrganization } from "./User";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
-import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
-import { UserFactory } from "../factories/UserFactory";
 
 describe("Model.Token", () => {
     const existingToken = "ABCDEFG";

@@ -1,6 +1,7 @@
 import { Member } from "@stamhoofd/shared/models/Member";
-import { Filter } from "./Filter";
 import { RecordType } from "@stamhoofd/shared/models/RecordType";
+
+import { Filter } from "./Filter";
 
 export class CanNotSwimFilter implements Filter {
     getName(): string {

@@ -18,24 +18,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { Editor, EditorContent, EditorMenuBubble, EditorFloatingMenu } from "tiptap";
+import { Editor, EditorContent, EditorFloatingMenu,EditorMenuBubble } from "tiptap";
 import {
     Blockquote,
+    Bold,
     BulletList,
+    Code,
     CodeBlock,
     HardBreak,
     Heading,
-    ListItem,
-    OrderedList,
-    Bold,
-    Code,
+    History,
     Italic,
     Link,
+    ListItem,
+    OrderedList,
     Strike,
     Underline,
-    History,
 } from "tiptap-extensions";
+import { Component, Vue } from "vue-property-decorator";
 
 import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 

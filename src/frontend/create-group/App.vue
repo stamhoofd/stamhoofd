@@ -9,11 +9,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import Steps from "./components/Steps.vue";
-import ModalStackComponent from "@stamhoofd/shared/components/layout/ModalStackComponent.vue";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import ModalStackComponent from "@stamhoofd/shared/components/layout/ModalStackComponent.vue";
 import StackComponent from "@stamhoofd/shared/components/layout/StackComponent.vue";
+import { Component, Vue } from "vue-property-decorator";
+
+import Steps from "./components/Steps.vue";
 
 @Component({
     components: {

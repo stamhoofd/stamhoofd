@@ -1,5 +1,5 @@
-import { Model } from "./Model";
 import { Database } from "./Database";
+import { Model } from "./Model";
 
 export class ManyToManyRelation<Key extends keyof any, A extends Model, B extends Model> {
     modelA: { new(): A } & typeof Model;

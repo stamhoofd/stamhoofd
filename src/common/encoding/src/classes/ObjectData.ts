@@ -1,11 +1,11 @@
-import { Data } from "./Data";
-import { Decoder } from "./Decoder";
-import StringDecoder from "../structs/StringDecoder";
-import NumberDecoder from "../structs/NumberDecoder";
-import ArrayDecoder from "../structs/ArrayDecoder";
 import { DecodingError } from "../classes/DecodingError";
+import ArrayDecoder from "../structs/ArrayDecoder";
 import Base64Decoder from "../structs/Base64Decoder";
 import KeyDecoder from "../structs/KeyDecoder";
+import NumberDecoder from "../structs/NumberDecoder";
+import StringDecoder from "../structs/StringDecoder";
+import { Data } from "./Data";
+import { Decoder } from "./Decoder";
 
 /// Implementation of Data that reads an already existing tree of data.
 export class ObjectData implements Data {

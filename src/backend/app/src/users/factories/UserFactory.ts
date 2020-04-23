@@ -1,6 +1,7 @@
-import { User, UserWithOrganization } from "../models/User";
-import { Factory } from "@stamhoofd-backend/database";
 import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
+import { Factory } from "@stamhoofd-backend/database";
+
+import { User, UserWithOrganization } from "../models/User";
 
 class Options {
     organization: Organization;

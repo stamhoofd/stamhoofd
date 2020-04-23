@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref,Vue } from "vue-property-decorator";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import ComponentWithPropertiesInstance from "./ComponentWithPropertiesInstance";
 

@@ -1,4 +1,5 @@
 import Vue from "vue";
+
 import LoginWindow from "./views/login/LoginWindow.vue";
 
 Vue.config.productionTip = false;

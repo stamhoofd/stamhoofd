@@ -1,7 +1,8 @@
-import { Endpoint } from "./Endpoint";
 import { promises as fs } from "fs";
-import { Request } from "./Request";
+
 import { EncodedResponse } from "./EncodedResponse";
+import { Endpoint } from "./Endpoint";
+import { Request } from "./Request";
 
 async function directoryExists(filePath): Promise<boolean> {
     try {

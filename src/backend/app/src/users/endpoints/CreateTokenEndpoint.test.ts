@@ -1,10 +1,11 @@
-import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
+import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { Request } from "@stamhoofd-backend/routing";
+
+import { UserFactory } from "../factories/UserFactory";
 import { UserWithOrganization } from "../models/User";
 import { TokenStruct } from "../structs/TokenStruct";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
-import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
-import { UserFactory } from "../factories/UserFactory";
+import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
 
 describe("Endpoint.CreateToken", () => {
     // Test endpoint

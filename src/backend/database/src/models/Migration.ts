@@ -1,6 +1,6 @@
+import { Database } from "../classes/Database";
 import { Model } from "../classes/Model";
 import { column } from "../decorators/Column";
-import { Database } from "../classes/Database";
 
 export class Migration extends Model {
     static table = "migrations";

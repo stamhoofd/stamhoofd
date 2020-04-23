@@ -1,7 +1,7 @@
-import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
-import { ObjectData } from "../classes/ObjectData";
+import { Decoder } from "../classes/Decoder";
 import { DecodingError } from "../classes/DecodingError";
+import { ObjectData } from "../classes/ObjectData";
 
 class ArrayDecoder implements Decoder<Data[]> {
     decode(data: Data): Data[] {

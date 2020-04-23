@@ -1,5 +1,5 @@
-import { Decoder } from "../classes/Decoder";
 import { Data } from "../classes/Data";
+import { Decoder } from "../classes/Decoder";
 import { DecodingError } from "../classes/DecodingError";
 
 class StringDecoder implements Decoder<string> {

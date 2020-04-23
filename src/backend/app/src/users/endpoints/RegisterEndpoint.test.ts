@@ -1,11 +1,11 @@
-import { Request } from "@stamhoofd-backend/routing";
-import { UserWithOrganization } from "../models/User";
-import { TokenStruct } from "../structs/TokenStruct";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
-import { UserFactory } from "../factories/UserFactory";
-import { RegisterEndpoint } from "./RegisterEndpoint";
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
+import { Request } from "@stamhoofd-backend/routing";
 import { Sodium } from "@stamhoofd-common/crypto";
+
+import { UserFactory } from "../factories/UserFactory";
+import { UserWithOrganization } from "../models/User";
+import { RegisterEndpoint } from "./RegisterEndpoint";
 
 describe("Endpoint.Register", () => {
     // Test endpoint

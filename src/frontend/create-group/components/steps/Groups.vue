@@ -84,17 +84,18 @@
 </template>
 
 <script lang="ts">
+import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
+import MoreButton from "@stamhoofd/shared/components/buttons/MoreButton.vue";
+import CheckboxItem from "@stamhoofd/shared/components/inputs/CheckboxItem.vue";
+import CheckboxList from "@stamhoofd/shared/components/inputs/CheckboxList.vue";
+import GenderSelector from "@stamhoofd/shared/components/inputs/GenderSelector.vue";
+import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
+import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
 import Vue from "vue";
 import Component from "vue-class-component";
-import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
-import CheckboxList from "@stamhoofd/shared/components/inputs/CheckboxList.vue";
-import CheckboxItem from "@stamhoofd/shared/components/inputs/CheckboxItem.vue";
-import GenderSelector from "@stamhoofd/shared/components/inputs/GenderSelector.vue";
-import MoreButton from "@stamhoofd/shared/components/buttons/MoreButton.vue";
-import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
+
 import EditGroup from "../EditGroup.vue";
-import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
-import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
 import Step from "../Step.vue";
 
 @Component({

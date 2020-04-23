@@ -28,11 +28,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Ref } from "vue-property-decorator";
+import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
+import { Component, Ref,Vue } from "vue-property-decorator";
+
 import Header from "./Header.vue";
 import GeneralStep from "./steps/General.vue";
-import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
-import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 
 @Component({
     components: {

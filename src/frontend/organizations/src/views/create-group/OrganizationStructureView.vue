@@ -111,15 +111,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from "vue-property-decorator";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
-import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
-import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
-import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
-import PriceInput from "@stamhoofd/shared/components/inputs/PriceInput.vue"
 import Checkbox from "@stamhoofd/shared/components/inputs/Checkbox.vue"
+import PriceInput from "@stamhoofd/shared/components/inputs/PriceInput.vue"
 import Radio from "@stamhoofd/shared/components/inputs/Radio.vue"
 import RadioGroup from "@stamhoofd/shared/components/inputs/RadioGroup.vue"
+import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
+import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
+import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
+import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
     components: {

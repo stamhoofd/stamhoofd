@@ -1,7 +1,8 @@
-import BoyNames from "./data/boys";
-import GirlNames from "./data/girls";
-import FamilyNames from "./data/family-names";
 import { Gender } from "@stamhoofd-backend/app/src/members/models/Gender";
+
+import BoyNames from "./data/boys";
+import FamilyNames from "./data/family-names";
+import GirlNames from "./data/girls";
 
 export abstract class Factory<Options, Model> {
     options: Options;

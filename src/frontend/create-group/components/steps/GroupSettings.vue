@@ -99,18 +99,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
+import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
 import Checkbox from "@stamhoofd/shared/components/inputs/Checkbox.vue";
+import PriceInput from "@stamhoofd/shared/components/inputs/PriceInput.vue";
 import Radio from "@stamhoofd/shared/components/inputs/Radio.vue";
 import RadioGroup from "@stamhoofd/shared/components/inputs/RadioGroup.vue";
-import PriceInput from "@stamhoofd/shared/components/inputs/PriceInput.vue";
-
-import { eventBus } from "@stamhoofd/shared/classes/event-bus/EventBus";
-import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
+import Slider from "@stamhoofd/shared/components/inputs/Slider.vue";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
-import Step from "../Step.vue";
+import { Component, Vue } from "vue-property-decorator";
+
 import EditGroupDetail from "../EditGroupDetail.vue";
+import Step from "../Step.vue";
 import Groups from "./Groups.vue";
 
 @Component({

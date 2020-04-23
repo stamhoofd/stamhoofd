@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Component from "vue-class-component";
+
 import { ComponentWithProperties } from "../../classes/ComponentWithProperties";
 import { NavigationMixin } from "../../classes/NavigationMixin";
 

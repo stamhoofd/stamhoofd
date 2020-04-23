@@ -103,12 +103,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Mixins } from "vue-property-decorator";
-import Tooltip from "@stamhoofd/shared/directives/Tooltip";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
+import Tooltip from "@stamhoofd/shared/directives/Tooltip";
 import { Member } from "@stamhoofd/shared/models/Member";
 import { ParentTypeHelper } from "@stamhoofd/shared/models/ParentType";
 import { RecordTypeHelper } from "@stamhoofd/shared/models/RecordType";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     directives: { Tooltip },

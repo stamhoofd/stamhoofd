@@ -1,5 +1,5 @@
-import XLSX from "xlsx";
 import { Member } from "@stamhoofd/shared/models/Member";
+import XLSX from "xlsx";
 
 export class MemberExcelExport {
     static export(members: Member[]) {

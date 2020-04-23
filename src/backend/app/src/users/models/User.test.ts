@@ -1,7 +1,8 @@
-import { User } from "./User";
-import { Database } from "@stamhoofd-backend/database";
-import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { OrganizationFactory } from "@stamhoofd-backend/app/src/organizations/factories/OrganizationFactory";
+import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
+import { Database } from "@stamhoofd-backend/database";
+
+import { User } from "./User";
 
 describe("Model.User", () => {
     let existingUserId: number;

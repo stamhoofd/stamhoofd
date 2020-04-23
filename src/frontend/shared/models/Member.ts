@@ -1,9 +1,9 @@
-import { Gender } from "./Gender";
 import { Address } from "./Address";
-import { Parent } from "./Parent";
 import { EmergencyContact } from "./EmergencyContact";
-import { Record } from "./Record";
+import { Gender } from "./Gender";
 import { Group } from "./Group";
+import { Parent } from "./Parent";
+import { Record } from "./Record";
 
 export class Member {
     id = 0;
