@@ -8,12 +8,18 @@
         "build": "webpack"
     },
     "dependencies": {
+        "@stamhoofd-frontend/networking": "1.0.0",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/shared": "1.0.0",
-        "@stamhoofd-frontend/networking": "1.0.0",
+        "@typescript-eslint/eslint-plugin": "^2.28.0",
+        "@typescript-eslint/parser": "^2.28.0",
         "core-js": "^3.6.4",
+        "eslint-plugin-vue": "^7.0.0-alpha.0",
+        "jest": "^25.3.0",
         "tiptap": "^1.26.6",
         "tiptap-extensions": "^1.28.6",
+        "ts-loader": "^7.0.0",
+        "webpack": "^4.42.1",
         "xlsx": "^0.15.5"
     },
     "devDependencies": {
