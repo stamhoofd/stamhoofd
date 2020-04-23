@@ -1,6 +1,6 @@
+import { Database } from "@stamhoofd-backend/database";
 import { Router } from "@stamhoofd-backend/routing";
 import { RouterServer } from "@stamhoofd-backend/routing";
-import { Database } from "@stamhoofd-backend/database";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -21,7 +21,7 @@ const start = async () => {
     await router.loadAllEndpoints(__dirname + "/src");
 
     const routerServer = new RouterServer(router);
-    routerServer.listen(8080);
+    routerServer.listen(9090);
 
     const shutdown = () => {
         routerServer

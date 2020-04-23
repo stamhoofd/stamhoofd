@@ -1,6 +1,8 @@
 const { app, BrowserWindow, systemPreferences } = require('electron')
 require('./electron/menu');
 
+const development = !!process.env.ELECTRON_WEBPACK_DEV_SERVER
+
 // For now, we do not support a dark mode yet
 systemPreferences.appLevelAppearance = "light"
 
@@ -10,7 +12,9 @@ function createLoginWindow () {
     width: 700 + 675, // dev console width = 675
     height: 500,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      webSecurity: false, // disable CORS... This should not be a problem since we'll only load local files, never never load files from a remote server
+      allowRunningInsecureContent: false,
     },
     titleBarStyle: 'hiddenInset'
   })
@@ -50,3 +54,22 @@ app.on('activate', () => {
     createLoginWindow()
   }
 })
+
+// Disable navigation away from our secure, static files
+app.on('web-contents-created', (event, contents) => {
+  contents.on('will-navigate', (event, navigationUrl) => {
+    const parsedUrl = new URL(navigationUrl)
+
+    if (development) {
+      if (parsedUrl.origin != "http://127.0.0.1:8080") {
+        console.warn("Prevented insecure navigation")
+        event.preventDefault()
+      }
+    } else {
+      if (parsedUrl.protocol != "file") {
+        console.warn("Prevented insecure navigation")
+        event.preventDefault()
+      }
+    }
+  })
+});

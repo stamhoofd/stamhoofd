@@ -1,7 +1,8 @@
-import { Router } from "./Router";
 import http from "http";
-import { Request } from "./Request";
+
 import { ClientError } from "./ClientError";
+import { Request } from "./Request";
+import { Router } from "./Router";
 
 export class RouterServer {
     router: Router;
@@ -42,7 +43,7 @@ export class RouterServer {
         }
     }
 
-    listen(port: 8080) {
+    listen(port: number) {
         if (this.server) {
             throw new Error("Already listening.");
         }

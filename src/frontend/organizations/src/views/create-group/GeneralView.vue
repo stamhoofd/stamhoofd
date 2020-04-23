@@ -51,6 +51,7 @@
         <STToolbar>
             <template #left>
                 Volledig gratis tot je de demo beïndigd
+                <a href="https://stamhoofd.be">Stamhoofd</a>
             </template>
             <template #right>
                 <button class="button primary" @click="goNext">
@@ -84,7 +85,7 @@ import CreateAccountView from "./CreateAccountView.vue"
 export default class GeneralView extends Mixins(NavigationMixin) {
     mounted() {
         const server = new Server()
-        server.host = "http://localhost:8080";
+        server.host = "http://localhost:9090";
 
         server.request({
             method: "GET",

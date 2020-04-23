@@ -89,10 +89,12 @@ export class Request<T> {
                 }
             }
 
-            response = await fetch(this.path, {
+            response = await fetch(this.server.host + this.path, {
                 method: this.method,
                 headers: this.headers,
                 body: body,
+                mode: "no-cors",
+                credentials: 'omit'
             })
         } catch (error) {
             // Todo: map the error in our own error types to make error handling easier
