@@ -14,16 +14,18 @@
         <main>
             <div class="split-inputs">
                 <div>
-                    <label class="style-label" for="organization-name">Naam van je vereniging</label>
-                    <input
-                        id="organization-name"
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="De naam van je vereniging"
-                        autocomplete="organization"
-                    >
+                    <STInput errorField="name">
+                        <label class="style-label" for="organization-name">Naam van je vereniging</label>
+                        <input
+                            id="organization-name"
+                            ref="firstInput"
+                            v-model="name"
+                            class="input"
+                            type="text"
+                            placeholder="De naam van je vereniging"
+                            autocomplete="organization"
+                        >
+                    </STInput>
 
                     <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
                     <Slider />

@@ -14,16 +14,18 @@
         <main>
             <p>Met dit account zal je later moeten inloggen om toegang te krijgen tot jouw vereniging.</p>
 
-            <label class="style-label" for="email">Persoonlijk e-mailadres</label>
-            <input
-                id="email"
-                ref="firstInput"
-                v-model="email"
-                class="input"
-                type="email"
-                placeholder="Jouw persoonlijk e-mailadres"
-                autocomplete="username"
-            >
+            <STInput errorField="user.email" :errors="errors">
+                <label class="style-label" for="email">Persoonlijk e-mailadres</label>
+                <input
+                    id="email"
+                    ref="firstInput"
+                    v-model="email"
+                    class="input"
+                    type="email"
+                    placeholder="Jouw persoonlijk e-mailadres"
+                    autocomplete="username"
+                >
+            </STInput>
 
             <label class="style-label" for="password">Kies je wachtwoord</label>
             <input
@@ -68,6 +70,7 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 
 import OrganizationStructureView from "./OrganizationStructureView.vue"
 
@@ -84,6 +87,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
     email = ""
     password = ""
     passwordRepeat = ""
+    errors: ClientErrors | null = null
 
     async goNext() {
         const server = new Server()
@@ -101,6 +105,8 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         this.data.user = user
 
         this.data.publicKey = organizationKeyPair.publicKey
+        
+        this.errors = null;
 
         server.request({
             method: "POST",
@@ -109,6 +115,9 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         }).then(data => {
             console.log(data)
         }).catch(e => {
+            if (e instanceof ClientErrors) {
+                this.errors = e
+            }
             console.error(e)
         });
 
