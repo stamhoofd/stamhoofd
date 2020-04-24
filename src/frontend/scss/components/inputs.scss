@@ -47,6 +47,18 @@
         }
     }
 }
+
+.input-errors {
+    .input {
+        border-color: $color-error;
+
+        &:focus,
+        &:focus-within {
+            border-color: $color-error-focus;
+        }
+    }
+}
+
 textarea.input {
     max-width: none;
     padding: 12px 15px;

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-for="(error, index) in errors.errors" :key="index" class="error">
+        <div v-for="(error, index) in errors" :key="index" class="error">
             {{ error.human || error.message }}
         </div>
     </div>
@@ -19,9 +19,10 @@ export default class STErrorsDefault extends Vue {
 
     @Watch('errorBox')
     onNewErrors(val: ErrorBox) {
-        console.log("Picked new default errors");
         const errors = val.remaining
-        this.errors.push(...errors.errors)
+        console.log("Picked new default errors", errors);
+
+        this.errors = errors.errors
     }
 }
 </script>

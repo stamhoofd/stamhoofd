@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{'input-errors': errors.length > 0}">
         <slot />
         <div v-for="(error, index) in errors" :key="index" class="error">
             {{ error.human || error.message }}
@@ -23,7 +23,7 @@ export default class STErrorsDefault extends Vue {
     onNewErrors(val: ErrorBox) {
         console.log("Picked new errors for", this.errorFields);
         const errors = val.forFields(this.errorFields.split(","))
-        this.errors.push(...errors.errors)
+        this.errors = errors.errors
     }
 }
 </script>

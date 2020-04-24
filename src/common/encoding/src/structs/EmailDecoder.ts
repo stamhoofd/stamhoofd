@@ -11,6 +11,7 @@ class EmailDecoderStatic implements Decoder<string> {
             throw new DecodingError({
                 code: "invalid_field",
                 message: "Received an invalid email address",
+                human: "Het e-mailadres dat je hebt opgegeven is niet geldig, kijk je even na of je geen typefout hebt gemaakt?",
                 field: data.currentField,
             });
         }
