@@ -14,7 +14,8 @@
         <main>
             <p>Met dit account zal je later moeten inloggen om toegang te krijgen tot jouw vereniging.</p>
 
-            <STInput errorField="user.email" :errors="errors">
+            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsInput error-fields="user.email" :error-box="errorBox">
                 <label class="style-label" for="email">Persoonlijk e-mailadres</label>
                 <input
                     id="email"
@@ -25,7 +26,7 @@
                     placeholder="Jouw persoonlijk e-mailadres"
                     autocomplete="username"
                 >
-            </STInput>
+            </STErrorsInput>
 
             <label class="style-label" for="password">Kies je wachtwoord</label>
             <input
@@ -46,6 +47,7 @@
                 placeholder="Herhaal je nieuw wachtwoord"
                 autocomplete="new-password"
             >
+            </sterrorsinput>
         </main>
 
         <STToolbar>
@@ -61,7 +63,9 @@
 <script lang="ts">
 import { CreateOrganizationStruct } from '@stamhoofd-backend/app/src/organizations/structs/CreateOrganizationStruct';
 import { RegisterStruct } from '@stamhoofd-backend/app/src/users/structs/RegisterStruct';
+import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 import { Sodium } from '@stamhoofd-common/crypto';
+import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Server } from "@stamhoofd-frontend/networking";
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
@@ -70,7 +74,6 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 
 import OrganizationStructureView from "./OrganizationStructureView.vue"
 
@@ -79,7 +82,9 @@ import OrganizationStructureView from "./OrganizationStructureView.vue"
         STToolbar,
         STNavigationBar,
         STNavigationTitle,
-        Slider
+        Slider,
+        STErrorsDefault,
+        STErrorsInput
     }
 })
 export default class CreateAccountView extends Mixins(NavigationMixin) {
@@ -88,6 +93,8 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
     password = ""
     passwordRepeat = ""
     errors: ClientErrors | null = null
+    /// An errorBox distributes the errors visually across multiple components that are able to handle them
+    errorBox: ErrorBox | null = null
 
     async goNext() {
         const server = new Server()
@@ -117,6 +124,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         }).catch(e => {
             if (e instanceof ClientErrors) {
                 this.errors = e
+                this.errorBox = new ErrorBox(e)
             }
             console.error(e)
         });

@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "@stamhoofd-frontend/networking": "1.0.0",
+        "@stamhoofd-frontend/errors": "1.0.0",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/shared": "1.0.0",
         "@typescript-eslint/eslint-plugin": "^2.28.0",

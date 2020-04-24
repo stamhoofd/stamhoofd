@@ -43,4 +43,21 @@ export class ClientError extends Error {
             field: data.optionalField("field")?.string,
         })
     }
+
+    doesMatchFields(fields: string[]): boolean {
+        for (const field of fields) {
+            if (this.doesMatchField(field)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    doesMatchField(field: string): boolean {
+        if (!this.field) {
+            return false
+        }
+
+        return (this.field.startsWith(field));
+    }
 }

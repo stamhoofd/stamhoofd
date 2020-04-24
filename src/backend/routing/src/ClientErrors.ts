@@ -16,6 +16,10 @@ export class ClientErrors extends Error {
         this.message += "\n" + error.toString();
     }
 
+    removeErrorAt(index: number) {
+        this.errors.splice(index, 1)
+    }
+
     addNamespace(field: string) {
         this.errors.forEach(e => {
             e.field = e.field ? e.field + "." + field : field;
