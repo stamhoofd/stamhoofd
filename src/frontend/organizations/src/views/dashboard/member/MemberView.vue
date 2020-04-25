@@ -90,7 +90,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
         });
-        this.navigationController?.push(component, true, true, true);
+        this.navigationController?.push(component, true, 1, true);
     }
 
     goNext() {
@@ -103,7 +103,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
         });
-        this.navigationController?.push(component, true, true, false);
+        this.navigationController?.push(component, true, 1, false);
     }
 
     activated() {

@@ -101,7 +101,7 @@ export default class NavigationController extends Vue {
     push(
         component: ComponentWithProperties,
         animated = true,
-        replace = false,
+        replace = 0,
         reverse = false
     ) {
         if (!animated) {
@@ -119,8 +119,8 @@ export default class NavigationController extends Vue {
         this.freezeSize();
 
         // Make sure the transition name changed, so wait for a rerender
-        if (replace) {
-            this.components.splice(this.components.length - 1, 1, component);
+        if (replace > 0) {
+            this.components.splice(this.components.length - replace, replace, component);
         } else {
             this.components.push(component);
         }

@@ -76,7 +76,7 @@ import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigat
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import OrganizationStructureView from "./OrganizationStructureView.vue"
+import BackupCopyView from './BackupCopyView.vue';
 
 @Component({
     components: {
@@ -133,6 +133,8 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         }).then(data => {
             console.log(data)
             this.errorBox = null;
+
+            this.navigationController?.push(new ComponentWithProperties(BackupCopyView), true, this.navigationController.components.length)
         }).catch(e => {
             if (e instanceof STErrors) {
                 this.errors = e
@@ -141,7 +143,6 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
             console.error(e)
         });
 
-        //this.show(new ComponentWithProperties(OrganizationStructureView))
     }
 }
 </script>
