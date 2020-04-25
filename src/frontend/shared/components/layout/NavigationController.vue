@@ -239,10 +239,12 @@ export default class NavigationController extends Vue {
         // We need to show some extra area below of the leaving frame, but to do this, we also need
         // to check if there is still content left below the visible client height. So we calculate the area underneath the client height
         // and limit to 300px maximum extra padding
-        const fixPadding = Math.min(300, Math.max(0, element.offsetHeight - current - scrollElement.clientHeight));
-        console.log("Fix padding: " + fixPadding);
-        const h = scrollElement.clientHeight + fixPadding;
+        // const fixPadding = Math.min(300, Math.max(0, element.offsetHeight - current - scrollElement.clientHeight));
+        // console.log("Fix padding: " + fixPadding);
+        // This fixPadding thing doesn't work on other browsers. Need to recheck when it reappears on iOS
+        const h = scrollElement.clientHeight;// + fixPadding;
         const height = h + "px";
+        console.log("height", height)
 
         // This animation frame is super important to prevent flickering on Safari and Webkit!
         // This is also one of the reasons why we cannot use the default Vue class additions
@@ -266,6 +268,7 @@ export default class NavigationController extends Vue {
             (element.firstElementChild as HTMLElement).scrollTop = current;
 
             requestAnimationFrame(() => {
+                debugger;
                 // We've reached our initial positioning and can start our animation
                 element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
 

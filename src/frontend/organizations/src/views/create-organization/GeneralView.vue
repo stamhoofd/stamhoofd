@@ -12,9 +12,10 @@
         </STNavigationTitle>
 
         <main>
+            <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
-                    <STInput errorField="name">
+                    <STErrorsInput error-fields="name" :error-box="errorBox">
                         <label class="style-label" for="organization-name">Naam van je vereniging</label>
                         <input
                             id="organization-name"
@@ -25,7 +26,7 @@
                             placeholder="De naam van je vereniging"
                             autocomplete="organization"
                         >
-                    </STInput>
+                    </STErrorsInput>
 
                     <label class="style-label" for="organization-count">Hoeveel leden hebben jullie ongeveer?</label>
                     <Slider />
@@ -67,6 +68,8 @@
 
 <script lang="ts">
 import { CreateOrganizationStruct } from '@stamhoofd-backend/app/src/organizations/structs/CreateOrganizationStruct';
+import { STError, STErrors } from '@stamhoofd-common/errors';
+import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Server } from "@stamhoofd-frontend/networking";
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
@@ -83,11 +86,14 @@ import CreateAccountView from "./CreateAccountView.vue"
         STToolbar,
         STNavigationBar,
         STNavigationTitle,
-        Slider
+        Slider,
+        STErrorsDefault,
+        STErrorsInput
     }
 })
 export default class GeneralView extends Mixins(NavigationMixin) {
     name = ""
+    errorBox: ErrorBox | null = null
 
     mounted() {
         const server = new Server()

@@ -21,7 +21,11 @@ module.exports = {
         allowedHosts: [
             '.stamhoofd.be',
             '.stamhoofd.dev',
-        ]
+        ],
+        // To test on external devices
+        host: '0.0.0.0',//your ip address
+        port: 8080,
+        disableHostCheck: true,
     },
     devtool: "sourcemap",
     module: {

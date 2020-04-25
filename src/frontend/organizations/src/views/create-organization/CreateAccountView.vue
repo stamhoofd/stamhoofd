@@ -98,6 +98,16 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     async goNext() {
+        if (this.password != this.passwordRepeat) {
+            const errors = new STErrors(new STError({
+                code: "invalid_field",
+                message: "De opgegeven wachtwoorden komen niet overeen",
+                field: "user.password"
+            }))
+            this.errorBox = new ErrorBox(errors)
+            return;
+        }
+
         const server = new Server()
         server.host = "http://localhost:9090";
 

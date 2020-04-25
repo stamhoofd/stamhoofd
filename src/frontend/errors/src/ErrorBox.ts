@@ -52,7 +52,8 @@ export class ErrorBox {
         console.log("scroll to ", firstElement)
 
         firstElement?.scrollIntoView({
-            block: "center"
+            block: "center",
+            behavior: "smooth"
         });
         this.scrollToElements = []
         this.scrollTimer = undefined
