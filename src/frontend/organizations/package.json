@@ -8,8 +8,9 @@
         "build": "webpack"
     },
     "dependencies": {
-        "@stamhoofd-frontend/networking": "1.0.0",
         "@stamhoofd-frontend/errors": "1.0.0",
+        "@stamhoofd-frontend/networking": "1.0.0",
+        "@stamhoofd-frontend/users": "1.0.0",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/shared": "1.0.0",
         "@typescript-eslint/eslint-plugin": "^2.28.0",
@@ -25,6 +26,8 @@
     },
     "devDependencies": {
         "electron": "^8.2.3",
-        "html-webpack-plugin": "^4.2.0"
+        "electron-rebuild": "^1.10.1",
+        "html-webpack-plugin": "^4.2.0",
+        "webpack-node-externals": "^1.7.2"
     }
 }

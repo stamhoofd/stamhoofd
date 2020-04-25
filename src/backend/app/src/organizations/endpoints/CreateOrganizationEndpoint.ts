@@ -1,5 +1,7 @@
 import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
+import { Token } from '@stamhoofd-backend/app/src/users/models/Token';
 import { User } from "@stamhoofd-backend/app/src/users/models/User";
+import { TokenStruct } from '@stamhoofd-backend/app/src/users/structs/TokenStruct';
 import { Email } from '@stamhoofd-backend/email';
 import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
@@ -15,7 +17,7 @@ import { OrganizationMetaStruct, OrganizationType } from "../structs/Organizatio
 type Params = {};
 type Query = undefined;
 type Body = CreateOrganizationStruct;
-type ResponseBody = undefined;
+type ResponseBody = TokenStruct;
 
 export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = CreateOrganizationStruct;
@@ -101,12 +103,15 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
+        // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
+        const token = await Token.createExpiredToken(user)
+
         // Send mail without waiting
         Email.send(user.email, "Verifieer jouw e-mailadres voor Stamhoofd", "Hey fa!\n\nWelkom bij Stamhoofd. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n\nStamhoofd").catch(e => {
             console.error(e)
         })
 
         // An email has been send to confirm your email address
-        return new Response(undefined);
+        return new Response(new TokenStruct(token));
     }
 }

@@ -75,7 +75,26 @@ export class Token extends Model {
         return token.setRelation(Token.user, user);
     }
 
-    static async createToken<U extends User>(user: U): Promise<(Token & { user: U }) | undefined> {
+    /**
+     * Create a token that is expired. This can be usefull if renewing the token is restricted by some account state.
+     * E.g. you cannot renew this token until the e-mail address has been verified.
+     * @param user 
+     */
+    static async createExpiredToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+        const token = await this.createUnsavedToken(user);
+
+        /// Expired a month ago (to prevent any timezone bugs)
+        token.accessTokenValidUntil = new Date(Date.now() - 24 * 60 * 60 * 1000 * 31 );
+        token.accessTokenValidUntil.setMilliseconds(0);
+
+        await token.save();
+        return token;
+    }
+
+    /***
+     * Create a token without saving it
+     */
+    private static async createUnsavedToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         // Get all the tokens of the user that are olde
 
         // First search if we already have more than 5 tokens (we only allow up to 5 devices)
@@ -105,7 +124,11 @@ export class Token extends Model {
 
         token.accessToken = (await randomBytes(192)).toString("base64").toUpperCase();
         token.refreshToken = (await randomBytes(192)).toString("base64").toUpperCase();
+        return token;
+    }
 
+    static async createToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+        const token = await this.createUnsavedToken(user);
         await token.save();
         return token;
     }

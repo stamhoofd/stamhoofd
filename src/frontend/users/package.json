@@ -1,0 +1,9 @@
+{
+    "name": "@stamhoofd-frontend/users",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "private": true,
+    "dependencies": {
+        "keytar": "^5.5.0"
+    }
+}

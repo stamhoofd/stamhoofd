@@ -68,6 +68,7 @@ import { Sodium } from '@stamhoofd-common/crypto';
 import { STError, STErrors } from '@stamhoofd-common/errors';
 import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Server } from "@stamhoofd-frontend/networking";
+import { Token } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
@@ -129,12 +130,23 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         server.request({
             method: "POST",
             path: "/organizations",
-            body: this.data
+            body: this.data,
+            decoder: Token
         }).then(data => {
+            // We now have an expired access token. Perfect. We can only renew it when our email address will be validated.
             console.log(data)
-            this.errorBox = null;
+            const token = data.data
+            if (token) {
+                token.storeInKeyChain().catch(e => {
+                    console.error(e)
+                })
+                this.errorBox = null;
+                this.navigationController?.push(new ComponentWithProperties(BackupCopyView), true, this.navigationController.components.length)
+            } else {
+                console.error("Expected a token")
+            }
 
-            this.navigationController?.push(new ComponentWithProperties(BackupCopyView), true, this.navigationController.components.length)
+            
         }).catch(e => {
             if (e instanceof STErrors) {
                 this.errors = e

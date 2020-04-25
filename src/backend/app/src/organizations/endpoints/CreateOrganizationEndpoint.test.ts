@@ -3,6 +3,8 @@ import { Request } from "@stamhoofd-backend/routing";
 import { Sodium } from "@stamhoofd-common/crypto";
 import { Formatter } from "@stamhoofd-common/formatting"; 
 
+import { Token } from '../../users/models/Token';
+import { TokenStruct } from '../../users/structs/TokenStruct';
 import { Organization } from "../models/Organization";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
@@ -30,12 +32,22 @@ describe("Endpoint.CreateOrganization", () => {
         });
 
         const response = await endpoint.getResponse(r, {});
-        expect(response.body).toBeUndefined();
+        expect(response.body).toBeDefined();
+
+        // Access token should be expired
+        expect(response.body.accessTokenValidUntil).toBeBefore(new Date());
+        expect(response.body).toBeInstanceOf(TokenStruct);
+
         expect(response.status).toEqual(200);
 
         const organization = await Organization.getByURI(Formatter.slug("My endpoint test organization"));
         expect(organization).toBeDefined();
         if (!organization) throw new Error("impossible");
+
+        const token = await Token.getByAccessToken(response.body.accessToken);
+        expect(token).toBeDefined();
+        if (!token) throw new Error("impossible");
+        expect(token.accessTokenValidUntil).toBeBefore(new Date());
 
         const user = await User.login(organization, "admin@domain.com", "My user password");
         expect(user).toBeDefined();
