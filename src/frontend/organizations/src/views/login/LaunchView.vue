@@ -21,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import { Token } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue"
@@ -28,6 +29,7 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
 import { Component, Mixins } from "vue-property-decorator";
 
+import ConfirmEmailView from '../create-organization/ConfirmEmailView.vue';
 import GeneralView from '../create-organization/GeneralView.vue';
 
 @Component({
@@ -37,6 +39,21 @@ import GeneralView from '../create-organization/GeneralView.vue';
     }
 })
 export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
+    mounted() {
+        Token.restoreFromKeyChain().then((token) => {
+            if (token) {
+                // Yay! we have a token
+                console.log("Found token in keychain", token)
+
+                // Future: renew token
+                // Got to confirm email view
+                this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(ConfirmEmailView)}));
+
+            }
+        }).catch(e => {
+            console.error(e);
+        })
+    }
     createNew() {
         this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(GeneralView)}));
     }
