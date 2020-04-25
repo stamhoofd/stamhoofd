@@ -132,6 +132,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
             body: this.data
         }).then(data => {
             console.log(data)
+            this.errorBox = null;
         }).catch(e => {
             if (e instanceof STErrors) {
                 this.errors = e

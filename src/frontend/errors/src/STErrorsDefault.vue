@@ -25,6 +25,10 @@ import ErrorBoxComponent from "./ErrorBox.vue"
 
     @Watch('errorBox')
     onNewErrors(val: ErrorBox) {
+        if (!val) {
+            this.errors = [];
+            return;
+        }
         // Wait for next tick, to prevent a useless rerender of errors that will get removed by other inputs
         this.$nextTick(() => {
             const errors = val.remaining

@@ -30,6 +30,10 @@ export default class STErrorsDefault extends Vue {
 
     @Watch('errorBox')
     onNewErrors(val: ErrorBox) {
+        if (!val) {
+            this.errors = [];
+            return;
+        }
         console.log("Picked new errors for", this.errorFields);
         const errors = val.forFields(this.errorFields.split(","))
         errors.generateIds()

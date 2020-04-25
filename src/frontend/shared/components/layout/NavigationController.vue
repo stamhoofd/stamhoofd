@@ -268,7 +268,6 @@ export default class NavigationController extends Vue {
             (element.firstElementChild as HTMLElement).scrollTop = current;
 
             requestAnimationFrame(() => {
-                debugger;
                 // We've reached our initial positioning and can start our animation
                 element.className = this.transitionName + "-leave-active " + this.transitionName + "-leave-to";
 
