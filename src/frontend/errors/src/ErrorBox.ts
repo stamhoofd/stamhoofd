@@ -65,7 +65,7 @@ export class ErrorBox {
         this.scrollToElements.push([errors, el])
 
         if (!this.scrollTimer) {
-            this.scrollTimer = window.setTimeout(this.fireScroll.bind(this), 100);
+            this.scrollTimer = window.setTimeout(this.fireScroll.bind(this), 250);
         }
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <div ref="errors" :class="{'input-errors': errors.length > 0}">
         <slot />
-        <div style="min-height: 1px;">
+        <div style="min-height: 1px; margin-top: -10px;">
             <template v-for="error in errors">
                 <ErrorBox :key="error.id">
                     {{ error.human || error.message }}

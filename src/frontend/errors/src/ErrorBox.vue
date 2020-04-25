@@ -89,7 +89,7 @@ export default class STErrorsDefault extends Vue {
     }
 
     .error-box-parent {
-        padding: 5px 0;
+        padding: 10px 0;
     }
 
     @keyframes shake {
