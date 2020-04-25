@@ -1,4 +1,5 @@
 import { Data, Encodeable } from '@stamhoofd-common/encoding';
+import { STError, STErrors } from '@stamhoofd-common/errors';
 
 import { RegisterStruct } from "../../users/structs/RegisterStruct";
 
@@ -13,10 +14,46 @@ export class CreateOrganizationStruct implements Encodeable {
     user: RegisterStruct;
 
     static decode(data: Data): CreateOrganizationStruct {
+        const errors = new STErrors()
         const s = new CreateOrganizationStruct();
-        s.name = data.field("name").string;
-        s.publicKey = data.field("publicKey").key;
-        s.user = data.field("user").decode(RegisterStruct);
+
+        try {
+            s.name = data.field("name").string;
+
+            if (s.name.length < 4) {
+                if (s.name.length == 0) {
+                    throw new STError({
+                        code: "invalid_field",
+                        message: "Should not be empty",
+                        human: "Je bent de naam van je organisatie vergeten in te vullen",
+                        field: data.addToCurrentField("name")
+                    })
+                }
+
+                throw new STError({
+                    code: "invalid_field",
+                    message: "Field is too short",
+                    human: "Kijk de naam van je organisatie na, deze is te kort",
+                    field: data.addToCurrentField("name")
+                })
+            }
+        } catch (e) {
+            errors.addError(e)
+        }
+
+        try {
+            s.user = data.field("user").decode(RegisterStruct);
+        } catch (e) {
+            errors.addError(e)
+        }
+
+        try {
+            s.publicKey = data.field("publicKey").key;
+        } catch (e) {
+            errors.addError(e)
+        }
+
+        errors.throwIfNotEmpty()
         return s;
     }
 
