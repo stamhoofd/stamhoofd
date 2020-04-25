@@ -1,0 +1,12 @@
+{
+    "name": "@stamhoofd-backend/email",
+    "main": "index.ts",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "nodemailer": "^6.4.6"
+    },
+    "devDependencies": {
+        "@types/nodemailer": "^6.4.0"
+    }
+}

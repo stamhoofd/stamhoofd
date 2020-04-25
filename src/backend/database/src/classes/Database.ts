@@ -3,10 +3,10 @@ import mysql from "mysql";
 // create the connection to database
 // Create the connection pool. The pool-specific settings are the defaults
 const pool = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "stamhoofd",
+    host: process.env.DB_HOST ?? "localhost",
+    user: process.env.DB_USER ?? "root",
+    password: process.env.DB_PASS ?? "root",
+    database: process.env.DB_DATABASE ?? "stamhoofd",
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

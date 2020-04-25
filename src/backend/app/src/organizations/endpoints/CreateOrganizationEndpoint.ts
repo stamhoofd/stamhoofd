@@ -1,5 +1,6 @@
 import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Organization";
 import { User } from "@stamhoofd-backend/app/src/users/models/User";
+import { Email } from '@stamhoofd-backend/email';
 import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
 import { Response } from "@stamhoofd-backend/routing";
@@ -99,6 +100,11 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 500
             });
         }
+
+        // Send mail without waiting
+        Email.send(user.email, "Verifieer jouw e-mailadres voor Stamhoofd", "Hey fa!\n\nWelkom bij Stamhoofd. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n\nStamhoofd").catch(e => {
+            console.error(e)
+        })
 
         // An email has been send to confirm your email address
         return new Response(undefined);

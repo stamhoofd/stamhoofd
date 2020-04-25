@@ -10,6 +10,7 @@ process.on("unhandledRejection", (error: Error) => {
 
 // Set timezone!
 process.env.TZ = "UTC";
+require('dotenv').config()
 
 // Quick check
 if (new Date().getTimezoneOffset() != 0) {

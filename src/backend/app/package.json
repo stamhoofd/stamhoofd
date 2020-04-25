@@ -16,16 +16,18 @@
         "ts-node": "^8.6.2"
     },
     "dependencies": {
+        "@stamhoofd-backend/database": "1.0.0",
+        "@stamhoofd-backend/email": "1.0.0",
+        "@stamhoofd-backend/routing": "1.0.0",
+        "@stamhoofd-common/crypto": "1.0.0",
+        "@stamhoofd-common/encoding": "1.0.0",
+        "@stamhoofd-common/formatting": "1.0.0",
         "@types/mysql": "^2.15.9",
         "@types/node": "^13.9.0",
         "argon2": "^0.26.1",
+        "dotenv": "^8.2.0",
         "libsodium-wrappers": "^0.7.6",
         "mysql": "^2.18.1",
-        "tslib": "^1.11.1",
-        "@stamhoofd-common/formatting": "1.0.0",
-        "@stamhoofd-common/encoding": "1.0.0",
-        "@stamhoofd-common/crypto": "1.0.0",
-        "@stamhoofd-backend/database": "1.0.0",
-        "@stamhoofd-backend/routing": "1.0.0"
+        "tslib": "^1.11.1"
     }
 }
