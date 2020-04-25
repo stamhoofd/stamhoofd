@@ -2,19 +2,21 @@ import { Data } from '@stamhoofd-common/encoding';
 
 // Error that is caused by a client and should be reported to the client
 export class STError extends Error {
+    id?: string;
     code: string;
     message: string;
     human: string | undefined;
     field: string | undefined;
     statusCode?: number
 
-    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number }) {
+    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number; id?: string }) {
         super(error.message);
         this.code = error.code;
         this.message = error.message;
         this.human = error.human;
         this.field = error.field;
         this.statusCode = error.statusCode
+        this.id = error.id
 
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, STError);
@@ -61,5 +63,9 @@ export class STError extends Error {
         }
 
         return (this.field.startsWith(field));
+    }
+
+    generateId() {
+        this.id = new Date().getTime() + "_"+Math.floor(Math.random()*1000)
     }
 }

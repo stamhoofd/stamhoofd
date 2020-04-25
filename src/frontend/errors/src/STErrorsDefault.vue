@@ -1,7 +1,7 @@
 <template>
     <div ref="errors" style="min-height: 1px;">
         <template v-for="error in errors">
-            <ErrorBox :key="error.message">
+            <ErrorBox :key="error.id">
                 {{ error.human || error.message }}
             </ErrorBox>
         </template>
@@ -29,6 +29,7 @@ import ErrorBoxComponent from "./ErrorBox.vue"
         this.$nextTick(() => {
             const errors = val.remaining
             console.log("Picked new default errors", errors);
+            errors.generateIds()
             this.errors = errors.errors
 
             val.scrollTo(this.errors, this.$refs.errors as HTMLElement)

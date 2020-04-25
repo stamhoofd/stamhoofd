@@ -55,4 +55,10 @@ export class STErrors extends Error {
             throw this;
         }
     }
+
+    generateIds() {
+        for (const error of this.errors) {
+            error.generateId()
+        }
+    }
 }

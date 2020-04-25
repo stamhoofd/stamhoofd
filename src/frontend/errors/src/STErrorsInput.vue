@@ -1,9 +1,9 @@
 <template>
-    <div :class="{'input-errors': errors.length > 0}">
+    <div ref="errors" :class="{'input-errors': errors.length > 0}">
         <slot />
-        <div ref="errors" style="min-height: 1px;">
+        <div style="min-height: 1px;">
             <template v-for="error in errors">
-                <ErrorBox :key="error.message">
+                <ErrorBox :key="error.id">
                     {{ error.human || error.message }}
                 </ErrorBox>
             </template>
@@ -32,6 +32,7 @@ export default class STErrorsDefault extends Vue {
     onNewErrors(val: ErrorBox) {
         console.log("Picked new errors for", this.errorFields);
         const errors = val.forFields(this.errorFields.split(","))
+        errors.generateIds()
         this.errors = errors.errors
         val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
     }
