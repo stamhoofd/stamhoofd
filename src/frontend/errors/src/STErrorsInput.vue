@@ -1,7 +1,7 @@
 <template>
     <div :class="{'input-errors': errors.length > 0}">
         <slot />
-        <div style="min-height: 1px;">
+        <div ref="errors" style="min-height: 1px;">
             <template v-for="error in errors">
                 <ErrorBox :key="error.message">
                     {{ error.human || error.message }}
@@ -33,31 +33,10 @@ export default class STErrorsDefault extends Vue {
         console.log("Picked new errors for", this.errorFields);
         const errors = val.forFields(this.errorFields.split(","))
         this.errors = errors.errors
-    }
 
-    beforeAppear(el: HTMLElement) {
-        const child = el.firstElementChild as HTMLElement
-        if (child) {
-            child.style.opacity = "0";
+        if (this.errors.length > 0) {
+            val.scrollTo(this.$refs.errors as HTMLElement)
         }
-    }
-
-    appear(el: HTMLElement) {
-        const height = el.offsetHeight;
-        const child = el.firstElementChild as HTMLElement;
-        el.style.height = "0";
-
-        requestAnimationFrame(() => {
-            el.style.height = height+"px";
-            if (child) {
-                child.style.opacity = "1";
-            }
-        });
-
-    }
-
-    afterAppear(el: HTMLElement) {
-        el.style.height = "";
     }
 }
 </script>

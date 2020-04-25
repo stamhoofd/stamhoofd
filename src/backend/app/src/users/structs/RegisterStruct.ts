@@ -38,7 +38,7 @@ export class RegisterStruct implements Encodeable {
             errors.addError(new STError({
                 code: "weak_password",
                 message: "Your password should be at least 12 characters long",
-                human: "Jouw wachtwoord moet minstens 12 karakters lang zijn. Een wachtwoord van minimum 18 karakters is sterk aan te raden. Tip: gebruik emojis of gebruik een passwordmanager.",
+                human: "Jouw wachtwoord moet minstens 12 karakters lang zijn. Een wachtwoord van minimum 18 karakters is sterk aan te raden. Tip: gebruik een passwordmanager en genereer een random wachtwoord.",
                 field: data.addToCurrentField("password")
             }))
         }

@@ -23,4 +23,10 @@ html {
     -moz-osx-font-smoothing: grayscale;
     color: $color-dark;
     -webkit-overflow-scrolling: auto;
+
+    scroll-behavior: smooth;
+
+    @media (prefers-reduced-motion: reduce) {
+        scroll-behavior: auto;
+    }
 }
