@@ -1,6 +1,6 @@
 import { Decoder, Encodeable } from '@stamhoofd-common/encoding';
+import { STError, STErrors } from '@stamhoofd-common/errors';
 
-import { ClientError } from './ClientError';
 import { DecodedRequest } from "./DecodedRequest";
 import { EncodedResponse } from "./EncodedResponse";
 import { Request } from "./Request";
@@ -18,8 +18,11 @@ export abstract class Endpoint<Params, Query, RequestBody, ResponseBody extends 
         try {
             decodedRequest = await DecodedRequest.fromRequest(request, params, this.queryDecoder, this.bodyDecoder);
         } catch (e) {
-            if (e.code) {
-                throw new ClientError(e)
+            if (e.code && e.message) {
+                throw new STError(e)
+            }
+            if (e.errors) {
+                throw new STErrors(...e.errors)
             }
             throw e;
         }

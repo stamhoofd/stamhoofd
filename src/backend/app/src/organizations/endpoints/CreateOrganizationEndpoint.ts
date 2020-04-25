@@ -4,9 +4,8 @@ import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
 import { Response } from "@stamhoofd-backend/routing";
 import { Endpoint } from "@stamhoofd-backend/routing";
-import { ServerError } from "@stamhoofd-backend/routing";
-import { ClientError } from "@stamhoofd-backend/routing";
 import { Sodium } from "@stamhoofd-common/crypto";
+import { STError } from '@stamhoofd-common/errors';
 import { Formatter } from "@stamhoofd-common/formatting"; 
 
 import { CreateOrganizationStruct } from "../structs/CreateOrganizationStruct";
@@ -36,7 +35,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Validate admin signature
         if (!request.body.user.adminSignature) {
-            throw new ClientError({
+            throw new STError({
                 code: "required_signature",
                 message:
                     "When creating an organization, you should sign your first user with the organization's secret",
@@ -47,7 +46,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         const organizationPublicKey = Buffer.from(request.body.publicKey, "base64");
 
         if (!(await Sodium.verifySignature(adminSignature, request.body.user.publicKey, organizationPublicKey))) {
-            throw new ClientError({
+            throw new STError({
                 code: "invalid_signature",
                 message: "Invalid adminSignature of user",
                 field: "user.adminSignature",
@@ -58,7 +57,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         const alreadyExists = await Organization.getByURI(uri);
 
         if (alreadyExists) {
-            throw new ClientError({
+            throw new STError({
                 code: "name_taken",
                 message: "An organization with the same name already exists",
                 human: "Er bestaat al een vereniging met dezelfde naam",
@@ -79,9 +78,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await organization.save();
         } catch (e) {
             console.error(e);
-            throw new ServerError({
+            throw new STError({
                 code: "creating_organization",
                 message: "Something went wrong while creating the organization. Please try again later or contact us.",
+                statusCode: 500
             });
         }
 
@@ -93,9 +93,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         );
         if (!user) {
             // This user already exists, well that is pretty impossible
-            throw new ServerError({
+            throw new STError({
                 code: "creating_user",
                 message: "Something went wrong while creating the user. Please contact us to resolve this issue.",
+                statusCode: 500
             });
         }
 

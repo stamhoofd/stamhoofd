@@ -1,6 +1,7 @@
+import { STError } from '@stamhoofd-common/errors';
+
 import { Data } from "../classes/Data";
 import { Decoder } from "../classes/Decoder";
-import { DecodingError } from "../classes/DecodingError";
 
 class Base64Decoder implements Decoder<string> {
     decode(data: Data): string {
@@ -8,7 +9,7 @@ class Base64Decoder implements Decoder<string> {
 
         const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
         if (!base64regex.test(str)) {
-            throw new DecodingError({
+            throw new STError({
                 code: "invalid_field",
                 message: "Expected a valid base64 encoded string, received " + str,
                 field: data.currentField,

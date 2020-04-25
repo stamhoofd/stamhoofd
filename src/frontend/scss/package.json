@@ -1,5 +1,8 @@
 {
     "name": "@stamhoofd/scss",
     "version": "1.0.0",
-    "private": true
+    "private": true,
+    "dependencies": {
+        "@stamhoofd/assets": "1.0.0"
+    }
 }

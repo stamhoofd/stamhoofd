@@ -1,6 +1,7 @@
+import { STError } from '@stamhoofd-common/errors';
+
 import { Data } from "../classes/Data";
 import { Decoder } from "../classes/Decoder";
-import { DecodingError } from "../classes/DecodingError";
 
 class KeyDecoder implements Decoder<string> {
     decode(data: Data): string {
@@ -9,7 +10,7 @@ class KeyDecoder implements Decoder<string> {
         const buffer = Buffer.from(str, "base64");
 
         if (buffer.length != 32) {
-            throw new DecodingError({
+            throw new STError({
                 code: "invalid_field",
                 message: "Invalid key. Expected 32 byte key",
                 field: data.currentField,

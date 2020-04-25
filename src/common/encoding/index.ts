@@ -1,6 +1,5 @@
 export * from "./src/classes/Data"
 export * from "./src/classes/Decoder"
-export * from "./src/classes/DecodingError"
 export * from "./src/classes/Encodeable"
 export * from "./src/classes/ObjectData"
 

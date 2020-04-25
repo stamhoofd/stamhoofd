@@ -1,7 +1,7 @@
 import { Model } from "@stamhoofd-backend/database";
 import { column } from "@stamhoofd-backend/database";
 import { Database } from "@stamhoofd-backend/database";
-import { ClientError } from "@stamhoofd-backend/routing";
+import { STError } from '@stamhoofd-common/errors';
 
 import { OrganizationMetaStruct } from "../structs/OrganizationMetaStruct";
 
@@ -102,7 +102,7 @@ export class Organization extends Model {
             const uri = host.substring(0, host.length - defaultDomain.length);
             const organization = await this.getByURI(uri);
             if (!organization) {
-                throw new ClientError({
+                throw new STError({
                     code: "invalid_organization",
                     message: "Unknown organization " + uri,
                 });
@@ -112,7 +112,7 @@ export class Organization extends Model {
 
         const organization = await this.getByRegisterDomain(host);
         if (!organization) {
-            throw new ClientError({
+            throw new STError({
                 code: "invalid_organization",
                 message: "No organization known for host " + host,
             });

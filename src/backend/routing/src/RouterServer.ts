@@ -1,7 +1,6 @@
+import { STError, STErrors } from '@stamhoofd-common/errors';
 import http from "http";
 
-import { ClientError } from "./ClientError";
-import { ClientErrors } from './ClientErrors';
 import { Request } from "./Request";
 import { Router } from "./Router";
 
@@ -34,13 +33,13 @@ export class RouterServer {
             }
         } catch (e) {
             // Todo: implement special errors to send custom status codes
-            if (e instanceof ClientError) {
-                res.writeHead(400, {
+            if (e instanceof STError) {
+                res.writeHead(e.statusCode ?? 400, {
                     "Content-Type": "application/json"
                 });
-                res.end(JSON.stringify(new ClientErrors(e)));
-            } else if(e instanceof ClientErrors) {
-                res.writeHead(400, {
+                res.end(JSON.stringify(new STErrors(e)));
+            } else if(e instanceof STErrors) {
+                res.writeHead(e.statusCode ?? 400, {
                     "Content-Type": "application/json"
                 });
                 res.end(JSON.stringify(e));
@@ -48,9 +47,14 @@ export class RouterServer {
                 res.writeHead(500, {
                     "Content-Type": "application/json"
                 });
+                // Todo: hide information if not running in development mode
                 res.end(JSON.stringify({
-                    code: "internal_error",
-                    message: e.message
+                    errors: [
+                        {
+                            code: "internal_error",
+                            message: e.message
+                        }
+                    ]
                 }));
             }
             

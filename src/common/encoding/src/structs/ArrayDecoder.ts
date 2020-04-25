@@ -1,6 +1,7 @@
+import { STError } from '@stamhoofd-common/errors';
+
 import { Data } from "../classes/Data";
 import { Decoder } from "../classes/Decoder";
-import { DecodingError } from "../classes/DecodingError";
 import { ObjectData } from "../classes/ObjectData";
 
 class ArrayDecoder implements Decoder<Data[]> {
@@ -9,7 +10,7 @@ class ArrayDecoder implements Decoder<Data[]> {
             return data.value.map(v => new ObjectData(v));
         }
 
-        throw new DecodingError({
+        throw new STError({
             code: "invalid_field",
             message: `Expected an array at ${data.currentField}`,
             field: data.currentField

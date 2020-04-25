@@ -1,4 +1,5 @@
-import { DecodingError } from "../classes/DecodingError";
+import { STError } from '@stamhoofd-common/errors';
+
 import ArrayDecoder from "../structs/ArrayDecoder";
 import Base64Decoder from "../structs/Base64Decoder";
 import KeyDecoder from "../structs/KeyDecoder";
@@ -17,7 +18,7 @@ export class ObjectData implements Data {
         this.currentField = currentField;
     }
 
-    private addToCurrentField(field: string | number): string {
+    addToCurrentField(field: string | number): string {
         if (this.currentField == "") {
             return field + "";
         }
@@ -51,14 +52,14 @@ export class ObjectData implements Data {
     index(number: number): Data {
         if (Array.isArray(this.value)) {
             if (!Number.isSafeInteger(number)) {
-                throw new DecodingError({
+                throw new STError({
                     code: "invalid_index",
                     message: `Invalid index`,
                     field: this.currentField,
                 });
             }
             if (this.data[number] !== undefined) {
-                throw new DecodingError({
+                throw new STError({
                     code: "invalid_field",
                     message: `Expected value at ${this.addToCurrentField(number)}`,
                     field: this.addToCurrentField(number),
@@ -66,7 +67,7 @@ export class ObjectData implements Data {
             }
             return new ObjectData(this.data[number], this.addToCurrentField(number));
         }
-        throw new DecodingError({
+        throw new STError({
             code: "invalid_field",
             message: `Expected an array at ${this.currentField}`,
             field: this.currentField,
@@ -89,7 +90,7 @@ export class ObjectData implements Data {
         if (this.data && this.data[field] !== undefined && this.data[field] !== null) {
             return new ObjectData(this.data[field], this.addToCurrentField(field));
         }
-        throw new DecodingError({
+        throw new STError({
             code: "missing_field",
             message: `Field ${field} is expected at ${this.currentField}`,
             field: this.currentField,

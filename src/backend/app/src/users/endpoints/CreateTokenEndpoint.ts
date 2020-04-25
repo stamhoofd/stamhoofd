@@ -3,8 +3,7 @@ import { Request } from "@stamhoofd-backend/routing";
 import { DecodedRequest } from "@stamhoofd-backend/routing";
 import { Response } from "@stamhoofd-backend/routing";
 import { Endpoint } from "@stamhoofd-backend/routing";
-import { ClientError } from "@stamhoofd-backend/routing";
-import { ServerError } from "@stamhoofd-backend/routing";
+import { STError } from '@stamhoofd-common/errors';
 
 import { Token } from "../models/Token";
 import { User } from "../models/User";
@@ -46,7 +45,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!user) {
             // Todo: send security email containing the IP and device name
 
-            throw new ClientError({
+            throw new STError({
                 code: "invalid_data",
                 message: "Invalid username or password",
                 human: "Het ingevoerde e-mailadres of wachtwoord is onjuist.",
@@ -55,10 +54,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const token = await Token.createToken(user);
         if (!token) {
-            throw new ServerError({
+            throw new STError({
                 code: "error",
                 message: "Could not generate token",
                 human: "Er ging iets mis tijdens het inloggen.",
+                statusCode: 500
             });
         }
 

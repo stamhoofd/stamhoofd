@@ -1,13 +1,14 @@
+import { STError } from '@stamhoofd-common/errors';
+
 import { Data } from "../classes/Data";
 import { Decoder } from "../classes/Decoder";
-import { DecodingError } from "../classes/DecodingError";
 
 class StringDecoder implements Decoder<string> {
     decode(data: Data): string {
         if (typeof data.value == "string") {
             return data.value;
         }
-        throw new DecodingError({
+        throw new STError({
             code: "invalid_field",
             message: `Expected a string at ${data.currentField}`,
             field: data.currentField

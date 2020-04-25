@@ -1,7 +1,7 @@
 
 // Requests use middleware to extend its behaviour
-import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 import { Decoder, Encodeable,isEncodeable,ObjectData } from "@stamhoofd-common/encoding";
+import { STError, STErrors } from '@stamhoofd-common/errors';
 
 import { RequestMiddleware } from './RequestMiddleware';
 import { Server } from './Server';
@@ -145,9 +145,9 @@ export class Request<T> {
         if (!response.ok) {
             if (response.headers.get('Content-Type') == 'application/json') {
                 const json = await response.json()
-                let err: ClientErrors
+                let err: STErrors
                 try {
-                    err = ClientErrors.decode(new ObjectData(json))
+                    err = STErrors.decode(new ObjectData(json))
                 } catch (e) {
                     // Failed to decode
                     console.error(json)

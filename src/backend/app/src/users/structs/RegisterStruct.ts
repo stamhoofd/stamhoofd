@@ -1,4 +1,5 @@
 import { Data, EmailDecoder, Encodeable } from '@stamhoofd-common/encoding';
+import { STError, STErrors } from '@stamhoofd-common/errors';
 
 /// Only used as input
 export class RegisterStruct implements Encodeable {
@@ -21,11 +22,28 @@ export class RegisterStruct implements Encodeable {
     adminSignature?: string;
 
     static decode(data: Data): RegisterStruct {
+        const errors = new STErrors()
+
         const struct = new RegisterStruct();
-        struct.email = data.field("email").decode(EmailDecoder);
+        try {
+            struct.email = data.field("email").decode(EmailDecoder);
+        } catch (e) {
+            errors.addError(e)
+        }
         struct.password = data.field("password").string;
         struct.publicKey = data.field("publicKey").key;
         struct.adminSignature = data.optionalField("adminSignature")?.string;
+
+        if (struct.password.length < 12) {
+            errors.addError(new STError({
+                code: "weak_password",
+                message: "Your password should be at least 12 characters long",
+                human: "Jouw wachtwoord moet minstens 12 karakters lang zijn. Een wachtwoord van minimum 18 karakters is sterk aan te raden. Tip: gebruik emojis of gebruik een passwordmanager.",
+                field: data.addToCurrentField("password")
+            }))
+        }
+
+        errors.throwIfNotEmpty()
 
         return struct;
     }

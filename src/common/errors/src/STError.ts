@@ -1,26 +1,28 @@
 import { Data } from '@stamhoofd-common/encoding';
 
 // Error that is caused by a client and should be reported to the client
-export class ClientError extends Error {
+export class STError extends Error {
     code: string;
     message: string;
     human: string | undefined;
     field: string | undefined;
+    statusCode?: number
 
-    constructor(error: { code: string; message: string; human?: string; field?: string }) {
+    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number }) {
         super(error.message);
         this.code = error.code;
         this.message = error.message;
         this.human = error.human;
         this.field = error.field;
+        this.statusCode = error.statusCode
 
         if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, ClientError);
+            Error.captureStackTrace(this, STError);
         }
     }
 
     toString(): string {
-        return this.code+": "+this.message+(this.field ? " at "+this.field : "");
+        return this.code + ": " + this.message + (this.field ? " at " + this.field : "");
     }
 
     /**
@@ -30,13 +32,13 @@ export class ClientError extends Error {
         return {
             code: this.code,
             message: this.message,
-            human: this.human, 
+            human: this.human,
             field: this.field
         }
     }
 
-    static decode(data: Data): ClientError {
-        return new ClientError({
+    static decode(data: Data): STError {
+        return new STError({
             code: data.field("code").string,
             message: data.field("message").string,
             human: data.optionalField("human")?.string,

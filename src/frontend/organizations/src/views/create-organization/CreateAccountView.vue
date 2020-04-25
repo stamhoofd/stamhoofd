@@ -28,26 +28,27 @@
                 >
             </STErrorsInput>
 
-            <label class="style-label" for="password">Kies je wachtwoord</label>
-            <input
-                id="password"
-                v-model="password"
-                class="input"
-                type="password"
-                placeholder="Kies een veilig wachtwoord"
-                autocomplete="new-password"
-            >
+            <STErrorsInput error-fields="user.password" :error-box="errorBox">
+                <label class="style-label" for="password">Kies je wachtwoord</label>
+                <input
+                    id="password"
+                    v-model="password"
+                    class="input"
+                    type="password"
+                    placeholder="Kies een veilig wachtwoord"
+                    autocomplete="new-password"
+                >
 
-            <label class="style-label" for="password-repeat">Herhaal je wachtwoord</label>
-            <input
-                id="password-repeat"
-                v-model="passwordRepeat"
-                class="input"
-                type="password"
-                placeholder="Herhaal je nieuw wachtwoord"
-                autocomplete="new-password"
-            >
-            </sterrorsinput>
+                <label class="style-label" for="password-repeat">Herhaal je wachtwoord</label>
+                <input
+                    id="password-repeat"
+                    v-model="passwordRepeat"
+                    class="input"
+                    type="password"
+                    placeholder="Herhaal je nieuw wachtwoord"
+                    autocomplete="new-password"
+                >
+            </STErrorsInput>
         </main>
 
         <STToolbar>
@@ -63,8 +64,8 @@
 <script lang="ts">
 import { CreateOrganizationStruct } from '@stamhoofd-backend/app/src/organizations/structs/CreateOrganizationStruct';
 import { RegisterStruct } from '@stamhoofd-backend/app/src/users/structs/RegisterStruct';
-import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
 import { Sodium } from '@stamhoofd-common/crypto';
+import { STError, STErrors } from '@stamhoofd-common/errors';
 import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Server } from "@stamhoofd-frontend/networking";
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
@@ -92,7 +93,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
     email = ""
     password = ""
     passwordRepeat = ""
-    errors: ClientErrors | null = null
+    errors: STErrors | null = null
     /// An errorBox distributes the errors visually across multiple components that are able to handle them
     errorBox: ErrorBox | null = null
 
@@ -122,7 +123,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
         }).then(data => {
             console.log(data)
         }).catch(e => {
-            if (e instanceof ClientErrors) {
+            if (e instanceof STErrors) {
                 this.errors = e
                 this.errorBox = new ErrorBox(e)
             }

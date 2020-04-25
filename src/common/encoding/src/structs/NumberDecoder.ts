@@ -1,6 +1,7 @@
+import { STError } from '@stamhoofd-common/errors';
+
 import { Data } from "../classes/Data";
 import { Decoder } from "../classes/Decoder";
-import { DecodingError } from "../classes/DecodingError";
 
 class NumberDecoder implements Decoder<number> {
     decode(data: Data): number {
@@ -8,7 +9,7 @@ class NumberDecoder implements Decoder<number> {
             return data.value;
         }
 
-        throw new DecodingError({
+        throw new STError({
             code: "invalid_field",
             message: `Expected a number at ${data.currentField}`,
             field: data.currentField

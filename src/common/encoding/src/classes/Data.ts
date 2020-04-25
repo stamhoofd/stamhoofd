@@ -10,6 +10,7 @@ export interface Data {
 
     /// Contains the path where we are reading
     readonly currentField: string;
+    addToCurrentField(field: string | number): string;
 
     field(field: string): Data;
     optionalField(field: string): Data | undefined;

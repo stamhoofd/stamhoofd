@@ -1,20 +1,19 @@
-import { ClientErrors } from '@stamhoofd-backend/routing/src/ClientErrors';
-
+import { STError, STErrors } from '@stamhoofd-common/errors';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */
 export class ErrorBox {
     /// Remaining errors to distribute
-    errors: ClientErrors
+    errors: STErrors
 
-    constructor(errors: ClientErrors) {
+    constructor(errors: STErrors) {
         this.errors = errors
     }
 
     /// Register a handler for field.
-    /// Returns a reference to ClientErrors that will get adjusted when arrays are distrubuted
-    forFields(fields: string[]): ClientErrors {
-        const errors = new ClientErrors()
+    /// Returns a reference to STErrors that will get adjusted when arrays are distrubuted
+    forFields(fields: string[]): STErrors {
+        const errors = new STErrors()
 
         for (let index = this.errors.errors.length - 1; index >= 0; index--) {
             const error = this.errors.errors[index];
@@ -27,7 +26,7 @@ export class ErrorBox {
         return errors
     }
 
-    get remaining(): ClientErrors {
+    get remaining(): STErrors {
         // note that this is a reference! So the errors can still change
         return this.errors
     }
