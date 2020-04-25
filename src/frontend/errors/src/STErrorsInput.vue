@@ -33,10 +33,7 @@ export default class STErrorsDefault extends Vue {
         console.log("Picked new errors for", this.errorFields);
         const errors = val.forFields(this.errorFields.split(","))
         this.errors = errors.errors
-
-        if (this.errors.length > 0) {
-            val.scrollTo(this.$refs.errors as HTMLElement)
-        }
+        val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
     }
 }
 </script>

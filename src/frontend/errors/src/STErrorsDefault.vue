@@ -1,5 +1,5 @@
 <template>
-    <div style="min-height: 1px;">
+    <div ref="errors" style="min-height: 1px;">
         <template v-for="error in errors">
             <ErrorBox :key="error.message">
                 {{ error.human || error.message }}
@@ -30,6 +30,8 @@ import ErrorBoxComponent from "./ErrorBox.vue"
             const errors = val.remaining
             console.log("Picked new default errors", errors);
             this.errors = errors.errors
+
+            val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
         });
         
     }

@@ -5,7 +5,7 @@ import { STError, STErrors } from '@stamhoofd-common/errors';
 export class ErrorBox {
     /// Remaining errors to distribute
     errors: STErrors
-    scrollToElements: HTMLElement[] = []
+    scrollToElements: [any[], HTMLElement][] = []
     scrollTimer?: number
 
     constructor(errors: STErrors) {
@@ -38,7 +38,10 @@ export class ErrorBox {
         let minimum: number | undefined
         let firstElement: HTMLElement | undefined
 
-        for (const element of this.scrollToElements) {
+        for (const [arr, element] of this.scrollToElements) {
+            if (arr.length == 0) {
+                continue;
+            }
             const pos = element.getBoundingClientRect().top
             if (minimum === undefined || pos < minimum) {
                 minimum = pos
@@ -56,8 +59,10 @@ export class ErrorBox {
     }
 
     /// Scroll to an element, errorBox will decide which one if it is called multiple times
-    scrollTo(el: HTMLElement) {
-        this.scrollToElements.push(el)
+    // You need to provide the array of errors because it is possible to change the errors after this call
+    // So we need to detect if the errors are empty or not
+    scrollTo(errors: any[], el: HTMLElement) {
+        this.scrollToElements.push([errors, el])
 
         if (!this.scrollTimer) {
             this.scrollTimer = window.setTimeout(this.fireScroll.bind(this), 100);
