@@ -45,8 +45,10 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
-    // Methods
-    static async getByAccessToken(accessToken: string): Promise<TokenWithUser | undefined> {
+    /**
+     * Get the token and user for a given accessToken IF it is still valid
+     */
+    static async getByAccessToken(accessToken: string, ignoreExpireDate = false): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
                 this.table
@@ -63,6 +65,49 @@ export class Token extends Model {
 
         if (!token) {
             return undefined;
+        }
+
+        if (!ignoreExpireDate && (token.accessTokenValidUntil < new Date() || token.refreshTokenValidUntil < new Date())) {
+            // Also if the refresh token is invalid, the access token will always be invalid
+            return undefined
+        }
+
+        const user = User.fromRow(rows[0]["user"]) || null;
+
+        if (!user) {
+            console.warn("Selected a token without a user!");
+            return undefined;
+        }
+
+        return token.setRelation(Token.user, user);
+    }
+
+    // Methods
+    static async getByRefreshToken(refreshToken: string): Promise<TokenWithUser | undefined> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
+            this.table
+            } ${Token.user.joinQuery(this.table, "user")} WHERE \`refreshToken\` = ? LIMIT 1 `,
+            [refreshToken]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        const token = this.fromRow(rows[0][this.table]);
+
+        if (!token) {
+            return undefined;
+        }
+
+        if (token.refreshTokenValidUntil < new Date()) {
+            // Refreh token invalid = can throw it away
+            token.delete().catch(e => {
+                console.error(e)
+            })
+            return undefined
         }
 
         const user = User.fromRow(rows[0]["user"]) || null;
@@ -94,7 +139,7 @@ export class Token extends Model {
     /***
      * Create a token without saving it
      */
-    private static async createUnsavedToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+    static async createUnsavedToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         // Get all the tokens of the user that are olde
 
         // First search if we already have more than 5 tokens (we only allow up to 5 devices)

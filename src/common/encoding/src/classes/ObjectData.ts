@@ -45,6 +45,17 @@ export class ObjectData implements Data {
         return this.decode(NumberDecoder);
     }
 
+    equals<T>(value: T): T {
+        if (this.data !== value) {
+            throw new STError({
+                code: "invalid_field",
+                message: "Expected "+value,
+                field: this.currentField
+            })
+        }
+        return value
+    }
+
     /**
      * Request an item at a given index. Expects a defined, non null value
      * @param number index

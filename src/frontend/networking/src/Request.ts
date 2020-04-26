@@ -71,7 +71,7 @@ export class Request<T> {
 
         // todo: add query parameters
         for (const middleware of this.getMiddlewares()) {
-            middleware.onBeforeRequest(this)
+            if (middleware.onBeforeRequest) await middleware.onBeforeRequest(this)
         }
 
         let response: Response
@@ -116,7 +116,9 @@ export class Request<T> {
             let retry = false
             for (const middleware of this.getMiddlewares()) {
                 // Check if one of the middlewares decides to stop
-                retry = retry || await middleware.shouldRetryError(this, error)
+                if (middleware.shouldRetryError) {
+                    retry = retry || await middleware.shouldRetryError(this, error)
+                }
             }
             if (retry) {
                 // Retry
@@ -134,7 +136,9 @@ export class Request<T> {
         let retry = false
         for (const middleware of this.getMiddlewares()) {
             // Check if one of the middlewares decides to stop
-            retry = retry || await middleware.shouldRetryRequest(this, response)
+            if (middleware.shouldRetryRequest) {
+                retry = retry || await middleware.shouldRetryRequest(this, response) 
+            }
         }
 
         if (retry) {

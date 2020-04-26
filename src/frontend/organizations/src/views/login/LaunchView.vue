@@ -45,7 +45,7 @@ export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
                 // Yay! we have a token
                 console.log("Found token in keychain", token)
 
-                // Future: renew token
+                // Future: renew token before doing anything
                 // Got to confirm email view
                 this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(ConfirmEmailView)}));
 

@@ -44,7 +44,7 @@ describe("Endpoint.CreateOrganization", () => {
         expect(organization).toBeDefined();
         if (!organization) throw new Error("impossible");
 
-        const token = await Token.getByAccessToken(response.body.accessToken);
+        const token = await Token.getByAccessToken(response.body.accessToken, true);
         expect(token).toBeDefined();
         if (!token) throw new Error("impossible");
         expect(token.accessTokenValidUntil).toBeBefore(new Date());

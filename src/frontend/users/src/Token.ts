@@ -1,9 +1,12 @@
 import { Data } from '@stamhoofd-common/encoding';
 
+import { Server } from '../../networking';
+
 export class Token {
     accessToken: string;
     refreshToken: string;
     accessTokenValidUntil: Date;
+    private refreshPromise?: Promise<void>
 
     constructor(data: { accessToken: string; refreshToken: string; accessTokenValidUntil: Date}) {
         this.accessToken = data.accessToken
@@ -44,5 +47,52 @@ export class Token {
                 accessTokenValidUntil: new Date(Date.now() - 1000)
             })
         }
+    }
+
+    /**
+     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
+     */
+    private async doRefresh(): Promise<void> {
+        const server = new Server();
+        const data = await server.request({
+            method: "POST",
+            path: "/oauth/token",
+            body: {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                grant_type: "refresh_token",
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                refresh_token: this.refreshToken
+            },
+            decoder: Token
+        })
+
+        if (!data.data) {
+            throw new Error("Refresh failed")
+        }
+
+        this.accessToken = data.data.accessToken
+        this.refreshToken = data.data.refreshToken
+        this.accessTokenValidUntil = data.data.accessTokenValidUntil
+    }
+
+    needsRefresh(): boolean {
+        return this.accessToken.length == 0 || this.accessTokenValidUntil < new Date()
+    }
+
+    isRefreshing(): boolean {
+        return this.refreshPromise != undefined
+    }
+
+    /**
+     * Refreshes the token and sets a new acces token. Throws on failure.
+     * Multiple calls only do one refresh at a time and resolve simultaneously
+     */
+    async refresh(): Promise<void> {
+        if (this.refreshPromise) {
+            return this.refreshPromise
+        }
+        this.refreshPromise = this.doRefresh()
+        await this.refreshPromise
+        this.refreshPromise = undefined
     }
 }

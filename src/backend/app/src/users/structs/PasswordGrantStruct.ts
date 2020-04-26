@@ -3,7 +3,7 @@ import { Data } from '@stamhoofd-common/encoding';
 /// Only used as input
 export class PasswordGrantStruct {
     /// Should be 'password'
-    grantType: string;
+    grantType: "password";
 
     /// Username
     username: string;
@@ -18,7 +18,7 @@ export class PasswordGrantStruct {
 
     static decode(data: Data): PasswordGrantStruct {
         const struct = new PasswordGrantStruct();
-        struct.grantType = data.field("grant_type").string;
+        struct.grantType = data.field("grant_type").equals("password");
         struct.username = data.field("username").string;
         struct.password = data.field("password").string;
         struct.deviceName = data.field("deviceName").string;

@@ -16,5 +16,6 @@ export interface Data {
     optionalField(field: string): Data | undefined;
     index(number: number): Data;
     decode<T>(decoder: Decoder<T>): T;
+    equals<T>(value: T): T;
     array<T>(decoder: Decoder<T>): T[];
 }

@@ -3,7 +3,8 @@ import { Organization } from "@stamhoofd-backend/app/src/organizations/models/Or
 import { Request } from "@stamhoofd-backend/routing";
 
 import { UserFactory } from "../factories/UserFactory";
-import { UserWithOrganization } from "../models/User";
+import { Token } from '../models/Token';
+import { User,UserWithOrganization } from "../models/User";
 import { TokenStruct } from "../structs/TokenStruct";
 import { CreateTokenEndpoint } from "./CreateTokenEndpoint";
 
@@ -88,5 +89,54 @@ describe("Endpoint.CreateToken", () => {
         });
 
         await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid username or password/);
+    });
+
+    test("Refresh a token", async () => {
+        const token = await Token.createToken(user)
+        const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "refresh_token",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            refresh_token: token.refreshToken
+        });
+
+        const response = await endpoint.getResponse(r, {});
+        expect(response.body).toBeInstanceOf(TokenStruct);
+        expect(response.body.accessToken.length).toBeGreaterThan(40);
+        expect(response.body.refreshToken.length).toBeGreaterThan(40);
+        expect(response.body.accessToken).not.toEqual(token.accessToken)
+        expect(response.body.refreshToken).not.toEqual(token.refreshToken)
+        expect(response.body.accessTokenValidUntil).toBeValidDate();
+
+        // Check if our old refresh token is still valid, in case of a network error, but only for maximum one hour
+        // And the access token should be invalid
+        const oldToken = await Token.getByAccessToken(token.accessToken, true)
+        expect(oldToken).toBeDefined()
+        if (!oldToken) throw new Error("unexpected")
+        expect(oldToken?.accessTokenValidUntil).toBeBefore(new Date())
+        expect(oldToken?.refreshTokenValidUntil).toBeAfter(new Date())
+
+        expect(oldToken.accessToken).toEqual(token.accessToken)
+        expect(oldToken.refreshToken).toEqual(token.refreshToken)
+        
+    });
+
+    test("Refresh an expired token", async () => {
+        const token = await Token.createUnsavedToken(user)
+        // Warning: set at least one second back, since saved in database without milliseconds! 
+        token.refreshTokenValidUntil = new Date(Date.now() - 1000); 
+        await token.save()
+        const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "refresh_token",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            refresh_token: token.refreshToken
+        });
+
+        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/Invalid refresh/);
+
+        // Await and check if the token is deleted (warning: this happens async from the endpoint)
+        const oldToken = await Token.getByAccessToken(token.accessToken, true)
+        expect(oldToken).not.toBeDefined()
     });
 });

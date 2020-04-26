@@ -323,18 +323,51 @@ export class Model /* static implements RowInitiable<Model> */ {
                 [set, id]
             );
             if (result.changedRows != 1) {
-                try {
-                    console.warn(
-                        `Updated ${this.constructor.name}, but it didn't change a row. Check if ID exists.`
-                    );
-                } catch (e) {
-                    console.error(e);
-                }
+                console.warn(
+                    `Updated ${this.constructor.name}, but it didn't change a row. Check if ID exists.`
+                );
             }
         }
 
         // Mark everything as saved
         this.markSaved();
         return true;
+    }
+
+    async delete() {
+        const id = this.getPrimaryKey();
+    
+        if (!id && this.existsInDatabase) {
+            throw new Error(
+                "Model " +
+                this.constructor.name +
+                " was loaded from the Database, but didn't select the ID. Deleting not possible."
+            );
+        }
+
+        if (!id || !this.existsInDatabase) {
+            throw new Error(
+                "Model " +
+                this.constructor.name +
+                " can't be deleted if it doesn't exist in the database already"
+            );
+        }
+
+        if (this.static.debug)
+            console.log(`Updating ${this.constructor.name} where ${this.static.primary.name} = ${id}`);
+
+        const [result] = await Database.delete(
+            "DELETE FROM `" + this.static.table + "` WHERE `" + this.static.primary.name + "` = ?",
+            [id]
+        );
+        if (result.affectedRows != 1) {
+            console.warn(
+                `Deleted ${this.constructor.name}, but it didn't change a row. Check if ID exists.`
+            );
+        }
+
+        this.existsInDatabase = false;
+        this.eraseProperty(this.static.primary.name);
+        this.savedProperties.clear();
     }
 }
