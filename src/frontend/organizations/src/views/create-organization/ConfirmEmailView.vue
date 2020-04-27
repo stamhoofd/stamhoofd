@@ -62,7 +62,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             session.storeInKeyChain().catch(e => {
                 console.error(e)
             })
-            this.navigationController?.pop()
+            this.pop()
         }).catch(e => {
             console.error(e)
             if (e instanceof STErrors) {
