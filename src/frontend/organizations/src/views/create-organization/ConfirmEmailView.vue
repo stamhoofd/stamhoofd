@@ -26,6 +26,8 @@
 </template>
 
 <script lang="ts">
+import { STErrors } from '@stamhoofd-common/errors';
+import { Session } from '@stamhoofd-frontend/users';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
@@ -41,6 +43,37 @@ import { Component, Mixins } from "vue-property-decorator";
     }
 })
 export default class ConfirmEmailView extends Mixins(NavigationMixin) {
+    mounted() {
+        this.doCheck()
+    }
+
+    doCheck() {
+        const session = Session.shared
+        if (!session) {
+            throw new Error("Expected session")
+        }
+
+        console.log("do check again");
+        
+        // Try to refresh token
+        session.token.refresh(session.server).then(() => {
+            // todo: do something with the token
+            console.log("Yay! Refreshed the token!")
+            session.storeInKeyChain().catch(e => {
+                console.error(e)
+            })
+            this.navigationController?.pop()
+        }).catch(e => {
+            console.error(e)
+            if (e instanceof STErrors) {
+                if (e.errors[0].code == "user_not_verified") {
+                    console.log("still same thing")
+
+                    setTimeout(this.doCheck, 5000);
+                }
+            }
+        })
+    }
 }
 </script>
 

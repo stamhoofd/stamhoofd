@@ -57,7 +57,14 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                const token = await Token.createToken(user);
+                let token: Token;
+                if (user.verified) {
+                    token = await Token.createToken(user);
+                } else {
+                    // Create expired token, to make it useless and only allow validation polling without password.
+                    token = await Token.createExpiredToken(user);
+                }
+
                 if (!token) {
                     throw new STError({
                         code: "error",
@@ -79,6 +86,15 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         code: "invalid_refresh_token",
                         message: "Invalid refresh token",
                         statusCode: 400
+                    });
+                }
+
+                if (!oldToken.user.verified) {
+                    throw new STError({
+                        code: "user_not_verified",
+                        message: "User not yet verified",
+                        human: "Je hebt jouw e-mailadres nog niet geverifieerd",
+                        statusCode: 401 // do not use 403, browser caches that for some reason...
                     });
                 }
 

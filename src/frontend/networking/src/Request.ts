@@ -9,9 +9,9 @@ import { Server } from './Server';
 export type HTTPMethod = "GET" | "POST" | "PATCH" | "DELETE" | "PUT"
 
 export class RequestResult<T> {
-    data?: T;
+    data: T;
 
-    constructor(data?: T) {
+    constructor(data: T) {
         this.data = data
     }
 }
@@ -96,13 +96,13 @@ export class Request<T> {
                 }
             }
 
-            console.log(this.method, this.path, this.body)
+            console.log("Starting new reuest")
+            console.log("New request", this.method, this.path, this.body)
 
             response = await fetch(this.server.host + this.path, {
                 method: this.method,
                 headers: this.headers,
                 body: body,
-                mode: "no-cors",
                 credentials: 'omit'
             })
         } catch (error) {
@@ -116,8 +116,8 @@ export class Request<T> {
             let retry = false
             for (const middleware of this.getMiddlewares()) {
                 // Check if one of the middlewares decides to stop
-                if (middleware.shouldRetryError) {
-                    retry = retry || await middleware.shouldRetryError(this, error)
+                if (middleware.shouldRetryNetworkError) {
+                    retry = retry || await middleware.shouldRetryNetworkError(this, error)
                 }
             }
             if (retry) {
@@ -129,37 +129,38 @@ export class Request<T> {
             throw error
         }
 
-        // A middleware might decide here to interrupt the callback
-        // He might for example fire a timer to retry the request because of a network failure
-        // Or it might decide to fetch a new access token because the current one is expired
-        // They return a promise with a boolean value indicating that the request should get retried
-        let retry = false
-        for (const middleware of this.getMiddlewares()) {
-            // Check if one of the middlewares decides to stop
-            if (middleware.shouldRetryRequest) {
-                retry = retry || await middleware.shouldRetryRequest(this, response) 
-            }
-        }
-
-        if (retry) {
-            // Retry
-            return await this.start()
-        }
-
         if (!response.ok) {
             if (response.headers.get('Content-Type') == 'application/json') {
                 const json = await response.json()
                 let err: STErrors
                 try {
                     err = STErrors.decode(new ObjectData(json))
+                    console.error(err)
                 } catch (e) {
                     // Failed to decode
                     console.error(json)
                     console.error(e)
                     throw new Error("Bad request with invalid json error")
                 }
+
+                // A middleware might decide here to retry instead of passing the error to the caller
+                let retry = false
+                for (const middleware of this.getMiddlewares()) {
+                    // Check if one of the middlewares decides to stop
+                    if (middleware.shouldRetryError) {
+                        retry = retry || await middleware.shouldRetryError(this, response, err)
+                    }
+                }
+
+                if (retry) {
+                    // Retry
+                    return await this.start()
+                }
+
                 throw err
             }
+
+            // Todo: add retry handlers
 
             throw new Error("Bad request")
         }
@@ -170,6 +171,7 @@ export class Request<T> {
             // todo: add automatic decoding here, so we know we are receiving what we expected with typings
             if (this.decoder) {
                 const decoded = this.decoder?.decode(new ObjectData(json))
+                console.info(decoded)
                 return new RequestResult(decoded)
             }
 
@@ -180,6 +182,6 @@ export class Request<T> {
             throw new Error("Received no decodeable content, but expected content")
         }
 
-        return new RequestResult()
+        return new RequestResult(await response.text()) as any
     }
 }

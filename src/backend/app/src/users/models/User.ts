@@ -17,6 +17,9 @@ export class User extends Model {
     @column({ type: "string" })
     email: string;
 
+    @column({ type: "boolean" })
+    verified: boolean;
+
     /**
      * Passwords will automatically get set to undefined if it was selected for login
      */
@@ -116,6 +119,7 @@ export class User extends Model {
         user.publicKey = publicKey;
         user.createdOn = new Date();
         user.createdOn.setMilliseconds(0);
+        user.verified = false;
 
         try {
             await user.save();

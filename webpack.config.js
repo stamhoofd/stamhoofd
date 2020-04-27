@@ -20,7 +20,7 @@ module.exports = {
         contentBase: './dist',
         allowedHosts: [
             '.stamhoofd.be',
-            '.stamhoofd.dev',
+            '.stamhoofd.local',
         ],
         // To test on external devices
         host: '0.0.0.0',//your ip address

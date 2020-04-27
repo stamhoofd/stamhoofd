@@ -28,6 +28,7 @@ export class RouterServer {
                 res.writeHead(404);
                 res.end("Endpoint not found.");
             } else {
+                if (!response.headers['Cache-Control']) response.headers['Cache-Control'] = "no-cache"
                 res.writeHead(response.status, response.headers);
                 res.end(response.body);
             }
@@ -35,17 +36,20 @@ export class RouterServer {
             // Todo: implement special errors to send custom status codes
             if (e instanceof STError) {
                 res.writeHead(e.statusCode ?? 400, {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-cache",
                 });
                 res.end(JSON.stringify(new STErrors(e)));
             } else if(e instanceof STErrors) {
                 res.writeHead(e.statusCode ?? 400, {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-cache",
                 });
                 res.end(JSON.stringify(e));
             } else {
                 res.writeHead(500, {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Cache-Control": "no-cache",
                 });
                 // Todo: hide information if not running in development mode
                 res.end(JSON.stringify({
@@ -68,8 +72,8 @@ export class RouterServer {
         }
         console.log("Starting server...");
         this.server = http.createServer(this.requestListener.bind(this));
-        this.server.listen(port, "127.0.0.1", () => {
-            console.log("Server running at http://127.0.0.1:" + port);
+        this.server.listen(port, "0.0.0.0", () => {
+            console.log("Server running at http://0.0.0.0:" + port);
         });
     }
 

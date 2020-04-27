@@ -68,13 +68,14 @@ import { Sodium } from '@stamhoofd-common/crypto';
 import { STError, STErrors } from '@stamhoofd-common/errors';
 import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Server } from "@stamhoofd-frontend/networking";
-import { Token } from '@stamhoofd-frontend/users';
+import { Session, Token, User } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
+import { Organization } from '@stamhoofd/shared/models/Organization';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import BackupCopyView from './BackupCopyView.vue';
@@ -109,8 +110,7 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const server = new Server()
-        server.host = "http://localhost:9090";
+        const server = new Server("http://api.stamhoofd.local:9090")
 
         const userKeyPair = await Sodium.boxKeyPair();
         const organizationKeyPair = await Sodium.signKeyPair();
@@ -133,11 +133,20 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
             body: this.data,
             decoder: Token
         }).then(data => {
+
             // We now have an expired access token. Perfect. We can only renew it when our email address will be validated.
             console.log(data)
             const token = data.data
             if (token) {
-                token.storeInKeyChain().catch(e => {
+                const user = new User()
+                user.email = this.data.user.email
+                const organization = new Organization()
+                organization.name = this.data.name;
+                organization.uri = this.data.name; // todo: we need to get this from the server
+                const session = new Session(token, user, organization)
+                session.setDefault()
+
+                session.storeInKeyChain().catch(e => {
                     console.error(e)
                 })
                 this.errorBox = null;

@@ -14,6 +14,7 @@ describe("Endpoint.CreateToken", () => {
     let organization: Organization;
     let otherOrganization: Organization;
     let user: UserWithOrganization;
+    let unverifiedUser: UserWithOrganization;
     const password = "my test password";
 
     beforeAll(async () => {
@@ -23,6 +24,11 @@ describe("Endpoint.CreateToken", () => {
         // Create user
         user = await new UserFactory({ organization, password }).create();
         if (!user) {
+            throw new Error("Could not register user for testing");
+        }
+
+        unverifiedUser = await new UserFactory({ organization, password, verified: false }).create();
+        if (!unverifiedUser) {
             throw new Error("Could not register user for testing");
         }
     });
@@ -41,6 +47,25 @@ describe("Endpoint.CreateToken", () => {
         expect(response.body.accessToken.length).toBeGreaterThan(40);
         expect(response.body.refreshToken.length).toBeGreaterThan(40);
         expect(response.body.accessTokenValidUntil).toBeValidDate();
+        expect(response.body.accessTokenValidUntil).toBeAfter(new Date());
+    });
+
+    test("Log a unverified user in", async () => {
+        const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "password",
+            username: unverifiedUser.email,
+            password: password,
+            deviceName: "iPhone of Tim",
+        });
+
+        // The access token should be expired
+        const response = await endpoint.getResponse(r, {});
+        expect(response.body).toBeInstanceOf(TokenStruct);
+        expect(response.body.accessToken.length).toBeGreaterThan(40);
+        expect(response.body.refreshToken.length).toBeGreaterThan(40);
+        expect(response.body.accessTokenValidUntil).toBeValidDate();
+        expect(response.body.accessTokenValidUntil).toBeBefore(new Date());
     });
 
     test("Login wrong organization", async () => {
@@ -92,7 +117,7 @@ describe("Endpoint.CreateToken", () => {
     });
 
     test("Refresh a token", async () => {
-        const token = await Token.createToken(user)
+        const token = await Token.createExpiredToken(user)
         const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
             // eslint-disable-next-line @typescript-eslint/camelcase
             grant_type: "refresh_token",
@@ -138,5 +163,21 @@ describe("Endpoint.CreateToken", () => {
         // Await and check if the token is deleted (warning: this happens async from the endpoint)
         const oldToken = await Token.getByAccessToken(token.accessToken, true)
         expect(oldToken).not.toBeDefined()
+    });
+
+    test("Refresh when a user is not yet verified", async () => {
+        const token = await Token.createExpiredToken(unverifiedUser)
+        const r = Request.buildJson("POST", "/oauth/token", organization.getApiHost(), {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            grant_type: "refresh_token",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            refresh_token: token.refreshToken
+        });
+
+        await expect(endpoint.getResponse(r, {})).rejects.toThrow(/verified/);
+
+        // Await and check if the token is not deleted
+        const oldToken = await Token.getByAccessToken(token.accessToken, true)
+        expect(oldToken).toBeDefined()
     });
 });

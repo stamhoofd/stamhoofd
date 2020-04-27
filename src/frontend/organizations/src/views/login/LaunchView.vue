@@ -21,7 +21,8 @@
 </template>
 
 <script lang="ts">
-import { Token } from '@stamhoofd-frontend/users';
+import { STErrors } from '@stamhoofd-common/errors';
+import { Session } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue"
@@ -40,15 +41,21 @@ import GeneralView from '../create-organization/GeneralView.vue';
 })
 export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
     mounted() {
-        Token.restoreFromKeyChain().then((token) => {
-            if (token) {
+        Session.restoreFromKeyChain().then((session) => {
+            if (session) {
                 // Yay! we have a token
-                console.log("Found token in keychain", token)
+                console.log("Found session in keychain", session)
+                session.setDefault()
 
-                // Future: renew token before doing anything
-                // Got to confirm email view
-                this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(ConfirmEmailView)}));
-
+                session.token.refresh(session.server).then(() => {
+                    // todo: do something with the token
+                }).catch(e => {
+                    if (e instanceof STErrors) {
+                        if (e.errors[0].code == "user_not_verified") {
+                            this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(ConfirmEmailView)}));
+                        }
+                    }
+                })
             }
         }).catch(e => {
             console.error(e);

@@ -96,8 +96,7 @@ export default class GeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
-        const server = new Server()
-        server.host = "http://localhost:9090";
+        const server = new Server("http://localhost:9090")
 
         server.request({
             method: "GET",

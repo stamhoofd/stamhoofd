@@ -1,12 +1,11 @@
 import { Data } from '@stamhoofd-common/encoding';
-
-import { Server } from '../../networking';
+import { Server } from '@stamhoofd-frontend/networking';
 
 export class Token {
     accessToken: string;
     refreshToken: string;
     accessTokenValidUntil: Date;
-    private refreshPromise?: Promise<void>
+    private refreshPromise?: Promise<void>;
 
     constructor(data: { accessToken: string; refreshToken: string; accessTokenValidUntil: Date}) {
         this.accessToken = data.accessToken
@@ -22,38 +21,9 @@ export class Token {
     }
 
     /**
-     * Persist this token in a keychain, or other method that is available
-     */
-    async storeInKeyChain() {
-        if (!process.env.IS_ELECTRON) {
-            return;
-        }
-        const keytar = await import("keytar")
-        await keytar.setPassword("be.stamhoofd.account.token", "todo", this.refreshToken);
-    }
-
-    static async restoreFromKeyChain(): Promise<Token | undefined> {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        if (!process.env.IS_ELECTRON) {
-            return;
-        }
-
-        const keytar = await import("keytar")
-        const credentials = await keytar.findCredentials("be.stamhoofd.account.token")
-        if (credentials.length > 0) {
-            return new Token({
-                accessToken: "",
-                refreshToken: credentials[0].password,
-                accessTokenValidUntil: new Date(Date.now() - 1000)
-            })
-        }
-    }
-
-    /**
      * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
      */
-    private async doRefresh(): Promise<void> {
-        const server = new Server();
+    private async doRefresh(server: Server): Promise<void> {
         const data = await server.request({
             method: "POST",
             path: "/oauth/token",
@@ -65,10 +35,6 @@ export class Token {
             },
             decoder: Token
         })
-
-        if (!data.data) {
-            throw new Error("Refresh failed")
-        }
 
         this.accessToken = data.data.accessToken
         this.refreshToken = data.data.refreshToken
@@ -87,12 +53,15 @@ export class Token {
      * Refreshes the token and sets a new acces token. Throws on failure.
      * Multiple calls only do one refresh at a time and resolve simultaneously
      */
-    async refresh(): Promise<void> {
+    async refresh(server: Server): Promise<void> {
         if (this.refreshPromise) {
             return this.refreshPromise
         }
-        this.refreshPromise = this.doRefresh()
-        await this.refreshPromise
-        this.refreshPromise = undefined
+        try {
+            this.refreshPromise = this.doRefresh(server)
+            await this.refreshPromise
+        } finally {
+            this.refreshPromise = undefined
+        }
     }
 }

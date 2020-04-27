@@ -91,7 +91,11 @@ export class Organization extends Model {
      */
     static async fromHost(host: string): Promise<Organization> {
         // Todo: we need to read this from a config or environment file
-        const defaultDomain = ".stamhoofd.be";
+        let defaultDomain = process.env.HOSTNAME;
+        if (!defaultDomain) {
+            throw new Error("Missing hostname in environment")
+        }
+        defaultDomain = "." + defaultDomain;
 
         if (host.startsWith("api.")) {
             host = host.substring(4);
@@ -124,15 +128,21 @@ export class Organization extends Model {
         if (this.registerDomain) {
             return this.registerDomain;
         }
-        const defaultDomain = ".stamhoofd.be";
-        return this.uri + defaultDomain;
+        const defaultDomain = process.env.HOSTNAME;
+        if (!defaultDomain) {
+            throw new Error("Missing hostname in environment")
+        }
+        return this.uri + "." + defaultDomain;
     }
 
     getApiHost(): string {
         if (this.registerDomain) {
             return "api." + this.registerDomain;
         }
-        const defaultDomain = ".stamhoofd.be";
-        return "api." + this.uri + defaultDomain;
+        const defaultDomain = process.env.HOSTNAME;
+        if (!defaultDomain) {
+            throw new Error("Missing hostname in environment")
+        }
+        return "api." + this.uri + "." +  defaultDomain;
     }
 }

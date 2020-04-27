@@ -1,7 +1,7 @@
 import http from "http";
 import url from "url";
 
-export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE" | "OPTIONS";
 export class Request {
     method: HttpMethod;
     url: string;
@@ -46,7 +46,7 @@ export class Request {
 
             // we can access HTTP headers
             req.on("data", chunk => {
-                console.log(`Data chunk available: ${chunk}`);
+                console.log(chunk+"");
                 chunks.push(chunk);
             });
             req.on("error", err => {
@@ -63,12 +63,22 @@ export class Request {
                 resolve(body);
             });
         });
+        
 
         const parsedUrl = url.parse(req.url, true);
+        console.log(req.headers.host)
+        console.log(parsedUrl)
+
+        let host = req.headers.host ?? ""
+        
+        // Remove port
+        const splitted = host.split(":")
+        host = splitted[0]
+
         return new Request({
             method: req.method as HttpMethod,
             url: parsedUrl.pathname ?? "",
-            host: parsedUrl.hostname ?? "",
+            host: host,
             query: parsedUrl.query,
             body: body
         });

@@ -6,6 +6,10 @@ import { User, UserWithOrganization } from "../models/User";
 class Options {
     organization: Organization;
     password?: string;
+    /**
+     * Default is true
+     */
+    verified?: boolean;
 }
 
 export class UserFactory extends Factory<Options, User> {
@@ -16,6 +20,12 @@ export class UserFactory extends Factory<Options, User> {
         if (!user) {
             throw new Error("Unexpected failure when creating user in factory");
         }
+        
+        if (this.options.verified === undefined || this.options.verified === true) {
+            user.verified = true;
+            await user.save();
+        }
+        
         return user;
     }
 }
