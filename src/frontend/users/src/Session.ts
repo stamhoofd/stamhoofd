@@ -76,7 +76,6 @@ export class Session implements RequestMiddleware {
                 accessTokenValidUntil: new Date(Date.now() - 1000)
             });
 
-            // Todo: do network request to request additional information!
             const user = new User();
             user.email = email
             const organization = new Organization()

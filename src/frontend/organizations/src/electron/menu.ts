@@ -1,4 +1,4 @@
-const { app, Menu } = require('electron')
+import { app, Menu } from 'electron'
 
 const isMac = process.platform === 'darwin'
 
@@ -91,7 +91,7 @@ const template = [
       {
         label: 'Learn More',
         click: async () => {
-          const { shell } = require('electron')
+          const { shell } = await import('electron')
           await shell.openExternal('https://electronjs.org')
         }
       }
@@ -99,5 +99,5 @@ const template = [
   }
 ]
 
-const menu = Menu.buildFromTemplate(template)
+const menu = Menu.buildFromTemplate(template as any)
 Menu.setApplicationMenu(menu)

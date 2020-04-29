@@ -1,5 +1,6 @@
-const { app, BrowserWindow, systemPreferences } = require('electron')
-require('./electron/menu');
+import './electron/menu';
+
+import { app, BrowserWindow, systemPreferences } from 'electron'
 
 const development = !!process.env.ELECTRON_WEBPACK_DEV_SERVER
 
@@ -29,9 +30,9 @@ function createLoginWindow () {
   win.maximizable = false;
 
   if (process.env.ELECTRON_WEBPACK_DEV_SERVER) {
-    win.loadURL('http://127.0.0.1:8080/login.html')
+    win.loadURL('http://127.0.0.1:8080/login.html').catch(e => console.error(e))
   } else {
-    win.loadFile('dist/login.html')
+    win.loadFile('dist/login.html').catch(e => console.error(e))
   }
 
   // Open the DevTools.
@@ -41,7 +42,7 @@ function createLoginWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createLoginWindow)
+app.whenReady().then(createLoginWindow).catch(e => console.error(e))
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
