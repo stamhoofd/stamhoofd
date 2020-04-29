@@ -41,25 +41,7 @@ import GeneralView from '../create-organization/GeneralView.vue';
 })
 export default class ChooseOrganizationView extends Mixins(NavigationMixin) {
     mounted() {
-        Session.restoreFromKeyChain().then((session) => {
-            if (session) {
-                // Yay! we have a token
-                console.log("Found session in keychain", session)
-                session.setDefault()
-
-                session.token.refresh(session.server).then(() => {
-                    // todo: do something with the token
-                }).catch(e => {
-                    if (e instanceof STErrors) {
-                        if (e.errors[0].code == "user_not_verified") {
-                            this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(ConfirmEmailView)}));
-                        }
-                    }
-                })
-            }
-        }).catch(e => {
-            console.error(e);
-        })
+       
     }
     createNew() {
         this.present(new ComponentWithProperties(NavigationController, {root: new ComponentWithProperties(GeneralView)}));

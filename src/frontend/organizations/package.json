@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "serve": "webpack-dev-server --hot",
-        "electron-serve": "tsc src/electron.ts --outDir dist && ELECTRON_WEBPACK_DEV_SERVER=true electron dist/electron.js",
+        "electron-serve": "webpack --config webpack.electron-main.config.js && ELECTRON_WEBPACK_DEV_SERVER=true electron dist/index.js",
         "build": "webpack"
     },
     "dependencies": {
