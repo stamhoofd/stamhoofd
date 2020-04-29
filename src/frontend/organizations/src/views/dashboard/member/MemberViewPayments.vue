@@ -38,8 +38,8 @@
 </template>
 
 <script lang="ts">
+import { Member } from "@stamhoofd-frontend/models";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue";
-import { Member } from "@stamhoofd/shared/models/Member";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
 @Component({ components: { STToolbar } })

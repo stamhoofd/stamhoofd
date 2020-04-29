@@ -1,5 +1,5 @@
-import { Group } from "../models/Group";
-import { Organization } from "../models/Organization";
+import { Group } from "../Group";
+import { Organization } from "../Organization";
 import { Factory } from "./Factory";
 import { MemberFactory } from "./MemberFactory";
 

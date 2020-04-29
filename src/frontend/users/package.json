@@ -4,6 +4,7 @@
     "main": "index.ts",
     "private": true,
     "dependencies": {
+        "@stamhoofd-frontend/models": "1.0.0",
         "keytar": "^5.5.0"
     }
 }

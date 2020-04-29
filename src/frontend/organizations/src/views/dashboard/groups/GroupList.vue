@@ -114,6 +114,9 @@
 </template>
 
 <script lang="ts">
+import { Group } from "@stamhoofd-frontend/models";
+import { Member } from "@stamhoofd-frontend/models";
+import { Organization } from "@stamhoofd-frontend/models";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import { CanNotSwimFilter,FoodAllergyFilter, NoFilter, NotPaidFilter } from "@stamhoofd/shared/classes/member-filters";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
@@ -123,9 +126,6 @@ import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigatio
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue";
 import Tooltip from "@stamhoofd/shared/directives/Tooltip";
-import { Group } from "@stamhoofd/shared/models/Group";
-import { Member } from "@stamhoofd/shared/models/Member";
-import { Organization } from "@stamhoofd/shared/models/Organization";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";

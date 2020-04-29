@@ -1,7 +1,7 @@
-import { EmergencyContact } from "../models/EmergencyContact";
+import { EmergencyContact } from "../EmergencyContact";
 import { Factory } from "./Factory";
 interface Options {}
-import { Gender } from "../models/Gender";
+import { Gender } from "../Gender";
 
 export class EmergencyContactFactory extends Factory<EmergencyContact> {
     options: Options;

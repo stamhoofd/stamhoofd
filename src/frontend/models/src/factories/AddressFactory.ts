@@ -1,4 +1,4 @@
-import { Address } from "../models/Address";
+import { Address } from "../Address";
 import StreetNames from "./data/streets";
 import { Factory } from "./Factory";
 

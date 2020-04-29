@@ -46,12 +46,12 @@
 </template>
 
 <script lang="ts">
+import { Group } from "@stamhoofd-frontend/models";
+import { Organization } from "@stamhoofd-frontend/models";
+import { OrganizationFactory } from "@stamhoofd-frontend/models";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import NavigationController from "@stamhoofd/shared/components/layout/NavigationController.vue";
-import { OrganizationFactory } from "@stamhoofd/shared/factories/OrganizationFactory";
-import { Group } from "@stamhoofd/shared/models/Group";
-import { Organization } from "@stamhoofd/shared/models/Organization";
 import { Component, Mixins } from "vue-property-decorator";
 
 import GroupList from "./groups/GroupList.vue";

@@ -1,14 +1,15 @@
 import { STErrors } from '@stamhoofd-common/errors';
+import { Organization } from "@stamhoofd-frontend/models";
 import { Request, RequestMiddleware } from '@stamhoofd-frontend/networking';
-import { Organization } from '@stamhoofd/shared/models/Organization';
 
 import { Token } from "./Token";
 import { User } from './User';
 
 export class Session implements RequestMiddleware {
     token: Token
-    organization: Organization
+    organization: Organization;
     user: User
+    keyPair: {publicKey: string; privateKey: string};
 
     static shared?: Session
 

@@ -1,11 +1,11 @@
-import { Parent } from "../models/Parent";
-import { ParentType } from "../models/ParentType";
+import { Parent } from "../Parent";
+import { ParentType } from "../ParentType";
 import { AddressFactory } from "./AddressFactory";
 import { Factory } from "./Factory";
 interface Options {
     type: ParentType | null;
 }
-import { Gender } from "../models/Gender";
+import { Gender } from "../Gender";
 
 export class ParentFactory extends Factory<Parent> {
     options: Options;

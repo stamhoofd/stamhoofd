@@ -30,9 +30,7 @@ export default class DashboardWindow extends Vue {
                 console.log("Found session in keychain", session)
                 session.setDefault()
 
-                session.token.refresh(session.server).then(() => {
-                    // We have a token, yay!
-                }).catch(e => {
+                session.token.refresh(session.server).catch(e => {
                     if (e instanceof STErrors) {
                         if (e.errors[0].code == "user_not_verified") {
                             (this.$refs.window as any).$refs.stack.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(ConfirmEmailView) }));

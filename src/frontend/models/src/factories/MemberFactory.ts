@@ -1,7 +1,7 @@
-import { Gender } from "../models/Gender";
-import { Member } from "../models/Member";
-import { ParentType } from "../models/ParentType";
-import { RecordTypeHelper,RecordTypePriority } from "../models/RecordType";
+import { Gender } from "../Gender";
+import { Member } from "../Member";
+import { ParentType } from "../ParentType";
+import { RecordTypeHelper,RecordTypePriority } from "../RecordType";
 import { EmergencyContactFactory } from "./EmergencyContactFactory";
 import { Factory } from "./Factory";
 import { ParentFactory } from "./ParentFactory";

@@ -1,5 +1,5 @@
-import { Record } from "../models/Record";
-import { RecordType } from "../models/RecordType";
+import { Record } from "../Record";
+import { RecordType } from "../RecordType";
 import { Factory } from "./Factory";
 interface Options {}
 

@@ -41,12 +41,12 @@
 </template>
 
 <script lang="ts">
+import { Member } from "@stamhoofd-frontend/models";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue";
-import { Member } from "@stamhoofd/shared/models/Member";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailEditor from "./MailEditor.vue";

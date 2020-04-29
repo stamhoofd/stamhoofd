@@ -1,0 +1,8 @@
+{
+    "name": "@stamhoofd-frontend/models",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "@stamhoofd-frontend/networking": "1.0.0"
+    }
+}

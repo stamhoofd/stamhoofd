@@ -1,4 +1,4 @@
-import { Gender } from "../models/Gender";
+import { Gender } from "../Gender";
 import BoyNames from "./data/boys";
 import FamilyNames from "./data/family-names";
 import GirlNames from "./data/girls";

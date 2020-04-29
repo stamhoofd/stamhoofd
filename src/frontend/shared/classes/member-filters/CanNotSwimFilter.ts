@@ -1,5 +1,5 @@
-import { Member } from "@stamhoofd/shared/models/Member";
-import { RecordType } from "@stamhoofd/shared/models/RecordType";
+import { Member } from "@stamhoofd-frontend/models";
+import { RecordType } from "@stamhoofd-frontend/models";
 
 import { Filter } from "./Filter";
 

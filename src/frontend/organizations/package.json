@@ -8,6 +8,7 @@
         "build": "webpack"
     },
     "dependencies": {
+        "@stamhoofd-frontend/models": "1.0.0",
         "@stamhoofd-frontend/errors": "1.0.0",
         "@stamhoofd-frontend/networking": "1.0.0",
         "@stamhoofd-frontend/users": "1.0.0",

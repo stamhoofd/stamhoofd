@@ -1,4 +1,4 @@
-import { Member } from "@stamhoofd/shared/models/Member";
+import { Member } from "@stamhoofd-frontend/models";
 
 import { Filter } from "./Filter";
 

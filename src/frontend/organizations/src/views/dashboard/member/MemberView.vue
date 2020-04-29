@@ -29,6 +29,8 @@
 </template>
 
 <script lang="ts">
+import { Gender } from "@stamhoofd-frontend/models";
+import { Member } from "@stamhoofd-frontend/models";
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import FemaleIcon from "@stamhoofd/shared/components/icons/FemaleIcon.vue";
@@ -36,8 +38,6 @@ import MaleIcon from "@stamhoofd/shared/components/icons/MaleIcon.vue";
 import SegmentedControl from "@stamhoofd/shared/components/inputs/SegmentedControl.vue";
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue";
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue";
-import { Gender } from "@stamhoofd/shared/models/Gender";
-import { Member } from "@stamhoofd/shared/models/Member";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MemberContextMenu from "./MemberContextMenu.vue";

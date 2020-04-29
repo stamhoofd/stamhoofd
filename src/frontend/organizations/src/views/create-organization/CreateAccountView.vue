@@ -67,6 +67,7 @@ import { RegisterStruct } from '@stamhoofd-backend/app/src/users/structs/Registe
 import { Sodium } from '@stamhoofd-common/crypto';
 import { STError, STErrors } from '@stamhoofd-common/errors';
 import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
+import { Organization } from "@stamhoofd-frontend/models";
 import { Server } from "@stamhoofd-frontend/networking";
 import { Session, Token, User } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
@@ -75,7 +76,6 @@ import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
 import STNavigationBar from "@stamhoofd/shared/components/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/shared/components/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/shared/components/navigation/STToolbar.vue"
-import { Organization } from '@stamhoofd/shared/models/Organization';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import BackupCopyView from './BackupCopyView.vue';
