@@ -2,25 +2,36 @@ import { STErrors } from '@stamhoofd-common/errors';
 import { Organization } from "@stamhoofd-frontend/models";
 import { Request, RequestMiddleware } from '@stamhoofd-frontend/networking';
 
-import { Token } from "./Token";
+import { ManagedToken } from "./ManagedToken";
 import { User } from './User';
 
 export class Session implements RequestMiddleware {
-    token: Token
+    /**
+     * Stored in localStorage or other location
+     */
     organization: Organization;
     user: User
-    keyPair: {publicKey: string; privateKey: string};
 
-    static shared?: Session
+    /**
+     * The token is stored in the keychain (only the refresh token)
+     */
+    token: ManagedToken
 
-    constructor(token: Token, user: User, organization: Organization) {
+    /**
+     * keyPair is stored in keychain
+     */
+    keyPair?: {publicKey: string; privateKey: string};
+
+    constructor(token: ManagedToken, user: User, organization: Organization) {
+        if (process.env.IS_ELECTRON) {
+            if (process.type != "renderer") {
+                throw new Error("You cannot use sessions in the electron main process for now")
+            }
+        }
+
         this.token = token
         this.user = user;
         this.organization = organization
-    }
-
-    setDefault() {
-        Session.shared = this
     }
 
     /**
@@ -39,54 +50,6 @@ export class Session implements RequestMiddleware {
         return server
     }
 
-    async storeInKeyChain() {
-        if (!process.env.IS_ELECTRON) {
-            // Store in different place
-            return;
-        }
-        const keytar = await import("keytar")
-        await keytar.setPassword("be.stamhoofd.account.token", this.organization.uri+";"+this.user.email, this.token.refreshToken);
-    }
-
-    /// Requires network (could get adjusted)
-    static async restoreFromKeyChain(organizationUri?: string): Promise<Session | undefined> {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        if (!process.env.IS_ELECTRON) {
-            // Store in different place
-            return;
-        }
-
-        const keytar = await import("keytar")
-        const credentials = await keytar.findCredentials("be.stamhoofd.account.token")
-        for (const credential of credentials) {
-            const split = credential.account.split(";");
-            if (split.length != 2) {
-                // Invalid one!
-                continue;
-            }
-            const uri = split[0];
-            const email = split[1];
-
-            if (organizationUri && uri != organizationUri) {
-                continue;
-            }
-
-            const token = new Token({
-                accessToken: "",
-                refreshToken: credentials[0].password,
-                accessTokenValidUntil: new Date(Date.now() - 1000)
-            });
-
-            const user = new User();
-            user.email = email
-            const organization = new Organization()
-            organization.uri = uri
-
-            const session = new Session(token, user, organization)
-            return session
-        }
-    }
-
     // -- Implementation for requestMiddleware ----
 
     async onBeforeRequest(request: Request<any>): Promise<void> {
@@ -101,7 +64,7 @@ export class Session implements RequestMiddleware {
             await this.token.refresh(this.server)
         }
 
-        request.headers["Authorization"] = "Bearer " + this.token.accessToken;
+        request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
     }
 
     async shouldRetryError(request: Request<any>, response: Response, error: STErrors): Promise<boolean> {

@@ -1,7 +1,7 @@
 import './electron/menu';
 import './electron/events';
 
-import { Session } from '@stamhoofd-frontend/users';
+import { SessionManager } from '@stamhoofd-frontend/users';
 import { app, BrowserWindow, systemPreferences } from 'electron'
 
 import { createDashboardWindow,createLoginWindow} from './electron/windows';
@@ -19,22 +19,10 @@ app.allowRendererProcessReuse = true
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  Session.restoreFromKeyChain().then((session) => {
+  SessionManager.getLastSession().then((session) => {
     if (session) {
       // Yay! we have a token
-      console.log("Found session in keychain", session)
-      session.setDefault()
-
-      /*session.token.refresh(session.server).then(() => {
-        // todo: do something with the token
-        createDashboardWindow()
-      }).catch(e => {
-        if (e instanceof STErrors) {
-          if (e.errors[0].code == "user_not_verified") {
-            this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(ConfirmEmailView) }));
-          }
-        }
-      })*/
+      console.log("Found session: going to dashboard")
       createDashboardWindow()
     } else {
       createLoginWindow()
