@@ -18,8 +18,10 @@ class SessionManager {
         const sessions = await AsyncStorage.getItem("sessions");
 
         if (!sessions) {
+            console.warn("Sessions not found")
             return []
         }
+        console.log(sessions)
         try {
             const data = new ObjectData(sessions)
 
@@ -36,14 +38,17 @@ class SessionManager {
                 allSessions.push(session)
 
             }
+            console.log(allSessions)
             return allSessions
 
         } catch (e) {
+            console.error(e)
             return []
         }
     }
 
     async setSessions(sessions: Session[]) {
+        console.warn("Saving sessions")
         const data: any = [];
         for (const session of sessions) {
             data.push({
@@ -75,9 +80,11 @@ class SessionManager {
 
     async saveSession(session: Session) {
         const sessions = await this.getSessions()
-        for (const s of sessions) {
+        for (const [index, s] of sessions.entries()) {
             if (s.user.email == session.user.email && s.organization.uri == session.organization.uri) {
                 // Already found
+                sessions[index] = session
+                await this.setSessions(sessions)
                 return;
             }
         }

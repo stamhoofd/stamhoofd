@@ -10,7 +10,7 @@ export function createLoginWindow() {
             nodeIntegration: true,
             webSecurity: false, // disable CORS... This should not be a problem since we'll only load local files, never never load files from a remote server
             allowRunningInsecureContent: false,
-            enableRemoteModule: false,
+            enableRemoteModule: true,
 
         },
         titleBarStyle: 'hiddenInset'
@@ -40,7 +40,7 @@ export function createDashboardWindow() {
             nodeIntegration: true,
             webSecurity: false, // disable CORS... This should not be a problem since we'll only load local files, never never load files from a remote server
             allowRunningInsecureContent: false,
-            enableRemoteModule: false,
+            enableRemoteModule: true,
 
         },
         titleBarStyle: 'hiddenInset'

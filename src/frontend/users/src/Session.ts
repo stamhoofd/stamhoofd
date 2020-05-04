@@ -23,12 +23,6 @@ export class Session implements RequestMiddleware {
     keyPair?: {publicKey: string; privateKey: string};
 
     constructor(token: ManagedToken, user: User, organization: Organization) {
-        if (process.env.IS_ELECTRON) {
-            if (process.type != "renderer") {
-                throw new Error("You cannot use sessions in the electron main process for now")
-            }
-        }
-
         this.token = token
         this.user = user;
         this.organization = organization

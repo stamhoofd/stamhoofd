@@ -16,7 +16,11 @@ export class OrganizationFactory extends Factory<Organization> {
     }
 
     create(): Organization {
-        const organization = new Organization();
+        const organization = new Organization({
+            id: Math.floor(Math.random() * 99999999999),
+            name: "",
+            uri: "",
+        });
         organization.id = Math.floor(Math.random() * 99999999999);
 
         let groupNames: any = [];

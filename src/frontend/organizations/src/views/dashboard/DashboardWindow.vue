@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { STErrors } from '@stamhoofd-common/errors';
-import { Session } from '@stamhoofd-frontend/users';
+import { Session, SessionManager } from '@stamhoofd-frontend/users';
 import { ComponentWithProperties } from "@stamhoofd/shared/classes/ComponentWithProperties";
 import NavigationController from '@stamhoofd/shared/components/layout/NavigationController.vue';
 import SplitViewController from "@stamhoofd/shared/components/layout/SplitViewController.vue";
@@ -24,11 +24,11 @@ export default class DashboardWindow extends Vue {
     });
 
     mounted() {
-        Session.restoreFromKeyChain().then((session) => {
+        SessionManager.getLastSession().then(session => {
             if (session) {
                 // Yay! we have a token
                 console.log("Found session in keychain", session)
-                session.setDefault()
+                SessionManager.setCurrent(session)
 
                 session.token.refresh(session.server).catch(e => {
                     if (e instanceof STErrors) {

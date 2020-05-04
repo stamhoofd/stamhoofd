@@ -69,7 +69,8 @@ import { STError, STErrors } from '@stamhoofd-common/errors';
 import { ErrorBox,STErrorsDefault, STErrorsInput } from "@stamhoofd-frontend/errors";
 import { Organization } from "@stamhoofd-frontend/models";
 import { Server } from "@stamhoofd-frontend/networking";
-import { Session, Token, User } from '@stamhoofd-frontend/users';
+import { Session, SessionManager,Token, User } from '@stamhoofd-frontend/users';
+import { ManagedToken } from '@stamhoofd-frontend/users/src/ManagedToken';
 import { ComponentWithProperties } from '@stamhoofd/shared/classes/ComponentWithProperties';
 import { NavigationMixin } from "@stamhoofd/shared/classes/NavigationMixin";
 import Slider from "@stamhoofd/shared/components/inputs/Slider.vue"
@@ -136,17 +137,18 @@ export default class CreateAccountView extends Mixins(NavigationMixin) {
 
             // We now have an expired access token. Perfect. We can only renew it when our email address will be validated.
             console.log(data)
-            const token = data.data
-            if (token) {
-                const user = new User()
-                user.email = this.data.user.email
-                const organization = new Organization()
-                organization.name = this.data.name;
-                organization.uri = this.data.name; // todo: we need to get this from the server
-                const session = new Session(token, user, organization)
-                session.setDefault()
+            if (data.data) {
+                const user = new User({email: this.data.user.email})
+                const organization = new Organization({
+                    id: 0,
+                    name: this.data.name,
+                    uri: this.data.name, //todo!!!
+                })
+                const token = new ManagedToken(organization.uri + ";" + user.email, data.data)
 
-                session.storeInKeyChain().catch(e => {
+                const session = new Session(token, user, organization)
+                SessionManager.setCurrent(session);
+                SessionManager.saveSession(session).catch(e => {
                     console.error(e)
                 })
                 this.errorBox = null;
