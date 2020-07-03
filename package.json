@@ -1,0 +1,31 @@
+{
+    "name": "@stamhoofd/crypto",
+    "version": "1.0.0",
+    "main": "./dist/index.js",
+    "module": "./esm/dist/index.js",
+    "types": "./dist/index.d.ts",
+    "license": "UNLICENCED",
+    "scripts": {
+        "build": "tsc -p . && tsc -p ./esm",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    },
+    "devDependencies": {
+        "@types/jest": "^25.1.4",
+        "@types/libsodium-wrappers": "^0.7.7",
+        "@typescript-eslint/eslint-plugin": "^2.28.0",
+        "@typescript-eslint/parser": "^2.28.0",
+        "colors": "^1.4.0",
+        "eslint": "^6.8.0",
+        "eslint-plugin-jest": "^23.8.2",
+        "eslint-plugin-simple-import-sort": "^5.0.2",
+        "jest": "^25.3.0",
+        "jest-extended": "^0.11.5",
+        "ts-jest": "^25.4.0",
+        "ts-node": "^8.6.2",
+        "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "^1.8.33",
+        "libsodium-wrappers": "^0.7.6"
+    }
+}
