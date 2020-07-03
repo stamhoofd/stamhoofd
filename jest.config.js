@@ -1,6 +1,11 @@
-const base = require("../jest.base.config")
-
-base.setupFilesAfterEnv.push("./tests/jest.setup.ts")
-base.globalSetup = "./tests/jest.global.setup.ts";
-
-module.exports = base;
+module.exports = {
+    preset: "ts-jest",
+    roots: ["<rootDir>"],
+    testEnvironment: "node",
+    setupFilesAfterEnv: ["jest-extended"],
+    moduleDirectories: [
+        "<rootDir>", // support for tsconfig baseUrl, which is .
+        "node_modules",
+    ],
+    //verbose: true,
+};
