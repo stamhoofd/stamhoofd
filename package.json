@@ -1,0 +1,40 @@
+{
+    "name": "@stamhoofd-backend/app",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "license": "UNLICENCED",
+    "private": true,
+    "scripts": {
+        "start": "NODE_ENV=development ts-node .",
+        "test": "jest",
+        "migrations": "NODE_ENV=development ts-node ./migrations.ts",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    },
+    "devDependencies": {
+        "@types/libsodium-wrappers": "^0.7.7",
+        "colors": "^1.4.0",
+        "ts-node": "^8.6.2"
+    },
+    "dependencies": {
+        "@simonbackx/simple-database": "^1.10.3",
+        "@simonbackx/simple-encoding": "^1.8.33",
+        "@simonbackx/simple-endpoints": "^1.2.21",
+        "@types/mysql": "^2.15.9",
+        "@types/node": "^13.9.0",
+        "argon2": "^0.26.1",
+        "dotenv": "^8.2.0",
+        "libsodium-wrappers": "^0.7.6",
+        "mysql": "^2.18.1",
+        "tslib": "^1.11.1",
+        "@types/jest": "^25.1.4",
+        "@typescript-eslint/eslint-plugin": "^2.28.0",
+        "@typescript-eslint/parser": "^2.28.0",
+        "eslint": "^6.8.0",
+        "eslint-plugin-jest": "^23.8.2",
+        "eslint-plugin-simple-import-sort": "^5.0.2",
+        "jest": "^25.3.0",
+        "jest-extended": "^0.11.5",
+        "ts-jest": "^25.4.0",
+        "typescript": "^3.8.3"
+    }
+}
