@@ -4,7 +4,7 @@ import { KeychainItem } from '../KeychainItem';
 import { Organization } from '../Organization';
 import { NewUser } from '../User';
 
-export class CreateOrganiation extends AutoEncoder {
+export class CreateOrganization extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization
 
