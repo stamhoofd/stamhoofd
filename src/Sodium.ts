@@ -60,6 +60,9 @@ class SodiumStatic {
 
         // Read buffer
         const concatCyphertextBuffer = Buffer.from(concatCyphertext, "base64")
+        if (concatCyphertextBuffer.length <= sodium.crypto_box_NONCEBYTES) {
+            throw new Error("ciphertext is too short")
+        }
 
         // Read nonce
         const nonce = concatCyphertextBuffer.slice(0, sodium.crypto_box_NONCEBYTES)

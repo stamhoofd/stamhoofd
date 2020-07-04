@@ -22,6 +22,10 @@ describe("Sodium", () => {
 
         // Test authentication fails
         await expect(Sodium.unsealMessageAuthenticated(cyphertext, receiverKeypair.publicKey, receiverKeypair.privateKey)).rejects.toThrow(/incorrect key pair/)
+
+        // Test invalid lengths fails
+        await expect(Sodium.unsealMessageAuthenticated("", senderKeypair.publicKey, receiverKeypair.privateKey)).rejects.toThrow(/ciphertext is too short/)
+        await expect(Sodium.unsealMessageAuthenticated("sdgdgjoagjidsqogkjssdfsdjgoadjgoksqdgsjdkogsdjgkosdjogkosdjgks", senderKeypair.publicKey, receiverKeypair.privateKey)).rejects.toThrow(/incorrect key pair/)
     });
 
     test("Authenticated public-key encryption for yourself", async () => {
@@ -53,5 +57,8 @@ describe("Sodium", () => {
         await expect(Sodium.unsealMessage(cyphertext, senderKeypair.publicKey, senderKeypair.privateKey)).rejects.toThrow(/incorrect key pair/)
         await expect(Sodium.unsealMessage(cyphertext, receiverKeypair.publicKey, senderKeypair.privateKey)).rejects.toThrow(/incorrect key pair/)
         await expect(Sodium.unsealMessage(cyphertext, senderKeypair.publicKey, receiverKeypair.privateKey)).rejects.toThrow(/incorrect key pair/)
+        await expect(Sodium.unsealMessage(cyphertext, "", receiverKeypair.privateKey)).rejects.toThrow(/invalid publicKey length/)
+        await expect(Sodium.unsealMessage(cyphertext, "", "")).rejects.toThrow(/invalid publicKey length/)
+        await expect(Sodium.unsealMessage(cyphertext, receiverKeypair.publicKey, "")).rejects.toThrow(/invalid privateKey length/)
     });
 });
