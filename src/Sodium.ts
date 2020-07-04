@@ -8,6 +8,26 @@ class SodiumStatic {
         this.loaded = true;
     }
 
+    async getBoxPublicKeyBytes() {
+        await this.loadIfNeeded();
+        return sodium.crypto_box_PUBLICKEYBYTES
+    }
+
+    async getBoxPrivateKeyBytes() {
+        await this.loadIfNeeded();
+        return sodium.crypto_box_SECRETKEYBYTES
+    }
+
+    async getBoxNonceBytes() {
+        await this.loadIfNeeded();
+        return sodium.crypto_box_NONCEBYTES
+    }
+
+    async getBoxEncryptedPrivateKeyBytes() {
+        await this.loadIfNeeded();
+        return await this.getBoxPrivateKeyBytes() + await this.getBoxNonceBytes() + sodium.crypto_box_MACBYTES
+    }
+
     async boxKeyPair(): Promise<StringKeyPair> {
         await this.loadIfNeeded();
         const keypair = sodium.crypto_box_keypair();
