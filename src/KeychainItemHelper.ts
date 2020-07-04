@@ -16,10 +16,11 @@ export class KeychainItemHelper {
             })
         }
         const esk = Buffer.from(item.encryptedPrivateKey, "base64")
-        if (esk.length != await Sodium.getBoxEncryptedPrivateKeyBytes()) {
+        const expectedBytes = await Sodium.getBoxEncryptedPrivateKeyBytes()
+        if (esk.length != expectedBytes) {
             throw new DecodingError({
                 code: "invalid_field",
-                message: "The length of the encrypted private key is not valid",
+                message: "The length of the encrypted private key is not valid. Expected " + expectedBytes + ", received " + esk.length,
                 field: "encryptedPrivateKey"
             })
         }

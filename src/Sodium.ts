@@ -23,9 +23,20 @@ class SodiumStatic {
         return sodium.crypto_box_NONCEBYTES
     }
 
+    /**
+     * How long a private key will be when it is encrypted with authentication using sealMessageAuthenticated. Because this method uses utf8 encoding
+     * the resulting length will be a bit longer
+     */
     async getBoxEncryptedPrivateKeyBytes() {
         await this.loadIfNeeded();
-        return await this.getBoxPrivateKeyBytes() + await this.getBoxNonceBytes() + sodium.crypto_box_MACBYTES
+        return this.base64LengthForBytes(sodium.crypto_box_SECRETKEYBYTES) + sodium.crypto_box_NONCEBYTES + sodium.crypto_box_MACBYTES
+    }
+
+    /**
+     * Returns how long a base64 encoded string will be for a given amount of bytes
+     */
+    base64LengthForBytes(bytes: number) {
+        return 4 * Math.ceil(bytes / 3)
     }
 
     async boxKeyPair(): Promise<StringKeyPair> {
