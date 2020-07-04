@@ -37,7 +37,7 @@ describe("Endpoint.CreateOrganization", () => {
             },
         });
 
-        const response = await endpoint.getResponse(r, {});
+        const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
 
         // Access token should be expired
@@ -63,7 +63,7 @@ describe("Endpoint.CreateOrganization", () => {
         const userKeyPair = await Sodium.boxKeyPair();
         const organizationKeyPair = await Sodium.signKeyPair();
 
-        const r = Request.buildJson("POST", "/organizations", "todo-host.be", {
+        const r = Request.buildJson("POST", "/v1/organizations", "todo-host.be", {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test organization",
             publicKey: organizationKeyPair.publicKey,
@@ -85,7 +85,7 @@ describe("Endpoint.CreateOrganization", () => {
         const userKeyPair = await Sodium.boxKeyPair();
         const organizationKeyPair = await Sodium.signKeyPair();
 
-        const r = Request.buildJson("POST", "/organizations", "todo-host.be", {
+        const r = Request.buildJson("POST", "/v1/organizations", "todo-host.be", {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test 2 organization",
             publicKey: organizationKeyPair.publicKey,
@@ -104,7 +104,7 @@ describe("Endpoint.CreateOrganization", () => {
         const organizationKeyPair = await Sodium.signKeyPair();
         const invalidKeyPair = await Sodium.signKeyPair();
 
-        const r = Request.buildJson("POST", "/organizations", "todo-host.be", {
+        const r = Request.buildJson("POST", "/v1/organizations", "todo-host.be", {
             // eslint-disable-next-line @typescript-eslint/camelcase
             name: "My endpoint test 3 organization",
             publicKey: organizationKeyPair.publicKey,
