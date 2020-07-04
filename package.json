@@ -6,12 +6,12 @@
     "private": true,
     "scripts": {
         "build": "tsc -b && mkdir -p ./dist/src/migrations && cp ./src/migrations/*.sql ./dist/src/migrations",
-        "build:full": "rm -r ./dist && yarn build",
+        "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "test": "yarn build:full && jest --runInBand --no-cache",
         "migrations": "NODE_ENV=development ts-node ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "upgrade:internal": "yarn upgrade --scope stamhoofd --scope simonbackx"
+        "upgrade:internal": "yarn upgrade --scope stamhoofd && yarn upgrade --scope simonbackx"
     },
     "devDependencies": {
         "@types/libsodium-wrappers": "^0.7.7",

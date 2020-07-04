@@ -18,6 +18,9 @@ export class User extends Model {
     })
     id!: string;
 
+    @column({ foreignKey: User.organization, type: "string" })
+    organizationId: string;
+
     @column({ type: "string" })
     email: string;
 
@@ -42,14 +45,26 @@ export class User extends Model {
     @column({ type: "string" })
     publicKey: string;
 
-    @column({ type: "datetime" })
-    createdOn: Date;
+    @column({
+        type: "datetime", beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    createdAt: Date
 
-    @column({ type: "datetime" })
-    updatedOn: Date;
-
-    @column({ foreignKey: User.organization, type: "string" })
-    organizationId: string;
+    @column({
+        type: "datetime", beforeSave() {
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    updatedAt: Date
 
     static organization = new ManyToOneRelation(Organization, "organization");
 
@@ -103,8 +118,6 @@ export class User extends Model {
         const hash = await argon2.hash(password);
         user.password = hash;
         user.publicKey = publicKey;
-        user.createdOn = new Date();
-        user.createdOn.setMilliseconds(0);
         user.verified = false;
 
         try {

@@ -1,26 +1,26 @@
 import { Database } from "@simonbackx/simple-database";
 import { Sodium } from "@stamhoofd/crypto";
-import { OrganizationType, UmbrellaOrganization } from "@stamhoofd/structures";
+import { OrganizationMetaData,OrganizationType, UmbrellaOrganization } from "@stamhoofd/structures";
 
+import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { Organization } from "./Organization";
 
 describe("Model.Organization", () => {
-    let existingOrganizationId: number;
+    let existingOrganizationId: string;
 
     beforeAll(async () => {
         const organizationKeyPair = await Sodium.signKeyPair();
 
-        const [data] = await Database.insert("INSERT INTO " + Organization.table + " SET ?", [
-            {
-                name: "Model Organization test",
-                website: "https://www.domain.com",
-                meta: "{}",
-                createdOn: "2020-03-29 14:30:15",
-                uri: "model-organization-test",
-                publicKey: organizationKeyPair.publicKey,
-            },
-        ]);
-        existingOrganizationId = data.insertId;
+        const organization = await new OrganizationFactory({
+            publicKey: organizationKeyPair.publicKey,
+            uri: "model-organization-test",
+            meta: OrganizationMetaData.create({
+                type: OrganizationType.Other,
+                umbrellaOrganization: null
+            })
+        }).create();
+
+        existingOrganizationId = organization.id;
     });
 
     test("Get organization by id", async () => {
@@ -28,8 +28,8 @@ describe("Model.Organization", () => {
         expect(organization).toBeDefined();
         if (!organization) return;
         expect(organization).toBeInstanceOf(Organization);
-        expect(organization.id).toBeGreaterThanOrEqual(1);
-        expect(organization.meta.type).toEqual("other");
+        expect(organization.id).toEqual(existingOrganizationId);
+        expect(organization.meta.type).toEqual("Other");
     });
 
     test("Save organization meta data", async () => {

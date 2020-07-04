@@ -21,6 +21,9 @@ export class Token extends Model {
     static table = "tokens";
     static MAX_DEVICES = 5;
 
+    @column({ type: "string", foreignKey: Token.user })
+    userId: string;
+
     // Columns
     @column({ primary: true, type: "string" })
     accessToken: string;
@@ -34,11 +37,26 @@ export class Token extends Model {
     @column({ type: "datetime" })
     refreshTokenValidUntil: Date;
 
-    @column({ type: "datetime" })
-    createdOn: Date;
+    @column({
+        type: "datetime", beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    createdAt: Date
 
-    @column({ type: "string", foreignKey: Token.user })
-    userId: string;
+    @column({
+        type: "datetime", beforeSave() {
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    updatedAt: Date
 
     static user = new ManyToOneRelation(User, "user");
 
@@ -160,9 +178,6 @@ export class Token extends Model {
         token.refreshTokenValidUntil = new Date();
         token.refreshTokenValidUntil.setTime(token.refreshTokenValidUntil.getTime() + 3600 * 1000 * 24 * 365);
         token.refreshTokenValidUntil.setMilliseconds(0);
-
-        token.createdOn = new Date();
-        token.createdOn.setMilliseconds(0);
 
         token.accessToken = (await randomBytes(192)).toString("base64").toUpperCase();
         token.refreshToken = (await randomBytes(192)).toString("base64").toUpperCase();

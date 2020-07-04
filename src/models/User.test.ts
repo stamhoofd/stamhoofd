@@ -1,29 +1,24 @@
 import { Database } from "@simonbackx/simple-database";
 
 import { OrganizationFactory } from "../factories/OrganizationFactory";
+import { UserFactory } from '../factories/UserFactory';
 import { Organization } from "../models/Organization";
 import { User } from "./User";
 
 describe("Model.User", () => {
-    let existingUserId: number;
+    let existingUserId: string;
     let organization: Organization;
 
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
-
-        const [data] = await Database.insert("INSERT INTO " + User.table + " SET ?", [
-            {
-                organizationId: organization.id,
-                email: "existing@domain.com",
-                password:
-                    "$argon2i$v=19$m=4096,t=3,p=1$wQiDNFtEKm8mQsdqJGnhfg$V4hByYMRUA/H9DipmJRG8QOn12wa+feRhi/ocBxxc2k",
-                publicKey: "My public key here",
-                // = "myPassword"
-                createdOn: "2020-03-29 14:30:15",
-                updatedOn: "2020-03-29 14:30:15",
-            },
-        ]);
-        existingUserId = data.insertId;
+        const user = await new UserFactory({
+            email: "existing@domain.com",
+            password: "myPassword",
+            verified: true,
+            organization: organization
+        }).create();
+        
+        existingUserId = user.id
     });
 
     test("Get user by id", async () => {
@@ -32,7 +27,7 @@ describe("Model.User", () => {
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
         expect(user.savedProperties.get("password")).toBeUndefined();
-        expect(user.id).toBeGreaterThanOrEqual(1);
+        expect(user.id).toEqual(existingUserId)
     });
 
     test("Create a user", async () => {
@@ -41,7 +36,7 @@ describe("Model.User", () => {
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
         expect(user.savedProperties.get("password")).toBeUndefined();
-        expect(user.id).toBeGreaterThanOrEqual(1);
+        expect(user.id).not.toBeEmpty()
     });
 
     test("Create a user with an email that already exists", async () => {
@@ -54,7 +49,7 @@ describe("Model.User", () => {
         expect(user).toBeInstanceOf(User);
         expect(user.password).toBeUndefined();
         expect(user.savedProperties.get("password")).toBeUndefined();
-        expect(user.id).toBeGreaterThanOrEqual(1);
+        expect(user.id).not.toBeEmpty()
     });
 
     test("Providing a wrong password fails login", async () => {

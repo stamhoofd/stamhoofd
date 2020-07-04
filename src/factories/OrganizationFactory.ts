@@ -5,22 +5,31 @@ import { Formatter } from "@stamhoofd/utility";
 
 import { Organization } from "../models/Organization";
 
-class Options {}
+class Options {
+    publicKey?: string;
+    uri?: string;
+    meta?: OrganizationMetaData
+}
 
 export class OrganizationFactory extends Factory<Options, Organization> {
     async create(): Promise<Organization> {
-        const organizationKeyPair = await Sodium.signKeyPair();
 
         const organization = new Organization();
         organization.name = "Organization " + (new Date().getTime() + Math.floor(Math.random() * 999));
         organization.website = "https://domain.com";
         organization.registerDomain = null;
-        organization.uri = Formatter.slug(organization.name);
-        organization.meta = OrganizationMetaData.create({
+        organization.uri = this.options.uri ?? Formatter.slug(organization.name);
+        organization.meta = this.options.meta ?? OrganizationMetaData.create({
             type: this.randomEnum(OrganizationType),
             umbrellaOrganization: null
         });
-        organization.publicKey = organizationKeyPair.publicKey;
+
+        if (this.options.publicKey) {
+            organization.publicKey = this.options.publicKey;
+        } else {
+            const organizationKeyPair = await Sodium.signKeyPair();
+            organization.publicKey = organizationKeyPair.publicKey;
+        }
 
         await organization.save();
         return organization;

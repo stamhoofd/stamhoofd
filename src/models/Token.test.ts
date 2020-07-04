@@ -24,7 +24,8 @@ describe("Model.Token", () => {
                 refreshTokenValidUntil: "2050-08-29 14:30:15",
                 userId: user.id,
                 // = "myPassword"
-                createdOn: "2020-03-29 14:30:15",
+                createdAt: "2020-03-29 14:30:15",
+                updatedAt: "2020-03-29 14:30:15",
             },
         ]);
     });
@@ -54,9 +55,15 @@ describe("Model.Token", () => {
 
         expect(token.userId).toEqual(user.id);
 
-        const search: any = await Token.getByAccessToken(token.accessToken);
+        const search = await Token.getByAccessToken(token.accessToken);
         // Make sure we do not compare the organization, since that won't be loaded now, but is loaded on user, and on token
 
-        expect(search).toEqual(token);
+        expect(search).toMatchObject({
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+            userId: token.userId,
+            accessTokenValidUntil: token.accessTokenValidUntil,
+            refreshTokenValidUntil: token.refreshTokenValidUntil
+        });
     });
 });

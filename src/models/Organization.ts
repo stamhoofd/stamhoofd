@@ -36,11 +36,26 @@ export class Organization extends Model {
     @column({ type: "string" })
     publicKey: string;
 
-    @column({ type: "datetime" })
-    createdOn: Date;
+    @column({
+        type: "datetime", beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    createdAt: Date
 
-    @column({ type: "datetime", nullable: true })
-    updatedOn: Date | null = null;
+    @column({
+        type: "datetime", beforeSave() {
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    updatedAt: Date
 
     // Methods
     static async getByURI(uri: string): Promise<Organization | undefined> {
