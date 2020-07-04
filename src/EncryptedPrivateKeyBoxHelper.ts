@@ -1,46 +1,10 @@
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { EncryptedPrivateKeyBox } from "@stamhoofd/structures"
 import sodium from "libsodium-wrappers";
 
 import { Sodium } from './Sodium'
 
-export class EncryptedPrivateKey extends AutoEncoder {
-    /**
-     * opslimit used to generate the key from the password
-     */
-    @field({ decoder: IntegerDecoder })
-    opslimit: number
-
-    /**
-     * memlimit used to generate the key from the password
-     */
-    @field({ decoder: IntegerDecoder })
-    memlimit: number
-
-    /**
-     * algo used to generate the key from the password
-     */
-    @field({ decoder: IntegerDecoder })
-    algo: number
-
-    /**
-     * Salt used to generate the key from the password
-     */
-    @field({ decoder: StringDecoder })
-    salt: string
-
-    /**
-     * Nonce used to encrypt the private key with the generated secret key (from the password)
-     */
-    @field({ decoder: StringDecoder })
-    nonce: string
-
-    /**
-     * Resulting encrypted private key
-     */
-    @field({ decoder: StringDecoder })
-    encryptedPrivateKey: string
-
-    static async encrypt(privateKey: string, password: string): Promise<EncryptedPrivateKey> {
+export class EncryptedPrivateKeyBoxHelper {
+    static async encrypt(privateKey: string, password: string): Promise<EncryptedPrivateKeyBox> {
         await Sodium.loadIfNeeded();
 
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
@@ -59,7 +23,7 @@ export class EncryptedPrivateKey extends AutoEncoder {
 
         const encryptedPrivateKey = sodium.crypto_secretbox_easy(Buffer.from(privateKey, "base64"), nonce, key)
 
-        return EncryptedPrivateKey.create({
+        return EncryptedPrivateKeyBox.create({
             opslimit,
             memlimit,
             algo,
@@ -70,15 +34,15 @@ export class EncryptedPrivateKey extends AutoEncoder {
     }
 
     /** Decrypt the encrypted private key with the given password */
-    async decrypt(password: string): Promise<string> {
+    static async decrypt(encryptedPrivateKeyBox: EncryptedPrivateKeyBox, password: string): Promise<string> {
         await Sodium.loadIfNeeded();
 
-        const salt = Buffer.from(this.salt, "base64")
-        const nonce = Buffer.from(this.nonce, "base64")
-        const encryptedPrivateKey = Buffer.from(this.encryptedPrivateKey, "base64")
+        const salt = Buffer.from(encryptedPrivateKeyBox.salt, "base64")
+        const nonce = Buffer.from(encryptedPrivateKeyBox.nonce, "base64")
+        const encryptedPrivateKey = Buffer.from(encryptedPrivateKeyBox.encryptedPrivateKey, "base64")
 
         // Step 1: recreate the password hash
-        const key = sodium.crypto_pwhash(sodium.crypto_secretbox_KEYBYTES, password, salt, this.opslimit, this.memlimit, this.algo, "uint8array")
+        const key = sodium.crypto_pwhash(sodium.crypto_secretbox_KEYBYTES, password, salt, encryptedPrivateKeyBox.opslimit, encryptedPrivateKeyBox.memlimit, encryptedPrivateKeyBox.algo, "uint8array")
 
         // This should be the same already (we'll see if authentication or decryption fails)
 

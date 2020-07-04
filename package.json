@@ -5,8 +5,13 @@
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
+    "files": [
+        "dist",
+        "esm/dist"
+    ],
     "scripts": {
-        "build": "tsc -p . && tsc -p ./esm",
+        "build": " tsc -b . esm",
+        "build:full": "rm -r ./dist && rm -r ./esm/dist && tsc -b . esm",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
@@ -26,7 +31,7 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "^1.8.33",
+        "@stamhoofd/structures": "^1.0.4",
         "libsodium-wrappers": "^0.7.6"
     }
 }

@@ -1,2 +1,2 @@
 export * from "./src/Sodium"
-export * from "./src/EncryptedPrivateKey"
+export * from "./src/EncryptedPrivateKeyBoxHelper"
