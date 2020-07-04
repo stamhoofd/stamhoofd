@@ -47,7 +47,7 @@ describe("Endpoint.CreateOrganization", () => {
                     publicKey: organizationKeyPair.publicKey,
                     // encrypted private key is always authenticated with the private key of the user
                     encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey),
-                })
+                }).encode({ version: 1 }),
             ]
         });
 

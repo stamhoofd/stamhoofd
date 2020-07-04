@@ -1,5 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, EndpointError, Request, Response } from "@simonbackx/simple-endpoints";
+import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures"; 
 import { Formatter } from "@stamhoofd/utility"; 
 
@@ -58,6 +59,28 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 human: "Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
                 field: "name",
             });
+        }
+
+        // Validate keychain
+        if (request.body.keychainItems.length == 0) {
+            throw new EndpointError({
+                code: "missing_items",
+                message: "You'll need to specify at least one keychain item to provide the user with access to the organization private key using his own keys",
+                field: "keychainItems",
+            });
+        }
+
+        for(const item of request.body.keychainItems) {
+            console.warn(item)
+            await KeychainItemHelper.validate(item)
+
+            if (item.userId != request.body.user.id) {
+                throw new EndpointError({
+                    code: "invalid_field",
+                    message: "You can only create keychain items for the created user",
+                    field: "keychainItems",
+                });
+            }
         }
 
         // First create the organization
