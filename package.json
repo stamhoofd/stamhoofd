@@ -5,6 +5,10 @@
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
+    "files": [
+        "dist",
+        "esm/dist"
+    ],
     "scripts": {
         "build": "tsc -p . && tsc -p ./esm",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
