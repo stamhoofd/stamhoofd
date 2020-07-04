@@ -1,0 +1,1 @@
+ALTER TABLE `users` CHANGE `encryptedPrivateKey` `encryptedPrivateKey` json NULL COMMENT '';

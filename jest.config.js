@@ -1,6 +1,12 @@
-const base = require("../jest.base.config")
+require("dotenv").config({path: __dirname+'/.test.env'});
 
-base.setupFilesAfterEnv.push("./tests/jest.setup.ts")
-base.globalSetup = "./tests/jest.global.setup.ts";
-
-module.exports = base;
+module.exports = {
+    roots: ["<rootDir>/dist"],
+    testEnvironment: "node",
+    setupFilesAfterEnv: [
+        "jest-extended",
+        "./dist/tests/jest.setup.js",
+    ],
+    globalSetup:  "./dist/tests/jest.global.setup.js"
+    //verbose: true,
+};

@@ -10,6 +10,9 @@
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "strictNullChecks": true,
+        "declaration": true,
+        "declarationMap": true,
+        "outDir": "dist",
         "lib": [
             "es2019"
         ],
@@ -19,6 +22,7 @@
         ]
     },
     "include": [
+        "*.d.ts",
         "src/**/*.ts",
         "tests/**/*.ts",
         "index.ts",

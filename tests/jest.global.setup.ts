@@ -1,6 +1,6 @@
-import { Database } from "@stamhoofd-backend/database";
+import { Database } from "@simonbackx/simple-database";
 
-import { User } from "../src/users/models/User";
+import { User } from "../src/models/User";
 
 export default async () => {
     await Database.delete("DELETE FROM " + User.table);

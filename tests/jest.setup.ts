@@ -1,4 +1,4 @@
-import { Database } from "@stamhoofd-backend/database";
+import { Database } from "@simonbackx/simple-database";
 
 console.log = jest.fn();
 afterAll(async () => {
