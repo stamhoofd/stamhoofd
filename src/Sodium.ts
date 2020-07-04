@@ -41,6 +41,35 @@ class SodiumStatic {
         return Buffer.from(sodium.crypto_sign_detached(message, Buffer.from(privateKey, "base64"))).toString("base64");
     }
 
+    async sealMessageAuthenticated(message: string, publicKeyReceiver: string, privateKeySender: string): Promise<string> {
+        await this.loadIfNeeded();
+
+        // Hide the nonce implementation details from crypto_box_easy and include the bytes in the result so we can use it to decrypt again using the same nonce
+        // Without having to worry about storing the nonce seperately
+        const nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES)
+        const cyphertext = sodium.crypto_box_easy(Buffer.from(message, "utf8"), nonce, Buffer.from(publicKeyReceiver, "base64"), Buffer.from(privateKeySender, "base64"))
+
+        const concatCyphertext = new Uint8Array([...nonce, ...cyphertext])
+
+        // Convert to base64
+        return Buffer.from(concatCyphertext).toString("base64");
+    }
+
+    async unsealMessageAuthenticated(concatCyphertext: string, publicKeySender: string, privateKeyReceiver: string): Promise<string> {
+        await this.loadIfNeeded();
+
+        // Read buffer
+        const concatCyphertextBuffer = Buffer.from(concatCyphertext, "base64")
+
+        // Read nonce
+        const nonce = concatCyphertextBuffer.slice(0, sodium.crypto_box_NONCEBYTES)
+        const cyphertext = concatCyphertextBuffer.slice(sodium.crypto_box_NONCEBYTES)
+
+        const messageBuffer = sodium.crypto_box_open_easy(cyphertext, nonce, Buffer.from(publicKeySender, "base64"), Buffer.from(privateKeyReceiver, "base64"))
+
+        return Buffer.from(messageBuffer).toString("utf8")
+    }
+
     async sealMessage(message: string, publicKey: string): Promise<string> {
         await this.loadIfNeeded();
         return Buffer.from(sodium.crypto_box_seal(Buffer.from(message, "utf8"), Buffer.from(publicKey, "base64"))).toString("base64");
