@@ -27,7 +27,7 @@
     },
     "devDependencies": {
         "@types/node": "12",
-        "electron": "^8.2.3",
+        "electron": "^8.2.4",
         "electron-rebuild": "^1.10.1",
         "html-webpack-plugin": "^4.2.0",
         "webpack-node-externals": "^1.7.2"
