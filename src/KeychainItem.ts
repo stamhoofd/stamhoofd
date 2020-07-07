@@ -14,7 +14,7 @@ export class KeychainItem extends AutoEncoder {
     publicKey: string
 
     /**
-     * The private key associated with the public key, encrypted with the user's key
+     * The private key associated with the public key, encrypted with the user's public encryption key AND authenticated using the user's private encryption key
      */
     @field({ decoder: StringDecoder })
     encryptedPrivateKey: string

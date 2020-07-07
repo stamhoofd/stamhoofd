@@ -10,20 +10,15 @@ export class User extends AutoEncoder {
     /**
      * Name of the organization you are creating
      */
-    @field({ decoder: EmailDecoder })
+    @field({ decoder: EmailDecoder })à
     email: string;
 
     @field({ decoder: StringDecoder })
     publicKey: string;
 }
 
-/**
- * Variant of user when updating the current user password or when creating a new user
- */
 export class NewUser extends User {
-    @field({ decoder: EncryptedPrivateKeyBox })
-    encryptedPrivateKey: EncryptedPrivateKeyBox;
-
+    // The public key that is used for authentication
     @field({ decoder: StringDecoder })
-    password: string;
+    authPublicKey: string;
 }
