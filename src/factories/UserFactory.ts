@@ -20,8 +20,8 @@ export class UserFactory extends Factory<Options, User> {
         const password = this.options.password ?? this.randomString(20);
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
-        const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
-        const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
+        const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Tests)
+        const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Tests)
         const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
         const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
         
