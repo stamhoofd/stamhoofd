@@ -1,6 +1,0 @@
-{
-    "name": "@stamhoofd-common/crypto",
-    "main": "index.ts",
-    "version": "1.0.0",
-    "private": true
-}

@@ -496,6 +496,26 @@
   dependencies:
     safe-buffer "^5.1.2"
 
+"@simonbackx/simple-database@^1.10.3":
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.10.3.tgz#75d6ac146e561d7eb09c0c6ec2aad510bbc45e93"
+  integrity sha512-uffNHuqbxCJgVl7XHu7sExX/NwKxMQf93Uj9VaVTTdsGL/xTkJj10fwc9dapA78jNKIEp4V8VBay1YvxYfTM7A==
+  dependencies:
+    colors "^1.4.0"
+    mysql "^2.18.1"
+
+"@simonbackx/simple-encoding@^1.8.0", "@simonbackx/simple-encoding@^1.8.33":
+  version "1.8.33"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.8.33.tgz#1338f78c2f22e7a09868ba31c21efb79928cdd35"
+  integrity sha512-+bAadDI3V53gwIxwkfK8vjiJJsHaCDv6B8roS9rdtAEgBI7fLANX7exmO65WXjz7Lcy1jfbc4n07bhORqyELHA==
+
+"@simonbackx/simple-endpoints@^1.2.21":
+  version "1.2.21"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.2.21.tgz#617e5160f4106be405a085b900c75261a60942ec"
+  integrity sha512-Sbx9tcfj2jc5BMPxIxcNMU1akX9rtREzfTVsHwp7RFw/Ieopa6xiEbIIu7zO47WHFZxBZVrcLh2wSLQiCbVaNA==
+  dependencies:
+    "@simonbackx/simple-encoding" "^1.8.0"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"

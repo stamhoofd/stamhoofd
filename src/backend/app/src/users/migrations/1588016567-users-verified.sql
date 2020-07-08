@@ -1,1 +1,0 @@
-ALTER TABLE `stamhoofd`.`users` ADD COLUMN `verified` tinyint(1) NOT NULL DEFAULT '0' COMMENT '' AFTER `email`;
