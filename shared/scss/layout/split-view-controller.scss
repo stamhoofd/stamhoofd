@@ -22,3 +22,11 @@
         max-width: 600px;
     }
 }
+
+.sheet {
+    transform: translate3d(0, 0, 0);
+
+    > div {
+        max-width: 450px;
+    }
+}

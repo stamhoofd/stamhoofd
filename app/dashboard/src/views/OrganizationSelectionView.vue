@@ -6,7 +6,7 @@
 
         <Spinner v-if="loading" class="gray center" />
 
-        <button class="search-result">
+        <button class="search-result" @click="loginOrganization()">
             <h1>Scouts Prins Boudewijn</h1>
             <p>Groene wegel 2, 9230 Wetteren</p>
         </button>
@@ -24,9 +24,11 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { Component, Mixins } from "vue-property-decorator";
+
+import LoginView from './LoginView.vue';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -34,11 +36,15 @@ import { Component, Mixins } from "vue-property-decorator";
         Spinner
     }
 })
-export default class OrganizationSelection extends Mixins(NavigationMixin){
+export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     loading = true;
 
     mounted() {
         console.log("mounted organization selection")
+    }
+
+    loginOrganization() {
+        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization: null }) }).setDisplayStyle("sheet"))
     }
 }
 </script>

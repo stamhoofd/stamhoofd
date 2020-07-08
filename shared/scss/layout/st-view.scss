@@ -1,4 +1,5 @@
 @use '../base/variables' as *;
+@use '../base/text-styles' as *;
 
 .st-view {
     display: flex;
@@ -8,7 +9,23 @@
     box-sizing: border-box;
     padding: 0px var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
 
+    &.auto {
+        min-height: auto;
+    }
+
     .st-toolbar {
         margin-top: auto;
+    }
+
+    > main {
+        > h1:first-child {
+            padding-bottom: 20px;
+            @extend .style-title-1;
+
+            + p {
+                @extend .style-description;
+                padding-bottom: 20px;
+            }
+        }
     }
 }

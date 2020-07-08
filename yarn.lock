@@ -473,10 +473,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@simonbackx/vue-app-navigation@^1.2.25":
-  version "1.2.25"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.2.25.tgz#b56e4eb71cc111a0c528682bc0732c644a16f074"
-  integrity sha512-/ios4tXDiDG9Pa1IrqMlBT0W+PtLXtTnsT638IX87ThhBkrowqdIPmU5pH4sFYBx7mqY0xwCdeM4hNFRwFGusw==
+"@simonbackx/vue-app-navigation@^1.3":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.3.0.tgz#bf223754854b8f0c05a791db7ad70218afbb1ddf"
+  integrity sha512-u3Mgeo952GOpDH0NNOip0bZXsrwZ+PzEQyfWWHOVB24bcL9joqpNSPsQ8+YHPz8RIqDPCAug/UtHPjR7LdBZDQ==
   dependencies:
     vue "^2.6.11"
     vue-class-component "^7.0.2"
