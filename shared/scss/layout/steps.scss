@@ -4,6 +4,8 @@ $header-height: 50px;
 
 .steps-layout {
     background: $color-white-shade;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
 
     @media (max-width: 800px + 50px*2) {
         background: $color-white;
@@ -14,7 +16,6 @@ $header-height: 50px;
             position: fixed;
             left: 0;
             top: 0;
-            right: 0;
             height: $header-height - 20px;
             display: flex;
             flex-direction: row;
@@ -103,5 +104,12 @@ $header-height: 50px;
                 }
             }
         }
+    }
+
+    > main {
+        padding-top: $header-height;
+        height: 100vh;
+        height: calc(var(--vh, 1vh) * 100);
+        box-sizing: border-box;
     }
 }

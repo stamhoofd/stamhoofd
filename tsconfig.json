@@ -22,8 +22,10 @@
         ]
     },
     "include": [
-        "src/**/*.ts",
-        "src/**/*.vue",
+        "app/**/*.ts",
+        "app/**/*.vue",
+        "shared/**/*.ts",
+        "shared/**/*.vue",
         "*.d.ts" // Include vue type definition for webpack
     ],
     "exclude": [

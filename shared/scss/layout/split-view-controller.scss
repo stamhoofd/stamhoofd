@@ -1,0 +1,24 @@
+@use "../base/variables" as *;
+
+.split-view-controller {
+    > .master {
+        z-index: 100;
+    }
+
+    > .detail {
+        background: var(--color-current-background);
+    }
+
+    &[data-has-detail="true"] {
+        > .master {
+        }
+    }
+}
+
+.popup {
+    transform: translate3d(0, 0, 0);
+
+    > div {
+        max-width: 600px;
+    }
+}
