@@ -39,7 +39,7 @@ export class KeyConstantsHelper {
         })
     }
 
-    static async getSignKeys(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
+    static async getSignKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
         if (constants.opslimit < 3) {
             throw new Error("These constants are too weak. Not going to use these.")
         }
@@ -63,7 +63,7 @@ export class KeyConstantsHelper {
         }
     }
 
-    static async getEncryptionKeys(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
+    static async getEncryptionKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
         if (constants.opslimit < 3) {
             throw new Error("These constants are too weak. Not going to use these.")
         }
@@ -88,6 +88,23 @@ export class KeyConstantsHelper {
         }
     }
 
+    static async getEncryptionKey(constants: KeyConstants, password: string): Promise<string> {
+        if (constants.opslimit < 3) {
+            throw new Error("These constants are too weak. Not going to use these.")
+        }
+        if (constants.memlimit < 64 * 1000 * 1000) {
+            throw new Error("These constants are too weak. We are not going to use these.")
+        }
+        // Todo: validate salt, to check if it is not forged somehow
 
-    
+        await Sodium.loadIfNeeded();
+
+        const salt = Buffer.from(constants.salt, "base64")
+        const opslimit = constants.opslimit // Increase to make the generation of the key slower
+        const memlimit = constants.memlimit // in bytes
+        const algo = constants.algo
+
+        const key = sodium.crypto_pwhash(sodium.crypto_secretbox_KEYBYTES, password, salt, opslimit, memlimit, algo, "uint8array")
+        return Buffer.from(key).toString("base64");
+    }
 }
