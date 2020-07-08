@@ -25,6 +25,10 @@
     text-overflow: ellipsis;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
+     &:hover {
+        border-color: $color-primary-gray-light;
+    }
+
     &:focus,
     &:focus-within {
         border-color: $color-primary;
