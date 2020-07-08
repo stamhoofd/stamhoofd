@@ -4,6 +4,7 @@ import sodium, { StringKeyPair } from "libsodium-wrappers";
 import { Sodium } from './Sodium'
 
 export enum SensitivityLevel {
+    Tests = "Tests",
     User = "User",
     Admin = "Admin"
 }
@@ -27,6 +28,11 @@ export class KeyConstantsHelper {
             opslimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE
             memlimit = sodium.crypto_pwhash_MEMLIMIT_SENSITIVE
         }
+
+        if (sensitivityLevel == SensitivityLevel.Tests) {
+            opslimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE
+            memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
+        }
        
         const algo = sodium.crypto_pwhash_ALG_ARGON2ID13
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
@@ -40,10 +46,10 @@ export class KeyConstantsHelper {
     }
 
     static async getSignKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 3) {
+        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000) {
+        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
@@ -64,10 +70,10 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 3) {
+        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000) {
+        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
@@ -89,10 +95,10 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKey(constants: KeyConstants, password: string): Promise<string> {
-        if (constants.opslimit < 3) {
+        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000) {
+        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
