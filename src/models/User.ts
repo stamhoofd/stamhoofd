@@ -126,9 +126,11 @@ export class User extends Model {
         publicAuthSignKey: string,
         encryptedPrivateKey: string,
         authSignKeyConstants: KeyConstants,
-        authEncryptionKeyConstants: KeyConstants
+        authEncryptionKeyConstants: KeyConstants,
+        id?: string
     ): Promise<UserWithOrganization | undefined> {
         const user = new User().setRelation(User.organization, organization);
+        user.id = id ?? uuidv4()
         user.email = email;
         user.publicKey = publicKey;
         user.publicAuthSignKey = publicAuthSignKey

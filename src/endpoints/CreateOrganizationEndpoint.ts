@@ -1,9 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, EndpointError, Request, Response } from "@simonbackx/simple-endpoints";
-import { KeychainItemHelper } from '@stamhoofd/crypto';
+import { KeychainItemHelper, Sodium } from '@stamhoofd/crypto';
 import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures"; 
 import { Formatter } from "@stamhoofd/utility"; 
 
+import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
 import { Token } from '../models/Token';
 import { User } from "../models/User";
@@ -62,10 +63,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // Validate keychain
-        if (request.body.keychainItems.length == 0) {
+        if (request.body.keychainItems.length != 1) {
             throw new EndpointError({
                 code: "missing_items",
-                message: "You'll need to specify at least one keychain item to provide the user with access to the organization private key using his own keys",
+                message: "You'll need to specify at exactly one keychain item to provide the user with access to the organization private key using his own keys",
                 field: "keychainItems",
             });
         }
@@ -74,13 +75,25 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             console.warn(item)
             await KeychainItemHelper.validate(item)
 
+            // Validate if the key's public key corresponds with the organization key
+            if (item.publicKey != request.body.organization.publicKey) {
+                throw new EndpointError({
+                    code: "invalid_field",
+                    message: "You can only add the organization's keypair to the keychain",
+                    field: "keychainItems.0.publicKey",
+                });
+            }
+
+            // Validate if the key's public key corresponds with the organization key
             if (item.userId != request.body.user.id) {
                 throw new EndpointError({
                     code: "invalid_field",
-                    message: "You can only create keychain items for the created user",
-                    field: "keychainItems",
+                    message: "You can only add a private key to the keychain for yourself",
+                    field: "keychainItems.0.userId",
                 });
             }
+
+            // Yay, we can add the keychain items (after creating the organization and user)
         }
 
         // First create the organization
@@ -110,6 +123,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             request.body.user.encryptedPrivateKey,
             request.body.user.authSignKeyConstants,
             request.body.user.authEncryptionKeyConstants,
+            request.body.user.id
         );
         if (!user) {
             // This user already exists, well that is pretty impossible
@@ -118,6 +132,15 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 message: "Something went wrong while creating the user. Please contact us to resolve this issue.",
                 statusCode: 500
             });
+        }
+
+        for (const item of request.body.keychainItems) {
+            const keychainItem = new KeychainItem()
+            keychainItem.userId = user.id
+            keychainItem.encryptedPrivateKey = item.encryptedPrivateKey
+            keychainItem.publicKey = item.publicKey
+
+            await keychainItem.save()
         }
 
         // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
