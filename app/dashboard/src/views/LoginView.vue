@@ -55,6 +55,5 @@ export default class LoginView extends Mixins(NavigationMixin){
 
 <style lang="scss">
     .login-view {
-        max-width: 500px;
     }
 </style>

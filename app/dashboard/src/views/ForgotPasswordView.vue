@@ -42,6 +42,5 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
 
 <style lang="scss">
     .forgot-password-view {
-        max-width: 500px;
     }
 </style>
