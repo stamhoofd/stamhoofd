@@ -1,6 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EncryptedPrivateKeyBox } from "@stamhoofd/structures"
-import argon2 from "argon2";
+import { KeyConstants } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "./Organization";
@@ -28,22 +27,35 @@ export class User extends Model {
     verified: boolean;
 
     /**
-     * Passwords will automatically get set to undefined if it was selected for login
-     */
-    @column({ type: "string" })
-    protected password: string | undefined;
-
-    /**
-     * Passwords will automatically get set to undefined if it was selected for login
-     */
-    @column({ type: "json", decoder: EncryptedPrivateKeyBox, nullable: true })
-    protected encryptedPrivateKey: EncryptedPrivateKeyBox | null = null
-
-    /**
-     * For now we only store one public key, but we might decide to allow the same user to have multiple keys.
+     * Public key used for encryption
      */
     @column({ type: "string" })
     publicKey: string;
+
+    /**
+     * public key that is used to verify during login (using a challenge) and for getting a token
+     */
+    @column({ type: "string", nullable: true })
+    protected publicAuthSignKey: string | null = null
+
+    /**
+     * Encrypted private key, used for authenticated encrytion and decryption
+     */
+    @column({ type: "string", nullable: true })
+    protected encryptedPrivateKey: string | null = null
+
+    /**
+     * Constants that are used to get the authSignKeyPair from the user password. Using
+     */
+    @column({ type: "json", decoder: KeyConstants, nullable: true })
+    protected authSignKeyConstants: KeyConstants | null = null
+
+    /**
+     * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
+     */
+    @column({ type: "json", decoder: KeyConstants, nullable: true })
+    protected authEncryptionKeyConstants: KeyConstants | null = null
+
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -73,11 +85,11 @@ export class User extends Model {
      * @override@override@override@override@override
      */
     static getDefaultSelect(namespace?: string): string {
-        return this.selectColumnsWithout(namespace, "password");
+        return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
     }
 
     // Methods
-    static async login(
+    /*static async login(
         organization: Organization,
         email: string,
         password: string
@@ -105,19 +117,24 @@ export class User extends Model {
             user.eraseProperty("password");
             return user.setRelation(User.organization, organization);
         }
-    }
+    }*/
 
     static async register(
         organization: Organization,
         email: string,
-        password: string,
-        publicKey: string
+        publicKey: string,
+        publicAuthSignKey: string,
+        encryptedPrivateKey: string,
+        authSignKeyConstants: KeyConstants,
+        authEncryptionKeyConstants: KeyConstants
     ): Promise<UserWithOrganization | undefined> {
         const user = new User().setRelation(User.organization, organization);
         user.email = email;
-        const hash = await argon2.hash(password);
-        user.password = hash;
         user.publicKey = publicKey;
+        user.publicAuthSignKey = publicAuthSignKey
+        user.encryptedPrivateKey = encryptedPrivateKey
+        user.authSignKeyConstants = authSignKeyConstants
+        user.authEncryptionKeyConstants = authEncryptionKeyConstants
         user.verified = false;
 
         try {
@@ -129,7 +146,12 @@ export class User extends Model {
             }
             throw e;
         }
-        user.eraseProperty("password");
+
+        // Remove from memory and avoid accidental leaking
+        user.eraseProperty("publicAuthSignKey");
+        user.eraseProperty("encryptedPrivateKey");
+        user.eraseProperty("authSignKeyConstants");
+        user.eraseProperty("authEncryptionKeyConstants");
         return user;
     }
 }

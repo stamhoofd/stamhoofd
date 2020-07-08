@@ -1,4 +1,4 @@
-require("dotenv").config({path: __dirname+'/.test.env'});
+require("dotenv").config({path: __dirname+'/.env.test'});
 
 module.exports = {
     roots: ["<rootDir>/dist"],

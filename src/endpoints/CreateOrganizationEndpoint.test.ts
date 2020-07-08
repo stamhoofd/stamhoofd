@@ -1,12 +1,11 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedPrivateKeyBoxHelper,Sodium } from "@stamhoofd/crypto";
+import { KeyConstantsHelper, SensitivityLevel,Sodium } from "@stamhoofd/crypto";
 import { KeychainItem,Token as TokenStruct } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility"; 
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "../models/Organization";
 import { Token } from '../models/Token';
-import { User } from "../models/User";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 describe("Endpoint.CreateOrganization", () => {
@@ -14,8 +13,13 @@ describe("Endpoint.CreateOrganization", () => {
     const endpoint = new CreateOrganizationEndpoint();
 
     test("Create an organization", async () => {
-        const userKeyPair = await Sodium.boxKeyPair();
-        const organizationKeyPair = await Sodium.boxKeyPair();
+        const userKeyPair = await Sodium.generateEncryptionKeyPair();
+        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
+
+        const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
+        const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
+        const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, "My user password")
+        const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, "My user password")
 
         const userId = uuidv4()
 
@@ -33,12 +37,14 @@ describe("Endpoint.CreateOrganization", () => {
             user: {
                 id: userId,
                 email: "admin@domain.com",
-                password: "My user password",
                 publicKey: userKeyPair.publicKey,
+                publicAuthSignKey: authSignKeyPair.publicKey,
                 // Indirectly the server can have access to the private key during moments where he can read the password (= login and register)
                 // encryptedPrivateKey is optional, and is only needed for browser based users. Users that use the apps will have a better
                 // (= forward secrecy) protection against a compromised server
-                encryptedPrivateKey: (await EncryptedPrivateKeyBoxHelper.encrypt(userKeyPair.privateKey, "My user password")).encode({version: 1}),
+                encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
+                authSignKeyConstants: authSignKeyConstants,
+                authEncryptionKeyConstants: authSignKeyConstants,
             },
             keychainItems: [
                 // Give access to the private key of the organization by encrypting the private key of the organization with the private key of the user
@@ -69,8 +75,8 @@ describe("Endpoint.CreateOrganization", () => {
         if (!token) throw new Error("impossible");
         expect(token.accessTokenValidUntil).toBeBefore(new Date());
 
-        const user = await User.login(organization, "admin@domain.com", "My user password");
-        expect(user).toBeDefined();
+        //const user = await User.login(organization, "admin@domain.com", "My user password");
+        //expect(user).toBeDefined();
     });
 
     /*test("Organization already exists throws", async () => {

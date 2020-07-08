@@ -9,7 +9,7 @@
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "test": "yarn build:full && jest --runInBand --no-cache",
-        "migrations": "NODE_ENV=development ts-node ./migrations.ts",
+        "migrations": "ts-node ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "upgrade:internal": "yarn upgrade --scope stamhoofd && yarn upgrade --scope simonbackx"
     },

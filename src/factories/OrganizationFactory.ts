@@ -27,7 +27,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
         if (this.options.publicKey) {
             organization.publicKey = this.options.publicKey;
         } else {
-            const organizationKeyPair = await Sodium.signKeyPair();
+            const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
             organization.publicKey = organizationKeyPair.publicKey;
         }
 

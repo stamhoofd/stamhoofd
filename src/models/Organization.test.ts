@@ -9,7 +9,7 @@ describe("Model.Organization", () => {
     let existingOrganizationId: string;
 
     beforeAll(async () => {
-        const organizationKeyPair = await Sodium.signKeyPair();
+        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
 
         const organization = await new OrganizationFactory({
             publicKey: organizationKeyPair.publicKey,
