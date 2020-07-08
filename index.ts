@@ -1,7 +1,7 @@
 require('dotenv').config()
-//import { Version } from '@stamhoofd/stamhoofd-structures';
 import { Column, Database } from "@simonbackx/simple-database";
 import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
+import { Version } from '@stamhoofd/structures';
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -10,7 +10,7 @@ process.on("unhandledRejection", (error: Error) => {
 });
 
 // Set version of saved structures
-//Column.jsonVersion = Version
+Column.jsonVersion = Version
 
 // Set timezone!
 process.env.TZ = "UTC";
