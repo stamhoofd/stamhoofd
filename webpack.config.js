@@ -52,7 +52,7 @@ module.exports = {
                 test: /\.scss$/,
                 use: [
                     //MiniCssExtractPlugin.loader, // If you enable this, HMR won't work. Replace it with a style loader
-                     'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
+                    'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     'sass-loader'
                 ]
