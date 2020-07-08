@@ -39,7 +39,7 @@ class SodiumStatic {
         return 4 * Math.ceil(bytes / 3)
     }
 
-    async boxKeyPair(): Promise<StringKeyPair> {
+    async generateEncryptionKeyPair(): Promise<StringKeyPair> {
         await this.loadIfNeeded();
         const keypair = sodium.crypto_box_keypair();
 
@@ -51,7 +51,15 @@ class SodiumStatic {
         };
     }
 
-    async signKeyPair(): Promise<StringKeyPair> {
+    async generateSecretKey(): Promise<string> {
+        await this.loadIfNeeded();
+        const key = sodium.crypto_secretbox_keygen(); // just random bytes with correct length
+
+        // Somehow, the base64 encoding of sodium.js is not working correctly? (need to check and add test in libsodium)
+        return Buffer.from(key).toString("base64");
+    }
+
+    async generateSignKeyPair(): Promise<StringKeyPair> {
         await this.loadIfNeeded();
         const keypair = sodium.crypto_sign_keypair();
 
@@ -70,6 +78,43 @@ class SodiumStatic {
     async signMessage(message: string, privateKey: string): Promise<string> {
         await this.loadIfNeeded();
         return Buffer.from(sodium.crypto_sign_detached(message, Buffer.from(privateKey, "base64"))).toString("base64");
+    }
+
+    /***
+     * Authenticated encryption using a secret key
+     */
+    async encryptMessage(message: string, secretKey: string): Promise<string> {
+        await this.loadIfNeeded();
+
+        // Hide the nonce implementation details from crypto_box_easy and include the bytes in the result so we can use it to decrypt again using the same nonce
+        // Without having to worry about storing the nonce seperately
+        const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
+        const cyphertext = sodium.crypto_secretbox_easy(Buffer.from(message, "utf8"), nonce, Buffer.from(secretKey, "base64"))
+
+        const concatCyphertext = new Uint8Array([...nonce, ...cyphertext])
+
+        // Convert to base64
+        return Buffer.from(concatCyphertext).toString("base64");
+    }
+
+    /***
+     * Authenticated encryption using a secret key
+     */
+    async decryptMessage(concatCyphertext: string, secretKey: string): Promise<string> {
+        await this.loadIfNeeded();
+
+        // Read buffer
+        const concatCyphertextBuffer = Buffer.from(concatCyphertext, "base64")
+        if (concatCyphertextBuffer.length <= sodium.crypto_secretbox_NONCEBYTES) {
+            throw new Error("ciphertext is too short")
+        }
+
+        // Read nonce
+        const nonce = concatCyphertextBuffer.slice(0, sodium.crypto_secretbox_NONCEBYTES)
+        const cyphertext = concatCyphertextBuffer.slice(sodium.crypto_secretbox_NONCEBYTES)
+
+        const messageBuffer = sodium.crypto_secretbox_open_easy(cyphertext, nonce, Buffer.from(secretKey, "base64"))
+        return Buffer.from(messageBuffer).toString("utf8")
     }
 
     async sealMessageAuthenticated(message: string, publicKeyReceiver: string, privateKeySender: string): Promise<string> {

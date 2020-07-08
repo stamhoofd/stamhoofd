@@ -7,8 +7,8 @@ describe("Sodium", () => {
 
     test("Authenticated public-key encryption", async () => {
         // Start of with generating a public  / private key pair
-        const receiverKeypair = await Sodium.boxKeyPair()
-        const senderKeypair = await Sodium.boxKeyPair()
+        const receiverKeypair = await Sodium.generateEncryptionKeyPair()
+        const senderKeypair = await Sodium.generateEncryptionKeyPair()
 
         // Encrypt a message and send it to the receiver
         const plaintext = "This is a text 😄"
@@ -30,7 +30,7 @@ describe("Sodium", () => {
 
     test("Authenticated public-key encryption for yourself", async () => {
         // Start of with generating a public  / private key pair
-        const senderKeypair = await Sodium.boxKeyPair()
+        const senderKeypair = await Sodium.generateEncryptionKeyPair()
 
         // Encrypt a message and send it to the receiver
         // We use some special UTF8 characters to test if the encoding is not broken during decryption
@@ -43,8 +43,8 @@ describe("Sodium", () => {
 
     test("Anonymous public-key encryption", async () => {
         // Start of with generating a public  / private key pair
-        const receiverKeypair = await Sodium.boxKeyPair()
-        const senderKeypair = await Sodium.boxKeyPair()
+        const receiverKeypair = await Sodium.generateEncryptionKeyPair()
+        const senderKeypair = await Sodium.generateEncryptionKeyPair()
 
         // Encrypt a message and send it to the receiver
         const plaintext = "This is a text 😄"
@@ -60,5 +60,18 @@ describe("Sodium", () => {
         await expect(Sodium.unsealMessage(cyphertext, "", receiverKeypair.privateKey)).rejects.toThrow(/invalid publicKey length/)
         await expect(Sodium.unsealMessage(cyphertext, "", "")).rejects.toThrow(/invalid publicKey length/)
         await expect(Sodium.unsealMessage(cyphertext, receiverKeypair.publicKey, "")).rejects.toThrow(/invalid privateKey length/)
+    });
+
+    test("Encrypt a message using a secret key and decrypt it again", async () => {
+        // Start of with generating a public  / private key pair
+        const secretKey = await Sodium.generateSecretKey()
+
+        // Encrypt a message and send it to the receiver
+        // We use some special UTF8 characters to test if the encoding is not broken during decryption
+        const plaintext = "😂 👌🏾This is a text 😄"
+        const cyphertext = await Sodium.encryptMessage(plaintext, secretKey)
+
+        // The receiver decrypts the message...
+        await expect(Sodium.decryptMessage(cyphertext, secretKey)).resolves.toEqual(plaintext)
     });
 });
