@@ -1,0 +1,24 @@
+<template>
+    <div class="radio-group">
+        <slot />
+    </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
+
+@Component
+export default class RadioGroup extends Vue {}
+</script>
+
+<style lang="scss">
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+
+    .radio {
+        flex-shrink: 0;
+        padding-right: 15px;
+    }
+}
+</style>

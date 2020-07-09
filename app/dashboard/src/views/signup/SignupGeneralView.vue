@@ -80,6 +80,8 @@ import STToolbar from "@stamhoofd/components/src/navigation/STToolbar.vue"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
+import SignupStructureView from './SignupStructureView.vue';
+
 @Component({
     components: {
         STToolbar,
@@ -157,6 +159,8 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             })
 
             this.errorBox = null
+
+            this.show(new ComponentWithProperties(SignupStructureView, { organization }))
         } catch (e) {
             console.error(e)
             if (isSimpleError(e) || isSimpleErrors(e)) {

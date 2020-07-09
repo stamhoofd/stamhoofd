@@ -3,9 +3,9 @@
         <slot />
         <div>
             <template v-for="error in errors">
-                <ErrorBox :key="error.id">
+                <STErrorBox :key="error.id">
                     {{ error.human || error.message }}
-                </ErrorBox>
+                </STErrorBox>
             </template>
         </div>
     </div>
@@ -16,11 +16,11 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import { ErrorBox } from "./ErrorBox"
-import ErrorBoxComponent from "./ErrorBox.vue"
+import STErrorBox from "./STErrorBox.vue"
 
 @Component({
     components: {
-        ErrorBox: ErrorBoxComponent
+        STErrorBox
     }
 })
 export default class STErrorsDefault extends Vue {

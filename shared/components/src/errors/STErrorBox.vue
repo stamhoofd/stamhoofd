@@ -21,7 +21,7 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({})
-export default class STErrorsDefault extends Vue {
+export default class STErrorBox extends Vue {
     beforeEnter(el: HTMLElement) {
         el.style.opacity = "0";
     }
