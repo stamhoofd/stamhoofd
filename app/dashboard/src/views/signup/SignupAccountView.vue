@@ -58,7 +58,9 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Server } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { Component, Mixins } from "vue-property-decorator";
+import GenerateWorker from 'worker-loader!../../workers/generateAuthKeys.ts';
 
 @Component({
     components: {
@@ -79,16 +81,37 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
     loading = false
 
-    goNext() {
+    async goNext() {
+        if (this.loading) {
+            return
+        }
 
         try {
             // todo: validate details
 
             // Generate keys
             this.loading = true
-
-
             this.errorBox = null
+
+            const myWorker = new GenerateWorker();
+
+            myWorker.onmessage = (e) => {
+                console.info(e)
+                // todo
+                console.log('Message received from worker');
+                myWorker.terminate();
+                this.loading = false
+            }
+
+             myWorker.onerror = (e) => {
+                // todo
+                console.error(e);
+                myWorker.terminate();
+                this.loading = false
+            }
+
+            myWorker.postMessage(this.password);
+
         } catch (e) {
             console.error(e)
             if (isSimpleError(e) || isSimpleErrors(e)) {

@@ -34,6 +34,10 @@ module.exports = {
                 test: /\.vue$/,
                 loader: 'vue-loader'
             },
+            {
+                test: /\.worker\.ts$/,
+                loader: 'worker-loader',
+            },
             { 
                 test: /\.tsx?$/, 
                 loader: "ts-loader",
@@ -80,7 +84,7 @@ module.exports = {
                         },
                     },
                 ],
-            },
+            }
         ],
     },
     plugins: [
