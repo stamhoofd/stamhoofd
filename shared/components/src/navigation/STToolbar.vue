@@ -38,6 +38,9 @@ export default class STToolbar extends Vue {}
 
     > div:last-child {
         flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 
     > div .button {
@@ -50,10 +53,8 @@ export default class STToolbar extends Vue {}
         }
 
         > div .button {
-            margin-left: 0px;
-            margin-bottom: 10px;
-            &:last-child {
-                margin-bottom: 0;;
+            &:first-child {
+                margin-left: 0;
             }
         }
 

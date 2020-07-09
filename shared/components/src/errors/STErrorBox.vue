@@ -66,18 +66,7 @@ export default class STErrorBox extends Vue {
         }
     }
 
-    .error-box {
-        background: $color-error-background url("~@stamhoofd/assets/images/icons/color/exclamation-two.svg") 10px center
-            no-repeat;
-        border-radius: $border-radius;
-        color: $color-error-dark;
-        font-size: 14px;
-        line-height: 1.4;
-        font-weight: 500;
-        padding: 15px 15px 15px 40px;
-        max-width: 500px;
-        box-sizing: border-box;
-
+    .error-box-parent > .error-box {
         animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
         transform: translate3d(0, 0, 0);
         backface-visibility: hidden;

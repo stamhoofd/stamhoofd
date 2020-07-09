@@ -5,11 +5,13 @@
                 Terug
             </button>
         </STNavigationBar>
-        <STNavigationTitle>
-            Jouw vereniging aansluiten
-        </STNavigationTitle>
+        
 
         <main>
+            <h1>
+                Jouw vereniging aansluiten
+            </h1>
+
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
@@ -67,16 +69,10 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox } from "@stamhoofd/components/src/errors/ErrorBox";
-import STErrorsDefault from "@stamhoofd/components/src/errors/STErrorsDefault.vue";
-import Slider from "@stamhoofd/components/src/inputs/Slider.vue"
-import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue";
-import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
-import STNavigationTitle from "@stamhoofd/components/src/navigation/STNavigationTitle.vue"
-import STToolbar from "@stamhoofd/components/src/navigation/STToolbar.vue"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -86,7 +82,6 @@ import SignupStructureView from './SignupStructureView.vue';
     components: {
         STToolbar,
         STNavigationBar,
-        STNavigationTitle,
         Slider,
         STErrorsDefault,
         STInputBox

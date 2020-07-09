@@ -56,10 +56,12 @@
 <script lang="ts">
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, PriceInput, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { GroupPrices,Organization, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import SignupAccountView from './SignupAccountView.vue';
 
 @Component({
     components: {
@@ -108,8 +110,11 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
                     reducedPrice: this.enableReducedPrice ? this.reducedLatePrice : null
                 }))
             }
+            organization.meta.defaultPrices = prices
             
             this.errorBox = null
+
+            this.show(new ComponentWithProperties(SignupAccountView, { organization }))
         } catch (e) {
             console.error(e)
             if (isSimpleError(e) || isSimpleErrors(e)) {

@@ -1,0 +1,25 @@
+@use '@stamhoofd/scss/base/variables' as *;
+
+.error-box {
+    background: $color-error-background url("~@stamhoofd/assets/images/icons/color/exclamation-two.svg") 10px center
+        no-repeat;
+    border-radius: $border-radius;
+    color: $color-error-dark;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    padding: 15px 15px 15px 40px;
+    box-sizing: border-box;
+}
+
+.warning-box {
+    background: $color-warning-background url("~@stamhoofd/assets/images/icons/color/exclamation.svg") 10px center
+        no-repeat;
+    border-radius: $border-radius;
+    color: $color-warning-dark;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    padding: 15px 15px 15px 40px;
+    box-sizing: border-box;
+}

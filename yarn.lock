@@ -510,7 +510,15 @@
   dependencies:
     type-detect "4.0.8"
 
-"@stamhoofd/structures@^1.0.6":
+"@stamhoofd/crypto@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.1.6.tgz#463b35219ea228924af6d224b1c9235d021c618a"
+  integrity sha512-2HS6Jl0M3QqOCk2NYf4whtPxc6MJQT7FU4m7RE7c8F15NZ9xQ1YSNSJQQOFVYIR7rZbb3zZ6m8YML+5aL1ueTA==
+  dependencies:
+    "@stamhoofd/structures" "^1.0.4"
+    libsodium-wrappers "^0.7.6"
+
+"@stamhoofd/structures@^1.0.4", "@stamhoofd/structures@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.0.6.tgz#b28ae5404866616e7ca9cef09ede74bbe3f082fc"
   integrity sha512-EwFbJ1CLsri3KSU+bIKiv5gxDP7kloRgk5TTAJy1Mn2UUmyzWXRNintYhHEJ0pXXLBD5OgWfbY8YAq77nhgg+w==
@@ -4552,6 +4560,18 @@ levn@^0.3.0, levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+libsodium-wrappers@^0.7.6:
+  version "0.7.6"
+  resolved "https://registry.yarnpkg.com/libsodium-wrappers/-/libsodium-wrappers-0.7.6.tgz#baed4c16d4bf9610104875ad8a8e164d259d48fb"
+  integrity sha512-OUO2CWW5bHdLr6hkKLHIKI4raEkZrf3QHkhXsJ1yCh6MZ3JDA7jFD3kCATNquuGSG6MjjPHQIQms0y0gBDzjQg==
+  dependencies:
+    libsodium "0.7.6"
+
+libsodium@0.7.6:
+  version "0.7.6"
+  resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.6.tgz#018b80c5728054817845fbffa554274441bda277"
+  integrity sha512-hPb/04sEuLcTRdWDtd+xH3RXBihpmbPCsKW/Jtf4PsvdyKh+D6z2D2gvp/5BfoxseP+0FCOg66kE+0oGUE/loQ==
 
 lines-and-columns@^1.1.6:
   version "1.1.6"

@@ -18,3 +18,6 @@ export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.v
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
+
+// Other
+export { default as Spinner } from "./src/Spinner.vue"
