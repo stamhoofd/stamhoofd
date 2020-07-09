@@ -6,9 +6,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController, SplitViewController } from "@simonbackx/vue-app-navigation";
-import Steps from '@stamhoofd/components/src/steps/Steps.vue';
 import { Component, Vue } from "vue-property-decorator";
 
+import OrganizationSelectionSteps from './views/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/OrganizationSelectionView.vue';
 
 // kick off the polyfill!
@@ -19,7 +19,7 @@ import OrganizationSelectionView from './views/OrganizationSelectionView.vue';
     },
 })
 export default class App extends Vue {
-    root = new ComponentWithProperties(Steps, { 
+    root = new ComponentWithProperties(OrganizationSelectionSteps, { 
         root: new ComponentWithProperties(OrganizationSelectionView, {}) 
     })
 

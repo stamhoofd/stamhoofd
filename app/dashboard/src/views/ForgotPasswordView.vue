@@ -1,8 +1,8 @@
 <template>
     <div class="auto st-view forgot-password-view">
         <STNavigationBar title="Wachtwoord vergeten">
-            <button v-if="canPop" slot="left" class="button icon left arrow-left" @click="pop">
-                Terug
+            <button v-if="canPop" slot="left" class="button icon left gray arrow-left" @click="pop">
+                Inloggen
             </button>
         </STNavigationBar>
         <main>
