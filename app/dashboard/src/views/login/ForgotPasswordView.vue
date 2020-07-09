@@ -8,9 +8,9 @@
         <main>
             <h1>Wachtwoord vergeten</h1>
 
-            <InputBox title="E-mailadres">
+            <STInputBox title="E-mailadres">
                 <input class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-            </InputBox>
+            </STInputBox>
         </main>
 
         <STFloatingFooter>
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import InputBox from "@stamhoofd/components/src/inputs/InputBox.vue"
+import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue"
 import STFloatingFooter from "@stamhoofd/components/src/navigation/STFloatingFooter.vue"
 import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
 import { Component, Mixins } from "vue-property-decorator";
@@ -32,7 +32,7 @@ import { Component, Mixins } from "vue-property-decorator";
     components: {
         STNavigationBar,
         STFloatingFooter,
-        InputBox
+        STInputBox
     }
 })
 export default class ForgotPasswordView extends Mixins(NavigationMixin){

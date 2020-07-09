@@ -7,16 +7,16 @@
             <h1>Inloggen</h1>
             <p>Vraag je mede leiding om je toe te voegen als beheerder als je nog geen account hebt.</p>
 
-            <InputBox title="E-mailadres">
+            <STInputBox title="E-mailadres">
                 <input class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-            </InputBox>
+            </STInputBox>
 
-            <InputBox title="Wachtwoord">
+            <STInputBox title="Wachtwoord">
                 <button slot="right" class="button icon right gray help" @click="gotoPasswordForgot">
                     Vergeten
                 </button>
                 <input class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
-            </InputBox>
+            </STInputBox>
         </main>
 
         <STFloatingFooter>
@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import InputBox from "@stamhoofd/components/src/inputs/InputBox.vue"
+import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue"
 import STFloatingFooter from "@stamhoofd/components/src/navigation/STFloatingFooter.vue"
 import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
 import { Component, Mixins } from "vue-property-decorator";
@@ -41,7 +41,7 @@ import ForgotPasswordView from './ForgotPasswordView.vue';
     components: {
         STNavigationBar,
         STFloatingFooter,
-        InputBox
+        STInputBox
     }
 })
 export default class LoginView extends Mixins(NavigationMixin){

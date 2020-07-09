@@ -473,6 +473,27 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
+"@simonbackx/simple-encoding@^1.8.0", "@simonbackx/simple-encoding@^1.8.33":
+  version "1.8.33"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.8.33.tgz#1338f78c2f22e7a09868ba31c21efb79928cdd35"
+  integrity sha512-+bAadDI3V53gwIxwkfK8vjiJJsHaCDv6B8roS9rdtAEgBI7fLANX7exmO65WXjz7Lcy1jfbc4n07bhORqyELHA==
+
+"@simonbackx/simple-errors@^1.0.0":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.4.tgz#6c504c31f54d2c3669a0d27b9410490f2d05895f"
+  integrity sha512-rqSDAkSDbB5bVjarUWr/fW+7ZJouGHP1jfn3JgSw9DwL8RC4gYk9UwbT0ui/4jOaPjNMTfB+riS/lLhEju0fsw==
+  dependencies:
+    "@simonbackx/simple-encoding" "^1.8.33"
+    uuid "^8.2.0"
+
+"@simonbackx/simple-networking@^1.3.0":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.1.tgz#7a9acaef7c4929927b3da5b0ff81730d4ad1ebf3"
+  integrity sha512-BsQoe6VmkzcAJN9WQtfGEfHrsgJeKw2s0gLSrBQuE4qANtgb8b2ZdnOHJV6tskD+WZ1YdbdubyMU4svwSSdXkQ==
+  dependencies:
+    "@simonbackx/simple-encoding" "^1.8.0"
+    "@simonbackx/simple-errors" "^1.0.0"
+
 "@simonbackx/vue-app-navigation@^1.3":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.3.0.tgz#bf223754854b8f0c05a791db7ad70218afbb1ddf"
@@ -488,6 +509,14 @@
   integrity sha512-+DUO6pnp3udV/v2VfUWgaY5BIE1IfT7lLfeDzPVeMT1XKkaAp9LgSI9x5RtrFQoZ9Oi0PgXQQHPaoKu7dCjVxw==
   dependencies:
     type-detect "4.0.8"
+
+"@stamhoofd/structures@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.0.6.tgz#b28ae5404866616e7ca9cef09ede74bbe3f082fc"
+  integrity sha512-EwFbJ1CLsri3KSU+bIKiv5gxDP7kloRgk5TTAJy1Mn2UUmyzWXRNintYhHEJ0pXXLBD5OgWfbY8YAq77nhgg+w==
+  dependencies:
+    "@simonbackx/simple-encoding" "^1.8.33"
+    uuid "^8.2.0"
 
 "@types/anymatch@*":
   version "1.3.1"
@@ -7185,6 +7214,11 @@ uuid@^3.0.1, uuid@^3.3.2:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+
+uuid@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.2.0.tgz#cb10dd6b118e2dada7d0cd9730ba7417c93d920e"
+  integrity sha512-CYpGiFTUrmI6OBMkAdjSDM0k5h8SkkiTP4WAjQgDgNB1S3Ou9VBEvr6q0Kv2H1mMk7IWfxYGpMH5sd5AvcIV2Q==
 
 v8-compile-cache@2.0.3:
   version "2.0.3"

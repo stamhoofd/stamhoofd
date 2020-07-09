@@ -5,11 +5,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController, SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "vue-property-decorator";
 
-import OrganizationSelectionSteps from './views/OrganizationSelectionSteps.vue';
-import OrganizationSelectionView from './views/OrganizationSelectionView.vue';
+import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
+import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 // kick off the polyfill!
 //smoothscroll.polyfill();

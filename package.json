@@ -5,10 +5,14 @@
         "shared/*"
     ],
     "scripts": {
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue"
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
+        "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd"
     },
     "dependencies": {
+        "@simonbackx/simple-errors": "^1.0.0",
+        "@simonbackx/simple-networking": "^1.3.0",
         "@simonbackx/vue-app-navigation": "^1.3",
+        "@stamhoofd/structures": "^1.0.6",
         "vue": "^2.6.11",
         "vue-class-component": "^7.0.2",
         "vue-property-decorator": "^8.4.1"

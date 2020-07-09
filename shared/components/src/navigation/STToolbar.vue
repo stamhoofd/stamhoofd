@@ -19,6 +19,7 @@ export default class STToolbar extends Vue {}
 <style lang="scss">
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/base/text-styles.scss';
+@use '~@stamhoofd/scss/components/buttons.scss' as buttons;
 
 .st-toolbar {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
