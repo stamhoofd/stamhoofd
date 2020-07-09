@@ -9,6 +9,7 @@
         "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "^1.8.33",
         "@simonbackx/simple-errors": "^1.0.0",
         "@simonbackx/simple-networking": "^1.3.0",
         "@simonbackx/vue-app-navigation": "^1.3",

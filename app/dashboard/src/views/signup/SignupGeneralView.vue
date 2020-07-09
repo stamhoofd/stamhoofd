@@ -146,13 +146,21 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 }
                 throw e;
             }
-            
+
+            const defaultStartDate = new Date()
+            defaultStartDate.setMonth(defaultStartDate.getMonth() + 1)
+            defaultStartDate.setDate(1)
+
+            const defaultEndDate = new Date(defaultStartDate.getTime())
+            defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1)
 
             const organization = Organization.create({
                 name: this.name,
                 meta: OrganizationMetaData.create({
                     type: OrganizationType.Other,
-                    expectedMemberCount: this.expectedMemberCount
+                    expectedMemberCount: this.expectedMemberCount,
+                    defaultStartDate,
+                    defaultEndDate
                 }),
                 address: address,
                 publicKey: "" // placeholder

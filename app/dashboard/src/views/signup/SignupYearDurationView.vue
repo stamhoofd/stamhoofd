@@ -32,10 +32,11 @@
 </template>
 
 <script lang="ts">
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { DateSelection, ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Organization } from "@stamhoofd/structures"
+import { Organization, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupPricesView from './SignupPricesView.vue';
@@ -54,8 +55,8 @@ export default class SignupYearDurationView extends Mixins(NavigationMixin) {
     organization: Organization
     errorBox: ErrorBox | null = null
 
-    startDate = new Date()
-    endDate = new Date()
+    startDate = this.organization.meta.defaultStartDate
+    endDate = this.organization.meta.defaultEndDate
 
     goNext() {
 
@@ -70,7 +71,10 @@ export default class SignupYearDurationView extends Mixins(NavigationMixin) {
             this.errorBox = null
 
             // todo: extend organization
-            const organization = this.organization
+            const organization = Organization.decode(new ObjectData(this.organization.encode({version: Version}), {version: Version}))
+
+            organization.meta.defaultStartDate = this.startDate
+            organization.meta.defaultEndDate = this.endDate
 
             this.show(new ComponentWithProperties(SignupPricesView, { organization }))
         } catch (e) {

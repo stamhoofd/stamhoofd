@@ -49,6 +49,9 @@ export default class ContextMenu extends Vue {
 
         this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
         this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y));
+        if (this.left < viewPadding) {
+            this.left = viewPadding
+        }
 
         this.$el.addEventListener("contextmenu", this.pop, { passive: true });
     }

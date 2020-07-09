@@ -1,6 +1,6 @@
 <template>
     <label class="radio">
-        <input type="radio" :name="name" :value="value">
+        <input v-model="radioButtonValue" type="radio" :name="name" :value="value">
         <div>
             <div />
             <div><slot /></div>
@@ -11,12 +11,28 @@
 <script lang="ts">
 import { Component, Prop,Vue } from "vue-property-decorator";
 
-@Component
+@Component({
+    model: {
+        prop: 'modelValue',
+        event: 'change'
+    },
+})
 export default class Radio extends Vue {
-    @Prop({})
-    value: any
+    @Prop({ default: "", type: String })
+    name!: string;
 
-    @Prop({ default: ""})
-    name: string
+    @Prop({ default: "" })
+    value!: any;
+
+    @Prop({})
+    modelValue!: any;
+
+    get radioButtonValue() {
+        return this.modelValue;
+    }
+
+    set radioButtonValue(value) {
+        this.$emit("change", value)
+    }
 }
 </script>

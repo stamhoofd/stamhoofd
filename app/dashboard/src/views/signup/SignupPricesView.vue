@@ -36,6 +36,10 @@
                 </STInputBox>
             </div>
 
+            <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verminderd lidgeld na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
+                <PriceInput v-model="reducedLatePrice" placeholder="Gratis" />
+            </STInputBox>
+
             <STErrorsDefault :error-box="errorBox" />
         </main>
 
@@ -50,10 +54,11 @@
 </template>
 
 <script lang="ts">
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, PriceInput, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Organization } from "@stamhoofd/structures"
+import { GroupPrices,Organization, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -79,11 +84,30 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
 
     enableLatePrice = false
     latePrice = Math.round(4000/3)
-    latePriceDate = new Date() // todo: take middle date
+    latePriceDate = new Date(this.organization.meta.defaultStartDate.getTime() + (this.organization.meta.defaultEndDate.getTime() - this.organization.meta.defaultStartDate.getTime())/2)
+    reducedLatePrice = 0
 
     goNext() {
 
         try {
+            const organization = Organization.decode(new ObjectData(this.organization.encode({version: Version}), {version: Version}))
+
+            //organization.
+            const prices: GroupPrices[] = [
+                GroupPrices.create({
+                    startDate: null,
+                    price: this.price,
+                    reducedPrice: this.enableReducedPrice ? this.reducedPrice : null
+                })
+            ]
+
+            if (this.enableLatePrice) {
+                prices.push(GroupPrices.create({
+                    startDate: this.latePriceDate,
+                    price: this.latePrice,
+                    reducedPrice: this.enableReducedPrice ? this.reducedLatePrice : null
+                }))
+            }
             
             this.errorBox = null
         } catch (e) {

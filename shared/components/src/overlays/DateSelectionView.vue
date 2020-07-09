@@ -134,6 +134,10 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     min-width: 300px;
     user-select: none;
 
+    @media (max-width: 330px) {
+        min-width: calc(100vw - 30px);
+    }
+
     > header{
         padding: 10px 10px;
         display: flex;

@@ -42,19 +42,10 @@
                 </STInputBox>
             </div>
 
-            <STInputBox title="Jongens en meisjes">
+            <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox">
                 <RadioGroup>
-                    <Radio name="gender">
-                        Gemengd
-                    </Radio>
-                    <Radio name="gender">
-                        Gescheiden
-                    </Radio>
-                    <Radio name="gender">
-                        Enkel jongens
-                    </Radio>
-                    <Radio name="gender">
-                        Enkel meisjes
+                    <Radio v-for="_genderType in genderTypes" :key="_genderType.value" v-model="genderType" :value="_genderType.value">
+                        {{ _genderType.name }}
                     </Radio>
                 </RadioGroup>
             </STInputBox>
@@ -74,6 +65,7 @@
 </template>
 
 <script lang="ts">
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Radio, RadioGroup } from "@stamhoofd/components"
@@ -83,7 +75,7 @@ import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue";
 import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/components/src/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/components/src/navigation/STToolbar.vue"
-import { Organization, OrganizationType, UmbrellaOrganization} from "@stamhoofd/structures"
+import { Organization, OrganizationGenderType,OrganizationType, UmbrellaOrganization, Version} from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupYearDurationView from './SignupYearDurationView.vue';
@@ -106,6 +98,75 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
 
     type: OrganizationType | null = null
     umbrellaOrganization: UmbrellaOrganization | null = null
+    genderType: OrganizationGenderType | null = null
+
+    goNext() {
+
+        try {
+            if (this.type === null) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Maak een keuze",
+                    field: "type"
+                })
+            }
+
+            if (this.umbrellaOrganization === null && this.type == OrganizationType.Youth) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Maak een keuze",
+                    field: "umbrellaOrganization"
+                })
+            }
+
+            if (this.genderType === null) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Maak een keuze",
+                    field: "genderType"
+                })
+            }
+
+            this.errorBox = null
+        
+            // todo: extend organization
+            const organization = Organization.decode(new ObjectData(this.organization.encode({version: Version}), {version: Version}))
+
+            organization.meta.type = this.type
+            organization.meta.umbrellaOrganization = this.umbrellaOrganization
+            organization.meta.genderType = this.genderType
+
+            this.show(new ComponentWithProperties(SignupYearDurationView, { organization }))
+        } catch (e) {
+            console.error(e)
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                console.log("Updated errorbox")
+                this.errorBox = new ErrorBox(e)
+            }
+            return;
+        }
+    }
+
+    get genderTypes() {
+        return [
+            {
+                value: OrganizationGenderType.Mixed,
+                name: "Gemengd",
+            },
+            {
+                value: OrganizationGenderType.Separated,
+                name: "Gescheiden",
+            },
+            {
+                value: OrganizationGenderType.OnlyFemale,
+                name: "Enkel meisjes",
+            },
+            {
+                value: OrganizationGenderType.OnlyMale,
+                name: "Enkel jongens",
+            },
+        ]
+    }
 
     get availableTypes() {
         return [
@@ -174,25 +235,6 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
                 name: "Niet in lijst",
             },
         ];
-    }
-
-    goNext() {
-
-        try {
-            this.errorBox = null
-
-            // todo: extend organization
-            const organization = this.organization
-
-            this.show(new ComponentWithProperties(SignupYearDurationView, { organization }))
-        } catch (e) {
-            console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
-            return;
-        }
     }
 }
 </script>
