@@ -18,7 +18,7 @@ export default class RadioGroup extends Vue {}
 
     .radio {
         flex-shrink: 0;
-        padding-right: 15px;
+        padding-right: 20px;
     }
 }
 </style>

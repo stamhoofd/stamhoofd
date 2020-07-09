@@ -7,7 +7,6 @@
 
     display: block;
     cursor: pointer;
-    height: 44px;
 
     > input {
         display: none;
@@ -20,7 +19,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        padding: 5px;
+        height: 44px;
 
         > div:first-child {
             width: 20px;

@@ -1,5 +1,5 @@
 <template>
-    <div class="input" @click="openContextMenu">
+    <div class="input input-dropdown" @click="openContextMenu">
         {{ dateText }}
     </div>
 </template>
@@ -21,9 +21,10 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 
     openContextMenu(event) {
+        const el = this.$el as HTMLElement;
         const displayedComponent = new ComponentWithProperties(DateSelectionView, {
-            x: event.clientX,
-            y: event.clientY + 15,
+            x: el.getBoundingClientRect().left + el.offsetWidth - 300,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
             selectedDay: this.value,
             setDate: (value: Date) => {
                 this.$emit("input", value)
