@@ -75,8 +75,8 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Radio, RadioGroup, Slider } from "@stamhoofd/components"
+import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Radio, RadioGroup } from "@stamhoofd/components"
 import { ErrorBox } from "@stamhoofd/components/src/errors/ErrorBox";
 import STErrorsDefault from "@stamhoofd/components/src/errors/STErrorsDefault.vue";
 import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue";
@@ -86,12 +86,13 @@ import STToolbar from "@stamhoofd/components/src/navigation/STToolbar.vue"
 import { Organization, OrganizationType, UmbrellaOrganization} from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import SignupYearDurationView from './SignupYearDurationView.vue';
+
 @Component({
     components: {
         STToolbar,
         STNavigationBar,
         STNavigationTitle,
-        Slider,
         STErrorsDefault,
         STInputBox,
         RadioGroup,
@@ -179,6 +180,11 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
 
         try {
             this.errorBox = null
+
+            // todo: extend organization
+            const organization = this.organization
+
+            this.show(new ComponentWithProperties(SignupYearDurationView, { organization }))
         } catch (e) {
             console.error(e)
             if (isSimpleError(e) || isSimpleErrors(e)) {
