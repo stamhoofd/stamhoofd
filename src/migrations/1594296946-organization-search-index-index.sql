@@ -1,0 +1,1 @@
+CREATE FULLTEXT INDEX `searchIndex` ON `organizations` (`searchIndex`);
