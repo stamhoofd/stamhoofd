@@ -103,6 +103,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.publicKey = request.body.organization.publicKey;
         organization.uri = uri;
         organization.meta = request.body.organization.meta
+        organization.address = request.body.organization.address
 
         try {
             await organization.save();

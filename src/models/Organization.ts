@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { EndpointError } from '@simonbackx/simple-endpoints';
-import { OrganizationMetaData } from "@stamhoofd/structures";
+import { Address, OrganizationMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 export class Organization extends Model {
@@ -33,8 +33,18 @@ export class Organization extends Model {
     @column({ type: "json", decoder: OrganizationMetaData })
     meta: OrganizationMetaData;
 
+    @column({ type: "json", decoder: Address })
+    address: Address;
+
     @column({ type: "string" })
     publicKey: string;
+
+    @column({
+        type: "string", beforeSave: function (this: Organization) {
+            return this.name+"\n"+this.address.toString()
+        }
+    })
+    searchIndex: string
 
     @column({
         type: "datetime", beforeSave(old?: any) {

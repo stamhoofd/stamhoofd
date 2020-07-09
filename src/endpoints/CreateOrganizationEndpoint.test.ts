@@ -1,6 +1,6 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from "@stamhoofd/crypto";
-import { KeychainItem,Token as TokenStruct } from '@stamhoofd/structures';
+import { KeychainItem,OrganizationGenderType,Token as TokenStruct } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility"; 
 import { v4 as uuidv4 } from "uuid";
 
@@ -33,7 +33,16 @@ describe("Endpoint.CreateOrganization", () => {
                 publicKey: organizationKeyPair.publicKey,
                 meta: {
                     type: "Other",
-                    umbrellaOrganization: null
+                    umbrellaOrganization: null,
+                    genderType: OrganizationGenderType.Mixed,
+                    expectedMemberCount: 120
+                },
+                address: {
+                    street: "Demostraat",
+                    number: "12",
+                    city: "Gent",
+                    postalCode: "9000",
+                    country: "BE"
                 }
             },
             user: {
