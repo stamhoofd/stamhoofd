@@ -87,9 +87,14 @@
         height: 42px;
         line-height: 42px;
         display: inline-flex;
+        justify-content: center;
 
         &:active {
             transform: scale(0.95, 0.95);
+        }
+
+        &.full {
+            width: 100%;
         }
     }
 

@@ -54,11 +54,13 @@
 </template>
 
 <script lang="ts">
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
+import { KeyConstants, Version } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 import GenerateWorker from 'worker-loader!../../workers/generateAuthKeys.ts';
 
@@ -94,23 +96,54 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.errorBox = null
 
             const myWorker = new GenerateWorker();
+            const component = new ComponentWithProperties(CenteredMessage, { 
+                type: "loading",
+                title: "Sleutels aanmaken...", 
+                description: "Dit duurt maar heel even. Met deze sleutels wordt jouw account beveiligd. De lange wiskundige berekeningen zorgen ervoor dat het voor hackers lang duurt om een mogelijk wachtwoord uit te proberen."
+            }).setDisplayStyle("overlay");
 
             myWorker.onmessage = (e) => {
+                const {
+                    userKeyPair,
+                    organizationKeyPair,
+                    authSignKeyConstantsEncoded,
+                    authEncryptionKeyConstantsEncoded,
+                    authSignKeyPair,
+                    authEncryptionSecretKey
+                } = e.data;
+
+                const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
+                const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
+                
                 console.info(e)
                 // todo
                 console.log('Message received from worker');
                 myWorker.terminate();
-                this.loading = false
+                (component.componentInstance() as any)?.pop()
+
+                // Do netwowrk request to create organization
+
+                this.loading = false;
             }
 
              myWorker.onerror = (e) => {
                 // todo
                 console.error(e);
                 myWorker.terminate();
-                this.loading = false
+                this.loading = false;
+                (component.componentInstance() as any)?.pop()
+
+                const errorMessage = new ComponentWithProperties(CenteredMessage, { 
+                    type: "error",
+                    title: "Er ging iets mis", 
+                    description: "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.",
+                    closeButton: "Sluiten",
+                }).setDisplayStyle("overlay");
+                this.present(errorMessage)
             }
 
             myWorker.postMessage(this.password);
+            this.present(component)
 
         } catch (e) {
             console.error(e)
