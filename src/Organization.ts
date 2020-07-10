@@ -1,6 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { Address } from './Address';
 import { OrganizationMetaData } from './OrganizationMetaData';
 
 export class Organization extends AutoEncoder {
@@ -15,6 +16,9 @@ export class Organization extends AutoEncoder {
 
     @field({ decoder: OrganizationMetaData })
     meta: OrganizationMetaData;
+
+    @field({ decoder: Address })
+    address: Address;
 
     @field({ decoder: StringDecoder })
     publicKey: string;

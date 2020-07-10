@@ -28,8 +28,12 @@ export class Token implements Encodeable {
         return {
             "access_token": this.accessToken,
             "token_type": "bearer",
-            "expires_in": (this.accessTokenValidUntil.getTime() - new Date().getTime()) / 1000,
+            "expires_in": Math.floor((this.accessTokenValidUntil.getTime() - new Date().getTime()) / 1000),
             "refresh_token": this.refreshToken,
         };
+    }
+
+    needsRefresh(): boolean {
+        return this.accessToken.length == 0 || this.accessTokenValidUntil < new Date()
     }
 }
