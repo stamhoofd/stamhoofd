@@ -98,19 +98,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     country: Country = "BE"
     expectedMemberCount = 150
 
-    mounted() {
-        const server = new Server("http://localhost:9090")
-
-        server.request({
-            method: "GET",
-            path: "/status",
-        }).then(data => {
-            console.log(data)
-        }).catch(e => {
-            console.error(e)
-        });
-    }
-
     goNext() {
 
         try {

@@ -110,7 +110,7 @@ export class Session implements RequestMiddleware  {
         this.callListeners()
     }
 
-    login(token: Token, authEncryptionKey: string) {
+    login(token: Token, user: User, authEncryptionKey: string, userPrivateKey: string | null = null, organizationPrivateKey: string | null = null) {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
@@ -120,7 +120,10 @@ export class Session implements RequestMiddleware  {
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
+        this.user = user
         this.authEncryptionKey = authEncryptionKey
+        this.userPrivateKey = userPrivateKey
+        this.organizationPrivateKey = organizationPrivateKey
         this.onTokenChanged();
     }
 

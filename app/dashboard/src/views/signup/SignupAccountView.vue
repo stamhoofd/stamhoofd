@@ -60,8 +60,9 @@ import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { KeyConstants, Version } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
+import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import GenerateWorker from 'worker-loader!../../workers/generateAuthKeys.ts';
 
 @Component({
@@ -74,7 +75,8 @@ import GenerateWorker from 'worker-loader!../../workers/generateAuthKeys.ts';
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
-    name = ""
+    @Prop({required: true})
+    organization: Organization
     errorBox: ErrorBox | null = null
 
     password = ""
@@ -102,15 +104,18 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 description: "Dit duurt maar heel even. Met deze sleutels wordt jouw account beveiligd. De lange wiskundige berekeningen zorgen ervoor dat het voor hackers lang duurt om een mogelijk wachtwoord uit te proberen."
             }).setDisplayStyle("overlay");
 
-            myWorker.onmessage = (e) => {
+            myWorker.onmessage = async (e) => {
                 const {
                     userKeyPair,
                     organizationKeyPair,
-                    authSignKeyConstantsEncoded,
-                    authEncryptionKeyConstantsEncoded,
                     authSignKeyPair,
                     authEncryptionSecretKey
                 } = e.data;
+
+                const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
+                const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
+
+                console.log(e.data)
 
                 const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
                 const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
@@ -121,7 +126,39 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 myWorker.terminate();
                 (component.componentInstance() as any)?.pop()
 
+                const user =  NewUser.create({
+                    email: this.email,
+                    publicKey: userKeyPair.publicKey,
+                    publicAuthSignKey: authSignKeyPair.publicKey,
+                    authSignKeyConstants,
+                    authEncryptionKeyConstants,
+                    encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey)
+                });
+
+                const organization = this.organization
+                organization.publicKey = organizationKeyPair.publicKey
+
                 // Do netwowrk request to create organization
+                const response = await NetworkManager.server.request({
+                    method: "POST",
+                    path: "/organizations",
+                    body: CreateOrganization.create({
+                        organization: this.organization,
+                        user,
+                        keychainItems: [
+                            KeychainItem.create({
+                                userId: user.id,
+                                publicKey: organization.publicKey,
+                                encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
+                            })
+                        ]
+                    }),
+                    decoder: Token
+                })
+
+                const session = new Session(organization)
+                session.login(response.data, user, authEncryptionSecretKey, userKeyPair.privateKey, organizationKeyPair.privateKeyPair)
+                SessionManager.setCurrentSession(session)
 
                 this.loading = false;
             }
