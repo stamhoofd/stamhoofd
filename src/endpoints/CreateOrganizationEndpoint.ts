@@ -72,7 +72,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         for(const item of request.body.keychainItems) {
-            console.warn(item)
             await KeychainItemHelper.validate(item)
 
             // Validate if the key's public key corresponds with the organization key

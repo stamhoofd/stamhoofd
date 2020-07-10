@@ -35,7 +35,10 @@ describe("Endpoint.CreateOrganization", () => {
                     type: "Other",
                     umbrellaOrganization: null,
                     genderType: OrganizationGenderType.Mixed,
-                    expectedMemberCount: 120
+                    expectedMemberCount: 120,
+                    defaultPrices: [],
+                    defaultEndDate: new Date().getTime(),
+                    defaultStartDate: new Date().getTime()
                 },
                 address: {
                     street: "Demostraat",

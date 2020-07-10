@@ -16,7 +16,9 @@ describe("Model.Organization", () => {
             uri: "model-organization-test",
             meta: OrganizationMetaData.create({
                 type: OrganizationType.Other,
-                umbrellaOrganization: null
+                umbrellaOrganization: null,
+                defaultStartDate: new Date(),
+                defaultEndDate: new Date(),
             })
         }).create();
 

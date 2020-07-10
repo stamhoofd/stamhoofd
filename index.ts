@@ -23,7 +23,7 @@ if (new Date().getTimezoneOffset() != 0) {
 
 const start = async () => {
     const router = new Router();
-    await router.loadAllEndpoints(__dirname + "/src/endpoints/*");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints");
     router.endpoints.push(new CORSPreflightEndpoint())
 
     const routerServer = new RouterServer(router);
