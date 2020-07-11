@@ -63,7 +63,7 @@ import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import GenerateWorker from 'worker-loader!../../workers/generateAuthKeys.ts';
+import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
 
 @Component({
     components: {

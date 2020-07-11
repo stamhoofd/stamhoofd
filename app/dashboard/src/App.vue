@@ -5,11 +5,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 
-import DashboardView from './views/dashboard/DashboardView.vue';
+import DashboardMenu from './views/dashboard/DashboardMenu.vue';
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
@@ -22,7 +22,7 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 })
 export default class App extends Vue {
     root = new ComponentWithProperties(AuthenticatedView, {
-        root: new ComponentWithProperties(DashboardView, {}),
+        root: new ComponentWithProperties(SplitViewController, {root: new ComponentWithProperties(DashboardMenu, {})}),
         loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
             root: new ComponentWithProperties(OrganizationSelectionView, {}) 
         })
