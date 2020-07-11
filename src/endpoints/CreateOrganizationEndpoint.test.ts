@@ -16,8 +16,6 @@ describe("Endpoint.CreateOrganization", () => {
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
         const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
 
-        console.warn(process.env.NODE_ENV)
-
         const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Tests)
         const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Tests)
         const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, "My user password")

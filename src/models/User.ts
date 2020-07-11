@@ -7,6 +7,7 @@ import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
+export type UserFull = User & { publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
 
 export class User extends Model {
     static table = "users";
@@ -88,6 +89,17 @@ export class User extends Model {
      */
     static getDefaultSelect(namespace?: string): string {
         return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
+    }
+
+    static async getFull(id: string): Promise<UserFull | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`id\` = ? LIMIT 1`, [id]);
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]) as UserFull;
     }
 
     static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
