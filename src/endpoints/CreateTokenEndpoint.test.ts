@@ -210,5 +210,8 @@ describe("Endpoint.CreateToken", () => {
         expect(userChallenges).toHaveLength(1)
         expect(userChallenges[0].tries).toEqual(3)
         expect(userChallenges[0].challenge).toEqual(response.body.challenge)
+
+        // Check 5 seconds lockout again
+        await expect(endpoint.test(r)).rejects.toThrow(/too many/i);
     });
 });

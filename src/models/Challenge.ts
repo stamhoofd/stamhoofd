@@ -51,11 +51,11 @@ export class Challenge extends Model {
     @column({ type: "datetime" })
     expiresAt: Date;
 
+    /**
+     * createdAt behaves more like createdAt for Challenge. Since every save is considered to have a new challenge
+     */
     @column({
-        type: "datetime", beforeSave(old?: any) {
-            if (old !== undefined) {
-                return old;
-            }
+        type: "datetime", beforeSave() {
             const date = new Date()
             date.setMilliseconds(0)
             return date
