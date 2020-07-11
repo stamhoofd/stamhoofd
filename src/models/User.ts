@@ -1,10 +1,12 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
+export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
 
 export class User extends Model {
     static table = "users";
@@ -35,8 +37,8 @@ export class User extends Model {
     /**
      * public key that is used to verify during login (using a challenge) and for getting a token
      */
-    @column({ type: "string", nullable: true })
-    protected publicAuthSignKey: string | null = null
+    @column({ type: "string" })
+    protected publicAuthSignKey?: string
 
     /**
      * Encrypted private key, used for authenticated encrytion and decryption
@@ -47,8 +49,8 @@ export class User extends Model {
     /**
      * Constants that are used to get the authSignKeyPair from the user password. Using
      */
-    @column({ type: "json", decoder: KeyConstants, nullable: true })
-    protected authSignKeyConstants: KeyConstants | null = null
+    @column({ type: "json", decoder: KeyConstants })
+    protected authSignKeyConstants?: KeyConstants
 
     /**
      * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
@@ -86,6 +88,17 @@ export class User extends Model {
      */
     static getDefaultSelect(namespace?: string): string {
         return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
+    }
+
+    static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organizationId]);
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]) as UserForAuthentication;
     }
 
     // Methods
@@ -155,5 +168,13 @@ export class User extends Model {
         user.eraseProperty("authSignKeyConstants");
         user.eraseProperty("authEncryptionKeyConstants");
         return user;
+    }
+
+    getAuthSignKeyConstants(this: UserForAuthentication): KeyConstants {
+        return this.authSignKeyConstants
+    }
+
+    async verifyAuthSignature(this: UserForAuthentication, signature: string, message: string) {
+        return await Sodium.verifySignature(signature, message, this.publicAuthSignKey)
     }
 }

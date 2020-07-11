@@ -99,34 +99,18 @@ export class Organization extends Model {
 
     /**
      * Get an Organization by looking at the host of a request
-     * Throws if the organization could not be found
+     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.be
      */
-    static async fromHost(host: string): Promise<Organization> {
-        // Todo: we need to read this from a config or environment file
-        let defaultDomain = process.env.HOSTNAME;
-        if (!defaultDomain) {
-            throw new Error("Missing hostname in environment")
+    static async fromApiHost(host: string): Promise<Organization> {
+        const splitted = host.split('.')
+        if (splitted.length < 2) {
+            throw new EndpointError({
+                code: "invalid_host",
+                message: "Please specify the organization in the hostname",
+            });
         }
-        defaultDomain = "." + defaultDomain;
-
-        if (host.startsWith("api.")) {
-            host = host.substring(4);
-        }
-
-        if (host.endsWith(defaultDomain)) {
-            // Search by URI
-            const uri = host.substring(0, host.length - defaultDomain.length);
-            const organization = await this.getByURI(uri);
-            if (!organization) {
-                throw new EndpointError({
-                    code: "invalid_organization",
-                    message: "Unknown organization " + uri,
-                });
-            }
-            return organization;
-        }
-
-        const organization = await this.getByRegisterDomain(host);
+        const id = splitted[0]
+        const organization = await this.getByID(id);
         if (!organization) {
             throw new EndpointError({
                 code: "invalid_organization",
@@ -148,13 +132,10 @@ export class Organization extends Model {
     }
 
     getApiHost(): string {
-        if (this.registerDomain) {
-            return "api." + this.registerDomain;
-        }
         const defaultDomain = process.env.HOSTNAME;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
         }
-        return "api." + this.uri + "." +  defaultDomain;
+        return this.id+".api." + defaultDomain;
     }
 }
