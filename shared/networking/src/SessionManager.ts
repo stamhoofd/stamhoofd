@@ -23,6 +23,19 @@ export class SessionManagerStatic {
 
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
+    constructor() {
+        const id = this.getSessionStorage().lastOrganizationId
+        if (id) {
+            const session = this.getSessionForOrganization(id)
+            if (session && session.canGetCompleted()) {
+                this.setCurrentSession(session)
+            } else {
+                console.log("session can not get completed, no autosignin")
+                console.log(session)
+            }
+        }
+    }
+
     addListener(owner: any, listener: AuthenticationStateListener) {
         this.listeners.set(owner, listener)
     }
@@ -36,7 +49,6 @@ export class SessionManagerStatic {
             listener()
         }
     }
-
 
     setCurrentSession(session: Session) {
         if (this.currentSession) {

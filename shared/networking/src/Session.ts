@@ -87,6 +87,10 @@ export class Session implements RequestMiddleware  {
         return !!this.token
     }
 
+    canGetCompleted(): boolean {
+        return !!this.token && !!this.authEncryptionKey
+    }
+
     isComplete(): boolean {
         return !!this.token && !!this.user && !!this.userPrivateKey
     }
