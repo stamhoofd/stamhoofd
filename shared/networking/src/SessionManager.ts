@@ -1,7 +1,17 @@
-import { Decoder,ObjectData } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, Decoder,field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Version } from '@stamhoofd/structures';
 
 import { Session } from './Session';
+
+class SessionStorage extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(Organization)})
+    organizations: Organization[] = []
+    
+    @field({ decoder: StringDecoder, nullable: true })
+    lastOrganizationId: string | null = null
+}
+
+type AuthenticationStateListener = () => void
 
 /**
  * The SessionManager manages the storage of Sessions for different organizations. You can request the session for a given organization.
@@ -11,12 +21,44 @@ import { Session } from './Session';
 export class SessionManagerStatic {
     currentSession: Session | null = null
 
+    protected listeners: Map<any, AuthenticationStateListener> = new Map()
+
+    addListener(owner: any, listener: AuthenticationStateListener) {
+        this.listeners.set(owner, listener)
+    }
+
+    removeListener(owner: any) {
+        this.listeners.delete(owner)
+    }
+
+    protected callListeners() {
+        for (const listener of this.listeners.values()) {
+            listener()
+        }
+    }
+
+
     setCurrentSession(session: Session) {
+        if (this.currentSession) {
+            this.currentSession.removeListener(this)
+        }
         this.currentSession = session
 
-        // todo: somehow save the session is active and skip selection
-        
-        // Save organization
+        const storage = this.getSessionStorage()
+        storage.lastOrganizationId = session.organization.id
+        const index = storage.organizations.map(o => o.id).indexOf(session.organization.id)
+
+        if (index !== -1) {
+            storage.organizations.splice(index, 1)
+        }
+        storage.organizations.unshift(session.organization)
+        this.saveSessionStorage(storage)
+
+        this.callListeners()
+
+        this.currentSession.addListener(this, () => {
+            this.callListeners()
+        })
     }
 
     getSessionForOrganization(id: string) {
@@ -27,24 +69,31 @@ export class SessionManagerStatic {
         }
     }
 
-    availableSessions(): Session[] {
+    saveSessionStorage(storage: SessionStorage) {
+        localStorage.setItem('organizations', JSON.stringify(storage.encode({ version: Version })))
+    }
+
+    getSessionStorage(): SessionStorage {
         // Loop thru organizations
 
         const json = localStorage.getItem('organizations')
         if (json) {
             try {
                 const parsed = JSON.parse(json)
-                const organizations = new ObjectData(parsed, { version: Version }).array(Organization as Decoder<Organization>)
-
-                // Build sessions
-                return organizations.map(o => new Session(o))
+                return new ObjectData(parsed, { version: Version }).decode(SessionStorage as Decoder<SessionStorage>)
             } catch (e) {
                 console.error(e)
             }
         }
-        return []
+        return SessionStorage.create({})
+    }
+
+    availableSessions(): Session[] {
+        return this.getSessionStorage().organizations.map(o => new Session(o))
     }
 
 }
 
-export const SessionManager = new SessionManagerStatic()
+export const SessionManager = new SessionManagerStatic();
+
+(window as any).SessionManager = SessionManager

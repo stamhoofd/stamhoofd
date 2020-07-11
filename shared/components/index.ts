@@ -22,5 +22,8 @@ export { default as STToolbar } from "./src/navigation/STToolbar.vue"
 // Overlays
 export { default as CenteredMessage } from "./src/overlays/CenteredMessage.vue"
 
+// Cotnainers
+export { default as AuthenticatedView } from "./src/containers/AuthenticatedView.vue"
+
 // Other
 export { default as Spinner } from "./src/Spinner.vue"

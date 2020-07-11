@@ -6,8 +6,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 
+import DashboardView from './views/dashboard/DashboardView.vue';
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
@@ -19,8 +21,11 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
     },
 })
 export default class App extends Vue {
-    root = new ComponentWithProperties(OrganizationSelectionSteps, { 
-        root: new ComponentWithProperties(OrganizationSelectionView, {}) 
+    root = new ComponentWithProperties(AuthenticatedView, {
+        root: new ComponentWithProperties(DashboardView, {}),
+        loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
+            root: new ComponentWithProperties(OrganizationSelectionView, {}) 
+        })
     })
 
     mounted() {

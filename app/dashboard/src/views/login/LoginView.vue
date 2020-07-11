@@ -35,7 +35,7 @@ import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-nav
 import { CenteredMessage, Spinner, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,Organization, Token, User } from '@stamhoofd/structures';
+import { ChallengeResponseStruct,KeyConstants,NewUser,Organization, Token, User } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import SignKeysWorker from 'worker-loader!../../workers/LoginSignKeys.ts';
 
@@ -163,21 +163,28 @@ export default class LoginView extends Mixins(NavigationMixin){
                 body: {grant_type: "challenge", email: this.email, challenge: challengeResponse.challenge, signature },
                 decoder: Token as Decoder<Token>
             })
+            this.session.login(response.data)
 
             // Request additional data
-            const user = User.create({
-                email: this.email,
-                publicKey: "todo"
+            const userRequest = await this.session.authenticatedServer.request({
+                method: "GET",
+                path: "/user",
+                decoder: NewUser as Decoder<NewUser>
             })
+
+            // Get encryption key...
+            // todo!
+
+            this.session.login(response.data, userRequest.data, "encryption key todo", "userPrivateKey", "organizationPrivateKey")
             
-            this.session.login(response.data, user, "")
+            SessionManager.setCurrentSession(this.session)
             this.pop()
         } catch (e) {
             this.loading = false;
             const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                 type: "error",
                 title: "Foutief wachtwoord of e-mailadres", 
-                description: "Kijk na of je geen typefout hebt gemaakt en probeer het opnieuw",
+                description: "Kijk na of je geen typfout hebt gemaakt en probeer het opnieuw",
                 closeButton: "Sluiten",
             }).setDisplayStyle("overlay");
             this.present(errorMessage)

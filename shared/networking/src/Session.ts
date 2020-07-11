@@ -1,7 +1,7 @@
 import { ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
-import { Organization, Token, User, Version } from '@stamhoofd/structures'
+import { NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
 
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
@@ -10,7 +10,7 @@ type AuthenticationStateListener = () => void
 
 export class Session implements RequestMiddleware  {
     organization: Organization
-    user: User | null = null
+    user: NewUser | null = null
 
     protected token: ManagedToken | null = null
 
@@ -118,7 +118,7 @@ export class Session implements RequestMiddleware  {
         this.callListeners()
     }
 
-    login(token: Token, user: User, authEncryptionKey: string, userPrivateKey: string | null = null, organizationPrivateKey: string | null = null) {
+    login(token: Token, user: NewUser | null = null, authEncryptionKey: string | null = null, userPrivateKey: string | null = null, organizationPrivateKey: string | null = null) {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy

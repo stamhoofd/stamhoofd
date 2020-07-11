@@ -9,6 +9,9 @@
             <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
                 <h1>{{ organization.name }}</h1>
                 <p>{{ organization.address }}</p>
+                <p v-if="isSignedInFor(organization)">
+                    Ingelogd
+                </p>
             </button>
         </template>
     </div>
@@ -113,7 +116,17 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     loginOrganization(organization: Organization) {
+        const session = SessionManager.getSessionForOrganization(organization.id)
+        if (session && session.hasToken()) {
+            SessionManager.setCurrentSession(session)
+            return
+        }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))
+    }
+
+    isSignedInFor(organization: Organization) {
+        const session = SessionManager.getSessionForOrganization(organization.id)
+        return session && session.hasToken()
     }
 }
 </script>
