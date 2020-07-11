@@ -1,12 +1,19 @@
 @use "../base/variables" as *;
+@use "../base/text-styles" as *;
 
 .split-view-controller {
+    background: $color-white-shade;
+
     > .master {
         z-index: 100;
     }
 
     > .detail {
         background: var(--color-current-background);
+        border-top-left-radius: $border-radius;
+        border-bottom-left-radius: $border-radius;
+        overflow: hidden;
+        @extend .style-side-view-shadow;
     }
 
     &[data-has-detail="true"] {
