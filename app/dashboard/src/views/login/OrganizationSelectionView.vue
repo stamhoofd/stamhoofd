@@ -149,6 +149,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
         > p {
             @extend .style-description;
+            padding-bottom: 10px;
+        }
+
+        > input.search {
+            max-width: none;
         }
 
         > .spinner-container {
