@@ -20,7 +20,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
                 server = new Server("https://api." + (window.location.hostname.replace('dashboard.', '')))
             }
         } else {
-            server = new Server("http://" + window.location.hostname + ":9090")
+            server = new Server("http://api.stamhoofd.local")
         }
         server.middlewares.push(this)
         return server

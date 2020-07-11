@@ -6,7 +6,7 @@
 
         <Spinner v-if="loading" class="gray center" />
         <template v-else>
-            <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization()">
+            <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
                 <h1>{{ organization.name }}</h1>
                 <p>{{ organization.address }}</p>
             </button>
@@ -53,7 +53,7 @@ const throttle = (func, limit) => {
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){
-    loading = true;
+    loading = false;
     q = ""
     results: Organization[] = []
 
@@ -112,8 +112,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
-    loginOrganization() {
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization: null }) }).setDisplayStyle("sheet"))
+    loginOrganization(organization: Organization) {
+        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))
     }
 }
 </script>

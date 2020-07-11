@@ -90,7 +90,15 @@ export class Session implements RequestMiddleware  {
      * Doing authenticated requests
      */
     get server() {
-        return NetworkManager.server
+        const server = NetworkManager.server
+
+        if (process.env.NODE_ENV == "production") {
+            server.host = "https://" + this.organization.id + ".api.stamhoofd.be"
+        } else {
+            server.host = "http://" + this.organization.id + ".api.stamhoofd.local"
+        }
+
+        return server
     }
 
     /**
