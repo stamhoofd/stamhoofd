@@ -1,13 +1,8 @@
-import { ArrayDecoder,AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, EndpointError, Request, Response } from "@simonbackx/simple-endpoints";
-import { KeychainItemHelper, Sodium } from '@stamhoofd/crypto';
-import { Organization as OrganizationStruct, PaginatedResponse,Token as TokenStruct } from "@stamhoofd/structures"; 
-import { Formatter } from "@stamhoofd/utility"; 
+import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { Organization as OrganizationStruct } from "@stamhoofd/structures"; 
 
-import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
-import { Token } from '../models/Token';
-import { User } from "../models/User";
 
 type Params = {};
 

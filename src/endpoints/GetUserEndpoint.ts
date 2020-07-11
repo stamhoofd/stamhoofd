@@ -1,9 +1,6 @@
-import { DecodedRequest, Endpoint, EndpointError, Request, Response } from '@simonbackx/simple-endpoints'
-import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,NewUser,RefreshTokenGrantStruct, RequestChallengeGrantStruct, Token as TokenStruct } from '@stamhoofd/structures';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
+import { NewUser } from '@stamhoofd/structures';
 
-import { Challenge } from '../models/Challenge';
-import { Organization } from '../models/Organization';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 

@@ -1,5 +1,5 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
-import { EndpointError } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Address, OrganizationMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
@@ -104,7 +104,7 @@ export class Organization extends Model {
     static async fromApiHost(host: string): Promise<Organization> {
         const splitted = host.split('.')
         if (splitted.length < 2) {
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "invalid_host",
                 message: "Please specify the organization in the hostname",
             });
@@ -112,7 +112,7 @@ export class Organization extends Model {
         const id = splitted[0]
         const organization = await this.getByID(id);
         if (!organization) {
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "invalid_organization",
                 message: "No organization known for host " + host,
             });

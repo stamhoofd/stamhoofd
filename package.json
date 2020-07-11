@@ -22,7 +22,7 @@
     "dependencies": {
         "@simonbackx/simple-database": "^1.10.3",
         "@simonbackx/simple-encoding": "^1.8.33",
-        "@simonbackx/simple-endpoints": "^1.2.21",
+        "@simonbackx/simple-endpoints": "^1.3.0",
         "@simonbackx/simple-errors": "^1.0.4",
         "@stamhoofd/crypto": "^1.0.0",
         "@stamhoofd/structures": "^1",

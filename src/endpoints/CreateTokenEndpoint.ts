@@ -1,5 +1,5 @@
-import { DecodedRequest, Endpoint, EndpointError, Request, Response } from '@simonbackx/simple-endpoints'
-import { Sodium } from '@stamhoofd/crypto';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Challenge } from '../models/Challenge';
@@ -50,7 +50,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             };
 
             if (!challenge || challenge.challenge !== request.body.challenge || !user || !challenge.challenge) {
-                throw new EndpointError(errBody);
+                throw new SimpleError(errBody);
             }
 
             // Check signature
@@ -59,7 +59,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 challenge.challenge = null;
                 await challenge.save();
 
-                throw new EndpointError(errBody);
+                throw new SimpleError(errBody);
             }
 
             const token = await Token.createToken(user);
@@ -68,7 +68,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await challenge.delete()
 
             if (!token) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "error",
                     message: "Could not generate token",
                     human: "Er ging iets mis bij het aanmelden",
@@ -94,7 +94,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         case "refresh_token": {
             const oldToken = await Token.getByRefreshToken(request.body.refreshToken)
             if (!oldToken) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "invalid_refresh_token",
                     message: "Invalid refresh token",
                     statusCode: 400
@@ -113,7 +113,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await oldToken.save();
    
             if (!token) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "error",
                     message: "Could not generate token",
                     human: "Er ging iets mis bij het aanmelden",

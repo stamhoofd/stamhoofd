@@ -1,6 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, EndpointError, Request, Response } from "@simonbackx/simple-endpoints";
-import { KeychainItemHelper, Sodium } from '@stamhoofd/crypto';
+import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures"; 
 import { Formatter } from "@stamhoofd/utility"; 
 
@@ -34,7 +35,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         if (request.body.organization.name.length < 4) {
             if (request.body.organization.name.length == 0) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "invalid_field",
                     message: "Should not be empty",
                     human: "Je bent de naam van je organisatie vergeten in te vullen",
@@ -42,7 +43,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 })
             }
 
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "invalid_field",
                 message: "Field is too short",
                 human: "Kijk de naam van je organisatie na, deze is te kort",
@@ -54,7 +55,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         const alreadyExists = await Organization.getByURI(uri);
 
         if (alreadyExists) {
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "name_taken",
                 message: "An organization with the same name already exists",
                 human: "Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
@@ -64,7 +65,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         // Validate keychain
         if (request.body.keychainItems.length != 1) {
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "missing_items",
                 message: "You'll need to specify at exactly one keychain item to provide the user with access to the organization private key using his own keys",
                 field: "keychainItems",
@@ -76,7 +77,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
             // Validate if the key's public key corresponds with the organization key
             if (item.publicKey != request.body.organization.publicKey) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "invalid_field",
                     message: "You can only add the organization's keypair to the keychain",
                     field: "keychainItems.0.publicKey",
@@ -85,7 +86,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
             // Validate if the key's public key corresponds with the organization key
             if (item.userId != request.body.user.id) {
-                throw new EndpointError({
+                throw new SimpleError({
                     code: "invalid_field",
                     message: "You can only add a private key to the keychain for yourself",
                     field: "keychainItems.0.userId",
@@ -108,7 +109,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await organization.save();
         } catch (e) {
             console.error(e);
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "creating_organization",
                 message: "Something went wrong while creating the organization. Please try again later or contact us.",
                 statusCode: 500
@@ -127,7 +128,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         );
         if (!user) {
             // This user already exists, well that is pretty impossible
-            throw new EndpointError({
+            throw new SimpleError({
                 code: "creating_user",
                 message: "Something went wrong while creating the user. Please contact us to resolve this issue.",
                 statusCode: 500
