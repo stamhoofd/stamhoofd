@@ -2,7 +2,7 @@
     <div class="menu">
         <div class="padding-group">
             <figure id="logo" />
-            <button id="organization-switcher">
+            <button id="organization-switcher" @click="switchOrganization">
                 {{ organization.name }}
             </button>
 
@@ -98,6 +98,10 @@ export default class Menu extends Mixins(NavigationMixin) {
                 })
             );
         }
+    }
+
+    switchOrganization() {
+        SessionManager.deactivateSession()
     }
 
     openAll() {

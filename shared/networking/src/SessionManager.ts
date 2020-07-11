@@ -50,6 +50,18 @@ export class SessionManagerStatic {
         }
     }
 
+    deactivateSession() {
+        if (this.currentSession) {
+            this.currentSession.removeListener(this)
+        }
+        this.currentSession = null
+
+        const storage = this.getSessionStorage()
+        storage.lastOrganizationId = null
+        this.saveSessionStorage(storage)
+        this.callListeners()
+    }
+
     setCurrentSession(session: Session) {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
