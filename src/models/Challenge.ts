@@ -115,9 +115,7 @@ export class Challenge extends Model {
 
             // Already generated two challenges after each other
             // Now limit to once every 5 seconds
-            const isTesting = process.env.JEST_WORKER_ID !== undefined
-
-            if (challenge.createdAt > new Date(new Date().getTime() - (isTesting ? 1000 : 1000 * 5))) {
+            if (challenge.createdAt > new Date(new Date().getTime() - 1000 * 5)) {
                 // Lockout for 1 hour
                 throw new SimpleError({
                     code: "too_many_requests",
