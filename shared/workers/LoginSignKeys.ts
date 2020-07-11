@@ -1,5 +1,5 @@
 import { Decoder,ObjectData } from '@simonbackx/simple-encoding';
-import { KeyConstantsHelper, SensitivityLevel, Sodium  } from "@stamhoofd/crypto"
+import { KeyConstantsHelper } from "@stamhoofd/crypto"
 import { KeyConstants,Version } from '@stamhoofd/structures';
 
 // todo

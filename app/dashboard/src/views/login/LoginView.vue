@@ -35,9 +35,10 @@ import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-nav
 import { CenteredMessage, Spinner, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser,Organization, Token, User } from '@stamhoofd/structures';
+import { ChallengeResponseStruct,KeyConstants,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import SignKeysWorker from 'worker-loader!../../workers/LoginSignKeys.ts';
+import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
+import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 
 import ForgotPasswordView from './ForgotPasswordView.vue';
 
@@ -89,10 +90,39 @@ export default class LoginView extends Mixins(NavigationMixin){
 
             myWorker.postMessage({
                 password,
-                authSignKeyConstants
+                authSignKeyConstants: authSignKeyConstants.encode({ version: Version })
             });
         })
     }
+
+    async createEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants): Promise<string> {
+        return new Promise((resolve, reject) => {
+            console.log("starting encryption key worker")
+            const myWorker = new AuthEncryptionKeyWorker();
+
+            myWorker.onmessage = (e) => {
+                const key = e.data
+                
+                // Requset challenge
+                myWorker.terminate()
+                resolve(key)
+            }
+
+             myWorker.onerror = (e) => {
+                // todo
+                console.error(e);
+                myWorker.terminate();
+                reject(e)
+            }
+
+            myWorker.postMessage({
+                password,
+                authEncryptionKeyConstants: authEncryptionKeyConstants.encode({ version: Version })
+            });
+        })
+    }
+
+     
 
     async submit() {
         if (this.loading) {
@@ -155,7 +185,11 @@ export default class LoginView extends Mixins(NavigationMixin){
             if (challengeResponse.challenge.length < 30) {
                 throw new Error("Malicious challenge received")
             }
+            console.log("Signing challenge...")
+            console.log(challengeResponse)
+            console.log(authSignKeys)
             const signature = await Sodium.signMessage(challengeResponse.challenge, authSignKeys.privateKey)
+            console.log("Sending signature...")
             const response = await this.session.server.request({
                 method: "POST",
                 path: "/oauth/token",
@@ -163,23 +197,20 @@ export default class LoginView extends Mixins(NavigationMixin){
                 body: {grant_type: "challenge", email: this.email, challenge: challengeResponse.challenge, signature },
                 decoder: Token as Decoder<Token>
             })
-            this.session.login(response.data)
+            console.log("Set token")
+            this.session.setToken(response.data)
 
             // Request additional data
-            const userRequest = await this.session.authenticatedServer.request({
-                method: "GET",
-                path: "/user",
-                decoder: NewUser as Decoder<NewUser>
-            })
-
-            // Get encryption key...
-            // todo!
-
-            this.session.login(response.data, userRequest.data, "encryption key todo", "userPrivateKey", "organizationPrivateKey")
+            console.log("Fetching user")
+            const user = await this.session.fetchUser()
+            console.log("ok")
+            const encryptionKey = await this.createEncryptionKey(this.password, user.authEncryptionKeyConstants)
+            this.session.setEncryptionKey(encryptionKey)
             
             SessionManager.setCurrentSession(this.session)
             this.pop()
         } catch (e) {
+            console.error(e)
             this.loading = false;
             const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                 type: "error",

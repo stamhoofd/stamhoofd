@@ -1,6 +1,7 @@
 <template>
     <div>
         <FramedComponent v-if="loggedIn" :key="root.key" :root="root" />
+        <LoadingView v-else-if="hasToken" />
         <FramedComponent v-else :key="loginRoot.key" :root="loginRoot" />
     </div>
 </template>
@@ -10,9 +11,12 @@ import { ComponentWithProperties, FramedComponent } from "@simonbackx/vue-app-na
 import {SessionManager} from "@stamhoofd/networking"
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+import LoadingView from "./LoadingView.vue"
+
 @Component({
     components: {
-        FramedComponent
+        FramedComponent,
+        LoadingView
     },
 })
 export default class AuthenticatedView extends Vue {
@@ -22,7 +26,8 @@ export default class AuthenticatedView extends Vue {
     @Prop()
     loginRoot: ComponentWithProperties
 
-    loggedIn = SessionManager.currentSession?.hasToken() ?? false
+    loggedIn = SessionManager.currentSession?.isComplete() ?? false
+    hasToken = SessionManager.currentSession?.hasToken() ?? false
 
     mounted() {
         this.changed();
@@ -44,7 +49,8 @@ export default class AuthenticatedView extends Vue {
 
     changed() {
         console.log("Authenticated view changed")
-        this.loggedIn = SessionManager.currentSession?.hasToken() ?? false
+        this.loggedIn = SessionManager.currentSession?.isComplete() ?? false
+        this.hasToken = SessionManager.currentSession?.hasToken() ?? false
     }
 }
 </script>

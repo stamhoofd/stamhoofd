@@ -59,6 +59,8 @@ export class SessionManagerStatic {
         this.currentSession.addListener(this, () => {
             this.callListeners()
         })
+
+        this.currentSession.updateData()
     }
 
     getSessionForOrganization(id: string) {

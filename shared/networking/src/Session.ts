@@ -1,6 +1,7 @@
-import { ObjectData } from '@simonbackx/simple-encoding'
+import { Decoder,ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
+import { Sodium } from '@stamhoofd/crypto'
 import { NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
 
 import { ManagedToken } from './ManagedToken'
@@ -86,6 +87,10 @@ export class Session implements RequestMiddleware  {
         return !!this.token
     }
 
+    isComplete(): boolean {
+        return !!this.token && !!this.user && !!this.userPrivateKey
+    }
+
     /**
      * Doing authenticated requests
      */
@@ -118,21 +123,69 @@ export class Session implements RequestMiddleware  {
         this.callListeners()
     }
 
-    login(token: Token, user: NewUser | null = null, authEncryptionKey: string | null = null, userPrivateKey: string | null = null, organizationPrivateKey: string | null = null) {
+    setToken(token: Token) {
         if (this.token) {
+            // Disable listener before clearing the token
             this.token.onChange = () => {
                 // emtpy
             }
         }
-
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
-        this.user = user
+    }
+
+    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string; organizationPrivateKey: string} | null = null) {
+        if (!this.token) {
+            throw new Error("You can only set the encryption key after setting the token")
+        }
         this.authEncryptionKey = authEncryptionKey
-        this.userPrivateKey = userPrivateKey
-        this.organizationPrivateKey = organizationPrivateKey
+
+        if (preload) {
+            this.user = preload.user
+            this.userPrivateKey = preload.userPrivateKey
+            this.organizationPrivateKey = preload.organizationPrivateKey
+        }
         this.onTokenChanged();
+
+        // Start loading the user and encryption keys
+        if (!preload) {
+            this.updateData()
+        }
+    }
+    
+    async fetchUser(): Promise<NewUser> {
+        const response = await this.authenticatedServer.request({
+            method: "GET",
+            path: "/user",
+            decoder: NewUser as Decoder<NewUser>
+        })
+        console.log(response)
+        this.user = response.data
+        this.callListeners()
+        return response.data
+    }
+
+    updateData() {
+        this.fetchUser().then(() => {
+            return this.updateKeys()
+        }).catch(e => {
+            console.error(e)
+            // todo: show message
+            this.logout()
+        })
+    }
+
+    async updateKeys() {
+        if (!this.user) {
+            throw new Error("Can't update keys if user is not set")
+        }
+
+        if (!this.authEncryptionKey) {
+            throw new Error("Can't update keys if authEncryptionKey is not set")
+        }
+        this.userPrivateKey = await Sodium.decryptMessage(this.user.encryptedPrivateKey, this.authEncryptionKey)
+        this.callListeners()
     }
 
     logout() {
