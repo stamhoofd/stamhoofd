@@ -2,6 +2,9 @@
     <div class="menu">
         <div class="padding-group">
             <figure id="logo" />
+            <button id="organization-switcher">
+                {{ organization.name }}
+            </button>
 
             <input class="input search" placeholder="Zoeken">
         </div>
@@ -50,8 +53,10 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { Group } from "@stamhoofd-frontend/models";
-import { Organization } from "@stamhoofd-frontend/models";
+import { Organization as MockOrganization } from "@stamhoofd-frontend/models";
 import { OrganizationFactory } from "@stamhoofd-frontend/models";
+import { SessionManager } from '@stamhoofd/networking';
+import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import GroupList from "./groups/GroupList.vue";
@@ -67,7 +72,8 @@ class SelectableGroup {
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
-    organization: Organization | null = null;
+    organization: Organization = SessionManager.currentSession!.organization
+    mockOrganization: MockOrganization | null = null;
     groups: SelectableGroup[] = [];
     selectedGroup: SelectableGroup | null = null;
 
@@ -75,10 +81,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         const factory = new OrganizationFactory({
             type: "chiro",
         });
-        this.organization = factory.create();
+        this.mockOrganization = factory.create();
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.groups = this.organization.groups!.map((group) => {
+        this.groups = this.mockOrganization.groups!.map((group) => {
             return new SelectableGroup(group);
         });
         if (!this.splitViewController?.shouldCollapse()) {
@@ -98,7 +104,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (this.selectedGroup) {
             this.selectedGroup.selected = false;
         }
-        this.showDetail(new ComponentWithProperties(GroupList, { organization: this.organization }));
+        this.showDetail(new ComponentWithProperties(GroupList, { organization: this.mockOrganization }));
     }
 
     openGroup(group: SelectableGroup) {
@@ -114,6 +120,34 @@ export default class Menu extends Mixins(NavigationMixin) {
 
 <style scoped lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+#organization-switcher {
+    margin-bottom: 15px;
+    padding-left: 40px;
+    display: flex;
+    align-items: center;
+    touch-action: manipulation;
+    user-select: none;
+    cursor: pointer;
+    @extend .style-interactive-small;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    transition: opacity 0.2s;
+
+    &:active {  
+        opacity: 0.4;
+        transition: none;
+    }
+
+    &::after {
+        content: "";
+        display: block;
+        width: 10px;
+        height: 10px;
+        margin-left: 5px;;
+        background: url("~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg") center center no-repeat;
+    }
+}
 
 .menu {
     padding: 30px 0;
@@ -127,7 +161,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
 #logo {
     display: block;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 .menu > .padding-group {
