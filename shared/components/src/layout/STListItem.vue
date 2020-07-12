@@ -32,6 +32,7 @@ export default class STListItem extends Vue {
 
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
+@use '~@stamhoofd/scss/base/text-styles' as *;
 
 .st-list-item {
     padding-left: var(--st-horizontal-padding, 15px);
@@ -49,6 +50,12 @@ export default class STListItem extends Vue {
 
         &:empty {
             display: none;
+        }
+    }
+
+    &.right-description {
+        .right {
+            @extend .style-description;
         }
     }
 

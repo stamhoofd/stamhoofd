@@ -18,9 +18,12 @@
             <h1>Groepen</h1>
             <p>Hier kan je de groepen binnen jouw vereniging beheren en bewerken. Je kan instellen wie zich kan inschrijven bij welke groepen op basis van leeftijd en geslacht. Als op basis van deze restricties, leden toch in meerdere groepen passen, dan krijgen ze de keuze tijdens het inschrijven. Je kan deze daarna nog goedkeuren of verplaatsen</p>
             <STList>
-                <STListItem :selectable="true">
+                <STListItem :selectable="true" class="right-stack right-description">
                     Kapoenen
-                    <span slot="right" class="icon gray arrow-right-small" />
+                    <template slot="right">
+                        16 jaar
+                        <span class="icon gray arrow-right-small" />
+                    </template>
                 </STListItem>
                 <STListItem>Wouters</STListItem>
                 <STListItem>Jonggivers</STListItem>
