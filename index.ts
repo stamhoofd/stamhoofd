@@ -10,6 +10,10 @@ export * from "./src/KeychainItem"
 export * from "./src/KeyConstants"
 export * from "./src/Address"
 export * from "./src/CountryDecoder"
+
+export * from "./src/Group"
+export * from "./src/GroupSettings"
+export * from "./src/GroupGenderType"
 export * from "./src/GroupPrices"
 
 // Endpoints
