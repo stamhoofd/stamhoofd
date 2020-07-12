@@ -33,6 +33,10 @@ export { default as TooltipDirective } from "./src/directives/Tooltip"
 // Cotnainers
 export { default as AuthenticatedView } from "./src/containers/AuthenticatedView.vue"
 
+// Layout
+export { default as STList } from "./src/layout/STList.vue"
+export { default as STListItem } from "./src/layout/STListItem.vue"
+
 // Other
 export { default as Spinner } from "./src/Spinner.vue"
 

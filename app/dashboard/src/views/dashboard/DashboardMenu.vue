@@ -29,7 +29,7 @@
         </div>
         <hr>
         <div class="">
-            <button class="menu-button icon groups">
+            <button class="menu-button icon groups" @click="manageGroups">
                 Groepen beheren
             </button>
             <button class="menu-button icon payments">
@@ -59,6 +59,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
+import GroupListView from './groups/GroupListView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 
 class SelectableGroup {
@@ -118,6 +119,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.selectedGroup = group;
         this.selectedGroup.selected = true;
         this.showDetail(new ComponentWithProperties(GroupMembersView, { group: group.group }));
+    }
+
+    manageGroups() {
+        this.showDetail(new ComponentWithProperties(GroupListView, {}));
     }
 }
 </script>

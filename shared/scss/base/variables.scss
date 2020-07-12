@@ -28,3 +28,10 @@ $color-warning-dark: #634e00;
 $border-width: 2px;
 $border-width-thin: 2px;
 $border-radius: 5px;
+
+// Aliasses
+$color-border: $color-gray-lighter; 
+$color-border-shade: $color-gray-light;
+$color-background: $color-white; 
+$color-background-shade: $color-white-shade;
+$color-background-shade-darker: $color-gray-lighter;
