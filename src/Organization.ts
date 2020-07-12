@@ -1,7 +1,8 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './Address';
+import { Group } from './Group';
 import { OrganizationMetaData } from './OrganizationMetaData';
 
 export class Organization extends AutoEncoder {
@@ -22,4 +23,9 @@ export class Organization extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     publicKey: string;
+
+    @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [] })
+    groups: Group[] = []
 }
+
+export const PatchOrganization = Organization.patchType()
