@@ -20,6 +20,7 @@
             <STList>
                 <STListItem :selectable="true">
                     Kapoenen
+                    <span slot="right" class="icon gray arrow-right-small" />
                 </STListItem>
                 <STListItem>Wouters</STListItem>
                 <STListItem>Jonggivers</STListItem>

@@ -195,6 +195,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    box-sizing: border-box;
     height: 45px;
     font-size: 16px;
     cursor: pointer;
