@@ -1,7 +1,5 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Group } from './Group';
-
 export enum PermissionLevel {
     /** No access */
     None = "None",
@@ -38,17 +36,17 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
     groups: GroupPermissions[]
 
-    hasReadAccess(group: Group | null = null) {
+    hasReadAccess(groupId: string | null = null) {
         if (this.level != PermissionLevel.None) {
             // Has read access
             return true
         }
 
-        if (!group) {
+        if (!groupId) {
             return false
         }
 
-        const permission = this.groups.find(g => g.groupId === group.id)
+        const permission = this.groups.find(g => g.groupId === groupId)
         if (permission) {
             if (permission.level != PermissionLevel.None) {
                 return true
@@ -58,17 +56,17 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
-    hasWriteAccess(group: Group | null = null) {
+    hasWriteAccess(groupId: string | null = null) {
         if (this.level == PermissionLevel.Write || this.level == PermissionLevel.Full) {
             // Has read access
             return true
         }
 
-        if (!group) {
+        if (!groupId) {
             return false
         }
 
-        const permission = this.groups.find(g => g.groupId === group.id)
+        const permission = this.groups.find(g => g.groupId === groupId)
         if (permission) {
             if (permission.level == PermissionLevel.Write || permission.level == PermissionLevel.Full) {
                 return true
@@ -78,17 +76,17 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
-    hasFullAccess(group: Group | null = null) {
+    hasFullAccess(groupId: string | null = null) {
         if (this.level == PermissionLevel.Full) {
             // Has read access
             return true
         }
 
-        if (!group) {
+        if (!groupId) {
             return false
         }
 
-        const permission = this.groups.find(g => g.groupId === group.id)
+        const permission = this.groups.find(g => g.groupId === groupId)
         if (permission) {
             if (permission.level == PermissionLevel.Full) {
                 return true
