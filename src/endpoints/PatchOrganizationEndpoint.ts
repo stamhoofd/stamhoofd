@@ -58,7 +58,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const organization = token.user.organization
         organization.name = request.body.name ?? organization.name
-        organization.address.patch(request.body.address)
+
+        if (request.body.address) {
+            organization.address.patch(request.body.address)
+        }
 
         // Save the organization
         await organization.save()

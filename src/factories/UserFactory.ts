@@ -1,5 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from '@stamhoofd/crypto';
+import { Permissions } from '@stamhoofd/structures';
 
 import { Organization } from "../models/Organization";
 import { User, UserWithOrganization } from "../models/User";
@@ -13,6 +14,7 @@ class Options {
      * Default is true
      */
     verified?: boolean;
+    permissions?: Permissions
 }
 
 export class UserFactory extends Factory<Options, User> {
@@ -31,12 +33,13 @@ export class UserFactory extends Factory<Options, User> {
         if (!user) {
             throw new Error("Unexpected failure when creating user in factory");
         }
+
+        user.permissions = this.options.permissions ?? null
         
         if (this.options.verified === undefined || this.options.verified === true) {
             user.verified = true;
-            await user.save();
         }
-        
+        await user.save();
         return user;
     }
 }
