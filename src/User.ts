@@ -2,6 +2,7 @@ import { AutoEncoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simp
 import { v4 as uuidv4 } from "uuid";
 
 import { KeyConstants } from './KeyConstants';
+import { Permissions } from './Permissions';
 
 export class User extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -15,6 +16,9 @@ export class User extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     publicKey: string;
+
+    @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
+    permissions: Permissions | null = null
 }
 
 export class NewUser extends User {
