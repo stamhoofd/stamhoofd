@@ -1,6 +1,6 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
-import { KeyConstants } from "@stamhoofd/structures"
+import { KeyConstants, Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "./Organization";
@@ -34,6 +34,12 @@ export class User extends Model {
      */
     @column({ type: "string" })
     publicKey: string;
+
+    /**
+     * Public key used for encryption
+     */
+    @column({ type: "json", decoder: Permissions, nullable: true })
+    permissions: Permissions | null = null
 
     /**
      * public key that is used to verify during login (using a challenge) and for getting a token

@@ -1,6 +1,6 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Organization as OrganizationStruct } from "@stamhoofd/structures"; 
+import { OrganizationSimple } from "@stamhoofd/structures"; 
 
 import { Organization } from "../models/Organization";
 
@@ -12,7 +12,7 @@ class Query extends AutoEncoder {
 }
 
 type Body = undefined;
-type ResponseBody = OrganizationStruct[]
+type ResponseBody = OrganizationSimple[]
 
 export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected queryDecoder = Query as Decoder<Query>
@@ -55,6 +55,6 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             ]
         });
         
-        return new Response(organizations.map(o => OrganizationStruct.create(o)));
+        return new Response(organizations.map(o => OrganizationSimple.create(o)));
     }
 }

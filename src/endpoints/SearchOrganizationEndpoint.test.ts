@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { Organization } from '@stamhoofd/structures';
+import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -24,12 +24,12 @@ describe("Endpoint.SearchOrganization", () => {
         expect(response.body).toHaveLength(1)
 
         // Access token should be expired
-        expect(response.body[0]).toBeInstanceOf(Organization);
+        expect(response.body[0]).toBeInstanceOf(OrganizationSimple);
         expect(response.status).toEqual(200);
         expect(response.body[0]).toMatchObject({
             id: organization.id,
             name: organization.name,
-            publicKey: organization.publicKey
+            address: organization.address
         })
     });
 
@@ -49,8 +49,8 @@ describe("Endpoint.SearchOrganization", () => {
         expect(response.body).toHaveLength(2)
 
         // Access token should be expired
-        expect(response.body[0]).toBeInstanceOf(Organization);
-        expect(response.body[1]).toBeInstanceOf(Organization);
+        expect(response.body[0]).toBeInstanceOf(OrganizationSimple);
+        expect(response.body[1]).toBeInstanceOf(OrganizationSimple);
         expect(response.status).toEqual(200);
         expect(response.body.map(o => o.id).sort()).toEqual(organizations.map(o => o.id).sort())
     });

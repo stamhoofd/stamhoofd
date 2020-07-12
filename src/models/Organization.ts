@@ -1,7 +1,9 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, OrganizationMetaData } from "@stamhoofd/structures";
+import { Address, Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
+
+import { Group } from './Group';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -137,5 +139,17 @@ export class Organization extends Model {
             throw new Error("Missing hostname in environment")
         }
         return this.id+".api." + defaultDomain;
+    }
+
+    async getStructure(): Promise<OrganizationStruct> {
+        const groups = await Group.where({organizationId: this.id})
+        return OrganizationStruct.create({
+            id: this.id,
+            name: this.name,
+            meta: this.meta,
+            address: this.address,
+            publicKey: this.publicKey,
+            groups: groups.map(g => GroupStruct.create(g))
+        })
     }
 }
