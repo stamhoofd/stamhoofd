@@ -1,7 +1,7 @@
 <template>
     <transition name="fade" mode="out-in" appear>
         <div class="loading-view">
-            <Spinner class="center" />
+            <Spinner class="center gray" />
         </div>
     </transition>
 </template>
@@ -34,7 +34,10 @@ export default class LoadingView extends Vue {
     right: 0;
     opacity: 1;
     background: $color-white-shade;
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
     &.fade-enter-active,
     &.fade-leave-active {
         transition: opacity 0.35s;

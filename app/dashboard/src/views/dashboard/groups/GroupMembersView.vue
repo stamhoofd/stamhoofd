@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view group-list">
+    <div class="st-view group-members-view">
         <STNavigationBar :sticky="false">
             <template #left>
                 <button v-if="canPop" class="button icon gray arrow-left" @click="pop">
@@ -372,7 +372,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
-.group-list {
+.group-members-view {
     background: $color-white;
 
     .new-member-bubble {
