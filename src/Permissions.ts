@@ -34,7 +34,7 @@ export class Permissions extends AutoEncoder {
     level: PermissionLevel
 
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
-    groups: GroupPermissions[]
+    groups: GroupPermissions[] = []
 
     hasReadAccess(groupId: string | null = null) {
         if (this.level != PermissionLevel.None) {
