@@ -28,4 +28,18 @@ export class Organization extends AutoEncoder {
     groups: Group[] = []
 }
 
+export class OrganizationSimple extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    /**
+     * Name of the organization you are creating
+     */
+    @field({ decoder: StringDecoder })
+    name: string;
+
+    @field({ decoder: Address })
+    address: Address;
+}
+
 export const PatchOrganization = Organization.patchType()
