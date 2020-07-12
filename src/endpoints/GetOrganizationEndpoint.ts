@@ -1,5 +1,4 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization as OrganizationStruct } from "@stamhoofd/structures";
 
 import { Token } from '../models/Token';
@@ -29,15 +28,6 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const token = await Token.authenticate(request);
         const user = token.user
-
-        if (!user.permissions || !user.permissions.hasReadAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
-
         return new Response(await user.organization.getStructure());
     }
 }
