@@ -15,6 +15,12 @@ export * from "./src/GroupPrices"
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
 
+export * from "./src/endpoints/tokens/ChallengeGrantStruct"
+export * from "./src/endpoints/tokens/ChallengeResponseStruct"
+export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
+export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
+export * from "./src/endpoints/tokens/CreateTokenStruct"
+
 // Grouping
 export * from "./src/grouping/PaginatedResponse"
 
