@@ -16,6 +16,8 @@ export * from "./src/GroupSettings"
 export * from "./src/GroupGenderType"
 export * from "./src/GroupPrices"
 
+export * from "./src/Permissions"
+
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
 
