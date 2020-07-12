@@ -1,6 +1,7 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { Organization } from '@stamhoofd/structures';
 
+import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { UserFactory } from '../factories/UserFactory';
 import { Token } from '../models/Token';
@@ -13,6 +14,7 @@ describe("Endpoint.GetOrganization", () => {
     test("Get organization as signed in user", async () => {
         const organization = await new OrganizationFactory({}).create()
         const user = await new UserFactory({ organization }).create()
+        const groups = await new GroupFactory({ organization }).createMultiple(2)
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v1/organization", organization.getApiHost());
@@ -26,7 +28,7 @@ describe("Endpoint.GetOrganization", () => {
         }
 
         expect(response.body.id).toEqual(organization.id)
-        expect(response.body.groups).toEqual([])
+        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
     });
 
 });

@@ -22,7 +22,7 @@ export class Group extends Model {
      * Every time a new registration period starts, this number increases. This is used to mark all older registrations as 'out of date' automatically
      */
     @column({ type: "integer" })
-    cycle: number;
+    cycle = 0;
 
     @column({
         type: "datetime", beforeSave(old?: any) {
