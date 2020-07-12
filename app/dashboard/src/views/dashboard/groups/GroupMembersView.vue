@@ -151,7 +151,7 @@ class SelectableMember {
     },
     directives: { Tooltip },
 })
-export default class GroupList extends Mixins(NavigationMixin) {
+export default class GroupMembersView extends Mixins(NavigationMixin) {
     @Prop()
     group!: Group | null;
 
@@ -278,7 +278,7 @@ export default class GroupList extends Mixins(NavigationMixin) {
         }
     }
     next() {
-        this.show(new ComponentWithProperties(GroupList, {}));
+        this.show(new ComponentWithProperties(GroupMembersView, {}));
     }
 
     onChanged(_selectableMember: SelectableMember) {

@@ -59,7 +59,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import GroupList from "./groups/GroupList.vue";
+import GroupMembersView from "./groups/GroupMembersView.vue";
 
 class SelectableGroup {
     group: Group;
@@ -92,7 +92,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             this.selectedGroup.selected = true;
             this.showDetail(
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(GroupList, {
+                    root: new ComponentWithProperties(GroupMembersView, {
                         group: this.selectedGroup.group,
                     }),
                 })
@@ -108,7 +108,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (this.selectedGroup) {
             this.selectedGroup.selected = false;
         }
-        this.showDetail(new ComponentWithProperties(GroupList, { organization: this.mockOrganization }));
+        this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
     }
 
     openGroup(group: SelectableGroup) {
@@ -117,7 +117,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
         this.selectedGroup = group;
         this.selectedGroup.selected = true;
-        this.showDetail(new ComponentWithProperties(GroupList, { group: group.group }));
+        this.showDetail(new ComponentWithProperties(GroupMembersView, { group: group.group }));
     }
 }
 </script>

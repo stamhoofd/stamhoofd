@@ -518,12 +518,21 @@
     "@stamhoofd/structures" "^1.0.4"
     libsodium-wrappers "^0.7.6"
 
-"@stamhoofd/structures@^1.0.4", "@stamhoofd/structures@^1.0.6":
+"@stamhoofd/structures@^1.0.4":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.0.6.tgz#b28ae5404866616e7ca9cef09ede74bbe3f082fc"
   integrity sha512-EwFbJ1CLsri3KSU+bIKiv5gxDP7kloRgk5TTAJy1Mn2UUmyzWXRNintYhHEJ0pXXLBD5OgWfbY8YAq77nhgg+w==
   dependencies:
     "@simonbackx/simple-encoding" "^1.8.33"
+    uuid "^8.2.0"
+
+"@stamhoofd/structures@^1.0.6":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.0.7.tgz#746e55532b860b879786d7c00f3d7bffaa32731d"
+  integrity sha512-y++KxL3sVFvZlt5GzBDIctRm3F3qTIfxPrlMPiE8LAXIl8Kupk4C3gSyVkr7d2bGtUoYcl3VR7Z/+/VEu6YOfw==
+  dependencies:
+    "@simonbackx/simple-encoding" "^1.8.33"
+    "@simonbackx/simple-errors" "^1.0.0"
     uuid "^8.2.0"
 
 "@stamhoofd/utility@^1.0.2":

@@ -12,7 +12,7 @@
         background: var(--color-current-background);
         border-top-left-radius: $border-radius;
         border-bottom-left-radius: $border-radius;
-        overflow: hidden;
+        
         @extend .style-side-view-shadow;
     }
 
