@@ -38,10 +38,14 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
     groups: GroupPermissions[]
 
-    hasReadAccess(group: Group) {
+    hasReadAccess(group: Group | null = null) {
         if (this.level != PermissionLevel.None) {
             // Has read access
             return true
+        }
+
+        if (!group) {
+            return false
         }
 
         const permission = this.groups.find(g => g.groupId === group.id)
@@ -54,10 +58,14 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
-    hasWriteAccess(group: Group) {
+    hasWriteAccess(group: Group | null = null) {
         if (this.level == PermissionLevel.Write || this.level == PermissionLevel.Full) {
             // Has read access
             return true
+        }
+
+        if (!group) {
+            return false
         }
 
         const permission = this.groups.find(g => g.groupId === group.id)
@@ -70,10 +78,14 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
-    hasFullAccess(group: Group) {
+    hasFullAccess(group: Group | null = null) {
         if (this.level == PermissionLevel.Full) {
             // Has read access
             return true
+        }
+
+        if (!group) {
+            return false
         }
 
         const permission = this.groups.find(g => g.groupId === group.id)
