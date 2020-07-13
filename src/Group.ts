@@ -9,6 +9,36 @@ export class Group extends AutoEncoder {
 
     @field({ decoder: GroupSettings })
     settings: GroupSettings
+
+    static defaultSort(a: Group, b: Group) {
+        if (a.settings.minBirthYear && !b.settings.minBirthYear) {
+            return 1
+        }
+        if (b.settings.minBirthYear && !a.settings.minBirthYear) {
+            return -1
+        }
+        if (!b.settings.minBirthYear && !a.settings.minBirthYear) {
+            // name
+            return this.nameSort(a, b)
+        }
+        if (a.settings.minBirthYear! > b.settings.minBirthYear!) {
+            return 1
+        }
+        if (a.settings.minBirthYear! < b.settings.minBirthYear!) {
+            return -1
+        }
+        return this.nameSort(a, b)
+    }
+
+    static nameSort(a: Group, b: Group) {
+        if (a.settings.name.toLowerCase() < b.settings.name.toLowerCase()) {
+            return 1
+        }
+        if (a.settings.name.toLowerCase() > b.settings.name.toLowerCase()) {
+            return -1
+        }
+        return 0
+    }
 }
 
 export const GroupPatch = Group.patchType()
