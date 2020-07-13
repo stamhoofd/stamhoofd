@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Organization as OrganizationStruct, PatchOrganization } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Token } from '../models/Token';
@@ -17,7 +17,7 @@ type ResponseBody = OrganizationStruct;
  */
 
 export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = PatchOrganization as Decoder<AutoEncoderPatchType<OrganizationStruct>>
+    bodyDecoder = OrganizationPatch as Decoder<AutoEncoderPatchType<OrganizationStruct>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -63,6 +63,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             organization.address.patch(request.body.address)
         }
 
+        console.warn(request.body)
+
         // Save the organization
         await organization.save()
 
@@ -89,6 +91,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         for (const struct of request.body.groups.getPatches()) {
+            console.warn(struct)
+
             const model = await Group.getByID(struct.id)
             if (!model || model.organizationId != organization.id) {
                 errors.addError(new SimpleError({
@@ -97,6 +101,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }))
                 continue;
             }
+
 
             if (!user.permissions.hasFullAccess(model.id)) {
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
