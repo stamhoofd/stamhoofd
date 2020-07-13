@@ -117,7 +117,6 @@ describe("Endpoint.PatchOrganization", () => {
             id: groups[0].id,
             settings: GroupSettingsPatch.create({
                 name: "My crazy group name",
-                prices: undefined
             })
         }))
 
@@ -136,6 +135,41 @@ describe("Endpoint.PatchOrganization", () => {
 
         expect(response.body.id).toEqual(organization.id)
         expect(response.body.groups.find(g => g.id == groups[0].id)!.settings.name).toEqual("My crazy group name")
+    });
+
+    test("Can't change name of group with write access", async () => {
+        const organization = await new OrganizationFactory({}).create()
+        const groups = await new GroupFactory({ organization }).createMultiple(2)
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Read,
+                groups: [
+                    GroupPermissions.create({
+                        groupId: groups[0].id,
+                        level: PermissionLevel.Write
+                    })
+                ]
+            })
+        }).create()
+        const token = await Token.createToken(user)
+
+        const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>()
+        changes.addPatch(GroupPatch.create({
+            id: groups[0].id,
+            settings: GroupSettingsPatch.create({
+                name: "My crazy group name",
+            })
+        }))
+
+        const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+            id: organization.id,
+            groups: changes.encode({ version: 3 }),
+        });
+        r.headers.authorization = "Bearer " + token.accessToken
+
+        await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
+
     });
 
 });
