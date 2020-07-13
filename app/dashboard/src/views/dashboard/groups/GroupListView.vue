@@ -21,7 +21,9 @@
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description" @click="editGroup(group)">
                     {{ group.settings.name }}
                     <template slot="right">
-                        16 jaar
+                        {{ groupDescription(group) }}
+                        <MaleIcon v-if="group.settings.genderType == 'OnlyMale'" />
+                        <FemaleIcon v-if="group.settings.genderType == 'OnlyFemale'" />
                         <span class="icon gray arrow-right-small" />
                     </template>
                 </STListItem>
@@ -33,7 +35,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
@@ -48,7 +50,9 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         STNavigationBar,
         STToolbar,
         STList,
-        STListItem
+        STListItem,
+        MaleIcon,
+        FemaleIcon
     }
 })
 export default class GroupListView extends Mixins(NavigationMixin) {
@@ -65,7 +69,7 @@ export default class GroupListView extends Mixins(NavigationMixin) {
     createGroup() {
         const group = Group.create({
             settings: GroupSettings.create({
-                name: "Naamloos",
+                name: "",
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
@@ -85,6 +89,15 @@ export default class GroupListView extends Mixins(NavigationMixin) {
             id: this.organization.id,
         })
         this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
+    }
+
+    groupDescription(group: Group) {
+        if (group.settings.minBirthYear && group.settings.maxBirthYear) {
+            const startYear = new Date().getFullYear() - group.settings.maxBirthYear
+            const endYear = new Date().getFullYear() - group.settings.minBirthYear
+            return startYear + " - "+endYear+" jaar"
+        }
+        return ""
     }
 }
 </script>
