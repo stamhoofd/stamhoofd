@@ -10,3 +10,5 @@ export class Group extends AutoEncoder {
     @field({ decoder: GroupSettings })
     settings: GroupSettings
 }
+
+export const GroupPatch = Group.patchType()

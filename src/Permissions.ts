@@ -7,7 +7,7 @@ export enum PermissionLevel {
     /** Read all data, but not allowed to write */
     Read = "Read",
     
-    /** Write and write all data, but not allowed to modify settings */
+    /** Read and write child data, but not allowed to modify settings */
     Write = "Write",
     
     /** Full access */

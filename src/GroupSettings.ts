@@ -28,3 +28,5 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     maxBirthYear: number | null = null
 }
+
+export const GroupSettingsPatch = GroupSettings.patchType()

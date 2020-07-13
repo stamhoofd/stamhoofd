@@ -42,4 +42,4 @@ export class OrganizationSimple extends AutoEncoder {
     address: Address;
 }
 
-export const PatchOrganization = Organization.patchType()
+export const OrganizationPatch = Organization.patchType()
