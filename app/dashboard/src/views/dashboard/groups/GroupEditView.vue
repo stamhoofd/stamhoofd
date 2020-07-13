@@ -82,6 +82,7 @@ import { BirthYearInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, R
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 
 @Component({
     components: {
@@ -115,7 +116,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     organizationPatch!: AutoEncoderPatchType<Organization> & AutoEncoder ;
 
     get organization() {
-        return SessionManager.currentSession!.organization!.patch(this.organizationPatch as any)
+        return OrganizationManager.organization.patch(this.organizationPatch)
     }
 
     get group() {
@@ -128,7 +129,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
         throw new Error("Group not found")
     }
 
-    addPatch(patch: AutoEncoderPatchType<Group> & AutoEncoder ) {
+    addPatch(patch: AutoEncoderPatchType<Group> ) {
         if (this.saving) {
             return
         }
@@ -136,12 +137,10 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>> ) {
-        console.log("Add settings patch")
-        console.log(patch)
         this.addPatch(GroupPatch.create({ 
             id: this.groupId, 
             settings: GroupSettingsPatch.create(patch)
-        }) as any )
+        }))
     }
 
     get name() {
@@ -221,13 +220,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     async save() {
         this.saving = true
 
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization",
-            body: this.organizationPatch,
-            decoder: Organization as Decoder<Organization>
-        })
-        SessionManager.currentSession!.setOrganization(response.data)
+        await OrganizationManager.patch(this.organizationPatch)
         this.saving = false
         this.pop()
     }

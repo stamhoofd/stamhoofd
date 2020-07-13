@@ -3,6 +3,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
 import { NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
+import { Vue } from "vue-property-decorator";
 
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
@@ -172,7 +173,7 @@ export class Session implements RequestMiddleware  {
     }
 
     setOrganization(organization: Organization) {
-        this.organization = organization
+        Vue.set(this, "organization", organization)
     }
 
     async fetchOrganization(): Promise<Organization> {

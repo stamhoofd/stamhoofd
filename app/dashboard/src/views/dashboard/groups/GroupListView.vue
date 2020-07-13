@@ -18,7 +18,7 @@
             <h1>Groepen</h1>
             <p>Hier kan je de groepen binnen jouw vereniging beheren en bewerken. Je kan instellen wie zich kan inschrijven bij welke groepen op basis van leeftijd en geslacht. Als op basis van deze restricties, leden toch in meerdere groepen passen, dan krijgen ze de keuze tijdens het inschrijven. Je kan deze daarna nog goedkeuren of verplaatsen</p>
             <STList>
-                <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description">
+                <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description" @click="editGroup(group)">
                     {{ group.settings.name }}
                     <template slot="right">
                         16 jaar
@@ -40,6 +40,7 @@ import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import GroupEditView from './GroupEditView.vue';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
@@ -51,8 +52,15 @@ import GroupEditView from './GroupEditView.vue';
     }
 })
 export default class GroupListView extends Mixins(NavigationMixin) {
-    organization = SessionManager.currentSession!.organization!
-    groups = SessionManager.currentSession!.organization!.groups
+    SessionManager = SessionManager // needed to make session reactive
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get groups() {
+        return this.organization.groups
+    }
 
     createGroup() {
         const group = Group.create({
@@ -69,6 +77,13 @@ export default class GroupListView extends Mixins(NavigationMixin) {
             id: this.organization.id,
         })
         organizationPatch.groups.addPut(group)
+        this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
+    }
+
+    editGroup(group: Group) {
+        const organizationPatch = OrganizationPatch.create({
+            id: this.organization.id,
+        })
         this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
     }
 }
