@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
-import { Organization } from '@stamhoofd/structures'
+import { Organization, OrganizationPatch } from '@stamhoofd/structures'
 
 import { SessionManager } from '../../../../shared/networking'
 
@@ -9,6 +9,12 @@ import { SessionManager } from '../../../../shared/networking'
 export class OrganizationManagerStatic {
     get organization() {
         return SessionManager.currentSession!.organization!
+    }
+
+    getPatch() {
+        return OrganizationPatch.create({
+            id: this.organization.id
+        })
     }
 
     async patch(patch: AutoEncoderPatchType<Organization>) {

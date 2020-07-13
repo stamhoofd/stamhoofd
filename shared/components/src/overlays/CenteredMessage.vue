@@ -4,6 +4,7 @@
             <div class="centered-message">
                 <Spinner v-if="type == 'loading'" class="center" />
                 <img v-if="type == 'error'" src="~@stamhoofd/assets/images/icons/color/error.svg" class="center">
+                <img v-if="type == 'success'" src="~@stamhoofd/assets/images/icons/color/success.svg" class="center">
                 <h1>{{ title }}</h1>
                 <p>{{ description }}</p>
 

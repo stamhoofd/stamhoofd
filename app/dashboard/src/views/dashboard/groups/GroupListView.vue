@@ -24,6 +24,7 @@
                         {{ groupDescription(group) }}
                         <MaleIcon v-if="group.settings.genderType == 'OnlyMale'" />
                         <FemaleIcon v-if="group.settings.genderType == 'OnlyFemale'" />
+                        <button class="button icon gray trash" @click.stop="deleteGroup(group)"/>
                         <span class="icon gray arrow-right-small" />
                     </template>
                 </STListItem>
@@ -35,7 +36,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon } from "@stamhoofd/components";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon, CenteredMessage } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
@@ -98,6 +99,23 @@ export default class GroupListView extends Mixins(NavigationMixin) {
             return startYear + " - "+endYear+" jaar"
         }
         return ""
+    }
+
+    deleteGroup(group: Group) {
+        if (confirm("Ben je zeker dat je deze groep wilt verwijderen? All leden worden automatisch ook uitgeschreven. Je kan dit niet ongedaan maken!")) {
+            if (confirm("Heel zeker?")) {
+                const patch = OrganizationManager.getPatch()
+                patch.groups.addDelete(group.id)
+                OrganizationManager.patch(patch)
+                .then(() => {
+                    this.present(new ComponentWithProperties(CenteredMessage, { title: "De groep is verwijderd", closeButton: "Sluiten", type: "success" }).setDisplayStyle("overlay"))
+                })
+                .catch(e => {
+                    console.error(e)
+                    this.present(new ComponentWithProperties(CenteredMessage, { title: "Er ging iets mis", description: e.human ?? e.message, closeButton: "Sluiten", type: "error" }).setDisplayStyle("overlay"))
+                })
+            }
+        }
     }
 }
 </script>
