@@ -149,7 +149,7 @@ export class Organization extends Model {
             meta: this.meta,
             address: this.address,
             publicKey: this.publicKey,
-            groups: groups.map(g => GroupStruct.create(g))
+            groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort)
         })
     }
 }

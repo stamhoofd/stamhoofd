@@ -41,7 +41,8 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             publicAuthSignKey: user.publicAuthSignKey,
             authSignKeyConstants: user.authSignKeyConstants,
             authEncryptionKeyConstants: user.authEncryptionKeyConstants,
-            encryptedPrivateKey: user.encryptedPrivateKey
+            encryptedPrivateKey: user.encryptedPrivateKey,
+            permissions: user.permissions
         })
         return new Response(st);      
     
