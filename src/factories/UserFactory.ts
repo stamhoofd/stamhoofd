@@ -14,7 +14,7 @@ class Options {
      * Default is true
      */
     verified?: boolean;
-    permissions?: Permissions
+    permissions?: Permissions | null
 }
 
 export class UserFactory extends Factory<Options, User> {
