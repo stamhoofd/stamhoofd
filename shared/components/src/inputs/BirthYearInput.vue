@@ -1,5 +1,5 @@
 <template>
-    <label class="price-input" :class="{ error: !valid }">
+    <label class="birth-year-input" :class="{ error: !valid }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
@@ -10,7 +10,7 @@
             ref="input"
             v-model="valueString"
             type="text"
-            inputmode="decimal"
+            inputmode="numeric"
             step="any"
             @blur="clean"
             @keydown.up.prevent="step(1)"
@@ -20,7 +20,7 @@
             <span>{{ valueString }}</span>
         </div>
         <div v-else-if="valueString != ''">
-            <span>{{ valueString }}</span> {{ currency }}
+            <span>{{ valueString }}</span> {{ descriptionText }}
         </div>
         <div v-else>{{ placeholder }}</div>
     </label>
@@ -31,22 +31,21 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class PriceInput extends Vue {
-    /** Price in cents */
-    @Prop({ default: 0 })
+    @Prop({ default: 1910 })
     min!: number
 
-    /** Price in cents */
-    @Prop({ default: null })
+    @Prop({ default: false })
+    nullable!: boolean
+
+    @Prop({ default: new Date().getFullYear() })
     max!: number | null
 
-    valueString = "40";
+    valueString = "";
     valid = true;
 
     /** Price in cents */
-    @Prop({ default: 0 })
-    value!: number
-
-    currency = "euro";
+    @Prop({ default: null })
+    value!: number | null
 
     @Prop({ default: "" })
     placeholder!: string
@@ -55,8 +54,15 @@ export default class PriceInput extends Vue {
         return this.value
     }
 
-    set internalValue(val: number) {
+    set internalValue(val: number | null) {
         this.$emit("input", val)
+    }
+
+    get descriptionText() {
+        if (!this.value) {
+            return ""
+        }
+        return "("+(new Date().getFullYear() - this.value)+" jaar)"
     }
 
     mounted() {
@@ -69,30 +75,28 @@ export default class PriceInput extends Vue {
         // but for our placeholder system we need exactly the same string
         if (value == "") {
             this.valid = true;
-            this.internalValue = Math.max(0, this.min);
-        } else {
-            if (!value.includes(".")) {
-                // We do this for all locales since some browsers report the language locale instead of the formatting locale
-                value = value.replace(",", ".");
+            if (this.nullable) {
+                this.internalValue = null
+            } else {
+                this.internalValue = Math.max(0, this.min);
             }
-            const v = parseFloat(value);
+        } else {
+            const v = parseInt(value);
             if (isNaN(v)) {
                 this.valid = false;
-                this.internalValue = this.min;
+
+                if (this.nullable) {
+                    this.internalValue = null
+                } else {
+                    this.internalValue = this.min;
+                }
             } else {
                 this.valid = true;
 
                 // Remove extra decimals
-                this.internalValue = this.constrain(Math.round(v * 100));
+                this.internalValue = this.constrain(v);
             }
         }
-    }
-
-    /// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
-    whatDecimalSeparator(): string {
-        const n = 1.1;
-        const str = n.toLocaleString().substring(1, 2);
-        return str;
     }
 
     // Restore invalid input, make the input value again
@@ -101,22 +105,12 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        // Check if has decimals
-        const float = this.internalValue / 100
-        const decimals = float % 1;
-        const abs = Math.abs(float);
-
-        if (decimals != 0) {
-            // Include decimals
-            this.valueString =
-                (float < 0 ? "-" : "") +
-                Math.floor(abs) +
-                this.whatDecimalSeparator() +
-                Math.round(Math.abs(decimals) * 100);
-        } else {
-            // Hide decimals
-            this.valueString = float + "";
+        if (this.internalValue === null) {
+            this.valueString = ""
+            return
         }
+        // Check if has decimals
+        this.valueString = Math.floor(this.internalValue) + "";
     }
 
     // Limit value to bounds
@@ -132,10 +126,11 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        this.clean();
-        this.internalValue = this.constrain(this.internalValue + add);
-
-        this.clean();
+        if (this.internalValue === null) {
+            return;
+        }
+        const val = this.constrain(this.internalValue + add);
+        this.valueString = Math.floor(val) + "";
     }
 }
 </script>
@@ -145,7 +140,7 @@ export default class PriceInput extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use "~@stamhoofd/scss/components/inputs.scss";
 
-.price-input {
+.birth-year-input {
     @extend .input;
     position: relative;
 

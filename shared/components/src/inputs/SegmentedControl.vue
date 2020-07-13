@@ -51,6 +51,10 @@ export default class SegmentedControl extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
+.st-view > main > h1 + .segmented-control {
+    margin-bottom: 15px;
+}
+
 .segmented-control {
     background: $color-gray-lighter;
     padding: $border-width;

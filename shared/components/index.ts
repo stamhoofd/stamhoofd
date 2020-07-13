@@ -13,6 +13,7 @@ export { default as STInputBox } from "./src/inputs/STInputBox.vue"
 export { default as DateSelection } from "./src/inputs/DateSelection.vue"
 export { default as PriceInput } from "./src/inputs/PriceInput.vue"
 export { default as SegmentedControl } from "./src/inputs/SegmentedControl.vue"
+export { default as BirthYearInput } from "./src/inputs/BirthYearInput.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
