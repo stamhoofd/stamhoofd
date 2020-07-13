@@ -31,10 +31,10 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "@simonbackx/simple-errors": "^1.0.0",
         "uuid": "^8.2.0"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "^1.8.33"
+        "@simonbackx/simple-encoding": "^1.8.33",
+        "@simonbackx/simple-errors": "^1.0.0"
     }
 }
