@@ -21,7 +21,7 @@
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description" @click="editGroup(group)">
                     {{ group.settings.name }}
                     <template slot="right">
-                        {{ groupDescription(group) }}
+                        <span>{{ groupDescription(group) }}</span>
                         <MaleIcon v-if="group.settings.genderType == 'OnlyMale'" />
                         <FemaleIcon v-if="group.settings.genderType == 'OnlyFemale'" />
                         <button class="button icon gray trash" @click.stop="deleteGroup(group)"/>
