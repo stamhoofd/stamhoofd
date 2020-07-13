@@ -19,7 +19,7 @@ export class Group extends AutoEncoder {
         }
         if (!b.settings.minBirthYear && !a.settings.minBirthYear) {
             // name
-            return this.nameSort(a, b)
+            return Group.nameSort(a, b)
         }
         if (a.settings.minBirthYear! > b.settings.minBirthYear!) {
             return 1
@@ -27,7 +27,7 @@ export class Group extends AutoEncoder {
         if (a.settings.minBirthYear! < b.settings.minBirthYear!) {
             return -1
         }
-        return this.nameSort(a, b)
+        return Group.nameSort(a, b)
     }
 
     static nameSort(a: Group, b: Group) {
