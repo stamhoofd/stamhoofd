@@ -5,8 +5,11 @@
         </STNavigationBar>
 
         <main>
-            <h1>
+            <h1 v-if="isNew">
                 Nieuwe groep toevoegen
+            </h1>
+            <h1 v-else>
+                {{ name }} bewerken
             </h1>
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
 
@@ -114,6 +117,10 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
 
     @Prop()
     organizationPatch!: AutoEncoderPatchType<Organization> & AutoEncoder ;
+
+    get isNew() {
+        return this.organizationPatch.groups.getPuts().length > 0
+    }
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
