@@ -96,6 +96,9 @@ export default class GroupListView extends Mixins(NavigationMixin) {
         if (group.settings.minBirthYear && group.settings.maxBirthYear) {
             const startYear = new Date().getFullYear() - group.settings.maxBirthYear
             const endYear = new Date().getFullYear() - group.settings.minBirthYear
+            if (startYear == endYear) {
+                return startYear+" jaar"
+            }
             return startYear + " - "+endYear+" jaar"
         }
         return ""
