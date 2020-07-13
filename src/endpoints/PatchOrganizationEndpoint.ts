@@ -46,7 +46,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasWriteAccess()) {
+        if (!user.permissions || !user.permissions.hasReadAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
@@ -57,16 +57,28 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const errors = new SimpleErrors()
 
         const organization = token.user.organization
-        organization.name = request.body.name ?? organization.name
+        if (user.permissions.hasFullAccess()) {
+            organization.name = request.body.name ?? organization.name
 
-        if (request.body.address) {
-            organization.address.patch(request.body.address)
+            if (request.body.address) {
+                organization.address.patch(request.body.address)
+            }
+
+            if (request.body.meta) {
+                organization.meta.patch(request.body.meta)
+            }
+
+            // Save the organization
+            await organization.save()
+        } else {
+            if (request.body.name || request.body.address || request.body.meta) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "You do not have permissions to edit the organization settings",
+                    statusCode: 403
+                })
+            }
         }
-
-        console.warn(request.body)
-
-        // Save the organization
-        await organization.save()
 
         // Check changes to groups
         const deleteGroups = request.body.groups.getDeletes()
@@ -91,8 +103,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         for (const struct of request.body.groups.getPatches()) {
-            console.warn(struct)
-
             const model = await Group.getByID(struct.id)
             if (!model || model.organizationId != organization.id) {
                 errors.addError(new SimpleError({

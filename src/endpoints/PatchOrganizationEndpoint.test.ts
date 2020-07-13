@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
-import { Group, GroupPatch,GroupSettingsPatch,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
+import { Group, GroupPatch,GroupPermissions,GroupSettingsPatch,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -83,7 +83,48 @@ describe("Endpoint.PatchOrganization", () => {
             groups: changes.encode({ version: 3}),
             name: "test"
         });
-        console.warn(r)
+        r.headers.authorization = "Bearer " + token.accessToken
+
+        const response = await endpoint.test(r);
+        expect(response.body).toBeDefined();
+
+        if (!(response.body instanceof Organization)) {
+            throw new Error("Expected Organization")
+        }
+
+        expect(response.body.id).toEqual(organization.id)
+        expect(response.body.groups.find(g => g.id == groups[0].id)!.settings.name).toEqual("My crazy group name")
+    });
+
+    test("Change the name of a group with group full access", async () => {
+        const organization = await new OrganizationFactory({}).create()
+        const groups = await new GroupFactory({ organization }).createMultiple(2)
+        const user = await new UserFactory({ organization, 
+            permissions: Permissions.create({ 
+                level: PermissionLevel.Read, 
+                groups: [
+                    GroupPermissions.create({
+                        groupId: groups[0].id,
+                        level: PermissionLevel.Full
+                    })
+                ] 
+            }) 
+        }).create()
+        const token = await Token.createToken(user)
+
+        const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>()
+        changes.addPatch(GroupPatch.create({
+            id: groups[0].id,
+            settings: GroupSettingsPatch.create({
+                name: "My crazy group name",
+                prices: undefined
+            })
+        }))
+
+        const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+            id: organization.id,
+            groups: changes.encode({ version: 3 }),
+        });
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
