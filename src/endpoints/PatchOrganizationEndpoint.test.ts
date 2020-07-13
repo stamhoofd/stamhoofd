@@ -18,7 +18,7 @@ describe("Endpoint.PatchOrganization", () => {
         //const groups = await new GroupFactory({ organization }).createMultiple(2)
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("PATCH", "/v1/organization", organization.getApiHost(), {
+        const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
             id: organization.id,
             name: "My crazy name"
         });
@@ -40,7 +40,7 @@ describe("Endpoint.PatchOrganization", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("PATCH", "/v1/organization", organization.getApiHost(), {
+        const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
             id: organization.id,
             name: "My crazy name"
         });
@@ -54,7 +54,7 @@ describe("Endpoint.PatchOrganization", () => {
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("PATCH", "/v1/organization", organization.getApiHost(), {
+        const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
             id: organization.id,
             name: "My crazy name"
         });
@@ -109,9 +109,9 @@ describe("Endpoint.PatchOrganization", () => {
                 })
             }))
 
-            const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+            const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
                 id: organization.id,
-                groups: changes.encode({ version: 3 }),
+                groups: changes.encode({ version: 2 }),
             });
             r.headers.authorization = "Bearer " + token.accessToken
 
@@ -173,9 +173,9 @@ describe("Endpoint.PatchOrganization", () => {
                         name: "My crazy group name",
                     })
                 }))
-                const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+                const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
                     id: organization.id,
-                    groups: changes.encode({ version: 3 }),
+                    groups: changes.encode({ version: 2 }),
                 });
                 r.headers.authorization = "Bearer " + token.accessToken
                 await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
@@ -254,9 +254,9 @@ describe("Endpoint.PatchOrganization", () => {
             })
             changes.addPut(put)
 
-            const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+            const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
                 id: organization.id,
-                groups: changes.encode({ version: 3 }),
+                groups: changes.encode({ version: 2 }),
             });
             r.headers.authorization = "Bearer " + token.accessToken
             await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
