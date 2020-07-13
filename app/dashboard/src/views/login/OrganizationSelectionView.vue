@@ -22,7 +22,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
+import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import LoginView from './LoginView.vue';
@@ -58,7 +58,7 @@ const throttle = (func, limit) => {
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     loading = false;
     q = ""
-    results: Organization[] = []
+    results: OrganizationSimple[] = []
 
     get query() {
         return this.q
@@ -104,7 +104,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             method: "GET",
             path: "/organizations/search",
             query: {query: this.query },
-            decoder: new ArrayDecoder(Organization as Decoder<Organization>)
+            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>)
         }).then((response) => {
             this.results = response.data
         }).catch(e => {
@@ -115,18 +115,18 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
-    loginOrganization(organization: Organization) {
+    loginOrganization(organization: OrganizationSimple) {
         const session = SessionManager.getSessionForOrganization(organization.id)
-        if (session && session.hasToken()) {
+        if (session && session.canGetCompleted()) {
             SessionManager.setCurrentSession(session)
             return
         }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))
     }
 
-    isSignedInFor(organization: Organization) {
+    isSignedInFor(organization: OrganizationSimple) {
         const session = SessionManager.getSessionForOrganization(organization.id)
-        return session && session.hasToken()
+        return session && session.canGetCompleted()
     }
 }
 </script>

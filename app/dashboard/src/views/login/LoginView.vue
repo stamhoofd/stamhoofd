@@ -35,7 +35,7 @@ import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-nav
 import { CenteredMessage, Spinner, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
 import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
@@ -52,7 +52,7 @@ import ForgotPasswordView from './ForgotPasswordView.vue';
 })
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})
-    organization: Organization
+    organization: OrganizationSimple
     session!: Session
     loading = false
 
@@ -61,7 +61,7 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     mounted() {
         // Search for the session
-        this.session = SessionManager.getSessionForOrganization(this.organization.id) ?? new Session(this.organization)
+        this.session = SessionManager.getSessionForOrganization(this.organization.id) ?? new Session(this.organization.id)
         this.email = this.session.user?.email ?? ""
     }
 
@@ -121,8 +121,6 @@ export default class LoginView extends Mixins(NavigationMixin){
             });
         })
     }
-
-     
 
     async submit() {
         if (this.loading) {

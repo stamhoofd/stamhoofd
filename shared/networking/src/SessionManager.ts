@@ -62,6 +62,18 @@ export class SessionManagerStatic {
         this.callListeners()
     }
 
+    addOrganizationToStorage(organization: Organization) {
+        const storage = this.getSessionStorage()
+        const index = storage.organizations.map(o => o.id).indexOf(organization.id)
+
+        // todo: improve this a lot
+        if (index !== -1) {
+            storage.organizations.splice(index, 1)
+        }
+        storage.organizations.unshift(organization)
+        this.saveSessionStorage(storage)
+    }
+
     setCurrentSession(session: Session) {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
@@ -69,18 +81,21 @@ export class SessionManagerStatic {
         this.currentSession = session
 
         const storage = this.getSessionStorage()
-        storage.lastOrganizationId = session.organization.id
-        const index = storage.organizations.map(o => o.id).indexOf(session.organization.id)
-
-        if (index !== -1) {
-            storage.organizations.splice(index, 1)
-        }
-        storage.organizations.unshift(session.organization)
+        storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
+
+        let needsResync = !session.organization
+        if (session.organization) {
+            this.addOrganizationToStorage(session.organization)
+        }
 
         this.callListeners()
 
         this.currentSession.addListener(this, () => {
+            if (needsResync && session.organization) {
+                needsResync = false
+                this.addOrganizationToStorage(session.organization)
+            }
             this.callListeners()
         })
 
@@ -89,7 +104,7 @@ export class SessionManagerStatic {
 
     getSessionForOrganization(id: string) {
         for (const session of this.availableSessions()) {
-            if (session.organization.id === id) {
+            if (session.organizationId === id) {
                 return session
             }
         }
@@ -115,7 +130,7 @@ export class SessionManagerStatic {
     }
 
     availableSessions(): Session[] {
-        return this.getSessionStorage().organizations.map(o => new Session(o))
+        return this.getSessionStorage().organizations.map(o => new Session(o.id))
     }
 
 }

@@ -156,7 +156,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     decoder: Token
                 })
 
-                const session = new Session(organization)
+                const session = new Session(organization.id)
+                session.organization = organization
                 session.setToken(response.data)
                 session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey, organizationPrivateKey: organizationKeyPair.privateKeyPair})
                 SessionManager.setCurrentSession(session)

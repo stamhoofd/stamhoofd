@@ -73,7 +73,7 @@ class SelectableGroup {
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
-    organization: Organization = SessionManager.currentSession!.organization
+    organization: Organization = SessionManager.currentSession!.organization!
     mockOrganization: MockOrganization | null = null;
     groups: SelectableGroup[] = [];
     selectedGroup: SelectableGroup | null = null;
