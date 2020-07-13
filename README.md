@@ -1,5 +1,11 @@
 # Stamhoofd frontend
 
+## Caddy setup
+
+To automate SSL certificate for a wide range of domains, caddy is used instead of nginx. In production, nginx is still used for the API since a wildcard certificate is required.
+
+In development, Caddy is also used, but you'll need to setup port forwarding for your custom domain to your LAN to make this work. You can also disable SSL in development. Run `yarn caddy:development` after installing Caddy to set the required configurations.
+
 ## Development
 
 Inside a services directory, run `yarn serve` to start a development server with hot reloading. Use `yarn build` to compile to the `dist/` folder.

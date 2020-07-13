@@ -6,7 +6,8 @@
     ],
     "scripts": {
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
-        "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd"
+        "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd",
+        "caddy:development": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.json"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "^1.8.33",

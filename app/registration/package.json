@@ -1,5 +1,5 @@
 {
-    "name": "@stamhoofd/dashboard",
+    "name": "@stamhoofd/dasregistration",
     "version": "1.0.0",
     "private": true,
     "scripts": {
@@ -10,10 +10,6 @@
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
         "@stamhoofd/scss": "1.0.0",
-        "@stamhoofd/structures": "^1.0.6",
-        "tiptap": "^1.29.0",
-        "tiptap-extensions": "^1.31.0",
-        "vue-property-decorator": "^8.4.1",
-        "xlsx": "^0.16.3"
+        "@stamhoofd/structures": "^1.0.6"
     }
 }

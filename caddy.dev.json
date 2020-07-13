@@ -1,0 +1,82 @@
+{
+    "apps": {
+        "http": {
+            "servers": {
+                "stamhoofd.dev": {
+                    "listen": [
+                        ":443"
+                    ],
+                    "routes": [
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "api.stamhoofd.dev",
+                                        "*.api.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:9091"
+                                        }
+                                    ],
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "x-real-ip": [
+                                                    "{http.request.remote}"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "dashboard.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "file_server",
+                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/dashboard/dist/"
+                                }
+                            ]
+                        },
+                        {
+                            "handle": [
+                                {
+                                    "handler": "file_server",
+                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/registration/dist/"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "tls": {
+            "automation": {
+                "policies": [
+                    {
+                        "on_demand": true
+                    }
+                ],
+                "on_demand": {
+                    "rate_limit": {
+                        "interval": "1d",
+                        "burst": 50
+                    }
+                }
+            }
+        }
+    }
+}
