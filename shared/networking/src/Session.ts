@@ -171,6 +171,10 @@ export class Session implements RequestMiddleware  {
         return response.data
     }
 
+    setOrganization(organization: Organization) {
+        this.organization = organization
+    }
+
     async fetchOrganization(): Promise<Organization> {
         const response = await this.authenticatedServer.request({
             method: "GET",

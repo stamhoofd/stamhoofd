@@ -35,7 +35,7 @@
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -64,7 +64,12 @@ export default class GroupListView extends Mixins(NavigationMixin) {
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             })
         })
-        this.present(new ComponentWithProperties(GroupEditView, { group }).setDisplayStyle("popup"))
+
+        const organizationPatch = OrganizationPatch.create({
+            id: this.organization.id,
+        })
+        organizationPatch.groups.addPut(group)
+        this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
     }
 }
 </script>

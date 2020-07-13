@@ -130,7 +130,12 @@ export class SessionManagerStatic {
     }
 
     availableSessions(): Session[] {
-        return this.getSessionStorage().organizations.map(o => new Session(o.id))
+        return this.getSessionStorage().organizations.map(o => {
+            const session = new Session(o.id)
+            session.setOrganization(o)
+
+            return session
+        })
     }
 
 }

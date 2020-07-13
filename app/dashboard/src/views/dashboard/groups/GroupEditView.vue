@@ -43,11 +43,11 @@
             </div>
 
             <div class="split-inputs">
-                <STInputBox title="Minimum geboortejaar" error-fields="settings.minBirthYear" :error-box="errorBox">
+                <STInputBox title="Minimum geboortejaar (max. leeftijd)" error-fields="settings.minBirthYear" :error-box="errorBox">
                     <BirthYearInput v-model="minBirthYear" placeholder="Onbeperkt" :nullable="true" />
                 </STInputBox>
 
-                <STInputBox title="Maximum geboortejaar" error-fields="settings.maxBirthYear" :error-box="errorBox">
+                <STInputBox title="Maximum geboortejaar (min. leeftijd)" error-fields="settings.maxBirthYear" :error-box="errorBox">
                     <BirthYearInput v-model="maxBirthYear" placeholder="Onbeperkt" :nullable="true" />
                 </STInputBox>
             </div>
@@ -63,19 +63,30 @@
                 </RadioGroup>
             </STInputBox>
         </main>
+
+        <STToolbar>
+            <template slot="right">
+                <Spinner v-if="saving" />
+                <button class="button primary" @click="save">
+                    Opslaan
+                </button>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
+import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, STErrorsDefault,STInputBox, STNavigationBar, STNavigationTitle } from "@stamhoofd/components";
-import { Group, GroupGenderType } from "@stamhoofd/structures"
+import { BirthYearInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     components: {
         STNavigationBar,
-        STNavigationTitle,
+        STToolbar,
         STInputBox,
         STErrorsDefault,
         SegmentedControl,
@@ -84,7 +95,8 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         DateSelection,
         RadioGroup,
         Radio,
-        BirthYearInput
+        BirthYearInput,
+        Spinner
     },
 })
 export default class GroupEditView extends Mixins(NavigationMixin) {
@@ -94,15 +106,50 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     tab = this.tabs[0];
     tabLabels = ["Algemeen", "Betaling", "Toegang"];
 
+    saving = false
+
     @Prop()
-    group!: Group;
+    groupId!: string;
+
+    @Prop()
+    organizationPatch!: AutoEncoderPatchType<Organization> & AutoEncoder ;
+
+    get organization() {
+        return SessionManager.currentSession!.organization!.patch(this.organizationPatch as any)
+    }
+
+    get group() {
+        const organization = this.organization
+        for (const group of organization.groups) {
+            if (group.id === this.groupId) {
+                return group
+            }
+        }
+        throw new Error("Group not found")
+    }
+
+    addPatch(patch: AutoEncoderPatchType<Group> & AutoEncoder ) {
+        if (this.saving) {
+            return
+        }
+        (this.organizationPatch as any).groups.addPatch(patch)
+    }
+
+    addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>> ) {
+        console.log("Add settings patch")
+        console.log(patch)
+        this.addPatch(GroupPatch.create({ 
+            id: this.groupId, 
+            settings: GroupSettingsPatch.create(patch)
+        }) as any )
+    }
 
     get name() {
         return this.group.settings.name
     }
 
     set name(name: string) {
-        this.group.settings.name = name
+        this.addSettingsPatch({ name })
     }
 
     get description() {
@@ -110,7 +157,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     set description(description: string) {
-        this.group.settings.description = description
+        this.addSettingsPatch({ description })
     }
 
     get startDate() {
@@ -118,7 +165,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     set startDate(startDate: Date) {
-        this.group.settings.startDate = startDate
+        this.addSettingsPatch({ startDate })
     }
 
     get endDate() {
@@ -126,7 +173,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     set endDate(endDate: Date) {
-        this.group.settings.endDate = endDate
+        this.addSettingsPatch({ endDate })
     }
 
     get genderType() {
@@ -134,7 +181,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     set genderType(genderType: GroupGenderType) {
-        this.group.settings.genderType = genderType
+        this.addSettingsPatch({ genderType })
     }
 
     // Birth years
@@ -143,7 +190,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
 
     set minBirthYear(minBirthYear: number | null) {
-        this.group.settings.minBirthYear = minBirthYear
+        this.addSettingsPatch({ minBirthYear })
     }
 
     get maxBirthYear() {
@@ -151,7 +198,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
     }
     
     set maxBirthYear(maxBirthYear: number | null) {
-        this.group.settings.maxBirthYear = maxBirthYear
+        this.addSettingsPatch({ maxBirthYear })
     }
 
     get genderTypes() {
@@ -169,6 +216,20 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
                 name: "Enkel jongens",
             },
         ]
+    }
+
+    async save() {
+        this.saving = true
+
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization",
+            body: this.organizationPatch,
+            decoder: Organization as Decoder<Organization>
+        })
+        SessionManager.currentSession!.setOrganization(response.data)
+        this.saving = false
+        this.pop()
     }
 
 
