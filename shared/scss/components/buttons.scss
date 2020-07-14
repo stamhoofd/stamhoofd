@@ -64,6 +64,14 @@
             align-self: stretch;
         }
 
+        .icon {
+            align-self: center;
+            &:first-child {
+                margin-right: 10px;
+                margin-left: -5px;
+            }
+        }
+
         &.full {
             width: 100%;
         }

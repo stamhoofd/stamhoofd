@@ -184,14 +184,17 @@ $header-height: 70px;
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
+        --st-vertical-padding: 60px;
 
-        > .navigation-controller > div > div > .st-view {
+        &> .navigation-controller > div > div > .st-view {
             background: $color-white;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 20px auto;
             @extend .style-side-view-shadow;
             border-radius: $border-radius;
         }
+
+       
     }
 }
 
