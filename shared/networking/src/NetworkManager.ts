@@ -14,13 +14,9 @@ export class NetworkManagerStatic implements RequestMiddleware {
     get server() {
         let server: Server;
         if (process.env.NODE_ENV == "production") {
-            if (!window.location.hostname || window.location.hostname.length == 0) {
-                server = new Server("https://api.stamhoofd.be")
-            } else {
-                server = new Server("https://api." + (window.location.hostname.replace('dashboard.', '')))
-            }
+            server = new Server("https://api.stamhoofd.be")
         } else {
-            server = new Server("http://api.stamhoofd.local")
+            server = new Server("https://api.stamhoofd.dev")
         }
         server.middlewares.push(this)
         return server

@@ -9,6 +9,9 @@ module.exports = merge(common, {
     output: {
         path: path.resolve(__dirname, "dist"),
     },
+    devServer: {
+        port: 8081,
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: './src/index.html'

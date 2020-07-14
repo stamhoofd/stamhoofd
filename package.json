@@ -7,7 +7,9 @@
     "scripts": {
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd",
-        "caddy:development": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.json"
+        "caddy:development": "export $(cat .env | xargs) && caddy run",
+        "caddy:development:config": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.json",
+        "caddy:development:config-watch": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json"
     },
     "dependencies": {
         "@simonbackx/simple-encoding": "^1.8.33",

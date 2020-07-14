@@ -46,8 +46,12 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/dashboard/dist/"
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8080"
+                                        }
+                                    ]
                                 }
                             ]
                         },
@@ -61,16 +65,24 @@
                             ],
                             "handle": [
                                 {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/registration/dist/"
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8081"
+                                        }
+                                    ]
                                 }
                             ]
                         },
                         {
                             "handle": [
                                 {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/registration/dist/"
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8081"
+                                        }
+                                    ]
                                 }
                             ]
                         }

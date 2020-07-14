@@ -106,7 +106,7 @@ export class Session implements RequestMiddleware  {
         if (process.env.NODE_ENV == "production") {
             server.host = "https://" + this.organizationId + ".api.stamhoofd.be"
         } else {
-            server.host = "http://" + this.organizationId + ".api.stamhoofd.local"
+            server.host = "https://" + this.organizationId + ".api.stamhoofd.dev"
         }
 
         return server
