@@ -30,5 +30,16 @@ export * from "./src/endpoints/tokens/CreateTokenStruct"
 // Grouping
 export * from "./src/grouping/PaginatedResponse"
 
+// Members
+export * from "./src/members/DecryptedMember"
+export * from "./src/members/EmergencyContact"
+export * from "./src/members/EncryptedMember"
+export * from "./src/members/Gender"
+export * from "./src/members/MemberDetails"
+export * from "./src/members/Parent"
+export * from "./src/members/ParentType"
+export * from "./src/members/Record"
+export * from "./src/members/RecordType"
+
 // Latest version of the structures
 export const Version = 3
