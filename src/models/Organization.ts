@@ -149,6 +149,9 @@ export class Organization extends Model {
             meta: this.meta,
             address: this.address,
             publicKey: this.publicKey,
+            registerDomain: this.registerDomain,
+            uri: this.uri,
+            website: this.website,
             groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort)
         })
     }
