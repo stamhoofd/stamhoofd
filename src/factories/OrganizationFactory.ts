@@ -8,6 +8,7 @@ import { Organization } from "../models/Organization";
 class Options {
     publicKey?: string;
     uri?: string;
+    domain?: string;
     meta?: OrganizationMetaData;
     name?: string;
     city?: string
@@ -19,7 +20,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
         const organization = new Organization();
         organization.name = this.options.name ?? "Organization " + (new Date().getTime() + Math.floor(Math.random() * 999999));
         organization.website = "https://domain.com";
-        organization.registerDomain = null;
+        organization.registerDomain = this.options.domain ?? null;
         organization.uri = this.options.uri ?? Formatter.slug(organization.name);
         organization.meta = this.options.meta ?? OrganizationMetaData.create({
             type: this.randomEnum(OrganizationType),

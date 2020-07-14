@@ -85,7 +85,7 @@ export class Organization extends Model {
     }
 
     // Methods
-    private static async getByRegisterDomain(host: string): Promise<Organization | undefined> {
+    static async getByRegisterDomain(host: string): Promise<Organization | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`registerDomain\` = ? LIMIT 1`,
             [host]
