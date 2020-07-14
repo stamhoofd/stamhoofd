@@ -11,6 +11,7 @@ module.exports = merge(common, {
     },
     devServer: {
         port: 8081,
+        sockPort: 443 // needed because the dev server runs behind a reverse proxy (Caddy)
     },
     plugins: [
         new HtmlWebpackPlugin({

@@ -547,9 +547,9 @@
     uuid "^8.2.0"
 
 "@stamhoofd/structures@^1.0.6":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.1.7.tgz#534e1e45547373f3fd778e77781839f555cadc7a"
-  integrity sha512-p25/tHdCm2Duq856eWo4UjcTe+NvVQEOTCvfzOamEDojrtFS6xKCUXchXO92q5Z4l0Q0qvcBkU5te/eG4KO/QQ==
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.1.11.tgz#1c36f742db84203c539bd276d18f03ab02a87e54"
+  integrity sha512-U50iOg+GWcaH5UO7MCdo2NBx+SASXJdiTFaSVr/DBJLN6MD0GW19XLdtSCDg08XKDZopQedZ32yZxm6kiJAP6g==
   dependencies:
     "@simonbackx/simple-encoding" "^1.8.33"
     "@simonbackx/simple-errors" "^1.0.0"

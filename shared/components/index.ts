@@ -33,6 +33,8 @@ export { default as TooltipDirective } from "./src/directives/Tooltip"
 
 // Cotnainers
 export { default as AuthenticatedView } from "./src/containers/AuthenticatedView.vue"
+export { default as PromiseView } from "./src/containers/PromiseView.vue"
+export { default as LoadingView } from "./src/containers/LoadingView.vue"
 
 // Layout
 export { default as STList } from "./src/layout/STList.vue"
