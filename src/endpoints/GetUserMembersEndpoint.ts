@@ -33,10 +33,13 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const members = await User.members.load(user)
 
         // Load the needed keychains the user has access to
-        const keychainItems = await KeychainItem.where({ "publicKey": {
-            sign: "IN",
-            value: members.map(m => m.publicKey)
-        }})
+        const keychainItems = await KeychainItem.where({ 
+            userId: user.id,
+            publicKey: {
+                sign: "IN",
+                value: members.map(m => m.publicKey)
+            }
+        })
         return new Response(new KeychainedResponse({
             data: members.map(m => EncryptedMember.create(m)),
             keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
