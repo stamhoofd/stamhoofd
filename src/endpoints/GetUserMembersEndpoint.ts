@@ -1,12 +1,13 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { EncryptedMember } from "@stamhoofd/structures";
+import { EncryptedMember, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
+import { KeychainItem } from '../models/KeychainItem';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = undefined
-type ResponseBody = EncryptedMember[];
+type ResponseBody = KeychainedResponse<EncryptedMember[]>;
 
 /**
  * Get the members of the user
@@ -30,6 +31,15 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const user = token.user
 
         const members = await User.members.load(user)
-        return new Response(members.map(m => EncryptedMember.create(m)));
+
+        // Load the needed keychains the user has access to
+        const keychainItems = await KeychainItem.where({ "publicKey": {
+            sign: "IN",
+            value: members.map(m => m.publicKey)
+        }})
+        return new Response(new KeychainedResponse({
+            data: members.map(m => EncryptedMember.create(m)),
+            keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+        }));
     }
 }

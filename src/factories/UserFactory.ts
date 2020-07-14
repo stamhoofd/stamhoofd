@@ -18,6 +18,8 @@ class Options {
 }
 
 export class UserFactory extends Factory<Options, UserWithOrganization> {
+    lastPrivateKey!: string
+
     async create(): Promise<UserWithOrganization> {
         const organization = this.options.organization ?? await new OrganizationFactory({}).create()
         const email = this.options.email ?? "generated-email-" + this.randomString(20) + "@domain.com";
@@ -40,6 +42,8 @@ export class UserFactory extends Factory<Options, UserWithOrganization> {
             user.verified = true;
         }
         await user.save();
+
+        this.lastPrivateKey = userKeyPair.privateKey
         return user;
     }
 }

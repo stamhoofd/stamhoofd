@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember } from '@stamhoofd/structures';
+import { EncryptedMember, KeychainedResponse } from '@stamhoofd/structures';
 
 import { MemberFactory } from '../factories/MemberFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -14,8 +14,9 @@ describe("Endpoint.GetUserMembers", () => {
 
     test("Request user members when signed in", async () => {
         const organization = await new OrganizationFactory({}).create()
-        const user = await new UserFactory({ organization }).create()
-        const members = await new MemberFactory({ user }).createMultiple(2)
+        const userFactory = new UserFactory({ organization })
+        const user = await userFactory.create()
+        const members = await new MemberFactory({ user, userPrivateKey: userFactory.lastPrivateKey }).createMultiple(2)
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
@@ -23,9 +24,12 @@ describe("Endpoint.GetUserMembers", () => {
 
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
+        expect(response.body).toBeInstanceOf(KeychainedResponse)
 
-        expect(response.body).toHaveLength(2)
-        expect(response.body).toIncludeAllMembers(members.map(m => EncryptedMember.create(m)))
+        expect(response.body.data).toHaveLength(2)
+        expect(response.body.keychainItems).toHaveLength(2)
+        expect(response.body.data).toIncludeAllMembers(members.map(m => EncryptedMember.create(m)))
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
     });
 
     test("Request user details when not signed in is not working", async () => {
