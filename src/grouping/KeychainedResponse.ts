@@ -5,7 +5,7 @@ import { KeychainItem } from '../KeychainItem';
 /**
  * Returns the response data, along with related keychain items that might be needed to decrypt the data
  */
-export class KeychainedResponse<T extends Encodeable> implements Encodeable {
+export class KeychainedResponse<T extends Encodeable | Encodeable[]> implements Encodeable {
     data: T;
     keychainItems: KeychainItem[];
 
@@ -15,14 +15,20 @@ export class KeychainedResponse<T extends Encodeable> implements Encodeable {
     }
 
     encode(context: EncodeContext) {
+        if (Array.isArray(this.data)) {
+            return {
+                data: this.data.map(r => r.encode(context)),
+                keychainItems: this.keychainItems.map(r => r.encode(context)),
+            };
+        }
         return {
-            data: this.data.encode(context),
+            data: (this.data as Encodeable).encode(context),
             keychainItems: this.keychainItems.map(r => r.encode(context)),
         };
     }
 }
 
-export class KeychainedResponseDecoder<T extends Encodeable> implements Decoder<KeychainedResponse<T>> {
+export class KeychainedResponseDecoder<T extends Encodeable | Encodeable[]> implements Decoder<KeychainedResponse<T>> {
     dataDecoder: Decoder<T>
 
     constructor(dataDecoder: Decoder<T>) {
