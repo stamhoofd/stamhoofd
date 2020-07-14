@@ -28,11 +28,11 @@
         "jest-extended": "^0.11.5",
         "ts-jest": "^25.4.0",
         "ts-node": "^8.6.2",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "@simonbackx/simple-encoding": "^1.8.33",
+        "@simonbackx/simple-errors": "^1.0.0"
     },
     "dependencies": {
-        "@simonbackx/simple-encoding": "^1.8.33",
-        "@simonbackx/simple-errors": "^1.0.0",
         "uuid": "^8.2.0"
     },
     "peerDependencies": {

@@ -1,4 +1,5 @@
-import { Data, Decoder, DecodingError } from '@simonbackx/simple-encoding';
+import { Data, Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from "@simonbackx/simple-errors"
 
 export type Country = "BE" | "NL"
 class CountryDecoderStatic implements Decoder<Country> {
@@ -6,7 +7,7 @@ class CountryDecoderStatic implements Decoder<Country> {
         const str = data.string.toUpperCase();
 
         if (str.length != 2) {
-            throw new DecodingError({
+            throw new SimpleError({
                 code: "invalid_field",
                 message: "Received an invalid country",
                 human: "Ongeldige landcode",
@@ -21,7 +22,7 @@ class CountryDecoderStatic implements Decoder<Country> {
             return str;
         }
 
-        throw new DecodingError({
+        throw new SimpleError({
             code: "invalid_field",
             message: "Country not supported",
             human: "Het opgegeven land wordt nog niet ondersteund",

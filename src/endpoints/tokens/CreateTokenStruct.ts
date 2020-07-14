@@ -1,5 +1,6 @@
 
-import { Data, DecodingError } from '@simonbackx/simple-encoding';
+import { Data } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 import { ChallengeGrantStruct } from './ChallengeGrantStruct';
 import { RefreshTokenGrantStruct } from './RefreshTokenGrantStruct';
@@ -21,7 +22,7 @@ export class CreateTokenStruct {
             return RequestChallengeGrantStruct.decode(data)
         }
 
-        throw new DecodingError({
+        throw new SimpleError({
             code: "invalid_field",
             message: "Unsupported grant_type",
             field: data.addToCurrentField("grant_type")
