@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { Organization } from '@stamhoofd/structures';
+import { KeychainedResponse,Organization } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -17,18 +17,22 @@ describe("Endpoint.GetOrganization", () => {
         const groups = await new GroupFactory({ organization }).createMultiple(2)
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/organization", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v3/organization", organization.getApiHost());
         r.headers.authorization = "Bearer "+token.accessToken
 
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
 
-        if (!(response.body instanceof Organization)) {
+        if (!(response.body instanceof KeychainedResponse)) {
+            throw new Error("Expected KeychainedResponse")
+        }
+
+        if (!(response.body.data instanceof Organization)) {
             throw new Error("Expected Organization")
         }
 
-        expect(response.body.id).toEqual(organization.id)
-        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
+        expect(response.body.data.id).toEqual(organization.id)
+        expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
     });
 
 });
