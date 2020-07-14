@@ -20,6 +20,7 @@ export * from "./src/Permissions"
 
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
+export * from "./src/endpoints/PatchMembers"
 
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
 export * from "./src/endpoints/tokens/ChallengeResponseStruct"

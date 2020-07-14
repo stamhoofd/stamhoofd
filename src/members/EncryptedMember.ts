@@ -14,3 +14,5 @@ export class EncryptedMember extends AutoEncoder {
     @field({ decoder: StringDecoder })
     publicKey: string
 }
+
+export const EncryptedMemberPatch = EncryptedMember.patchType()

@@ -5,7 +5,7 @@ import { KeychainItem } from '../KeychainItem';
 /**
  * Returns the response data, along with related keychain items that might be needed to decrypt the data
  */
-export class KeychainedResponse<T extends Encodeable | Encodeable[]> implements Encodeable {
+export class KeychainedResponse<T extends Encodeable | (Encodeable[])> implements Encodeable {
     data: T;
     keychainItems: KeychainItem[];
 
