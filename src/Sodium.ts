@@ -4,6 +4,9 @@ class SodiumStatic {
     loaded = false;
 
     async loadIfNeeded() {
+        if (this.loaded) {
+            return;
+        }
         await sodium.ready;
         this.loaded = true;
     }
