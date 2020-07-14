@@ -18,7 +18,7 @@ export class Organization extends Model {
     @column({ type: "string" })
     name: string;
 
-    /// URL to a website page or a Facebook page
+    /// URL to a website page or a Facebook page (including http)
     @column({ type: "string", nullable: true })
     website: string | null = null;
 

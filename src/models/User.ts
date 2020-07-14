@@ -1,8 +1,9 @@
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { column, Database, ManyToManyRelation,ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
+import { Member } from './Member';
 import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
@@ -88,6 +89,9 @@ export class User extends Model {
     updatedAt: Date
 
     static organization = new ManyToOneRelation(Organization, "organization");
+
+    // Members that were added by this user
+    static members = new ManyToManyRelation(User, Member, "members");
 
     /**
      * @param namespace

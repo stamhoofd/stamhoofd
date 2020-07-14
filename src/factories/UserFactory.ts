@@ -17,7 +17,7 @@ class Options {
     permissions?: Permissions | null
 }
 
-export class UserFactory extends Factory<Options, User> {
+export class UserFactory extends Factory<Options, UserWithOrganization> {
     async create(): Promise<UserWithOrganization> {
         const organization = this.options.organization ?? await new OrganizationFactory({}).create()
         const email = this.options.email ?? "generated-email-" + this.randomString(20) + "@domain.com";
