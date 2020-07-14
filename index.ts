@@ -31,4 +31,4 @@ export * from "./src/endpoints/tokens/CreateTokenStruct"
 export * from "./src/grouping/PaginatedResponse"
 
 // Latest version of the structures
-export const Version = 2
+export const Version = 3

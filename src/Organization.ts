@@ -15,6 +15,15 @@ export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name: string;
 
+    @field({ decoder: StringDecoder, nullable: true, version: 3, upgrade: () => null })
+    website: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 3, upgrade: () => null })
+    registerDomain: string | null = null;
+
+    @field({ decoder: StringDecoder, version: 3, upgrade: () => "" })
+    uri: string;
+
     @field({ decoder: OrganizationMetaData })
     meta: OrganizationMetaData;
 
