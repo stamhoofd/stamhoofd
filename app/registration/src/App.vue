@@ -43,7 +43,9 @@ export default class App extends Vue {
                 SessionManager.setCurrentSession(session)
 
                 return new ComponentWithProperties(AuthenticatedView, {
-                    root: new ComponentWithProperties(OverviewView, {}),
+                    root: new ComponentWithProperties(RegistrationSteps, { 
+                        root: new ComponentWithProperties(OverviewView, {}),
+                    }),
                     loginRoot: new ComponentWithProperties(RegistrationSteps, { 
                         root: new ComponentWithProperties(LoginView, {}) 
                     })

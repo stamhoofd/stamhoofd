@@ -70,8 +70,9 @@ export default class Steps extends Vue {
 
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
+@use '~@stamhoofd/scss/base/text-styles' as *;
 
-$header-height: 60px;
+$header-height: 70px;
 
 .steps-layout {
     background: $color-white-shade;
@@ -88,7 +89,7 @@ $header-height: 60px;
             left: 0;
             top: 0;
             right: 0;
-            height: $header-height - 20px;
+            height: $header-height - 30px;
             display: flex;
             flex-direction: row;
             padding: 15px 15px;
@@ -183,6 +184,14 @@ $header-height: 60px;
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
+
+        > .navigation-controller > div > div > .st-view {
+            background: $color-white;
+            max-width: 800px;
+            margin: 0 auto;
+            @extend .style-side-view-shadow;
+            border-radius: $border-radius;
+        }
     }
 }
 

@@ -18,13 +18,10 @@
 </template>
 
 <script lang="ts">
-import { Editor, EditorContent, EditorFloatingMenu,EditorMenuBubble } from "tiptap";
+import { Editor, EditorContent, EditorFloatingMenu, EditorMenuBubble } from "tiptap";
 import {
-    Blockquote,
     Bold,
     BulletList,
-    Code,
-    CodeBlock,
     HardBreak,
     Heading,
     History,
@@ -32,7 +29,6 @@ import {
     Link,
     ListItem,
     OrderedList,
-    Strike,
     Underline,
 } from "tiptap-extensions";
 import { Component, Vue } from "vue-property-decorator";
@@ -48,18 +44,14 @@ export default class MailEditor extends Vue {
     mounted() {
         this.editor = new Editor({
             extensions: [
-                new Blockquote(),
                 new BulletList(),
-                new CodeBlock(),
                 new HardBreak(),
                 new Heading({ levels: [1, 2, 3] }),
                 new ListItem(),
                 new OrderedList(),
                 new Link(),
                 new Bold(),
-                new Code(),
                 new Italic(),
-                new Strike(),
                 new Underline(),
                 new History(),
                 new ReplacePlaceholderMark(),

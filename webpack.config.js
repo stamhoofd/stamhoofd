@@ -15,6 +15,7 @@ module.exports = {
         //filename: '[name].[contenthash].js',
         // Development:
         filename: '[name].[hash].js',
+        chunkFilename: '[name].[hash].js',
     },
     devServer: {
         contentBase: './dist',

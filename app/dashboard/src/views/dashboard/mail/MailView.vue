@@ -49,15 +49,13 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailEditor from "./MailEditor.vue";
-
 @Component({
     components: {
         STNavigationBar,
         STNavigationTitle,
         SegmentedControl,
         STToolbar,
-        MailEditor,
+        MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
 export default class MailView extends Mixins(NavigationMixin) {

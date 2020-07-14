@@ -30,7 +30,6 @@ import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { MemberExcelExport } from "../../../classes/MemberExcelExport";
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 
@@ -64,7 +63,9 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
-    excel() {
+    async excel() {
+        const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
+        const MemberExcelExport = d.MemberExcelExport
         MemberExcelExport.export(this.members);
     }
 }

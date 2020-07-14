@@ -7,7 +7,7 @@
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
-    padding: 0px var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+    padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
 
     &.auto {
         min-height: auto;
