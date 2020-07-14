@@ -2,6 +2,7 @@ import { Factory } from "@simonbackx/simple-database";
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from '@stamhoofd/crypto';
 import { Permissions } from '@stamhoofd/structures';
 
+import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
 import { User, UserWithOrganization } from "../models/User";
 import { OrganizationFactory } from './OrganizationFactory';
@@ -15,13 +16,23 @@ class Options {
      */
     verified?: boolean;
     permissions?: Permissions | null
+    organizationPrivateKey?: string;
 }
 
 export class UserFactory extends Factory<Options, UserWithOrganization> {
     lastPrivateKey!: string
 
     async create(): Promise<UserWithOrganization> {
-        const organization = this.options.organization ?? await new OrganizationFactory({}).create()
+        let organization: Organization
+
+        if (!this.options.organization) {
+            const organizationFactory = new OrganizationFactory({})
+            organization = await organizationFactory.create()
+            this.options.organizationPrivateKey = organizationFactory.lastPrivateKey
+        } else {
+            organization = this.options.organization
+        }
+        
         const email = this.options.email ?? "generated-email-" + this.randomString(20) + "@domain.com";
         const password = this.options.password ?? this.randomString(20);
 
@@ -42,6 +53,26 @@ export class UserFactory extends Factory<Options, UserWithOrganization> {
             user.verified = true;
         }
         await user.save();
+
+        if (this.options.organizationPrivateKey) {
+            if (this.options.permissions) {
+                // Add the private key to the keychain for this user (if possible)
+                const keychainItem = new KeychainItem()
+                keychainItem.userId = user.id
+                keychainItem.publicKey = organization.publicKey
+                keychainItem.encryptedPrivateKey = await Sodium.sealMessageAuthenticated(
+                    this.options.organizationPrivateKey,
+                    user.publicKey,
+                    userKeyPair.privateKey
+                )
+                await keychainItem.save()
+            } else {
+                if (this.options.organization) {
+                    // Only thow error if explicitly added the private key
+                    throw new Error("Not allowed to create keychain item when you don't have permissions to access the organization")
+                }
+            }
+        }
 
         this.lastPrivateKey = userKeyPair.privateKey
         return user;
