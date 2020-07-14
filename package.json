@@ -15,7 +15,15 @@
         "test": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
+    "peerDependencies": {
+        "@stamhoofd/structures": "^1.0.4",
+        "@simonbackx/simple-encoding": "^1.9.2",
+        "@simonbackx/simple-errors": "^1.0"
+    },
     "devDependencies": {
+        "@stamhoofd/structures": "^1.0.4",
+        "@simonbackx/simple-encoding": "^1.9.2",
+        "@simonbackx/simple-errors": "^1.0",
         "@types/jest": "^25.1.4",
         "@types/libsodium-wrappers": "^0.7.7",
         "@typescript-eslint/eslint-plugin": "^2.28.0",
@@ -31,7 +39,6 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "@stamhoofd/structures": "^1.0.4",
         "libsodium-wrappers": "^0.7.6"
     }
 }
