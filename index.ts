@@ -29,6 +29,7 @@ export * from "./src/endpoints/tokens/CreateTokenStruct"
 
 // Grouping
 export * from "./src/grouping/PaginatedResponse"
+export * from "./src/grouping/KeychainedResponse"
 
 // Members
 export * from "./src/members/DecryptedMember"
