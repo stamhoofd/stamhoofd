@@ -79,7 +79,7 @@ export class Address extends AutoEncoder {
             })
         }
         // Get position of last letter
-        const match = /^\s*([^0-9]+)\s*([0-9].*?)\s*$/.exec(addressLine1)
+        const match = /^\s*([^0-9]+?)\s*([0-9].*?)\s*$/.exec(addressLine1)
         if (!match) {
             throw new SimpleError({
                 code: "invalid_field",
