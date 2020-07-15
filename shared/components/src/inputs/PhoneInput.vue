@@ -61,6 +61,7 @@ export default class PhoneInput extends Vue {
         this.$emit("input", null)
 
         if (!this.required && this.phoneRaw.length == 0) {
+            this.errorBox = null
             return true
         }
         const libphonenumber = await import("libphonenumber-js")
