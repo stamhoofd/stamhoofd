@@ -61,6 +61,8 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
+import { MemberDetails } from '@stamhoofd/structures';
+import MemberParentsView from './MemberParentsView.vue';
 
 @Component({
     components: {
@@ -131,7 +133,21 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         valid = valid && await this.validator.validate()
 
         if (valid) {
-            alert("todo: is valid")
+            const memberDetails = MemberDetails.create({
+                firstName: this.firstName,
+                lastName: this.lastName,
+                gender: this.gender,
+                phone: this.phone,
+                mail: null,
+                birthDay: this.birthDay!,
+                address: this.address
+            })
+
+            // todo: Get possible groups
+
+            // todo: check age before asking parents
+
+            this.show(new ComponentWithProperties(MemberParentsView, { member: memberDetails }))
         }
     }
 
