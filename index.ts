@@ -17,6 +17,7 @@ export * from "./src/GroupGenderType"
 export * from "./src/GroupPrices"
 
 export * from "./src/Permissions"
+export * from "./src/PaymentMethod"
 
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
