@@ -18,6 +18,7 @@ export * from "./src/GroupPrices"
 
 export * from "./src/Permissions"
 export * from "./src/PaymentMethod"
+export * from "./src/PaymentStatus"
 
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
