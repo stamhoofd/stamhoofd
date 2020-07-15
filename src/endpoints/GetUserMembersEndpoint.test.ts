@@ -40,6 +40,33 @@ describe("Endpoint.GetUserMembers", () => {
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
+    test("Member with multiple registrations", async () => {
+        const organization = await new OrganizationFactory({}).create()
+        const groups = await new GroupFactory({ organization }).createMultiple(2)
+        const userFactory = new UserFactory({ organization })
+        const user = await userFactory.create()
+        const member = await new MemberFactory({ user, userPrivateKey: userFactory.lastPrivateKey }).create()
+
+        // Register one of the members and create a payment
+        const registration = await new RegistrationFactory({ member, group: groups[0] }).create()
+        const registration2 = await new RegistrationFactory({ member, group: groups[1] }).create()
+
+        const token = await Token.createToken(user)
+
+        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        r.headers.authorization = "Bearer " + token.accessToken
+
+        const response = await endpoint.test(r);
+        expect(response.body).toBeDefined();
+        expect(response.body).toBeInstanceOf(KeychainedResponse)
+
+        expect(response.body.data).toHaveLength(1)
+        expect(response.body.keychainItems).toHaveLength(1)
+        expect(response.body.data[0]).toMatchObject(EncryptedMember.create(member))
+        expect(response.body.data[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
+        expect(response.body.keychainItems[0].publicKey).toEqual(member.publicKey)
+    });
+
     test("Request user members when signed in when no member is registered yet", async () => {
         const organization = await new OrganizationFactory({}).create()
         const userFactory = new UserFactory({ organization })

@@ -221,11 +221,12 @@ export class User extends Model {
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
+            const _f = foundMember.setManyRelation(Member.registrations, []) as MemberWithRegistrations
 
             // Seach if we already got this member?
-            const existingMember = members.find(m => m.id == foundMember.id)
+            const existingMember = members.find(m => m.id == _f.id)
 
-            const member: MemberWithRegistrations = (existingMember ?? foundMember).setManyRelation(Member.registrations, []) as MemberWithRegistrations
+            const member: MemberWithRegistrations = (existingMember ?? _f)
             if (!existingMember) {
                 members.push(member)
             }
@@ -241,7 +242,6 @@ export class User extends Model {
                 const regWithPayment: RegistrationWithPayment = registration.setRelation(Registration.payment, payment)
                 member.registrations.push(regWithPayment)
             }
-
         }
 
         return members
