@@ -17,14 +17,14 @@ export class ErrorBox {
     }
 
     /// Register a handler for field.
-    /// Returns a reference to SimpleErrors that will get adjusted when arrays are distrubuted
+    /// Returns a reference to SimpleErrors that will get adjusted when arrays are distrubuted (this is not yet implemented)
     forFields(fields: string[]): SimpleErrors {
         const errors = new SimpleErrors()
 
         for (let index = this.errors.errors.length - 1; index >= 0; index--) {
             const error = this.errors.errors[index];
             if (error.doesMatchFields(fields)) {
-                errors.addError(error)
+                errors.unshiftError(error)
                 this.errors.removeErrorAt(index)
             }
         }

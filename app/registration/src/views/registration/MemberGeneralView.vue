@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
@@ -103,8 +103,35 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     async goNext() {
-        await this.validator.validate()
-        
+        const errors = new SimpleErrors()
+        if (this.firstName.length < 2) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul de voornaam in",
+                field: "firstName"
+            }))
+        }
+        if (this.lastName.length < 2) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul de achternaam in",
+                field: "lastName"
+            }))
+        }
+
+        let valid = false
+
+        if (errors.errors.length > 0) {
+            this.errorBox = new ErrorBox(errors)
+        } else {
+            this.errorBox = null
+            valid = true
+        }
+        valid = valid && await this.validator.validate()
+
+        if (valid) {
+            alert("todo: is valid")
+        }
     }
 
     shouldNavigateAway() {
