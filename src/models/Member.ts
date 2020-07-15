@@ -1,8 +1,10 @@
 import { column,Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { EncryptedMemberWithRegistrations, Payment as PaymentStructure, Registration as RegistrationStructure } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Registration } from './Registration';
+import { Registration, RegistrationWithPayment } from './Registration';
 
+export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[] }
 export class Member extends Model {
     static table = "members"
 
@@ -51,4 +53,16 @@ export class Member extends Model {
     updatedAt: Date
 
     static registrations = new OneToManyRelation(Member, Registration, "registrations", "memberId")
+
+    getStructureWithRegistrations(this: MemberWithRegistrations) {
+        return EncryptedMemberWithRegistrations.create(
+            Object.assign(Object.assign({}, this), {
+                registrations: this.registrations.map(r => RegistrationStructure.create(
+                    Object.assign(Object.assign({}, r), {
+                        payment: PaymentStructure.create(r.payment)
+                    })
+                ))
+            })
+        )
+    }
 }

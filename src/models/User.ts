@@ -3,8 +3,10 @@ import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
-import { Member } from './Member';
+import { Member, MemberWithRegistrations } from './Member';
 import { Organization } from "./Organization";
+import { Payment } from './Payment';
+import { Registration, RegistrationWithPayment } from './Registration';
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
@@ -198,5 +200,51 @@ export class User extends Model {
 
     async verifyAuthSignature(this: UserForAuthentication, signature: string, message: string) {
         return await Sodium.verifySignature(signature, message, this.publicAuthSignKey)
+    }
+
+    /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    async getMembersWithRegistration(): Promise<MemberWithRegistrations[]> {
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${User.members.linkTable}\`\n`;
+        query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${User.members.linkTable}\`.\`${User.members.linkKeyB}\`\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        query += `where \`${User.members.linkTable}\`.\`${User.members.linkKeyA}\` = ?`
+
+        const [results] = await Database.select(query, [this.id])
+        const members: MemberWithRegistrations[] = []
+
+        for (const row of results) {
+            const foundMember = Member.fromRow(row[Member.table])
+            if (!foundMember) {
+                throw new Error("Expected member in every row")
+            }
+
+            // Seach if we already got this member?
+            const existingMember = members.find(m => m.id == foundMember.id)
+
+            const member: MemberWithRegistrations = (existingMember ?? foundMember).setManyRelation(Member.registrations, []) as MemberWithRegistrations
+            if (!existingMember) {
+                members.push(member)
+            }
+
+            // Check if we have a registration with a payment
+            const registration = Registration.fromRow(row[Registration.table])
+            if (registration) {
+                const payment = Payment.fromRow(row[Payment.table])
+                if (!payment) {
+                    throw new Error("Every registration should have a valid payment")
+                }
+
+                const regWithPayment: RegistrationWithPayment = registration.setRelation(Registration.payment, payment)
+                member.registrations.push(regWithPayment)
+            }
+
+        }
+
+        return members
+
     }
 }

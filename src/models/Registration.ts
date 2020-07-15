@@ -3,8 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 
+export type RegistrationWithPayment = Registration & { payment: Payment }
 export class Registration extends Model {
-    static table = "members"
+    static table = "registrations"
 
     @column({
         primary: true, type: "string", beforeSave(value) {
@@ -19,8 +20,8 @@ export class Registration extends Model {
     @column({ type: "string" })
     groupId: string;
 
-    @column({ type: "string", nullable: true })
-    paymentId: string | null = null;
+    @column({ type: "string", foreignKey: Registration.payment })
+    paymentId: string
 
     @column({ type: "integer" })
     cycle: number;

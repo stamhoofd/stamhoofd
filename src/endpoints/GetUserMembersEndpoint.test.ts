@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedResponse } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberWithRegistrations,KeychainedResponse } from '@stamhoofd/structures';
 
 import { MemberFactory } from '../factories/MemberFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -29,8 +29,8 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeAllMembers(members.map(m => EncryptedMember.create(m)))
-        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
+        expect(response.body.data).toIncludeSameMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({registrations: []}, m))))
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
     test("Do not include keychain items of other users", async () => {
@@ -57,7 +57,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(0)
-        expect(response.body.data).toIncludeAllMembers(members.map(m => EncryptedMember.create(m)))
+        expect(response.body.data).toIncludeAllMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({ registrations: [] }, m))))
     });
 
     test("Request user details when not signed in is not working", async () => {
