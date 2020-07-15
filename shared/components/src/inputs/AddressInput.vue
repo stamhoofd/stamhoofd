@@ -1,16 +1,16 @@
 <template>
-  <div>
-      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" @change="updateAddress">
+  <STInputBox :title="title" error-fields="address" :error-box="errorBox">
+      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" @change="updateAddress" @focus="onFocus" @blur="onBlur">
         <div class="input-group">
             <div>
-                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" autocomplete="postal-code" @change="updateAddress">
+                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" autocomplete="city" @change="updateAddress">
+                <input v-model="city" class="input" type="text" placeholder="Gemeente" autocomplete="city" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             </div>
         </div>
 
-        <select v-model="country" class="input" @change="updateAddress">
+        <select v-model="country" class="input" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             <option value="BE">
                 België
             </option>
@@ -18,7 +18,7 @@
                 Nederland
             </option>
         </select>
-  </div>
+  </STInputBox>
 </template>
 
 <script lang="ts">
@@ -30,9 +30,17 @@ import { Address, Country, Organization, OrganizationMetaData, OrganizationType}
 import { Vue, Prop, Component, Watch } from "vue-property-decorator";
 
 @Component({
-    components: {}
+    components: {
+        STInputBox
+    }
 })
 export default class SignupGeneralView extends Vue {
+    @Prop({ default: "" }) 
+    title: string;
+
+    errorBox: ErrorBox | null = null
+    pendingErrorBox: ErrorBox | null = null
+    
     @Prop({ default: null })
     value: Address | null
 
@@ -40,6 +48,8 @@ export default class SignupGeneralView extends Vue {
     city = ""
     postalCode = ""
     country: Country = "BE"
+
+    hasFocus = false
 
     @Watch('value', { deep: true })
     onValueChanged(val: Address | null) {
@@ -52,18 +62,34 @@ export default class SignupGeneralView extends Vue {
         this.country = val.country
     }
 
+    onBlur() {
+        this.hasFocus = false
+    }
+
+    onFocus() {
+        this.hasFocus = true
+    }
+
     updateAddress() {
         let address: Address
 
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
             this.$emit("input", address)
+            this.errorBox = null
+            this.pendingErrorBox = null
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace("address")
+                this.pendingErrorBox = new ErrorBox(e)
+
+                setTimeout( () => {
+                    if (!this.hasFocus) {
+                        this.errorBox = this.pendingErrorBox
+                    }
+                }, 200);
             }
             this.$emit("input", null)
-            throw e;
         }
 
     }

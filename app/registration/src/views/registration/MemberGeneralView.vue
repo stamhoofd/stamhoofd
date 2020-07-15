@@ -23,11 +23,11 @@
                         </div>
                     </STInputBox>
 
-                    <STInputBox title="Adres van dit lid" error-fields="address" :error-box="errorBox">
-                        <AddressInput v-model="address" />
-                    </STInputBox>
+                    <AddressInput title="Adres van dit lid" v-model="address" />
 
-                    <BirthDateInput v-model="birthDate" />
+                    <STInputBox title="Geboortedatum" error-fields="birthDate" :error-box="errorBox">
+                        <BirthDateInput v-model="birthDate" />
+                    </STInputBox>
                 </div>
 
                 
