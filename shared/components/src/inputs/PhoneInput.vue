@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox } from "@stamhoofd/components"
+import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 
 @Component({
     components: {
@@ -18,11 +18,17 @@ export default class PhoneInput extends Vue {
     @Prop({ default: "" }) 
     title: string;
 
+    @Prop({ default: null }) 
+    validator: Validator | null
+
     phoneRaw = "";
     valid = true;
 
     @Prop({ default: null })
     value!: string | null
+
+    @Prop({ default: true })
+    required!: boolean
 
     @Prop({ default: "" })
     placeholder!: string
@@ -37,8 +43,26 @@ export default class PhoneInput extends Vue {
         this.phoneRaw = val
     }
 
+    mounted() {
+        if (this.validator) {
+            this.validator.addValidation(this, () => {
+                return this.validate()
+            })
+        }
+    }
+
+    destroyed() {
+        if (this.validator) {
+            this.validator.removeValidation(this)
+        }
+    }
+
     async validate() {
         this.$emit("input", null)
+
+        if (!this.required && this.phoneRaw.length == 0) {
+            return true
+        }
         const libphonenumber = await import("libphonenumber-js")
         const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
 
@@ -49,10 +73,12 @@ export default class PhoneInput extends Vue {
                 "field": "phone"
             }))
             this.$emit("input", null)
+            return false
 
         } else {
             this.$emit("input", phoneNumber.formatInternational())
             this.errorBox = null
+            return true
         }
     }
 }

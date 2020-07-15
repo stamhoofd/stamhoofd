@@ -39,9 +39,9 @@
                 </div>
 
                 <div>
-                    <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents"/>
+                    <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator"/>
 
-                    <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
+                    <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
 
 
                 </div>
@@ -60,7 +60,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -90,6 +90,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     birthDay = new Date()
     gender = Gender.Male
     livesAtParents = false
+    validator = new Validator()
 
     get age() {
         const today = new Date();
@@ -101,13 +102,15 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         return age;
     }
 
-    goNext() {
-
+    async goNext() {
+        await this.validator.validate()
         
     }
 
     shouldNavigateAway() {
-        console.log("should navigate away called")
+        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
+            return true;
+        }
         return false;
     }
 }
