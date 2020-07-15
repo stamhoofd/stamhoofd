@@ -142,24 +142,6 @@
         }
     }
 
-    &.close {
-        width: 24px;
-        height: 24px;
-        padding: 10px;
-        display: inline-block;
-        vertical-align: middle;
-        cursor: pointer;
-        touch-action: manipulation;
-
-        background-image: url(~@stamhoofd/assets/images/icons/gray/close.svg);
-        background-position: center center;
-        background-repeat: no-repeat;
-
-        &:active {
-            opacity: 0.4;
-        }
-    }
-
     &.tooltip-only {
         cursor: help;
     }
@@ -169,6 +151,10 @@
       
         &:active {
             opacity: 0.4;
+        }
+
+        &:empty {
+            padding: 10px;
         }
     }
 }

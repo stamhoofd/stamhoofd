@@ -10,7 +10,7 @@ import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import LoginView from './views/login/LoginView.vue';
-import OverviewView from './views/registration/OverviewView.vue';
+import OverviewView from './views/overview/OverviewView.vue';
 import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';

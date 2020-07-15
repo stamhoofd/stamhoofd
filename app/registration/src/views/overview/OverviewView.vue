@@ -5,7 +5,7 @@
             <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
         </main>
         <STToolbar>
-            <button class="primary button add" slot="right">
+            <button class="primary button add" slot="right" @click="addNewMember">
                 <span class="icon white add"/>
                 Lid inschrijven
             </button>
@@ -23,6 +23,7 @@
 import { Component, Vue, Mixins } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar, STToolbar } from "@stamhoofd/components"
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
 
 @Component({
     components: {
@@ -32,5 +33,11 @@ import { STNavigationBar, STToolbar } from "@stamhoofd/components"
 })
 export default class OverviewView extends Mixins(NavigationMixin){
     members: any[] = []
+
+    addNewMember() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberGeneralView, {})
+        }).setDisplayStyle("popup"))
+    }
 }
 </script>
