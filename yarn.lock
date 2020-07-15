@@ -509,9 +509,9 @@
   integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
 
 "@simonbackx/vue-app-navigation@^1.3":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.3.0.tgz#bf223754854b8f0c05a791db7ad70218afbb1ddf"
-  integrity sha512-u3Mgeo952GOpDH0NNOip0bZXsrwZ+PzEQyfWWHOVB24bcL9joqpNSPsQ8+YHPz8RIqDPCAug/UtHPjR7LdBZDQ==
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.3.4.tgz#53d2fb7903928b396cdcf7052bf02212db3962cb"
+  integrity sha512-Z49Cvm8FBLFwYvU9/A0KcA9P0aZMza6CEgAV6vkSikJtRCwRqVh7u5yFM3kbvmOsXYjAV/n1U1ZZpJAfe0kztA==
   dependencies:
     vue "^2.6.11"
     vue-class-component "^7.0.2"

@@ -34,12 +34,14 @@
                             <Radio v-model="gender" value="Other">Andere</Radio>
                         </RadioGroup>
                     </STInputBox>
+
+                    <Checkbox v-model="livesAtParents" v-if="livesAtParents || (age >= 18 && age <= 27)">Woont bij ouders</Checkbox>
                 </div>
 
                 <div>
-                    <AddressInput title="Adres van dit lid" v-model="address" />
+                    <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents"/>
 
-                    <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age > 12"/>
+                    <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
 
 
                 </div>
@@ -58,7 +60,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -73,7 +75,8 @@ import { Component, Mixins } from "vue-property-decorator";
         BirthDayInput,
         RadioGroup,
         Radio,
-        PhoneInput
+        PhoneInput,
+        Checkbox
     }
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
@@ -86,6 +89,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     address: Address | null = null
     birthDay = new Date()
     gender = Gender.Male
+    livesAtParents = false
 
     get age() {
         const today = new Date();
@@ -100,6 +104,11 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     goNext() {
 
         
+    }
+
+    shouldNavigateAway() {
+        console.log("should navigate away called")
+        return false;
     }
 }
 </script>
