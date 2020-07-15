@@ -45,5 +45,9 @@ export * from "./src/members/ParentType"
 export * from "./src/members/Record"
 export * from "./src/members/RecordType"
 
+export * from "./src/members/EncryptedMemberWithRegistrations"
+export * from "./src/members/Payment"
+export * from "./src/members/Registration"
+
 // Latest version of the structures
 export const Version = 3
