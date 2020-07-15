@@ -23,15 +23,13 @@
                         </div>
                     </STInputBox>
 
-                    <STInputBox title="Geboortedatum" error-fields="birthDate" :error-box="errorBox">
-                        <BirthDayInput v-model="birthDay" />
-                    </STInputBox>
+                    <BirthDayInput title="Geboortedatum" :validator="validator" v-model="birthDay" />
 
                     <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
                         <RadioGroup>
-                            <Radio v-model="gender" value="Male">Man</Radio>
-                            <Radio v-model="gender" value="Female">Vrouw</Radio>
-                            <Radio v-model="gender" value="Other">Andere</Radio>
+                            <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">Man</Radio>
+                            <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">Vrouw</Radio>
+                            <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">Andere</Radio>
                         </RadioGroup>
                     </STInputBox>
 
@@ -87,12 +85,15 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
 
     // todo: replace with Addres and new input component
     address: Address | null = null
-    birthDay = new Date()
+    birthDay: Date | null = null
     gender = Gender.Male
     livesAtParents = false
     validator = new Validator()
 
     get age() {
+        if (!this.birthDay) {
+            return 0
+        }
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
         const m = today.getMonth() - this.birthDay.getMonth();

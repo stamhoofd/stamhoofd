@@ -1,16 +1,16 @@
 <template>
   <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" autocomplete="address-line1" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
         <div class="input-group">
             <div>
-                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" autocomplete="city" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
             </div>
         </div>
 
-        <select v-model="country" class="input" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+        <select v-model="country" class="input" @change="updateAddress" @focus="onFocus" @blur="onBlur" autocomplete="country" name="country">
             <option value="BE">
                 België
             </option>
@@ -25,7 +25,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Vue, Prop, Component, Watch } from "vue-property-decorator";
 

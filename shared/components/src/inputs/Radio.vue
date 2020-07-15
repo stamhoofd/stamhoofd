@@ -1,6 +1,6 @@
 <template>
     <label class="radio">
-        <input v-model="radioButtonValue" type="radio" :name="name" :value="value">
+        <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete">
         <div>
             <div />
             <div><slot /></div>
@@ -20,6 +20,9 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 export default class Radio extends Vue {
     @Prop({ default: "", type: String })
     name!: string;
+
+    @Prop({ default: "", type: String })
+    autocomplete!: string;
 
     @Prop({ default: "" })
     value!: any;
