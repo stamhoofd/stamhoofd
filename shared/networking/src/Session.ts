@@ -2,7 +2,7 @@ import { Decoder,ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
-import { NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
 import { ManagedToken } from './ManagedToken'
@@ -180,12 +180,15 @@ export class Session implements RequestMiddleware  {
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/organization",
-            decoder: Organization as Decoder<Organization>
+            decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>)
         })
         console.log(response)
-        this.organization = response.data
+        this.organization = response.data.data
+
+        // todo: add items to keychain
+        
         this.callListeners()
-        return response.data
+        return this.organization
     }
 
     updateData() {

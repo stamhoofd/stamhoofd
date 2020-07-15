@@ -99,7 +99,9 @@ export class SessionManagerStatic {
             this.callListeners()
         })
 
-        this.currentSession.updateData()
+        if (this.currentSession.canGetCompleted()) {
+            this.currentSession.updateData()
+        }
     }
 
     getSessionForOrganization(id: string) {
