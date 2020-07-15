@@ -23,6 +23,16 @@ export class Address extends AutoEncoder {
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + this.country
     }
 
+    static createDefault() {
+        return Address.create({
+            street: "",
+            number: "",
+            postalCode: "",
+            city: "",
+            country: "BE"
+        })
+    }
+
     static createFromFields(addressLine1: string, postalCode: string, city: string, country: string) {
         const { street, number } = Address.splitAddressLine(addressLine1)
 
