@@ -1,0 +1,1 @@
+ALTER TABLE `registrations` ADD COLUMN `updatedAt` datetime NOT NULL COMMENT '' AFTER `createdAt`;

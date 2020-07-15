@@ -7,6 +7,8 @@ export default async () => {
     await Database.delete("DELETE FROM " + User.table);
     await Database.delete("DELETE FROM `tokens`");
     await Database.delete("DELETE FROM `users`");
+    await Database.delete("DELETE FROM `registrations`");
+    await Database.delete("DELETE FROM `payments`");
     await Database.delete("DELETE FROM `members`");
     await Database.delete("DELETE FROM `organizations`");
 

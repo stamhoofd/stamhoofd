@@ -1,4 +1,5 @@
 import { column,ManyToOneRelation,Model } from '@simonbackx/simple-database';
+import { Payment as PaymentStructure, Registration as RegistrationStructure } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
@@ -38,6 +39,15 @@ export class Registration extends Model {
     })
     createdAt: Date
 
+    @column({
+        type: "datetime", beforeSave() {
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    updatedAt: Date
+
     @column({ type: "datetime", nullable: true })
     registeredAt: Date | null = null
 
@@ -45,4 +55,12 @@ export class Registration extends Model {
     deactivatedAt: Date | null = null
 
     static payment = new ManyToOneRelation(Payment, "payment")
+
+    getStructure(this: RegistrationWithPayment) {
+        return RegistrationStructure.create(
+            Object.assign(Object.assign({}, this), {
+                payment: PaymentStructure.create(this.payment)
+            })
+        )
+    }
 }

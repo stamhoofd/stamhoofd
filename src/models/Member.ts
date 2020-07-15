@@ -57,11 +57,7 @@ export class Member extends Model {
     getStructureWithRegistrations(this: MemberWithRegistrations) {
         return EncryptedMemberWithRegistrations.create(
             Object.assign(Object.assign({}, this), {
-                registrations: this.registrations.map(r => RegistrationStructure.create(
-                    Object.assign(Object.assign({}, r), {
-                        payment: PaymentStructure.create(r.payment)
-                    })
-                ))
+                registrations: this.registrations.map(r => r.getStructure())
             })
         )
     }
