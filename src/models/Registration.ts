@@ -1,5 +1,7 @@
-import { column,Model } from '@simonbackx/simple-database';
+import { column,ManyToOneRelation,Model } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from "uuid";
+
+import { Payment } from './Payment';
 
 export class Registration extends Model {
     static table = "members"
@@ -40,4 +42,6 @@ export class Registration extends Model {
 
     @column({ type: "datetime", nullable: true})
     deactivatedAt: Date | null = null
+
+    static payment = new ManyToOneRelation(Payment, "payment")
 }
