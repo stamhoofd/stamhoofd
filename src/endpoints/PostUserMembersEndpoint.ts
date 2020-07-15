@@ -67,6 +67,9 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     human: "Je probeert een lid aan te passen die niet (meer) bestaat. Er ging ergens iets mis."
                 })
             }
+            member.encryptedForMember = struct.encryptedForMember
+            member.encryptedForOrganization = struct.encryptedForOrganization
+            await member.save();
         }
 
         const addedKeychainItems: KeychainItem[] = []
