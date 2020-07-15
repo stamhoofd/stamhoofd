@@ -1,5 +1,7 @@
-import { column,Model } from '@simonbackx/simple-database';
+import { column,Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from "uuid";
+
+import { Registration } from './Registration';
 
 export class Member extends Model {
     static table = "members"
@@ -48,5 +50,5 @@ export class Member extends Model {
     })
     updatedAt: Date
 
-
+    static registrations = new OneToManyRelation(Member, Registration, "registrations", "memberId")
 }

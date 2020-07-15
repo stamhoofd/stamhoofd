@@ -1,0 +1,1 @@
+ALTER TABLE `registrations` CHANGE `deactivatedAt` `deactivatedAt` datetime NULL COMMENT 'Set if the registration was canceled or deactivated during the group cycle. Keep this null at the end of the group cycle.';

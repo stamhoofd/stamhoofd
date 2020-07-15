@@ -1,0 +1,2 @@
+ALTER TABLE `registrations` CHANGE `registeredAt` `registeredAt` datetime NULL COMMENT 'Date of the registration or renewal. This is null if the registration is not yet active (e.g. during payment)';
+ALTER TABLE `registrations` ADD COLUMN `createdAt` datetime NOT NULL COMMENT '' AFTER `groupId`;
