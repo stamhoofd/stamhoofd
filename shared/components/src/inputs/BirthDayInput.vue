@@ -1,5 +1,5 @@
 <template>
-    <div class="input birth-date-selection">
+    <div class="input birth-day-selection">
         <select v-model="day" @change="updateDate">
             <option disabled>Dag</option>
             <option v-for="day in 31" :key="day" :value="day">{{ day }}</option>
@@ -25,7 +25,7 @@ import { Vue, Component, Mixins,Prop, Watch } from "vue-property-decorator";
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
 @Component
-export default class BirthDateInput extends Vue {
+export default class BirthDayInput extends Vue {
     @Prop({ default: new Date() })
     value: Date
 
@@ -56,7 +56,7 @@ export default class BirthDateInput extends Vue {
     @use "~@stamhoofd/scss/base/variables.scss" as *;
     @use "~@stamhoofd/scss/components/inputs.scss";
 
-    .input.birth-date-selection {
+    .input.birth-day-selection {
         padding-right: 0;
         display: grid;
         grid-template-columns: auto 1fr auto;

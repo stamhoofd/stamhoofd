@@ -19,6 +19,7 @@
         "@stamhoofd/crypto": "^1",
         "@stamhoofd/structures": "^1",
         "@stamhoofd/utility": "^1",
+        "libphonenumber-js": "^1.7.54",
         "vue": "^2.6.11",
         "vue-class-component": "^7.0.2",
         "vue-property-decorator": "^8.4.1"

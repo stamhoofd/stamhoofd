@@ -23,14 +23,26 @@
                         </div>
                     </STInputBox>
 
-                    <AddressInput title="Adres van dit lid" v-model="address" />
-
                     <STInputBox title="Geboortedatum" error-fields="birthDate" :error-box="errorBox">
-                        <BirthDateInput v-model="birthDate" />
+                        <BirthDayInput v-model="birthDay" />
+                    </STInputBox>
+
+                    <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
+                        <RadioGroup>
+                            <Radio v-model="gender" value="Male">Man</Radio>
+                            <Radio v-model="gender" value="Female">Vrouw</Radio>
+                            <Radio v-model="gender" value="Other">Andere</Radio>
+                        </RadioGroup>
                     </STInputBox>
                 </div>
 
-                
+                <div>
+                    <AddressInput title="Adres van dit lid" v-model="address" />
+
+                    <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age > 12"/>
+
+
+                </div>
             </div>
         </main>
 
@@ -46,8 +58,8 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDateInput, AddressInput } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput } from "@stamhoofd/components"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
@@ -58,17 +70,32 @@ import { Component, Mixins } from "vue-property-decorator";
         STErrorsDefault,
         STInputBox,
         AddressInput,
-        BirthDateInput
+        BirthDayInput,
+        RadioGroup,
+        Radio,
+        PhoneInput
     }
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
     firstName = ""
     lastName = ""
+    phone: string | null = null
     errorBox: ErrorBox | null = null
 
     // todo: replace with Addres and new input component
     address: Address | null = null
-    birthDate = new Date()
+    birthDay = new Date()
+    gender = Gender.Male
+
+    get age() {
+        const today = new Date();
+        let age = today.getFullYear() - this.birthDay.getFullYear();
+        const m = today.getMonth() - this.birthDay.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < this.birthDay.getDate())) {
+            age--;
+        }
+        return age;
+    }
 
     goNext() {
 
