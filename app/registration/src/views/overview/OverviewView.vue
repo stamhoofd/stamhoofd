@@ -14,13 +14,17 @@
     </div>
     <div class="st-view auto" v-else>
         <main>
-            <h1>Nog iemand inschrijven?</h1>
-            <p>Voeg eventueel nog andere broers of zussen toe voor je doorgaat naar betalen.</p>
+            <h1>Wie wil je inschrijven?</h1>
 
-            <STList>
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack">
+            <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
+
+            <STList class="member-selection-table">
+                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" @click="onSelectMember(member)">
                     <Checkbox slot="left" />
-                    {{ member.details.name }}
+                    <p>{{ member.details.name }}</p>
+                    <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).name }}</p>
+                    <p class="member-group" v-else>Kies eerst een groep</p>
+
                     <template slot="right">
                         <span class="icon gray arrow-right-small" />
                     </template>
@@ -29,8 +33,8 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" @click="addNewMember"><span class="icon white add"/>Nog iemand inschrijven</button>
-            <button slot="right" class="button secundary"><span class="icon white arrow-right"/>Doorgaan naar betalen</button>
+            <button slot="right" class="button primary" @click="addNewMember"><span class="icon white add"/>Nog iemand toevoegen</button>
+            <button slot="right" class="button secundary">Inschrijven<span class="icon gray arrow-right"/></button>
         </STToolbar>
     </div>
 </template>
@@ -41,6 +45,9 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
+import { DecryptedMember, Group } from '@stamhoofd/structures';
+import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import MemberGroupView from '../registration/MemberGroupView.vue';
 
 @Component({
     components: {
@@ -65,6 +72,42 @@ export default class OverviewView extends Mixins(NavigationMixin){
         })
     }
 
+    onSelectMember(member: DecryptedMember) {
+        if (!member.details) {
+            return
+        }
+        if (this.memberGetGroup(member) === null) {
+            this.present(new ComponentWithProperties(MemberGroupView, {
+                member: member.details,
+                handler: () => {
+
+                }
+            }).setDisplayStyle("popup"))
+        }
+    }
+
+    memberGetGroup(member: DecryptedMember): Group | null {
+        if (!member.details) {
+            return null
+        }
+
+        const groups = OrganizationManager.organization.groups
+        if (member.details.preferredGroupId) {
+            for (const group of groups) {
+                if (group.id === member.details.preferredGroupId) {
+                    return group
+                }
+            }
+        }
+
+        // Search for possibilities
+        const matching = member.details.getMatchingGroups(groups)
+        if (matching.length == 1) {
+            return matching[0]
+        }
+        return null
+    }
+
     addNewMember() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {})
@@ -72,3 +115,16 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 }
 </script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.member-selection-table {
+    .member-group {
+        @extend .style-description-small;
+        margin-top: 5px;
+        line-height: 1; // to fix alignment
+    }
+}
+</style>

@@ -14,7 +14,7 @@
 
             <p class="warning-box" v-if="member.parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
             <STList>
-                <STListItem v-for="parent in member.parents" :key="parent.id" :selectable="true" @click="editParent(parent)" class="right-stack">
+                <STListItem v-for="parent in member.parents" :key="parent.id" :selectable="true" @click="editParent(parent)" class="right-stack left-center">
                     <Checkbox slot="left" @click.stop />
 
                     <h2 class="parent-name">{{ parent.firstName }} {{ parent.lastName }}</h2>

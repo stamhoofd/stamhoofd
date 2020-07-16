@@ -117,6 +117,20 @@
             transform: scale(0.95, 0.95);
         }
 
+        .icon {
+            align-self: center;
+            
+            &:first-child {
+                margin-right: 10px;
+                margin-left: -5px;
+            }
+
+            &:last-child {
+                margin-left: 10px;
+                margin-right: -5px;
+            }
+        }
+
         &.full {
             width: 100%;
         }

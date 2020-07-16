@@ -41,6 +41,7 @@ export default class STListItem extends Vue {
 
 .st-list-item {
     padding-left: var(--st-horizontal-padding, 15px);
+    padding-right: var(--st-horizontal-padding, 15px);
     margin: 0;
     display: flex;
     flex-direction: row;
@@ -55,6 +56,14 @@ export default class STListItem extends Vue {
 
         &:empty {
             display: none;
+        }
+    }
+
+    &.left-center {
+        >.left {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
         }
     }
 

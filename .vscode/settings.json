@@ -26,5 +26,5 @@
         "javascript",
         "vue"
     ],
-    "eslint.enable": true
+    "eslint.enable": false
 }
