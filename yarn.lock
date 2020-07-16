@@ -508,10 +508,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.3.tgz#2b2909bfc857cc88cec32757e02eaa29b9dce457"
   integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
 
-"@simonbackx/vue-app-navigation@^1.3":
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.3.6.tgz#cac3830eee9c5dd8caf24f16c13ba994342bd6cc"
-  integrity sha512-EL0GvplfoF2S5aXiYFBTiA/76UblXX/YFPpwSHK9YWBqqZjFqotWPnLHcUUB0Jm1ouNV0mf0PRHgXrDxB1XFhg==
+"@simonbackx/vue-app-navigation@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.4.0.tgz#7f8476f94249dfbea697dff7f5b4eb93497114df"
+  integrity sha512-sccuN+IXlnN+FPOUnmbNu7N6SSsx6PbFsO011suvjGioAEu8AaKnwvMbH2aQkclDBOABfeqaBXSzemEUCRcZzg==
   dependencies:
     vue "^2.6.11"
     vue-class-component "^7.0.2"

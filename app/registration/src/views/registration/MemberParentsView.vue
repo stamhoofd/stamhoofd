@@ -54,6 +54,9 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     member: MemberDetails
 
     editParent(parent: Parent) {
+        if (this.navigationController) {
+            this.navigationController.animationType = "modal"
+        }
         this.show(new ComponentWithProperties(ParentView, {
             parent,
             handler: (parent: Parent) => {
@@ -64,11 +67,20 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     }
 
     addParent() {
+        if (this.navigationController) {
+            this.navigationController.animationType = "modal"
+        }
         this.show(new ComponentWithProperties(ParentView, {
             handler: (parent: Parent) => {
                 this.member.parents.push(parent)
             }
         }))
+    }
+
+    activated() {
+        if (this.navigationController) {
+            this.navigationController.animationType = "default"
+        }
     }
 
     

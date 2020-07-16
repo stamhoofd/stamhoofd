@@ -15,7 +15,7 @@
         "@simonbackx/simple-encoding": "^1.9",
         "@simonbackx/simple-errors": "^1.0",
         "@simonbackx/simple-networking": "^1.3.0",
-        "@simonbackx/vue-app-navigation": "^1.3",
+        "@simonbackx/vue-app-navigation": "^1.4.0",
         "@stamhoofd/crypto": "^1",
         "@stamhoofd/structures": "^1",
         "@stamhoofd/utility": "^1",
