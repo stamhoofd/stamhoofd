@@ -70,7 +70,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
     parent: Parent | null // tood
 
     @Prop({ required: true })
-    handler: (parent: Parent) => void;
+    handler: (parent: Parent, component: ParentView) => void;
 
     firstName = ""
     lastName = ""
@@ -117,9 +117,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
             })
 
             // todo: Get possible groups
-
-           this.handler(parent)
-           this.pop()
+           this.handler(parent, this)
         }
     }
 }

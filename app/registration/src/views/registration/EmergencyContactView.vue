@@ -1,7 +1,7 @@
 <template>
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Noodcontact">
-            <button slot="right" class="button icon gray close" @click="pop"></button>
+            <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
         </STNavigationBar>
         
         <main>
@@ -42,8 +42,11 @@
         </main>
 
         <STToolbar>
-            <button  slot="right" class="button primary" @click="goNext">
-                Toevoegen
+            <button slot="right" class="button secundary">
+                Overslaan
+            </button>
+            <button slot="right" class="button primary" @click="goNext">
+                Volgende
             </button>
         </STToolbar>
     </div>
@@ -78,7 +81,7 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     parent: EmergencyContact | null // tood
 
     @Prop({ required: true })
-    handler: (contact: EmergencyContact) => void;
+    handler: (contact: EmergencyContact, component: EmergencyContactView) => void;
 
     name = ""
     title = ""
@@ -122,8 +125,7 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
                 title: this.title
             })
 
-           this.handler(contact)
-           this.pop()
+           this.handler(contact, this)
         }
     }
 }

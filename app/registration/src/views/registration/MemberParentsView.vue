@@ -50,6 +50,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
 import EmergencyContactView from './EmergencyContactView.vue';
 import { EmergencyContact } from '@stamhoofd/structures';
+import MemberRecordsView from './MemberRecordsView.vue';
 
 @Component({
     components: {
@@ -72,9 +73,8 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
         }
         this.show(new ComponentWithProperties(ParentView, {
             parent,
-            handler: (parent: Parent) => {
-                // todo
-                //this.member.parents.push(parent)
+            handler: (parent: Parent, component: ParentView) => {
+                component.pop()
             }
         }))
     }
@@ -84,8 +84,9 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.navigationController.animationType = "modal"
         }
         this.show(new ComponentWithProperties(ParentView, {
-            handler: (parent: Parent) => {
+            handler: (parent: Parent, component: ParentView) => {
                 this.member.parents.push(parent)
+                component.pop()
             }
         }))
     }
@@ -104,11 +105,13 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
 
         // Emergency contact
         this.show(new ComponentWithProperties(EmergencyContactView, { 
-            handler: (contact: EmergencyContact) => {
+            handler: (contact: EmergencyContact, component: EmergencyContactView) => {
                 this.member.emergencyContacts = [contact]
+                
+                // go to the steekkaart view
+                component.show(new ComponentWithProperties(MemberRecordsView, { member: this.member }))
             }
         }))
-
     }
 }
 </script>
