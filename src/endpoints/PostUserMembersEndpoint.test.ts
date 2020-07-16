@@ -30,7 +30,7 @@ describe("Endpoint.PostUserMembers", () => {
             updateMembers: [],
             keychainItems: keychainItems
         });
-        r.headers.authorization = "Bearer "+token.accessToken
+        r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
@@ -38,11 +38,11 @@ describe("Endpoint.PostUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeAllMembers(members)
+        expect(response.body.data).toIncludeAllMembers(members.map(m => Object.assign({ registrations: [] }, m))) // created user won't have any registrations
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
     });
 
-    test("Register a new member and update a member", async () => {
+    test("Create a new member and update a member", async () => {
         const organization = await new OrganizationFactory({}).create()
         const userFactory = new UserFactory({ organization })
         const user = await userFactory.create()
@@ -77,7 +77,7 @@ describe("Endpoint.PostUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeAllMembers([...members, existingMemberEncrypted])
+        expect(response.body.data).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => Object.assign({ registrations: [] }, m)))
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => m.publicKey))
     });
 });

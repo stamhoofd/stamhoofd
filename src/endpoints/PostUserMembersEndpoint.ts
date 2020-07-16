@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EncryptedMember, KeychainedResponse, KeychainItem as KeychainItemStruct, PatchMembers } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PatchMembers } from "@stamhoofd/structures";
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from '../models/Member';
@@ -10,7 +10,7 @@ import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = PatchMembers
-type ResponseBody = KeychainedResponse<EncryptedMember[]>;
+type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>;
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -57,7 +57,7 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Modify members
-        const members = await User.members.load(user)
+        const members = await user.getMembersWithRegistration()
         for (const struct of request.body.updateMembers) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
@@ -92,7 +92,7 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             await model.save()
         }
-        
+
         // Load the needed keychains the user has access to
         const keychainItems = await KeychainItem.where({
             userId: user.id,
@@ -101,9 +101,9 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 value: members.map(m => m.publicKey)
             }
         })
-        
+
         return new Response(new KeychainedResponse({
-            data: members.map(m => EncryptedMember.create(m)),
+            data: members.map(m => m.getStructureWithRegistrations()),
             keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
         }));
     }
