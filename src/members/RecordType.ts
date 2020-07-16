@@ -6,7 +6,14 @@ export enum RecordType {
     // Allergies & diet
     FoodAllergies = "FoodAllergies",
     MedicineAllergies = "MedicineAllergies",
+    HayFever = "HayFever",
     OtherAllergies = "OtherAllergies",
+
+    // Diet
+    Vegetarian = "Vegetarian",
+    Vegan = "Vegan",
+    Halal = "Halal",
+    Kosher = "Kosher",
     Diet = "Diet",
 
     // Health, hygiene and sleep
@@ -14,7 +21,6 @@ export enum RecordType {
     BedWaters = "BedWaters",
     Epilepsy = "Epilepsy",
     HeartDisease = "HeartDisease",
-    HayFever = "HayFever",
     SkinCondition = "SkinCondition",
     Rheumatism = "Rheumatism",
     SleepWalking = "SleepWalking",
@@ -51,13 +57,23 @@ export class RecordTypeHelper {
             case RecordType.NoPictures:
                 return "Geen foto's maken";
             case RecordType.FoodAllergies:
-                return "Allergisch voor noten";
+                return "Allergisch voor voeding";
             case RecordType.MedicineAllergies:
-                return "Allergisch voor paracetamol";
+                return "Allergisch voor geneesmiddelen";
             case RecordType.OtherAllergies:
-                return "Allergisch voor verf";
+                return "Allergisch voor bepaalde zaken";
+
+            case RecordType.Vegetarian:
+                return "Vegetarisch dieet";
+            case RecordType.Vegan:
+                return "Veganistisch dieet (geen dierlijke producten)";
+            case RecordType.Halal:
+                return "Halal dieet";
+            case RecordType.Kosher:
+                return "Koosjer dieet";
             case RecordType.Diet:
-                return "Vegetarisch";
+                return "Speciaal dieet";
+
             case RecordType.Asthma:
                 return "Astma";
             case RecordType.BedWaters:
@@ -109,6 +125,14 @@ export class RecordTypeHelper {
                 return RecordTypePriority.Medium;
             case RecordType.OtherAllergies:
                 return RecordTypePriority.Medium;
+            case RecordType.Vegetarian:
+                return RecordTypePriority.Low;
+            case RecordType.Vegan:
+                return RecordTypePriority.Low;
+            case RecordType.Halal:
+                return RecordTypePriority.Low;
+            case RecordType.Kosher:
+                return RecordTypePriority.Low;
             case RecordType.Diet:
                 return RecordTypePriority.Low;
             case RecordType.Asthma:
