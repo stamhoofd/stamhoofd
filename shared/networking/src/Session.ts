@@ -5,6 +5,7 @@ import { Sodium } from '@stamhoofd/crypto'
 import { KeychainedResponseDecoder,KeychainItem,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
+import { Keychain } from './Keychain'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 
@@ -34,6 +35,24 @@ export class Session implements RequestMiddleware  {
         this.loadFromStorage()
     }
 
+    async decryptKeychainItem(item: KeychainItem): Promise<{ publicKey: string; privateKey: string }> {
+        // todo: if no keys load them
+        if (!this.userPrivateKey) {
+            throw new Error("User private key not found!")
+        }
+
+        if (!this.user) {
+            throw new Error("User not found!")
+        }
+
+        const privateKey = await Sodium.unsealMessageAuthenticated(item.encryptedPrivateKey, this.user.publicKey, this.userPrivateKey)
+
+        return {
+            publicKey: item.publicKey,
+            privateKey
+        }
+    }
+
     /**
      * Create a keychain item for a public/private key set
      */
@@ -47,10 +66,13 @@ export class Session implements RequestMiddleware  {
             throw new Error("User not found!")
         }
 
-        return KeychainItem.create({
+        const item = KeychainItem.create({
             publicKey: keyPair.publicKey,
             encryptedPrivateKey: await Sodium.sealMessageAuthenticated(keyPair.privateKey, this.user.publicKey, this.userPrivateKey)
         })
+
+        Keychain.addItem(item)
+        return item
     }
 
     loadFromStorage() {
@@ -204,7 +226,7 @@ export class Session implements RequestMiddleware  {
         console.log(response)
         this.organization = response.data.data
 
-        // todo: add items to keychain
+        Keychain.addItems(response.data.keychainItems)
         
         this.callListeners()
         return this.organization

@@ -222,6 +222,8 @@ import { PatchMembers } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import { EncryptedMemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
@@ -279,10 +281,10 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                     updateMembers: [],
                     keychainItems: [keychainItem]
                 }),
-                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMember as Decoder<EncryptedMember>))
+                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMember as Decoder<EncryptedMemberWithRegistrations>))
             })
 
-            // todo: save data
+            await MemberManager.setMembers(response.data)
             this.dismiss()
         } catch (e) {
             console.error(e);
