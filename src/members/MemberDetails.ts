@@ -46,6 +46,12 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
 
+    /**
+     * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in
+     */
+    @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null })
+    preferredGroupId: string | null = null
+
     get name() {
         return this.firstName + " " + this.lastName;
     }

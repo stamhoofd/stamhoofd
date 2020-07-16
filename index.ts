@@ -50,4 +50,4 @@ export * from "./src/members/Payment"
 export * from "./src/members/Registration"
 
 // Latest version of the structures
-export const Version = 3
+export const Version = 4
