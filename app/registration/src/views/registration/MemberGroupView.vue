@@ -35,10 +35,10 @@
 
             <STErrorsDefault :error-box="errorBox" />
             <STList>
-                <STListItem v-for="group in groups" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+                <STListItem v-for="group in groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                     <Radio slot="left" @click.stop name="choose-group" />
-                    <h2 class="group-name">{{ group.name }}</h2>
-                    <p class="group-description" v-if="group.description">{{ group.description }}</p>
+                    <h2 class="group-name">{{ group.settings.name }}</h2>
+                    <p class="group-description" v-if="group.settings.description">{{ group.settings.description }}</p>
                 </STListItem>
             </STList>
         </main>

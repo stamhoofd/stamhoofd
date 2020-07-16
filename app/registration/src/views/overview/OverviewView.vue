@@ -22,7 +22,7 @@
                 <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" @click="onSelectMember(member)">
                     <Checkbox slot="left" />
                     <p>{{ member.details.name }}</p>
-                    <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).name }}</p>
+                    <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
                     <p class="member-group" v-else>Kies eerst een groep</p>
 
                     <template slot="right">

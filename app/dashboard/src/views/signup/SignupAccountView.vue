@@ -147,7 +147,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                         user,
                         keychainItems: [
                             KeychainItem.create({
-                                userId: user.id,
                                 publicKey: organization.publicKey,
                                 encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
                             })
