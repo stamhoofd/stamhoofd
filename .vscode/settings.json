@@ -21,5 +21,10 @@
 
     // Prettier acts fucked up in vue, typescript and javascript, so we let eslint format vue files
     "eslint.validate": ["typescript", "javascript", "vue"],
-    "prettier.disableLanguages": ["typescript", "javascript", "vue"]
+    "prettier.disableLanguages": [
+        "typescript",
+        "javascript",
+        "vue"
+    ],
+    "eslint.enable": true
 }

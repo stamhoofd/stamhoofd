@@ -9,7 +9,8 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    display: block;
+    display: inline-block;
+    vertical-align: middle;
 
     &.gray {
         color: $color-gray;

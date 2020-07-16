@@ -19,7 +19,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: flex-start;
-        height: 44px;
+        min-height: 44px;
 
         > div:first-child {
             width: 20px;
@@ -42,7 +42,7 @@
             }
 
             ~ div {
-                margin-left: 10px;
+                margin-left: 15px;
 
                 &:empty {
                     margin: 0;
