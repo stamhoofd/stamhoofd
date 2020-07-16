@@ -1,11 +1,11 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMember, Gender, KeychainItem,MemberDetails, ParentType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
+import { EncryptedMember, Gender, KeychainItem, MemberDetails, ParentType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
 
 import { Member } from "../models/Member";
 import { Organization } from "../models/Organization";
-import { User,UserWithOrganization } from "../models/User";
+import { User, UserWithOrganization } from "../models/User";
 import { EmergencyContactFactory } from './EmergencyContactFactory';
 import { OrganizationFactory } from './OrganizationFactory';
 import { ParentFactory } from './ParentFactory';
@@ -17,17 +17,17 @@ class Options {
 
     /// In order to add something to the keychain, we need the private key of the user (since everything needs to be signed)
     userPrivateKey?: string;
-    
+
     minAge?: number
     maxAge?: number
 }
 
 export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, KeychainItem | undefined]> {
     async create(): Promise<[EncryptedMember, KeychainItem | undefined]> {
-        const organization = this.options.organization 
-            ?? this.options.user?.organization 
+        const organization = this.options.organization
+            ?? this.options.user?.organization
             ?? await new OrganizationFactory({}).create()
-       
+
         const memberKeyPair = await Sodium.generateEncryptionKeyPair();
 
         const memberDetails = new MemberDetails()
@@ -61,7 +61,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
                 Math.floor(Math.random() * 10);
         }
 
-        let parentFactory = new ParentFactory({ });
+        let parentFactory = new ParentFactory({});
 
         memberDetails.parents.push(await parentFactory.create());
 
@@ -159,18 +159,17 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
         const member = new EncryptedMember()
         member.publicKey = memberKeyPair.publicKey
-        
+
         // Encrypt the details
         const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))
         member.encryptedForMember = await Sodium.sealMessage(data, member.publicKey)
         member.encryptedForOrganization = await Sodium.sealMessage(data, organization.publicKey)
 
         let keychainItem: KeychainItem | undefined;
-        
+
         if (this.options.user && this.options.userPrivateKey) {
             // Add the private key to the keychain for this user (if possible)
             keychainItem = new KeychainItem()
-            keychainItem.userId = this.options.user.id
             keychainItem.publicKey = member.publicKey
             keychainItem.encryptedPrivateKey = await Sodium.sealMessageAuthenticated(
                 memberKeyPair.privateKey,

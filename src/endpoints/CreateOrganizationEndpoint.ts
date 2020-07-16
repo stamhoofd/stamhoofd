@@ -2,8 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures"; 
-import { Formatter } from "@stamhoofd/utility"; 
+import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
@@ -72,7 +72,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
-        for(const item of request.body.keychainItems) {
+        for (const item of request.body.keychainItems) {
             await KeychainItemHelper.validate(item)
 
             // Validate if the key's public key corresponds with the organization key
@@ -81,15 +81,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                     code: "invalid_field",
                     message: "You can only add the organization's keypair to the keychain",
                     field: "keychainItems.0.publicKey",
-                });
-            }
-
-            // Validate if the key's public key corresponds with the organization key
-            if (item.userId != request.body.user.id) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "You can only add a private key to the keychain for yourself",
-                    field: "keychainItems.0.userId",
                 });
             }
 

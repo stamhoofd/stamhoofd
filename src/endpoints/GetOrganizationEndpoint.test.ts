@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { KeychainedResponse,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
+import { KeychainedResponse, Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -18,7 +18,7 @@ describe("Endpoint.GetOrganization", () => {
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v3/organization", organization.getApiHost());
-        r.headers.authorization = "Bearer "+token.accessToken
+        r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
@@ -37,10 +37,10 @@ describe("Endpoint.GetOrganization", () => {
     });
 
     test("Get organization as admin with keys", async () => {
-        const user = await new UserFactory({ 
-            permissions: Permissions.create({ 
-                level: PermissionLevel.Read 
-            }) 
+        const user = await new UserFactory({
+            permissions: Permissions.create({
+                level: PermissionLevel.Read
+            })
         }).create()
         const organization = user.organization
 
@@ -65,7 +65,6 @@ describe("Endpoint.GetOrganization", () => {
         expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
         expect(response.body.keychainItems).toHaveLength(1)
         expect(response.body.keychainItems[0]).toMatchObject({
-            userId: user.id,
             publicKey: organization.publicKey
         })
     });

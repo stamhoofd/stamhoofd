@@ -1,7 +1,7 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { KeyConstantsHelper, SensitivityLevel,Sodium } from "@stamhoofd/crypto";
-import { KeychainItem,OrganizationGenderType,Token as TokenStruct } from '@stamhoofd/structures';
-import { Formatter } from "@stamhoofd/utility"; 
+import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto";
+import { KeychainItem, OrganizationGenderType, Token as TokenStruct } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "../models/Organization";
@@ -61,7 +61,6 @@ describe("Endpoint.CreateOrganization", () => {
             keychainItems: [
                 // Give access to the private key of the organization by encrypting the private key of the organization with the private key of the user
                 KeychainItem.create({
-                    userId: userId,
                     publicKey: organizationKeyPair.publicKey,
                     // encrypted private key is always authenticated with the private key of the user
                     encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey),
