@@ -2,12 +2,6 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class KeychainItem extends AutoEncoder {
     /**
-     * The user that owns this keychain item
-     */
-    @field({ decoder: StringDecoder })
-    userId: string
-
-    /**
      * The public key associated with the encrypted private key
      */
     @field({ decoder: StringDecoder })

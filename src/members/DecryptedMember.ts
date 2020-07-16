@@ -8,7 +8,7 @@ export class DecryptedMember extends AutoEncoder {
     id: string;
 
     @field({ decoder: MemberDetails, nullable: true })
-    details: string | null
+    details: MemberDetails | null
 
     @field({ decoder: StringDecoder })
     publicKey: string
