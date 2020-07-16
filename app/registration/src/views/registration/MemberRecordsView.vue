@@ -15,182 +15,191 @@
             <h2>Privacy</h2>
 
             <div class="st-input-box">
-                <Checkbox>Ik geef toestemming aan Scouts Prins Boudewijn om de gevoelige gegevens van {{ member.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe ze met deze gegevens omgaan staat vermeldt in hun privacybeleid, dewelke ik eerder heb geaccepteerd.</Checkbox>
+                <Checkbox v-model="allowData">
+                    Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ member.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
+                </Checkbox>
+            </div>
+            <div v-if="allowData && member.age < 18" class="st-input-box">
+                <Checkbox v-model="isParent">
+                    Ik ben wettelijke voogd of ouder van {{ member.firstName }} en mag deze toestemming geven.
+                </Checkbox>
             </div>
             <div class="st-input-box">
-                <Checkbox>Ik ben wettelijke voogd of ouder van {{ member.firstName }} en heb het recht om deze toestemming te geven in zijn plaats.</Checkbox>
-            </div>
-            <div class="st-input-box">
-                <Checkbox>{{ member.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van de groep.</Checkbox>
+                <Checkbox v-model="allowPictures">
+                    {{ member.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
+                </Checkbox>
             </div>
 
-            <p class="warning-box">
-                Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat de vereniging geen weet heeft van bepaalde zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
+            <p v-if="!allowData" class="warning-box">
+                Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
             </p>
 
-            <hr>
-            <h2>Allergieën</h2>
+            <template v-if="allowData">
+                <hr>
+                <h2>Allergieën</h2>
 
-            <Checkbox v-model="foodAllergies">
-                Allergisch of overgevoelig voor bepaalde voeding
-            </Checkbox>
-            <div v-if="foodAllergies" class="textarea-container">
-                <textarea v-model="foodAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
-            </div>
+                <Checkbox v-model="foodAllergies">
+                    Allergisch of overgevoelig voor bepaalde voeding
+                </Checkbox>
+                <div v-if="foodAllergies" class="textarea-container">
+                    <textarea v-model="foodAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
+                </div>
 
-            <Checkbox v-model="medicineAllergies">
-                Allergisch voor geneesmiddelen
-            </Checkbox>
-            <div v-if="medicineAllergies" class="textarea-container">
-                <textarea v-model="medicineAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
-            </div>
+                <Checkbox v-model="medicineAllergies">
+                    Allergisch voor geneesmiddelen
+                </Checkbox>
+                <div v-if="medicineAllergies" class="textarea-container">
+                    <textarea v-model="medicineAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
+                </div>
 
-            <Checkbox v-model="hayFever">
-                Hooikoorts
-            </Checkbox>
-            <div v-if="false && hayFever" class="textarea-container">
-                <textarea v-model="hayFeverDescription" class="input" placeholder="Eventuele opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="hayFever">
+                    Hooikoorts
+                </Checkbox>
+                <div v-if="false && hayFever" class="textarea-container">
+                    <textarea v-model="hayFeverDescription" class="input" placeholder="Eventuele opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="otherAllergies">
-                Allergisch voor andere zaken (verf, insecten...)
-            </Checkbox>
-            <div v-if="otherAllergies" class="textarea-container">
-                <textarea v-model="otherAllergiesDescription" class="input" placeholder="Som hier op welke zaken." />
-            </div>
+                <Checkbox v-model="otherAllergies">
+                    Allergisch voor andere zaken (verf, insecten...)
+                </Checkbox>
+                <div v-if="otherAllergies" class="textarea-container">
+                    <textarea v-model="otherAllergiesDescription" class="input" placeholder="Som hier op welke zaken." />
+                </div>
 
-            <hr>
-            <h2>Dieet</h2>
+                <hr>
+                <h2>Dieet</h2>
 
-            <Checkbox v-model="vegetarian">
-                Vegetarisch dieet
-            </Checkbox>
-            <Checkbox v-model="vegan">
-                Veganistisch dieet (geen dierlijke producten)
-            </Checkbox>
-            <Checkbox v-model="halal">
-                Halal dieet
-            </Checkbox>
-            <Checkbox v-model="kosher">
-                Koosjer dieet
-            </Checkbox>
+                <Checkbox v-model="vegetarian">
+                    Vegetarisch dieet
+                </Checkbox>
+                <Checkbox v-model="vegan">
+                    Veganistisch dieet (geen dierlijke producten)
+                </Checkbox>
+                <Checkbox v-model="halal">
+                    Halal dieet
+                </Checkbox>
+                <Checkbox v-model="kosher">
+                    Koosjer dieet
+                </Checkbox>
 
-            <Checkbox v-model="diet">
-                Ander dieet (geen allergieën)
-            </Checkbox>
-            <div v-if="diet" class="textarea-container">
-                <textarea v-model="dietDescription" class="input" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
-            </div>
+                <Checkbox v-model="diet">
+                    Ander dieet (geen allergieën)
+                </Checkbox>
+                <div v-if="diet" class="textarea-container">
+                    <textarea v-model="dietDescription" class="input" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
+                </div>
 
-            <hr>
-            <h2>Gezondheid, hygiëne &amp; slapen</h2>
+                <hr>
+                <h2>Gezondheid, hygiëne &amp; slapen</h2>
 
-            <Checkbox v-model="asthma">
-                Astma
-            </Checkbox>
-            <div v-if="asthma" class="textarea-container">
-                <textarea v-model="asthmaDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="asthma">
+                    Astma
+                </Checkbox>
+                <div v-if="asthma" class="textarea-container">
+                    <textarea v-model="asthmaDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="bedWaters">
-                Bedwateren
-            </Checkbox>
-            <div v-if="bedWaters" class="textarea-container">
-                <textarea v-model="bedWatersDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="bedWaters">
+                    Bedwateren
+                </Checkbox>
+                <div v-if="bedWaters" class="textarea-container">
+                    <textarea v-model="bedWatersDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="epilepsy">
-                Epilepsie
-            </Checkbox>
-            <div v-if="epilepsy" class="textarea-container">
-                <textarea v-model="epilepsyDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="epilepsy">
+                    Epilepsie
+                </Checkbox>
+                <div v-if="epilepsy" class="textarea-container">
+                    <textarea v-model="epilepsyDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="heartDisease">
-                Hartkwaal
-            </Checkbox>
-            <div v-if="heartDisease" class="textarea-container">
-                <textarea v-model="heartDiseaseDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="heartDisease">
+                    Hartkwaal
+                </Checkbox>
+                <div v-if="heartDisease" class="textarea-container">
+                    <textarea v-model="heartDiseaseDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="skinCondition">
-                Huidaandoening
-            </Checkbox>
-            <div v-if="skinCondition" class="textarea-container">
-                <textarea v-model="skinConditionDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="skinCondition">
+                    Huidaandoening
+                </Checkbox>
+                <div v-if="skinCondition" class="textarea-container">
+                    <textarea v-model="skinConditionDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="rheumatism">
-                Reuma
-            </Checkbox>
-            <div v-if="rheumatism" class="textarea-container">
-                <textarea v-model="rheumatismDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="rheumatism">
+                    Reuma
+                </Checkbox>
+                <div v-if="rheumatism" class="textarea-container">
+                    <textarea v-model="rheumatismDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="sleepWalking">
-                Slaapwandelen
-            </Checkbox>
-            <div v-if="sleepWalking" class="textarea-container">
-                <textarea v-model="sleepWalkingDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="sleepWalking">
+                    Slaapwandelen
+                </Checkbox>
+                <div v-if="sleepWalking" class="textarea-container">
+                    <textarea v-model="sleepWalkingDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="diabetes">
-                Suikerziekte
-            </Checkbox>
-            <div v-if="diabetes" class="textarea-container">
-                <textarea v-model="diabetesDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-            </div>
+                <Checkbox v-model="diabetes">
+                    Suikerziekte
+                </Checkbox>
+                <div v-if="diabetes" class="textarea-container">
+                    <textarea v-model="diabetesDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                </div>
 
-            <Checkbox v-model="medicines">
-                Moet geneesmiddelen nemen (dagelijks, wekelijks...)
-            </Checkbox>
-            <div v-if="medicines" class="textarea-container">
-                <textarea v-model="medicinesDescription" class="input" placeholder="Welke, wanneer en hoe vaak?" />
-                <p>Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.</p>
-            </div>
+                <Checkbox v-model="medicines">
+                    Moet geneesmiddelen nemen (dagelijks, wekelijks...)
+                </Checkbox>
+                <div v-if="medicines" class="textarea-container">
+                    <textarea v-model="medicinesDescription" class="input" placeholder="Welke, wanneer en hoe vaak?" />
+                    <p>Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.</p>
+                </div>
 
-            <Checkbox v-model="specialHealthCare">
-                Er is bijzondere aandacht nodig om risico's te voorkomen
-            </Checkbox>
-            <div v-if="specialHealthCare" class="textarea-container">
-                <textarea v-model="specialHealthCareDescription" class="input" placeholder="Welke?" />
-            </div>
+                <Checkbox v-model="specialHealthCare">
+                    Er is bijzondere aandacht nodig om risico's te voorkomen
+                </Checkbox>
+                <div v-if="specialHealthCare" class="textarea-container">
+                    <textarea v-model="specialHealthCareDescription" class="input" placeholder="Welke?" />
+                </div>
 
-            <hr>
-            <h2>Sport, spel en sociale omgang</h2>
+                <hr>
+                <h2>Sport, spel en sociale omgang</h2>
 
-            <Checkbox v-model="canNotSwim">
-                Kan niet (of onvoldoende) zwemmen
-            </Checkbox>
+                <Checkbox v-model="canNotSwim">
+                    Kan niet (of onvoldoende) zwemmen
+                </Checkbox>
 
-            <Checkbox v-model="tiredQuickly">
-                Vlug moe
-            </Checkbox>
-            <div v-if="tiredQuickly" class="textarea-container">
-                <textarea v-model="tiredQuicklyDescription" class="input" placeholder="Eventuele opmerkingen" />
-            </div>
+                <Checkbox v-model="tiredQuickly">
+                    Vlug moe
+                </Checkbox>
+                <div v-if="tiredQuickly" class="textarea-container">
+                    <textarea v-model="tiredQuicklyDescription" class="input" placeholder="Eventuele opmerkingen" />
+                </div>
 
-            <Checkbox v-model="canNotParticipateInSport">
-                Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
-            </Checkbox>
-            <div v-if="canNotParticipateInSport" class="textarea-container">
-                <textarea v-model="canNotParticipateInSportDescription" class="input" placeholder="Meer informatie" />
-            </div>
+                <Checkbox v-model="canNotParticipateInSport">
+                    Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
+                </Checkbox>
+                <div v-if="canNotParticipateInSport" class="textarea-container">
+                    <textarea v-model="canNotParticipateInSportDescription" class="input" placeholder="Meer informatie" />
+                </div>
 
-            <Checkbox v-model="specialSocialCare">
-                Er is bijzondere aandacht nodig bij sociale omgang
-            </Checkbox>
-            <div v-if="specialSocialCare" class="textarea-container">
-                <textarea v-model="specialSocialCareDescription" class="input" placeholder="Meer informatie" />
-            </div>
+                <Checkbox v-model="specialSocialCare">
+                    Er is bijzondere aandacht nodig bij sociale omgang
+                </Checkbox>
+                <div v-if="specialSocialCare" class="textarea-container">
+                    <textarea v-model="specialSocialCareDescription" class="input" placeholder="Meer informatie" />
+                </div>
 
-            <hr>
-            <h2>Andere inlichtingen</h2>
+                <hr>
+                <h2>Andere inlichtingen</h2>
 
-            <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
+                <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
+            </template>
         </main>
         <STToolbar>
-            <button slot="right" class="button secundary" @click="goNext">
+            <Spinner v-if="loading" slot="right" />
+            <button slot="right" class="button primary" @click="goNext">
                 Doorgaan
             </button>
         </STToolbar>
@@ -198,10 +207,21 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip,Validator } from "@stamhoofd/components"
+import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip,Validator } from "@stamhoofd/components"
+import { Sodium } from '@stamhoofd/crypto';
+import { SessionManager } from '@stamhoofd/networking';
 import { MemberDetails, Record, RecordType } from "@stamhoofd/structures"
+import { DecryptedMember } from '@stamhoofd/structures';
+import { EncryptedMember } from '@stamhoofd/structures';
+import { Version } from '@stamhoofd/structures';
+import { KeychainItem } from '@stamhoofd/structures';
+import { KeychainedResponseDecoder } from '@stamhoofd/structures';
+import { PatchMembers } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {
@@ -211,13 +231,71 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STInputBox,
         STList,
         STListItem,
-        Checkbox
+        Checkbox,
+        Spinner
     },
     directives: { Tooltip },
 })
 export default class MemberRecordsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     member: MemberDetails
+
+    organization = OrganizationManager.organization
+
+    isParent = false
+    loading = false
+
+    async goNext() {
+        if (this.loading) {
+            return
+        }
+        this.loading = true
+
+        try {
+            // todo: validate
+
+            // Create a keypair
+            const keyPair = await Sodium.generateEncryptionKeyPair()
+
+            // Create the member
+            const data = JSON.stringify(new VersionBox(this.member).encode({ version: Version }))
+
+            const encryptedMember = EncryptedMember.create({
+                encryptedForOrganization: await Sodium.sealMessage(data, this.organization.publicKey),
+                encryptedForMember: await Sodium.sealMessage(data, keyPair.publicKey),
+                publicKey: keyPair.publicKey
+            })
+
+            const session = SessionManager.currentSession!
+
+            const keychainItem = await session.createKeychainItem(keyPair)
+
+            // Send the request
+            const response = await session.authenticatedServer.request({
+                method: "POST",
+                path: "/user/members",
+                body: PatchMembers.create({
+                    addMembers: [encryptedMember],
+                    updateMembers: [],
+                    keychainItems: [keychainItem]
+                }),
+                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMember as Decoder<EncryptedMember>))
+            })
+
+            // todo: save data
+            this.dismiss()
+        } catch (e) {
+            console.error(e);
+            alert("Er ging iets mis...")
+        }
+
+    }
+
+    get allowData() { return !this.getBooleanType(RecordType.NoData) }
+    set allowData(enabled: boolean) { this.setBooleanType(RecordType.NoData, !enabled) }
+
+    get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
+    set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled) }
 
     get foodAllergies() { return this.getBooleanType(RecordType.FoodAllergies) }
     set foodAllergies(enabled: boolean) { this.setBooleanType(RecordType.FoodAllergies, enabled) }
@@ -369,10 +447,6 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             return
         }
         record.description = description
-    }
-    
-    async goNext() {
-        // todo
     }
 }
 </script>

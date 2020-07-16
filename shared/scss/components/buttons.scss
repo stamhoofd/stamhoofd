@@ -1,6 +1,22 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
+.link {
+    &:hover, &:link, &:active, &:visited {
+        color: $color-primary;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    &:hover {
+        opacity: 0.6;
+    }
+
+    &:active {
+        opacity: 0.4;
+    }
+}
+
 .icon-spacer {
     margin-right: 5px;
     vertical-align: middle;

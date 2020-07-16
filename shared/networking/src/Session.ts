@@ -2,7 +2,7 @@ import { Decoder,ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
-import { KeychainedResponseDecoder,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder,KeychainItem,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
 import { ManagedToken } from './ManagedToken'
@@ -32,6 +32,25 @@ export class Session implements RequestMiddleware  {
         
         // todo: search for the token and keys
         this.loadFromStorage()
+    }
+
+    /**
+     * Create a keychain item for a public/private key set
+     */
+    async createKeychainItem(keyPair: { publicKey: string; privateKey: string }): Promise<KeychainItem> {
+        // todo: if no keys load them
+        if (!this.userPrivateKey) {
+            throw new Error("User private key not found!")
+        }
+
+        if (!this.user) {
+            throw new Error("User not found!")
+        }
+
+        return KeychainItem.create({
+            publicKey: keyPair.publicKey,
+            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(keyPair.privateKey, this.user.publicKey, this.userPrivateKey)
+        })
     }
 
     loadFromStorage() {
