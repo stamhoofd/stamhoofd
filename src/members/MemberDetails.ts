@@ -1,6 +1,8 @@
 import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Address } from '../Address';
+import { Group } from '../Group';
+import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
@@ -82,5 +84,34 @@ export class MemberDetails extends AutoEncoder {
             return true;
         }
         return false;
+    }
+
+    doesMatchGroup(group: Group) {
+        const birthYear = this.birthDay.getFullYear()
+        if (group.settings.minBirthYear) {
+            if (birthYear < group.settings.minBirthYear) {
+                return false
+            }
+        }
+
+        if (group.settings.maxBirthYear) {
+            if (birthYear > group.settings.maxBirthYear) {
+                return false
+            }
+        }
+
+        if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
+            return false
+        }
+
+        if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
+            return false
+        }
+        
+        return false
+    }
+
+    getMatchingGroups(groups: Group[]) {
+        return groups.filter(g => this.doesMatchGroup(g))
     }
 }
