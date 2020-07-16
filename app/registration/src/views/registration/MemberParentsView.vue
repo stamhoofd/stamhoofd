@@ -1,5 +1,5 @@
 <template>
-    <div id="member-general-view" class="st-view">
+    <div id="member-parents-view" class="st-view">
         <STNavigationBar title="Ouders">
             <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
         </STNavigationBar>
@@ -14,10 +14,20 @@
 
             <p class="warning-box" v-if="member.parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
             <STList>
-                <STListItem v-for="parent in member.parents" :key="parent.id" :selectable="true" @click="editParent(parent)">
-                    {{ parent.firstName }} {{ parent.lastName }}
+                <STListItem v-for="parent in member.parents" :key="parent.id" :selectable="true" @click="editParent(parent)" class="right-stack">
+                    <Checkbox slot="left" @click.stop />
+
+                    <h2 class="parent-name">{{ parent.firstName }} {{ parent.lastName }}</h2>
+                    <p class="parent-description" v-if="parent.phone">{{ parent.phone }}</p>
+
+                    <template slot="right">
+                        <p class="parent-description" v-if="parent.address">{{ parent.address }}</p>
+                        <span class=" icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
+
+            <!-- todo: add checkboxes and parents of other members that are already known -->
         </main>
         <STToolbar>
             <button  slot="right" class="button primary" @click="addParent">
@@ -34,10 +44,12 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
+import EmergencyContactView from './EmergencyContactView.vue';
+import { EmergencyContact } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -46,7 +58,8 @@ import ParentView from './ParentView.vue';
         STErrorsDefault,
         STInputBox,
         STList,
-        STListItem
+        STListItem,
+        Checkbox
     }
 })
 export default class MemberParentsView extends Mixins(NavigationMixin) {
@@ -85,14 +98,28 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
 
     
     async goNext() {
-        // todo
+        if (this.member.parents.length == 0) {
+            return;
+        }
+
+        // Emergency contact
+        this.show(new ComponentWithProperties(EmergencyContactView, { 
+            handler: (contact: EmergencyContact) => {
+                this.member.emergencyContacts = [contact]
+            }
+        }))
+
     }
 }
 </script>
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #member-parents-view {
+    .parent-description {
+        @extend .style-description-small;
+    }
 }
 </style>

@@ -1,34 +1,42 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar title="Ouder">
+        <STNavigationBar title="Noodcontact">
             <button slot="right" class="button icon gray close" @click="pop"></button>
         </STNavigationBar>
         
         <main>
             <h1>
-                Gegevens van een ouder
+                Gegevens van een reserve noodcontactpersoon
             </h1>
+            <p>Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn. Dit kan bv. een tante, opa of buurvrouw zijn.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
-                        </div>
+                    <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                        <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
                     </STInputBox>
 
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" />
-
+                    <STInputBox title="Relatie" error-fields="title" :error-box="errorBox">
+                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. oma">
+                        <datalist id="emergency-contact-types">
+                            <option value="Oma" />
+                            <option value="Opa" />
+                            <option value="Tante" />
+                            <option value="Oom" />
+                            <option value="Buurvrouw" />
+                            <option value="Buurman" />
+                            <option value="Nonkel" />
+                            <option value="Pepe" />
+                            <option value="Meme" />
+                            <option value="Grootvader" />
+                            <option value="Grootmoeder" />
+                        </datalist>
+                    </STInputBox>
                 </div>
 
                 <div>
-                    <AddressInput title="Adres" v-model="address" :validator="validator"/>
+                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer" />
                 </div>
             </div>
         </main>
@@ -46,7 +54,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 
@@ -65,35 +73,35 @@ import MemberParentsView from './MemberParentsView.vue';
         Checkbox
     }
 })
-export default class ParentView extends Mixins(NavigationMixin) {
+export default class EmergencyContactView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    parent: Parent | null // tood
+    parent: EmergencyContact | null // tood
 
     @Prop({ required: true })
-    handler: (parent: Parent) => void;
+    handler: (contact: EmergencyContact) => void;
 
-    firstName = ""
-    lastName = ""
+    name = ""
+    title = ""
     phone: string | null = null
     errorBox: ErrorBox | null = null
 
-    address: Address | null = null
     validator = new Validator()
 
     async goNext() {
         const errors = new SimpleErrors()
-        if (this.firstName.length < 2) {
+        if (this.name.length < 2) {
             errors.addError(new SimpleError({
                 code: "invalid_field",
-                message: "Vul de voornaam in",
-                field: "firstName"
+                message: "Vul de naam in",
+                field: "name"
             }))
         }
-        if (this.lastName.length < 2) {
+
+        if (this.title.length < 2) {
             errors.addError(new SimpleError({
                 code: "invalid_field",
-                message: "Vul de achternaam in",
-                field: "lastName"
+                message: "Vul de relatie in",
+                field: "title"
             }))
         }
 
@@ -108,17 +116,13 @@ export default class ParentView extends Mixins(NavigationMixin) {
         valid = valid && await this.validator.validate()
 
         if (valid) {
-            const parent = Parent.create({
-                firstName: this.firstName,
-                lastName: this.lastName,
+            const contact = EmergencyContact.create({
+                name: this.name,
                 phone: this.phone,
-                mail: null,
-                address: this.address
+                title: this.title
             })
 
-            // todo: Get possible groups
-
-           this.handler(parent)
+           this.handler(contact)
            this.pop()
         }
     }
@@ -128,6 +132,6 @@ export default class ParentView extends Mixins(NavigationMixin) {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
-#parent-view {
+#emergency-contact-view {
 }
 </style>
