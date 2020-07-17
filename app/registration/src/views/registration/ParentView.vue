@@ -31,19 +31,20 @@
                 </div>
 
                 <div>
-                    <label>Kies een adres</label>
-                    <STList>
-                        <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true">
-                            <Radio v-model="address" slot="left" :value="_address"/>
-                            {{ _address }}
-                            <button slot="right" class="button icon gray more" @click.stop="doEditAddress(_address)"/>
-                        </STListItem>
-                        <STListItem element-name="label" :selectable="true">
-                            <Radio v-model="address" slot="left" :value="customAddress"/>
-                            Een ander adres ingeven
-                        </STListItem>
-                    </STList>
-                    <AddressInput title="Adres" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator"/>
+                    <STInputBox v-if="availableAddresses.length > 0" title="Kies een adres">
+                        <STList>
+                            <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center">
+                                <Radio v-model="address" slot="left" :value="_address"/>
+                                {{ _address }}
+                                <button slot="right" class="button icon gray more" @click.stop="doEditAddress(_address)"/>
+                            </STListItem>
+                            <STListItem element-name="label" :selectable="true" class="left-center">
+                                <Radio v-model="address" slot="left" :value="customAddress"/>
+                                Een ander adres ingeven
+                            </STListItem>
+                        </STList>
+                    </STInputBox>
+                    <AddressInput :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator"/>
                 </div>
             </div>
         </main>
@@ -111,6 +112,10 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.phone = this.parent.phone
             this.email = this.parent.email
             this.address = this.parent.address ? Address.create(this.parent.address) : null
+        } else {
+            if (this.availableAddresses.length > 0) {
+                this.address = this.availableAddresses[0]
+            }
         }
     }
 
