@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent } from '@stamhoofd/structures'
+import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -155,6 +155,56 @@ export class MemberManagerStatic {
         }
 
         return Array.from(parents.values())
+    }
+
+    updateAddress(oldValue: Address, newValue: Address) {
+        if (!this.members) {
+            return
+        }
+
+        const str = oldValue.toString()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+
+            if (member.details.address && member.details.address.toString() == str) {
+                member.details.address = newValue
+            }
+
+            for (const parent of member.details.parents) {
+                if (parent.address && parent.address.toString() == str) {
+                    parent.address = newValue
+                }
+            }
+        }
+    }
+
+    /**
+     * List all unique addresses of the already existing members
+     */
+    getAddresses(): Address[] {
+        if (!this.members) {
+            return []
+        }
+        const addresses = new Map<string, Address>()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+
+            if (member.details.address) {
+                addresses.set(member.details.address.toString(), member.details.address)
+            }
+
+            for (const parent of member.details.parents) {
+                if (parent.address) {
+                    addresses.set(parent.address.toString(), parent.address)
+                }
+            }
+        }
+
+        return Array.from(addresses.values())
     }
 
 }

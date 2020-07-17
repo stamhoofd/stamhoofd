@@ -31,7 +31,19 @@
                 </div>
 
                 <div>
-                    <AddressInput title="Adres" v-model="address" :validator="validator"/>
+                    <label>Kies een adres</label>
+                    <STList>
+                        <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true">
+                            <Radio v-model="address" slot="left" :value="_address"/>
+                            {{ _address }}
+                            <button slot="right" class="button icon gray more" @click.stop="doEditAddress(_address)"/>
+                        </STListItem>
+                        <STListItem element-name="label" :selectable="true">
+                            <Radio v-model="address" slot="left" :value="customAddress"/>
+                            Een ander adres ingeven
+                        </STListItem>
+                    </STList>
+                    <AddressInput title="Adres" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator"/>
                 </div>
             </div>
         </main>
@@ -48,24 +60,24 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
+import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
         STToolbar,
         STNavigationBar,
-        Slider,
         STErrorsDefault,
         STInputBox,
         AddressInput,
-        BirthDayInput,
-        RadioGroup,
         Radio,
         PhoneInput,
-        Checkbox
+        Checkbox,
+        STList,
+        STListItem
     }
 })
 export default class ParentView extends Mixins(NavigationMixin) {
@@ -82,7 +94,12 @@ export default class ParentView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     address: Address | null = null
+    customAddress: Address | null = null
+    editingAddress = false
+
     validator = new Validator()
+
+    MemberManager = MemberManager
 
     mounted() {
         if (this.parent) {
@@ -92,6 +109,26 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.email = this.parent.email
             this.address = this.parent.address ? Address.create(this.parent.address) : null
         }
+    }
+
+    get availableAddresses() {
+        return MemberManager.getAddresses()
+    }
+
+    get editAddress() {
+        return this.address
+    }
+
+    set editAddress(address: Address | null) {
+        if (this.address && address) {
+            MemberManager.updateAddress(this.address, address)
+        }
+        this.address = address
+    }
+
+    doEditAddress(address: Address) {
+        this.$set(this, "address", address)
+        this.editingAddress = true
     }
 
     async goNext() {

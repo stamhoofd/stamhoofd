@@ -82,6 +82,13 @@ export default class SignupGeneralView extends Vue {
                 return this.isValid()
             })
         }
+
+        if (this.value) {
+            this.addressLine1 = this.value.street+" "+this.value.number
+            this.city = this.value.city
+            this.postalCode = this.value.postalCode
+            this.country = this.value.country
+        }
     }
 
     destroyed() {
