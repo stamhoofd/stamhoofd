@@ -27,8 +27,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    mail: string | null = null;
+    @field({ decoder: StringDecoder, nullable: true, field: "mail" })
+    @field({ decoder: StringDecoder, nullable: true, version: 5 })
+    email: string | null = null;
 
     @field({ decoder: DateDecoder })
     birthDay: Date = new Date("1970-01-01");

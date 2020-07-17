@@ -20,8 +20,9 @@ export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     phone: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    mail: string | null = null;
+    @field({ decoder: StringDecoder, nullable: true, field: "mail" })
+    @field({ decoder: StringDecoder, nullable: true, version: 5 })
+    email: string | null = null;
 
     @field({ decoder: Address, nullable: true })
     address: Address | null;
