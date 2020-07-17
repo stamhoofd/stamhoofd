@@ -59,10 +59,12 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
+import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import MemberGroupView from './MemberGroupView.vue';
 
 @Component({
     components: {
@@ -80,6 +82,8 @@ import MemberParentsView from './MemberParentsView.vue';
     }
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
+    memberDetails: MemberDetails | null = null
+
     firstName = ""
     lastName = ""
     phone: string | null = null
@@ -133,25 +137,67 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         valid = valid && await this.validator.validate()
 
         if (valid) {
-            const memberDetails = MemberDetails.create({
-                firstName: this.firstName,
-                lastName: this.lastName,
-                gender: this.gender,
-                phone: this.phone,
-                mail: null,
-                birthDay: this.birthDay!,
-                address: this.livesAtParents ? null : this.address
-            })
-
-            // todo: Get possible groups
-
-            // todo: check age before asking parents
-            if (memberDetails.age < 18 || this.livesAtParents) {
-                this.show(new ComponentWithProperties(MemberParentsView, { member: memberDetails }))
+            if (this.memberDetails) {
+                // Keep all that was already chagned in next steps
+                this.memberDetails.firstName = this.firstName
+                this.memberDetails.lastName = this.lastName
+                this.memberDetails.gender = this.gender
+                this.memberDetails.phone = this.phone
+                this.memberDetails.birthDay = this.birthDay!
+                this.memberDetails.address = this.livesAtParents ? null : this.address
             } else {
-                // Noodcontacten
-                alert("noodcontacten")
+                this.memberDetails = MemberDetails.create({
+                    firstName: this.firstName,
+                    lastName: this.lastName,
+                    gender: this.gender,
+                    phone: this.phone,
+                    mail: null,
+                    birthDay: this.birthDay!,
+                    address: this.livesAtParents ? null : this.address
+                })
             }
+            
+            // todo: Get possible groups
+            const organizization = OrganizationManager.organization
+            const possibleGroups = this.memberDetails.getMatchingGroups(organizization.groups)
+
+            if (possibleGroups.length == 0) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    code: "",
+                    message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk de oud of te jong."
+                }))
+                return;
+            }
+
+            if (possibleGroups.length == 1) {
+                this.memberDetails.preferredGroupId = possibleGroups[0].id
+            } else {
+                // go to group selection
+                this.show(new ComponentWithProperties(MemberGroupView, { 
+                    member: this.memberDetails,
+                    handler: (group: Group, component: MemberGroupView) => {
+                        this.memberDetails!.preferredGroupId = group.id
+                        this.goToParents(component)
+                    }
+                }))
+                return;
+            }
+
+            this.goToParents(this);
+            
+        }
+    }
+
+    goToParents(component: NavigationMixin) {
+        if (!this.memberDetails) {
+            return;
+        }
+        // todo: check age before asking parents
+        if (this.memberDetails.age < 18 || this.livesAtParents) {
+            component.show(new ComponentWithProperties(MemberParentsView, { member: this.memberDetails }))
+        } else {
+            // Noodcontacten
+            alert("noodcontacten")
         }
     }
 

@@ -87,6 +87,16 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     /// Loading value can get set inside handler by caller
     loading = false
 
+    mounted() {
+        if (this.member.preferredGroupId) {
+            for (const group of this.groups) {
+                if (group.id === this.member.preferredGroupId) {
+                    this.$set(this, "selectedGroup", group)
+                }
+            }
+        }
+    }
+
     get groups() {
         const organizization = OrganizationManager.organization
         return this.member.getMatchingGroups(organizization.groups)
