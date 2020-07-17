@@ -108,7 +108,7 @@ export class MemberDetails extends AutoEncoder {
             return false
         }
         
-        return false
+        return true
     }
 
     getMatchingGroups(groups: Group[]) {
