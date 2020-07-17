@@ -255,42 +255,13 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
 
         try {
             // todo: validate
+            await MemberManager.addMember(this.member)
 
-            // Create a keypair
-            const keyPair = await Sodium.generateEncryptionKeyPair()
-
-            // Create the member
-            const data = JSON.stringify(new VersionBox(this.member).encode({ version: Version }))
-
-            const encryptedMember = EncryptedMember.create({
-                encryptedForOrganization: await Sodium.sealMessage(data, this.organization.publicKey),
-                encryptedForMember: await Sodium.sealMessage(data, keyPair.publicKey),
-                publicKey: keyPair.publicKey
-            })
-
-            const session = SessionManager.currentSession!
-
-            const keychainItem = await session.createKeychainItem(keyPair)
-
-            // Send the request
-            const response = await session.authenticatedServer.request({
-                method: "POST",
-                path: "/user/members",
-                body: PatchMembers.create({
-                    addMembers: [encryptedMember],
-                    updateMembers: [],
-                    keychainItems: [keychainItem]
-                }),
-                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
-            })
-
-            await MemberManager.setMembers(response.data)
             this.dismiss()
         } catch (e) {
             console.error(e);
             alert("Er ging iets mis...")
         }
-
     }
 
     get allowData() { return !this.getBooleanType(RecordType.NoData) }

@@ -32,11 +32,11 @@
             <!-- todo: add checkboxes and parents of other members that are already known -->
         </main>
         <STToolbar>
-            <button slot="right" class="button" :class="{ primary: selectionCount <= 1, secundary: selectionCount > 1}" @click="addParent">
+            <button slot="right" class="button" :class="{ primary: parents.length <= 1, secundary: parents.length > 1}" @click="addParent">
                 <span class="icon white add"/>Ouder toevoegen
             </button>
             <!-- Next buttons becomes primary button when two parents are selected. We know lot's of members will only have one parent, but we need to force parents to add both parents if they have two parents -->
-            <button slot="right" class="button" :class="{ secundary: selectionCount <= 1, primary: selectionCount > 1}" @click="goNext">
+            <button slot="right" class="button" :class="{ secundary: parents.length <= 1, primary: parents.length > 1}" @click="goNext">
                 Volgende
             </button>
         </STToolbar>

@@ -79,18 +79,7 @@
             width: 40px;
             align-self: stretch;
         }
-
-        .icon {
-            align-self: center;
-            &:first-child {
-                margin-right: 10px;
-                margin-left: -5px;
-            }
-        }
-
-        &.full {
-            width: 100%;
-        }
+       
     }
 
     &.secundary {
@@ -116,7 +105,9 @@
         &:active {
             transform: scale(0.95, 0.95);
         }
+    }
 
+    &.secundary, &.primary {
         .icon {
             align-self: center;
             
@@ -131,7 +122,7 @@
             }
         }
 
-        &.full {
+         &.full {
             width: 100%;
         }
     }

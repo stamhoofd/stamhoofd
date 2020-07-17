@@ -67,8 +67,36 @@ export class MemberManagerStatic {
         await this.setMembers(response.data)
     }
 
-    async patchMembers(members: DecryptedMember[]) {
+    async addMember(member: MemberDetails) {
+        const session = SessionManager.currentSession!
 
+        // Create a keypair
+        const keyPair = await Sodium.generateEncryptionKeyPair()
+        const keychainItem = await session.createKeychainItem(keyPair)
+
+        // Create member
+        const decryptedMember = DecryptedMember.create({
+            details: member,
+            publicKey: keyPair.publicKey,
+            registrations: []
+        })
+
+        // Send the request
+        const response = await session.authenticatedServer.request({
+            method: "POST",
+            path: "/user/members",
+            body: PatchMembers.create({
+                addMembers: await this.getEncryptedMembers([decryptedMember]),
+                updateMembers: this.members ? await this.getEncryptedMembers(this.members) : [],
+                keychainItems: [keychainItem]
+            }),
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+        })
+
+        await MemberManager.setMembers(response.data)
+    }
+
+    async getEncryptedMembers(members: DecryptedMember[]): Promise<EncryptedMember[]> {
         const encryptedMembers: EncryptedMember[] = [];
 
         for (const member of members) {
@@ -86,6 +114,12 @@ export class MemberManagerStatic {
                 })
             )
         }
+        return encryptedMembers
+    }
+
+    async patchMembers(members: DecryptedMember[]) {
+
+        const encryptedMembers = await this.getEncryptedMembers(members)
 
         const session = SessionManager.currentSession!
 

@@ -5,8 +5,11 @@
         </STNavigationBar>
         
         <main>
-            <h1>
-                Gegevens van een ouder
+            <h1 v-if="!parent">
+                Ouder toevoegen
+            </h1>
+            <h1 v-else>
+                Gegevens van {{ parent.firstName }}
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -35,7 +38,7 @@
 
         <STToolbar>
             <button  slot="right" class="button primary" @click="goNext">
-                Toevoegen
+                {{ !parent ? 'Toevoegen' : 'Opslaan' }}
             </button>
         </STToolbar>
     </div>
@@ -67,7 +70,7 @@ import MemberParentsView from './MemberParentsView.vue';
 })
 export default class ParentView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    parent: Parent | null // tood
+    parent: Parent | null
 
     @Prop({ required: true })
     handler: (parent: Parent, component: ParentView) => void;
@@ -75,10 +78,21 @@ export default class ParentView extends Mixins(NavigationMixin) {
     firstName = ""
     lastName = ""
     phone: string | null = null
+    email: string | null = null
     errorBox: ErrorBox | null = null
 
     address: Address | null = null
     validator = new Validator()
+
+    mounted() {
+        if (this.parent) {
+            this.firstName = this.parent.firstName
+            this.lastName = this.parent.lastName
+            this.phone = this.parent.phone
+            this.email = this.parent.email
+            this.address = this.parent.address ? Address.create(this.parent.address) : null
+        }
+    }
 
     async goNext() {
         const errors = new SimpleErrors()
@@ -108,16 +122,25 @@ export default class ParentView extends Mixins(NavigationMixin) {
         valid = valid && await this.validator.validate()
 
         if (valid) {
-            const parent = Parent.create({
-                firstName: this.firstName,
-                lastName: this.lastName,
-                phone: this.phone,
-                mail: null,
-                address: this.address
-            })
+            if (this.parent) {
+                this.parent.firstName = this.firstName
+                this.parent.lastName = this.lastName
+                this.parent.phone = this.phone
+                this.parent.email = this.email
+                this.parent.address = this.address
 
-            // todo: Get possible groups
-           this.handler(parent, this)
+            } else {
+                this.parent = Parent.create({
+                    firstName: this.firstName,
+                    lastName: this.lastName,
+                    phone: this.phone,
+                    email: null,
+                    address: this.address
+                })
+            }
+            
+
+           this.handler(this.parent, this)
         }
     }
 }

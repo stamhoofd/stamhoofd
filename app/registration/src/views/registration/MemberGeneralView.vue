@@ -122,7 +122,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             lastName: this.lastName,
             gender: this.gender,
             phone: null,
-            mail: null,
+            email: null,
             birthDay: this.birthDay,
             address: null
         })
@@ -176,7 +176,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                     lastName: this.lastName,
                     gender: this.gender,
                     phone: this.phone,
-                    mail: null,
+                    email: null,
                     birthDay: this.birthDay!,
                     address: this.livesAtParents ? null : this.address
                 })
