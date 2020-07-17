@@ -115,4 +115,18 @@ export class MemberDetails extends AutoEncoder {
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
     }
+
+    updateAddress(oldValue: Address, newValue: Address) {
+        const str = oldValue.toString()
+
+        if (this.address && this.address.toString() == str) {
+            this.address = newValue
+        }
+
+        for (const parent of this.parents) {
+            if (parent.address && parent.address.toString() == str) {
+                parent.address = newValue
+            }
+        }
+    }
 }
