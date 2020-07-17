@@ -122,6 +122,10 @@ export default class ParentView extends Mixins(NavigationMixin) {
     set editAddress(address: Address | null) {
         if (this.address && address) {
             MemberManager.updateAddress(this.address, address)
+        } else {
+            if (this.address === this.customAddress) {
+                this.customAddress = address
+            }
         }
         this.address = address
     }
