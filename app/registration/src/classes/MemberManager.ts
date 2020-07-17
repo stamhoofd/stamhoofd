@@ -162,21 +162,12 @@ export class MemberManagerStatic {
             return
         }
 
-        const str = oldValue.toString()
         for (const member of this.members) {
             if (!member.details) {
                 continue
             }
 
-            if (member.details.address && member.details.address.toString() == str) {
-                member.details.address = newValue
-            }
-
-            for (const parent of member.details.parents) {
-                if (parent.address && parent.address.toString() == str) {
-                    parent.address = newValue
-                }
-            }
+            member.details.updateAddress(oldValue, newValue)
         }
     }
 

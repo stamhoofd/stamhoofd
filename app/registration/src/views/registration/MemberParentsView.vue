@@ -89,6 +89,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.navigationController.animationType = "modal"
         }
         this.show(new ComponentWithProperties(ParentView, {
+            member: this.member,
             parent,
             handler: (parent: Parent, component: ParentView) => {
                 component.pop()
@@ -101,6 +102,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.navigationController.animationType = "modal"
         }
         this.show(new ComponentWithProperties(ParentView, {
+            member: this.member,
             handler: (parent: Parent, component: ParentView) => {
                 this.member.parents.push(parent)
                 component.pop()
