@@ -12,16 +12,18 @@
             <p v-if="member.age <= 18">Voeg alle ouders van {{ member.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.</p>
             <p v-else>Voeg alle ouders van {{ member.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.</p>
 
-            <p class="warning-box" v-if="member.parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
-            <STList>
-                <STListItem v-for="parent in member.parents" :key="parent.id" :selectable="true" @click="editParent(parent)" class="right-stack left-center">
-                    <Checkbox slot="left" @click.stop />
+            <p class="warning-box" v-if="parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
+            <STErrorsDefault :error-box="errorBox" />
 
-                    <h2 class="parent-name">{{ parent.firstName }} {{ parent.lastName }}</h2>
-                    <p class="parent-description" v-if="parent.phone">{{ parent.phone }}</p>
+            <STList>
+                <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" @click="editParent(parent.parent)" class="right-stack left-center">
+                    <Checkbox slot="left" @click.native.stop v-model="parent.selected" @change="onChangedSelection" />
+
+                    <h2 class="parent-name">{{ parent.parent.firstName }} {{ parent.parent.lastName }}</h2>
+                    <p class="parent-description" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
 
                     <template slot="right">
-                        <p class="parent-description" v-if="parent.address">{{ parent.address }}</p>
+                        <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
                         <span class=" icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -30,10 +32,11 @@
             <!-- todo: add checkboxes and parents of other members that are already known -->
         </main>
         <STToolbar>
-            <button  slot="right" class="button primary" @click="addParent">
+            <button slot="right" class="button" :class="{ primary: selectionCount <= 1, secundary: selectionCount > 1}" @click="addParent">
                 <span class="icon white add"/>Ouder toevoegen
             </button>
-            <button  slot="right" class="button secundary" @click="goNext">
+            <!-- Next buttons becomes primary button when two parents are selected. We know lot's of members will only have one parent, but we need to force parents to add both parents if they have two parents -->
+            <button slot="right" class="button" :class="{ secundary: selectionCount <= 1, primary: selectionCount > 1}" @click="goNext">
                 Volgende
             </button>
         </STToolbar>
@@ -51,6 +54,17 @@ import ParentView from './ParentView.vue';
 import EmergencyContactView from './EmergencyContactView.vue';
 import { EmergencyContact } from '@stamhoofd/structures';
 import MemberRecordsView from './MemberRecordsView.vue';
+import { MemberManager } from '../../classes/MemberManager';
+
+class SelectableParent {
+    selected = false
+    parent: Parent
+
+    constructor(parent: Parent, selected: boolean = false) {
+        this.selected = selected
+        this.parent = parent
+    }
+}
 
 @Component({
     components: {
@@ -66,6 +80,9 @@ import MemberRecordsView from './MemberRecordsView.vue';
 export default class MemberParentsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     member: MemberDetails
+    errorBox: ErrorBox | null = null
+
+    parents: SelectableParent[] = []
 
     editParent(parent: Parent) {
         if (this.navigationController) {
@@ -91,15 +108,52 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
         }))
     }
 
+    mounted() {
+        // Read parents from member
+        for (const parent of this.member.parents) {
+            this.parents.push(new SelectableParent(parent, true))
+        }
+
+        // Read parents from membermanager
+        for (const parent of MemberManager.getParents()) {
+            if (!this.parents.find(p => p.parent.id == parent.id)) {
+                this.parents.push(new SelectableParent(parent, false))
+            }
+        }
+    }
+
+    onChangedSelection() {
+        this.member.parents = this.parents.flatMap(p => {
+            if (p.selected) {
+                return [p.parent]
+            }
+            return []
+        })
+    }
+
     activated() {
         if (this.navigationController) {
             this.navigationController.animationType = "default"
         }
+
+        // Only check for new parents!
+        for (const parent of this.member.parents) {
+            if (!this.parents.find(p => p.parent.id == parent.id)) {
+                this.parents.push(new SelectableParent(parent, true))
+            }
+        }
     }
 
+    get selectionCount() {
+        return this.parents.reduce((a, p) => { return a + (p.selected ? 1 : 0) }, 0)
+    }
     
     async goNext() {
         if (this.member.parents.length == 0) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Voeg alle ouders toe voor je verder gaat"
+            }))
             return;
         }
 

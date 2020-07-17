@@ -38,12 +38,15 @@
 
                 <div>
                     <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator"/>
-
                     <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
-
-
                 </div>
             </div>
+
+            <template v-if="suggestedGroup">
+                <hr>
+                <h2>Leeftijdsgroep: {{ suggestedGroup.settings.name }}</h2>
+                <p>{{ suggestedGroup.settings.description }}</p>
+            </template>
         </main>
 
         <STToolbar>
@@ -109,6 +112,28 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         return age;
     }
 
+    get suggestedGroup() {
+        if (!this.birthDay) {
+            return null
+        }
+
+        const mem = MemberDetails.create({
+            firstName: this.firstName,
+            lastName: this.lastName,
+            gender: this.gender,
+            phone: null,
+            mail: null,
+            birthDay: this.birthDay,
+            address: null
+        })
+        const organizization = OrganizationManager.organization
+        const possibleGroups = mem.getMatchingGroups(organizization.groups)
+        if (possibleGroups.length == 1) {
+            return possibleGroups[0]
+        }
+        return null
+    }
+
     async goNext() {
         const errors = new SimpleErrors()
         if (this.firstName.length < 2) {
@@ -164,7 +189,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             if (possibleGroups.length == 0) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: "",
-                    message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk de oud of te jong."
+                    message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk te oud of te jong."
                 }))
                 return;
             }
@@ -212,7 +237,23 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #member-general-view {
+    > main {
+        > h2{
+            @extend .style-title-2;
+            padding-bottom: 15px;
+        }
+
+        > h2 + p {
+            @extend .style-description;
+        }
+
+        > hr{
+            @extend .style-hr;
+        }
+
+    }
 }
 </style>

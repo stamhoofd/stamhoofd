@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers } from '@stamhoofd/structures'
+import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -101,6 +101,26 @@ export class MemberManagerStatic {
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
         this.setMembers(response.data)
+    }
+
+    /**
+     * List all unique parents of the already existing members
+     */
+    getParents(): Parent[] {
+        if (!this.members) {
+            return []
+        }
+        const parents = new Map<string, Parent>()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            for (const parent of member.details.parents) {
+                parents.set(parent.id, parent)
+            }
+        }
+
+        return Array.from(parents.values())
     }
 
 }

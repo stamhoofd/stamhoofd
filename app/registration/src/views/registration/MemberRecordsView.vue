@@ -464,7 +464,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             padding-bottom: 15px;
         }
 
-         > hr{
+        > hr{
             @extend .style-hr;
         }
 
