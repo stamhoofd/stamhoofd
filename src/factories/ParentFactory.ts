@@ -33,7 +33,7 @@ export class ParentFactory extends Factory<Options, Parent> {
             Math.floor(Math.random() * 10) +
             Math.floor(Math.random() * 10);
 
-        parent.mail =
+        parent.email =
             (Math.random() >= 0.5 ? parent.firstName.toLowerCase() : parent.firstName.toLowerCase()[0]) +
             (Math.random() >= 0.5 ? "." : Math.random() >= 0.5 ? "_" : "") +
             parent.lastName.toLowerCase().replace(" ", "") +

@@ -86,7 +86,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
             if (Math.random() >= 0.5) {
                 // 50% chance no e-mail
-                memberDetails.parents[1].mail = null;
+                memberDetails.parents[1].email = null;
             }
         }
         const recordFactory = new RecordFactory({});
