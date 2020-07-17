@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, Payment,Registration } from "@stamhoofd/structures";
+import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, Payment, Registration } from "@stamhoofd/structures";
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Token } from '../models/Token';
@@ -31,9 +31,15 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const user = token.user
 
         const members = await user.getMembersWithRegistration()
+        if (members.length == 0) {
+            return new Response(new KeychainedResponse({
+                data: [],
+                keychainItems: []
+            }));
+        }
 
         // Load the needed keychains the user has access to
-        const keychainItems = await KeychainItem.where({ 
+        const keychainItems = await KeychainItem.where({
             userId: user.id,
             publicKey: {
                 sign: "IN",

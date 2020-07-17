@@ -93,6 +93,13 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await model.save()
         }
 
+        if (members.length == 0) {
+            return new Response(new KeychainedResponse({
+                data: [],
+                keychainItems: []
+            }));
+        }
+
         // Load the needed keychains the user has access to
         const keychainItems = await KeychainItem.where({
             userId: user.id,

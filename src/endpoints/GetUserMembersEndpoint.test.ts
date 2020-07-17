@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations,KeychainedResponse } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { MemberFactory } from '../factories/MemberFactory';
@@ -40,6 +40,25 @@ describe("Endpoint.GetUserMembers", () => {
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
+    test("Request user without members", async () => {
+        const organization = await new OrganizationFactory({}).create()
+        const group = await new GroupFactory({ organization }).create()
+        const userFactory = new UserFactory({ organization })
+        const user = await userFactory.create()
+
+        const token = await Token.createToken(user)
+
+        const r = Request.buildJson("GET", "/v5/user/members", organization.getApiHost());
+        r.headers.authorization = "Bearer " + token.accessToken
+
+        const response = await endpoint.test(r);
+        expect(response.body).toBeDefined();
+        expect(response.body).toBeInstanceOf(KeychainedResponse)
+
+        expect(response.body.data).toHaveLength(0)
+        expect(response.body.keychainItems).toHaveLength(0)
+    });
+
     test("Member with multiple registrations", async () => {
         const organization = await new OrganizationFactory({}).create()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
@@ -75,7 +94,7 @@ describe("Endpoint.GetUserMembers", () => {
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
-        r.headers.authorization = "Bearer "+token.accessToken
+        r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
@@ -83,7 +102,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeSameMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({registrations: []}, m))))
+        expect(response.body.data).toIncludeSameMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({ registrations: [] }, m))))
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
@@ -130,7 +149,7 @@ describe("Endpoint.GetUserMembers", () => {
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
-        r.headers.authorization = "Bearer " + token.accessToken+"d"
+        r.headers.authorization = "Bearer " + token.accessToken + "d"
 
         await expect(endpoint.test(r)).rejects.toThrow(/invalid/i)
     });
@@ -146,5 +165,5 @@ describe("Endpoint.GetUserMembers", () => {
         await expect(endpoint.test(r)).rejects.toThrow(/expired/i)
     });
 
-    
+
 });
