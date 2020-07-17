@@ -19,8 +19,8 @@
             <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
             <STList class="member-selection-table">
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" @click="onSelectMember(member)">
-                    <Checkbox slot="left" />
+                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center">
+                    <Checkbox v-model="memberSelection[member.id]" slot="left" @change="onSelectMember(member)" />
                     <p>{{ member.details.name }}</p>
                     <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
                     <p class="member-group" v-else>Kies eerst een groep</p>
@@ -42,12 +42,13 @@
 <script lang="ts">
 import { Component, Vue, Mixins } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { DecryptedMember, Group } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -61,8 +62,21 @@ import MemberGroupView from '../registration/MemberGroupView.vue';
 })
 export default class OverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    memberSelection: { [key:string]:boolean; } = {}
 
     get members() {
+        if (MemberManager.members) {
+            for (const member of MemberManager.members) {
+                if (this.memberSelection[member.id] === undefined) {
+                    // if the member doesn't have any registrations, we select it by default
+                    if (member.registrations.length == 0 && this.memberGetGroup(member) !== null) {
+                        this.$set(this.memberSelection, member.id, true)
+                    } else {
+                        this.$set(this.memberSelection, member.id, false)
+                    }
+                }
+            }
+        }
         return MemberManager.members
     }
 
@@ -76,11 +90,41 @@ export default class OverviewView extends Mixins(NavigationMixin){
         if (!member.details) {
             return
         }
+        if (this.memberSelection[member.id] === false) {
+            return;
+        }
         if (this.memberGetGroup(member) === null) {
+            // Disable select until group is chosen
+            this.$nextTick(() => {
+                this.memberSelection[member.id] = false;
+                console.log(this.memberSelection)
+            })
+
             this.present(new ComponentWithProperties(MemberGroupView, {
                 member: member.details,
-                handler: () => {
+                handler: (group: Group, component: MemberGroupView) => {
+                    if (!member.details) {
+                        console.error("Member details suddenly gone")
+                        return
+                    }
+                    
+                    component.loading = true;
 
+                    member.details.preferredGroupId = group.id
+
+                    MemberManager.patchMembers([
+                        member
+                    ]).then(() => {
+                        component.pop()
+                        this.memberSelection[member.id] = true;
+                    }).catch(e => {
+                        console.error(e)
+                        component.loading = false
+                        component.errorBox = new ErrorBox(new SimpleError({
+                            code: "",
+                            message: "Er ging iets mis"
+                        }))
+                    })
                 }
             }).setDisplayStyle("popup"))
         }

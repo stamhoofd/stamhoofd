@@ -36,7 +36,7 @@
             <STErrorsDefault :error-box="errorBox" />
             <STList>
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                    <Radio slot="left" @click.stop name="choose-group" />
+                    <Radio slot="left" @click.stop name="choose-group" v-model="selectedGroup" :value="group"/>
                     <h2 class="group-name">{{ group.settings.name }}</h2>
                     <p class="group-description" v-if="group.settings.description">{{ group.settings.description }}</p>
                 </STListItem>
@@ -44,6 +44,7 @@
         </main>
 
         <STToolbar>
+            <Spinner slot="right" v-if="loading" />
             <button  slot="right" class="button primary" @click="goNext">
                 Volgende
             </button>
@@ -55,7 +56,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Radio, Validator, STList, STListItem } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, Spinner } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
@@ -66,10 +67,10 @@ import { OrganizationManager } from '../../../../dashboard/src/classes/Organizat
         STToolbar,
         STNavigationBar,
         STErrorsDefault,
-        STInputBox,
         Radio,
         STList,
-        STListItem
+        STListItem,
+        Spinner
     }
 })
 export default class MemberGroupView extends Mixins(NavigationMixin) {
@@ -81,18 +82,29 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
 
+    selectedGroup = this.groups[0] ?? null
+
+    /// Loading value can get set inside handler by caller
+    loading = false
+
     get groups() {
         const organizization = OrganizationManager.organization
         return this.member.getMatchingGroups(organizization.groups)
     }
 
     async goNext() {
-        const valid = false
-        if (valid) {
-     
-            // todo: Get possible groups
-           //this.handler(parent, this)
+        if (this.loading) {
+            return;
         }
+        if (!this.selectedGroup) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "not_selected",
+                message: "Kies een groep voor je verder gaat"
+            }))
+            return;
+        }
+        this.errorBox = null
+        this.handler(this.selectedGroup, this)
     }
 }
 </script>

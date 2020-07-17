@@ -281,7 +281,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                     updateMembers: [],
                     keychainItems: [keychainItem]
                 }),
-                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMember as Decoder<EncryptedMemberWithRegistrations>))
+                decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
             })
 
             await MemberManager.setMembers(response.data)
