@@ -62,7 +62,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
@@ -180,6 +180,19 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                     birthDay: this.birthDay!,
                     address: this.livesAtParents ? null : this.address
                 })
+
+                // Add default values for records
+                this.memberDetails.records.push(Record.create({
+                    type: RecordType.NoData
+                }))
+                this.memberDetails.records.push(Record.create({
+                    type: RecordType.NoPictures
+                }))
+                if (this.memberDetails.age < 18) {
+                    this.memberDetails.records.push(Record.create({
+                        type: RecordType.NoPermissionForMedicines
+                    }))
+                }
             }
             
             // todo: Get possible groups

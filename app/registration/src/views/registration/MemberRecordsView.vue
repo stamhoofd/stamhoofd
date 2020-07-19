@@ -187,6 +187,35 @@
                 <h2>Andere inlichtingen</h2>
 
                 <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
+
+                <template v-if="member.age < 18">
+                    <hr>
+                    <h2>Toedienen van medicatie</h2>
+
+                    <p class="style-description">Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.</p>
+
+                    <Checkbox v-model="allowMedicines">
+                        Wij geven toestemming aan de leiding om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                    </Checkbox>
+
+                    <p class="style-description-small">* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang</p>
+                </template>
+
+                <hr>
+                <h2>Contactgegevens huisarts</h2>
+
+                <div class="split-inputs">
+                    <div>
+                        <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
+                            <input v-model="doctorName" class="input" name="name" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
+                        </STInputBox>
+                    </div>
+
+                    <div>
+                        <PhoneInput title="Telefoonnummer huisarts" v-model="doctorPhone" :validator="validator" placeholder="Telefoonnummer" />
+                    </div>
+                </div>
+
             </template>
         </main>
         <STToolbar>
@@ -201,7 +230,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton } from "@stamhoofd/components"
+import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
 import { MemberDetails, Record, RecordType } from "@stamhoofd/structures"
@@ -227,7 +256,8 @@ import { MemberManager } from '../../classes/MemberManager';
         STListItem,
         Checkbox,
         Spinner,
-        BackButton
+        BackButton,
+        PhoneInput
     },
     directives: { Tooltip },
 })
@@ -236,6 +266,12 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     member: MemberDetails
 
     organization = OrganizationManager.organization
+
+    validator = new Validator()
+    errorBox: ErrorBox | null = null
+
+    doctorName = ""
+    doctorPhone: string | null = null
 
     isParent = false
     loading = false
@@ -262,6 +298,9 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
 
     get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
     set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled) }
+
+    get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
+    set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.NoPermissionForMedicines, !enabled) }
 
     get foodAllergies() { return this.getBooleanType(RecordType.FoodAllergies) }
     set foodAllergies(enabled: boolean) { this.setBooleanType(RecordType.FoodAllergies, enabled) }
