@@ -117,6 +117,28 @@ export class MemberManagerStatic {
         return encryptedMembers
     }
 
+    async patchAllMembers() {
+        const encryptedMembers = this.members ? await this.getEncryptedMembers(this.members) : []
+        if (encryptedMembers.length == 0) {
+            return;
+        }
+
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        const response = await session.authenticatedServer.request({
+            method: "POST",
+            path: "/user/members",
+            body: PatchMembers.create({
+                addMembers: [],
+                updateMembers: encryptedMembers,
+                keychainItems: []
+            }),
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+        })
+        this.setMembers(response.data)
+    }
+
     async patchMembers(members: DecryptedMember[]) {
 
         const encryptedMembers = await this.getEncryptedMembers(members)

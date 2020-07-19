@@ -19,7 +19,7 @@
             <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
             <STList class="member-selection-table">
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center">
+                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" @click="editMember(member)">
                     <Checkbox v-model="memberSelection[member.id]" slot="left" @change="onSelectMember(member)" />
                     <p>{{ member.details.name }}</p>
                     <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
@@ -107,7 +107,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
             })
 
             this.present(new ComponentWithProperties(MemberGroupView, {
-                member: member.details,
+                memberDetails: member.details,
                 handler: (group: Group, component: MemberGroupView) => {
                     if (!member.details) {
                         console.error("Member details suddenly gone")
@@ -161,6 +161,14 @@ export default class OverviewView extends Mixins(NavigationMixin){
     addNewMember() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    editMember(member: DecryptedMember) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberGeneralView, {
+                member
+            })
         }).setDisplayStyle("popup"))
     }
 }

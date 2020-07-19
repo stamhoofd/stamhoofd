@@ -1,5 +1,5 @@
 <template>
-    <div id="parent-view" class="st-view">
+    <div id="emergency-contact-view" class="st-view">
         <STNavigationBar title="Noodcontact">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
@@ -79,7 +79,7 @@ import MemberParentsView from './MemberParentsView.vue';
 })
 export default class EmergencyContactView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    parent: EmergencyContact | null // tood
+    contact: EmergencyContact | null // tood
 
     @Prop({ required: true })
     handler: (contact: EmergencyContact, component: EmergencyContactView) => void;
@@ -90,6 +90,14 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     validator = new Validator()
+
+    mounted() {
+        if (this.contact) {
+            this.name = this.contact.name
+            this.title = this.contact.title
+            this.phone = this.contact.phone
+        }
+    }
 
     async goNext() {
         const errors = new SimpleErrors()
@@ -120,13 +128,19 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
         valid = valid && await this.validator.validate()
 
         if (valid) {
-            const contact = EmergencyContact.create({
-                name: this.name,
-                phone: this.phone,
-                title: this.title
-            })
+            if (this.contact) {
+                this.contact.name = this.name
+                this.contact.title = this.title
+                this.contact.phone = this.phone
+            } else {
+                this.contact = EmergencyContact.create({
+                    name: this.name,
+                    phone: this.phone,
+                    title: this.title
+                })
+            }
 
-           this.handler(contact, this)
+           this.handler(this.contact, this)
         }
     }
 }

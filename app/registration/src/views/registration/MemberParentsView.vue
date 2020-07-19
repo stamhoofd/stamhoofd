@@ -6,11 +6,11 @@
         
         <main>
             <h1>
-                Ouders van {{ member.firstName }}
+                Ouders van {{ memberDetails.firstName }}
             </h1>
 
-            <p v-if="member.age <= 18">Voeg alle ouders van {{ member.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.</p>
-            <p v-else>Voeg alle ouders van {{ member.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.</p>
+            <p v-if="memberDetails.age <= 18">Voeg alle ouders van {{ memberDetails.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.</p>
+            <p v-else>Voeg alle ouders van {{ memberDetails.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.</p>
 
             <p class="warning-box" v-if="parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
             <STErrorsDefault :error-box="errorBox" />
@@ -49,7 +49,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, DecryptedMember } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
 import EmergencyContactView from './EmergencyContactView.vue';
@@ -80,8 +80,12 @@ class SelectableParent {
     }
 })
 export default class MemberParentsView extends Mixins(NavigationMixin) {
+    @Prop({ default: null })
+    member: DecryptedMember | null
+
     @Prop({ required: true })
-    member: MemberDetails
+    memberDetails: MemberDetails
+
     errorBox: ErrorBox | null = null
 
     parents: SelectableParent[] = []
@@ -91,7 +95,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.navigationController.animationType = "modal"
         }
         this.show(new ComponentWithProperties(ParentView, {
-            member: this.member,
+            memberDetails: this.memberDetails,
             parent,
             handler: (parent: Parent, component: ParentView) => {
                 component.pop()
@@ -104,17 +108,17 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.navigationController.animationType = "modal"
         }
         this.show(new ComponentWithProperties(ParentView, {
-            member: this.member,
+            memberDetails: this.memberDetails,
             handler: (parent: Parent, component: ParentView) => {
-                this.member.parents.push(parent)
+                this.memberDetails.parents.push(parent)
                 component.pop()
             }
         }))
     }
 
     mounted() {
-        // Read parents from member
-        for (const parent of this.member.parents) {
+        // Read parents from memberDetails
+        for (const parent of this.memberDetails.parents) {
             this.parents.push(new SelectableParent(parent, true))
         }
 
@@ -127,7 +131,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     }
 
     onChangedSelection() {
-        this.member.parents = this.parents.flatMap(p => {
+        this.memberDetails.parents = this.parents.flatMap(p => {
             if (p.selected) {
                 return [p.parent]
             }
@@ -141,7 +145,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
         }
 
         // Only check for new parents!
-        for (const parent of this.member.parents) {
+        for (const parent of this.memberDetails.parents) {
             if (!this.parents.find(p => p.parent.id == parent.id)) {
                 this.parents.push(new SelectableParent(parent, true))
             }
@@ -153,7 +157,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     }
     
     async goNext() {
-        if (this.member.parents.length == 0) {
+        if (this.memberDetails.parents.length == 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
                 message: "Voeg alle ouders toe voor je verder gaat"
@@ -163,11 +167,15 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
 
         // Emergency contact
         this.show(new ComponentWithProperties(EmergencyContactView, { 
+            contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
             handler: (contact: EmergencyContact, component: EmergencyContactView) => {
-                this.member.emergencyContacts = [contact]
+                this.memberDetails.emergencyContacts = [contact]
                 
                 // go to the steekkaart view
-                component.show(new ComponentWithProperties(MemberRecordsView, { member: this.member }))
+                component.show(new ComponentWithProperties(MemberRecordsView, { 
+                    memberDetails: this.memberDetails,
+                    member: this.member
+                }))
             }
         }))
     }

@@ -6,20 +6,20 @@
         
         <main>
             <h1>
-                Persoonlijke steekkaart van {{ member.firstName }}<span v-tooltip="'Enkel zichtbaar voor leiding en kookploeg. Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy middle" />
+                Persoonlijke steekkaart van {{ memberDetails.firstName }}<span v-tooltip="'Enkel zichtbaar voor leiding en kookploeg. Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy middle" />
             </h1>
 
             <hr>
             <h2>Privacy</h2>
 
             <Checkbox v-model="allowData">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ member.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
             </Checkbox>
-            <Checkbox v-model="isParent" v-if="allowData && member.age < 18">
-                Ik ben wettelijke voogd of ouder van {{ member.firstName }} en mag deze toestemming geven.
+            <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18">
+                Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
             <Checkbox v-model="allowPictures">
-                {{ member.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
+                {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
 
             <p v-if="!allowData" class="warning-box">
@@ -188,7 +188,7 @@
 
                 <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
 
-                <template v-if="member.age < 18">
+                <template v-if="memberDetails.age < 18">
                     <hr>
                     <h2>Toedienen van medicatie</h2>
 
@@ -262,8 +262,11 @@ import { MemberManager } from '../../classes/MemberManager';
     directives: { Tooltip },
 })
 export default class MemberRecordsView extends Mixins(NavigationMixin) {
+    @Prop({ default: null })
+    member: DecryptedMember | null
+    
     @Prop({ required: true })
-    member: MemberDetails
+    memberDetails: MemberDetails
 
     organization = OrganizationManager.organization
 
@@ -283,8 +286,12 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         this.loading = true
 
         try {
-            // todo: validate
-            await MemberManager.addMember(this.member)
+            if (this.member) {
+                this.member.details = this.memberDetails
+                await MemberManager.patchAllMembers()
+            } else {
+                await MemberManager.addMember(this.memberDetails)
+            }
 
             this.dismiss()
         } catch (e) {
@@ -420,25 +427,25 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     // Helpers ---
 
     getBooleanType(type: RecordType) {
-        return !!this.member.records.find(r => r.type == type)
+        return !!this.memberDetails.records.find(r => r.type == type)
     }
 
     setBooleanType(type: RecordType, enabled: boolean) {
-        const index = this.member.records.findIndex(r => r.type == type)
+        const index = this.memberDetails.records.findIndex(r => r.type == type)
         if ((index != -1) === enabled) {
             return
         }
         if (enabled) {
-            this.member.records.push(Record.create({
+            this.memberDetails.records.push(Record.create({
                 type,
             }))
         } else {
-            this.member.records.splice(index, 1)
+            this.memberDetails.records.splice(index, 1)
         }
     }
 
     getTypeDescription(type: RecordType) {
-        const record = this.member.records.find(r => r.type == type)
+        const record = this.memberDetails.records.find(r => r.type == type)
         if (!record) {
             return ""
         }
@@ -446,7 +453,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     }
 
     setTypeDescription(type: RecordType, description: string) {
-        const record = this.member.records.find(r => r.type == type)
+        const record = this.memberDetails.records.find(r => r.type == type)
         if (!record) {
             console.error("Tried to set description for record that doesn't exist")
             return

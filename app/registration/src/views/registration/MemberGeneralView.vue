@@ -5,8 +5,11 @@
         </STNavigationBar>
         
         <main>
-            <h1>
+            <h1 v-if="!member">
                 Wie ga je inschrijven?
+            </h1>
+            <h1 v-else>
+                Gegevens wijzigen van {{ member.details.firstName }}
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -62,12 +65,13 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType } from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, DecryptedMember, Version } from "@stamhoofd/structures"
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from './MemberGroupView.vue';
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 
 @Component({
     components: {
@@ -85,8 +89,11 @@ import MemberGroupView from './MemberGroupView.vue';
     }
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
-    memberDetails: MemberDetails | null = null
+    @Prop({ default: null })
+    member: DecryptedMember | null
 
+    memberDetails: MemberDetails | null = null
+   
     firstName = ""
     lastName = ""
     phone: string | null = null
@@ -98,6 +105,23 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     gender = Gender.Male
     livesAtParents = false
     validator = new Validator()
+
+    mounted() {
+        if (this.member && this.member.details) {
+            // Create a deep clone using encoding
+            this.memberDetails = new ObjectData(this.member.details.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+        }
+
+        if (this.memberDetails) {
+            this.firstName = this.memberDetails.firstName
+            this.lastName = this.memberDetails.lastName
+            this.phone = this.memberDetails.phone
+            this.address = this.memberDetails.address
+            this.birthDay = this.memberDetails.birthDay
+            this.gender = this.memberDetails.gender
+            this.livesAtParents = !this.memberDetails.address && this.age >= 18
+        }
+    }
 
     get age() {
         if (!this.birthDay) {
@@ -232,7 +256,10 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         }
         // todo: check age before asking parents
         if (this.memberDetails.age < 18 || this.livesAtParents) {
-            component.show(new ComponentWithProperties(MemberParentsView, { member: this.memberDetails }))
+            component.show(new ComponentWithProperties(MemberParentsView, { 
+                memberDetails: this.memberDetails,
+                member: this.member
+            }))
         } else {
             // Noodcontacten
             alert("noodcontacten")

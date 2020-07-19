@@ -89,7 +89,7 @@ import { MemberManager } from '../../classes/MemberManager';
 })
 export default class ParentView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    member: MemberDetails | null
+    memberDetails: MemberDetails | null
 
     @Prop({ default: null })
     parent: Parent | null
@@ -137,8 +137,8 @@ export default class ParentView extends Mixins(NavigationMixin) {
 
     get availableAddresses() {
         const addresses = MemberManager.getAddresses()
-        if (this.member) {
-            for (const parent of this.member.parents) {
+        if (this.memberDetails) {
+            for (const parent of this.memberDetails.parents) {
                 if (parent.address && !addresses.find(a => a.toString() == parent.address!.toString())) {
                     addresses.push(parent.address)
                 }
@@ -154,8 +154,8 @@ export default class ParentView extends Mixins(NavigationMixin) {
     set editAddress(address: Address | null) {
         if (this.address && address) {
             MemberManager.updateAddress(this.address, address)
-            if (this.member) {
-                this.member.updateAddress(this.address, address)
+            if (this.memberDetails) {
+                this.memberDetails.updateAddress(this.address, address)
             }
         } else {
             if (this.address === this.customAddress) {
