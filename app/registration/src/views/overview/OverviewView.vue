@@ -19,7 +19,7 @@
             <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
             <STList class="member-selection-table">
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" >
+                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
                     <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
                     <p>{{ member.details.name }}</p>
                     <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
