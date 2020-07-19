@@ -3,6 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
+const autoprefixer = require('autoprefixer');
 
 module.exports = {
     mode: "development",
@@ -42,14 +43,27 @@ module.exports = {
             },
             { 
                 test: /\.tsx?$/, 
-                loader: "ts-loader",
-                options: { appendTsSuffixTo: [/\.vue$/] }
+                use: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                    {
+                        loader: 'ts-loader',
+                        options: { appendTsSuffixTo: [/\.vue$/] },
+                    }
+                ]
             },
             {
                 test: /\.css$/,
                 use: [
                     'style-loader',
                     'css-loader',
+                    { 
+                        loader: 'postcss-loader', 
+                        options: {
+                            "plugins": [autoprefixer]
+                        }
+                    },
                     'icon-font-loader',
                 ],
             },
@@ -66,7 +80,8 @@ module.exports = {
                         options: {
                             plugins: (loader) => [
                                 // Add the plugin
-                                new IconfontWebpackPlugin(loader)
+                                new IconfontWebpackPlugin(loader),
+                                autoprefixer
                             ]
                         }
                     },
@@ -104,9 +119,9 @@ module.exports = {
         new FriendlyErrorsWebpackPlugin(),
         new CleanWebpackPlugin(), // Clear the dist folder before building
         new VueLoaderPlugin(), // Allow .vue files
-        new MiniCssExtractPlugin({ // Make sure CSS is not put inline, but saved to a seperate file
+        ...(process.env.NODE_ENV !== 'production') ? [] : [new MiniCssExtractPlugin({ // Make sure CSS is not put inline, but saved to a seperate file
             filename: '[name].[contenthash].css',
             chunkFilename: '[id].[contenthash].css',
-        })
+        })]
     ]
 };

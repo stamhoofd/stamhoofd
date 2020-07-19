@@ -15,6 +15,12 @@
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
+                    <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
+                        <select class="input" v-model="type">
+                            <option v-for="type in parentTypes" :key="type" :value="type">{{ parentTypeName(type) }}</option>
+                        </select>
+                    </STInputBox>
+
                     <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
@@ -62,7 +68,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 import { MemberManager } from '../../classes/MemberManager';
@@ -93,6 +99,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
 
     firstName = ""
     lastName = ""
+    type: ParentType = ParentType.Mother
     phone: string | null = null
     email: string | null = null
     errorBox: ErrorBox | null = null
@@ -112,11 +119,20 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.phone = this.parent.phone
             this.email = this.parent.email
             this.address = this.parent.address ? Address.create(this.parent.address) : null
+            this.type = this.parent.type
         } else {
             if (this.availableAddresses.length > 0) {
                 this.address = this.availableAddresses[0]
             }
         }
+    }
+
+    get parentTypes() {
+        return Object.values(ParentType)
+    }
+
+    parentTypeName(type: ParentType) {
+        return ParentTypeHelper.getName(type)
     }
 
     get availableAddresses() {
@@ -188,6 +204,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
                 this.parent.phone = this.phone
                 this.parent.email = this.email
                 this.parent.address = this.address
+                this.parent.type = this.type
 
             } else {
                 this.parent = Parent.create({
@@ -195,7 +212,8 @@ export default class ParentView extends Mixins(NavigationMixin) {
                     lastName: this.lastName,
                     phone: this.phone,
                     email: null,
-                    address: this.address
+                    address: this.address,
+                    type: this.type
                 })
             }
             

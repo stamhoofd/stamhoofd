@@ -1,7 +1,13 @@
 const path = require("path");
 var merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-var common = require("../../webpack.config.js");
+
+var common;
+if (process.env.NODE_ENV != "production") {
+    common = require("../../webpack.config.js");
+} else {
+    common = require("../../webpack.production.config.js");
+}
 
 module.exports = merge(common, {
     target: 'web',
