@@ -2,8 +2,9 @@
     <div class="st-view group-list-view">
         <STNavigationBar :sticky="false">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon gray left add" @click="createGroup">
-                Nieuw
+            <button slot="right" class="button text" @click="createGroup">
+                <span class="icon add"/>
+                <span>Nieuw</span>
             </button>
         </STNavigationBar>
 

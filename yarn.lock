@@ -505,24 +505,24 @@
   dependencies:
     mkdirp "^1.0.4"
 
-"@simonbackx/simple-encoding@^1.9":
+"@simonbackx/simple-encoding@~1.9":
   version "1.9.2"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.2.tgz#628c5bbb6cb002e7afeb7aa62414ef21741a0ee7"
   integrity sha512-lz38KRjYgcTSVSRNmV1nsR7QaEEHt2R25LZ3rr6jSyZhwM+HQdmuktP85j7FiyQTkp4HJsbNLEsDMDKn0Gyo6w==
 
-"@simonbackx/simple-errors@^1.0":
+"@simonbackx/simple-errors@~1.0":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.6.tgz#ce56301d557324c1d220eab4197e4a19edbed9f3"
   integrity sha512-zIoUMbJN6zVTHVejrze3Q9uARj/HwCjhSUYd46HFZMAgG6FqEFpPZ8zPbAc/6BCzS+h3vA7mKMmP3RmyjwwCFg==
   dependencies:
     uuid "^8.2.0"
 
-"@simonbackx/simple-networking@^1.3.0":
+"@simonbackx/simple-networking@~1.3.0":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.3.tgz#2b2909bfc857cc88cec32757e02eaa29b9dce457"
   integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
 
-"@simonbackx/vue-app-navigation@^1.4.0":
+"@simonbackx/vue-app-navigation@~1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.4.0.tgz#7f8476f94249dfbea697dff7f5b4eb93497114df"
   integrity sha512-sccuN+IXlnN+FPOUnmbNu7N6SSsx6PbFsO011suvjGioAEu8AaKnwvMbH2aQkclDBOABfeqaBXSzemEUCRcZzg==
@@ -546,9 +546,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.2.19"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.2.19.tgz#762f25b01a21810401bacd2956ac62b35dd03361"
-  integrity sha512-0INXbDTyQqpAhj4E5IwOZPsgpMCdHdYR7iDYH0Jn+gNtoV1cejXYv01g18RjBlxwCiSrUppSvVzz7bfDH/+I7Q==
+  version "1.2.20"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.2.20.tgz#3793ff98987e5de91a6f72dcde14e6fc34a6295b"
+  integrity sha512-ffy2wzHTYLiP1Sqw6j3bEZ+Y+ViRRr2dzJ7Ehk6J3PcMKJdlZlwI75ZvSBWjFXq7qVnJfFNyvVV/rtkrnOQbCg==
   dependencies:
     uuid "^8.2.0"
 
