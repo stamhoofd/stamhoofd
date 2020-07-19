@@ -1,7 +1,35 @@
 <template>
     <LoadingView v-if="members === null" />
     <div class="boxed-view" v-else>
-        <div class="st-view auto" v-if="members.length == 0">
+        <div class="st-view auto" v-if="registeredMembers.length > 0">
+            <main>
+                <h1>Ingeschreven leden</h1>
+                <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
+
+                <STList>
+                    <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack left-center">
+                        <span class="icon user" slot="left" />
+                        <p>{{ member.details.name }}</p>
+
+                        <template slot="right">
+                            <button class="button text" @click.stop="editMember(member)">
+                                <span class="icon edit" />
+                                <span>Bewerken</span>
+                            </button>
+                            
+                        </template>
+                    </STListItem>
+                </STList>
+
+            </main>
+            <STToolbar>
+                <button class="primary button" slot="right" @click="addNewMember">
+                    <span class="icon white left add"/>
+                    <span>Lid inschrijven</span>
+                </button>
+            </STToolbar>
+        </div>
+        <div class="st-view auto" v-else-if="members.length == 0">
             <main>
                 <h1>Je hebt nog niemand ingeschreven</h1>
                 <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
@@ -76,6 +104,25 @@ import FinancialProblemsView from './FinancialProblemsView.vue';
 export default class OverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     memberSelection: { [key:string]:boolean; } = {}
+
+    /**
+     * Return members that are currently registered in
+     */
+    get registeredMembers() {
+        if (!this.members) {
+            return []
+        }
+        const groups = OrganizationManager.organization.groups
+        return this.members.filter(m => {
+            if (m.registrations.find(r => {
+                const group = groups.find(g => g.id == r.groupId)
+                return group && group.cycle == r.cycle && !r.deactivatedAt
+            })) {
+                return true
+            }
+            return false
+        })
+    }
 
     get members() {
         if (MemberManager.members) {

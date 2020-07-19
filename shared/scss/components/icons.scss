@@ -64,4 +64,8 @@
     &.edit:after {
         font-icon: url(@stamhoofd/assets/images/icons/pencil.svg);
     }
+
+    &.user:after {
+        font-icon: url(@stamhoofd/assets/images/icons/user.svg);
+    }
 }
