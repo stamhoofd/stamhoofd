@@ -163,4 +163,14 @@
             opacity: 0.4;
         }
     }
+
+    &.icon {
+        cursor: pointer;
+        padding: 10px;
+        margin: -10px;
+
+        &:active {
+            opacity: 0.4;
+        }
+    }
 }
