@@ -23,6 +23,7 @@ export * from "./src/PaymentStatus"
 // Endpoints
 export * from "./src/endpoints/CreateOrganization"
 export * from "./src/endpoints/PatchMembers"
+export * from "./src/endpoints/RegisterMember"
 
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
 export * from "./src/endpoints/tokens/ChallengeResponseStruct"
