@@ -1,6 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from '@stamhoofd/crypto';
-import { GroupSettings } from "@stamhoofd/structures";
+import { GroupPrices,GroupSettings } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { Organization } from "../models/Organization";
@@ -20,7 +20,11 @@ export class GroupFactory extends Factory<Options, Group> {
             name: "Group name",
             startDate: new Date(),
             endDate: new Date(),
-            prices: [],
+            prices: [
+                GroupPrices.create({
+                    price: 400
+                })
+            ],
         })
 
         await group.save()

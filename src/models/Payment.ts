@@ -47,4 +47,25 @@ export class Payment extends Model {
 
     @column({ type: "datetime", nullable: true })
     paidAt: Date | null = null
+
+    static generateOGM() {
+        /**
+         * De eerste tien cijfers zijn bijvoorbeeld een klantennummer of een factuurnummer. 
+         * De laatste twee cijfers vormen het controlegetal dat verkregen wordt door van de 
+         * voorgaande tien cijfers de rest bij Euclidische deling door 97 te berekenen (modulo 97). 
+         * Voor en achter de cijfers worden drie plussen (+++) of sterretjes (***) gezet.
+         * 
+         * Uitzondering: Indien de rest 0 bedraagt, dan wordt als controlegetal 97 gebruikt.[1]
+         */
+
+        const firstChars = Math.round(Math.random() * 9999999999)
+        let modulo = firstChars % 97
+        if (modulo == 0) {
+            modulo = 97
+        }
+
+        const str = (firstChars + "").padStart(10, "0") + (modulo + "").padStart(2, "0")
+
+        return "+++"+str.substr(0, 3) + "/" + str.substr(3, 4) + "+"+str.substr(3 + 4)+"+++"
+    }
 }
