@@ -116,6 +116,24 @@ export class MemberDetails extends AutoEncoder {
         return groups.filter(g => this.doesMatchGroup(g))
     }
 
+    getPreferredGroup(groups: Group[]): Group | null {
+        if (this.preferredGroupId) {
+            for (const group of groups) {
+                if (group.id === this.preferredGroupId) {
+                    return group
+                }
+            }
+            return null
+        }
+
+        // Search for possibilities
+        const matching = this.getMatchingGroups(groups)
+        if (matching.length == 1) {
+            return matching[0]
+        }
+        return null
+    }
+
     updateAddress(oldValue: Address, newValue: Address) {
         const str = oldValue.toString()
 
