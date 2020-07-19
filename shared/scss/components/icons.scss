@@ -9,6 +9,14 @@
     white-space: nowrap;
     display: inline;
 
+    &.gray {
+        color: $color-gray;
+    }
+
+    &.middle {
+        vertical-align: middle;
+    }
+
     &:after {
         vertical-align: middle;
     }
@@ -42,7 +50,7 @@
     }
 
     &.close:after {
-        font-icon: url(@stamhoofd/assets/images/icons/gray/close.svg);
+        font-icon: url(@stamhoofd/assets/images/icons/close.svg);
     }
 
     &.more:after {
@@ -50,6 +58,6 @@
     }
 
     &.privacy:after {
-        font-icon: url(@stamhoofd/assets/images/icons/gray/privacy.svg);
+        font-icon: url(@stamhoofd/assets/images/icons/privacy.svg);
     }
 }

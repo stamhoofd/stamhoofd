@@ -6,27 +6,21 @@
         
         <main>
             <h1>
-                Persoonlijke steekkaart van {{ member.firstName }} <span v-tooltip="'Enkel zichtbaar voor leiding en kookploeg. Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy" />
+                Persoonlijke steekkaart van {{ member.firstName }}<span v-tooltip="'Enkel zichtbaar voor leiding en kookploeg. Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy middle" />
             </h1>
 
             <hr>
             <h2>Privacy</h2>
 
-            <div class="st-input-box">
-                <Checkbox v-model="allowData">
-                    Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ member.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
-                </Checkbox>
-            </div>
-            <div v-if="allowData && member.age < 18" class="st-input-box">
-                <Checkbox v-model="isParent">
-                    Ik ben wettelijke voogd of ouder van {{ member.firstName }} en mag deze toestemming geven.
-                </Checkbox>
-            </div>
-            <div class="st-input-box">
-                <Checkbox v-model="allowPictures">
-                    {{ member.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
-                </Checkbox>
-            </div>
+            <Checkbox v-model="allowData">
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ member.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
+            </Checkbox>
+            <Checkbox v-model="isParent" v-if="allowData && member.age < 18">
+                Ik ben wettelijke voogd of ouder van {{ member.firstName }} en mag deze toestemming geven.
+            </Checkbox>
+            <Checkbox v-model="allowPictures">
+                {{ member.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
+            </Checkbox>
 
             <p v-if="!allowData" class="warning-box">
                 Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).

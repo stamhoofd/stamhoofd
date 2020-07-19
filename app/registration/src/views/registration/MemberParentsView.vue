@@ -33,7 +33,8 @@
         </main>
         <STToolbar>
             <button slot="right" class="button" :class="{ primary: parents.length <= 1, secundary: parents.length > 1}" @click="addParent">
-                <span class="icon white add"/>Ouder toevoegen
+                <span class="icon add" />
+                <span>Ouder toevoegen</span>
             </button>
             <!-- Next buttons becomes primary button when two parents are selected. We know lot's of members will only have one parent, but we need to force parents to add both parents if they have two parents -->
             <button slot="right" class="button" :class="{ secundary: parents.length <= 1, primary: parents.length > 1}" @click="goNext">
