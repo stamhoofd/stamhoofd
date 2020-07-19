@@ -48,6 +48,9 @@ export { default as STListItem } from "./src/layout/STListItem.vue"
 // Other
 export { default as Spinner } from "./src/Spinner.vue"
 
+export { default as Steps } from "./src/steps/Steps.vue"
+
+
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
 export { default as MaleIcon } from "./src/icons/MaleIcon.vue"

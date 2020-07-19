@@ -1,7 +1,10 @@
 <template>
-    <Steps :root="root">
-        <template slot="left">
-            {{ organization.name }}
+    <Steps :root="root" :total-steps="3">
+        <template v-slot:left="slotProps">
+            <template v-if="slotProps.step <= 1 ||!canPop">
+                {{ organization.name }}
+            </template>
+            <BackButton v-else @click="popNav" />
         </template>
         <template slot="right">
             <button class="button text" @click="returnToSite" v-if="organization.website">
@@ -15,7 +18,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import Steps from "@stamhoofd/components/src/steps/Steps.vue"
+import { Steps, BackButton } from "@stamhoofd/components"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import SignupGeneralView from '../signup/SignupGeneralView.vue';
@@ -23,7 +26,8 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {
-        Steps
+        Steps,
+        BackButton
     },
 })
 export default class RegistrationSteps extends Mixins(NavigationMixin){
@@ -39,6 +43,10 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
             return
         }
         window.location.href = this.organization.website
+    }
+
+    popNav() {
+        (this.root.componentInstance() as any).navigationController.pop();
     }
 }
 </script>

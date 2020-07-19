@@ -33,3 +33,13 @@
         }
     }
 }
+
+.boxed-view {
+    > .st-view {
+        max-width: 800px;
+        background: $color-white;
+        @extend .style-side-view-shadow;
+        border-radius: $border-radius;
+        margin: 0 auto;
+    }
+}

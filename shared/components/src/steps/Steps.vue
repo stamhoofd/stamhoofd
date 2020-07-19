@@ -2,7 +2,7 @@
     <div class="steps-layout">
         <StepsHeader :progress="totalSteps ? ((step - 1) / totalSteps) : 0">
             <template #left>
-                <slot name="left">
+                <slot name="left" v-bind:step="step">
                     <transition name="move" mode="out-in">
                         <div v-if="step <= 1" id="logo" alt="Stamhoofd" />
                         <div v-else @click.prevent="goBack()">
@@ -185,16 +185,6 @@ $header-height: 70px;
         height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
         --st-vertical-padding: 60px;
-
-        &> .navigation-controller > div > div > .st-view {
-            background: $color-white;
-            max-width: 800px;
-            margin: 20px auto;
-            @extend .style-side-view-shadow;
-            border-radius: $border-radius;
-        }
-
-       
     }
 }
 

@@ -1,51 +1,53 @@
 <template>
     <LoadingView v-if="members === null" />
-    <div class="st-view auto" v-else-if="members.length == 0">
-        <main>
-            <h1>Je hebt nog niemand ingeschreven</h1>
-            <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
-        </main>
-        <STToolbar>
-            <button class="primary button" slot="right" @click="addNewMember">
-                <span class="icon white left add"/>
-                <span>Lid inschrijven</span>
-            </button>
-        </STToolbar>
-    </div>
-    <div class="st-view auto" v-else>
-        <main>
-            <h1>Wie wil je inschrijven?</h1>
+    <div class="boxed-view" v-else>
+        <div class="st-view auto" v-if="members.length == 0">
+            <main>
+                <h1>Je hebt nog niemand ingeschreven</h1>
+                <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
+            </main>
+            <STToolbar>
+                <button class="primary button" slot="right" @click="addNewMember">
+                    <span class="icon white left add"/>
+                    <span>Lid inschrijven</span>
+                </button>
+            </STToolbar>
+        </div>
+        <div class="st-view auto" v-else>
+            <main>
+                <h1>Wie wil je inschrijven?</h1>
 
-            <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
+                <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
-            <STList class="member-selection-table">
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
-                    <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
-                    <p>{{ member.details.name }}</p>
-                    <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
-                    <p class="member-group" v-else>Kies eerst een groep</p>
+                <STList class="member-selection-table">
+                    <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
+                        <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
+                        <p>{{ member.details.name }}</p>
+                        <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
+                        <p class="member-group" v-else>Kies eerst een groep</p>
 
-                    <template slot="right">
-                        <button class="button text" @click.stop="editMember(member)">
-                            <span class="icon edit" />
-                            <span>Bewerken</span>
-                        </button>
-                        
-                    </template>
-                </STListItem>
-            </STList>
-        </main>
+                        <template slot="right">
+                            <button class="button text" @click.stop="editMember(member)">
+                                <span class="icon edit" />
+                                <span>Bewerken</span>
+                            </button>
+                            
+                        </template>
+                    </STListItem>
+                </STList>
+            </main>
 
-        <STToolbar>
-            <button slot="right" class="button primary" @click="addNewMember">
-                <span class="icon add"/>
-                <span>Nog iemand toevoegen</span>
-            </button>
-            <button slot="right" class="button secundary">
-                <span>Inschrijven</span>
-                <span class="icon gray arrow-right"/>
-            </button>
-        </STToolbar>
+            <STToolbar>
+                <button slot="right" class="button primary" @click="addNewMember">
+                    <span class="icon add"/>
+                    <span>Nog iemand toevoegen</span>
+                </button>
+                <button slot="right" class="button secundary" @click="registerSelectedMembers">
+                    <span>Inschrijven</span>
+                    <span class="icon arrow-right"/>
+                </button>
+            </STToolbar>
+        </div>
     </div>
 </template>
 
@@ -59,6 +61,7 @@ import { DecryptedMember, Group } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
+import FinancialProblemsView from './FinancialProblemsView.vue';
 
 @Component({
     components: {
@@ -174,6 +177,20 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 member
             })
         }).setDisplayStyle("popup"))
+    }
+
+    registerSelectedMembers() {
+        if (!this.members) {
+            return
+        }
+        this.show(new ComponentWithProperties(FinancialProblemsView, {
+            selectedMembers: this.members.flatMap((m) => {
+                if (this.memberSelection[m.id] === true) {
+                    return [m]
+                }
+                return []
+            })
+        }))
     }
 }
 </script>
