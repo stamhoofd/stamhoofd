@@ -60,4 +60,8 @@
     &.privacy:after {
         font-icon: url(@stamhoofd/assets/images/icons/privacy.svg);
     }
+
+    &.edit:after {
+        font-icon: url(@stamhoofd/assets/images/icons/pencil.svg);
+    }
 }

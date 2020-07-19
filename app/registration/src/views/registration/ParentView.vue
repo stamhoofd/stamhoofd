@@ -39,10 +39,11 @@
                 <div>
                     <STInputBox v-if="availableAddresses.length > 0" title="Kies een adres">
                         <STList>
-                            <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center">
+                            <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                                 <Radio v-model="address" slot="left" :value="_address"/>
-                                {{ _address }}
-                                <button slot="right" class="button icon gray more" @click.stop="doEditAddress(_address)"/>
+                                {{ _address.street }} {{ _address.number }}<br>
+                                {{ _address.postalCode }} {{ _address.city }}
+                                <button slot="right" class="button icon gray edit" @click.stop="doEditAddress(_address)"/>
                             </STListItem>
                             <STListItem element-name="label" :selectable="true" class="left-center">
                                 <Radio v-model="address" slot="left" :value="customAddress"/>
@@ -205,7 +206,10 @@ export default class ParentView extends Mixins(NavigationMixin) {
                 this.parent.email = this.email
                 this.parent.address = this.address
                 this.parent.type = this.type
-
+                MemberManager.updateParent(this.parent)
+                if (this.memberDetails) {
+                    this.memberDetails.updateParent(this.parent)
+                }
             } else {
                 this.parent = Parent.create({
                     firstName: this.firstName,
@@ -217,16 +221,21 @@ export default class ParentView extends Mixins(NavigationMixin) {
                 })
             }
             
-
-           this.handler(this.parent, this)
+            this.handler(this.parent, this)
         }
     }
 }
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables" as *;
+@use "@stamhoofd/scss/base/text-styles" as *;
 
 #parent-view {
+    .address-selection {
+        .middle {
+            @extend .style-normal;
+        }
+    }
 }
 </style>

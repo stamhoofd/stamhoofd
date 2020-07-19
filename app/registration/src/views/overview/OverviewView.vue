@@ -19,14 +19,18 @@
             <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
             <STList class="member-selection-table">
-                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" @click="editMember(member)">
-                    <Checkbox v-model="memberSelection[member.id]" slot="left" @change="onSelectMember(member)" />
+                <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" >
+                    <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
                     <p>{{ member.details.name }}</p>
                     <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
                     <p class="member-group" v-else>Kies eerst een groep</p>
 
                     <template slot="right">
-                        <span class="icon gray arrow-right-small" />
+                        <button class="button text" @click.stop="editMember(member)">
+                            <span class="icon edit" />
+                            <span>Bewerken</span>
+                        </button>
+                        
                     </template>
                 </STListItem>
             </STList>

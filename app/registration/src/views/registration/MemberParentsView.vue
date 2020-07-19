@@ -16,16 +16,17 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <STList>
-                <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" @click="editParent(parent.parent)" class="right-stack left-center">
-                    <Checkbox slot="left" @click.native.stop v-model="parent.selected" @change="onChangedSelection" />
+                <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+                    <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
 
                     <h2 class="parent-name">{{ parent.parent.firstName }} {{ parent.parent.lastName }}</h2>
                     <p class="parent-description" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
+                    <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
 
-                    <template slot="right">
-                        <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
-                        <span class=" icon arrow-right-small gray" />
-                    </template>
+                    <button slot="right" class="button text" @click.stop="editParent(parent.parent)">
+                        <span class="icon edit" />
+                        <span>Bewerken</span>
+                    </button>
                 </STListItem>
             </STList>
 

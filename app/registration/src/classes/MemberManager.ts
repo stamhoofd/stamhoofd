@@ -193,6 +193,21 @@ export class MemberManagerStatic {
         }
     }
 
+    /// Update all references to this parent (with same id)
+    updateParent(parent: Parent) {
+        if (!this.members) {
+            return
+        }
+
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+
+            member.details.updateParent(parent)
+        }
+    }
+
     /**
      * List all unique addresses of the already existing members
      */

@@ -41,7 +41,7 @@ export default class STListItem extends Vue {
 
 .st-list-item {
     padding-left: var(--st-horizontal-padding, 15px);
-    padding-right: var(--st-horizontal-padding, 15px);
+    padding-right: 0;
     margin: 0;
     display: flex;
     flex-direction: row;
@@ -121,7 +121,7 @@ export default class STListItem extends Vue {
 
             > .right {
                 margin-left: auto;
-                padding-right: 15px;
+                padding-right: var(--st-horizontal-padding, 15px);
                 min-width: 0; // flexbox disable becoming bigger than parent
 
                 padding-top: 10px;
