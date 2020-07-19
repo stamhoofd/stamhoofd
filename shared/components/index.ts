@@ -1,8 +1,8 @@
 // Errors
 export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
 export * from "./src/errors/ErrorBox"
-export { default as STErrorsDefault }  from "./src/errors/STErrorsDefault.vue"
-export { default as STErrorsInput }  from "./src/errors/STErrorsInput.vue"
+export { default as STErrorsDefault } from "./src/errors/STErrorsDefault.vue"
+export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/Validator"
 
 // Inputs
@@ -24,6 +24,7 @@ export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.v
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
+export { default as BackButton } from "./src/navigation/BackButton.vue"
 
 // Overlays
 export { default as CenteredMessage } from "./src/overlays/CenteredMessage.vue"

@@ -1,9 +1,7 @@
 <template>
     <div id="signup-structure-view" class="st-view">
         <STNavigationBar title="Samenstelling">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         <STNavigationTitle>
             Samenstelling
@@ -69,7 +67,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Radio, RadioGroup } from "@stamhoofd/components"
-import { ErrorBox } from "@stamhoofd/components/src/errors/ErrorBox";
+import { ErrorBox, BackButton } from "@stamhoofd/components";
 import STErrorsDefault from "@stamhoofd/components/src/errors/STErrorsDefault.vue";
 import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue";
 import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
@@ -88,7 +86,8 @@ import SignupYearDurationView from './SignupYearDurationView.vue';
         STErrorsDefault,
         STInputBox,
         RadioGroup,
-        Radio
+        Radio,
+        BackButton
     }
 })
 export default class SignupStructureView extends Mixins(NavigationMixin) {

@@ -2,86 +2,54 @@
 @use '../base/text-styles';
 
 .icon {
-    height: 24px;
-    line-height: 24px;
+    width: 24px;
+    font-size: 24px;
     box-sizing: content-box;
-    @extend .style-button-small;
-    text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    display: inline-block;
-    vertical-align: middle;
+    display: inline;
 
-    &.gray {
-        color: $color-gray;
+    &:after {
+        vertical-align: middle;
     }
 
-    background-position: center center;
-    background-repeat: no-repeat;
-
-    &.left {
-        background-position: left center;
-        
-        padding-left: 30px;
-        padding-right: 10px;
+    &.add:after {
+        font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
 
-    &.right {
-        background-position: right center;
-        padding-right: 30px;
-        padding-left: 10px;
+    &.help:after {
+        font-icon: url('@stamhoofd/assets/images/icons/gray/help.svg');
     }
 
-    &:empty {
-        width: 24px;
-        padding: 0;
+    &.arrow-left:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-left-big.svg);
     }
 
-    &.white {
-        &.add {
-            background-image: url(~@stamhoofd/assets/images/icons/white/add.svg);
-        }
+    &.arrow-right:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-right-big.svg);
     }
 
-    &.gray {
-        &.help {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/help.svg);
-        }
+    &.clock:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/clock.svg);
+    }
 
-        &.arrow-left {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-left-big.svg);
-        }
+    &.trash:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/trash.svg);
+    }
 
-        &.arrow-right {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-right-big.svg);
-        }
+    &.arrow-right-small:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/arrow-right-small.svg);
+    }
 
-        &.clock {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/clock.svg);
-        }
+    &.close:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/close.svg);
+    }
 
-        &.add {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/add.svg);
-        }
+    &.more:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/more.svg);
+    }
 
-        &.trash {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/trash.svg);
-        }
-
-        &.arrow-right-small {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-right-small.svg);
-        }
-
-        &.close {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/close.svg);
-        }
-
-        &.more {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/more.svg);
-        }
-
-        &.privacy {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/privacy.svg);
-        }
+    &.privacy:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/privacy.svg);
     }
 }

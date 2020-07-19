@@ -149,16 +149,18 @@
         cursor: help;
     }
 
-    &.icon {
+    &.text {
         cursor: pointer;
+        @extend .style-button-small;
+        color: $color-gray;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: middle;
+        height: 24px;
+        line-height: 24px;
       
         &:active {
             opacity: 0.4;
-        }
-
-        &:empty {
-            padding: 10px;
-            margin: -10px;
         }
     }
 }

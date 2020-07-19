@@ -1,7 +1,7 @@
 <template>
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Noodcontact">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
         <main>
@@ -56,7 +56,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
@@ -73,7 +73,8 @@ import MemberParentsView from './MemberParentsView.vue';
         RadioGroup,
         Radio,
         PhoneInput,
-        Checkbox
+        Checkbox,
+        BackButton
     }
 })
 export default class EmergencyContactView extends Mixins(NavigationMixin) {

@@ -1,7 +1,7 @@
 <template>
     <div v-if="groups.length == 0" id="group-selection-view" class="st-view">
         <STNavigationBar title="Kies een groep">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
         <main>
@@ -24,7 +24,7 @@
 
     <div v-else id="group-selection-view" class="st-view">
         <STNavigationBar title="Kies een groep">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
         <main>
@@ -56,7 +56,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, Spinner } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, Spinner, BackButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
@@ -70,7 +70,8 @@ import { OrganizationManager } from '../../../../dashboard/src/classes/Organizat
         Radio,
         STList,
         STListItem,
-        Spinner
+        Spinner,
+        BackButton
     }
 })
 export default class MemberGroupView extends Mixins(NavigationMixin) {

@@ -4,7 +4,7 @@
             {{ organization.name }}
         </template>
         <template slot="right">
-            <button class="button icon left logout gray" @click="returnToSite" v-if="organization.website">
+            <button class="button text" @click="returnToSite" v-if="organization.website">
                 Terug naar website
             </button>
         </template>

@@ -1,9 +1,7 @@
 <template>
     <div id="signup-year-duration-view" class="st-view">
         <STNavigationBar title="Werkjaar">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
   
         <main>
@@ -35,7 +33,7 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { DateSelection, ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { DateSelection, ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { Organization, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -47,7 +45,8 @@ import SignupPricesView from './SignupPricesView.vue';
         STNavigationBar,
         STErrorsDefault,
         STInputBox,
-        DateSelection
+        DateSelection,
+        BackButton
     }
 })
 export default class SignupYearDurationView extends Mixins(NavigationMixin) {

@@ -1,9 +1,7 @@
 <template>
     <div id="signup-general-view" class="st-view">
         <STNavigationBar title="Jouw vereniging aansluiten">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
 
@@ -72,7 +70,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -84,7 +82,8 @@ import SignupStructureView from './SignupStructureView.vue';
         STNavigationBar,
         Slider,
         STErrorsDefault,
-        STInputBox
+        STInputBox,
+        BackButton
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {

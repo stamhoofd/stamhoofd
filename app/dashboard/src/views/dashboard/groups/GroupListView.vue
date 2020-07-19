@@ -1,16 +1,10 @@
 <template>
     <div class="st-view group-list-view">
         <STNavigationBar :sticky="false">
-            <template #left>
-                <button v-if="canPop" class="button icon gray left arrow-left" @click="pop">
-                    Terug
-                </button>
-            </template>
-            <template #right>
-                <button class="button icon gray left add" @click="createGroup">
-                    Nieuw
-                </button>
-            </template>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button slot="right" class="button icon gray left add" @click="createGroup">
+                Nieuw
+            </button>
         </STNavigationBar>
 
     
@@ -36,7 +30,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon, CenteredMessage } from "@stamhoofd/components";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon, CenteredMessage, BackButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
@@ -53,7 +47,8 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         STList,
         STListItem,
         MaleIcon,
-        FemaleIcon
+        FemaleIcon,
+        BackButton
     }
 })
 export default class GroupListView extends Mixins(NavigationMixin) {

@@ -1,9 +1,7 @@
 <template>
     <div id="member-records-view" class="st-view">
         <STNavigationBar title="Steekkaart">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
         <main>
@@ -209,7 +207,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip,Validator } from "@stamhoofd/components"
+import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
 import { MemberDetails, Record, RecordType } from "@stamhoofd/structures"
@@ -234,7 +232,8 @@ import { MemberManager } from '../../classes/MemberManager';
         STList,
         STListItem,
         Checkbox,
-        Spinner
+        Spinner,
+        BackButton
     },
     directives: { Tooltip },
 })

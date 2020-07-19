@@ -6,9 +6,9 @@
             <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
         </main>
         <STToolbar>
-            <button class="primary button add" slot="right" @click="addNewMember">
-                <span class="icon white add"/>
-                Lid inschrijven
+            <button class="primary button" slot="right" @click="addNewMember">
+                <span class="icon white left add"/>
+                <span>Lid inschrijven</span>
             </button>
         </STToolbar>
     </div>
@@ -33,8 +33,14 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" @click="addNewMember"><span class="icon white add"/>Nog iemand toevoegen</button>
-            <button slot="right" class="button secundary">Inschrijven<span class="icon gray arrow-right"/></button>
+            <button slot="right" class="button primary" @click="addNewMember">
+                <span class="icon add"/>
+                <span>Nog iemand toevoegen</span>
+            </button>
+            <button slot="right" class="button secundary">
+                <span>Inschrijven</span>
+                <span class="icon gray arrow-right"/>
+            </button>
         </STToolbar>
     </div>
 </template>

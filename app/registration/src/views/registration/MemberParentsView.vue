@@ -1,7 +1,7 @@
 <template>
     <div id="member-parents-view" class="st-view">
         <STNavigationBar title="Ouders">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">Terug</button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
         
         <main>
@@ -47,7 +47,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox, BackButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
@@ -74,7 +74,8 @@ class SelectableParent {
         STInputBox,
         STList,
         STListItem,
-        Checkbox
+        Checkbox,
+        BackButton
     }
 })
 export default class MemberParentsView extends Mixins(NavigationMixin) {

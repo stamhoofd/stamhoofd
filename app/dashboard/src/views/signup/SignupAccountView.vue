@@ -1,9 +1,7 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Maak jouw account">
-            <button slot="left" type="button" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
 
         <main>
@@ -58,7 +56,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -71,7 +69,8 @@ import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts
         STNavigationBar,
         STErrorsDefault,
         STInputBox,
-        Spinner
+        Spinner,
+        BackButton
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {

@@ -1,9 +1,7 @@
 <template>
     <div id="signup-prices-view" class="st-view">
         <STNavigationBar title="Lidgeld">
-            <button slot="left" class="button icon gray left arrow-left" @click="pop">
-                Terug
-            </button>
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
   
         <main>
@@ -57,7 +55,7 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, DateSelection, ErrorBox, PriceInput, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Checkbox, DateSelection, ErrorBox, PriceInput, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { GroupPrices,Organization, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -71,7 +69,8 @@ import SignupAccountView from './SignupAccountView.vue';
         STInputBox,
         DateSelection,
         PriceInput,
-        Checkbox
+        Checkbox,
+        BackButton
     }
 })
 export default class SignupPricesView extends Mixins(NavigationMixin) {

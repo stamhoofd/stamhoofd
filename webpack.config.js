@@ -2,6 +2,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
 
 module.exports = {
     mode: "development",
@@ -49,6 +50,7 @@ module.exports = {
                 use: [
                     'style-loader',
                     'css-loader',
+                    'icon-font-loader',
                 ],
             },
             // this will apply to both plain `.css` files
@@ -59,7 +61,16 @@ module.exports = {
                     //MiniCssExtractPlugin.loader, // If you enable this, HMR won't work. Replace it with a style loader
                     'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
-                    'sass-loader'
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: (loader) => [
+                                // Add the plugin
+                                new IconfontWebpackPlugin(loader)
+                            ]
+                        }
+                    },
+                    'sass-loader',
                 ]
             },
             {

@@ -12,8 +12,9 @@
             </STInputBox>
 
             <STInputBox title="Wachtwoord">
-                <button slot="right" class="button icon right gray help" type="button" @click="gotoPasswordForgot">
-                    Vergeten
+                <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                    <span>Vergeten</span>
+                    <span class="icon help"/>
                 </button>
                 <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
             </STInputBox>
