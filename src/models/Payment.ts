@@ -66,6 +66,6 @@ export class Payment extends Model {
 
         const str = (firstChars + "").padStart(10, "0") + (modulo + "").padStart(2, "0")
 
-        return "+++"+str.substr(0, 3) + "/" + str.substr(3, 4) + "+"+str.substr(3 + 4)+"+++"
+        return "+++"+str.substr(0, 3) + "/" + str.substr(3, 4) + "/"+str.substr(3 + 4)+"+++"
     }
 }

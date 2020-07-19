@@ -20,7 +20,7 @@ export class RegistrationFactory extends Factory<Options, RegistrationWithPaymen
         payment.paidAt = new Date()
         payment.paidAt.setMilliseconds(0)
         payment.price = 400
-        payment.transferDescription = "++189/458/266++"
+        payment.transferDescription = Payment.generateOGM()
         await payment.save()
         
         const registration = new Registration().setRelation(Registration.payment, payment)
