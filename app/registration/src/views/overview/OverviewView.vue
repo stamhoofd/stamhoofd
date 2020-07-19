@@ -149,20 +149,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
 
         const groups = OrganizationManager.organization.groups
-        if (member.details.preferredGroupId) {
-            for (const group of groups) {
-                if (group.id === member.details.preferredGroupId) {
-                    return group
-                }
-            }
-        }
-
-        // Search for possibilities
-        const matching = member.details.getMatchingGroups(groups)
-        if (matching.length == 1) {
-            return matching[0]
-        }
-        return null
+        return member.details.getPreferredGroup(groups)
     }
 
     addNewMember() {

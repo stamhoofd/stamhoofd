@@ -5,7 +5,7 @@
                 <h1>Lidgeld overschrijven</h1>
                 <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! Je kan de QR-code scannen met de meeste bank apps.</p>
 
-                <p class="warning-box">Vermeld “Lidgeld 123” in je overschrijving.</p>
+                <p class="warning-box">Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
             </main>
 
             <STToolbar>
@@ -27,7 +27,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { DecryptedMember, Group } from '@stamhoofd/structures';
+import { DecryptedMember, Group, Payment } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -44,6 +44,9 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
     }
 })
 export default class TransferPaymentView extends Mixins(NavigationMixin){
+    @Prop({ required: true })
+    payment: Payment
+
     MemberManager = MemberManager
 
     goNext() {
