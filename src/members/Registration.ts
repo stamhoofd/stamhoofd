@@ -16,6 +16,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null
 
+    @field({ decoder: DateDecoder, nullable: true })
+    deactivatedAt: Date | null = null
+
     @field({ decoder: DateDecoder })
     createdAt: Date
 
