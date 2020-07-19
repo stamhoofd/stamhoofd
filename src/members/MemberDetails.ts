@@ -129,4 +129,12 @@ export class MemberDetails extends AutoEncoder {
             }
         }
     }
+
+    updateParent(parent: Parent) {
+        for (const [index, _parent] of this.parents.entries()) {
+            if (_parent.id == parent.id) {
+                this.parents[index] = parent
+            }
+        }
+    }
 }
