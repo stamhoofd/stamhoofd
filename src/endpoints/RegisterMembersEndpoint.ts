@@ -68,7 +68,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Determine price
             for (const price of group.settings.prices) {
-                if (!price.startDate || price.startDate < now) {
+                if (!price.startDate || price.startDate <= now) {
                     foundPrice = price
                 }
             }

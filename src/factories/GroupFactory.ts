@@ -8,6 +8,12 @@ import { OrganizationFactory } from './OrganizationFactory';
 
 class Options {
     organization?: Organization;
+    price?: number;
+    reducedPrice?: number
+
+    delayDate?: Date
+    delayPrice?: number
+    delayReducedPrice?: number
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -22,10 +28,19 @@ export class GroupFactory extends Factory<Options, Group> {
             endDate: new Date(),
             prices: [
                 GroupPrices.create({
-                    price: 400
+                    price: this.options.price ?? 400,
+                    reducedPrice: this.options.reducedPrice ?? null
                 })
             ],
         })
+
+        if (this.options.delayPrice !== undefined) {
+            group.settings.prices.push(GroupPrices.create({
+                startDate: this.options.delayDate ?? new Date(),
+                price: this.options.delayPrice,
+                reducedPrice: this.options.delayReducedPrice ?? null
+            }))
+        }
 
         await group.save()
         return group;
