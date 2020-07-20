@@ -41,5 +41,9 @@
         @extend .style-side-view-shadow;
         border-radius: $border-radius;
         margin: 0 auto;
+
+        & +.st-view {
+            margin-top: 40px;;
+        }
     }
 }

@@ -18,6 +18,7 @@ export class MemberManagerStatic {
         Keychain.addItems(data.keychainItems)
 
         Vue.set(this, "members", [])
+        const groups = OrganizationManager.organization.groups
 
         for (const member of data.data) {
             const keychainItem = Keychain.getItem(member.publicKey)
@@ -44,15 +45,14 @@ export class MemberManagerStatic {
 
             }
 
-            console.log(member)
-
             const decryptedMember = DecryptedMember.create({
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,
                 registrations: member.registrations
             })
-            console.log(decryptedMember)
+            decryptedMember.fillGroups(groups)
+
             this.members!.push(decryptedMember)
         }
     }

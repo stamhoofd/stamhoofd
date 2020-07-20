@@ -546,16 +546,16 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.2.25"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.2.25.tgz#9e474f3c0c1ddb9b42c7aa7995e7334972f1df84"
-  integrity sha512-XOyWHZ5tRHNFJokI57bfKj6uOHdYFjMBwKT4xWHl3ZFsdLiYVjQ61I0Y+Eq/QAgX0Ul2Mi99RGTDvr0RbDDoXQ==
+  version "1.2.28"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.2.28.tgz#d1f479ee5eec2fbc6868884207a0b7997ad92a0c"
+  integrity sha512-9EBef7efk1ASgOf5FaTiwL9O7KA0Oufu7HPQj/jyWxo7DKwkf1S2M00W65QDgijoVJP2FEbyF3eVtXpchhphSw==
   dependencies:
     uuid "^8.2.0"
 
 "@stamhoofd/utility@^1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.2.tgz#8bb4b7f721cf237de303aa0090f367ef833d20bf"
-  integrity sha512-9JsZbKTDaBxxFJTAgRSckMBgAQDMwguxzV/aT87ZVmdLKueAcqnnonZNJ75r5kIwqWAnBlypzV2NUhfTnL6Bjg==
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.3.tgz#4d1dfaa68e06177d470390842d2f65a329019bd6"
+  integrity sha512-L8dW6tCeA8xipWEtd/U3UghABASICiTLCYPblLzThghahFi+w7QNForlXkQmhiFQvUuOr3GJPiFJlsSj2OswNA==
 
 "@types/anymatch@*":
   version "1.3.1"

@@ -68,4 +68,8 @@
     &.user:after {
         font-icon: url(@stamhoofd/assets/images/icons/user.svg);
     }
+
+    &.card:after {
+        font-icon: url(@stamhoofd/assets/images/icons/card.svg);
+    }
 }

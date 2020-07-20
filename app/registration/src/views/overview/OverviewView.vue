@@ -1,34 +1,61 @@
 <template>
     <LoadingView v-if="members === null" />
     <div class="boxed-view" v-else>
-        <div class="st-view auto" v-if="registeredMembers.length > 0">
-            <main>
-                <h1>Ingeschreven leden</h1>
-                <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
+        <template v-if="registeredMembers.length > 0">
+            <div class="st-view auto">
+                <main>
+                    <h1>Ingeschreven leden</h1>
+                    <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
 
-                <STList>
-                    <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack left-center">
-                        <span class="icon user" slot="left" />
-                        <p>{{ member.details.name }}</p>
+                    <STList>
+                        <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
+                            <span class="icon user" slot="left" />
 
-                        <template slot="right">
-                            <button class="button text" @click.stop="editMember(member)">
-                                <span class="icon edit" />
-                                <span>Bewerken</span>
-                            </button>
-                            
-                        </template>
-                    </STListItem>
-                </STList>
+                            <h2 class="payment-period">{{ member.details.name }}</h2>
+                            <p class="style-description-small">{{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
 
-            </main>
-            <STToolbar>
-                <button class="primary button" slot="right" @click="addNewMember">
-                    <span class="icon white left add"/>
-                    <span>Lid inschrijven</span>
-                </button>
-            </STToolbar>
-        </div>
+                            <template slot="right">
+                                <button class="button text" @click.stop="editMember(member)">
+                                    <span class="icon edit" />
+                                    <span>Bewerken</span>
+                                </button>
+                                
+                            </template>
+                        </STListItem>
+                    </STList>
+
+                </main>
+                <STToolbar>
+                    <button class="primary button" slot="right" @click="addNewMember">
+                        <span class="icon white left add"/>
+                        <span>Lid inschrijven</span>
+                    </button>
+                </STToolbar>
+            </div>
+
+            <div class="st-view auto payments-overview-view">
+                <main>
+                    <h1>Afrekeningen</h1>
+                    <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
+
+                    <STList>
+                        <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true">
+                            <span class="icon card" slot="left" />
+
+                            <h2 class="payment-period">{{ payment.getPaymentPeriod() }}</h2>
+                            <p class="style-description-small">{{ payment.getMemberNames() }}</p>
+                            <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
+
+                            <template slot="right">
+                                {{ payment.price | price }}
+                                <span class="icon arrow-right" />
+                            </template>
+                        </STListItem>
+                    </STList>
+
+                </main>
+            </div>
+        </template>
         <div class="st-view auto" v-else-if="members.length == 0">
             <main>
                 <h1>Je hebt nog niemand ingeschreven</h1>
@@ -85,11 +112,12 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { DecryptedMember, Group } from '@stamhoofd/structures';
+import { DecryptedMember, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';
+import { Formatter } from '@stamhoofd/utility';
 
 @Component({
     components: {
@@ -99,6 +127,9 @@ import FinancialProblemsView from './FinancialProblemsView.vue';
         STListItem,
         LoadingView,
         Checkbox
+    },
+    filters: {
+        price: Formatter.price
     }
 })
 export default class OverviewView extends Mixins(NavigationMixin){
@@ -112,16 +143,39 @@ export default class OverviewView extends Mixins(NavigationMixin){
         if (!this.members) {
             return []
         }
+        return this.members.filter(m => m.activeRegistrations.length > 0)
+    }
+
+    get payments() {
+        if (!this.members) {
+            return []
+        }
+
+        const payments: Map<string, PaymentDetailed> = new Map()
         const groups = OrganizationManager.organization.groups
-        return this.members.filter(m => {
-            if (m.registrations.find(r => {
-                const group = groups.find(g => g.id == r.groupId)
-                return group && group.cycle == r.cycle && !r.deactivatedAt
-            })) {
-                return true
+        for (const member of this.members) {
+            for (const registration of member.registrations) {
+                const existing = payments.get(registration.payment.id)
+                const group = groups.find(g => g.id == registration.groupId)
+                if (!group) {
+                    continue;
+                }
+                const reg = RegistrationWithMember.create(
+                    Object.assign({
+                        member,
+                        group
+                    }, registration)
+                );
+                if (existing) {
+                    existing.registrations.push(reg)
+                } else {
+                    payments.set(registration.payment.id, PaymentDetailed.create(Object.assign({
+                        registrations: [reg]
+                    }, registration.payment)))
+                }
             }
-            return false
-        })
+        }
+        return Array.from(payments.values())
     }
 
     get members() {
@@ -238,6 +292,12 @@ export default class OverviewView extends Mixins(NavigationMixin){
         @extend .style-description-small;
         margin-top: 5px;
         line-height: 1; // to fix alignment
+    }
+}
+
+.payments-overview-view {
+    .payment-period {
+        padding-bottom: 4px;
     }
 }
 </style>
