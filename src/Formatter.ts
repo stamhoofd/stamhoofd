@@ -30,4 +30,8 @@ export class Formatter {
 
         return formatted.replace(new RegExp("EUR", "ig"), '€');
     }
+
+    static capitalizeFirstLetter(string: string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 }
