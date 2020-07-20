@@ -107,7 +107,7 @@
         }
     }
 
-    &.secundary, &.primary, &.text {
+    &.secundary, &.primary {
         .icon {
             align-self: center;
             
@@ -125,7 +125,9 @@
         &.full {
             width: 100%;
         }
+    }
 
+    &.secundary, &.primary, &.text {
         &> span {
             text-overflow: ellipsis;
             overflow: hidden;
@@ -172,12 +174,6 @@
         line-height: 34px;
         white-space: nowrap;
 
-        &> span {
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-      
         &:active {
             opacity: 0.4;
         }
