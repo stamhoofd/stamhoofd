@@ -1,9 +1,10 @@
 <template>
-    <ModalStackComponent id="app" ref="modalStack" :root="root" />
+    <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
+    <ComponentWithPropertiesInstance id="app" :component="root"/>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
@@ -19,7 +20,7 @@ import { MemberManager } from './classes/MemberManager';
 //smoothscroll.polyfill();
 @Component({
     components: {
-        ModalStackComponent
+        ComponentWithPropertiesInstance
     },
 })
 export default class App extends Vue {
@@ -45,13 +46,17 @@ export default class App extends Vue {
                     root: new ComponentWithProperties(PromiseView, {
                         promise: async () => {
                             await MemberManager.loadMembers();
-                            return new ComponentWithProperties(RegistrationSteps, { 
-                                root: new ComponentWithProperties(OverviewView, {}),
-                            });
+                            return new ComponentWithProperties(ModalStackComponent, {
+                                root: new ComponentWithProperties(RegistrationSteps, { 
+                                    root: new ComponentWithProperties(OverviewView, {}),
+                                })
+                            })
                         }
                     }),
-                    loginRoot: new ComponentWithProperties(RegistrationSteps, { 
-                        root: new ComponentWithProperties(LoginView, {}) 
+                    loginRoot: new ComponentWithProperties(ModalStackComponent, {
+                        root: new ComponentWithProperties(RegistrationSteps, { 
+                            root: new ComponentWithProperties(LoginView, {}) 
+                        })
                     })
                 });
             } catch (e) {

@@ -46,9 +46,9 @@ export default class AuthenticatedView extends Vue {
     }
 
     changed() {
-        console.log("Authenticated view changed")
         this.loggedIn = SessionManager.currentSession?.isComplete() ?? false
         this.hasToken = SessionManager.currentSession?.hasToken() ?? false
+        console.log("Authenticated view changed: "+this.loggedIn)
     }
 }
 </script>

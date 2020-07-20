@@ -1,7 +1,11 @@
 @use 'variables' as *;
 
-.style-side-view-shadow {
+@mixin style-side-view-shadow() {
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.style-side-view-shadow {
+    @include style-side-view-shadow();
 }
 .style-input-shadow {
     box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);

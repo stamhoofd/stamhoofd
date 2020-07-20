@@ -25,6 +25,11 @@ export default class PromiseView extends Mixins(NavigationMixin) {
         this.run()
     }
 
+    activated() {
+        console.log("activated promise view")
+        console.log(this.root)
+    }
+
     run() {
         this.promise.call(this).then((value) => {
            this.root = value

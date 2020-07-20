@@ -195,4 +195,26 @@ $header-height: 70px;
     }
 }
 
+.steps-layout {
+    .boxed-view {
+        > .st-view {
+            min-height: auto;
+            
+            @media (min-width: 800px + 50px*2 - 1px) {
+                max-width: 800px;
+                background: $color-white;
+                @include style-side-view-shadow();
+                border-radius: $border-radius;
+                margin: 0 auto;
+
+                & +.st-view {
+                    margin-top: 40px;;
+                }
+            }
+        }
+    }
+}
+
+
+
 </style>
