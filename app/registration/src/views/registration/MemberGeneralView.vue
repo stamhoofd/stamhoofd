@@ -219,32 +219,34 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 }
             }
             
-            // todo: Get possible groups
-            const organizization = OrganizationManager.organization
-            const possibleGroups = this.memberDetails.getMatchingGroups(organizization.groups)
+            if (!this.member || this.member.activeRegistrations.length == 0) {
+                // todo: Get possible groups
+                const organizization = OrganizationManager.organization
+                const possibleGroups = this.memberDetails.getMatchingGroups(organizization.groups)
 
-            if (possibleGroups.length == 0) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: "",
-                    message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk te oud of te jong."
-                }))
-                return;
+                if (possibleGroups.length == 0) {
+                    this.errorBox = new ErrorBox(new SimpleError({
+                        code: "",
+                        message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk te oud of te jong."
+                    }))
+                    return;
+                }
+
+                if (possibleGroups.length == 1) {
+                    this.memberDetails.preferredGroupId = possibleGroups[0].id
+                } else {
+                    // go to group selection
+                    this.show(new ComponentWithProperties(MemberGroupView, { 
+                        member: this.memberDetails,
+                        handler: (group: Group, component: MemberGroupView) => {
+                            this.memberDetails!.preferredGroupId = group.id
+                            this.goToParents(component)
+                        }
+                    }))
+                    return;
+                }
             }
-
-            if (possibleGroups.length == 1) {
-                this.memberDetails.preferredGroupId = possibleGroups[0].id
-            } else {
-                // go to group selection
-                this.show(new ComponentWithProperties(MemberGroupView, { 
-                    member: this.memberDetails,
-                    handler: (group: Group, component: MemberGroupView) => {
-                        this.memberDetails!.preferredGroupId = group.id
-                        this.goToParents(component)
-                    }
-                }))
-                return;
-            }
-
+            
             this.goToParents(this);
             
         }
