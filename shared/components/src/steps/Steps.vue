@@ -76,8 +76,8 @@ $header-height: 70px;
 
 .steps-layout {
     background: $color-white-shade;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
 
     @media (max-width: 800px + 50px*2) {
         background: $color-white;
@@ -181,10 +181,11 @@ $header-height: 70px;
 
     > main {
         padding-top: $header-height;
-        height: 100vh;
-        height: calc(var(--vh, 1vh) * 100);
+        min-height: 100vh;
+        min-height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
         --st-vertical-padding: 60px;
+        padding-bottom: 30px;
     }
 }
 
