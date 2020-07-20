@@ -22,6 +22,9 @@ export class DecryptedMember extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
     activeRegistrations: Registration[] = []
 
+    /**
+     * Groups the member is currently registered for
+     */
     @field({ decoder: new ArrayDecoder(Group), optional: true })
     groups: Group[] = []
 
