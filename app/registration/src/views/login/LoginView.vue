@@ -1,6 +1,6 @@
 <template>
     <div class="split-login-view">
-        <div class="login-view st-view auto">
+        <form class="login-view st-view auto" @submit.prevent="submit">
             <h1>Inloggen</h1>
             
             <main>
@@ -19,16 +19,16 @@
 
             <STFloatingFooter>
                 <LoadingButton :loading="loading">
-                    <button class="button primary full" @click="submit">
+                    <button class="button primary full">
                         <span class="lock" />
                         Inloggen
                     </button>
                 </LoadingButton>
-                <button class="button secundary full" @click="createAccount">
+                <button class="button secundary full" @click="createAccount" type="button">
                     Account aanmaken
                 </button>
             </STFloatingFooter>
-        </div>
+        </form>
 
         <aside>
             <h1>Hoe schrijf je iemand in?</h1>
