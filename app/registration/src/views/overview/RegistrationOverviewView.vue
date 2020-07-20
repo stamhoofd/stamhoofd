@@ -22,7 +22,8 @@
                     <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
                         <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
                         <p>{{ member.details.name }}</p>
-                        <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
+                        <p class="member-group" v-if="member.groups.length > 0">Reeds ingeschreven bij {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
+                        <p class="member-group" v-else-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
                         <p class="member-group" v-else>Kies eerst een groep</p>
 
                         <template slot="right">
@@ -53,7 +54,7 @@
 <script lang="ts">
 import { Component, Vue, Mixins } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { DecryptedMember, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
@@ -112,6 +113,23 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
         if (this.memberSelection[member.id] === false) {
             return;
+        }
+
+        if (member.groups.length > 0) {
+            // Disable select until group is chosen
+            this.$nextTick(() => {
+                this.memberSelection[member.id] = false;
+                console.log(this.memberSelection)
+            })
+
+            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
+                type: "error",
+                title: member.details.firstName+" is al ingeschreven", 
+                description: "Je kan dit lid niet nog eens inschrijven.",
+                closeButton: "Sluiten",
+            }).setDisplayStyle("overlay");
+            this.present(errorMessage)
+            return
         }
         if (this.memberGetGroup(member) === null) {
             // Disable select until group is chosen

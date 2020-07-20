@@ -44,6 +44,29 @@ export default class CenteredMessage extends Vue {
         this.$parent.$emit("pop");
     }
 
+    activated() {
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+        if (!this.closeButton) {
+            return
+        }
+
+        const key = event.key || event.keyCode;
+        if (key === "Escape" || key === "Esc" || key === 27 || key === "Enter") {
+            this.pop();
+            event.preventDefault();
+        }
+    }
+
    
 
 }
