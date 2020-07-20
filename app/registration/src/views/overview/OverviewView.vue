@@ -42,7 +42,7 @@
                         <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true">
                             <span class="icon card" slot="left" />
 
-                            <h2 class="payment-period">{{ payment.getPaymentPeriod() }}</h2>
+                            <h2 class="payment-period">{{ getPaymentPeriod(payment) }}</h2>
                             <p class="style-description-small">{{ payment.getMemberNames() }}</p>
                             <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
 
@@ -144,6 +144,10 @@ export default class OverviewView extends Mixins(NavigationMixin){
             return []
         }
         return this.members.filter(m => m.activeRegistrations.length > 0)
+    }
+
+    getPaymentPeriod(payment: Payment) {
+        return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
     }
 
     get payments() {

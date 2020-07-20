@@ -553,9 +553,9 @@
     uuid "^8.2.0"
 
 "@stamhoofd/utility@^1":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.3.tgz#4d1dfaa68e06177d470390842d2f65a329019bd6"
-  integrity sha512-L8dW6tCeA8xipWEtd/U3UghABASICiTLCYPblLzThghahFi+w7QNForlXkQmhiFQvUuOr3GJPiFJlsSj2OswNA==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.4.tgz#7fb0437c9081e4cad6273be6706f2f8688778aca"
+  integrity sha512-t101Y51xXv+9zKpf3DfRKyb3DIN5FYYIQK1PCuNQnjilQfsStZWmCLhMxHG7f03vVRna4GVjBPYIh1cS3WUmpQ==
 
 "@types/anymatch@*":
   version "1.3.1"
