@@ -49,6 +49,8 @@ export default class PhoneInput extends Vue {
                 return this.validate()
             })
         }
+
+        this.phoneRaw = this.value ?? ""
     }
 
     destroyed() {
