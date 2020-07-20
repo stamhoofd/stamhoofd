@@ -13,7 +13,7 @@
                         <p class="style-description-small">{{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
-                            <button class="button text" @click.stop="editMember(member)">
+                            <button class="button text limit-space" @click.stop="editMember(member)">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>

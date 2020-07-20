@@ -126,6 +126,7 @@ export default class STListItem extends Vue {
 
                 padding-top: 10px;
                 padding-bottom: 10px;
+                flex-shrink: 0;
 
                 &:empty {
                     display: none;

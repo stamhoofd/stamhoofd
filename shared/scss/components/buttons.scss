@@ -79,7 +79,7 @@
             width: 40px;
             align-self: stretch;
         }
-       
+
     }
 
     &.secundary {
@@ -107,7 +107,7 @@
         }
     }
 
-    &.secundary, &.primary {
+    &.secundary, &.primary, &.text {
         .icon {
             align-self: center;
             
@@ -122,8 +122,19 @@
             }
         }
 
-         &.full {
+        &.full {
             width: 100%;
+        }
+
+        &> span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+
+            &.icon {
+                text-overflow: clip;
+                flex-shrink: 0;
+            }
         }
     }
 
@@ -156,11 +167,29 @@
         text-overflow: ellipsis;
         display: inline-block;
         vertical-align: middle;
+        overflow: hidden;
         height: 34px;
         line-height: 34px;
+        white-space: nowrap;
+
+        &> span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
       
         &:active {
             opacity: 0.4;
+        }
+
+        @media (max-width: 400px) {
+            &.limit-space {
+                overflow: visible;
+                
+                span:not(.icon) {
+                    display: none
+                }
+            }
         }
     }
 

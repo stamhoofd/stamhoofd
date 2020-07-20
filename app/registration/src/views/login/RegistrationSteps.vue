@@ -7,8 +7,9 @@
             <BackButton v-else @click="popNav" />
         </template>
         <template slot="right">
-            <button class="button text" @click="returnToSite" v-if="organization.website">
-                Terug naar website
+            <button class="button text limit-space" @click="returnToSite" v-if="organization.website">
+                <span class="icon logout"/>
+                <span>Terug naar website</span>
             </button>
         </template>
     </Steps>

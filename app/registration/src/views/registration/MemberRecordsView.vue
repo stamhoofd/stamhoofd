@@ -12,13 +12,13 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox v-model="allowData">
+            <Checkbox v-model="allowData" class="long-text">
                 Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
             </Checkbox>
-            <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18">
+            <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
-            <Checkbox v-model="allowPictures">
+            <Checkbox v-model="allowPictures" class="long-text">
                 {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
 
@@ -279,6 +279,13 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     isParent = false
     loading = false
 
+    mounted() {
+        if (this.member && this.memberDetails.age < 18) {
+            // already accepted previous time
+            this.isParent = true
+        }
+    }
+
     async goNext() {
         if (this.loading) {
             return
@@ -481,6 +488,10 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         > .checkbox + .textarea-container {
             padding-bottom: 20px;
             padding-left: 35px;
+
+            @media (max-width: 400px) {
+                padding-left: 0;
+            }
         }
     }
 }

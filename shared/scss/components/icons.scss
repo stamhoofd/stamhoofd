@@ -72,4 +72,8 @@
     &.card:after {
         font-icon: url(@stamhoofd/assets/images/icons/card.svg);
     }
+
+    &.logout:after {
+        font-icon: url(@stamhoofd/assets/images/icons/logout.svg);
+    }
 }

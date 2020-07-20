@@ -23,7 +23,7 @@
                     <p class="parent-description" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
                     <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
 
-                    <button slot="right" class="button text" @click.stop="editParent(parent.parent)">
+                    <button slot="right" class="button text limit-space" @click.stop="editParent(parent.parent)">
                         <span class="icon edit" />
                         <span>Bewerken</span>
                     </button>
