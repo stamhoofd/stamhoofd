@@ -1,6 +1,6 @@
 <template>
     <div class="boxed-view">
-        <div class="st-view auto">
+        <div class="st-view">
             <main>
                 <h1>Hoera! X en X zijn ingeschreven</h1>
             </main>

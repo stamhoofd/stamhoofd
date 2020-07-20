@@ -1,7 +1,5 @@
 <template>
-    <div id="app">
-        <ModalStackComponent ref="modalStack" :root="root" />
-    </div>
+    <ModalStackComponent id="app" ref="modalStack" :root="root" />
 </template>
 
 <script lang="ts">

@@ -1,19 +1,17 @@
 <template>
-    <div>
-        <FramedComponent v-if="root" :root="root" :key="root.key" />
-        <LoadingView v-else />
-    </div>
+    <ComponentWithPropertiesInstance v-if="root" :component="root" :key="root.key" />
+    <LoadingView v-else />
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin, FramedComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue, Mixins } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
 
 @Component({
     components: {
-        FramedComponent,
+        ComponentWithPropertiesInstance,
         LoadingView
     },
 })

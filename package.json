@@ -22,6 +22,7 @@
         "@stamhoofd/utility": "^1",
         "core-js": "^3.6.5",
         "libphonenumber-js": "^1.7.54",
+        "qrcode": "^1.4.4",
         "vue": "^2.6.11",
         "vue-class-component": "^7.0.2",
         "vue-property-decorator": "^8.4.1"

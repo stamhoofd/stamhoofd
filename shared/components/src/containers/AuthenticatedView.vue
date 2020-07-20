@@ -1,13 +1,11 @@
 <template>
-    <div>
-        <FramedComponent v-if="loggedIn" :key="root.key" :root="root" />
-        <LoadingView v-else-if="hasToken" />
-        <FramedComponent v-else :key="loginRoot.key" :root="loginRoot" />
-    </div>
+    <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
+    <LoadingView v-else-if="hasToken" />
+    <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, FramedComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import {SessionManager} from "@stamhoofd/networking"
 import { Component, Prop, Vue } from "vue-property-decorator";
 
@@ -15,7 +13,7 @@ import LoadingView from "./LoadingView.vue"
 
 @Component({
     components: {
-        FramedComponent,
+        ComponentWithPropertiesInstance,
         LoadingView
     },
 })

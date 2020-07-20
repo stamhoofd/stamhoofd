@@ -2,7 +2,7 @@
     <LoadingView v-if="members === null" />
     <div class="boxed-view" v-else>
         <template v-if="registeredMembers.length > 0">
-            <div class="st-view auto">
+            <div class="st-view">
                 <main>
                     <h1>Ingeschreven leden</h1>
                     <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
@@ -33,13 +33,13 @@
                 </STToolbar>
             </div>
 
-            <div class="st-view auto payments-overview-view">
+            <div class="st-view payments-overview-view">
                 <main>
                     <h1>Afrekeningen</h1>
                     <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
                     <STList>
-                        <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true">
+                        <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true" @click="openPayment(payment)">
                             <span class="icon card" slot="left" />
 
                             <h2 class="payment-period">{{ getPaymentPeriod(payment) }}</h2>
@@ -118,6 +118,7 @@ import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';
 import { Formatter } from '@stamhoofd/utility';
+import TransferPaymentView from './TransferPaymentView.vue';
 
 @Component({
     components: {
@@ -283,6 +284,15 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 return []
             })
         }))
+    }
+
+    openPayment(payment: PaymentDetailed) {
+            this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(TransferPaymentView, {
+                payment,
+                isPopup: true
+            })
+        }).setDisplayStyle("popup"))
     }
 }
 </script>

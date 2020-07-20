@@ -34,16 +34,19 @@
     }
 }
 
-.boxed-view {
-    > .st-view {
-        max-width: 800px;
-        background: $color-white;
-        @extend .style-side-view-shadow;
-        border-radius: $border-radius;
-        margin: 0 auto;
+.steps-layout {
+    .boxed-view {
+        > .st-view {
+            max-width: 800px;
+            background: $color-white;
+            @extend .style-side-view-shadow;
+            border-radius: $border-radius;
+            margin: 0 auto;
+            min-height: auto;
 
-        & +.st-view {
-            margin-top: 40px;;
+            & +.st-view {
+                margin-top: 40px;;
+            }
         }
     }
 }
