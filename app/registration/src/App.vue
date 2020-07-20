@@ -13,6 +13,7 @@ import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
+import { MemberManager } from './classes/MemberManager';
 
 // kick off the polyfill!
 //smoothscroll.polyfill();
@@ -41,8 +42,13 @@ export default class App extends Vue {
                 SessionManager.setCurrentSession(session)
 
                 return new ComponentWithProperties(AuthenticatedView, {
-                    root: new ComponentWithProperties(RegistrationSteps, { 
-                        root: new ComponentWithProperties(OverviewView, {}),
+                    root: new ComponentWithProperties(PromiseView, {
+                        promise: async () => {
+                            await MemberManager.loadMembers();
+                            return new ComponentWithProperties(RegistrationSteps, { 
+                                root: new ComponentWithProperties(OverviewView, {}),
+                            });
+                        }
                     }),
                     loginRoot: new ComponentWithProperties(RegistrationSteps, { 
                         root: new ComponentWithProperties(LoginView, {}) 

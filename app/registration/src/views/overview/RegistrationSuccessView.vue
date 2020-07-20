@@ -25,6 +25,7 @@ import { DecryptedMember, Group } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
+import OverviewView from './OverviewView.vue';
 
 @Component({
     components: {
@@ -38,9 +39,16 @@ import { SimpleError } from '@simonbackx/simple-errors';
 })
 export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    step = 4
+
+    mounted() {
+        MemberManager.loadMembers().catch(e => {
+            console.error(e)
+        })
+    }
 
     close() {
-        this.navigationController!.popToRoot()
+        this.navigationController!.push(new ComponentWithProperties(OverviewView, {}), true, this.navigationController!.components.length, true)
     }
 
 }

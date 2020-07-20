@@ -1,85 +1,16 @@
 <template>
-    <LoadingView v-if="members === null" />
-    <div class="boxed-view" v-else>
-        <template v-if="registeredMembers.length > 0">
-            <div class="st-view">
-                <main>
-                    <h1>Ingeschreven leden</h1>
-                    <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
-
-                    <STList>
-                        <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
-                            <span class="icon user" slot="left" />
-
-                            <h2 class="payment-period">{{ member.details.name }}</h2>
-                            <p class="style-description-small">{{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
-
-                            <template slot="right">
-                                <button class="button text" @click.stop="editMember(member)">
-                                    <span class="icon edit" />
-                                    <span>Bewerken</span>
-                                </button>
-                                
-                            </template>
-                        </STListItem>
-                    </STList>
-
-                </main>
-                <STToolbar>
-                    <button class="primary button" slot="right" @click="addNewMember">
-                        <span class="icon white left add"/>
-                        <span>Lid inschrijven</span>
-                    </button>
-                </STToolbar>
-            </div>
-
-            <div class="st-view payments-overview-view">
-                <main>
-                    <h1>Afrekeningen</h1>
-                    <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
-
-                    <STList>
-                        <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true" @click="openPayment(payment)">
-                            <span class="icon card" slot="left" />
-
-                            <h2 class="payment-period">{{ getPaymentPeriod(payment) }}</h2>
-                            <p class="style-description-small">{{ payment.getMemberNames() }}</p>
-                            <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
-
-                            <template slot="right">
-                                {{ payment.price | price }}
-                                <span class="icon arrow-right" />
-                            </template>
-                        </STListItem>
-                    </STList>
-
-                </main>
-            </div>
-        </template>
-        <div class="st-view auto" v-else-if="members.length == 0">
+    <div class="boxed-view">
+        <div class="st-view">
             <main>
-                <h1>Je hebt nog niemand ingeschreven</h1>
-                <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
-            </main>
-            <STToolbar>
-                <button class="primary button" slot="right" @click="addNewMember">
-                    <span class="icon white left add"/>
-                    <span>Lid inschrijven</span>
-                </button>
-            </STToolbar>
-        </div>
-        <div class="st-view auto" v-else>
-            <main>
-                <h1>Wie wil je inschrijven?</h1>
+                <h1>Ingeschreven leden</h1>
+                <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
 
-                <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
+                <STList>
+                    <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
+                        <span class="icon user" slot="left" />
 
-                <STList class="member-selection-table">
-                    <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
-                        <Checkbox v-model="memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" />
-                        <p>{{ member.details.name }}</p>
-                        <p class="member-group" v-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
-                        <p class="member-group" v-else>Kies eerst een groep</p>
+                        <h2 class="payment-period">{{ member.details.name }}</h2>
+                        <p class="style-description-small">{{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
                             <button class="button text" @click.stop="editMember(member)">
@@ -90,18 +21,37 @@
                         </template>
                     </STListItem>
                 </STList>
-            </main>
 
+            </main>
             <STToolbar>
-                <button slot="right" class="button primary" @click="addNewMember">
-                    <span class="icon add"/>
-                    <span>Nog iemand toevoegen</span>
-                </button>
-                <button slot="right" class="button secundary" @click="registerSelectedMembers">
-                    <span>Inschrijven</span>
-                    <span class="icon arrow-right"/>
+                <button class="primary button" slot="right" @click="addNewMember">
+                    <span class="icon white left add"/>
+                    <span>Lid inschrijven</span>
                 </button>
             </STToolbar>
+        </div>
+
+        <div class="st-view payments-overview-view">
+            <main>
+                <h1>Afrekeningen</h1>
+                <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
+
+                <STList>
+                    <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true" @click="openPayment(payment)">
+                        <span class="icon card" slot="left" />
+
+                        <h2 class="payment-period">{{ getPaymentPeriod(payment) }}</h2>
+                        <p class="style-description-small">{{ payment.getMemberNames() }}</p>
+                        <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
+
+                        <template slot="right">
+                            {{ payment.price | price }}
+                            <span class="icon arrow-right" />
+                        </template>
+                    </STListItem>
+                </STList>
+
+            </main>
         </div>
     </div>
 </template>
@@ -119,6 +69,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';
 import { Formatter } from '@stamhoofd/utility';
 import TransferPaymentView from './TransferPaymentView.vue';
+import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
     components: {
@@ -135,7 +86,6 @@ import TransferPaymentView from './TransferPaymentView.vue';
 })
 export default class OverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
-    memberSelection: { [key:string]:boolean; } = {}
 
     /**
      * Return members that are currently registered in
@@ -185,68 +135,9 @@ export default class OverviewView extends Mixins(NavigationMixin){
 
     get members() {
         if (MemberManager.members) {
-            for (const member of MemberManager.members) {
-                if (this.memberSelection[member.id] === undefined) {
-                    // if the member doesn't have any registrations, we select it by default
-                    if (member.registrations.length == 0 && this.memberGetGroup(member) !== null) {
-                        this.$set(this.memberSelection, member.id, true)
-                    } else {
-                        this.$set(this.memberSelection, member.id, false)
-                    }
-                }
-            }
+            return MemberManager.members
         }
-        return MemberManager.members
-    }
-
-    mounted() {
-        MemberManager.loadMembers().catch(e => {
-            console.error(e)
-        })
-    }
-
-    onSelectMember(member: DecryptedMember) {
-        if (!member.details) {
-            return
-        }
-        if (this.memberSelection[member.id] === false) {
-            return;
-        }
-        if (this.memberGetGroup(member) === null) {
-            // Disable select until group is chosen
-            this.$nextTick(() => {
-                this.memberSelection[member.id] = false;
-                console.log(this.memberSelection)
-            })
-
-            this.present(new ComponentWithProperties(MemberGroupView, {
-                memberDetails: member.details,
-                handler: (group: Group, component: MemberGroupView) => {
-                    if (!member.details) {
-                        console.error("Member details suddenly gone")
-                        return
-                    }
-                    
-                    component.loading = true;
-
-                    member.details.preferredGroupId = group.id
-
-                    MemberManager.patchMembers([
-                        member
-                    ]).then(() => {
-                        component.pop()
-                        this.memberSelection[member.id] = true;
-                    }).catch(e => {
-                        console.error(e)
-                        component.loading = false
-                        component.errorBox = new ErrorBox(new SimpleError({
-                            code: "",
-                            message: "Er ging iets mis"
-                        }))
-                    })
-                }
-            }).setDisplayStyle("popup"))
-        }
+        return []
     }
 
     memberGetGroup(member: DecryptedMember): Group | null {
@@ -259,9 +150,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     addNewMember() {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberGeneralView, {})
-        }).setDisplayStyle("popup"))
+        this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
     }
 
     editMember(member: DecryptedMember) {
@@ -270,20 +159,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 member
             })
         }).setDisplayStyle("popup"))
-    }
-
-    registerSelectedMembers() {
-        if (!this.members) {
-            return
-        }
-        this.show(new ComponentWithProperties(FinancialProblemsView, {
-            selectedMembers: this.members.flatMap((m) => {
-                if (this.memberSelection[m.id] === true) {
-                    return [m]
-                }
-                return []
-            })
-        }))
     }
 
     openPayment(payment: PaymentDetailed) {
@@ -300,14 +175,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.member-selection-table {
-    .member-group {
-        @extend .style-description-small;
-        margin-top: 5px;
-        line-height: 1; // to fix alignment
-    }
-}
 
 .payments-overview-view {
     .payment-period {

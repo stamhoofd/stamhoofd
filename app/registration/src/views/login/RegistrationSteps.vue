@@ -1,7 +1,7 @@
 <template>
     <Steps :root="root" :total-steps="3">
         <template v-slot:left="slotProps">
-            <template v-if="slotProps.step <= 1 ||!canPop">
+            <template v-if="!slotProps.canPop">
                 {{ organization.name }}
             </template>
             <BackButton v-else @click="popNav" />

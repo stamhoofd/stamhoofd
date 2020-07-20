@@ -1,10 +1,10 @@
 <template>
     <div class="steps-layout">
-        <StepsHeader :progress="totalSteps ? ((step - 1) / totalSteps) : 0">
+        <StepsHeader :progress="totalSteps && step ? ((step - 1) / totalSteps) : 0">
             <template #left>
-                <slot name="left" v-bind:step="step">
+                <slot name="left" v-bind:step="step" v-bind:canPop="canPop">
                     <transition name="move" mode="out-in">
-                        <div v-if="step <= 1" id="logo" alt="Stamhoofd" />
+                        <div v-if="!canPop" id="logo" alt="Stamhoofd" />
                         <div v-else @click.prevent="goBack()">
                             Terug
                         </div>
@@ -13,7 +13,7 @@
             </template>
             <template #center>
                 <slot name="center">
-                    <span v-if="totalSteps" class="style-caption">Stap {{ step }} / {{ totalSteps }}</span>
+                    <span v-if="totalSteps && step && step <= totalSteps" class="style-caption">Stap {{ step }} / {{ totalSteps }}</span>
                 </slot>
             </template>
             <template #right>
@@ -45,7 +45,9 @@ import StepsHeader from "./StepsHeader.vue";
     },
 })
 export default class Steps extends Vue {
-    step = 1;
+    step = 0;
+
+    canPop = false
 
     @Prop({ default: null })
     totalSteps!: number | null
@@ -63,7 +65,11 @@ export default class Steps extends Vue {
     }
 
     updateProgress() {
-        this.step = this.navigationController.components.length;
+        this.canPop = this.navigationController.components.length > 1
+        this.$nextTick(() => {
+            this.step = (this.navigationController.mainComponent?.componentInstance() as any)?.step ?? 0;
+        })
+        
     }
 }
 </script>

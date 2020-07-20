@@ -46,6 +46,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 })
 export default class FinancialProblemsView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    step = 2
 
     @Prop({ required: true })
     selectedMembers: DecryptedMember[]

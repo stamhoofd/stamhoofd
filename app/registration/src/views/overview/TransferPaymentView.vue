@@ -92,6 +92,8 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     QRCodeUrl: string | null = null
 
+    step = 3
+
     get paymentDetailed() {
         if (this.payment instanceof PaymentDetailed) {
             return this.payment
