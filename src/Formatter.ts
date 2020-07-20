@@ -21,4 +21,13 @@ export class Formatter {
         const year = date.getFullYear()
         return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
     }
+
+    static price(value: number): string {
+        const formatted = new Intl.NumberFormat("nl-BE", {
+            style: "currency",
+            currency: "EUR",
+        }).format(Math.abs(value) / 100);
+
+        return formatted.replace(new RegExp("EUR", "ig"), '€');
+    }
 }
