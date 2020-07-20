@@ -1,26 +1,44 @@
 <template>
-    <div class="login-view">
-       <h1>Inloggen</h1>
+    <div class="split-login-view">
+        <div class="login-view st-view auto">
+            <h1>Inloggen</h1>
+            
+            <main>
+                <STInputBox title="E-mailadres">
+                    <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
+                </STInputBox>
 
-        <STInputBox title="E-mailadres">
-            <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-        </STInputBox>
+                <STInputBox title="Wachtwoord">
+                    <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                        <span>Vergeten</span>
+                        <span class="icon help"/>
+                    </button>
+                    <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                </STInputBox>
+            </main>
 
-        <STInputBox title="Wachtwoord">
-            <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
-                <span>Vergeten</span>
-                <span class="icon help"/>
-            </button>
-            <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
-        </STInputBox>
+            <STFloatingFooter>
+                <LoadingButton :loading="loading">
+                    <button class="button primary full" @click="submit">
+                        <span class="lock" />
+                        Inloggen
+                    </button>
+                </LoadingButton>
+                <button class="button secundary full" @click="createAccount">
+                    Account aanmaken
+                </button>
+            </STFloatingFooter>
+        </div>
 
-        <STFloatingFooter>
-            <Spinner v-if="loading" />
-            <button class="button primary full" @click="submit">
-                <span class="lock" />
-                Inloggen
-            </button>
-        </STFloatingFooter>
+        <aside>
+            <h1>Hoe schrijf je iemand in?</h1>
+            <ol>
+                <li>Log in, of maak een account aan.</li>
+                <li>Vul alle gegevens van de leden in of kijk ze na.</li>
+                <li>Betaal het lidgeld.</li>
+                <li>Klaar! Je hoeft vanaf nu enkel nog de gegevens jaarlijks na te kijken.</li>
+            </ol>
+        </aside>
     </div>
 </template>
 
@@ -32,8 +50,9 @@ import { Component, Mixins } from "vue-property-decorator";
 import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
 import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, Spinner, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
+import ForgotPasswordView from './ForgotPasswordView.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -63,7 +82,7 @@ const throttle = (func, limit) => {
         STNavigationBar,
         STFloatingFooter,
         STInputBox,
-        Spinner
+        LoadingButton
     }
 })
 export default class LoginView extends Mixins(NavigationMixin){
@@ -74,7 +93,11 @@ export default class LoginView extends Mixins(NavigationMixin){
     session = SessionManager.currentSession!
 
     gotoPasswordForgot() {
-       // this.show(new ComponentWithProperties(ForgotPasswordView, {}))
+        this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet"))
+    }
+
+    createAccount() {
+        this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet")) 
     }
 
     async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
@@ -235,16 +258,51 @@ export default class LoginView extends Mixins(NavigationMixin){
     @use "~@stamhoofd/scss/base/variables.scss" as *;
     @use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
-    .login-view {
-        padding: 20px;
+    .split-login-view {
         padding-top: 100px;
-
-        max-width: 400px;
+        max-width: 850px;
         margin: 0 auto;
+        display: grid;
+        width: 100%;
+        grid-template-columns: minmax(300px, 380px) auto;
+        gap: 60px;
+        align-items: center;
+
+        ol {
+            list-style: none; 
+            counter-reset: li;
+            @extend .style-text-large;
+            padding-left: 30px;
+
+            li {
+                counter-increment: li;
+                padding: 8px 0;
+            }
+
+            li::before {
+                content: counter(li)"."; 
+                @extend .style-title-2;
+                color: $color-primary;
+                display: inline-block; 
+                width: 30px;
+                margin-left: -30px;;
+            }
+        }
+
+        aside > h1 {
+            @extend .style-title-1;
+            padding-bottom: 30px;;
+        }
+    }
+
+    .login-view {
+        @include style-side-view-shadow();
+        background: $color-white;
+        border-radius: $border-radius;
 
         > h1 {
             @extend .style-huge-title-1;
-            padding-bottom: 10px;
+            padding-bottom: 20px;
         }
 
         > p {

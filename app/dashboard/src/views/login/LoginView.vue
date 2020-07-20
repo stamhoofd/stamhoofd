@@ -21,11 +21,12 @@
         </main>
 
         <STFloatingFooter>
-            <Spinner v-if="loading" />
-            <button class="button primary full">
-                <span class="lock" />
-                Inloggen
-            </button>
+            <LoadingButton :loading="loading">
+                <button class="button primary full">
+                    <span class="lock" />
+                    Inloggen
+                </button>
+            </LoadingButton>
         </STFloatingFooter>
     </form>
 </template>
@@ -33,7 +34,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Spinner, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
@@ -48,7 +49,7 @@ import ForgotPasswordView from './ForgotPasswordView.vue';
         STNavigationBar,
         STFloatingFooter,
         STInputBox,
-        Spinner
+        LoadingButton
     }
 })
 export default class LoginView extends Mixins(NavigationMixin){

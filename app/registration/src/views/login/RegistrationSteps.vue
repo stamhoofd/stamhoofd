@@ -9,7 +9,8 @@
         <template slot="right">
             <button class="button text limit-space" @click="returnToSite" v-if="organization.website">
                 <span class="icon logout"/>
-                <span>Terug naar website</span>
+                <span v-if="isLoggedIn">Uitloggen</span>
+                <span v-else>Terug naar website</span>
             </button>
         </template>
     </Steps>
@@ -24,6 +25,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import SignupGeneralView from '../signup/SignupGeneralView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import { SessionManager } from '@stamhoofd/networking';
 
 @Component({
     components: {
@@ -38,8 +40,16 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
     get organization() {
         return OrganizationManager.organization
     }
+
+    get isLoggedIn() {
+        return SessionManager.currentSession?.isComplete() ?? false
+    }
  
     returnToSite() {
+        if (SessionManager.currentSession?.isComplete() ?? false) {
+            SessionManager.currentSession!.logout()
+            return;
+        }
         if (!this.organization.website || (!this.organization.website.startsWith("https://") && !this.organization.website.startsWith("http://"))) {
             return
         }

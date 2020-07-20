@@ -12,7 +12,23 @@
 
 .st-floating-footer {
     margin-top: auto;
-    padding: 20px 0;
-    padding-bottom: var(--st-vertical-padding, 20px);
+    padding-top: 15px;
+    position: sticky;
+    bottom: 0;
+    
+
+    >div {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    > div > * {
+        margin-top: 15px;
+
+        &:first-child {
+            margin-top: 0;;
+        }
+    }
 }
 </style>

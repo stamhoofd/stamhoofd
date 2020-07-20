@@ -25,6 +25,7 @@ export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
 export { default as BackButton } from "./src/navigation/BackButton.vue"
+export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
 
 // Overlays
 export { default as CenteredMessage } from "./src/overlays/CenteredMessage.vue"
