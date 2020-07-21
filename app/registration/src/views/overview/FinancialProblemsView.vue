@@ -1,6 +1,6 @@
 <template>
     <div class="boxed-view">
-        <div class="st-view auto">
+        <div class="st-view">
             <main>
                 <h1>De kostprijs van scouting</h1>
 

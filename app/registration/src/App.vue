@@ -15,6 +15,7 @@ import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import { MemberManager } from './classes/MemberManager';
+import RegistrationOverviewView from './views/overview/RegistrationOverviewView.vue';
 
 // kick off the polyfill!
 //smoothscroll.polyfill();
@@ -46,9 +47,17 @@ export default class App extends Vue {
                     root: new ComponentWithProperties(PromiseView, {
                         promise: async () => {
                             await MemberManager.loadMembers();
+
+                            if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
+                                return new ComponentWithProperties(ModalStackComponent, {
+                                    root: new ComponentWithProperties(RegistrationSteps, { 
+                                        root: new ComponentWithProperties(OverviewView, {}),
+                                    })
+                                })
+                            }
                             return new ComponentWithProperties(ModalStackComponent, {
                                 root: new ComponentWithProperties(RegistrationSteps, { 
-                                    root: new ComponentWithProperties(OverviewView, {}),
+                                    root: new ComponentWithProperties(RegistrationOverviewView, {}),
                                 })
                             })
                         }

@@ -1,7 +1,7 @@
 <template>
-    <div id="member-general-view" class="st-view">
+    <form id="member-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Inschrijven">
-            <button slot="right" class="button icon gray close" @click="pop"></button>
+            <button slot="right" class="button icon gray close" @click="pop" type="button"></button>
         </STNavigationBar>
         
         <main>
@@ -53,11 +53,11 @@
         </main>
 
         <STToolbar>
-            <button  slot="right" class="button primary" @click="goNext">
+            <button  slot="right" class="button primary">
                 Volgende
             </button>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
@@ -65,13 +65,15 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, DecryptedMember, Version } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, DecryptedMember, Version, EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from './MemberGroupView.vue';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import EmergencyContactView from './EmergencyContactView.vue';
+import MemberRecordsView from './MemberRecordsView.vue';
 
 @Component({
     components: {
@@ -256,6 +258,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         if (!this.memberDetails) {
             return;
         }
+        const memberDetails = this.memberDetails
         // todo: check age before asking parents
         if (this.memberDetails.age < 18 || this.livesAtParents) {
             component.show(new ComponentWithProperties(MemberParentsView, { 
@@ -264,7 +267,18 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             }))
         } else {
             // Noodcontacten
-            alert("noodcontacten")
+            component.show(new ComponentWithProperties(EmergencyContactView, { 
+                contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
+                handler: (contact: EmergencyContact, component: EmergencyContactView) => {
+                    memberDetails.emergencyContacts = [contact]
+                    
+                    // go to the steekkaart view
+                    component.show(new ComponentWithProperties(MemberRecordsView, { 
+                        memberDetails: memberDetails,
+                        member: this.member
+                    }))
+                }
+            }))
         }
     }
 

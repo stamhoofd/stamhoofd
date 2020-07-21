@@ -194,14 +194,30 @@ $header-height: 70px;
         @media (min-width: 800px + 50px*2 - 1px) {
             --st-vertical-padding: 60px;
         }
-        padding-bottom: 30px;
+        --vh-tmp-b: calc(var(--vh, 7px) * 100);
+        --vh-tmp: calc(var(--vh-tmp-b, 7px) - #{$header-height});
+
+        > * {
+            --vh: calc(var(--vh-tmp, 7px) / 100);
+        }
     }
 }
 
 .steps-layout {
     .boxed-view {
+        @media (min-width: 800px + 50px*2 - 1px) {
+            padding-bottom: 30px;
+        }
+
         > .st-view {
-            min-height: auto;
+            &:not(:only-child) {
+                min-height: auto;
+
+                &:not(:last-child) {
+                    border-bottom: $border-width solid $color-white-shade;
+                    margin-bottom: 20px;
+                }
+            }
             
             @media (min-width: 800px + 50px*2 - 1px) {
                 max-width: 800px;
@@ -209,6 +225,7 @@ $header-height: 70px;
                 @include style-side-view-shadow();
                 border-radius: $border-radius;
                 margin: 0 auto;
+                min-height: auto;
 
                 & +.st-view {
                     margin-top: 40px;;

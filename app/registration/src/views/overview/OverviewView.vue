@@ -31,7 +31,7 @@
             </STToolbar>
         </div>
 
-        <div class="st-view payments-overview-view">
+        <div class="st-view payments-overview-view" v-if="payments.length > 0">
             <main>
                 <h1>Afrekeningen</h1>
                 <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>

@@ -63,9 +63,10 @@ export default class STToolbar extends Vue {}
             > div .button {
                 margin-left: 0;
                 margin-right: 0;
+                margin-top: 10px;
 
-                &:last-child {
-                    margin-top: 10px;
+                &:first-child {
+                    margin-top: 0;
                 }
             }
 

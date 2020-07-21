@@ -7,10 +7,10 @@
 
             <main>
                 <h1>Lidgeld overschrijven</h1>
-                <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! Je kan de QR-code scannen met de meeste bank apps.</p>
+                <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! <span class="hide-smartphone">Je kan de QR-code scannen met de meeste bank apps.</span></p>
 
                 <div class="payment-split">
-                    <div>
+                    <div class="hide-smartphone">
                         <img v-if="QRCodeUrl" :src="QRCodeUrl" />
                     </div>
                     <div>

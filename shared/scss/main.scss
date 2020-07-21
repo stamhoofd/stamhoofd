@@ -1,5 +1,6 @@
 // Include all styles that only should get included once
 @use "./base/reset";
+@use "./base/responsive-helpers";
 @use "./elements/body";
 @use "./layout/st-view";
 @use "./layout/split-view-controller";
