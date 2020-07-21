@@ -12,6 +12,7 @@
 
 .st-floating-footer {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     margin-top: auto;
     padding-top: 15px;
     position: sticky;
@@ -19,6 +20,7 @@
     
     >div {
         padding: 0 var(--st-horizontal-padding, 40px);
+        padding-bottom: var(--st-vertical-padding, 40px);
         display: flex;
         flex-direction: column;
         align-items: stretch;

@@ -1,5 +1,5 @@
 <template>
-    <div class="auto st-view forgot-password-view">
+    <div class="st-view forgot-password-view">
         <STNavigationBar title="Wachtwoord vergeten">
             <button slot="right" class="button icon gray close" @click="pop"></button>
         </STNavigationBar>
