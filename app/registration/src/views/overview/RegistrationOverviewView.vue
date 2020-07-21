@@ -14,7 +14,8 @@
         </div>
         <div class="st-view" v-else>
             <main>
-                <h1>Wie wil je inschrijven?</h1>
+                <h1 v-if="defaultSelection">Wil je nog iemand inschrijven?</h1>
+                <h1 v-else>Wie wil je inschrijven?</h1>
 
                 <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
@@ -82,6 +83,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     memberSelection: { [key:string]:boolean; } = {}
     step = 1
+    defaultSelection = false
 
     /**
      * Return members that are currently registered in
@@ -99,6 +101,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 // if the member doesn't have any registrations, we select it by default
                 if (member.registrations.length == 0 && this.memberGetGroup(member) !== null) {
                     this.$set(this.memberSelection, member.id, true)
+                    this.defaultSelection = true
                 } else {
                     this.$set(this.memberSelection, member.id, false)
                 }

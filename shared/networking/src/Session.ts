@@ -1,8 +1,8 @@
-import { Decoder,ObjectData } from '@simonbackx/simple-encoding'
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
-import { Request,RequestMiddleware } from '@simonbackx/simple-networking'
+import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
-import { KeychainedResponseDecoder,KeychainItem,NewUser,Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, KeychainItem, NewUser, Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
 import { Keychain } from './Keychain'
@@ -11,7 +11,7 @@ import { NetworkManager } from './NetworkManager'
 
 type AuthenticationStateListener = () => void
 
-export class Session implements RequestMiddleware  {
+export class Session implements RequestMiddleware {
     organizationId: string;
     organization: Organization | null = null
     user: NewUser | null = null
@@ -30,7 +30,7 @@ export class Session implements RequestMiddleware  {
 
     constructor(organizationId: string) {
         this.organizationId = organizationId
-        
+
         // todo: search for the token and keys
         this.loadFromStorage()
     }
@@ -77,7 +77,7 @@ export class Session implements RequestMiddleware  {
 
     loadFromStorage() {
         // Check localstorage
-        const json = localStorage.getItem('token-'+this.organizationId)
+        const json = localStorage.getItem('token-' + this.organizationId)
         if (json) {
             try {
                 const parsed = JSON.parse(json)
@@ -103,7 +103,7 @@ export class Session implements RequestMiddleware  {
     saveToStorage() {
         // Save token to localStorage
         if (this.token && this.authEncryptionKey) {
-            localStorage.setItem('token-'+this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
+            localStorage.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
             localStorage.setItem('key-' + this.organizationId, this.authEncryptionKey)
         } else {
             localStorage.removeItem('token-' + this.organizationId)
@@ -182,7 +182,7 @@ export class Session implements RequestMiddleware  {
         });
     }
 
-    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string; organizationPrivateKey: string} | null = null) {
+    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string; organizationPrivateKey?: string } | null = null) {
         if (!this.token) {
             throw new Error("You can only set the encryption key after setting the token")
         }
@@ -191,7 +191,9 @@ export class Session implements RequestMiddleware  {
         if (preload) {
             this.user = preload.user
             this.userPrivateKey = preload.userPrivateKey
-            this.organizationPrivateKey = preload.organizationPrivateKey
+            if (preload.organizationPrivateKey) {
+                this.organizationPrivateKey = preload.organizationPrivateKey
+            }
         }
         this.onTokenChanged();
 
@@ -200,7 +202,7 @@ export class Session implements RequestMiddleware  {
             this.updateData()
         }
     }
-    
+
     async fetchUser(): Promise<NewUser> {
         const response = await this.authenticatedServer.request({
             method: "GET",
@@ -227,20 +229,20 @@ export class Session implements RequestMiddleware  {
         this.organization = response.data.data
 
         Keychain.addItems(response.data.keychainItems)
-        
+
         this.callListeners()
         return this.organization
     }
 
     updateData() {
         this.fetchOrganization()
-        .then(() => this.fetchUser())
-        .then(() => this.updateKeys())
-        .catch(e => {
-            console.error(e)
-            // todo: show message
-            this.logout()
-        })
+            .then(() => this.fetchUser())
+            .then(() => this.updateKeys())
+            .catch(e => {
+                console.error(e)
+                // todo: show message
+                this.logout()
+            })
     }
 
     async updateKeys() {

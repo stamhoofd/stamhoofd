@@ -190,7 +190,10 @@ $header-height: 70px;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
-        --st-vertical-padding: 60px;
+
+        @media (min-width: 800px + 50px*2 - 1px) {
+            --st-vertical-padding: 60px;
+        }
         padding-bottom: 30px;
     }
 }

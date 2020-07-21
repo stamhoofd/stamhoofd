@@ -1,13 +1,12 @@
 <template>
     <div class="auto st-view forgot-password-view">
         <STNavigationBar title="Wachtwoord vergeten">
-            <button v-if="canPop" slot="left" class="button text" @click="pop">
-                <span class="icon arrow-left" />
-                <span>Inloggen</span>
-            </button>
+            <button slot="right" class="button icon gray close" @click="pop"></button>
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>
+
+            <div class="warning-box">Als je jouw wachtwoord opnieuw instelt zal je tijdelijk geen toegang meer hebben tot jouw gegevens. Deze worden versleuteld opgeslagen, dus het computersysteem zelf kan je geen toegang geven. We kunnen jouw toegang manueel herstellen maar dat kan even duren.</div>
 
             <STInputBox title="E-mailadres">
                 <input class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">

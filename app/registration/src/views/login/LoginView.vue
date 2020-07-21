@@ -53,6 +53,7 @@ import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
+import SignupView from './SignupView.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -97,7 +98,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     createAccount() {
-        this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet")) 
+        this.present(new ComponentWithProperties(SignupView, {}).setDisplayStyle("popup")) 
     }
 
     async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
@@ -268,6 +269,15 @@ export default class LoginView extends Mixins(NavigationMixin){
         gap: 60px;
         align-items: center;
 
+        @media (max-width: 800px) {
+            padding-top: 0;
+            display: block;
+
+            > aside {
+                padding: 0 var(--st-horizontal-padding, 20px);
+            }
+        }
+
         ol {
             list-style: none; 
             counter-reset: li;
@@ -296,9 +306,11 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     .login-view {
-        @include style-side-view-shadow();
-        background: $color-white;
-        border-radius: $border-radius;
+        @media (min-width: 800px + 50px*2 - 1px) {
+            @include style-side-view-shadow();
+            background: $color-white;
+            border-radius: $border-radius;
+        }
 
         > h1 {
             @extend .style-huge-title-1;
