@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { GroupPrices } from './GroupPrices';
 import { OrganizationGenderType } from './OrganizationGenderType';
@@ -26,4 +26,10 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(GroupPrices) })
     defaultPrices: GroupPrices[] = []
+
+    @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
+    iban = ""
+
+    @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
+    bic = ""
 }

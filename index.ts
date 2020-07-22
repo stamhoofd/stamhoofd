@@ -1,3 +1,6 @@
+// Latest version of the structures
+export const Version = 6
+
 // General
 export * from "./src/OrganizationMetaData"
 export * from "./src/OrganizationType"
@@ -52,5 +55,3 @@ export * from "./src/members/Registration"
 export * from "./src/members/RegistrationWithMember"
 export * from "./src/members/PaymentDetailed"
 
-// Latest version of the structures
-export const Version = 5
