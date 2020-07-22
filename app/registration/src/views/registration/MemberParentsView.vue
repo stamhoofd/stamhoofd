@@ -21,6 +21,7 @@
 
                     <h2 class="parent-name">{{ parent.parent.firstName }} {{ parent.parent.lastName }}</h2>
                     <p class="parent-description" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
+                    <p class="parent-description" v-if="parent.parent.email">{{ parent.parent.email }}</p>
                     <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
 
                     <button slot="right" class="button text limit-space" @click.stop="editParent(parent.parent)">
@@ -188,6 +189,9 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #member-parents-view {
+    .parent-name + .parent-description {
+        padding-top: 5px;
+    }
     .parent-description {
         @extend .style-description-small;
     }

@@ -33,7 +33,7 @@
                     </STInputBox>
 
                     <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" />
-
+                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Voor belangrijke mededelingen" :required="false" />
                 </div>
 
                 <div>
@@ -68,7 +68,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
@@ -83,6 +83,7 @@ import { MemberManager } from '../../classes/MemberManager';
         AddressInput,
         Radio,
         PhoneInput,
+        EmailInput,
         Checkbox,
         STList,
         STListItem

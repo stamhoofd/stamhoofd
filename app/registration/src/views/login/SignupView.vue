@@ -12,11 +12,9 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="E-mailadres">
-                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-                    </STInputBox>
+                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
-                        <STInputBox title="Kies een wachtwoord">
+                    <STInputBox title="Kies een wachtwoord">
                         <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
 

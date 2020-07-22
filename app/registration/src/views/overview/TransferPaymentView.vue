@@ -176,6 +176,10 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     @media (max-width: 500px) {
         display: block;
     }
+
+    > div:last-child {
+        padding: 15px 0;
+    }
 }
 .payment-transfer-table {
     td {

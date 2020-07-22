@@ -18,6 +18,7 @@ export { default as BirthYearInput } from "./src/inputs/BirthYearInput.vue"
 export { default as AddressInput } from "./src/inputs/AddressInput.vue"
 export { default as BirthDayInput } from "./src/inputs/BirthDayInput.vue"
 export { default as PhoneInput } from "./src/inputs/PhoneInput.vue"
+export { default as EmailInput } from "./src/inputs/EmailInput.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
