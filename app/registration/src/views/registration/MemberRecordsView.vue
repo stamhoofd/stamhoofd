@@ -234,7 +234,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput, LoadingButton } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
-import { MemberDetails, Record, RecordType } from "@stamhoofd/structures"
+import { MemberDetails, Record, RecordType, EmergencyContact } from "@stamhoofd/structures"
 import { DecryptedMember } from '@stamhoofd/structures';
 import { EncryptedMember } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
@@ -286,6 +286,11 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             // already accepted previous time
             this.isParent = true
         }
+
+        if (this.memberDetails) {
+            this.doctorName = this.memberDetails.doctor?.name ?? ""
+            this.doctorPhone = this.memberDetails.doctor?.phone ?? ""
+        }
     }
 
     async goNext() {
@@ -311,6 +316,11 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             return;
         }
 
+        this.memberDetails.doctor = EmergencyContact.create({
+            name: this.doctorName,
+            phone: this.doctorPhone,
+            title: "Huisdokter"
+        })
 
         this.loading = true
 
