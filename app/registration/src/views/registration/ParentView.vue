@@ -189,41 +189,41 @@ export default class ParentView extends Mixins(NavigationMixin) {
             }))
         }
 
-        let valid = false
+        const valid = await this.validator.validate()
 
         if (errors.errors.length > 0) {
             this.errorBox = new ErrorBox(errors)
-        } else {
+            return;
+        } 
+        
+        if (!valid) {
             this.errorBox = null
-            valid = true
+            return;
         }
-        valid = valid && await this.validator.validate()
 
-        if (valid) {
-            if (this.parent) {
-                this.parent.firstName = this.firstName
-                this.parent.lastName = this.lastName
-                this.parent.phone = this.phone
-                this.parent.email = this.email
-                this.parent.address = this.address
-                this.parent.type = this.type
-                MemberManager.updateParent(this.parent)
-                if (this.memberDetails) {
-                    this.memberDetails.updateParent(this.parent)
-                }
-            } else {
-                this.parent = Parent.create({
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                    phone: this.phone,
-                    email: null,
-                    address: this.address,
-                    type: this.type
-                })
+        if (this.parent) {
+            this.parent.firstName = this.firstName
+            this.parent.lastName = this.lastName
+            this.parent.phone = this.phone
+            this.parent.email = this.email
+            this.parent.address = this.address
+            this.parent.type = this.type
+            MemberManager.updateParent(this.parent)
+            if (this.memberDetails) {
+                this.memberDetails.updateParent(this.parent)
             }
-            
-            this.handler(this.parent, this)
+        } else {
+            this.parent = Parent.create({
+                firstName: this.firstName,
+                lastName: this.lastName,
+                phone: this.phone,
+                email: null,
+                address: this.address,
+                type: this.type
+            })
         }
+        
+        this.handler(this.parent, this)
     }
 }
 </script>
