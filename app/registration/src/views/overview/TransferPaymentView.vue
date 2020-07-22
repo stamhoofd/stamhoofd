@@ -22,11 +22,11 @@
                                 </tr>
                                 <tr>
                                     <td>Bankrekening</td>
-                                    <td>todo</td>
+                                    <td>{{ organization.meta.iban }}</td>
                                 </tr>
                                 <tr>
                                     <td>BIC</td>
-                                    <td>todo</td>
+                                    <td>{{ organization.meta.bic }}</td>
                                 </tr>
                                 <tr>
                                     <td>Gestructureerde mededeling</td>
@@ -35,11 +35,9 @@
                             </tbody>
                         </table>
                     </div>
-                    
                 </div>
 
-
-                <p class="warning-box">Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
+                <p class="warning-box">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
             </main>
 
             <STToolbar>
@@ -90,6 +88,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     isPopup: boolean
 
     MemberManager = MemberManager
+    organization = OrganizationManager.organization
     QRCodeUrl: string | null = null
 
     step = 3
@@ -135,14 +134,13 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     generateQRCode() {
-        const iban = "AT611904300234573201";
-        const bic = "ABCDATWW"
+        const iban = this.organization.meta.iban ?? "";
+        const bic = this.organization.meta.bic ?? "";
         const creditor = OrganizationManager.organization.name
         const message = "BCD\n001\n1\nSCT\n"+bic+"\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nLidgeld betalen";
 
         QRCode.toDataURL(message)
             .then(url => {
-                console.log(url)
                 this.QRCodeUrl = url
             })
             .catch(err => {
