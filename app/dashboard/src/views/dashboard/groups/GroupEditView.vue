@@ -229,9 +229,7 @@ export default class GroupEditView extends Mixins(NavigationMixin) {
 
         await OrganizationManager.patch(this.organizationPatch)
         this.saving = false
-        this.pop({
-            force: true
-        })
+        this.pop({ force: true })
     }
 
 
