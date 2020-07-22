@@ -42,7 +42,7 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary">
+            <button slot="right" class="button secundary" v-if="false">
                 Overslaan
             </button>
             <button slot="right" class="button primary" @click="goNext">

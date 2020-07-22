@@ -208,7 +208,7 @@ export default class LoginView extends Mixins(NavigationMixin){
             this.session.setEncryptionKey(encryptionKey)
             
             SessionManager.setCurrentSession(this.session)
-            this.pop()
+            this.pop({ force: true })
         } catch (e) {
             console.error(e)
             this.loading = false;

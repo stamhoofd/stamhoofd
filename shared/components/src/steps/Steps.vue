@@ -85,7 +85,7 @@ $header-height: 70px;
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
 
-    @media (max-width: 800px + 50px*2) {
+    @media (max-width: 800px) {
         background: $color-white;
     }
 
@@ -103,7 +103,7 @@ $header-height: 70px;
 
             background: $color-white-shade;
 
-            @media (max-width: 800px + 50px*2) {
+            @media (max-width: 800px) {
                 background: $color-white;
             }
 
@@ -119,7 +119,7 @@ $header-height: 70px;
                 transition: opacity 0.4s;
                 position: absolute;
 
-                @media (max-width: 800px + 50px*2) {
+                @media (max-width: 800px) {
                     background: linear-gradient($color-white, rgba($color-white, 0));
                 }
             }
@@ -191,7 +191,7 @@ $header-height: 70px;
         min-height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
 
-        @media (min-width: 800px + 50px*2 - 1px) {
+        @media (min-width: 801px) {
             --st-vertical-padding: 60px;
         }
         --vh-tmp-b: calc(var(--vh, 7px) * 100);
@@ -205,7 +205,7 @@ $header-height: 70px;
 
 .steps-layout {
     .boxed-view {
-        @media (min-width: 800px + 50px*2 - 1px) {
+        @media (min-width: 801px) {
             padding-bottom: 30px;
         }
 
@@ -219,7 +219,7 @@ $header-height: 70px;
                 }
             }
             
-            @media (min-width: 800px + 50px*2 - 1px) {
+            @media (min-width: 801px) {
                 max-width: 800px;
                 background: $color-white;
                 @include style-side-view-shadow();

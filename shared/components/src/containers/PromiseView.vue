@@ -36,7 +36,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
         }).catch(e => {
             console.error(e);
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
-            this.dismiss();
+            this.dismiss({ force: true });
         })
     }
 

@@ -32,6 +32,9 @@ export default class LoadingButton extends Vue {
     > div:first-child {
         padding-right: 0px;
         transition: padding-right 0.25s;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
     }
 
      > div:last-child {

@@ -207,7 +207,7 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
-                            <input v-model="doctorName" class="input" name="name" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
+                            <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
                         </STInputBox>
                     </div>
 
@@ -219,10 +219,11 @@
             </template>
         </main>
         <STToolbar>
-            <Spinner v-if="loading" slot="right" />
-            <button slot="right" class="button primary" @click="goNext">
-                Doorgaan
-            </button>
+            <LoadingButton :loading="loading" slot="right">
+                <button class="button primary" @click="goNext">
+                    Doorgaan
+                </button>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
@@ -230,7 +231,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput } from "@stamhoofd/components"
+import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput, LoadingButton } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
 import { MemberDetails, Record, RecordType } from "@stamhoofd/structures"
@@ -245,6 +246,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { EncryptedMemberWithRegistrations } from '@stamhoofd/structures';
 import { MemberManager } from '../../classes/MemberManager';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -255,9 +257,9 @@ import { MemberManager } from '../../classes/MemberManager';
         STList,
         STListItem,
         Checkbox,
-        Spinner,
         BackButton,
-        PhoneInput
+        PhoneInput,
+        LoadingButton
     },
     directives: { Tooltip },
 })
@@ -290,6 +292,26 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return
         }
+        this.errorBox =  null;
+        const errors = new SimpleErrors()
+        if (this.doctorName.length < 2) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul de naam van de dokter",
+                field: "doctorName"
+            }))
+        }
+
+        const valid = await this.validator.validate()
+
+        if (!valid || errors.errors.length > 0) {
+            if (errors.errors.length > 0) {
+                this.errorBox = new ErrorBox(errors)
+            }
+            return;
+        }
+
+
         this.loading = true
 
         try {
@@ -300,7 +322,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                 await MemberManager.addMember(this.memberDetails)
             }
 
-            this.dismiss()
+            this.dismiss({ force: true })
         } catch (e) {
             console.error(e);
             alert("Er ging iets mis...")

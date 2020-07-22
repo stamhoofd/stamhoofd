@@ -99,7 +99,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             memberDetails: this.memberDetails,
             parent,
             handler: (parent: Parent, component: ParentView) => {
-                component.pop()
+                component.pop({ force: true })
             }
         }))
     }
@@ -112,7 +112,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             memberDetails: this.memberDetails,
             handler: (parent: Parent, component: ParentView) => {
                 this.memberDetails.parents.push(parent)
-                component.pop()
+                component.pop({ force: true })
             }
         }))
     }

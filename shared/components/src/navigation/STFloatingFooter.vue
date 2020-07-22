@@ -28,7 +28,7 @@
     }
 
     > div > * {
-        margin-top: 15px;
+        margin-top: 10px;
 
         &:first-child {
             margin-top: 0;;

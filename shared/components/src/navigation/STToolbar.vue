@@ -47,7 +47,7 @@ export default class STToolbar extends Vue {}
             flex-shrink: 0;
             display: flex;
             flex-direction: row;
-            align-items: center;
+            align-items: stretch;
             min-width: 0;
         }
 

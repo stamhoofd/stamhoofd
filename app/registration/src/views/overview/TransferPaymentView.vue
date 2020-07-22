@@ -152,7 +152,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     goNext() {
         if (this.isPopup) {
-            this.dismiss()
+            this.dismiss({ force: true })
             return;
         }
        

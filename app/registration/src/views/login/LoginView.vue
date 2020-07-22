@@ -238,7 +238,7 @@ export default class LoginView extends Mixins(NavigationMixin){
             this.session.setEncryptionKey(encryptionKey)
             
             SessionManager.setCurrentSession(this.session)
-            this.pop()
+            this.pop({ force: true })
         } catch (e) {
             console.error(e)
             this.loading = false;
@@ -275,6 +275,7 @@ export default class LoginView extends Mixins(NavigationMixin){
 
             > aside {
                 padding: 0 var(--st-horizontal-padding, 20px);
+                padding-top: 20px;
             }
         }
 
@@ -306,7 +307,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     .login-view {
-        @media (min-width: 800px + 50px*2 - 1px) {
+        @media (min-width: 801px) {
             @include style-side-view-shadow();
             background: $color-white;
             border-radius: $border-radius;

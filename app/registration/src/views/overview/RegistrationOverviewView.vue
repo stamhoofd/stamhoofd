@@ -156,7 +156,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                     MemberManager.patchMembers([
                         member
                     ]).then(() => {
-                        component.pop()
+                        component.pop({ force: true })
                         this.memberSelection[member.id] = true;
                     }).catch(e => {
                         console.error(e)
