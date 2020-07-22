@@ -47,7 +47,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
 import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
@@ -83,7 +83,8 @@ const throttle = (func, limit) => {
         STFloatingFooter,
         STInputBox,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        EmailInput
     }
 })
 export default class SignupView extends Mixins(NavigationMixin){
@@ -93,6 +94,7 @@ export default class SignupView extends Mixins(NavigationMixin){
     passwordRepeat = ""
 
     errorBox: ErrorBox | null = null
+    validator = new Validator()
 
     session = SessionManager.currentSession!
 
@@ -146,6 +148,8 @@ export default class SignupView extends Mixins(NavigationMixin){
             return
         }
 
+        const valid = await this.validator.validate()
+
         if (this.password != this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
@@ -162,6 +166,10 @@ export default class SignupView extends Mixins(NavigationMixin){
             return;
         }
 
+        if (!valid) {
+            this.errorBox = null
+            return;
+        }
 
         this.loading = true
         // Request the key constants

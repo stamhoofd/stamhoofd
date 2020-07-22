@@ -302,7 +302,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         if (this.doctorName.length < 2) {
             errors.addError(new SimpleError({
                 code: "invalid_field",
-                message: "Vul de naam van de dokter",
+                message: "Vul de naam van de dokter in",
                 field: "doctorName"
             }))
         }
