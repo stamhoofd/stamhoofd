@@ -506,14 +506,14 @@
     mkdirp "^1.0.4"
 
 "@simonbackx/simple-encoding@~1.9":
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.2.tgz#628c5bbb6cb002e7afeb7aa62414ef21741a0ee7"
-  integrity sha512-lz38KRjYgcTSVSRNmV1nsR7QaEEHt2R25LZ3rr6jSyZhwM+HQdmuktP85j7FiyQTkp4HJsbNLEsDMDKn0Gyo6w==
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.3.tgz#c2968e3c19b495b1166c31b0cdd46664cb36b596"
+  integrity sha512-UML/JxK78SjbDFe4Tql66pvRolJuRMzxZNh/ns1CgRzgmKtP7YsyDPIj3JrA6VFQqzlWjRBKDNheNuwGP/zXkA==
 
 "@simonbackx/simple-errors@~1.0":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.6.tgz#ce56301d557324c1d220eab4197e4a19edbed9f3"
-  integrity sha512-zIoUMbJN6zVTHVejrze3Q9uARj/HwCjhSUYd46HFZMAgG6FqEFpPZ8zPbAc/6BCzS+h3vA7mKMmP3RmyjwwCFg==
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.7.tgz#e6e02b224d04a0c8c3e4aabf790a27788120d4bd"
+  integrity sha512-vDA9EqAeR04OHV3pkFAT3zSMNxmFwPWSXtrSUcFpO0HYegwlc1utPDQ4xNm5UAxeXwz67+YiZJN+aT3KuipdfQ==
   dependencies:
     uuid "^8.2.0"
 
@@ -523,9 +523,9 @@
   integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.5.0.tgz#c11eddc5c7615c1ca8a41c81027f76c944d51f79"
-  integrity sha512-hUGXoH8oIp2Qn+DsYLAKMe6u/JOY87GT7K7H7UkDHIBkGniFUTXNH8QTyw8qCcX1U2Prd1Z/FFxREgOvzHgTIg==
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.5.1.tgz#e5f422fb98b0fff50bfc00026ce5fd26a885332b"
+  integrity sha512-+hTbQ6yJx8qAHNZBxBh2OI65lYBi27WzlPbBmxkJGwIS2S994v+WMwV2ooZ6Igwo2DdmDtLu+7P2cNyVLo1hXw==
   dependencies:
     vue "^2.6.11"
     vue-class-component "^7.0.2"

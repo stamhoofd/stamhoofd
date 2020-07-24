@@ -1,12 +1,11 @@
-import { ArrayDecoder,AutoEncoder, Decoder,field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
-import { Organization, Version } from '@stamhoofd/structures';
-
+import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { Organization, Version, KeyConstants, ChallengeResponseStruct, Token } from '@stamhoofd/structures';
 import { Session } from './Session';
 
 class SessionStorage extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(Organization)})
+    @field({ decoder: new ArrayDecoder(Organization) })
     organizations: Organization[] = []
-    
+
     @field({ decoder: StringDecoder, nullable: true })
     lastOrganizationId: string | null = null
 }
@@ -139,7 +138,6 @@ export class SessionManagerStatic {
             return session
         })
     }
-
 }
 
 export const SessionManager = new SessionManagerStatic();

@@ -28,6 +28,7 @@ module.exports = {
         // To test on external devices
         host: '0.0.0.0',//your ip address
         port: 8080,
+        sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
         disableHostCheck: true,
     },
     devtool: "sourcemap",
