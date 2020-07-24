@@ -25,7 +25,6 @@ export class Session implements RequestMiddleware {
     protected userPrivateKey: string | null = null // Used to decrypt messages for this user
 
     // Not stored:
-    protected organizationPrivateKey: string | null = null // Used to decrypt messages for this organization (only for admins)
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     constructor(organizationId: string) {
@@ -182,7 +181,7 @@ export class Session implements RequestMiddleware {
         });
     }
 
-    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string; organizationPrivateKey?: string } | null = null) {
+    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string } | null = null) {
         if (!this.token) {
             throw new Error("You can only set the encryption key after setting the token")
         }
@@ -191,9 +190,6 @@ export class Session implements RequestMiddleware {
         if (preload) {
             this.user = preload.user
             this.userPrivateKey = preload.userPrivateKey
-            if (preload.organizationPrivateKey) {
-                this.organizationPrivateKey = preload.organizationPrivateKey
-            }
         }
         this.onTokenChanged();
 

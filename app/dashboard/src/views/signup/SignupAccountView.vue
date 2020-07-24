@@ -58,7 +58,7 @@ import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
+import { NetworkManager, Session, SessionManager, Keychain } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
@@ -137,6 +137,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 const organization = this.organization
                 organization.publicKey = organizationKeyPair.publicKey
 
+                const item = KeychainItem.create({
+                    publicKey: organization.publicKey,
+                    encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
+                })
+
                 // Do netwowrk request to create organization
                 const response = await NetworkManager.server.request({
                     method: "POST",
@@ -145,10 +150,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                         organization: this.organization,
                         user,
                         keychainItems: [
-                            KeychainItem.create({
-                                publicKey: organization.publicKey,
-                                encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
-                            })
+                            item
                         ]
                     }),
                     decoder: Token
@@ -157,7 +159,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 const session = new Session(organization.id)
                 session.organization = organization
                 session.setToken(response.data)
-                session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey, organizationPrivateKey: organizationKeyPair.privateKeyPair})
+                Keychain.addItem(item)
+                session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
                 SessionManager.setCurrentSession(session)
 
                 this.loading = false;

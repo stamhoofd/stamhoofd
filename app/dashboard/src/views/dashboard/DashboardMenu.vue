@@ -13,7 +13,7 @@
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user"/>
                 <span>Leden</span>
-                <button>
+                <button class="button">
                     Alle
                 </button>
             </button>
@@ -190,7 +190,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     box-sizing: border-box;
     height: 45px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition: transform 0.2s, background-color 0.2s, color 0.2s;
 
     text-overflow: ellipsis;
     vertical-align: middle;
@@ -202,15 +202,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     &:active {
-        opacity: 0.4;
+        background-color: $color-gray-lighter;
     }
 
     padding-left: var(--horizontal-padding, 30px);
     padding-right: var(--horizontal-padding, 30px);
-
-    &:hover {
-        background-color: $color-primary-lighter;
-    }
 
     &.heading {
         @extend .style-button-small;
