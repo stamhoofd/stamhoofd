@@ -28,5 +28,3 @@ export default class ContextMenuItem extends Vue {
     }
 }
 </script>
-
-<style lang="scss"></style>

@@ -116,7 +116,7 @@ export default class ContextMenu extends Vue {
     left: 0;
     top: 0;
     background: $color-white;
-    padding: 0;
+    padding: 4px 0;
     border-radius: $border-radius;
     @extend .style-overlay-shadow;
     border-radius: $border-radius;
@@ -126,14 +126,17 @@ export default class ContextMenu extends Vue {
     max-width: calc(100vw - 30px);
     overflow: hidden;
 
-    /*.context-menu-item {
+    .context-menu-item {
         @extend .style-context-menu-item;
-        padding: 5px 20px;
-        cursor: default;
+        padding: 10px 20px;
+        cursor: pointer;
         user-select: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
         &:hover {
             background: $color-primary;
+            color: $color-white;
         }
 
         &.clicked {
@@ -142,13 +145,12 @@ export default class ContextMenu extends Vue {
     }
 
     .context-menu-line {
-        background: $color-white;
-        opacity: 0.2;
+        background: $color-border;
         border: 0;
         outline: 0;
         border-radius: $border-width/2;
         height: $border-width;
-        margin: 8px 0;
-    }*/
+        margin: 4px 0;
+    }
 }
 </style>
