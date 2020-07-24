@@ -90,7 +90,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Create payment
         const payment = new Payment()
         payment.method = request.body.paymentMethod
-        payment.status = payment.method == PaymentMethod.Transfer ? PaymentStatus.Succeeded : PaymentStatus.Pending
+        payment.status = PaymentStatus.Pending
         payment.price = totalPrice
         payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
         payment.paidAt = payment.method == PaymentMethod.Transfer ? new Date() : null
@@ -99,7 +99,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         for (const registration of registrations) {
             registration.paymentId = payment.id
-            if (payment.status == PaymentStatus.Succeeded) {
+
+            if (payment.method == PaymentMethod.Transfer) {
                 registration.registeredAt = new Date()
             }
             await registration.save()
