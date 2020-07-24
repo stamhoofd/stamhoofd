@@ -6,7 +6,7 @@
                     Terug
                 </button>
                 <STNavigationTitle v-else>
-                    <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
+                    <span class="icon-spacer">{{ group ? group.settings.name : "Alle leden" }}</span>
                     <button class="button more" />
                 </STNavigationTitle>
             </template>
@@ -24,10 +24,12 @@
     
         <main>
             <h1 v-if="canPop">
-                <span class="icon-spacer">{{ group ? group.name : "Alle leden" }}</span>
+                <span class="icon-spacer">{{ group ? group.settings.name : "Alle leden" }}</span>
                 <button class="button more" />
             </h1>
-            <table class="data-table">
+
+            <Spinner class="center" v-if="loading"/>
+            <table class="data-table" v-else>
                 <thead>
                     <tr>
                         <th>
@@ -80,10 +82,10 @@
                                 v-tooltip="'Ingeschreven op ' + member.member.createdOn"
                                 class="new-member-bubble"
                             />
-                            {{ member.member.name }}
+                            {{ member.member.details.name }}
                         </td>
                         <td class="minor">
-                            {{ member.member.age }} jaar
+                            {{ member.member.details.age }} jaar
                         </td>
                         <td>{{ member.member.info }}</td>
                         <td>
@@ -117,12 +119,9 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { Group } from "@stamhoofd-frontend/models";
-import { Member } from "@stamhoofd-frontend/models";
-import { Organization } from "@stamhoofd-frontend/models";
 import { TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { STNavigationTitle } from "@stamhoofd/components";
+import { STNavigationTitle, Spinner } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -132,12 +131,14 @@ import MailView from "../mail/MailView.vue";
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
+import { DecryptedMember, Group, Organization } from '@stamhoofd/structures';
+import { MemberManager } from '../../../classes/MemberManager';
 
 class SelectableMember {
-    member: Member;
+    member: DecryptedMember;
     selected = false;
 
-    constructor(member: Member) {
+    constructor(member: DecryptedMember) {
         this.member = member;
     }
 }
@@ -148,6 +149,7 @@ class SelectableMember {
         STNavigationBar,
         STNavigationTitle,
         STToolbar,
+        Spinner
     },
     directives: { Tooltip },
 })
@@ -166,31 +168,80 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     sortBy = "info";
     sortDirection = "ASC";
 
+    loading = false;
+
+    mounted() {
+        this.loading = true;
+
+        MemberManager.loadMembers(this.group?.id ?? null).then((members) => {
+            this.members = members.map((member) => {
+                return new SelectableMember(member);
+            }) ?? [];
+        }).catch((e) => {
+            console.error(e)
+        }).finally(() => {
+            this.loading = false
+        })
+
+        // todo!
+
+        /*if (this.group) {
+            this.members = this.group.members?.map((member) => {
+                return new SelectableMember(member);
+            }) ?? [];
+        } else {
+            this.members = this.organization?.groups?.flatMap((group) => {
+                return group.members?.map((member) => {
+                    return new SelectableMember(member);
+                }) ?? [];
+            }) ?? [];
+        }*/
+    }
+
     get sortedMembers(): SelectableMember[] {
         if (this.sortBy == "info") {
             return this.filteredMembers.sort((a, b) => {
-                if (this.sortDirection == "ASC") {
-                    return a.member.age - b.member.age;
+                if (!a.member.details && !b.member.details) {
+                    return 0
                 }
-                return b.member.age - a.member.age;
+                if (!a.member.details) {
+                    return 1
+                }
+                if (!b.member.details) {
+                    return -1
+                }
+                if (this.sortDirection == "ASC") {
+                    return a.member.details.age - b.member.details.age;
+                }
+                return b.member.details.age - a.member.details.age;
             });
         }
 
         if (this.sortBy == "name") {
             return this.filteredMembers.sort((a, b) => {
+                if (!a.member.details && !b.member.details) {
+                    return 0
+                }
+                if (!a.member.details) {
+                    return 1
+                }
+                if (!b.member.details) {
+                    return -1
+                }
+
                 if (this.sortDirection == "ASC") {
-                    if (a.member.name.toLowerCase() > b.member.name.toLowerCase()) {
+                    if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
                         return 1;
                     }
-                    if (a.member.name.toLowerCase() < b.member.name.toLowerCase()) {
+                    if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
                         return -1;
                     }
                     return 0;
                 }
-                if (a.member.name.toLowerCase() > b.member.name.toLowerCase()) {
+                if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
                     return -1;
                 }
-                if (a.member.name.toLowerCase() < b.member.name.toLowerCase()) {
+                if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
                     return 1;
                 }
                 return 0;
@@ -234,7 +285,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return filtered;
         }
         return filtered.filter((member: SelectableMember) => {
-            if (member.member.matchQuery(this.searchQuery)) {
+            if (member.member.details && member.member.details.matchQuery(this.searchQuery)) {
                 return true;
             }
             this.selectionCountHidden += member.selected ? 1 : 0;
@@ -264,19 +315,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.sortBy = field;
     }
 
-    mounted() {
-        if (this.group) {
-            this.members = this.group.members?.map((member) => {
-                return new SelectableMember(member);
-            }) ?? [];
-        } else {
-            this.members = this.organization?.groups?.flatMap((group) => {
-                return group.members?.map((member) => {
-                    return new SelectableMember(member);
-                }) ?? [];
-            }) ?? [];
-        }
-    }
     next() {
         this.show(new ComponentWithProperties(GroupMembersView, {}));
     }
@@ -285,7 +323,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         // do nothing for now
     }
 
-    getPreviousMember(member: Member): Member | null {
+    getPreviousMember(member: DecryptedMember): DecryptedMember | null {
         for (let index = 0; index < this.sortedMembers.length; index++) {
             const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
@@ -298,7 +336,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return null;
     }
 
-    getNextMember(member: Member): Member | null {
+    getNextMember(member: DecryptedMember): DecryptedMember | null {
         for (let index = 0; index < this.sortedMembers.length; index++) {
             const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
@@ -331,7 +369,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         });
     }
 
-    showMemberContextMenu(event, member: Member) {
+    showMemberContextMenu(event, member: DecryptedMember) {
         const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
@@ -340,7 +378,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
-    getSelectedMembers(): Member[] {
+    getSelectedMembers(): DecryptedMember[] {
         return this.filteredMembers
             .filter((member: SelectableMember) => {
                 return member.selected;

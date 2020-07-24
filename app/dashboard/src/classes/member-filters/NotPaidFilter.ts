@@ -1,4 +1,4 @@
-import { Member } from "@stamhoofd-frontend/models";
+import { DecryptedMember } from '@stamhoofd/structures';
 
 import { Filter } from "./Filter";
 
@@ -6,7 +6,7 @@ export class NotPaidFilter implements Filter {
     getName(): string {
         return "Nog niet betaald";
     }
-    doesMatch(member: Member): boolean {
+    doesMatch(member: DecryptedMember): boolean {
         return !member.paid;
     }
 }

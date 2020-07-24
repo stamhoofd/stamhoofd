@@ -25,7 +25,7 @@
                 :class="{ selected: currentlySelected == 'group-'+group.group.id }"
                 @click="openGroup(group)"
             >
-                {{ group.group.name }}
+                {{ group.group.settings.name }}
             </button>
         </div>
         <hr>
@@ -57,11 +57,9 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { Group } from "@stamhoofd-frontend/models";
-import { Organization as MockOrganization } from "@stamhoofd-frontend/models";
 import { OrganizationFactory } from "@stamhoofd-frontend/models";
 import { SessionManager } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
+import { Organization, Group } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import GroupListView from './groups/GroupListView.vue';
@@ -79,18 +77,12 @@ class SelectableGroup {
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
     organization: Organization = SessionManager.currentSession!.organization!
-    mockOrganization: MockOrganization | null = null;
     groups: SelectableGroup[] = [];
     currentlySelected: string | null = null
 
     mounted() {
-        const factory = new OrganizationFactory({
-            type: "chiro",
-        });
-        this.mockOrganization = factory.create();
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.groups = this.mockOrganization.groups!.map((group) => {
+               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.groups = this.organization.groups!.map((group) => {
             return new SelectableGroup(group);
         });
         if (!this.splitViewController?.shouldCollapse()) {
@@ -104,7 +96,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     openAll() {
         this.currentlySelected = "group-all"
-        this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
+        //this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
     }
 
     openGroup(group: SelectableGroup) {
