@@ -78,8 +78,8 @@
                         </td>
                         <td>
                             <div
-                                v-if="member.member.isNew"
-                                v-tooltip="'Ingeschreven op ' + member.member.createdOn"
+                                v-if="isNew(member.member)"
+                                v-tooltip="'Ingeschreven op ' + registrationDate(member.member)"
                                 class="new-member-bubble"
                             />
                             {{ member.member.details.name }}
@@ -89,7 +89,7 @@
                         </td>
                         <td>{{ member.member.info }}</td>
                         <td>
-                            <button class="button more" @click.stop="showMemberContextMenu($event, member.member)" />
+                            <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
                 </tbody>
@@ -196,6 +196,38 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }) ?? [];
             }) ?? [];
         }*/
+    }
+
+    registrationDate(member: DecryptedMember) {
+        if (member.registrations.length == 0) {
+            return new Date()
+        }
+        const reg = !this.group ? member.registrations[0] : member.registrations.find(r => r.groupId === this.group!.id)
+        if (!reg) {
+            return new Date()
+        }
+
+        if (!reg.registeredAt) {
+            return new Date()
+        }
+        
+        return reg.registeredAt
+    }
+
+    isNew(member: DecryptedMember) {
+        if (!this.group) {
+            return false
+        }
+        const reg = member.registrations.find(r => r.groupId === this.group!.id)
+        if (!reg) {
+            return false
+        }
+
+        if (!reg.registeredAt) {
+            return true
+        }
+        
+        return reg.registeredAt > new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 14)
     }
 
     get sortedMembers(): SelectableMember[] {

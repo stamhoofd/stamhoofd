@@ -2,21 +2,21 @@
     <div class="view-payments">
         <h2>Betaling</h2>
         <main>
-            <dl class="details-grid">
+            <dl class="details-grid" v-for="payment in payments">
                 <dt>Bedrag</dt>
-                <dd>€ 40</dd>
+                <dd>{{ payment.price | price }}</dd>
 
                 <dt>Bankrekening</dt>
-                <dd>BE31 9789 7578 4155</dd>
+                <dd>{{ organization.meta.iban }}</dd>
 
                 <dt>BIC</dt>
-                <dd>KREDBEBB</dd>
+                <dd>{{ organization.meta.bic }}</dd>
 
                 <dt>Mededeling</dt>
-                <dd>Lidgeld 123</dd>
+                <dd>{{ payment.transferDescription }}</dd>
 
                 <dt>Status</dt>
-                <dd v-if="member.paid">
+                <dd v-if="payment.status == 'Succeeded'">
                     Betaald
                 </dd>
                 <dd v-else>
@@ -38,14 +38,29 @@
 </template>
 
 <script lang="ts">
-import { Member } from "@stamhoofd-frontend/models";
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Prop,Vue } from "vue-property-decorator";
+import { DecryptedMember } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
-@Component({ components: { STToolbar } })
+@Component({ 
+    components: { 
+        STToolbar 
+    },
+    filters: {
+        price: Formatter.price
+    }
+})
 export default class MemberViewPayments extends Vue {
     @Prop()
-    member!: Member;
+    member!: DecryptedMember;
+
+    organization = OrganizationManager.organization
+
+    get payments() {
+        return this.member.registrations.map(r => r.payment)
+    }
 }
 </script>
 

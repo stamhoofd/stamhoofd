@@ -80,11 +80,11 @@
 
         <div>
             <h2>
-                <span class="icon-spacer">Steekkaart</span><button
+                <span class="icon-spacer">Steekkaart</span><span
                     v-tooltip="
                         'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
                     "
-                    class="button privacy tooltip-only"
+                    class="icon privacy"
                 />
             </h2>
 
