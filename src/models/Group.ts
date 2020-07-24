@@ -1,6 +1,11 @@
-import { column,Model } from '@simonbackx/simple-database';
+import { column,Database,Model } from '@simonbackx/simple-database';
 import { GroupSettings } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+
+import { Member,MemberWithRegistrations } from './Member';
+import { Payment } from './Payment';
+import { Registration, RegistrationWithPayment } from './Registration';
+import { User } from './User';
 
 export class Group extends Model {
     static table = "groups";
@@ -44,4 +49,51 @@ export class Group extends Model {
         }
     })
     updatedAt: Date
+
+    /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    async getMembersWithRegistration(): Promise<MemberWithRegistrations[]> {
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        query += `JOIN \`${Registration.table}\` as reg_filter ON reg_filter.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND reg_filter.\`registeredAt\` is not null\n`
+        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        query += `where reg_filter.\`groupId\` = ? AND reg_filter.\`cycle\` = ?`
+
+        const [results] = await Database.select(query, [this.id, this.cycle])
+        const members: MemberWithRegistrations[] = []
+
+        for (const row of results) {
+            const foundMember = Member.fromRow(row[Member.table])
+            if (!foundMember) {
+                throw new Error("Expected member in every row")
+            }
+            const _f = foundMember.setManyRelation(Member.registrations, []) as MemberWithRegistrations
+
+            // Seach if we already got this member?
+            const existingMember = members.find(m => m.id == _f.id)
+
+            const member: MemberWithRegistrations = (existingMember ?? _f)
+            if (!existingMember) {
+                members.push(member)
+            }
+
+            // Check if we have a registration with a payment
+            const registration = Registration.fromRow(row[Registration.table])
+            if (registration) {
+                const payment = Payment.fromRow(row[Payment.table])
+                if (!payment) {
+                    throw new Error("Every registration should have a valid payment")
+                }
+
+                const regWithPayment: RegistrationWithPayment = registration.setRelation(Registration.payment, payment)
+                member.registrations.push(regWithPayment)
+            }
+        }
+
+        return members
+
+    }
+
 }
