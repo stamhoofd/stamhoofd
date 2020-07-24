@@ -2,6 +2,7 @@ import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simp
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from '../Group';
+import { PaymentStatus } from '../PaymentStatus';
 import { MemberDetails } from './MemberDetails';
 import { Registration } from './Registration';
 
@@ -44,6 +45,14 @@ export class DecryptedMember extends AutoEncoder {
             }
         }
         this.groups = Array.from(groupMap.values())
+    }
+    
+    get paid(): boolean {
+        return !this.activeRegistrations.find(r => r.payment.status != PaymentStatus.Succeeded)
+    }
+
+    get info(): string {
+        return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
 }
