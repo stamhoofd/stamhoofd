@@ -4,23 +4,28 @@
             <h2>Algemeen</h2>
             <dl class="details-grid">
                 <dt>Verjaardag</dt>
-                <dd>{{ member.birthDayFormatted }} ({{ member.age }} jaar)</dd>
+                <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
 
                 <dt>Lidnummer</dt>
                 <dd>{{ member.id }}</dd>
 
                 <dt>Groep</dt>
-                <dd>{{ member.group.name }}</dd>
+                <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
 
-                <template v-if="member.phone">
+                <template v-if="member.details.phone">
                     <dt>GSM-nummer</dt>
-                    <dd>{{ member.phone }}</dd>
+                    <dd>{{ member.details.phone }}</dd>
+                </template>
+
+                <template v-if="member.details.email">
+                    <dt>GSM-nummer</dt>
+                    <dd>{{ member.details.email }}</dd>
                 </template>
             </dl>
 
             <hr>
 
-            <div v-for="(parent, index) in member.parents" :key="index">
+            <div v-for="(parent, index) in member.details.parents" :key="index">
                 <h2>{{ ParentTypeHelper.getName(parent.type) }}</h2>
                 <dl class="details-grid">
                     <dt>Naam</dt>
@@ -31,9 +36,9 @@
                         <dd>{{ parent.phone }}</dd>
                     </template>
 
-                    <template v-if="parent.mail">
+                    <template v-if="parent.email">
                         <dt>E-mailadres</dt>
-                        <dd>{{ parent.mail }}</dd>
+                        <dd>{{ parent.email }}</dd>
                     </template>
 
                     <dt>Adres</dt>
@@ -46,7 +51,7 @@
                 <hr>
             </div>
 
-            <div v-for="(contact, index) in member.emergencyContacts" :key="'contact-' + index">
+            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index">
                 <h2>{{ contact.title }}</h2>
                 <dl class="details-grid">
                     <dt>Naam</dt>
@@ -56,19 +61,19 @@
                     <dd>{{ contact.phone }}</dd>
                 </dl>
 
-                <hr v-if="index < member.emergencyContacts.length - 1">
+                <hr v-if="index < member.details.emergencyContacts.length - 1">
             </div>
 
-            <template v-if="member.doctor">
+            <template v-if="member.details.doctor">
                 <hr>
 
                 <h2>Huisarts</h2>
                 <dl class="details-grid">
                     <dt>Naam</dt>
-                    <dd>{{ member.doctor.name }}</dd>
+                    <dd>{{ member.details.doctor.name }}</dd>
 
                     <dt>Telefoonnummer</dt>
-                    <dd>{{ member.doctor.phone }}</dd>
+                    <dd>{{ member.details.doctor.phone }}</dd>
                 </dl>
             </template>
         </div>
@@ -85,7 +90,7 @@
 
             <ul class="member-records">
                 <li
-                    v-for="(record, index) in member.records"
+                    v-for="(record, index) in member.details.records"
                     :key="index"
                     class="more"
                     :class="RecordTypeHelper.getPriority(record.type)"
@@ -104,18 +109,16 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Member } from "@stamhoofd-frontend/models";
-import { ParentTypeHelper } from "@stamhoofd-frontend/models";
-import { RecordTypeHelper } from "@stamhoofd-frontend/models";
 import { TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { RecordTypeHelper, ParentTypeHelper, DecryptedMember } from '@stamhoofd/structures';
 
 @Component({
     directives: { Tooltip },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
-    member!: Member;
+    member!: DecryptedMember;
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;

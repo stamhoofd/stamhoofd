@@ -1,23 +1,25 @@
 <template>
     <div class="st-view member-view">
-        <STNavigationBar :title="member.name">
+        <STNavigationBar :title="member.details.name">
             <template #left>
-                <button v-if="hasPreviousMember" class="button icon gray arrow-left" @click="goBack">
-                    Vorige
+                <button v-if="hasPreviousMember" class="button text" @click="goBack">
+                    <span class="icon arrow-left" />
+                    <span>Vorige</span>
                 </button>
             </template>
             <template #right>
-                <button v-if="hasNextMember" class="button icon gray arrow-right" @click="goNext">
-                    Volgende
+                <button v-if="hasNextMember" class="button text" @click="goNext">
+                    <span>Volgende</span>
+                    <span class="icon arrow-right" />
                 </button>
-                <button class="button icon close" @click="pop" />
+                <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
-            <span class="icon-spacer">{{ member.name }}</span>
-            <MaleIcon v-if="member.gender == Gender.Male" class="icon-spacer" />
-            <FemaleIcon v-if="member.gender == Gender.Female" class="icon-spacer" />
-            <button class="button more" @click="showContextMenu" />
+            <span class="icon-spacer">{{ member.details.name }}</span>
+            <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
+            <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
+            <button class="button icon gray more" @click="showContextMenu" />
         </STNavigationTitle>
 
         <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
@@ -42,6 +44,7 @@ import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
+import { DecryptedMember } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -58,13 +61,13 @@ export default class MemberView extends Mixins(NavigationMixin) {
     tabLabels = ["Steekkaart", "Betaling", "Geschiedenis"];
 
     @Prop()
-    member!: Member;
+    member!: DecryptedMember;
 
     @Prop()
-    getNextMember!: (Member) => Member | null;
+    getNextMember!: (DecryptedMember) => DecryptedMember | null;
 
     @Prop()
-    getPreviousMember!: (Member) => Member | null;
+    getPreviousMember!: (DecryptedMember) => DecryptedMember | null;
 
     created() {
         (this as any).Gender = Gender;
@@ -107,6 +110,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
     activated() {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
+        console.log(this.member)
     }
 
     deactivated() {
