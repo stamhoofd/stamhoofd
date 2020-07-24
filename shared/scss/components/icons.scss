@@ -76,4 +76,12 @@
     &.logout:after {
         font-icon: url(@stamhoofd/assets/images/icons/logout.svg);
     }
+
+    &.settings:after {
+        font-icon: url(@stamhoofd/assets/images/icons/settings.svg);
+    }
+
+    &.group:after {
+        font-icon: url(@stamhoofd/assets/images/icons/group.svg);
+    }
 }

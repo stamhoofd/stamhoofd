@@ -116,6 +116,11 @@
     @extend .style-title-small;
 }
 
+.style-button-smaller {
+    @extend .style-title-small;
+    font-weight: 500;
+}
+
 .style-label {
     @extend .style-title-small;
     display: block;

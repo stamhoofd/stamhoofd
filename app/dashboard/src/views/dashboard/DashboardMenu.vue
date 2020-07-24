@@ -10,10 +10,11 @@
         </div>
 
         <div v-if="organization" class="">
-            <button class="menu-button icon user" :class="{ selected: currentlySelected == 'group-all'}">
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
+                <span class="icon user"/>
                 <span>Leden</span>
-                <button @click="openAll()">
-                    Iedereen
+                <button>
+                    Alle
                 </button>
             </button>
 
@@ -29,20 +30,24 @@
         </div>
         <hr>
         <div class="">
-            <button class="menu-button icon groups" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
-                Groepen beheren
+            <button class="menu-button button heading" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
+                <span class="icon group"/>
+                <span>Groepen beheren</span>
             </button>
-            <button class="menu-button icon payments">
-                Overschrijvingen
+            <button class="menu-button button heading">
+                <span class="icon card"/>
+                <span>Overschrijvingen</span>
             </button>
-            <button class="menu-button icon settings">
-                Instellingen
+            <button class="menu-button button heading">
+                <span class="icon settings"/>
+                <span>Instellingen</span>
             </button>
         </div>
         <hr>
         <div class="">
-            <button class="menu-button icon logout">
-                Uitloggen
+            <button class="menu-button button heading">
+                <span class="icon logout"/>
+                <span>Uitloggen</span>
             </button>
         </div>
     </div>
@@ -177,16 +182,28 @@ export default class Menu extends Mixins(NavigationMixin) {
 .menu-button {
     display: flex;
     flex-direction: row;
+    @extend .style-button-smaller;
     color: $color-dark;
-    font-weight: 500;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
     box-sizing: border-box;
     height: 45px;
-    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    overflow: hidden;
+    white-space: nowrap;
+
+    .icon {
+        padding-right: 10px;
+    }
+
+    &:active {
+        opacity: 0.4;
+    }
 
     padding-left: var(--horizontal-padding, 30px);
     padding-right: var(--horizontal-padding, 30px);
@@ -195,43 +212,20 @@ export default class Menu extends Mixins(NavigationMixin) {
         background-color: $color-primary-lighter;
     }
 
+    &.heading {
+        @extend .style-button-small;
+        color: $color-gray-dark;
+    }
+
     &.selected {
         background-color: $color-primary-light;
         color: $color-primary;
         font-weight: 600;
     }
 
-    &.icon {
-        color: $color-gray;
-        font-weight: 600;
-        padding-left: calc(var(--horizontal-padding, 30px) + 32px);
-
-        button {
-            color: $color-gray-light;
-            cursor: pointer;
-        }
-        background-position: var(--horizontal-padding, 30px) center;
-
-        &.user {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/user.svg);
-        }
-
-        &.groups {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/group.svg);
-        }
-
-        &.payments {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/payments.svg);
-        }
-
-        &.settings {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/settings.svg);
-        }
-
-        &.logout {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/logout.svg);
-        }
-        background-repeat: no-repeat;
+    > button {
+        margin-left: auto;
+        color: $color-primary;
     }
 }
 </style>
