@@ -37,7 +37,7 @@ import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamho
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import GroupEditView from './GroupEditView.vue';
+import EditGroupView from './EditGroupView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
@@ -52,7 +52,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         BackButton
     }
 })
-export default class GroupListView extends Mixins(NavigationMixin) {
+export default class EditGroupsView extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
 
     get organization() {
@@ -78,14 +78,14 @@ export default class GroupListView extends Mixins(NavigationMixin) {
             id: this.organization.id,
         })
         organizationPatch.groups.addPut(group)
-        this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
+        this.present(new ComponentWithProperties(EditGroupView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
     }
 
     editGroup(group: Group) {
         const organizationPatch = OrganizationPatch.create({
             id: this.organization.id,
         })
-        this.present(new ComponentWithProperties(GroupEditView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
+        this.present(new ComponentWithProperties(EditGroupView, { groupId: group.id, organizationPatch }).setDisplayStyle("popup"))
     }
 
     groupDescription(group: Group) {

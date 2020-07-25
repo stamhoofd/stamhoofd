@@ -103,7 +103,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         Spinner
     },
 })
-export default class GroupEditView extends Mixins(NavigationMixin) {
+export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     tabs = ["general", "payments", "permissions"];

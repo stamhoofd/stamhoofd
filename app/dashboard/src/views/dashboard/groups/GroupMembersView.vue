@@ -35,7 +35,7 @@
                         <th>
                             <Checkbox
                                 :value="selectionCount >= filteredMembers.length && filteredMembers.length"
-                                @input="selectAll($event)"
+                                @change="selectAll($event)"
                             />
                         </th>
                         <th @click="toggleSort('name')">
@@ -74,7 +74,7 @@
                 <tbody>
                     <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)">
                         <td @click.stop="">
-                            <Checkbox v-model="member.selected" @input="onChanged(member)" />
+                            <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
                         <td>
                             <div
@@ -396,6 +396,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     selectAll(selected: boolean) {
+        console.log("select all")
         this.filteredMembers.forEach((member) => {
             member.selected = selected;
         });

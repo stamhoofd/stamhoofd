@@ -6,7 +6,7 @@
                 {{ organization.name }}
             </button>
 
-            <input class="input search" placeholder="Zoeken">
+            <input class="input search" placeholder="Zoeken" v-if="false">
         </div>
 
         <div v-if="organization" class="">
@@ -62,7 +62,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Organization, Group } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import GroupListView from './groups/GroupListView.vue';
+import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 
 class SelectableGroup {
@@ -106,7 +106,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     manageGroups() {
         this.currentlySelected = "manage-groups"
-        this.showDetail(new ComponentWithProperties(GroupListView, {}));
+        this.showDetail(new ComponentWithProperties(EditGroupsView, {}));
     }
 }
 </script>
