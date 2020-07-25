@@ -41,22 +41,22 @@ $input-height: 44px;
     }
 
     &.error {
-        border-color: $color-error;
+        border-color: $color-error-border;
 
         &:focus,
         &:focus-within {
-            border-color: $color-error-focus;
+            border-color: $color-error-border-focus;
         }
     }
 }
 
 .input-errors {
     .input {
-        border-color: $color-error;
+        border-color: $color-error-border;
 
         &:focus,
         &:focus-within {
-            border-color: $color-error-focus;
+            border-color: $color-error-border-focus;
         }
     }
 }

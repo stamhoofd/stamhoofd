@@ -13,6 +13,14 @@
         color: $color-gray;
     }
 
+    &.green {
+        color: #1ABD6F;
+    }
+
+    &.red {
+        color: $color-error;
+    }
+
     &.middle {
         vertical-align: middle;
     }
@@ -83,5 +91,21 @@
 
     &.group:after {
         font-icon: url(@stamhoofd/assets/images/icons/group.svg);
+    }
+
+    &.success:after {
+        font-icon: url(@stamhoofd/assets/images/icons/success.svg);
+    }
+
+    &.error:after {
+        font-icon: url(@stamhoofd/assets/images/icons/error.svg);
+    }
+
+    &.clock:after {
+        font-icon: url(@stamhoofd/assets/images/icons/clock.svg);
+    }
+
+    &.new:after {
+        font-icon: url(@stamhoofd/assets/images/icons/new.svg);
     }
 }

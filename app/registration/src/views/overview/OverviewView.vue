@@ -40,7 +40,7 @@
                     <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true" @click="openPayment(payment)">
                         <span class="icon card" slot="left" />
 
-                        <h2 class="payment-period">{{ getPaymentPeriod(payment) }}</h2>
+                        <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
                         <p class="style-description-small">{{ payment.getMemberNames() }}</p>
                         <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
 
@@ -175,10 +175,4 @@ export default class OverviewView extends Mixins(NavigationMixin){
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.payments-overview-view {
-    .payment-period {
-        padding-bottom: 4px;
-    }
-}
 </style>
