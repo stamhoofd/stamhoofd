@@ -6,6 +6,6 @@ export class PaymentPatch extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string
 
-    @field({ decoder: new EnumDecoder(PaymentStatus) })
-    status: PaymentStatus
+    @field({ decoder: new EnumDecoder(PaymentStatus), optional: true })
+    status?: PaymentStatus
 }
