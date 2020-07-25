@@ -47,7 +47,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(Payment)
 
-        expect(response.body.status).toEqual("Succeeded")
+        expect(response.body.status).toEqual("Pending")
         expect(response.body.method).toEqual("Transfer")
         expect(response.body.price).toEqual(123 * 2)
     });
@@ -85,7 +85,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(Payment)
 
-        expect(response.body.status).toEqual("Succeeded")
+        expect(response.body.status).toEqual("Pending")
         expect(response.body.method).toEqual("Transfer")
         expect(response.body.price).toEqual(12 * 2)
     });
@@ -123,7 +123,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(Payment)
 
-        expect(response.body.status).toEqual("Succeeded")
+        expect(response.body.status).toEqual("Pending")
         expect(response.body.method).toEqual("Transfer")
         expect(response.body.price).toEqual(5 * 2)
     });
@@ -161,7 +161,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(Payment)
 
-        expect(response.body.status).toEqual("Succeeded")
+        expect(response.body.status).toEqual("Pending")
         expect(response.body.method).toEqual("Transfer")
         expect(response.body.price).toEqual(10 * 2)
     });

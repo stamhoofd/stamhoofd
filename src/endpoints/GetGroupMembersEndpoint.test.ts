@@ -38,12 +38,12 @@ describe("Endpoint.GetGroupMembers", () => {
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(1)
-        expect(response.body).toEqual([
-            EncryptedMemberWithRegistrations.create(
-                Object.assign({ 
-                    registrations: [registration.getStructure(), registration2.getStructure()] 
-                }, members[0])
-            )
-        ])
+
+        expect(response.body[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
+        expect(response.body[0]).toMatchObject({
+            id: members[0].id,
+            publicKey: members[0].publicKey,
+            encryptedForOrganization: members[0].encryptedForOrganization,
+        })
     });
 });
