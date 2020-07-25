@@ -10,35 +10,35 @@
 
         <main>
             <h1>Overschrijvingen</h1>
-            <p>Hier kan je de betalingen van het lidgeld opvolgen. We bekijken momenteel een mogelijkheid om dit op een betaalbare manier te automatiseren, maar hier komt veel bij kijken. Online betalingen zijn helaas erg duur, en onbetaalbaar voor veel verenigingen. Moesten jullie het toch overwegen om 39 cent per Bancontact betaling, of 20 cent per Payconiq betaling te betalen, kan je ons contacteren en kunnen we dit voor jullie activeren. Online betalingen bij feitelijke verenigingen is ook niet mogelijk.</p>
+            <p>Hier kan je de betalingen van het lidgeld opvolgen. We bekijken momenteel een mogelijkheid om dit op een betaalbare manier te automatiseren, maar hier komt veel bij kijken. Online betalingen zijn helaas erg duur, en onbetaalbaar voor veel verenigingen. Moesten jullie het toch overwegen om 39 cent per Bancontact betaling, of 20 cent per Payconiq betaling te betalen, kan je ons contacteren en kunnen we dit voor jullie activeren. Online betalingen bij feitelijke verenigingen zijn helaas niet mogelijk.</p>
     
             <p class="warning-box">We raden aan om één keer per week de overschrijvingen na te kijken. Daarna kan je dat afbouwen tot één keer per maand. Gebruik de zoekfunctie om het werk te versnellen. De middelste 4 cijfers van een mededeling zijn altijd uniek en kan je gebruiken om te zoeken naar bv. /0015/. Je kan ook zoeken op naam of familienaam van de ouders.</p>
 
             <Spinner v-if="loading"/>
             <STList v-else>
-                <STListItem v-for="payment in payments" :key="payment.id" :selectable="true" class="right-stack right-description" element-name="label">
-                    <Checkbox slot="left"/>
+                <STListItem v-for="payment in filteredPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
+                    <Checkbox slot="left" v-model="payment.selected"/>
 
-                    <h2 class="style-title-list">{{ payment.registrations.map(r => r.member.details.name).join(", ") }}</h2>
-                    <p class="style-description-small">{{ payment.createdAt | date }}</p>
-                    <p class="style-description-small">{{ payment.transferDescription }}</p>
+                    <h2 class="style-title-list">{{ payment.payment.registrations.map(r => r.member.details.name).join(", ") }}</h2>
+                    <p class="style-description-small">{{ payment.payment.createdAt | date }}</p>
+                    <p class="style-description-small">{{ payment.payment.transferDescription }}</p>
                     
                     <template slot="right">
-                        <span>{{ payment.price | price }}</span>
-                        <span v-if="getPaymentTiming(payment) == 'Succeeded'" class="icon success green" v-tooltip="'Betaald op '+payment.paidAt"></span>
-                        <span v-else-if="getPaymentTiming(payment) == 'Pending'" class="icon clock gray" v-tooltip="'Wacht op betaling, zou intussen overgeschreven moeten zijn. Je kan deze al een herinnering sturen.'"></span>
-                        <span v-else-if="getPaymentTiming(payment) == 'Late'" class="icon error red" v-tooltip="'Na meer dan een maand nog steeds niet betaald'"></span>
-                        <span v-else-if="getPaymentTiming(payment) == 'New'" class="icon new gray" v-tooltip="'Recente inschrijving, betaling kan mogelijks nog niet aangekomen zijn (minder dan 3 werkdagen geleden)'"></span>
+                        <span>{{ payment.payment.price | price }}</span>
+                        <span v-if="getPaymentTiming(payment.payment) == 'Succeeded'" class="icon success green" v-tooltip="'Betaald op '+payment.payment.paidAt"></span>
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'Pending'" class="icon clock gray" v-tooltip="'Wacht op betaling, zou intussen overgeschreven moeten zijn. Je kan deze al een herinnering sturen.'"></span>
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'Late'" class="icon error red" v-tooltip="'Na meer dan een maand nog steeds niet betaald'"></span>
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'New'" class="icon new gray" v-tooltip="'Recente inschrijving, betaling kan mogelijks nog niet aangekomen zijn (minder dan 3 werkdagen geleden)'"></span>
                     </template>
                 </STListItem>
             </STList>
             
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="canMarkNotPaid || canMarkPaid">
             <template #right>
-                <button class="button secundary">Niet betaald</button>
-                <button class="button primary">Markeer als betaald</button>
+                <button class="button" :class="{ secundary: canMarkPaid, primary: !canMarkPaid}" v-if="canMarkNotPaid">Niet betaald</button>
+                <button class="button primary" v-if="canMarkPaid">Markeer als betaald</button>
             </template>
         </STToolbar>
     </div>
@@ -58,6 +58,15 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { MemberManager } from '../../../classes/MemberManager';
 import { Formatter } from '@stamhoofd/utility';
+
+class SelectablePayment {
+    payment: PaymentDetailed;
+    selected = false;
+
+    constructor(payment: PaymentDetailed) {
+        this.payment = payment;
+    }
+}
 
 @Component({
     components: {
@@ -81,7 +90,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     loading = false
     searchQuery = ""
-    payments: PaymentDetailed[] = []
+    payments: SelectablePayment[] = []
 
     mounted() {
         this.loading = true
@@ -91,6 +100,41 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
         })
+    }
+
+    get filteredPayments(): SelectablePayment[] {
+        if (this.searchQuery == "") {
+            return this.payments;
+        }
+
+        return this.payments.filter((payment: SelectablePayment) => {
+            if (payment.payment.matchQuery(this.searchQuery)) {
+                return true;
+            }
+            return false;
+        });
+    }
+
+    get canMarkPaid() {
+        for (const payment of this.payments) {
+            if (payment.selected) {
+                if (payment.payment.status != PaymentStatus.Succeeded) {
+                    return true;
+                }
+            }
+        }
+        return false
+    }
+
+    get canMarkNotPaid() {
+        for (const payment of this.payments) {
+            if (payment.selected) {
+                if (payment.payment.status == PaymentStatus.Succeeded) {
+                    return true;
+                }
+            }
+        }
+        return false
     }
 
     calculateWorkDaysSince(d: Date) {
@@ -192,7 +236,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             return sa - sb;
         })
 
-        this.payments = payments
+        this.payments = payments.map(p => new SelectablePayment(p))
 
     }
 }
