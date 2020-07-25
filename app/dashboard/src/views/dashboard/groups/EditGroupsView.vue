@@ -1,6 +1,6 @@
 <template>
     <div class="st-view group-list-view">
-        <STNavigationBar :sticky="false">
+        <STNavigationBar title="Groepen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
             <button slot="right" class="button text" @click="createGroup">
                 <span class="icon add"/>

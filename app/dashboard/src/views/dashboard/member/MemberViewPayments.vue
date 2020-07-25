@@ -40,7 +40,7 @@
 <script lang="ts">
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Prop,Vue } from "vue-property-decorator";
-import { DecryptedMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 
@@ -54,7 +54,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 })
 export default class MemberViewPayments extends Vue {
     @Prop()
-    member!: DecryptedMember;
+    member!: MemberWithRegistrations;
 
     organization = OrganizationManager.organization
 

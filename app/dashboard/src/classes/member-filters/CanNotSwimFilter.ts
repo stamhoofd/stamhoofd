@@ -1,11 +1,11 @@
 import { Filter } from "./Filter";
-import { DecryptedMember, RecordType } from '@stamhoofd/structures';
+import { MemberWithRegistrations, RecordType } from '@stamhoofd/structures';
 
 export class CanNotSwimFilter implements Filter {
     getName(): string {
         return "Kan niet zwemmen";
     }
-    doesMatch(member: DecryptedMember): boolean {
+    doesMatch(member: MemberWithRegistrations): boolean {
         if (!member.details) {
             return false;
         }

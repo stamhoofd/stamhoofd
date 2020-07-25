@@ -235,7 +235,7 @@ import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigation
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
 import { MemberDetails, Record, RecordType, EmergencyContact } from "@stamhoofd/structures"
-import { DecryptedMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { EncryptedMember } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
 import { KeychainItem } from '@stamhoofd/structures';
@@ -265,7 +265,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 })
 export default class MemberRecordsView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    member: DecryptedMember | null
+    member: MemberWithRegistrations | null
     
     @Prop({ required: true })
     memberDetails: MemberDetails

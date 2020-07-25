@@ -44,7 +44,7 @@ import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
-import { DecryptedMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -61,13 +61,13 @@ export default class MemberView extends Mixins(NavigationMixin) {
     tabLabels = ["Steekkaart", "Betaling", "Geschiedenis"];
 
     @Prop()
-    member!: DecryptedMember;
+    member!: MemberWithRegistrations;
 
     @Prop()
-    getNextMember!: (DecryptedMember) => DecryptedMember | null;
+    getNextMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
     @Prop()
-    getPreviousMember!: (DecryptedMember) => DecryptedMember | null;
+    getPreviousMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
     created() {
         (this as any).Gender = Gender;

@@ -131,14 +131,14 @@ import MailView from "../mail/MailView.vue";
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import { DecryptedMember, Group, Organization } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Organization } from '@stamhoofd/structures';
 import { MemberManager } from '../../../classes/MemberManager';
 
 class SelectableMember {
-    member: DecryptedMember;
+    member: MemberWithRegistrations;
     selected = false;
 
-    constructor(member: DecryptedMember) {
+    constructor(member: MemberWithRegistrations) {
         this.member = member;
     }
 }
@@ -198,7 +198,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }*/
     }
 
-    registrationDate(member: DecryptedMember) {
+    registrationDate(member: MemberWithRegistrations) {
         if (member.registrations.length == 0) {
             return new Date()
         }
@@ -214,7 +214,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return reg.registeredAt
     }
 
-    isNew(member: DecryptedMember) {
+    isNew(member: MemberWithRegistrations) {
         if (!this.group) {
             return false
         }
@@ -355,7 +355,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         // do nothing for now
     }
 
-    getPreviousMember(member: DecryptedMember): DecryptedMember | null {
+    getPreviousMember(member: MemberWithRegistrations): MemberWithRegistrations | null {
         for (let index = 0; index < this.sortedMembers.length; index++) {
             const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
@@ -368,7 +368,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return null;
     }
 
-    getNextMember(member: DecryptedMember): DecryptedMember | null {
+    getNextMember(member: MemberWithRegistrations): MemberWithRegistrations | null {
         for (let index = 0; index < this.sortedMembers.length; index++) {
             const _member = this.sortedMembers[index];
             if (_member.member.id == member.id) {
@@ -402,7 +402,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         });
     }
 
-    showMemberContextMenu(event, member: DecryptedMember) {
+    showMemberContextMenu(event, member: MemberWithRegistrations) {
         const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
@@ -411,7 +411,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
-    getSelectedMembers(): DecryptedMember[] {
+    getSelectedMembers(): MemberWithRegistrations[] {
         return this.filteredMembers
             .filter((member: SelectableMember) => {
                 return member.selected;

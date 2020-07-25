@@ -111,14 +111,14 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { RecordTypeHelper, ParentTypeHelper, DecryptedMember } from '@stamhoofd/structures';
+import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     directives: { Tooltip },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
-    member!: DecryptedMember;
+    member!: MemberWithRegistrations;
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;

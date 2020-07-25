@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -11,7 +11,7 @@ import { OrganizationManager } from './OrganizationManager';
  * Controls the fetching and decrypting of members
  */
 export class MemberManagerStatic {
-    members: DecryptedMember[] | null = null
+    members: MemberWithRegistrations[] | null = null
 
     async setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
@@ -45,7 +45,7 @@ export class MemberManagerStatic {
 
             }
 
-            const decryptedMember = DecryptedMember.create({
+            const decryptedMember = MemberWithRegistrations.create({
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,
@@ -75,7 +75,7 @@ export class MemberManagerStatic {
         const keychainItem = await session.createKeychainItem(keyPair)
 
         // Create member
-        const decryptedMember = DecryptedMember.create({
+        const decryptedMember = MemberWithRegistrations.create({
             details: member,
             publicKey: keyPair.publicKey,
             registrations: []
@@ -96,7 +96,7 @@ export class MemberManagerStatic {
         await MemberManager.setMembers(response.data)
     }
 
-    async getEncryptedMembers(members: DecryptedMember[]): Promise<EncryptedMember[]> {
+    async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<EncryptedMember[]> {
         const encryptedMembers: EncryptedMember[] = [];
 
         for (const member of members) {
@@ -139,7 +139,7 @@ export class MemberManagerStatic {
         this.setMembers(response.data)
     }
 
-    async patchMembers(members: DecryptedMember[]) {
+    async patchMembers(members: MemberWithRegistrations[]) {
 
         const encryptedMembers = await this.getEncryptedMembers(members)
 

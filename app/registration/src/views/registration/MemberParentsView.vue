@@ -51,7 +51,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, DecryptedMember } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, MemberWithRegistrations } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
 import EmergencyContactView from './EmergencyContactView.vue';
@@ -83,7 +83,7 @@ class SelectableParent {
 })
 export default class MemberParentsView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    member: DecryptedMember | null
+    member: MemberWithRegistrations | null
 
     @Prop({ required: true })
     memberDetails: MemberDetails

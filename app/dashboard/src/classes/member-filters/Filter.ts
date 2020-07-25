@@ -1,7 +1,7 @@
 import { Member } from "@stamhoofd-frontend/models";
-import { DecryptedMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 
 export interface Filter {
     getName(): string;
-    doesMatch(member: DecryptedMember): boolean;
+    doesMatch(member: MemberWithRegistrations): boolean;
 }

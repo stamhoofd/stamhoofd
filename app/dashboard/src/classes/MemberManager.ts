@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { DecryptedMember, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -13,7 +13,7 @@ import { OrganizationManager } from './OrganizationManager';
 export class MemberManagerStatic {
     async decryptMembers(data: EncryptedMemberWithRegistrations[]) {
         // Save keychain items
-        const members: DecryptedMember[] = []
+        const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
         const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
 
@@ -42,7 +42,7 @@ export class MemberManagerStatic {
                 }
             }
 
-            const decryptedMember = DecryptedMember.create({
+            const decryptedMember = MemberWithRegistrations.create({
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,

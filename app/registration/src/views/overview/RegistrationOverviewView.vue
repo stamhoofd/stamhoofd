@@ -58,7 +58,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { DecryptedMember, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -110,7 +110,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         return MemberManager.members
     }
 
-    onSelectMember(member: DecryptedMember) {
+    onSelectMember(member: MemberWithRegistrations) {
         if (!member.details) {
             return
         }
@@ -171,7 +171,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
     }
 
-    memberGetGroup(member: DecryptedMember): Group | null {
+    memberGetGroup(member: MemberWithRegistrations): Group | null {
         if (!member.details) {
             return null
         }
@@ -186,7 +186,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }).setDisplayStyle("popup"))
     }
 
-    editMember(member: DecryptedMember) {
+    editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
                 member

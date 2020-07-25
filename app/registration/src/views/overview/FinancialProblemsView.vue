@@ -26,7 +26,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, Spinner, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { DecryptedMember, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -49,7 +49,7 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
     step = 2
 
     @Prop({ required: true })
-    selectedMembers: DecryptedMember[]
+    selectedMembers: MemberWithRegistrations[]
 
     reduced = false
     loading = false
