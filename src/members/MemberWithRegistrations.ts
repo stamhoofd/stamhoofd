@@ -1,21 +1,11 @@
-import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from "uuid";
+import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 
 import { Group } from '../Group';
 import { PaymentStatus } from '../PaymentStatus';
-import { MemberDetails } from './MemberDetails';
+import { Member } from './Member';
 import { Registration } from './Registration';
 
-export class DecryptedMember extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
-
-    @field({ decoder: MemberDetails, nullable: true })
-    details: MemberDetails | null
-
-    @field({ decoder: StringDecoder })
-    publicKey: string
-
+export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Registration) })
     registrations: Registration[]
 

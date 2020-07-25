@@ -39,7 +39,8 @@ export * from "./src/grouping/PaginatedResponse"
 export * from "./src/grouping/KeychainedResponse"
 
 // Members
-export * from "./src/members/DecryptedMember"
+export * from "./src/members/Member"
+export * from "./src/members/MemberWithRegistrations"
 export * from "./src/members/EmergencyContact"
 export * from "./src/members/EncryptedMember"
 export * from "./src/members/Gender"
