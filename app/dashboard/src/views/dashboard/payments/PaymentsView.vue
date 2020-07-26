@@ -37,8 +37,12 @@
 
         <STToolbar v-if="canMarkNotPaid || canMarkPaid">
             <template #right>
-                <button class="button" :class="{ secundary: canMarkPaid, primary: !canMarkPaid}" v-if="canMarkNotPaid">Niet betaald</button>
-                <button class="button primary" v-if="canMarkPaid">Markeer als betaald</button>
+                <LoadingButton :loading="loadingNotPaid" v-if="canMarkNotPaid" >
+                    <button class="button" :class="{ secundary: canMarkPaid, primary: !canMarkPaid}" @click="markNotPaid">Niet betaald</button>
+                </LoadingButton>
+                <LoadingButton :loading="loadingPaid" v-if="canMarkPaid" >
+                    <button class="button primary" @click="markPaid">Markeer als betaald</button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
@@ -47,9 +51,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, CenteredMessage, BackButton, Spinner, TooltipDirective } from "@stamhoofd/components";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, CenteredMessage, BackButton, Spinner, TooltipDirective, LoadingButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch, EncryptedPaymentDetailed, PaymentDetailed, RegistrationWithMember, PaymentStatus } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupSettings, OrganizationPatch, EncryptedPaymentDetailed, PaymentDetailed, RegistrationWithMember, PaymentStatus, PaymentPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -76,7 +80,8 @@ class SelectablePayment {
         STList,
         STListItem,
         Spinner,
-        BackButton
+        BackButton,
+        LoadingButton
     },
     filters: {
         price: Formatter.price,
@@ -89,6 +94,8 @@ class SelectablePayment {
 export default class PaymentsView extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     loading = false
+    loadingPaid = false
+    loadingNotPaid = false
     searchQuery = ""
     payments: SelectablePayment[] = []
 
@@ -185,21 +192,12 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async loadPayments(groupId: string | null = null) {
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/payments",
-            decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
-        })
-
-        console.log("Received response. Decryping...")
-
+    async setPayments(encryptedPayments: EncryptedPaymentDetailed[]) {
         const organization = OrganizationManager.organization
 
         // Decrypt data
         const payments: PaymentDetailed[] = []
-        for (const encryptedPayment of response.data) {
+        for (const encryptedPayment of encryptedPayments) {
             // Create a detailed payment without registrations
             const payment = PaymentDetailed.create({...encryptedPayment, registrations: []})
 
@@ -237,7 +235,88 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         })
 
         this.payments = payments.map(p => new SelectablePayment(p))
+    }
 
+    async loadPayments(groupId: string | null = null) {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/payments",
+            decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+        })
+
+        console.log("Received response. Decryping...")
+        await this.setPayments(response.data)
+    }
+
+    async markPaid() {
+        if (this.loadingPaid) {
+            return;
+        }
+
+        const data: PaymentPatch[] = []
+
+        for (const payment of this.payments) {
+            if (payment.selected && payment.payment.status != PaymentStatus.Succeeded) {
+                data.push(PaymentPatch.create({
+                    id: payment.payment.id,
+                    status: PaymentStatus.Succeeded
+                }))
+            }
+        }
+
+        if (data.length > 0) {
+            this.loadingPaid = true
+            const session = SessionManager.currentSession!
+
+            try {
+                const response = await session.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: data,
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                })
+                this.setPayments(response.data)
+            } finally {
+                this.loadingPaid = false
+            }
+            
+        }
+    }
+
+    async markNotPaid() {
+        if (this.loadingNotPaid) {
+            return;
+        }
+
+        const data: PaymentPatch[] = []
+
+        for (const payment of this.payments) {
+            if (payment.selected && payment.payment.status != PaymentStatus.Pending) {
+                data.push(PaymentPatch.create({
+                    id: payment.payment.id,
+                    status: PaymentStatus.Pending
+                }))
+            }
+        }
+
+        if (data.length > 0) {
+            this.loadingNotPaid = true
+            const session = SessionManager.currentSession!
+
+            try {
+                const response = await session.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: data,
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                })
+                this.setPayments(response.data)
+            } finally {
+                this.loadingNotPaid = false
+            }
+            
+        }
     }
 }
 </script>
@@ -245,6 +324,5 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
-
 
 </style>
