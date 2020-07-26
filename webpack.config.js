@@ -2,7 +2,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
-const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
+const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const autoprefixer = require('autoprefixer');
 
 module.exports = {
@@ -64,8 +64,7 @@ module.exports = {
                         options: {
                             "plugins": [autoprefixer]
                         }
-                    },
-                    'icon-font-loader',
+                    }
                 ],
             },
             // this will apply to both plain `.css` files

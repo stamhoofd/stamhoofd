@@ -29,6 +29,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.10.5",
+        "@simonbackx/iconfont-webpack-plugin": "^4.3.0",
         "@types/jest": "^25.1.4",
         "@typescript-eslint/eslint-plugin": "^2.28.0",
         "@typescript-eslint/parser": "^2.28.0",

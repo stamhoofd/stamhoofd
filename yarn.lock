@@ -505,6 +505,17 @@
   dependencies:
     mkdirp "^1.0.4"
 
+"@simonbackx/iconfont-webpack-plugin@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/iconfont-webpack-plugin/-/iconfont-webpack-plugin-4.3.0.tgz#bd811aa87aa2eb42edd38d14328ca70cb8e8bdfa"
+  integrity sha512-WKGAUJi7lZ4OYfuQeRgyDXqbE62iCQGys0/YreSwsz4C5Xb7Sx5xGdMAkYaU6DwpF0DCHP43gfaq/ZgCp3GnrQ==
+  dependencies:
+    loader-utils "1.4.0"
+    postcss "7.0.27"
+    svg2ttf "5.0.0"
+    svgicons2svgfont "9.1.1"
+    ttf2woff "2.0.2"
+
 "@simonbackx/simple-encoding@~1.9":
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.3.tgz#c2968e3c19b495b1166c31b0cdd46664cb36b596"
@@ -546,9 +557,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.3.1.tgz#f14744d1d0cc3acfd2e3574263f3d6d39c7946c1"
-  integrity sha512-UhKGomLhCRNmMIP3dJCT5Bz2xO5ID+vfNCV+i3n+C7ZSiVcV+0EOTQ/pWc+2v5wA4+WndzP9cwhDROdFqCe81w==
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.3.3.tgz#3fbcc21cb830921ee2e8e1fe3b70ca0c51b55aa0"
+  integrity sha512-4Gfxme7G+oXQ6ON0iGSmmsOG2d1rYdJdJdWRBmn/fSfLs8XU/ZxwnyX+0XZ+mVjI1CtFwL09Fn/DiY03o2693Q==
   dependencies:
     uuid "^8.2.0"
 
@@ -8047,6 +8058,18 @@ svg2ttf@4.3.0:
     svgpath "^2.1.5"
     xmldom "~0.1.22"
 
+svg2ttf@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/svg2ttf/-/svg2ttf-5.0.0.tgz#834d5cc61c9ac14fa9f6ad2aa5a9736090e46204"
+  integrity sha512-xv4ERtuuaY+RQu7G57nKF7agrAGP+Bqmox72+kIbKek5vyAo02Dus901fR995p0E6adc27+kRhPVynDdShUWWw==
+  dependencies:
+    argparse "^1.0.6"
+    cubic2quad "^1.0.0"
+    lodash "^4.17.10"
+    microbuffer "^1.0.0"
+    svgpath "^2.1.5"
+    xmldom "~0.1.22"
+
 svgicons2svgfont@9.1.1:
   version "9.1.1"
   resolved "https://registry.yarnpkg.com/svgicons2svgfont/-/svgicons2svgfont-9.1.1.tgz#655d30c256176f6e29c96058609ef0a9b0ebf2df"
@@ -8408,6 +8431,15 @@ ttf2woff@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/ttf2woff/-/ttf2woff-2.0.1.tgz#871832240024b09db9570904c7c1928b8057c969"
   integrity sha1-hxgyJAAksJ25VwkEx8GSi4BXyWk=
+  dependencies:
+    argparse "^1.0.6"
+    microbuffer "^1.0.0"
+    pako "^1.0.0"
+
+ttf2woff@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/ttf2woff/-/ttf2woff-2.0.2.tgz#09a7cee59abd3c15282b57ed84ac7c7770749f1f"
+  integrity sha512-X68badwBjAy/+itU49scLjXUL094up+rHuYk+YAOTTBYSUMOmLZ7VyhZJuqQESj1gnyLAC2/5V8Euv+mExmyPA==
   dependencies:
     argparse "^1.0.6"
     microbuffer "^1.0.0"
