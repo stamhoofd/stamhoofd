@@ -1,10 +1,15 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
+const { Resolver } = require('dns').promises;
 
+import SES from 'aws-sdk/clients/sesv2';
+
+import Email from '../email/Email';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
+import { User } from './User';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -190,5 +195,235 @@ export class Organization extends Model {
             groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta
         })
+    }
+
+    async updateDNSRecords() {
+        const organization = this;
+
+        // Check initial status
+        let isValidRecords = true
+        for (const record of organization.privateMeta.dnsRecords) {
+            if (record.status != DNSRecordStatus.Valid) {
+                isValidRecords = false
+            }
+        }
+        
+        // Revalidate all
+        const resolver = new Resolver();
+        resolver.setServers(Math.random() > 0.5 ? ['1.1.1.1', '8.8.8.8'] : ['8.8.8.8', '1.1.1.1']);
+
+        let allValid = true
+        for (const record of organization.privateMeta.dnsRecords) {
+            if (record.status != DNSRecordStatus.Valid) {
+                try {
+                    switch (record.type) {
+                        case DNSRecordType.CNAME: {
+
+                            const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1))
+                            record.errors = null;
+
+                            if (addresses.length == 0) {
+                                record.status = DNSRecordStatus.Pending
+                                allValid = false
+
+                                record.errors = new SimpleErrors(new SimpleError({
+                                    code: "not_found",
+                                    message: "",
+                                    human: "We konden de CNAME-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                                }))
+                            } else if (addresses.length > 1) {
+                                record.status = DNSRecordStatus.Failed
+                                allValid = false
+
+                                record.errors = new SimpleErrors(new SimpleError({
+                                    code: "too_many_fields",
+                                    message: "",
+                                    human: "Er zijn meerdere CNAME records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                                }))
+                            } else {
+                                if (addresses[0] + "." === record.value) {
+                                    record.status = DNSRecordStatus.Valid
+                                } else {
+                                    record.status = DNSRecordStatus.Failed
+                                    allValid = false
+
+                                    record.errors = new SimpleErrors(new SimpleError({
+                                        code: "wrong_value",
+                                        message: "",
+                                        human: "Er is een andere waarde ingesteld voor de CNAME-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + addresses[0] + "."
+                                    }))
+                                }
+                            }
+
+                            break;
+                        }
+
+                        case DNSRecordType.TXT: {
+                            const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1))
+
+                            record.errors = null;
+
+                            if (records.length == 0) {
+                                record.status = DNSRecordStatus.Pending
+                                allValid = false
+
+                                record.errors = new SimpleErrors(new SimpleError({
+                                    code: "not_found",
+                                    message: "",
+                                    human: "We konden de TXT-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                                }))
+                            } else if (records.length > 1) {
+                                record.status = DNSRecordStatus.Failed
+                                allValid = false
+                                record.errors = new SimpleErrors(new SimpleError({
+                                    code: "too_many_fields",
+                                    message: "",
+                                    human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                                }))
+                            } else {
+                                if (records[0].join("").trim() === record.value.trim()) {
+                                    record.status = DNSRecordStatus.Valid
+                                } else {
+                                    record.status = DNSRecordStatus.Failed
+                                    allValid = false
+
+                                    record.errors = new SimpleErrors(new SimpleError({
+                                        code: "wrong_value",
+                                        message: "",
+                                        human: "Er is een andere waarde ingesteld voor de TXT-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + records[0].join("")
+                                    }))
+                                }
+                            }
+                            break;
+                        }
+
+                    }
+                } catch (e) {
+                    console.error(e)
+                    record.status = DNSRecordStatus.Pending
+                    allValid = false
+                }
+            }
+        }
+
+        if (allValid) {
+            if (organization.privateMeta.pendingMailDomain !== null) {
+                organization.privateMeta.mailDomain = organization.privateMeta.pendingMailDomain
+                organization.privateMeta.pendingMailDomain = null;
+            }
+
+            const wasActive = this.privateMeta.mailDomainActive
+
+            await this.updateAWSMailIdenitity()
+
+            // yay! Do not Save until after doing AWS changes
+            await organization.save()
+
+            if (!wasActive && this.privateMeta.mailDomainActive) {
+                // Became valid -> send an e-mail to the organization admins
+                const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null } })
+
+                for (const user of users) {
+                    if (user.permissions && user.permissions.hasFullAccess()) {
+                        Email.send(user.email, "Jouw nieuwe domeinnaam is actief!", "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie domeinnaam die jullie hebben ingesteld voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf " + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd").catch(e => {
+                            console.error(e)
+                        })
+                    }
+                }
+            }
+        } else {
+            // DNS settings gone broken
+            if (organization.privateMeta.mailDomain) {
+                organization.privateMeta.pendingMailDomain = organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain
+                organization.privateMeta.mailDomain = null
+            }
+
+            // disable AWS emails
+            this.privateMeta.mailDomainActive = false
+
+            // save
+            await organization.save()
+
+            if (isValidRecords) {
+                // Became invalid -> send an e-mail to the organization admins
+                const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
+                let found = false
+
+                for (const user of users) {
+                    if (user.permissions && user.permissions.hasFullAccess()) {
+                        found = true
+                        Email.send(user.email, "Stamhoofd domeinnaam instellingen ongeldig", "Hallo daar!\n\nBij onze routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd").catch(e => {
+                            console.error(e)
+                        })
+                    }
+                }
+
+                if (!found) {
+                    Email.send("simon@stamhoofd.be", "Stamhoofd domeinnaam instellingen ongeldig", "Domeinnaam instelling ongeldig voor "+organization.name+". Kon geen contactgegevens vinden.").catch(e => {
+                        console.error(e)
+                    })
+                } else {
+                    Email.send("simon@stamhoofd.be", "Stamhoofd domeinnaam instellingen ongeldig", "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd").catch(e => {
+                        console.error(e)
+                    })
+                }
+            }
+        }
+    }
+
+    /**
+     * Create or update the AWS mail idenitiy and also update the active state of the mailDomain
+     */
+    async updateAWSMailIdenitity() {
+        if (this.privateMeta.mailDomain === null) {
+            return;
+        }
+
+        const sesv2 = new SES();
+
+        // Check if mail identitiy already exists..
+        let exists = false
+        try {
+            const existing = await sesv2.getEmailIdentity({
+                EmailIdentity: this.privateMeta.mailDomain
+            }).promise()
+            exists = true
+
+            console.log("Mail domain exists already")
+
+            this.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
+        } catch (e) {
+            console.error(e)
+            // todo
+        }
+
+        if (!exists) {
+            console.log("Creating email identity")
+
+            const result = await sesv2.createEmailIdentity({
+                EmailIdentity: this.privateMeta.mailDomain,
+                DkimSigningAttributes: {
+                    DomainSigningPrivateKey: this.serverMeta.privateDKIMKey!,
+                    DomainSigningSelector: "stamhoofd"
+                },
+                Tags: [
+                    {
+                        "Key": "OrganizationId",
+                        "Value": this.id
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": process.env.NODE_ENV ?? "Unknown"
+                    }
+                ]
+
+            }).promise()
+
+            // todo: check result
+            if (result.VerifiedForSendingStatus !== true) {
+                console.error("Not validated :/")
+            }
+            this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
+        }
     }
 }

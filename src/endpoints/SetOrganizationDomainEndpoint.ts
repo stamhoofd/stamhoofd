@@ -2,7 +2,6 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DNSRecord, DNSRecordStatus, DNSRecordType, Organization as OrganizationStruct,OrganizationDomains } from "@stamhoofd/structures";
-import SES from 'aws-sdk/clients/sesv2';
 const { Resolver } = require('dns').promises;
 import { add } from 'libsodium-wrappers';
 import NodeRSA from 'node-rsa';
@@ -133,17 +132,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         } else {
             // Validate DNS-records if not empty
             console.log("Validating domains")
-
-            let isValidRecords = true
-            for(const record of organization.privateMeta.dnsRecords) {
-                if (record.status != DNSRecordStatus.Valid) {
-                    isValidRecords = false
-                }
-            }
-
-            if (!isValidRecords) {
-                await this.updateDNSRecords(user)
-            }
+            await organization.updateDNSRecords()
         }
 
         console.log("Done.")
@@ -152,155 +141,5 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         return new Response(await user.getOrganizatonStructure(organization));
     }
 
-    async updateDNSRecords(user: UserWithOrganization) {
-        const organization = user.organization
-
-        // Revalidate all
-        const resolver = new Resolver();
-        resolver.setServers(Math.random() > 0.5 ? ['1.1.1.1', '8.8.8.8'] : ['8.8.8.8', '1.1.1.1']);
-
-        let allValid = true
-        for (const record of organization.privateMeta.dnsRecords) {
-            if (record.status != DNSRecordStatus.Valid) {
-                try {
-                    switch (record.type) {
-                        case DNSRecordType.CNAME: {
-                            
-                            const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1))
-                            record.errors = null;
-
-                            if (addresses.length == 0) {
-                                record.status = DNSRecordStatus.Pending
-                                allValid = false
-                            } else if (addresses.length > 1) {
-                                record.status = DNSRecordStatus.Failed
-                                allValid = false
-
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "too_many_fields",
-                                    message: "",
-                                    human: "Er zijn meerdere CNAME records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
-                                }))
-                            } else {
-                                if (addresses[0]+"." === record.value) {
-                                    record.status = DNSRecordStatus.Valid
-                                } else {
-                                    record.status = DNSRecordStatus.Failed
-                                    allValid = false
-
-                                    record.errors = new SimpleErrors(new SimpleError({
-                                        code: "wrong_value",
-                                        message: "",
-                                        human: "Er is een andere waarde ingesteld voor de CNAME-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: "+addresses[0]+"."
-                                    }))
-                                }
-                            }
-                            
-                            break;
-                        }
-
-                        case DNSRecordType.TXT: {
-                            const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1))
-
-                            record.errors = null;
-
-                            if (records.length == 0) {
-                                record.status = DNSRecordStatus.Pending
-                                allValid = false
-                            } else if (records.length > 1) {
-                                record.status = DNSRecordStatus.Failed
-                                allValid = false
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "too_many_fields",
-                                    message: "",
-                                    human: "Er zijn meerdere TXT records ingesteld voor "+record.name+", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
-                                }))
-                            } else {
-                                if (records[0].join("").trim() === record.value.trim()) {
-                                    record.status = DNSRecordStatus.Valid
-                                } else {
-                                    record.status = DNSRecordStatus.Failed
-                                    allValid = false
-
-                                    record.errors = new SimpleErrors(new SimpleError({
-                                        code: "wrong_value",
-                                        message: "",
-                                        human: "Er is een andere waarde ingesteld voor de TXT-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + records[0].join("")
-                                    }))
-                                }
-                            }
-                            break;
-                        }
-
-                    }
-                } catch (e) {
-                    console.error(e)
-                    record.status = DNSRecordStatus.Pending
-                    allValid = false
-                }
-            }
-        }
-
-        if (allValid) {
-            if (organization.privateMeta.pendingMailDomain !== null) {
-                organization.privateMeta.mailDomain = organization.privateMeta.pendingMailDomain
-                organization.privateMeta.pendingMailDomain = null;
-                
-                const sesv2 = new SES();
-
-                // Check if mail identitiy already exists..
-                let exists = false
-                try {
-                    const existing = await sesv2.getEmailIdentity({
-                        EmailIdentity: organization.privateMeta.mailDomain
-                    }).promise()
-                    exists = true
-
-                    organization.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
-                } catch (e) {
-                    console.error(e)
-                    // todo
-                }
-                
-                if (!exists) {
-                    console.log("Creating email identity")
-
-                    const result = await sesv2.createEmailIdentity({
-                        EmailIdentity: organization.privateMeta.mailDomain,
-                        DkimSigningAttributes: {
-                            DomainSigningPrivateKey: organization.serverMeta.privateDKIMKey!,
-                            DomainSigningSelector: "stamhoofd"
-                        },
-                        Tags: [
-                            {
-                                "Key": "OrganizationId",
-                                "Value": organization.id
-                            },
-                            {
-                                "Key": "CreatedBy",
-                                "Value": user.id
-                            },
-                            {
-                                "Key": "Environment",
-                                "Value": process.env.NODE_ENV ?? "Unknown"
-                            }
-                        ]
-
-                    }).promise()
-
-                    // todo: check result
-                    if (result.VerifiedForSendingStatus !== true) {
-                        console.error("Not validated :/")
-                    }
-                    organization.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
-                }
-                
-            }
-
-            // yay! Do not Save until after doing AWS changes
-            await organization.save()
-        } else {
-            await organization.save()
-        }
-    }
+    
 }
