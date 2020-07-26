@@ -38,7 +38,7 @@
                 <span class="icon card"/>
                 <span>Overschrijvingen</span>
             </button>
-            <button class="menu-button button heading">
+            <button class="menu-button button heading" @click="manageSettings" :class="{ selected: currentlySelected == 'manage-settings'}">
                 <span class="icon settings"/>
                 <span>Instellingen</span>
             </button>
@@ -65,6 +65,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import PaymentsView from './payments/PaymentsView.vue';
+import SettingsView from './settings/SettingsView.vue';
 
 class SelectableGroup {
     group: Group;
@@ -113,6 +114,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     managePayments() {
         this.currentlySelected = "manage-payments"
         this.showDetail(new ComponentWithProperties(PaymentsView, {}));
+    }
+
+    manageSettings() {
+        this.currentlySelected = "manage-settings"
+        this.showDetail(new ComponentWithProperties(SettingsView, {}));
     }
 }
 </script>
