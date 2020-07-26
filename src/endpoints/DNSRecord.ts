@@ -2,7 +2,8 @@ import { AutoEncoder, DateDecoder,EnumDecoder,field, StringDecoder } from '@simo
 import { v4 as uuidv4 } from "uuid";
 
 export enum DNSRecordType {
-    CNAME = "CNAME"
+    CNAME = "CNAME",
+    TXT = "TXT"
 }
 
 export enum DNSRecordStatus {
