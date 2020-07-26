@@ -10,7 +10,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
-export default class Checkbox extends Vue {
+export default class Tooltip extends Vue {
     @Prop({
         default: "No tooltip text set",
     })
@@ -59,7 +59,7 @@ export default class Checkbox extends Vue {
     left: 0;
     top: 0;
     background: $color-dark;
-    padding: 15px;
+    padding: 10px 15px;
     border-radius: $border-radius;
     @extend .style-description-small;
     @extend .style-overlay-shadow;

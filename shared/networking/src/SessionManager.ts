@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Version, KeyConstants, ChallengeResponseStruct, Token } from '@stamhoofd/structures';
 import { Session } from './Session';
 
@@ -112,7 +112,7 @@ export class SessionManagerStatic {
     }
 
     saveSessionStorage(storage: SessionStorage) {
-        localStorage.setItem('organizations', JSON.stringify(storage.encode({ version: Version })))
+        localStorage.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version })))
     }
 
     getSessionStorage(): SessionStorage {
@@ -122,7 +122,7 @@ export class SessionManagerStatic {
         if (json) {
             try {
                 const parsed = JSON.parse(json)
-                return new ObjectData(parsed, { version: Version }).decode(SessionStorage as Decoder<SessionStorage>)
+                return new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
             } catch (e) {
                 console.error(e)
             }

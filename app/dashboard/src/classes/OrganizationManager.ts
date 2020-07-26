@@ -11,6 +11,10 @@ export class OrganizationManagerStatic {
         return SessionManager.currentSession!.organization!
     }
 
+    set organization(organization: Organization) {
+        SessionManager.currentSession!.setOrganization(organization)
+    }
+
     getPatch() {
         return OrganizationPatch.create({
             id: this.organization.id
@@ -24,7 +28,7 @@ export class OrganizationManagerStatic {
             body: patch,
             decoder: Organization as Decoder<Organization>
         })
-        SessionManager.currentSession!.setOrganization(response.data)
+        this.organization = response.data
     }
 }
 

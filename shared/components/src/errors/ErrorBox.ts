@@ -1,4 +1,4 @@
-import { isSimpleError,SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */
@@ -8,11 +8,16 @@ export class ErrorBox {
     scrollToElements: [any[], HTMLElement][] = []
     scrollTimer?: number
 
-    constructor(errors: SimpleErrors | SimpleError) {
+    constructor(errors: Error) {
         if (isSimpleError(errors)) {
             this.errors = new SimpleErrors(errors)
-        } else {
+        } else if (isSimpleErrors(errors)) {
             this.errors = errors
+        } else {
+            this.errors = new SimpleErrors(new SimpleError({
+                code: "unknown_error",
+                message: errors.message
+            }))
         }
     }
 

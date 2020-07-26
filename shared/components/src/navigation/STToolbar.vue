@@ -29,6 +29,7 @@ export default class STToolbar extends Vue {}
     padding-top: var(--st-vertical-padding, 20px);
     position: sticky;
     bottom: 0;
+    overflow: hidden;
 
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);

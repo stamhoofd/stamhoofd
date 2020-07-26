@@ -46,50 +46,28 @@
             </div>
 
             <hr>
-            <h2>Inschrijvingspagina</h2>
-            <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via {{ organization.uri }}.stamhoofd.be. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
+            <h2>Domeinnaam</h2>
 
-
-            <Checkbox v-model="useRegisterDomain">Ik wil mijn eigen domeinnaam gebruiken</Checkbox>
-
-            <template v-if="useRegisterDomain">
-                <STInputBox title="Subdomeinnaam" error-fields="registerDomain" :error-box="errorBox" >
-                    <input
-                        v-model="registerDomain"
-                        class="input"
-                        type="text"
-                        placeholder="bv. inschrijven.vereniging.be"
-                        @change="validateRegisterDomain"
-                    >
-                </STInputBox>
-
-                
-                <template v-if="registerDomain.length > 3 && showDomainSettings">
-                    <h3 class="style-label">Instellen</h3>
-
-                    <p class="st-list-description">Stel de volgende CNAME record in bij de DNS-instellingen van jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van de registrar (Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.</p>
-                    
-                    <dl class="details-grid dns-settings">
-                        <dt>Type</dt>
-                        <dd>CNAME</dd>
-
-                        <dt>Naam</dt>
-                        <dd>{{ registerDomain }}.</dd>
-
-                        <dt>Waarde</dt>
-                        <dd>{{ organization.uri }}.stamhoofd.be.</dd>
-
-                        <dt>TTL</dt>
-                        <dd>3306 / 1 uur</dd>
-                    </dl>
-
-                    <a class="button text" :href="'https://www.samdns.com/lookup/cname/'+registerDomain+'/'" target="_blank">Testen</a>
-
-                    <p class="warning-box">Zorg dat je weet wat je doet en de instructies exact opvolgt. Als je niet alles correct volgt kan jouw huidige website onbereikbaar worden.</p>
-                    <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn.</p>
-                </template>
+            <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
+                <p class="warning-box">Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.</p>
+                <button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button>
             </template>
 
+            <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
+                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> én jouw e-mails worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.</p>
+                
+                <p class="warning-box" v-if="!organization.privateMeta.mailDomainActive">Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.</p>
+
+                <p><button class="button secundary" @click="setupDomain">Domeinnaam wijzigen</button></p>
+
+            </template>
+
+            <template v-else>
+                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
+                <button class="button secundary" @click="setupDomain">Domeinnaam instellen</button>
+            </template>
+
+      
 
         </main>
 
@@ -106,13 +84,15 @@
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
 import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import DomainSettingsView from './DomainSettingsView.vue';
+import DNSRecordsView from './DNSRecordsView.vue';
 
 @Component({
     components: {
@@ -157,44 +137,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         this.$set(this.organizationPatch, "website", website.length == 0 ? null : website)
     }
 
-    get useRegisterDomain() {
-        return this.organization.registerDomain !== null
-    }
-
-    set useRegisterDomain(use: boolean) {
-        if (use) {
-            this.$set(this.organizationPatch, "registerDomain", this.organization.registerDomain ?? "")
-        } else {
-            this.$set(this.organizationPatch, "registerDomain", null)
-        }
-    }
-
-    get registerDomain() {
-        return this.organization.registerDomain ?? ""
-    }
-
-    set registerDomain(registerDomain: string) {
-        this.$set(this.organizationPatch, "registerDomain", registerDomain)
-        console.log(registerDomain)
-        this.showDomainSettings = false
-    }
-
-    validateRegisterDomain() {
-        const d = this.registerDomain;
-        if (d.length == 0) {
-            this.useRegisterDomain = false
-            return true
-        }
-        if (!d.match(/^[a-zA-Z0-9]+\.[a-zA-Z0-9]+\.[a-zA-Z]+$/)) {
-            this.showDomainSettings = false
-
-            return false
-        } else {
-            this.showDomainSettings = true
-        }
-        return true
-    }
-
     get address() {
         return this.organization.address
     }
@@ -221,14 +163,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.website = "http://"+this.organization.website
         }
 
-        if (!this.validateRegisterDomain()) {
-            errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "De subdomeinnaam die je hebt ingevuld is niet geldig",
-                field: "registerDomain"
-            }))
-        }
-
         let valid = false
 
         if (errors.errors.length > 0) {
@@ -250,7 +184,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         //this.pop({ force: true })
     }
 
+    setupDomain() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DomainSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
 
+    openRecords() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DNSRecordsView, {})
+        }).setDisplayStyle("popup"))
+    }
 }
 </script>
 
