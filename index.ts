@@ -28,6 +28,7 @@ export * from "./src/endpoints/CreateOrganization"
 export * from "./src/endpoints/PatchMembers"
 export * from "./src/endpoints/RegisterMember"
 export * from "./src/endpoints/DNSRecord"
+export * from "./src/endpoints/OrganizationDomains"
 
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
 export * from "./src/endpoints/tokens/ChallengeResponseStruct"
