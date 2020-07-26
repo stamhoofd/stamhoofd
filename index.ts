@@ -3,6 +3,7 @@ export const Version = 6
 
 // General
 export * from "./src/OrganizationMetaData"
+export * from "./src/OrganizationPrivateMetaData"
 export * from "./src/OrganizationType"
 export * from "./src/OrganizationGenderType"
 export * from "./src/UmbrellaOrganization"
@@ -27,7 +28,7 @@ export * from "./src/PaymentStatus"
 export * from "./src/endpoints/CreateOrganization"
 export * from "./src/endpoints/PatchMembers"
 export * from "./src/endpoints/RegisterMember"
-export * from "./src/endpoints/DNSRecord"
+export * from "./src/DNSRecord"
 export * from "./src/endpoints/OrganizationDomains"
 
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
