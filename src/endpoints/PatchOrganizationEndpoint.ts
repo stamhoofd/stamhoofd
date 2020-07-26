@@ -125,6 +125,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         errors.throwIfNotEmpty()
-        return new Response(await organization.getStructure());
+        return new Response(await user.getOrganizatonStructure(organization));
     }
 }

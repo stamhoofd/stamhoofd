@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation,ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
-import { KeyConstants, Permissions } from "@stamhoofd/structures"
+import { KeyConstants, Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Member, MemberWithRegistrations } from './Member';
@@ -246,5 +246,12 @@ export class User extends Model {
 
         return members
 
+    }
+
+    async getOrganizatonStructure(organization: Organization): Promise<OrganizationStruct> {
+        if (organization.id != this.organizationId) {
+            throw new Error("Unexpected permission failure")
+        }
+        return this.permissions && this.permissions.hasFullAccess() ? await organization.getPrivateStructure() : await organization.getStructure()
     }
 }

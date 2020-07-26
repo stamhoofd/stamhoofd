@@ -1,8 +1,9 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData } from "@stamhoofd/structures";
+import { Address, Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
+import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
 
 export class Organization extends Model {
@@ -32,8 +33,23 @@ export class Organization extends Model {
     @column({ type: "string" })
     uri: string;
 
+    /**
+     * Public meta data
+     */
     @column({ type: "json", decoder: OrganizationMetaData })
     meta: OrganizationMetaData;
+
+    /**
+     * Data only accessible by the owners / users with special permissions
+     */
+    @column({ type: "json", decoder: OrganizationPrivateMetaData })
+    privateMeta: OrganizationPrivateMetaData = OrganizationPrivateMetaData.create({})
+
+    /**
+     * Data only accessible by the server
+     */
+    @column({ type: "json", decoder: OrganizationServerMetaData })
+    serverMeta: OrganizationServerMetaData = OrganizationServerMetaData.create({})
 
     @column({ type: "json", decoder: Address })
     address: Address;
@@ -126,6 +142,10 @@ export class Organization extends Model {
         if (this.registerDomain) {
             return this.registerDomain;
         }
+        return this.getDefaultHost()
+    }
+
+    getDefaultHost(): string {
         const defaultDomain = process.env.HOSTNAME;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
@@ -153,6 +173,22 @@ export class Organization extends Model {
             uri: this.uri,
             website: this.website,
             groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort)
+        })
+    }
+
+    async getPrivateStructure(): Promise<OrganizationStruct> {
+        const groups = await Group.where({ organizationId: this.id })
+        return OrganizationStruct.create({
+            id: this.id,
+            name: this.name,
+            meta: this.meta,
+            address: this.address,
+            publicKey: this.publicKey,
+            registerDomain: this.registerDomain,
+            uri: this.uri,
+            website: this.website,
+            groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort),
+            privateMeta: this.privateMeta
         })
     }
 }

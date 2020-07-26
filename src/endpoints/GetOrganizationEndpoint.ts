@@ -40,7 +40,7 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
         return new Response(new KeychainedResponse({
-            data: await user.organization.getStructure(),
+            data: await user.getOrganizatonStructure(user.organization),
             keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
         }));
     }
