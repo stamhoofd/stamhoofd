@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord"
 
@@ -20,4 +20,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 6 })
     mailDomain: string | null = null
+
+    @field({ decoder: BooleanDecoder, version: 8 })
+    mailDomainActive = false
 }
