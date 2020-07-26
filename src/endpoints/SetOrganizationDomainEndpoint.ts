@@ -1,14 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { DNSRecord, DNSRecordStatus, DNSRecordType, Organization as OrganizationStruct,OrganizationDomains } from "@stamhoofd/structures";
-const { Resolver } = require('dns').promises;
-import { add } from 'libsodium-wrappers';
+import { DNSRecord, DNSRecordType, Organization as OrganizationStruct,OrganizationDomains } from "@stamhoofd/structures";
 import NodeRSA from 'node-rsa';
 
-import { Organization } from '../models/Organization';
 import { Token } from '../models/Token';
-import { UserWithOrganization } from '../models/User';
 
 type Params = {};
 type Query = undefined;
