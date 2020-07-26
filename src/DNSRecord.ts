@@ -1,4 +1,5 @@
 import { AutoEncoder, DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from "uuid";
 
 export enum DNSRecordType {
@@ -30,4 +31,7 @@ export class DNSRecord extends AutoEncoder {
 
     @field({ decoder: DateDecoder, defaultValue: () => new Date() })
     createdAt: Date
+
+    @field({ decoder: SimpleErrors, nullable: true, version: 7 })
+    errors: SimpleErrors | null = null
 }
