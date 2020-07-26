@@ -255,6 +255,8 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                         EmailIdentity: organization.privateMeta.mailDomain
                     }).promise()
                     exists = true
+
+                    organization.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
                 } catch (e) {
                     console.error(e)
                     // todo
@@ -290,6 +292,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                     if (result.VerifiedForSendingStatus !== true) {
                         console.error("Not validated :/")
                     }
+                    organization.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
                 }
                 
             }
