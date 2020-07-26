@@ -33,7 +33,7 @@
             </div>
 
             <p class="warning-box">Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert kan jouw huidige website onbereikbaar worden.</p>
-            <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn.</p>
+            <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm ondertussen sluiten, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.</p>
         </main>
 
         <STToolbar>
