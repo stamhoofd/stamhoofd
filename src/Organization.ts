@@ -36,6 +36,12 @@ export class Organization extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [] })
     groups: Group[] = []
+
+    /**
+     * Only set for users with full access to the organization
+     */
+    @field({ decoder: OrganizationPrivateMetaData, nullable: true })
+    privateMeta: OrganizationPrivateMetaData | null;
 }
 
 export class OrganizationSimple extends AutoEncoder {
@@ -50,11 +56,6 @@ export class OrganizationSimple extends AutoEncoder {
 
     @field({ decoder: Address })
     address: Address;
-}
-
-export class OrganizationPrivate extends Organization {
-    @field({ decoder: OrganizationPrivateMetaData, nullable: true })
-    privateMeta: OrganizationPrivateMetaData | null;
 }
 
 export const OrganizationPatch = Organization.patchType()
