@@ -314,7 +314,9 @@ export class Organization extends Model {
 
             const wasActive = this.privateMeta.mailDomainActive
 
-            await this.updateAWSMailIdenitity()
+            if (!wasActive) {
+                await this.updateAWSMailIdenitity()
+            }
 
             // yay! Do not Save until after doing AWS changes
             await organization.save()
@@ -389,7 +391,7 @@ export class Organization extends Model {
             }).promise()
             exists = true
 
-            console.log("Mail domain exists already")
+            console.log("AWS mail idenitiy exists already")
 
             this.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
         } catch (e) {
