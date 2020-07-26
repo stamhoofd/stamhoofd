@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from './Address';
 import { Group } from './Group';
 import { OrganizationMetaData } from './OrganizationMetaData';
+import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -49,6 +50,11 @@ export class OrganizationSimple extends AutoEncoder {
 
     @field({ decoder: Address })
     address: Address;
+}
+
+export class OrganizationPrivate extends Organization {
+    @field({ decoder: OrganizationPrivateMetaData, nullable: true })
+    privateMeta: OrganizationPrivateMetaData | null;
 }
 
 export const OrganizationPatch = Organization.patchType()
