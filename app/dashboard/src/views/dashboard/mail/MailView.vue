@@ -10,7 +10,7 @@
         </STNavigationTitle>
 
         <main>
-            <STInputBox title="Versturen vanaf">
+            <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
                 <button slot="right" class="button text" @click="manageEmails">
                     <span class="icon settings" />
                     <span>Wijzigen</span>
@@ -19,6 +19,11 @@
                     <option v-for="email in emails" :key="email.id" :value="email.id">{{ email.name ? email.name+" <"+email.email+">" : email.email }}</option>
                 </select>
             </STInputBox>
+
+            <p class="warning-box" v-if="emails.length == 0">Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
+                    <span class="icon settings" />
+                    <span>Wijzigen</span>
+                </button></p>
 
             <STInputBox title="Onderwerp">
                 <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
@@ -40,9 +45,8 @@
             </template>
             <template #right>
                 <LoadingButton :loading="sending">
-                    <button class="button primary" @click="send">
+                    <button class="button primary" @click="send" :disabled="emails.length == 0">
                         Versturen
-                        <div class="dropdown" @click.stop="" />
                     </button>
                 </LoadingButton>
             </template>
@@ -84,7 +88,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
-    emailId: string = this.group?.privateSettings?.defaultEmailId ?? this.emails.find(e => e.default)?.id ?? this.emails[0].id
+    emailId: string | null = this.group?.privateSettings?.defaultEmailId ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
     subject = ""
 
     get organization() {
@@ -123,7 +127,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     async send() {
-        if (this.sending) {
+        if (this.sending || !this.emailId) {
             return;
         }
         this.sending = true;

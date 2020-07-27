@@ -131,7 +131,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             }
         }
         if (this.saving) {
-            return 
+            return OrganizationEmail.create({ email: "" })
         }
         throw new Error("Email not found")
     }

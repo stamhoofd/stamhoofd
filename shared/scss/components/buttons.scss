@@ -81,6 +81,17 @@
             align-self: stretch;
         }
 
+        &:disabled {
+            color: $color-gray-light;
+            background: $color-white-shade;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
+
     }
 
     &.secundary {
