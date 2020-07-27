@@ -8,7 +8,7 @@ export class OrganizationEmail extends AutoEncoder {
     /**
      * Name of this person / group
      */
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder, nullable: true })
     name: string | null = null;
 
     @field({ decoder: StringDecoder })
