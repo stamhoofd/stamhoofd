@@ -9,9 +9,6 @@
                 <dt>Bankrekening</dt>
                 <dd>{{ organization.meta.iban }}</dd>
 
-                <dt>BIC</dt>
-                <dd>{{ organization.meta.bic }}</dd>
-
                 <dt>Mededeling</dt>
                 <dd>{{ payment.transferDescription }}</dd>
 
