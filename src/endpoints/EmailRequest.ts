@@ -29,6 +29,7 @@ export class EmailRequest extends AutoEncoder {
     @field({ decoder: StringDecoder })
     subject: string
 
+    @field({ decoder: new ArrayDecoder(Recipient) })
     recipients: Recipient[]
 
     @field({ decoder: StringDecoder, nullable: true })
