@@ -61,11 +61,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             organization.name = request.body.name ?? organization.name
 
             if (request.body.address) {
-                organization.address.patch(request.body.address)
+                organization.address = organization.address.patch(request.body.address)
             }
 
             if (request.body.meta) {
-                organization.meta.patch(request.body.meta)
+                organization.meta = organization.meta.patch(request.body.meta)
             }
 
             if (request.body.privateMeta) {

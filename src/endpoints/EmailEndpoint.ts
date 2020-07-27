@@ -1,7 +1,7 @@
-import { ArrayDecoder,AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRequest, Organization as OrganizationStruct, OrganizationPatch } from "@stamhoofd/structures";
+import { EmailRequest } from "@stamhoofd/structures";
 
 import Email, { EmailBuilder } from '../email/Email';
 import { Token } from '../models/Token';
@@ -79,14 +79,21 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
                 return undefined
             }
 
+            let html = email.html
+
             // Replacements (todo)
+            for (const replacement of recipient.replacements) {
+                if (html) {
+                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                }
+            }
 
             return {
                 from,
                 to: recipient.email,
                 subject: email.subject,
                 text: email.text ?? undefined,
-                html: email.html ?? undefined
+                html: html ?? undefined
             }
         }
 
