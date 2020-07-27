@@ -30,6 +30,8 @@ export * from "./src/PaymentStatus"
 export * from "./src/endpoints/CreateOrganization"
 export * from "./src/endpoints/PatchMembers"
 export * from "./src/endpoints/RegisterMember"
+export * from "./src/endpoints/EmailRequest"
+
 export * from "./src/DNSRecord"
 export * from "./src/endpoints/OrganizationDomains"
 
