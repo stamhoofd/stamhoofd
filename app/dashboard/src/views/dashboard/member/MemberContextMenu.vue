@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Member } from "@stamhoofd-frontend/models";
 import { ParentTypeHelper } from "@stamhoofd-frontend/models";
@@ -67,8 +67,10 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     }
 
     openMail() {
-        const displayedComponent = new ComponentWithProperties(MailView, {
-            members: [this.member],
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MailView, {
+                members: [this.member],
+            })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }

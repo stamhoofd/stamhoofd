@@ -2,7 +2,7 @@
     <div class="st-view" id="settings-view">
         <STNavigationBar title="E-mailadressen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+            <button slot="right" class="button icon close gray" v-if="!canPop && canDismiss" @click="dismiss"/>
         </STNavigationBar>
 
         <main>
@@ -27,7 +27,7 @@
 
         </main>
 
-        <STToolbar v-if="!canPop">
+        <STToolbar>
             <template slot="right">
                 <button class="button primary" @click="addEmail">
                     <span class="icon add" />

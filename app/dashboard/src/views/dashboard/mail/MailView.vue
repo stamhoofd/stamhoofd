@@ -11,50 +11,56 @@
 
         <main>
             <STInputBox title="Versturen vanaf">
-                <button slot="right" class="button text">
+                <button slot="right" class="button text" @click="manageEmails">
                     <span class="icon settings" />
                     <span>Wijzigen</span>
                 </button>
-                <select class="input">
-                    <option>info@stamhoofd.be</option>
+                <select class="input" v-model="emailId">
+                    <option v-for="email in emails" :key="email.id" :value="email.id">{{ email.name ? email.name+" <"+email.email+">" : email.email }}</option>
                 </select>
             </STInputBox>
 
-            <label class="style-label" for="mail-subject">Onderwerp</label>
-            <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+            <STInputBox title="Onderwerp">
+                <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
+            </STInputBox>
 
             <label class="style-label" for="mail-text">Bericht</label>
-            <MailEditor />
+            <MailEditor ref="editor"/>
         </main>
 
         <STToolbar>
             <template #left>
                 {{
-                    mailaddresses.length
-                        ? mailaddresses.length > 1
-                            ? mailaddresses.length + " ontvangers"
+                    recipients.length
+                        ? recipients.length > 1
+                            ? recipients.length + " ontvangers"
                             : "Eén ontvanger"
                         : "Geen ontvangers"
                 }}
             </template>
             <template #right>
-                <button class="button primary">
-                    Versturen
-                    <div class="dropdown" @click.stop="" />
-                </button>
+                <LoadingButton :loading="sending">
+                    <button class="button primary" @click="send">
+                        Versturen
+                        <div class="dropdown" @click.stop="" />
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Member } from "@stamhoofd-frontend/models";
-import { STNavigationTitle, STInputBox } from "@stamhoofd/components";
+import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { STNavigationTitle, STInputBox, LoadingButton } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import EmailSettingsView from '../settings/EmailSettingsView.vue';
+import { SessionManager } from '@stamhoofd/networking';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
+import { MemberWithRegistrations, EmailRequest, Recipient, Replacement } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -63,22 +69,92 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         SegmentedControl,
         STToolbar,
         STInputBox,
+        LoadingButton,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
 export default class MailView extends Mixins(NavigationMixin) {
     @Prop()
-    members!: Member[];
+    members!: MemberWithRegistrations[];
+    sending = false
 
-    get mailaddresses(): string[] {
+    // Make session (organization) reactive
+    reactiveSession = SessionManager.currentSession
+
+    emailId: string = this.emails[0].id
+    subject = ""
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get recipients(): Recipient[] {
         return this.members.flatMap((member) => {
-            return member.parents.flatMap((parent) => {
-                if (parent.mail) {
-                    return [parent.mail];
+            if (!member.details) {
+                return []
+            }
+            return member.details.parents.flatMap((parent) => {
+                if (parent.email) {
+                    return [Recipient.create({
+                        firstName: parent.firstName,
+                        email: parent.email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: parent.firstName
+                            })
+                        ]
+                    })];
                 }
                 return [];
             });
         });
+    }
+
+    get emails() {
+        return this.organization.privateMeta?.emails ?? []
+    }
+
+    manageEmails() {
+        this.show(new ComponentWithProperties(EmailSettingsView, {}))
+    }
+
+    async send() {
+        if (this.sending) {
+            return;
+        }
+        this.sending = true;
+
+        try {
+            let html = (this.$refs.editor as any).editor!.getHTML();
+
+            const element = document.createElement("div")
+            element.innerHTML = html
+
+            const elements = element.querySelectorAll("span.replace-placeholder[data-replace-type='firstName']")
+            for (const el of elements) {
+                el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
+            }
+
+            html = element.innerHTML
+
+            const emailRequest = EmailRequest.create({
+                emailId: this.emailId,
+                recipients: this.recipients,
+                subject: this.subject,
+                html
+            })
+
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/email",
+                body: emailRequest,
+            })
+            this.pop({ force: true })
+        } catch (e) {
+            console.error(e)
+        }
+        this.sending = false
     }
 }
 </script>
