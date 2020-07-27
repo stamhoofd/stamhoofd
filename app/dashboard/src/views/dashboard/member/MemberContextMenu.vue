@@ -31,7 +31,6 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Member } from "@stamhoofd-frontend/models";
 import { ParentTypeHelper } from "@stamhoofd-frontend/models";
 import { ContextMenu } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
@@ -40,6 +39,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -56,7 +56,7 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     y!: number;
 
     @Prop()
-    member!: Member;
+    member!: MemberWithRegistrations;
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
@@ -70,6 +70,7 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
                 members: [this.member],
+                group: this.member.groups[0] ?? null
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

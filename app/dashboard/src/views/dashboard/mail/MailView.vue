@@ -60,7 +60,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { MemberWithRegistrations, EmailRequest, Recipient, Replacement } from '@stamhoofd/structures';
+import { MemberWithRegistrations, EmailRequest, Recipient, Replacement, Group } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -78,10 +78,13 @@ export default class MailView extends Mixins(NavigationMixin) {
     members!: MemberWithRegistrations[];
     sending = false
 
+    @Prop({ default: null })
+    group: Group | null
+
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
-    emailId: string = this.emails[0].id
+    emailId: string = this.group?.privateSettings?.defaultEmailId ?? this.emails.find(e => e.default)?.id ?? this.emails[0].id
     subject = ""
 
     get organization() {

@@ -425,6 +425,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
                 members: this.getSelectedMembers(),
+                group: this.group
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
