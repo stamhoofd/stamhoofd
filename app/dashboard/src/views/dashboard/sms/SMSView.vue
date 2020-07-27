@@ -2,10 +2,7 @@
     <div class="st-view sms-view">
         <STNavigationBar title="SMS'en">
             <template #right>
-                <button class="button icon gray clock">
-                    Geschiedenis
-                </button>
-                <button class="button icon close" @click="pop" />
+                <button class="button icon close gray" @click="dismiss" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
@@ -72,7 +69,8 @@ export default class SMSView extends Mixins(NavigationMixin) {
     members!: MemberWithRegistrations[];
 
     @Prop({ default: "parents" })
-    smsFilter!: string;
+    initialSmsFilter!: string;
+    smsFilter = this.initialSmsFilter
 
     message = "";
 

@@ -78,7 +78,7 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     openSMS(smsFilter = "parents") {
         const displayedComponent = new ComponentWithProperties(SMSView, {
             members: [this.member],
-            smsFilter: smsFilter,
+            initialSmsFilter: smsFilter,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
