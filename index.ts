@@ -39,7 +39,7 @@ const start = async () => {
     };
     routerServer.listen(parseInt(process.env.PORT ?? "9090"));
 
-    const cronInterval = setInterval(crons, 60 * 1000);
+    const cronInterval = setInterval(crons, 10 * 60 * 1000);
     crons()
 
     const shutdown = () => {

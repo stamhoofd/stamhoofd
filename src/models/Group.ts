@@ -1,11 +1,10 @@
 import { column,Database,Model } from '@simonbackx/simple-database';
-import { GroupSettings } from '@stamhoofd/structures';
+import { GroupPrivateSettings,GroupSettings } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member,MemberWithRegistrations } from './Member';
 import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
-import { User } from './User';
 
 export class Group extends Model {
     static table = "groups";
@@ -19,6 +18,9 @@ export class Group extends Model {
 
     @column({ type: "json", decoder: GroupSettings })
     settings: GroupSettings;
+
+    @column({ type: "json", decoder: GroupPrivateSettings })
+    privateSettings: GroupPrivateSettings;
 
     @column({ type: "string" })
     organizationId: string;

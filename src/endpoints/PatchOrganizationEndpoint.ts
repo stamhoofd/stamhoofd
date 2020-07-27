@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Organization as OrganizationStruct, OrganizationPatch } from "@stamhoofd/structures";
+import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Token } from '../models/Token';
@@ -68,6 +68,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.meta.patch(request.body.meta)
             }
 
+            if (request.body.privateMeta) {
+                organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
+            }
+
             // Save the organization
             await organization.save()
         } else {
@@ -99,6 +103,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.id = struct.id
             model.organizationId = organization.id
             model.settings = struct.settings
+            model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
             await model.save();
         }
 
@@ -119,6 +124,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (struct.settings) {
                 model.settings = model.settings.patch(struct.settings)
+            }
+
+            if (struct.privateSettings) {
+                model.privateSettings = model.privateSettings.patch(struct.privateSettings)
             }
             
             await model.save();

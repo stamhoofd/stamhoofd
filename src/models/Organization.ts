@@ -177,7 +177,7 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort)
+            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort)
         })
     }
 
@@ -210,99 +210,106 @@ export class Organization extends Model {
         
         // Revalidate all
         const resolver = new Resolver();
-        resolver.setServers(Math.random() > 0.5 ? ['1.1.1.1', '8.8.8.8'] : ['8.8.8.8', '1.1.1.1']);
+        const r = Math.random()
+        resolver.setServers(r > 0.33 ? ['1.1.1.1', '8.8.8.8', '8.8.4.4'] : (r > 0.66 ? ['8.8.8.8', '1.1.1.1'] : ['8.8.4.4', '1.1.1.1']));
 
         let allValid = true
         for (const record of organization.privateMeta.dnsRecords) {
-            if (record.status != DNSRecordStatus.Valid) {
-                try {
-                    switch (record.type) {
-                        case DNSRecordType.CNAME: {
+            try {
+                switch (record.type) {
+                    case DNSRecordType.CNAME: {
 
-                            const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1))
-                            record.errors = null;
+                        const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1))
+                        record.errors = null;
 
-                            if (addresses.length == 0) {
-                                record.status = DNSRecordStatus.Pending
-                                allValid = false
+                        if (addresses.length == 0) {
+                            record.status = DNSRecordStatus.Pending
+                            allValid = false
 
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "not_found",
-                                    message: "",
-                                    human: "We konden de CNAME-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
-                                }))
-                            } else if (addresses.length > 1) {
+                            record.errors = new SimpleErrors(new SimpleError({
+                                code: "not_found",
+                                message: "",
+                                human: "We konden de CNAME-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                            }))
+                        } else if (addresses.length > 1) {
+                            record.status = DNSRecordStatus.Failed
+                            allValid = false
+
+                            record.errors = new SimpleErrors(new SimpleError({
+                                code: "too_many_fields",
+                                message: "",
+                                human: "Er zijn meerdere CNAME records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                            }))
+                        } else {
+                            if (addresses[0] + "." === record.value) {
+                                record.status = DNSRecordStatus.Valid
+                            } else {
                                 record.status = DNSRecordStatus.Failed
                                 allValid = false
 
                                 record.errors = new SimpleErrors(new SimpleError({
-                                    code: "too_many_fields",
+                                    code: "wrong_value",
                                     message: "",
-                                    human: "Er zijn meerdere CNAME records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                                    human: "Er is een andere waarde ingesteld voor de CNAME-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + addresses[0] + "."
                                 }))
-                            } else {
-                                if (addresses[0] + "." === record.value) {
-                                    record.status = DNSRecordStatus.Valid
-                                } else {
-                                    record.status = DNSRecordStatus.Failed
-                                    allValid = false
-
-                                    record.errors = new SimpleErrors(new SimpleError({
-                                        code: "wrong_value",
-                                        message: "",
-                                        human: "Er is een andere waarde ingesteld voor de CNAME-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + addresses[0] + "."
-                                    }))
-                                }
                             }
-
-                            break;
                         }
 
-                        case DNSRecordType.TXT: {
-                            const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1))
-
-                            record.errors = null;
-
-                            if (records.length == 0) {
-                                record.status = DNSRecordStatus.Pending
-                                allValid = false
-
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "not_found",
-                                    message: "",
-                                    human: "We konden de TXT-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
-                                }))
-                            } else if (records.length > 1) {
-                                record.status = DNSRecordStatus.Failed
-                                allValid = false
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "too_many_fields",
-                                    message: "",
-                                    human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
-                                }))
-                            } else {
-                                if (records[0].join("").trim() === record.value.trim()) {
-                                    record.status = DNSRecordStatus.Valid
-                                } else {
-                                    record.status = DNSRecordStatus.Failed
-                                    allValid = false
-
-                                    record.errors = new SimpleErrors(new SimpleError({
-                                        code: "wrong_value",
-                                        message: "",
-                                        human: "Er is een andere waarde ingesteld voor de TXT-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + records[0].join("")
-                                    }))
-                                }
-                            }
-                            break;
-                        }
-
+                        break;
                     }
-                } catch (e) {
-                    console.error(e)
-                    record.status = DNSRecordStatus.Pending
-                    allValid = false
+
+                    case DNSRecordType.TXT: {
+                        const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1))
+
+                        record.errors = null;
+
+                        if (records.length == 0) {
+                            record.status = DNSRecordStatus.Pending
+                            allValid = false
+
+                            record.errors = new SimpleErrors(new SimpleError({
+                                code: "not_found",
+                                message: "",
+                                human: "We konden de TXT-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                            }))
+                        } else if (records.length > 1) {
+                            record.status = DNSRecordStatus.Failed
+                            allValid = false
+                            record.errors = new SimpleErrors(new SimpleError({
+                                code: "too_many_fields",
+                                message: "",
+                                human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                            }))
+                        } else {
+                            if (records[0].join("").trim() === record.value.trim()) {
+                                record.status = DNSRecordStatus.Valid
+                            } else {
+                                record.status = DNSRecordStatus.Failed
+                                allValid = false
+
+                                record.errors = new SimpleErrors(new SimpleError({
+                                    code: "wrong_value",
+                                    message: "",
+                                    human: "Er is een andere waarde ingesteld voor de TXT-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + records[0].join("")
+                                }))
+                            }
+                        }
+                        break;
+                    }
+
                 }
+            } catch (e) {
+                console.error(e)
+                record.status = DNSRecordStatus.Pending
+
+                if (e.code && e.code == "ENOTFOUND") {
+                    record.errors = new SimpleErrors(new SimpleError({
+                        code: "not_found",
+                        message: "",
+                        human: "We konden de record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                    }))
+                }
+                allValid = false
             }
         }
 
@@ -327,7 +334,7 @@ export class Organization extends Model {
 
                 for (const user of users) {
                     if (user.permissions && user.permissions.hasFullAccess()) {
-                        Email.send(user.email, "Jouw nieuwe domeinnaam is actief!", "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie domeinnaam die jullie hebben ingesteld voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf " + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd").catch(e => {
+                        Email.send(user.email, "Jouw nieuwe domeinnaam is actief!", "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf iets@" + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd").catch(e => {
                             console.error(e)
                         })
                     }
@@ -354,7 +361,7 @@ export class Organization extends Model {
                 for (const user of users) {
                     if (user.permissions && user.permissions.hasFullAccess()) {
                         found = true
-                        Email.send(user.email, "Stamhoofd domeinnaam instellingen ongeldig", "Hallo daar!\n\nBij onze routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd").catch(e => {
+                        Email.send(user.email, "Stamhoofd domeinnaam instellingen ongeldig", "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd").catch(e => {
                             console.error(e)
                         })
                     }
