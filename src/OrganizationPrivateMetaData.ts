@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord"
+import { OrganizationEmail } from './OrganizationEmail';
 
 export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
@@ -23,4 +24,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 8 })
     mailDomainActive = false
+
+    /**
+     * E-mail addresses that an organization can send from (or reply-to)
+     */
+    @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 9 })
+    emails: OrganizationEmail[] = [];
 }
