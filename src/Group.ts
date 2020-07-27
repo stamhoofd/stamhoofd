@@ -1,6 +1,7 @@
 import { AutoEncoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings } from './GroupSettings';
 
 export class Group extends AutoEncoder {
