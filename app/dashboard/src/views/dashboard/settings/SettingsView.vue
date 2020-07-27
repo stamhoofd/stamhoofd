@@ -42,6 +42,8 @@
                     </STInputBox>
                     <p class="st-list-description">De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.</p>
 
+                    <IBANInput title="Bankrekeningnummer" v-model="iban" :validator="validator"/>
+
                 </div>
             </div>
 
@@ -99,10 +101,11 @@
 
         <STToolbar>
             <template slot="right">
-                <Spinner v-if="saving" />
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
+                <LoadingButton :loading="saving">
+                    <button class="button primary" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
@@ -111,9 +114,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator } from "@stamhoofd/components";
+import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -132,7 +135,8 @@ import EmailSettingsView from './EmailSettingsView.vue';
         RadioGroup,
         BackButton,
         AddressInput,
-        Spinner
+        LoadingButton,
+        IBANInput
     },
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
@@ -154,6 +158,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     set name(name: string) {
         this.$set(this.organizationPatch, "name", name)
+    }
+
+    get iban() {
+        return this.organization.meta.iban
+    }
+
+    set iban(iban: string) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
+        }
+        this.$set(this.organizationPatch.meta, "iban", iban)
     }
 
     get website() {
