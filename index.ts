@@ -18,6 +18,7 @@ export * from "./src/OrganizationEmail"
 
 export * from "./src/Group"
 export * from "./src/GroupSettings"
+export * from "./src/GroupPrivateSettings"
 export * from "./src/GroupGenderType"
 export * from "./src/GroupPrices"
 
