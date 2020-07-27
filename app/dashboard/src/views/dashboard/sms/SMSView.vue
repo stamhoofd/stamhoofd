@@ -57,6 +57,7 @@ import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -68,7 +69,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 })
 export default class SMSView extends Mixins(NavigationMixin) {
     @Prop()
-    members!: Member[];
+    members!: MemberWithRegistrations[];
 
     @Prop({ default: "parents" })
     smsFilter!: string;
@@ -81,9 +82,12 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
     get phones(): string[] {
         return this.members.flatMap((member) => {
+            if (!member.details) {
+                return []
+            }
             let arr: string[] = [];
             if (this.smsFilter == "parents" || this.smsFilter == "all") {
-                arr = member.parents.flatMap((parent) => {
+                arr = member.details.parents.flatMap((parent) => {
                     if (parent.phone) {
                         return [parent.phone];
                     }
@@ -91,8 +95,8 @@ export default class SMSView extends Mixins(NavigationMixin) {
                 });
             }
 
-            if (member.phone && (this.smsFilter == "members" || this.smsFilter == "all")) {
-                arr.push(member.phone);
+            if (member.details.phone && (this.smsFilter == "members" || this.smsFilter == "all")) {
+                arr.push(member.details.phone);
             }
             return arr;
         });

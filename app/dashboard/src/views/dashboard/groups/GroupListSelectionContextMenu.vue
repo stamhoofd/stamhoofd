@@ -1,16 +1,16 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem @click="excel">
+        <!--<ContextMenuItem @click="excel">
             Etiketten maken
         </ContextMenuItem>
 
-        <ContextMenuLine />
+        <ContextMenuLine />-->
         <ContextMenuItem @click="excel">
             Exporteer als Excel
         </ContextMenuItem>
-        <ContextMenuItem @click="excel">
+        <!--<ContextMenuItem @click="excel">
             Exporteer als CSV
-        </ContextMenuItem>
+        </ContextMenuItem>-->
         <ContextMenuLine />
         <ContextMenuItem @click="sms">
             SMS'en

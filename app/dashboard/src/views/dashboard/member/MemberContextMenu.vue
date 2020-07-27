@@ -2,7 +2,7 @@
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem>Groep wijzigen</ContextMenuItem>
         <ContextMenuLine />
-        <ContextMenuItem v-for="(parent, index) in member.parents" :key="index" @click="call(parent.phone)">
+        <ContextMenuItem v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
             {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen
         </ContextMenuItem>
         <ContextMenuItem @click="openSMS('parents')">
@@ -12,19 +12,18 @@
             Ouders mailen
         </ContextMenuItem>
 
-        <template v-if="member.phone">
+        <template v-if="member.details && member.details.phone">
             <ContextMenuLine />
-            <ContextMenuItem @click="call(member.phone)">
-                {{ member.firstName }} bellen
+            <ContextMenuItem @click="call(member.details.phone)">
+                {{ member.details.firstName }} bellen
             </ContextMenuItem>
             <ContextMenuItem @click="openSMS('members')">
-                {{ member.firstName }} SMS'en
+                {{ member.details.firstName }} SMS'en
             </ContextMenuItem>
         </template>
 
         <ContextMenuLine />
         <ContextMenuItem>Uitschrijven</ContextMenuItem>
-        <ContextMenuItem>Data verwijderen</ContextMenuItem>
     </ContextMenu>
 </template>
 
