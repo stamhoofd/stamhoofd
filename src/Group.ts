@@ -13,6 +13,12 @@ export class Group extends AutoEncoder {
     @field({ decoder: GroupSettings })
     settings: GroupSettings
 
+    /**
+     * Only set when you have access to this information
+     */
+    @field({ decoder: GroupPrivateSettings, nullable: true, version: 10 })
+    privateSettings: GroupPrivateSettings | null = null
+
     static defaultSort(this: unknown, a: Group, b: Group) {
         if (a.settings.minBirthYear && !b.settings.minBirthYear) {
             return -1

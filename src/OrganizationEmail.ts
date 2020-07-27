@@ -15,7 +15,7 @@ export class OrganizationEmail extends AutoEncoder {
     email: string;
 
     /**
-     * Whether this e-mail might get used as a default one when we could not use a different one
+     * Whether this e-mail might get used as a global default one when we could not find a different one
      */
     @field({ decoder: BooleanDecoder })
     default = false;
@@ -25,10 +25,4 @@ export class OrganizationEmail extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     restricted = false;
-
-    /**
-     * The groups that sends e-mail from this address by default
-     */
-    @field({ decoder: new ArrayDecoder(StringDecoder) })
-    groupIds: string[] = []
 }
