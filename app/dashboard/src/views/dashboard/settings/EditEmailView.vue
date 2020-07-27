@@ -2,6 +2,10 @@
     <div class="st-view" id="settings-view">
         <STNavigationBar title="E-mailadres">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button class="button text" slot="right" v-if="!isNew" @click="deleteMe">
+                <span class="icon trash"/>
+                <span>Verwijderen</span>
+            </button>
         </STNavigationBar>
 
         <main>
@@ -126,6 +130,9 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
                 return email
             }
         }
+        if (this.saving) {
+            return 
+        }
         throw new Error("Email not found")
     }
 
@@ -164,6 +171,51 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
 
     set isDefault(d: boolean) {
         this.addPatch({ default: d })
+    }
+
+    async deleteMe() {
+        if (this.saving) {
+            return;
+        }
+
+        if (!confirm("Ben je zeker dat je dit e-mailadres wilt verwijderen?")) {
+            return;
+        }
+
+        const patch = OrganizationPatch.create({}).patch(this.organizationPatch)
+
+        if (!patch.privateMeta) {
+            patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
+        }
+
+        patch.privateMeta!.emails.addDelete(this.emailId)
+
+        patch.groups = new PatchableArray()
+
+        for (const group of this.groups) {
+            // Check if changed
+            const prev = group.group.privateSettings !== null && group.group.privateSettings.defaultEmailId !== null && group.group.privateSettings.defaultEmailId === this.emailId
+            if (prev) {
+                patch.groups.addPatch(GroupPatch.create({
+                    id: group.group.id,
+                    privateSettings: GroupPrivateSettingsPatch.create({
+                        defaultEmailId: null,
+                    })
+                }))
+            }
+        }
+
+        this.saving = true
+
+        try {
+            await OrganizationManager.patch(patch)
+            this.pop({ force: true })
+            this.saving = false
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+            this.saving = false
+        }
     }
    
     async save() {
