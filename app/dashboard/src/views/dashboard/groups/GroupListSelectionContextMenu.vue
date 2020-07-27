@@ -32,6 +32,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -48,7 +49,7 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     y!: number;
 
     @Prop()
-    members!: Member[];
+    members!: MemberWithRegistrations[];
 
     sms() {
         const displayedComponent = new ComponentWithProperties(SMSView, {

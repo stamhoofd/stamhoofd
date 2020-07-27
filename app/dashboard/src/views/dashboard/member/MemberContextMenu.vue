@@ -1,16 +1,25 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem>Groep wijzigen</ContextMenuItem>
-        <ContextMenuLine />
-        <ContextMenuItem v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
-            {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen
-        </ContextMenuItem>
-        <ContextMenuItem @click="openSMS('parents')">
-            Ouders SMS'en
-        </ContextMenuItem>
-        <ContextMenuItem @click="openMail">
-            Ouders mailen
-        </ContextMenuItem>
+
+        <template v-if="member.details && member.details.parents.length > 0">
+            <ContextMenuLine />
+            <ContextMenuItem v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
+                {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen
+            </ContextMenuItem>
+            <ContextMenuItem @click="openSMS('parents')">
+                Ouders SMS'en
+            </ContextMenuItem>
+            <ContextMenuItem @click="openMail">
+                Ouders mailen
+            </ContextMenuItem>
+        </template>
+        <template v-else-if="member.details && member.details.emergencyContacts.length > 0">
+            <ContextMenuLine />
+            <ContextMenuItem v-for="contact in member.details.emergencyContacts" :key="contact.id" @click="call(contact.phone)">
+                {{ contact.name }} (noodcontact) bellen
+            </ContextMenuItem>
+        </template>
 
         <template v-if="member.details && member.details.phone">
             <ContextMenuLine />
