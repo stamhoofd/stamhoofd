@@ -50,24 +50,50 @@
 
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
                 <p class="warning-box">Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.</p>
-                <button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button>
+                <p class="st-list-description"><button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button></p>
             </template>
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
-                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> én jouw e-mails worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.</p>
+                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.</p>
                 
                 <p class="warning-box" v-if="!organization.privateMeta.mailDomainActive">Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.</p>
 
-                <p><button class="button secundary" @click="setupDomain">Domeinnaam wijzigen</button></p>
+                <p class="st-list-description">
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam wijzigen</span>
+                    </button>
+                </p>
 
             </template>
 
             <template v-else>
                 <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
-                <button class="button secundary" @click="setupDomain">Domeinnaam instellen</button>
+
+                <p class="st-list-description">
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam instellen</span>
+                    </button>
+                </p>
             </template>
 
-      
+            <hr>
+            <h2>E-mailadressen</h2>
+            
+            <p class="st-list-description" v-if="organization.privateMeta && organization.privateMeta.mailDomainActive">
+                Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt die eindigen op @{{ organization.privateMeta.mailDomain }}, kan je e-mails versturen vanaf dat e-mailadres. Bij andere e-mailadressen (bv. {{ organization.uri }}@gmail.com) kunnen we enkel instellen dat leden antwoorden naar dat e-mailadres, de e-mail wordt nog steeds verstuurd vanaf iets@{{ organization.privateMeta.mailDomain }}. Voeg enkel e-mailadressen toe waar je ook e-mails kan op ontvangen.
+            </p>
+            <p class="st-list-description" v-else>
+                Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je het domeinnaam hierboven eerst toevoegt. Bij andere e-mailadressen (bv. {{ organization.uri }}@gmail.com) kunnen we enkel instellen dat leden antwoorden naar dat e-mailadres, de e-mail wordt nog steeds verstuurd vanaf iets@{{ organization.uri }}.stamhoofd.be. Voeg enkel e-mailadressen toe waarop je e-mails kan ontvangen.
+            </p>
+
+            <p class="st-list-description">
+                <button class="button text" @click="setupEmail">
+                    <span class="icon settings" />
+                    <span>E-mailadressen instellen</span>
+                </button>
+            </p>
 
         </main>
 
@@ -93,6 +119,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DomainSettingsView from './DomainSettingsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
+import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({
     components: {
@@ -187,6 +214,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     setupDomain() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(DomainSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    setupEmail() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EmailSettingsView, {})
         }).setDisplayStyle("popup"))
     }
 

@@ -2,10 +2,7 @@
     <div class="st-view mail-view">
         <STNavigationBar title="Mail versturen">
             <template #right>
-                <button class="button icon gray clock">
-                    Geschiedenis
-                </button>
-                <button class="button icon close" @click="pop" />
+                <button class="button icon close gray" @click="dismiss" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
@@ -13,6 +10,16 @@
         </STNavigationTitle>
 
         <main>
+            <STInputBox title="Versturen vanaf">
+                <button slot="right" class="button text">
+                    <span class="icon settings" />
+                    <span>Wijzigen</span>
+                </button>
+                <select class="input">
+                    <option>info@stamhoofd.be</option>
+                </select>
+            </STInputBox>
+
             <label class="style-label" for="mail-subject">Onderwerp</label>
             <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
 
@@ -43,7 +50,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Member } from "@stamhoofd-frontend/models";
-import { STNavigationTitle } from "@stamhoofd/components";
+import { STNavigationTitle, STInputBox } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -55,6 +62,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         STNavigationTitle,
         SegmentedControl,
         STToolbar,
+        STInputBox,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })

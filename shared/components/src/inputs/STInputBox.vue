@@ -47,7 +47,7 @@ export default class STInputBox extends Vue {
         display: flex;
         flex-direction: row;
         align-items: center;
-        max-width: 500px;
+        max-width: 340px;
 
         > .right {
             margin-left: auto;

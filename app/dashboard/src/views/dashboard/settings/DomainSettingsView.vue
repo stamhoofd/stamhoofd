@@ -2,6 +2,7 @@
     <div class="st-view" id="settings-view">
         <STNavigationBar title="Instellingen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
         </STNavigationBar>
 
         <main>

@@ -2,6 +2,7 @@
     <div class="st-view" id="dns-records-view">
         <STNavigationBar title="Instellingen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button slot="right" class="button icon close gray" v-if="!canPop && canDismiss" @click="dismiss"/>
         </STNavigationBar>
 
         <main>
@@ -12,7 +13,7 @@
             <p class="st-list-description">Stel volgende de DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.</p>
             
             <div v-for="record in records" :key="record.id">
-                <dl class="details-grid dns-records">
+                <dl class="details-grid dns-records" :class="{ success: record.status == 'Valid' }">
                     <dt>Type</dt>
                     <dd>{{ record.type }}</dd>
 
@@ -24,16 +25,19 @@
 
                     <dt>TTL</dt>
                     <dd class="selectable" @click="copyElement">3600</dd>
+
+                    <span class="icon green success" v-if="record.status == 'Valid'"/>
+                    <span class="icon error" v-if="record.status == 'Failed'"/>
                 </dl>
                 <template v-if="record.errors">
-                    <div v-for="error in record.errors.errors" :key="error.id" class="error-box">
+                    <div v-for="error in record.errors.errors" :key="error.id" class="error-box" style="word-wrap: break-word">
                         {{ error.human || error.message }}
                     </div>
                 </template>
             </div>
 
-            <p class="warning-box">Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert kan jouw huidige website onbereikbaar worden.</p>
-            <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm ondertussen sluiten, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.</p>
+            <p class="warning-box">Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.</p>
+            <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.</p>
         </main>
 
         <STToolbar>
@@ -165,6 +169,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
         display: grid;
         grid-template-columns: 20% 80%;
         gap: 8px 0;
+        position: relative;
 
         @media (max-width: 400px) {
             margin: 15px calc(-1 * var(--st-horizontal-padding, 40px));
@@ -184,6 +189,12 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
             &.selectable {
                 cursor: pointer;
             }
+        }
+
+        > .icon {
+            position: absolute;
+            right: 10px;
+            top: 10px;
         }
     }
 }
