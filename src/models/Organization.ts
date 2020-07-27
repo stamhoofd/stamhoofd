@@ -334,8 +334,10 @@ export class Organization extends Model {
 
                 for (const user of users) {
                     if (user.permissions && user.permissions.hasFullAccess()) {
-                        Email.send(user.email, "Jouw nieuwe domeinnaam is actief!", "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf iets@" + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd").catch(e => {
-                            console.error(e)
+                        Email.sendInternal({
+                            to: user.email, 
+                            subject: "Jouw nieuwe domeinnaam is actief!", 
+                            text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf iets@" + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd"
                         })
                     }
                 }
@@ -361,19 +363,27 @@ export class Organization extends Model {
                 for (const user of users) {
                     if (user.permissions && user.permissions.hasFullAccess()) {
                         found = true
-                        Email.send(user.email, "Stamhoofd domeinnaam instellingen ongeldig", "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd").catch(e => {
-                            console.error(e)
+
+                        Email.sendInternal({
+                            to: user.email,
+                            subject: "Stamhoofd domeinnaam instellingen ongeldig",
+                            text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd"
                         })
                     }
                 }
 
                 if (!found) {
-                    Email.send("simon@stamhoofd.be", "Stamhoofd domeinnaam instellingen ongeldig", "Domeinnaam instelling ongeldig voor "+organization.name+". Kon geen contactgegevens vinden.").catch(e => {
-                        console.error(e)
+                    Email.sendInternal({
+                        to: "simon@stamhoofd.be",
+                        subject: "Stamhoofd domeinnaam instellingen ongeldig",
+                        text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Kon geen contactgegevens vinden."
                     })
+
                 } else {
-                    Email.send("simon@stamhoofd.be", "Stamhoofd domeinnaam instellingen ongeldig", "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd").catch(e => {
-                        console.error(e)
+                    Email.sendInternal({
+                        to: "simon@stamhoofd.be",
+                        subject: "Stamhoofd domeinnaam instellingen ongeldig",
+                        text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd"
                     })
                 }
             }
