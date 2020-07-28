@@ -5,7 +5,7 @@
 .checkbox {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-    display: block;
+    display: inline-block; // needed to not cover whole width, since that might cause accidental clicks
     cursor: pointer;
 
     > input {

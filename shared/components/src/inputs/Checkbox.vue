@@ -1,21 +1,23 @@
 <template>
-    <label class="checkbox">
-        <input type="checkbox" v-model="checkboxValue">
-        <div>
+    <div>
+        <label class="checkbox">
+            <input type="checkbox" v-model="checkboxValue">
             <div>
-                <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M1 4L4 8L9 1"
-                        stroke="white"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    />
-                </svg>
+                <div>
+                    <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M1 4L4 8L9 1"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                </div>
+                <div><slot /></div>
             </div>
-            <div><slot /></div>
-        </div>
-    </label>
+        </label>
+    </div>
 </template>
 
 <script lang="ts">

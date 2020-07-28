@@ -1,11 +1,13 @@
 <template>
-    <label class="radio">
-        <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete">
-        <div>
-            <div />
-            <div><slot /></div>
-        </div>
-    </label>
+    <div>
+        <label class="radio">
+            <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete">
+            <div>
+                <div />
+                <div><slot /></div>
+            </div>
+        </label>
+    </div>
 </template>
 
 <script lang="ts">
