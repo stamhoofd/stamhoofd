@@ -6,7 +6,7 @@ CREATE TABLE `invites` (
   `senderId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `receiverId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
   `permissions` json DEFAULT NULL COMMENT 'Only set when you going to give admin permissions',
-  `members` json DEFAULT NULL COMMENT 'Set when you are going to give permissions to access members',
+  `memberIds` json DEFAULT NULL COMMENT 'Set when you are going to give permissions to access members',
   `userDetails` json DEFAULT NULL COMMENT 'Auto prefill user information (email, name, ...) when creating the user',
   `validUntil` datetime NOT NULL,
   `createdAt` datetime NOT NULL,
