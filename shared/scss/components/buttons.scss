@@ -176,7 +176,7 @@
 
     &.text {
         @extend .style-button-small;
-        color: $color-gray;
+        color: $color-gray-dark;
         text-overflow: ellipsis;
         display: inline-block;
         vertical-align: middle;

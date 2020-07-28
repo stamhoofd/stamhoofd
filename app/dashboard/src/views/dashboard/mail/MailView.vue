@@ -20,7 +20,6 @@
                 <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox" >
                     <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
                 </STInputBox>
-
                 <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
                     <button slot="right" class="button text" @click="manageEmails">
                         <span class="icon settings" />
@@ -32,8 +31,29 @@
                 </STInputBox>
             </div>
 
-            <STInputBox title="Bericht" id="message-title" error-fields="message" :error-box="errorBox"/>
+            <STInputBox title="Bericht" id="message-title" error-fields="message" :error-box="errorBox" class="max">
+                <label slot="right" class="button text">
+                    <span class="icon add" />
+                    <span>Bijlage</span>
+                    <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
+                </label>
+            </STInputBox>
             <MailEditor ref="editor"/>
+
+            <p class="warning-box" v-if="fileWarning">We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.</p>
+
+            <STList v-if="files.length > 0" title="Bijlages">
+                <STListItem v-for="(file, index) of files" :key="index" class="file-list-item right-description right-stack">
+                    <span class="icon file" slot="left"/>
+                    {{ file.name }}
+
+                    <template #right>
+                        <span>{{ file.size }}</span>
+                        <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)"/></span>
+                    </template>
+                </STListItem>
+            </STList>
+
         </main>
 
         <STToolbar>
@@ -59,7 +79,7 @@
 
 <script lang="ts">
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox } from "@stamhoofd/components";
+import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox, STListItem, STList } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -67,8 +87,21 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { MemberWithRegistrations, EmailRequest, Recipient, Replacement, Group } from '@stamhoofd/structures';
+import { MemberWithRegistrations, EmailRequest, Recipient, Replacement, Group, EmailAttachment } from '@stamhoofd/structures';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
+
+class TmpFile {
+    name: string;
+    file: File;
+    size: string;
+
+    constructor(name: string, file: File) {
+        this.name = name
+        this.file = file
+        this.size = Formatter.fileSize(file.size)
+    }
+}
 
 @Component({
     components: {
@@ -78,6 +111,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
         STToolbar,
         STInputBox,
         LoadingButton,
+        STList,
+        STListItem,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
@@ -96,6 +131,35 @@ export default class MailView extends Mixins(NavigationMixin) {
     subject = ""
 
     errorBox: ErrorBox | null = null
+
+    files: TmpFile[] = []
+
+    deleteAttachment(index) {
+        this.files.splice(index, 1)
+    }
+
+    get fileWarning() {
+        for (const file of this.files) {
+            if (file.file.name.endsWith(".docx") || file.file.name.endsWith(".xlsx") || file.file.name.endsWith(".doc") || file.file.name.endsWith(".xls")) {
+                return true
+            }
+        }
+        return false;
+    }
+
+    changedFile(event) {
+        if (!event.target.files || event.target.files.length == 0) {
+            return;
+        }
+
+        for (const file of event.target.files as FileList) {
+            console.log(file)
+            this.files.push(new TmpFile(file.name, file))
+        }
+        
+        // Clear selection
+        event.target.value = null;
+    }
 
     get organization() {
         return OrganizationManager.organization
@@ -174,12 +238,29 @@ export default class MailView extends Mixins(NavigationMixin) {
             this.errorBox = null
             this.sending = true;
           
+          const toBase64 = file => new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsArrayBuffer(file)
+                reader.onload = () => resolve(new Buffer(reader.result as ArrayBuffer).toString("base64"));
+                reader.onerror = error => reject(error);
+            });
+
+            const attachments: EmailAttachment[] = []
+
+            for (const file of this.files) {
+                attachments.push(EmailAttachment.create({
+                    filename: file.file.name,
+                    content: await toBase64(file.file),
+                    contentType: file.file.type
+                }))
+            }
 
             const emailRequest = EmailRequest.create({
                 emailId: this.emailId,
                 recipients: this.recipients,
                 subject: this.subject,
-                html
+                html,
+                attachments
             })
 
             const response = await SessionManager.currentSession!.authenticatedServer.request({
@@ -226,6 +307,14 @@ export default class MailView extends Mixins(NavigationMixin) {
                 & > .ProseMirror {
                     flex-grow: 1;
                 }
+            }
+        }
+
+        .file-list-item {
+            .middle {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
             }
         }
     }

@@ -38,7 +38,7 @@
                             class="input"
                             type="url"
                             placeholder="bv. https://www.vereniging.be"
-                        >
+                        />
                     </STInputBox>
                     <p class="st-list-description">De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.</p>
 

@@ -123,10 +123,10 @@ export default class STListItem extends Vue {
                 margin-left: auto;
                 padding-right: var(--st-horizontal-padding, 15px);
                 min-width: 0; // flexbox disable becoming bigger than parent
+                flex-shrink: 0;
 
                 padding-top: 10px;
                 padding-bottom: 10px;
-                flex-shrink: 0;
 
                 &:empty {
                     display: none;

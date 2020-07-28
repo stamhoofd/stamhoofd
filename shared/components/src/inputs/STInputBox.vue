@@ -38,6 +38,7 @@ export default class STInputBox extends Vue {
 .st-input-box {
     padding: 12px 0;
     display: block;
+    max-width: 340px;
 
     > h4 {
         margin: 0;
@@ -45,7 +46,6 @@ export default class STInputBox extends Vue {
         display: flex;
         flex-direction: row;
         align-items: center;
-        max-width: 340px;
         height: 34px;
 
         > .right {
@@ -54,11 +54,19 @@ export default class STInputBox extends Vue {
 
         ~ * {
             margin-top: 8px;
+
+            &:last-child {
+                margin-top: 0; // error box
+            }
         }
 
         + * {
             margin-top: 0;
         }
+    }
+
+    &.max {
+        max-width: none;
     }
 }
 </style>

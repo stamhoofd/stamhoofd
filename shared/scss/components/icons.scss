@@ -10,7 +10,7 @@
     display: inline;
 
     &.gray {
-        color: $color-gray;
+        color: $color-gray-dark;
     }
 
     &.green {
@@ -107,5 +107,9 @@
 
     &.new:after {
         font-icon: url(@stamhoofd/assets/images/icons/new.svg);
+    }
+
+    &.file:after {
+        font-icon: url(@stamhoofd/assets/images/icons/file.svg);
     }
 }

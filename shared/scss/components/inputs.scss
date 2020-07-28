@@ -9,7 +9,6 @@ $input-height: 44px;
 
 .input,
 .editor .ProseMirror {
-    @extend .input-spacing;
     @extend .style-input;
     @extend .style-input-shadow;
     color: $color-dark;
