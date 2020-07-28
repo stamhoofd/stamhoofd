@@ -10,12 +10,6 @@ import { User } from './User';
  */
 export class NewInvite extends AutoEncoder {
     /**
-     * Key that will get used in the invitation
-     */
-    @field({ decoder: StringDecoder })
-    key: string
-
-    /**
      * ID of the user that will receive this invitation. Login will be required to open the invitation. Can only be used by organization admins.
      */
     @field({ decoder: StringDecoder, nullable: true })
@@ -49,6 +43,12 @@ export class NewInvite extends AutoEncoder {
 export class Invite extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    /**
+     * Key that will get used in the invitation
+     */
+    @field({ decoder: StringDecoder })
+    key: string
 
     @field({ decoder: User, nullable: true })
     receiver: User | null = null
