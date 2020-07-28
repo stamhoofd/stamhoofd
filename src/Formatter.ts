@@ -34,4 +34,20 @@ export class Formatter {
     static capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
+
+    static fileSize(bytes: number) {
+        if (bytes < 1000) {
+            return bytes+" bytes"
+        }
+
+        if (bytes < 1000*1000) {
+            return Math.round(bytes/1000) + " kB"
+        }
+
+        if (bytes < 1000 * 1000 * 1000) {
+            return Math.round(bytes / 1000 / 100)/10 + " MB"
+        }
+
+        return Math.round(bytes / 1000 / 1000 / 10) / 100 + " GB"
+    }
 }
