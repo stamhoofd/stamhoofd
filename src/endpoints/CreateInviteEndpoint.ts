@@ -2,6 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Invite as InviteStruct, NewInvite, User as UserStruct } from "@stamhoofd/structures";
+import crypto from "crypto";
 
 import { Invite } from '../models/Invite';
 import { Token } from '../models/Token';
@@ -10,6 +11,18 @@ type Params = {};
 type Query = undefined;
 type Body = NewInvite
 type ResponseBody = InviteStruct
+
+async function randomBytes(size: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(buf);
+        });
+    });
+}
 
 /**
  * Return a list of users and invites for the given organization with admin permissions
@@ -41,14 +54,6 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
             })
         }
 
-        if (request.body.key.length < 30) {
-            throw new SimpleError({
-                code: "invalid_field",
-                message: "Key too short",
-                field: "key"
-            })
-        }
-
         let receiver: User | null = null
 
         // Create the invite
@@ -57,7 +62,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
         invite.userDetails = request.body.userDetails
         invite.organizationId = user.organizationId
         invite.keychainItems = request.body.keychainItems
-        invite.key = request.body.key
+        invite.key = (await randomBytes(32)).toString("base64")
 
         // todo: validate member access ids
         // invite.memberIds = request.body.memberIds
