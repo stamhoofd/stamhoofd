@@ -59,6 +59,12 @@ export class MemberDetails extends AutoEncoder {
         return this.firstName + " " + this.lastName;
     }
 
+    /// The age this member will become, this year
+    get maxAge() {
+        const today = new Date();
+        return today.getFullYear() - this.birthDay.getFullYear();
+    }
+
     get age() {
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
@@ -88,15 +94,14 @@ export class MemberDetails extends AutoEncoder {
     }
 
     doesMatchGroup(group: Group) {
-        const birthYear = this.birthDay.getFullYear()
-        if (group.settings.minBirthYear) {
-            if (birthYear < group.settings.minBirthYear) {
+        if (group.settings.minAge || group.settings.maxAge) {
+            
+            const age = this.maxAge
+            if (group.settings.minAge && age < group.settings.minAge) {
                 return false
             }
-        }
 
-        if (group.settings.maxBirthYear) {
-            if (birthYear > group.settings.maxBirthYear) {
+            if (group.settings.maxAge && age > group.settings.maxAge) {
                 return false
             }
         }

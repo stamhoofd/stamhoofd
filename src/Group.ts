@@ -21,20 +21,20 @@ export class Group extends AutoEncoder {
     privateSettings: GroupPrivateSettings | null = null
 
     static defaultSort(this: unknown, a: Group, b: Group) {
-        if (a.settings.minBirthYear && !b.settings.minBirthYear) {
+        if (a.settings.maxAge && !b.settings.maxAge) {
             return -1
         }
-        if (b.settings.minBirthYear && !a.settings.minBirthYear) {
+        if (b.settings.maxAge && !a.settings.maxAge) {
             return 1
         }
-        if (!b.settings.minBirthYear && !a.settings.minBirthYear) {
+        if (!b.settings.maxAge && !a.settings.maxAge) {
             // name
             return Group.nameSort(a, b)
         }
-        if (a.settings.minBirthYear! > b.settings.minBirthYear!) {
+        if (a.settings.maxAge! > b.settings.maxAge!) {
             return -1
         }
-        if (a.settings.minBirthYear! < b.settings.minBirthYear!) {
+        if (a.settings.maxAge! < b.settings.maxAge!) {
             return 1
         }
         return Group.nameSort(a, b)

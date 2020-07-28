@@ -22,11 +22,19 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupGenderType) })
     genderType: GroupGenderType = GroupGenderType.Mixed
 
-    @field({ decoder: IntegerDecoder, nullable: true })
-    minBirthYear: number | null = null
+    @field({ decoder: IntegerDecoder, nullable: true, field: "maxBirthYear" })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
+        return 2020 - year
+    } })
+    minAge: number | null = null
 
-    @field({ decoder: IntegerDecoder, nullable: true })
-    maxBirthYear: number | null = null
+    @field({ decoder: IntegerDecoder, nullable: true, field: "minBirthYear" })
+    @field({
+        decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
+            return 2020 - year
+        }
+    })
+    maxAge: number | null = null
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()
