@@ -1,7 +1,7 @@
 <template>
     <div class="st-view group-edit-view">
-        <STNavigationBar title="Nieuwe groep toevoegen">
-            <button slot="right" class="button icon close" @click="pop" />
+        <STNavigationBar :title="isNew ? 'Nieuwe groep toevoegen' : name+' bewerken'">
+            <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
