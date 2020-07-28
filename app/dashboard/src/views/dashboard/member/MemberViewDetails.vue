@@ -18,7 +18,7 @@
                 </template>
 
                 <template v-if="member.details.email">
-                    <dt>GSM-nummer</dt>
+                    <dt>E-mailadres</dt>
                     <dd>{{ member.details.email }}</dd>
                 </template>
             </dl>

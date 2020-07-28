@@ -33,7 +33,7 @@
                     </STInputBox>
 
                     <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" />
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Voor belangrijke mededelingen" :required="false" />
+                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Voor belangrijke mededelingen" />
                 </div>
 
                 <div>

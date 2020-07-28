@@ -41,6 +41,7 @@
 
                 <div>
                     <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator"/>
+                    <EmailInput title="E-mailadres" v-model="email" v-if="age >= 18" :validator="validator"/>
                     <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
                 </div>
             </div>
@@ -64,7 +65,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
@@ -74,6 +75,7 @@ import MemberGroupView from './MemberGroupView.vue';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import EmergencyContactView from './EmergencyContactView.vue';
 import MemberRecordsView from './MemberRecordsView.vue';
+import { SessionManager } from '@stamhoofd/networking';
 
 @Component({
     components: {
@@ -87,6 +89,7 @@ import MemberRecordsView from './MemberRecordsView.vue';
         RadioGroup,
         Radio,
         PhoneInput,
+        EmailInput,
         Checkbox
     }
 })
@@ -103,6 +106,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
 
     // todo: replace with Addres and new input component
     address: Address | null = null
+    email: string | null = null
     birthDay: Date | null = null
     gender = Gender.Male
     livesAtParents = false
@@ -122,6 +126,12 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             this.birthDay = this.memberDetails.birthDay
             this.gender = this.memberDetails.gender
             this.livesAtParents = !this.memberDetails.address && this.age >= 18
+            this.email = this.memberDetails.email
+        }
+
+        if (!this.email) {
+            // Recommend the current user's email
+            this.email = SessionManager.currentSession?.user?.email ?? null
         }
     }
 
@@ -195,6 +205,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 this.memberDetails.gender = this.gender
                 this.memberDetails.phone = this.phone
                 this.memberDetails.birthDay = this.birthDay!
+                this.memberDetails.email = this.age >= 18 ? this.email : null
                 this.memberDetails.address = this.livesAtParents ? null : this.address
             } else {
                 this.memberDetails = MemberDetails.create({
@@ -202,7 +213,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                     lastName: this.lastName,
                     gender: this.gender,
                     phone: this.phone,
-                    email: null,
+                    email: this.age >= 18 ? this.email : null,
                     birthDay: this.birthDay!,
                     address: this.livesAtParents ? null : this.address
                 })
