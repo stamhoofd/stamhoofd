@@ -51,6 +51,14 @@ export default class STInputBox extends Vue {
         > .right {
             margin-left: auto;
         }
+
+        ~ * {
+            margin-top: 8px;
+        }
+
+        + * {
+            margin-top: 0;
+        }
     }
 }
 </style>
