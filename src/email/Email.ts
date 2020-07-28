@@ -12,7 +12,7 @@ export type EmailInterfaceBase = {
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; content?: string }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string; contentType?: string }[];
 }
 
 export type EmailInterface = EmailInterfaceBase & {
