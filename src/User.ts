@@ -8,9 +8,12 @@ export class User extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    /**
-     * Name of the organization you are creating
-     */
+    @field({ decoder: StringDecoder, version: 14 })
+    firstName: string | null = null;
+
+    @field({ decoder: StringDecoder, version: 14 })
+    lastName: string | null = null;
+
     @field({ decoder: EmailDecoder })
     email: string;
 

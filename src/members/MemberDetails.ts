@@ -60,9 +60,8 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /// The age this member will become, this year
-    get maxAge() {
-        const today = new Date();
-        return today.getFullYear() - this.birthDay.getFullYear();
+    ageForYear(year: number) {
+        return year - this.birthDay.getFullYear();
     }
 
     get age() {
@@ -96,7 +95,7 @@ export class MemberDetails extends AutoEncoder {
     doesMatchGroup(group: Group) {
         if (group.settings.minAge || group.settings.maxAge) {
             
-            const age = this.maxAge
+            const age = this.ageForYear(group.settings.startDate.getFullYear())
             if (group.settings.minAge && age < group.settings.minAge) {
                 return false
             }
