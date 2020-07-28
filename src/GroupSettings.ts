@@ -24,6 +24,9 @@ export class GroupSettings extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true, field: "maxBirthYear" })
     @field({ decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
+        if (year === null) {
+            return null;
+        }
         return 2020 - year
     } })
     minAge: number | null = null
@@ -31,6 +34,9 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, field: "minBirthYear" })
     @field({
         decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
+            if (year === null) {
+                return null;
+            }
             return 2020 - year
         }
     })
