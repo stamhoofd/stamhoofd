@@ -25,8 +25,8 @@
                 </select>
             </STInputBox>
 
-            <STInputBox title="Bericht" id="message-title" />
-            <textarea id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
+            <STInputBox title="Bericht" id="message-title" v-if="canUseBody" />
+            <textarea id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" v-if="canUseBody" />
         </main>
 
         <STToolbar>
@@ -40,7 +40,7 @@
                 }}
             </template>
             <template #right>
-                <button class="button primary" @click="send" :disabled="!isSupported">
+                <button class="button primary" @click="send" :disabled="!isSupported || phones.length == 0">
                     Versturen
                 </button>
             </template>
@@ -78,8 +78,11 @@ export default class SMSView extends Mixins(NavigationMixin) {
     message = "";
 
     get isSupported() {
-        console.log(this.getOS())
         return this.getOS() != "unknown" && this.getOS() != "windows"
+    }
+
+    get canUseBody() {
+        return this.getOS() != "unknown" && this.getOS() != "windows" && this.getOS() != "macOS-old"
     }
 
     getOS(): string {
