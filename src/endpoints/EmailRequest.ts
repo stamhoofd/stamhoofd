@@ -19,6 +19,20 @@ export class Recipient extends AutoEncoder {
     replacements: Replacement[] = []
 }
 
+export class EmailAttachment extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true })
+    filename: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    contentType: string | null = null
+
+    /**
+     * base64 encoded content
+     */
+    @field({ decoder: StringDecoder })
+    content: string;
+}
+
 export class EmailRequest extends AutoEncoder {
     /**
      * ID of the sender email address
@@ -37,4 +51,7 @@ export class EmailRequest extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     html: string | null = null
+
+    @field({ decoder: EmailAttachment, nullable: true, version: 11 })
+    attachments: EmailAttachment | null = null
 }

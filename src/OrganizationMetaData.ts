@@ -1,5 +1,6 @@
 import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { Image } from './files/Image';
 import { GroupPrices } from './GroupPrices';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
@@ -30,6 +31,21 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
     iban = ""
 
+    /**
+     * Logo used in a horizontal environment (e.g. menu bar)
+     */
+    @field({ decoder: Image, nullable: true, version: 11 })
+    horizontalLogo: Image | null = null
+
+    /**
+     * Logo to display (small)
+     */
+    @field({ decoder: Image, nullable: true, version: 11 })
+    squareLogo: Image | null = null
+
+    // Deprecated
     @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
     bic = ""
+
+    
 }

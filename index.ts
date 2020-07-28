@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 10
+export const Version = 11
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -66,3 +66,7 @@ export * from "./src/members/PaymentPatch"
 
 export * from "./src/members/EncryptedPaymentDetailed"
 export * from "./src/members/RegistrationWithEncryptedMember"
+
+export * from "./src/files/Image"
+export * from "./src/files/File"
+export * from "./src/files/Resolution"
