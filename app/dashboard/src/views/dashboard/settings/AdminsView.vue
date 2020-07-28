@@ -1,0 +1,108 @@
+<template>
+    <div class="st-view admins-list-view">
+        <STNavigationBar title="Beheerders">
+            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button slot="right" class="button text" @click="createAdmin">
+                <span class="icon add"/>
+                <span>Nieuw</span>
+            </button>
+        </STNavigationBar>
+
+    
+        <main>
+            <h1>Beheerders</h1>
+            <p>Geef jouw medeleiding toegang.</p>
+
+            <Spinner v-if="loading" />
+            <STList v-else>
+                <STListItem v-for="admin in admins" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                    {{ admin.firstName || admin.email }}
+                    <template slot="right">
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
+
+                <STListItem v-for="invite in invites" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                    {{ invite.userDetails.firstName || "?" }}
+                    <template slot="right">
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
+            </STList>
+        </main>
+    </div>
+</template>
+
+
+<script lang="ts">
+import { ComponentWithProperties,NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, CenteredMessage, BackButton } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, GroupGenderType,GroupSettings, OrganizationPatch, User, OrganizationAdmins, Invite } from '@stamhoofd/structures';
+import { OrganizationGenderType } from '@stamhoofd/structures';
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from '../../../classes/OrganizationManager';
+import { Decoder } from '@simonbackx/simple-encoding';
+import AdminInviteView from './AdminInviteView.vue';
+
+@Component({
+    components: {
+        Checkbox,
+        STNavigationBar,
+        STToolbar,
+        STList,
+        STListItem,
+        Spinner,
+        BackButton
+    }
+})
+export default class AdminsView extends Mixins(NavigationMixin) {
+    SessionManager = SessionManager // needed to make session reactive
+    loading = true
+    admins: User[] = []
+    invites: Invite[] = []
+
+    mounted() {
+        this.load().catch(e => {
+            console.error(e)
+        })
+    }
+
+    async load() {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+        this.admins = response.data.users
+        this.invites = response.data.invites
+        this.loading = false
+    }
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    createAdmin() {
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(AdminInviteView, {}) 
+        }).setDisplayStyle("popup"))
+    }
+
+    editAdmin(admin: User) {
+       
+    }
+}
+
+</script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/base/text-styles.scss';
+
+.admins-list-view {
+    background: $color-white;
+}
+</style>

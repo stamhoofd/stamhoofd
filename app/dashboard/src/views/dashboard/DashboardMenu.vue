@@ -32,7 +32,7 @@
         <div class="">
             <button class="menu-button button heading" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
                 <span class="icon group"/>
-                <span>Groepen beheren</span>
+                <span>Leeftijdsgroepen</span>
             </button>
             <button class="menu-button button heading" @click="managePayments" :class="{ selected: currentlySelected == 'manage-payments'}"> 
                 <span class="icon card"/>
@@ -41,6 +41,11 @@
             <button class="menu-button button heading" @click="manageSettings" :class="{ selected: currentlySelected == 'manage-settings'}">
                 <span class="icon settings"/>
                 <span>Instellingen</span>
+            </button>
+
+            <button class="menu-button button heading" @click="manageAdmins" :class="{ selected: currentlySelected == 'manage-admins'}">
+                <span class="icon lock"/>
+                <span>Leiding &amp; beheerders</span>
             </button>
         </div>
         <hr>
@@ -66,6 +71,7 @@ import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
+import AdminsView from './settings/AdminsView.vue';
 
 class SelectableGroup {
     group: Group;
@@ -119,6 +125,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageSettings() {
         this.currentlySelected = "manage-settings"
         this.showDetail(new ComponentWithProperties(SettingsView, {}));
+    }
+
+    manageAdmins() {
+        this.currentlySelected = "manage-admins"
+        this.showDetail(new ComponentWithProperties(AdminsView, {}));
     }
 }
 </script>

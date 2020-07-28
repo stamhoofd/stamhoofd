@@ -112,4 +112,12 @@
     &.file:after {
         font-icon: url(@stamhoofd/assets/images/icons/file.svg);
     }
+
+    &.lock:after {
+        font-icon: url(@stamhoofd/assets/images/icons/lock.svg);
+    }
+
+    &.share:after {
+        font-icon: url(@stamhoofd/assets/images/icons/share.svg);
+    }
 }

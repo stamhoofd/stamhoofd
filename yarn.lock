@@ -517,9 +517,9 @@
     ttf2woff "2.0.2"
 
 "@simonbackx/simple-encoding@~1.9":
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.3.tgz#c2968e3c19b495b1166c31b0cdd46664cb36b596"
-  integrity sha512-UML/JxK78SjbDFe4Tql66pvRolJuRMzxZNh/ns1CgRzgmKtP7YsyDPIj3JrA6VFQqzlWjRBKDNheNuwGP/zXkA==
+  version "1.9.4"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.9.4.tgz#424e91bd3d0a757e5a55b8e9e15a10eb5a8d3ad9"
+  integrity sha512-orVXO1l368VZVQetPh6l3RZRONHBdcBHongrbXG4fkhadzbmJcMWBPgCvfm094wUG2rXlv3n+mxH2Bao0IViZQ==
 
 "@simonbackx/simple-errors@~1.0":
   version "1.0.7"
@@ -557,9 +557,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.4.1.tgz#2673d4bc77174c3607025a38acecf466cc7ff162"
-  integrity sha512-Pc2yhAbyrHQOIO7SpLIF+GcZhKC93gzqT9/+SW01BoG8QhfkStLFAK/PMwKkgpi7xcQkLgaDjcQVZmGZqHqnoQ==
+  version "1.4.7"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.4.7.tgz#7f57f76aeb356f24d3fbe6a6971c41c6dcdb2f65"
+  integrity sha512-vn1o9nxJHuz+qJy+sPUo0lX43j35MLr+kxfBWJ3Jb7uuNfmfHwYpBDN/NKiWtBTnMmfnbRJDBwTIvr4WYfhCJQ==
   dependencies:
     uuid "^8.2.0"
 
