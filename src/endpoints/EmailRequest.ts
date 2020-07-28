@@ -52,6 +52,6 @@ export class EmailRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     html: string | null = null
 
-    @field({ decoder: EmailAttachment, nullable: true, version: 11 })
-    attachments: EmailAttachment | null = null
+    @field({ decoder: new ArrayDecoder(EmailAttachment), version: 11 })
+    attachments: EmailAttachment[] = []
 }
