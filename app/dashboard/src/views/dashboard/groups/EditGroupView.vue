@@ -25,7 +25,7 @@
                 >
             </STInputBox>
 
-            <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errorBox">
+            <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errorBox" class="max">
                 <textarea
                     v-model="description"
                     class="input"
@@ -46,19 +46,19 @@
             </div>
 
             <div class="split-inputs">
-                <STInputBox title="Minimum geboortejaar (max. leeftijd)" error-fields="settings.minBirthYear" :error-box="errorBox">
-                    <BirthYearInput v-model="minBirthYear" placeholder="Onbeperkt" :nullable="true" />
+                <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
+                    <AgeInput v-model="minAge" placeholder="Onbeperkt" :nullable="true" />
                 </STInputBox>
 
-                <STInputBox title="Maximum geboortejaar (min. leeftijd)" error-fields="settings.maxBirthYear" :error-box="errorBox">
-                    <BirthYearInput v-model="maxBirthYear" placeholder="Onbeperkt" :nullable="true" />
+                <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errorBox">
+                    <AgeInput v-model="maxAge" placeholder="Onbeperkt" :nullable="true" />
                 </STInputBox>
             </div>
             <p class="st-list-description">
-                De geboortejaren worden elk jaar automatisch aangepast.
+                *De leeftijd die het lid zal worden in het jaar waarin de inschrijvingen starten.
             </p>
 
-            <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox">
+            <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-for="_genderType in genderTypes" :key="_genderType.value" v-model="genderType" :value="_genderType.value">
                         {{ _genderType.name }}
@@ -81,7 +81,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -99,7 +99,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         DateSelection,
         RadioGroup,
         Radio,
-        BirthYearInput,
+        AgeInput,
         Spinner
     },
 })
@@ -191,20 +191,20 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     // Birth years
-    get minBirthYear() {
-        return this.group.settings.minBirthYear
+    get minAge() {
+        return this.group.settings.minAge
     }
 
-    set minBirthYear(minBirthYear: number | null) {
-        this.addSettingsPatch({ minBirthYear })
+    set minAge(minAge: number | null) {
+        this.addSettingsPatch({ minAge })
     }
 
-    get maxBirthYear() {
-        return this.group.settings.maxBirthYear
+    get maxAge() {
+        return this.group.settings.maxAge
     }
     
-    set maxBirthYear(maxBirthYear: number | null) {
-        this.addSettingsPatch({ maxBirthYear })
+    set maxAge(maxAge: number | null) {
+        this.addSettingsPatch({ maxAge })
     }
 
     get genderTypes() {

@@ -17,10 +17,10 @@
                     {{ group.settings.name }}
                     <template slot="right">
                         <span>{{ groupDescription(group) }}</span>
-                        <MaleIcon v-if="group.settings.genderType == 'OnlyMale'" />
-                        <FemaleIcon v-if="group.settings.genderType == 'OnlyFemale'" />
-                        <button class="button icon gray trash" @click.stop="deleteGroup(group)"/>
-                        <span class="icon gray arrow-right-small" />
+                        <span v-if="group.settings.genderType == 'OnlyMale'" ><MaleIcon /></span>
+                        <span v-if="group.settings.genderType == 'OnlyFemale'"><FemaleIcon /></span>
+                        <span><button class="button icon gray trash" @click.stop="deleteGroup(group)"/></span>
+                        <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
             </STList>
@@ -89,13 +89,11 @@ export default class EditGroupsView extends Mixins(NavigationMixin) {
     }
 
     groupDescription(group: Group) {
-        if (group.settings.minBirthYear && group.settings.maxBirthYear) {
-            const startYear = new Date().getFullYear() - group.settings.maxBirthYear
-            const endYear = new Date().getFullYear() - group.settings.minBirthYear
-            if (startYear == endYear) {
-                return startYear+" jaar"
+        if (group.settings.minAge && group.settings.maxAge) {
+            if (group.settings.minAge == group.settings.maxAge) {
+                return group.settings.maxAge+" jaar"
             }
-            return startYear + " - "+endYear+" jaar"
+            return group.settings.minAge + " - "+group.settings.maxAge+" jaar"
         }
         return ""
     }
