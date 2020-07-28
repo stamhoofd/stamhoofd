@@ -17,7 +17,7 @@
 
 
             <div class="split-inputs">
-                <STInputBox title="Onderwerp">
+                <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox" >
                     <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
                 </STInputBox>
 
@@ -32,7 +32,7 @@
                 </STInputBox>
             </div>
 
-            <STInputBox title="Bericht" id="message-title" />
+            <STInputBox title="Bericht" id="message-title" error-fields="message" :error-box="errorBox"/>
             <MailEditor ref="editor"/>
         </main>
 
@@ -48,7 +48,7 @@
             </template>
             <template #right>
                 <LoadingButton :loading="sending">
-                    <button class="button primary" @click="send" :disabled="emails.length == 0">
+                    <button class="button primary" @click="send" :disabled="recipients.length == 0 || emails.length == 0">
                         Versturen
                     </button>
                 </LoadingButton>
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, STInputBox, LoadingButton } from "@stamhoofd/components";
+import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -68,6 +68,7 @@ import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import { MemberWithRegistrations, EmailRequest, Recipient, Replacement, Group } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -93,6 +94,8 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     emailId: string | null = this.group?.privateSettings?.defaultEmailId ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
     subject = ""
+
+    errorBox: ErrorBox | null = null
 
     get organization() {
         return OrganizationManager.organization
@@ -133,7 +136,17 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (this.sending || !this.emailId) {
             return;
         }
-        this.sending = true;
+
+        if (this.subject.length < 2) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Vul zeker een onderwerp in, anders is de kans groot dat jouw e-mail als spam wordt gezien",
+                field: "subject"
+            }))
+            return;
+        }
+
+       
 
         try {
             let html = (this.$refs.editor as any).editor!.getHTML();
@@ -147,6 +160,20 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
 
             html = element.innerHTML
+            const text = element.textContent
+
+            if (!text || text.length < 20) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    code: "",
+                    message: "Vul een voldoende groot bericht in, anders is de kans groot dat jouw e-mail als spam wordt gezien",
+                    field: "message"
+                }))
+                return;
+            }
+
+            this.errorBox = null
+            this.sending = true;
+          
 
             const emailRequest = EmailRequest.create({
                 emailId: this.emailId,
