@@ -9,9 +9,6 @@ import { User } from './User';
  * Create an invitation
  */
 export class NewInvite extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
-
     /**
      * Key that will get used in the invitation
      */
