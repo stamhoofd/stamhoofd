@@ -217,7 +217,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
                 firstName: this.firstName,
                 lastName: this.lastName,
                 phone: this.phone,
-                email: null,
+                email: this.email,
                 address: this.address,
                 type: this.type
             })
