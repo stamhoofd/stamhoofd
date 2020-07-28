@@ -10,26 +10,29 @@
         </STNavigationTitle>
 
         <main>
-            <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
-                <button slot="right" class="button text" @click="manageEmails">
-                    <span class="icon settings" />
-                    <span>Wijzigen</span>
-                </button>
-                <select class="input" v-model="emailId">
-                    <option v-for="email in emails" :key="email.id" :value="email.id">{{ email.name ? email.name+" <"+email.email+">" : email.email }}</option>
-                </select>
-            </STInputBox>
-
             <p class="warning-box" v-if="emails.length == 0">Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
-                    <span class="icon settings" />
-                    <span>Wijzigen</span>
-                </button></p>
+                <span class="icon settings" />
+                <span>Wijzigen</span>
+            </button></p>
 
-            <STInputBox title="Onderwerp">
-                <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
-            </STInputBox>
 
-            <label class="style-label" for="mail-text">Bericht</label>
+            <div class="split-inputs">
+                <STInputBox title="Onderwerp">
+                    <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
+                </STInputBox>
+
+                <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
+                    <button slot="right" class="button text" @click="manageEmails">
+                        <span class="icon settings" />
+                        <span>Wijzigen</span>
+                    </button>
+                    <select class="input" v-model="emailId">
+                        <option v-for="email in emails" :key="email.id" :value="email.id">{{ email.name ? email.name+" <"+email.email+">" : email.email }}</option>
+                    </select>
+                </STInputBox>
+            </div>
+
+            <STInputBox title="Bericht" id="message-title" />
             <MailEditor ref="editor"/>
         </main>
 
@@ -175,6 +178,10 @@ export default class MailView extends Mixins(NavigationMixin) {
         flex-grow: 1;
         flex-direction: column;
 
+        #message-title {
+            padding-bottom: 0;
+        }
+
         & > .editor {
             flex-grow: 1;
             display: flex;
@@ -182,7 +189,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
             justify-content: stretch;
             align-items: stretch;
-            padding-bottom: 20px;
+            min-height: 200px;
 
             & > .editor-content {
                 flex-grow: 1;

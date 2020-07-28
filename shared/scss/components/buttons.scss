@@ -185,6 +185,10 @@
         line-height: 34px;
         white-space: nowrap;
 
+        > * {
+            vertical-align: top;
+        }
+
         &:active {
             opacity: 0.4;
         }

@@ -1,14 +1,12 @@
 <template>
-    <STErrorsInput :error-fields="errorFields" :error-box="errorBox">
-        <div class="st-input-box">
-            <h4>
-                <label>{{ title }}</label>
-                <div class="right">
-                    <slot name="right" />
-                </div>
-            </h4>
-            <slot />
-        </div>
+    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box">
+        <h4>
+            <label>{{ title }}</label>
+            <div class="right">
+                <slot name="right" />
+            </div>
+        </h4>
+        <slot />
     </STErrorsInput>
 </template>
 
@@ -48,13 +46,10 @@ export default class STInputBox extends Vue {
         flex-direction: row;
         align-items: center;
         max-width: 340px;
+        height: 34px;
 
         > .right {
             margin-left: auto;
-        }
-
-        ~ * {
-            margin-top: 8px;
         }
     }
 }

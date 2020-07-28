@@ -10,20 +10,22 @@
         </STNavigationTitle>
 
         <main>
-            <label class="style-label" for="sms-who">Naar wie?</label>
-            <select id="sms-who" v-model="smsFilter" class="input">
-                <option value="parents">
-                    Enkel naar ouders
-                </option>
-                <option value="members">
-                    Enkel naar leden
-                </option>
-                <option value="all">
-                    Ouders en leden
-                </option>
-            </select>
+            <div class="error-box" v-if="!isSupported">SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.</div>
+            <STInputBox title="Naar wie?">
+                <select id="sms-who" v-model="smsFilter" class="input">
+                    <option value="parents">
+                        Enkel naar ouders
+                    </option>
+                    <option value="members">
+                        Enkel naar leden
+                    </option>
+                    <option value="all">
+                        Ouders en leden
+                    </option>
+                </select>
+            </STInputBox>
 
-            <label class="style-label" for="sms-text">Bericht</label>
+            <STInputBox title="Bericht" id="message-title" />
             <textarea id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
         </main>
 
@@ -38,7 +40,7 @@
                 }}
             </template>
             <template #right>
-                <button class="button primary" @click="send">
+                <button class="button primary" @click="send" :disabled="!isSupported">
                     Versturen
                 </button>
             </template>
@@ -50,7 +52,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Member } from "@stamhoofd-frontend/models";
 import { STNavigationTitle } from "@stamhoofd/components";
-import { STToolbar } from "@stamhoofd/components";
+import { STToolbar, STInputBox } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -61,6 +63,7 @@ import { MemberWithRegistrations } from '@stamhoofd/structures';
         STNavigationBar,
         STNavigationTitle,
         SegmentedControl,
+        STInputBox,
         STToolbar,
     },
 })
@@ -74,8 +77,50 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
     message = "";
 
-    getOS() {
-        return "macOS";
+    get isSupported() {
+        console.log(this.getOS())
+        return this.getOS() != "unknown" && this.getOS() != "windows"
+    }
+
+    getOS(): string {
+        var userAgent = navigator.userAgent || navigator.vendor;
+
+        if (/android/i.test(userAgent)) {
+            return "android";
+        }
+
+        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+            // Different sms protocol
+            return "macOS-old";
+        }
+
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return "iOS";
+        }
+
+        // iPad on iOS 13 detection
+        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+            return "macOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+            return "windows";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+            return "android";
+        }
+
+        return "unknown"
     }
 
     get phones(): string[] {
@@ -112,9 +157,9 @@ export default class SMSView extends Mixins(NavigationMixin) {
             case "android":
                 url = "sms:";
                 break;
-            case "whatsapp":
+            /*case "whatsapp":
                 url = "https://wa.me/";
-                break;
+                break;*/
             case "macOS":
             case "iOS":
                 url = "sms:/open?addresses=";
@@ -157,10 +202,14 @@ export default class SMSView extends Mixins(NavigationMixin) {
         display: flex;
         flex-grow: 1;
         flex-direction: column;
-        padding-bottom: 20px;
+
+        #message-title {
+            padding-bottom: 0;
+        }
 
         & > textarea {
             flex-grow: 1;
+            min-height: 200px;
         }
     }
 }

@@ -534,9 +534,9 @@
   integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.5.2.tgz#d0e86c21b00fb160228d6ea4f7f29a1526cf25f5"
-  integrity sha512-HAnGnDkPM75NK7sYkbUOD918rvkZ40ReD/aFmxLru3rBK3GRwyBNop2xWE7pVjCzPwdTrOaZRBkoWCqnzcNz6g==
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.6.3.tgz#8cbbf43f9f419c72fc807601bf4293693e2f0084"
+  integrity sha512-8bAzmJVjFIESz5qmadswL0YBZrohr1FviuF8KZh7S5fVpE7ceXgLf6TesUgYe0oMvrY2NtOi7x1ro8BS/L+4ew==
   dependencies:
     vue "^2.6.11"
     vue-class-component "^7.0.2"
@@ -6750,24 +6750,10 @@ prosemirror-keymap@1.1.4, prosemirror-keymap@^1.0.0, prosemirror-keymap@^1.1.2:
     prosemirror-state "^1.0.0"
     w3c-keyname "^2.2.0"
 
-prosemirror-model@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.10.0.tgz#bb1101732bccacf336e23a36a8b045b865025fa2"
-  integrity sha512-xTMbbO2q4abs5lJdeRvk/SrftNfZlMdvChKziTiK+OKtP8LkQI8uw39u4S5zqyflrmW3Or6+qnyFPf1p4v2u1g==
-  dependencies:
-    orderedmap "^1.1.0"
-
-prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.8.1:
+prosemirror-model@1.10.0, prosemirror-model@1.9.1, prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.10.0, prosemirror-model@^1.8.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.9.1.tgz#8c08cf556f593c5f015548d2c1a6825661df087f"
   integrity sha512-Qblh8pm1c7Ll64sYLauwwzjimo/tFg1zW3Q3IWhKRhvfOEgRKqa6dC5pRrAa+XHOIjBFEYrqbi52J5bqA2dV8Q==
-  dependencies:
-    orderedmap "^1.1.0"
-
-prosemirror-model@^1.10.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.11.0.tgz#dc36cdb3ad6442b9f6325c7d89170c624f9dc520"
-  integrity sha512-GqoAz/mIYjdv8gVYJ8mWFKpHoTxn/lXq4tXJ6bTVxs+rem2LzMYXrNVXfucGtfsgqsJlRIgng/ByG9j7Q8XDrg==
   dependencies:
     orderedmap "^1.1.0"
 
