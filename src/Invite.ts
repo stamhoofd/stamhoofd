@@ -5,6 +5,16 @@ import { InviteUserDetails } from './InviteUserDetails';
 import { Permissions } from './Permissions';
 import { User } from './User';
 
+export class InviteKeychainItem extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    publicKey: string
+
+    @field({ decoder: StringDecoder })
+    privateKey: string
+}
+
+export const InviteKeychainItemsDecoder = new ArrayDecoder(InviteKeychainItem)
+
 /**
  * Create an invitation
  */
