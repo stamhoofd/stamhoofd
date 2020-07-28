@@ -41,6 +41,8 @@ export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/tokens/CreateTokenStruct"
 
+export * from "./src/endpoints/OrganizationAdmins"
+
 // Grouping
 export * from "./src/grouping/PaginatedResponse"
 export * from "./src/grouping/KeychainedResponse"
