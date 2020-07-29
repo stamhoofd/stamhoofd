@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, NewInvite, User as UserStruct } from "@stamhoofd/structures";
+import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
 
 import { Invite } from '../models/Invite';
 import { Organization } from '../models/Organization';
@@ -78,9 +78,21 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
             })
         }
 
+        const organization = await Organization.getByID(invite.organizationId)
+
+        if (!organization) {
+            throw new SimpleError({
+                code: "not_found",
+                message: "This invite is invalid or expired",
+                human: "Deze link is niet langer geldig",
+                statusCode: 404
+            })
+        }
+
         return new Response(InviteStruct.create(Object.assign({}, invite, {
             receiver: token ? UserStruct.create(token.user) : null,
-            sender: UserStruct.create(sender)
+            sender: UserStruct.create(sender),
+            organization: OrganizationSimple.create(organization)
         })));
     }
 }
