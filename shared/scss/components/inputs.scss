@@ -23,7 +23,6 @@ $input-height: 44px;
     box-sizing: border-box;
     display: block;
     transition: border-color 0.2s;
-    text-overflow: ellipsis;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
      &:hover {
@@ -47,6 +46,10 @@ $input-height: 44px;
             border-color: $color-error-border-focus;
         }
     }
+}
+
+input.input {
+    text-overflow: ellipsis;
 }
 
 .input-errors {

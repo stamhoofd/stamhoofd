@@ -121,3 +121,11 @@
         font-icon: url(@stamhoofd/assets/images/icons/share.svg);
     }
 }
+
+.android-icons {
+    .icon {
+        &.share:after {
+            font-icon: url(@stamhoofd/assets/images/icons/share-android.svg);
+        }
+    }
+}

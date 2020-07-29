@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view" id="send-invite-view">
+    <div class="st-view" id="send-invite-view" :class="{ 'android-icons': isAndroid }">
         <STNavigationBar title="Gelukt!">
             <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
         </STNavigationBar>
@@ -11,7 +11,7 @@
         
             <p class="st-list-description">Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). De link is één uur geldig.</p>
 
-            <STInputBox title="Link">
+            <STInputBox title="Link" class="max">
                 <p class="link-box input" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ url }}</p>
             </STInputBox>
 
@@ -68,6 +68,15 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     secret!: string
 
     QRCodeUrl: string | null = null
+
+    get isAndroid() {
+        var userAgent = navigator.userAgent || navigator.vendor;
+
+        if (/android/i.test(userAgent)) {
+            return true;
+        }
+        return false;
+    }
 
     get name() {
         return this.invite.userDetails?.firstName ?? "deze persoon"
