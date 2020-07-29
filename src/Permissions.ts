@@ -50,11 +50,6 @@ export class Permissions extends AutoEncoder {
     groups: GroupPermissions[] = []
 
     hasAccess(level: PermissionLevel, groupId: string | null = null) {
-        if (level == PermissionLevel.None) {
-            // none means, none, even not none.
-            return false
-        }
-
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
             return true;
