@@ -30,7 +30,7 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Organization.fromApiHost(request.host);
-        const invites = await Invite.where({ key: request.params.key, organizationId: organization.id }, { limit: 1 })
+        const invites = await Invite.where({ key: decodeURIComponent(request.params.key), organizationId: organization.id }, { limit: 1 })
 
         if (invites.length != 1) {
             throw new SimpleError({
