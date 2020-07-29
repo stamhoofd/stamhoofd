@@ -26,6 +26,12 @@ export class User extends Model {
     @column({ foreignKey: User.organization, type: "string" })
     organizationId: string;
 
+    @column({ type: "string", nullable: true })
+    firstName: string | null = null;
+
+    @column({ type: "string", nullable: true  })
+    lastName: string | null = null;
+
     @column({ type: "string" })
     email: string;
 

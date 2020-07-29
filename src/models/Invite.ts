@@ -56,8 +56,8 @@ export class Invite extends Model {
                 return old;
             }
 
-            // 7 days valid by default
-            const date = new Date(new Date().getTime() + 1000*60*60*24*7)
+            // 1 hour valid
+            const date = new Date(new Date().getTime() + 1000*60*60)
             date.setMilliseconds(0)
             return date
         }

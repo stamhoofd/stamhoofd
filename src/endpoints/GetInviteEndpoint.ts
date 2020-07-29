@@ -29,7 +29,6 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
         
         /*const token = await Token.authenticate(request);
         const user = token.user
@@ -41,7 +40,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
             })
         }*/
 
-        const invites = await Invite.where({ key: request.params.key, organizationId: organization.id }, { limit: 1 })
+        const invites = await Invite.where({ key: decodeURIComponent(request.params.key) }, { limit: 1 })
 
         if (invites.length != 1) {
             throw new SimpleError({
