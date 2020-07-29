@@ -20,12 +20,12 @@
 
             <button
                 v-for="group in groups"
-                :key="group.group.id"
+                :key="group.id"
                 class="menu-button"
-                :class="{ selected: currentlySelected == 'group-'+group.group.id }"
+                :class="{ selected: currentlySelected == 'group-'+group.id }"
                 @click="openGroup(group)"
             >
-                {{ group.group.settings.name }}
+                {{ group.settings.name }}
             </button>
         </div>
         <hr v-if="fullAccess">
@@ -73,31 +73,23 @@ import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
 
-class SelectableGroup {
-    group: Group;
-    selected = false;
 
-    constructor(group: Group) {
-        this.group = group;
-    }
-}
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
     organization: Organization = SessionManager.currentSession!.organization!
-    groups: SelectableGroup[] = [];
     currentlySelected: string | null = null
 
     mounted() {
-               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.groups = this.organization.groups!.filter((group) => {
-            return this.hasAccessToGroup(group)
-        }).map((group) => {
-            return new SelectableGroup(group);
-        });
         if (!this.splitViewController?.shouldCollapse()) {
             this.openGroup(this.groups[0])
         }
+    }
+
+    get groups() {
+        return this.organization.groups!.filter(g => {
+            return this.hasAccessToGroup(g)
+        })
     }
 
     switchOrganization() {
@@ -112,9 +104,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         //this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
     }
 
-    openGroup(group: SelectableGroup) {
-        this.currentlySelected = "group-"+group.group.id
-        this.showDetail(new ComponentWithProperties(GroupMembersView, { group: group.group }));
+    openGroup(group: Group) {
+        this.currentlySelected = "group-"+group.id
+        this.showDetail(new ComponentWithProperties(GroupMembersView, { group }));
     }
 
     manageGroups() {
