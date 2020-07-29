@@ -91,3 +91,8 @@ export class Invite extends AutoEncoder {
     @field({ decoder: DateDecoder })
     validUntil: Date
 }
+
+export class TradedInvite extends Invite {
+    @field({ decoder: StringDecoder, nullable: true })
+    keychainItems: string | null = null;
+}
