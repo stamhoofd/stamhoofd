@@ -1,5 +1,6 @@
 <template>
     <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
+    <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
     <LoadingView v-else-if="hasToken" />
     <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
 </template>
@@ -24,8 +25,15 @@ export default class AuthenticatedView extends Vue {
     @Prop()
     loginRoot: ComponentWithProperties
 
-    loggedIn = SessionManager.currentSession?.isComplete() ?? false
-    hasToken = SessionManager.currentSession?.hasToken() ?? false
+    /**
+     * Set this as the root when the user doesn't have permissions (don't set if permissions are not needed)
+     */
+    @Prop()
+    noPermissionsRoot: ComponentWithProperties | null
+
+    loggedIn = false
+    hasToken = false
+    showPermissionsRoot = false
 
     mounted() {
         this.changed();
@@ -46,8 +54,16 @@ export default class AuthenticatedView extends Vue {
     }
 
     changed() {
-        this.loggedIn = SessionManager.currentSession?.isComplete() ?? false
-        this.hasToken = SessionManager.currentSession?.hasToken() ?? false
+        if (this.noPermissionsRoot) {
+            this.loggedIn = (SessionManager.currentSession?.isComplete() ?? false) && !!SessionManager.currentSession!.user && SessionManager.currentSession!.user.permissions != null
+            this.hasToken = SessionManager.currentSession?.hasToken() ?? false
+            this.showPermissionsRoot = SessionManager.currentSession?.isComplete() ?? false
+        } else {
+            this.loggedIn = SessionManager.currentSession?.isComplete() ?? false
+            this.hasToken = SessionManager.currentSession?.hasToken() ?? false
+            this.showPermissionsRoot = false
+        }
+        
         console.log("Authenticated view changed: "+this.loggedIn)
     }
 }

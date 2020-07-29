@@ -13,7 +13,7 @@
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user"/>
                 <span>Leden</span>
-                <button class="button">
+                <button class="button" v-if="fullReadAccess">
                     Alle
                 </button>
             </button>
@@ -28,8 +28,8 @@
                 {{ group.group.settings.name }}
             </button>
         </div>
-        <hr>
-        <div class="">
+        <hr v-if="fullAccess">
+        <div v-if="fullAccess">
             <button class="menu-button button heading" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
                 <span class="icon group"/>
                 <span>Leeftijdsgroepen</span>
@@ -90,7 +90,9 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     mounted() {
                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.groups = this.organization.groups!.map((group) => {
+        this.groups = this.organization.groups!.filter((group) => {
+            return this.hasAccessToGroup(group)
+        }).map((group) => {
             return new SelectableGroup(group);
         });
         if (!this.splitViewController?.shouldCollapse()) {
@@ -103,6 +105,9 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     openAll() {
+        if (!this.fullReadAccess) {
+            return;
+        }
         this.currentlySelected = "group-all"
         //this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
     }
@@ -130,6 +135,18 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageAdmins() {
         this.currentlySelected = "manage-admins"
         this.showDetail(new ComponentWithProperties(AdminsView, {}));
+    }
+
+    hasAccessToGroup(group: Group) {
+        return SessionManager.currentSession!.user!.permissions!.hasReadAccess(group.id)
+    }
+
+    get fullAccess() {
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+    }
+
+    get fullReadAccess() {
+        return SessionManager.currentSession!.user!.permissions!.hasReadAccess()
     }
 }
 </script>

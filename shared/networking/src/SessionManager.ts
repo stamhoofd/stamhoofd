@@ -104,6 +104,9 @@ export class SessionManagerStatic {
     }
 
     getSessionForOrganization(id: string) {
+        if (this.currentSession && this.currentSession.organizationId == id) {
+            return this.currentSession
+        }
         for (const session of this.availableSessions()) {
             if (session.organizationId === id) {
                 return session

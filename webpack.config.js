@@ -30,6 +30,7 @@ module.exports = {
         port: 8080,
         sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
         disableHostCheck: true,
+        historyApiFallback: true
     },
     devtool: "sourcemap",
     module: {
