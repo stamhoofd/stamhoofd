@@ -49,10 +49,15 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
     groups: GroupPermissions[] = []
 
-    hasReadAccess(groupId: string | null = null) {
-        if (this.level != PermissionLevel.None) {
-            // Has read access
-            return true
+    hasAccess(level: PermissionLevel, groupId: string | null = null) {
+        if (level == PermissionLevel.None) {
+            // none means, none, even not none.
+            return false
+        }
+
+        if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
+            // Someone with read / write access for the whole organization, also the same access for each group
+            return true;
         }
 
         if (!groupId) {
@@ -61,51 +66,24 @@ export class Permissions extends AutoEncoder {
 
         const permission = this.groups.find(g => g.groupId === groupId)
         if (permission) {
-            if (permission.level != PermissionLevel.None) {
-                return true
+            if (getPermissionLevelNumber(permission.level) >= getPermissionLevelNumber(level)) {
+                return true;
             }
         }
 
         return false
+
+    }
+
+    hasReadAccess(groupId: string | null = null) {
+        return this.hasAccess(PermissionLevel.Read, groupId)
     }
 
     hasWriteAccess(groupId: string | null = null) {
-        if (this.level == PermissionLevel.Write || this.level == PermissionLevel.Full) {
-            // Has read access
-            return true
-        }
-
-        if (!groupId) {
-            return false
-        }
-
-        const permission = this.groups.find(g => g.groupId === groupId)
-        if (permission) {
-            if (permission.level == PermissionLevel.Write || permission.level == PermissionLevel.Full) {
-                return true
-            }
-        }
-
-        return false
+        return this.hasAccess(PermissionLevel.Write, groupId)
     }
 
     hasFullAccess(groupId: string | null = null) {
-        if (this.level == PermissionLevel.Full) {
-            // Has read access
-            return true
-        }
-
-        if (!groupId) {
-            return false
-        }
-
-        const permission = this.groups.find(g => g.groupId === groupId)
-        if (permission) {
-            if (permission.level == PermissionLevel.Full) {
-                return true
-            }
-        }
-
-        return false
+        return this.hasAccess(PermissionLevel.Full, groupId)
     }
 }
