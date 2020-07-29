@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, NewInvite, User as UserStruct } from "@stamhoofd/structures";
+import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
 import crypto from "crypto";
 
 import { Invite } from '../models/Invite';
@@ -95,7 +95,8 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
 
         return new Response(InviteStruct.create(Object.assign({}, invite, {
             receiver: receiver ? UserStruct.create(receiver) : null,
-            sender: UserStruct.create(user)
+            sender: UserStruct.create(user),
+            organization: OrganizationSimple.create(user.organization)
         })));
     }
 }

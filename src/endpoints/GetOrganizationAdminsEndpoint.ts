@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, OrganizationAdmins, User as UserStruct } from "@stamhoofd/structures";
+import { Invite as InviteStruct, OrganizationAdmins, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
 
 import { Invite } from '../models/Invite';
 import { Token } from '../models/Token';
@@ -56,7 +56,8 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
             }
             inviteStructs.push(InviteStruct.create(Object.assign({}, i, {
                 receiver: receiver ? UserStruct.create(receiver) : null,
-                sender: UserStruct.create(sender)
+                sender: UserStruct.create(sender),
+                organization: OrganizationSimple.create(user.organization)
             })))
         }
 
