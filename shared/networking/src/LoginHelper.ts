@@ -1,12 +1,13 @@
 import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
 import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
-import { KeyConstants, Version, ChallengeResponseStruct, Token } from '@stamhoofd/structures';
-import { Decoder } from '@simonbackx/simple-encoding';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser } from '@stamhoofd/structures';
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
 import { Session } from './Session';
 import { SimpleError, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
+import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
 
 export class LoginHelper {
 
@@ -63,6 +64,52 @@ export class LoginHelper {
         })
     }
 
+    static async createKeys(password: string): Promise<{ userKeyPair, organizationKeyPair, authSignKeyPair, authEncryptionSecretKey, authSignKeyConstants, authEncryptionKeyConstants }> {
+        return new Promise((resolve, reject) => {
+            const myWorker = new GenerateWorker();
+
+            myWorker.onmessage = (e) => {
+                try {
+                    const {
+                        userKeyPair,
+                        organizationKeyPair,
+                        authSignKeyPair,
+                        authEncryptionSecretKey
+                    } = e.data;
+
+                    const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
+                    const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
+
+                    const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, { version: Version }))
+                    const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, { version: Version }))
+
+                    // Requset challenge
+                    resolve({
+                        userKeyPair,
+                        organizationKeyPair,
+                        authSignKeyPair,
+                        authEncryptionSecretKey,
+                        authSignKeyConstants,
+                        authEncryptionKeyConstants
+                    })
+                } catch (e) {
+                    reject(e)
+                }
+                myWorker.terminate()
+            }
+
+            myWorker.onerror = (e) => {
+                // todo
+                console.error(e);
+                myWorker.terminate();
+                reject(e)
+            }
+
+            myWorker.postMessage(password);
+        })
+    }
+
+
     static async login(session: Session, email: string, password: string) {
         let challengeResponse: ChallengeResponseStruct
 
@@ -118,6 +165,31 @@ export class LoginHelper {
         const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
         session.setEncryptionKey(encryptionKey)
 
+        SessionManager.setCurrentSession(session)
+    }
+
+    static async signUp(session: Session, email: string, password: string) {
+        const keys = await this.createKeys(password)
+
+        const user = NewUser.create({
+            email,
+            publicKey: keys.userKeyPair.publicKey,
+            publicAuthSignKey: keys.authSignKeyPair.publicKey,
+            authSignKeyConstants: keys.authSignKeyConstants,
+            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
+            encryptedPrivateKey: await Sodium.encryptMessage(keys.userKeyPair.privateKey, keys.authEncryptionSecretKey)
+        });
+
+        // Do netwowrk request to create organization
+        const response = await session.server.request({
+            method: "POST",
+            path: "/sign-up",
+            body: user,
+            decoder: Token
+        })
+
+        session.setToken(response.data)
+        session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: keys.userKeyPair.privateKey })
         SessionManager.setCurrentSession(session)
     }
 }

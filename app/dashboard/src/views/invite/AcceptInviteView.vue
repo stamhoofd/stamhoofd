@@ -13,9 +13,7 @@
                 <p class="st-list-description" v-if="invite.sender.firstName">{{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.</p>
 
 
-                <STInputBox title="E-mailadres">
-                    <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-                </STInputBox>
+                <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
                 <STInputBox title="Kies een wachtwoord">
                     <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
@@ -51,7 +49,7 @@
 <script lang="ts">
 import { Decoder, StringDecoder, ObjectData, VersionBoxDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ErrorBox, STErrorsDefault, Validator, EmailInput } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version, Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, TradedInvite } from '@stamhoofd/structures';
@@ -61,6 +59,7 @@ import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import LoginView from '../login/LoginView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -68,6 +67,7 @@ import LoginView from '../login/LoginView.vue';
         STFloatingFooter,
         STInputBox,
         LoadingButton,
+        EmailInput,
         STErrorsDefault
     }
 })
@@ -83,7 +83,10 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     email = this.invite.userDetails?.email ?? ""
     password = ""
     passwordRepeat = ""
+
     errorBox: ErrorBox | null = null
+    validator = new Validator()
+
     session: Session | null = SessionManager.getSessionForOrganization(this.invite.organization.id) ?? null
     loggedIn = false
 
@@ -122,14 +125,47 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-            // Trade in the key for the keychain constants + permissions (happens in the background)
-
             // First need to create an account in this organization (required)
+            if (!this.loggedIn) {
+                const valid = await this.validator.validate()
 
-            if (this.loggedIn) {
-                // No need to create an account
-                await this.trade()
+                if (this.password != this.passwordRepeat) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "De ingevoerde wachtwoorden komen niet overeen"
+                    })
+                }
+
+                if (this.password.length < 8) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan."
+                    })
+                }
+
+                if (!valid) {
+                    this.loading = false 
+                    this.errorBox = null
+                    return;
+                }
+
+                const component = new ComponentWithProperties(CenteredMessage, { 
+                    type: "loading",
+                    title: "Account aanmaken...", 
+                    description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
+                }).setDisplayStyle("overlay");
+                this.present(component);
+
+                if (!this.session) {
+                    this.session = new Session(this.invite.organization.id)
+                }
+
+                await LoginHelper.signUp(this.session, this.email, this.password);
+                (component.componentInstance() as any)?.pop()
             }
+
+            // Trade in the key for the keychain constants + permissions (happens in the background
+            await this.trade()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             console.error(e)

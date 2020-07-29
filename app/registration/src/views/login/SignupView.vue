@@ -42,7 +42,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
+import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
 import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
@@ -98,51 +98,6 @@ export default class SignupView extends Mixins(NavigationMixin){
 
     session = SessionManager.currentSession!
 
-    async createKeys(password: string): Promise<{ userKeyPair, organizationKeyPair, authSignKeyPair, authEncryptionSecretKey, authSignKeyConstants, authEncryptionKeyConstants }> {
-        return new Promise((resolve, reject) => {
-            const myWorker = new GenerateWorker();
-
-            myWorker.onmessage = (e) => {
-                try {
-                    const {
-                        userKeyPair,
-                        organizationKeyPair,
-                        authSignKeyPair,
-                        authEncryptionSecretKey
-                    } = e.data;
-
-                    const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
-                    const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
-
-                    const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
-                    const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
-                    
-                    // Requset challenge
-                    resolve({
-                        userKeyPair,
-                        organizationKeyPair,
-                        authSignKeyPair,
-                        authEncryptionSecretKey,
-                        authSignKeyConstants,
-                        authEncryptionKeyConstants
-                    })
-                } catch (e) {
-                    reject(e)
-                }
-                myWorker.terminate()
-            }
-
-             myWorker.onerror = (e) => {
-                // todo
-                console.error(e);
-                myWorker.terminate();
-                reject(e)
-            }
-
-            myWorker.postMessage(password);
-        })
-    }
-
     async submit() {
         if (this.loading) {
             return
@@ -176,40 +131,20 @@ export default class SignupView extends Mixins(NavigationMixin){
         
         const component = new ComponentWithProperties(CenteredMessage, { 
             type: "loading",
-            title: "Sleutels aanmaken...", 
-            description: "Dit duurt maar heel even. Met deze sleutels wordt jouw account beveiligd. De lange wiskundige berekeningen zorgen ervoor dat het voor hackers lang duurt om een mogelijk wachtwoord uit te proberen."
+            title: "Account aanmaken...", 
+            description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
         }).setDisplayStyle("overlay");
         this.present(component)
 
         try {
-            const keys = await this.createKeys(this.password)
-
-            const user =  NewUser.create({
-                email: this.email,
-                publicKey: keys.userKeyPair.publicKey,
-                publicAuthSignKey: keys.authSignKeyPair.publicKey,
-                authSignKeyConstants: keys.authSignKeyConstants,
-                authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-                encryptedPrivateKey: await Sodium.encryptMessage(keys.userKeyPair.privateKey, keys.authEncryptionSecretKey)
-            });
-
             const session = new Session(OrganizationManager.organization.id)
-
-            // Do netwowrk request to create organization
-            const response = await session.server.request({
-                method: "POST",
-                path: "/sign-up",
-                body: user,
-                decoder: Token
-            })
-
             session.organization = OrganizationManager.organization
-            session.setToken(response.data)
-            session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: keys.userKeyPair.privateKey })
-            SessionManager.setCurrentSession(session)
 
+            await LoginHelper.signUp(session, this.email, this.password)
+            
             this.loading = false;
             (component.componentInstance() as any)?.pop()
+            this.dismiss({ force: true })
             
         } catch (e) {
             this.loading = false;
