@@ -2,6 +2,7 @@ import { ArrayDecoder,AutoEncoder, DateDecoder,field, StringDecoder } from '@sim
 import { v4 as uuidv4 } from "uuid";
 
 import { InviteUserDetails } from './InviteUserDetails';
+import { Organization, OrganizationSimple } from './Organization';
 import { Permissions } from './Permissions';
 import { User } from './User';
 
@@ -65,6 +66,9 @@ export class Invite extends AutoEncoder {
 
     @field({ decoder: User})
     sender: User
+
+    @field({ decoder: OrganizationSimple })
+    organization: OrganizationSimple
 
     /**
      * Give permissions to members. Only allowed to give permissions to members as an admin with full access to the group of that member or as a normal user that already has access to that member.
