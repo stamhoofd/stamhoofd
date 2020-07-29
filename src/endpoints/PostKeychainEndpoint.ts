@@ -40,6 +40,7 @@ export class PostKeychainEndpoint extends Endpoint<Params, Query, Body, Response
             if (models.length == 0) {
                 model = new KeychainItem()
                 model.publicKey = item.encryptedPrivateKey
+                model.userId= user.id
             } else {
                 model = models[0]
             }

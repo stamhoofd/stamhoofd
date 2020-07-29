@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
+import { Invite as InviteStruct, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
 
 import { Invite } from '../models/Invite';
 import { Organization } from '../models/Organization';
