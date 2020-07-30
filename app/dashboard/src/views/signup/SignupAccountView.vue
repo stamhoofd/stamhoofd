@@ -51,10 +51,11 @@
                 Het aanmaken van de verenging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
             </template>
             <template #right>
-                <Spinner v-if="loading" />
-                <button class="button primary">
-                    Volgende
-                </button>
+                <LoadingButton :loading="loading" >
+                    <button class="button primary">
+                        Volgende
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </form>
@@ -65,7 +66,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator } from "@stamhoofd/components"
+import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager, Keychain } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -78,7 +79,7 @@ import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts
         STNavigationBar,
         STErrorsDefault,
         STInputBox,
-        Spinner,
+        LoadingButton,
         BackButton,
         EmailInput
     }
@@ -218,6 +219,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 SessionManager.setCurrentSession(session)
 
                 this.loading = false;
+                this.dismiss({ force: true })
             }
 
              myWorker.onerror = (e) => {

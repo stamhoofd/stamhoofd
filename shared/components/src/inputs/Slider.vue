@@ -276,6 +276,7 @@ $slider-height: 6px;
     position: relative;
     height: $slider-height;
     display: block;
+    z-index: 0; // prevent going before sticky elements
 
     .middle {
         top: 0;

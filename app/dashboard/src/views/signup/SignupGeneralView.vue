@@ -132,6 +132,13 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             return;
         }
     }
+
+    shouldNavigateAway() {
+        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
+            return true;
+        }
+        return false;
+    }
 }
 </script>
 
