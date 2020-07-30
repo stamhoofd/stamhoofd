@@ -145,6 +145,25 @@ export default class STListItem extends Vue {
         }
     }
 
+    // Wrap on smartphones (because content is too long)
+    &.smartphone-wrap {
+        @media (max-width: 450px) {
+            > .main > div {
+                display: block;
+
+                > .middle {
+                    padding-right: var(--st-horizontal-padding, 15px);
+                    padding-bottom: 0px;
+                }
+
+                > .right {
+                    padding-top: 5px;
+                    padding-bottom: 15px;
+                }
+            }
+        }
+    }
+
     &:last-child {
         > .main > hr {
             display: none;

@@ -35,13 +35,13 @@
             <h2>Geef toegang tot...</h2>
 
             <STList>
-                <STListItem element-name="label" :selectable="true" class="right-description">
+                <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                     <Checkbox slot="left" v-model="fullAccess"/>
                     Maak administrator
 
                     <template #right>Kan alle instellingen en beheerders bewerken</template>
                 </STListItem>
-                <STListItem v-if="!fullAccess" element-name="label" :selectable="true" class="right-description">
+                <STListItem v-if="!fullAccess" element-name="label" :selectable="true" class="right-description smartphone-wrap">
                     <Checkbox slot="left" v-model="writeAccess"/>
                     Toegang tot alle groepen
 
