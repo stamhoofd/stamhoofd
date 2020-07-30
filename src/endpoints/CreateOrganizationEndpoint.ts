@@ -109,13 +109,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         const user = await User.register(
             organization,
-            request.body.user.email,
-            request.body.user.publicKey,
-            request.body.user.publicAuthSignKey,
-            request.body.user.encryptedPrivateKey,
-            request.body.user.authSignKeyConstants,
-            request.body.user.authEncryptionKeyConstants,
-            request.body.user.id
+            request.body.user
         );
         if (!user) {
             // This user already exists, well that is pretty impossible

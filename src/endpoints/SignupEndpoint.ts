@@ -37,13 +37,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         //
         const user = await User.register(
             organization,
-            request.body.email,
-            request.body.publicKey,
-            request.body.publicAuthSignKey,
-            request.body.encryptedPrivateKey,
-            request.body.authSignKeyConstants,
-            request.body.authEncryptionKeyConstants,
-            request.body.id
+            request.body
         );
 
         if (!user) {

@@ -1,6 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from '@stamhoofd/crypto';
-import { Permissions } from '@stamhoofd/structures';
+import { NewUser,Permissions } from '@stamhoofd/structures';
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
@@ -42,7 +42,14 @@ export class UserFactory extends Factory<Options, UserWithOrganization> {
         const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
         const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
         
-        const user = await User.register(organization, email, userKeyPair.publicKey, authSignKeyPair.publicKey, await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey), authSignKeyConstants, authEncryptionKeyConstants);
+        const user = await User.register(organization, NewUser.create({
+            email,
+            publicKey: userKeyPair.publicKey, 
+            publicAuthSignKey: authSignKeyPair.publicKey, 
+            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
+            authSignKeyConstants, 
+            authEncryptionKeyConstants
+        }));
         if (!user) {
             throw new Error("Unexpected failure when creating user in factory");
         }

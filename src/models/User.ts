@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation,ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
-import { KeyConstants, Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
+import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Member, MemberWithRegistrations } from './Member';
@@ -164,14 +164,20 @@ export class User extends Model {
 
     static async register(
         organization: Organization,
-        email: string,
-        publicKey: string,
-        publicAuthSignKey: string,
-        encryptedPrivateKey: string,
-        authSignKeyConstants: KeyConstants,
-        authEncryptionKeyConstants: KeyConstants,
-        id?: string
+        data: NewUser
     ): Promise<UserWithOrganization | undefined> {
+        const {
+            email,
+            publicKey,
+            publicAuthSignKey,
+            encryptedPrivateKey,
+            authSignKeyConstants,
+            authEncryptionKeyConstants,
+            id,
+            firstName,
+            lastName
+        } = data;
+
         const user = new User().setRelation(User.organization, organization);
         user.id = id ?? uuidv4()
         user.email = email;
@@ -181,6 +187,8 @@ export class User extends Model {
         user.authSignKeyConstants = authSignKeyConstants
         user.authEncryptionKeyConstants = authEncryptionKeyConstants
         user.verified = false;
+        user.firstName = firstName
+        user.lastName = lastName
 
         try {
             await user.save();

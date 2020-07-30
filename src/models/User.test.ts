@@ -1,5 +1,5 @@
 import { KeyConstantsHelper, SensitivityLevel,Sodium } from '@stamhoofd/crypto';
-import { KeyConstants } from '@stamhoofd/structures';
+import { KeyConstants, NewUser } from '@stamhoofd/structures';
 
 import { OrganizationFactory } from "../factories/OrganizationFactory";
 import { UserFactory } from '../factories/UserFactory';
@@ -51,7 +51,15 @@ describe("Model.User", () => {
     });
 
     test("Create a user", async () => {
-        const user: any = await User.register(organization, "test@domain.com", userKeyPair.publicKey, authSignKeyPair.publicKey, await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey), authSignKeyConstants, authEncryptionKeyConstants);
+        const user: any = await User.register(organization, NewUser.create({
+            email: "test@domain.com",
+            publicKey: userKeyPair.publicKey, 
+            publicAuthSignKey: authSignKeyPair.publicKey, 
+            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
+            authSignKeyConstants, 
+            authEncryptionKeyConstants
+        }));
+            
         expect(user).toBeDefined();
         expect(user).toBeInstanceOf(User);
         expect(user.publicAuthSignKey).toBeUndefined();
@@ -66,7 +74,14 @@ describe("Model.User", () => {
     });
 
     test("Create a user with an email that already exists", async () => {
-        const user: any = await User.register(organization, "existing@domain.com", userKeyPair.publicKey, authSignKeyPair.publicKey, await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey), authSignKeyConstants, authEncryptionKeyConstants);
+        const user: any = await User.register(organization, NewUser.create({
+            email: "existing@domain.com",
+            publicKey: userKeyPair.publicKey, 
+            publicAuthSignKey: authSignKeyPair.publicKey, 
+            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
+            authSignKeyConstants, 
+            authEncryptionKeyConstants
+        }));
         expect(user).toBeUndefined();
     });
 
