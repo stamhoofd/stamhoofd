@@ -87,7 +87,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }) 
             }
 
-            const price = register.reduced && foundPrice.reducedPrice ? foundPrice.reducedPrice : foundPrice.price
+            const price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
             totalPrice += price
             registrations.push(registration)
         }
@@ -100,7 +100,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         payment.status = PaymentStatus.Pending
         payment.price = totalPrice
         payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
-        payment.paidAt = payment.method == PaymentMethod.Transfer ? new Date() : null
+        payment.paidAt = null
+
+        if (totalPrice == 0) {
+            payment.status = PaymentStatus.Succeeded
+            payment.paidAt = new Date()
+        }
 
         await payment.save()
 
