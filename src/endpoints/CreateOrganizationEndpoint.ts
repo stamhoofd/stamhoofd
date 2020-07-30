@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures";
+import { CreateOrganization, PermissionLevel,Permissions, Token as TokenStruct } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import { KeychainItem } from '../models/KeychainItem';
@@ -90,6 +90,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         // First create the organization
         // todo: add some duplicate validation
         const organization = new Organization();
+        organization.id = request.body.organization.id;
         organization.name = request.body.organization.name;
         organization.publicKey = request.body.organization.publicKey;
         organization.uri = uri;
@@ -109,7 +110,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         const user = await User.register(
             organization,
-            request.body.user
+            Object.assign(request.body.user, { permissions: Permissions.create({ level: PermissionLevel.Full })})
         );
         if (!user) {
             // This user already exists, well that is pretty impossible
@@ -130,7 +131,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
-        const token = await Token.createExpiredToken(user)
+        const token = await Token.createToken(user)
 
         // Send mail without waiting
         /*Email.send(user.email, "Verifieer jouw e-mailadres voor Stamhoofd", "Hey fa!\n\nWelkom bij Stamhoofd. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n\nStamhoofd").catch(e => {
