@@ -108,9 +108,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
+
         const user = await User.register(
             organization,
-            Object.assign(request.body.user, { permissions: Permissions.create({ level: PermissionLevel.Full })})
+            request.body.user
         );
         if (!user) {
             // This user already exists, well that is pretty impossible
@@ -120,6 +121,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 500
             });
         }
+
+        // Should prevent this extra save
+        user.permissions = Permissions.create({ level: PermissionLevel.Full })
+        await user.save()
 
         for (const item of request.body.keychainItems) {
             const keychainItem = new KeychainItem()
