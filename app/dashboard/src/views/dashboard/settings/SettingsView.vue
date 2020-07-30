@@ -52,7 +52,13 @@
 
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
                 <p class="warning-box">Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.</p>
-                <p class="st-list-description"><button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button></p>
+                <p class="st-list-description">
+                    <button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button>
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Wijzigen</span>
+                    </button>
+                </p>
             </template>
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">

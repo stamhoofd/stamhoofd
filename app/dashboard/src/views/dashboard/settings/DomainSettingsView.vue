@@ -25,6 +25,10 @@
 
         <STToolbar>
             <template slot="right">
+                <button v-if="isAlreadySet" class="button secundary" @click="deleteMe">
+                    <span class="icon trash"/>
+                    <span>Verwijderen</span>
+                </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="save">
                         Volgende
@@ -71,6 +75,10 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         } else {
         }
         return true
+    }
+
+    isAlreadySet() {
+        return !!(OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain)
     }
 
     domainChanged() {
@@ -139,6 +147,37 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         }
 
             //this.pop({ force: true })
+    }
+
+    async deleteMe() {
+        if (this.saving) {
+            return;
+        }
+
+        if (!confirm("Ben je zeker dat je jouw domeinnaam wilt loskoppelen?")) {
+            return;
+        }
+
+        this.saving = true
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/organization/domain",
+                body: OrganizationDomains.create({
+                    mailDomain: null,
+                    registerDomain: null
+                }),
+                decoder: Organization as Decoder<Organization>
+            })
+            OrganizationManager.organization = response.data
+            this.pop({ force: true })
+            this.saving = false
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+            this.saving = false
+        }
     }
 
 
