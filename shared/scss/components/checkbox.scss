@@ -87,6 +87,28 @@
         }
     }
 
+    > input:disabled + div  {
+        > div:first-child {
+            border: $border-width solid $color-gray-light;
+            background: $color-white-shade;
+
+            svg > path {
+                stroke: $color-white-shade;
+            }
+        }
+    }
+
+    > input:disabled:checked + div  {
+        > div:first-child {
+            border: $border-width solid $color-gray-light;
+            background: $color-gray-light;
+
+            svg > path {
+                stroke: $color-gray;
+            }
+        }
+    }
+
     @media (max-width: 400px) {
         &.long-text {
             > div  > div:first-child ~ div {

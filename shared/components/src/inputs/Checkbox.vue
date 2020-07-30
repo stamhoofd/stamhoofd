@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="checkbox">
-            <input type="checkbox" v-model="checkboxValue">
+            <input type="checkbox" v-model="checkboxValue" :disabled="disabled">
             <div>
                 <div>
                     <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -35,6 +35,9 @@ export default class Checkbox extends Vue {
 
     @Prop({ default: false })
     checked!: boolean;
+
+    @Prop({ default: false })
+    disabled!: boolean;
 
     get checkboxValue() {
         return this.checked;

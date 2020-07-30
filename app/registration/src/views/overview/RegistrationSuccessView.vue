@@ -2,7 +2,10 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1>Hoera! X en X zijn ingeschreven</h1>
+                <h1 v-if="names.length == 2">Hoera! {{ names.join(' en ') }} zijn ingeschreven</h1>
+                <h1 v-else-if="names.length > 1">Hoera! {{ names.splice(0, names.length - 2).join(', ') }} en {{ names[names.length - 1] }} zijn ingeschreven</h1>
+                <h1 v-else>Hoera! {{ names[0] }} is ingeschreven</h1>
+                <p>Je kan hier later super gemakkelijk jaarlijks de inschrijving verlengen. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
             </main>
 
             <STToolbar>
@@ -21,7 +24,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, PaymentDetailed } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -38,6 +41,9 @@ import OverviewView from './OverviewView.vue';
     }
 })
 export default class RegistrationSuccessView extends Mixins(NavigationMixin){
+    @Prop({ required: true })
+    payment: PaymentDetailed
+
     MemberManager = MemberManager
     step = 4
 
@@ -45,6 +51,10 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
         MemberManager.loadMembers().catch(e => {
             console.error(e)
         })
+    }
+
+    get names() {
+        return this.payment.registrations.map(r => r.member.details?.firstName ?? "")
     }
 
     close() {

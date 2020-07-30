@@ -150,7 +150,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
        
         this.show(new ComponentWithProperties(RegistrationSuccessView, {
-
+            payment: this.paymentDetailed
         }))
     }
 
