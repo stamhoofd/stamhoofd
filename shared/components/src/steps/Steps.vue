@@ -65,8 +65,11 @@ export default class Steps extends Vue {
     }
 
     updateProgress() {
-        this.canPop = this.navigationController.components.length > 1
+        if (this.navigationController.components.length <= 1) {
+            this.canPop = false
+        }
         this.$nextTick(() => {
+            this.canPop = (this.navigationController.mainComponent?.componentInstance() as any)?.isStepsPoppable ?? (this.navigationController.components.length > 1);
             this.step = (this.navigationController.mainComponent?.componentInstance() as any)?.step ?? 0;
         })
         
