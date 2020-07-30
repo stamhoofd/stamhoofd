@@ -2,7 +2,7 @@
     <Steps :root="root">
         <template slot="right">
             <button class="button primary" @click="gotoSignup">
-                Mijn vereniging aansluiten
+                Aansluiten
             </button>
         </template>
     </Steps>

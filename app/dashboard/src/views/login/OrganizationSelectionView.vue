@@ -137,10 +137,18 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     .organization-selection-view {
         padding: 20px;
+        padding: 20px var(--st-horizontal-padding, 20px);
         padding-top: 100px;
 
         max-width: 400px;
         margin: 0 auto;
+
+        @media (max-height: 800px) {
+            padding-top: 40px;
+        }
+        @media (max-height: 600px) {
+            padding-top: 20px;
+        }
 
         > h1 {
             @extend .style-huge-title-1;

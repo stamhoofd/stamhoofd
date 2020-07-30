@@ -1,7 +1,7 @@
 <template>
     <div id="signup-general-view" class="st-view">
         <STNavigationBar title="Jouw vereniging aansluiten">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <button slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         
 

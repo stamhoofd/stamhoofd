@@ -3,4 +3,8 @@
     background: url(~@stamhoofd/assets/images/logo/logo-horizontal.svg) left top no-repeat;
     width: 179px;
     height: 33px;
+
+    @media (max-width: 450px) {
+        width: 33px;
+    }
 }
