@@ -9,7 +9,7 @@ export class Group extends AutoEncoder {
     id: string;
 
     @field({ decoder: IntegerDecoder })
-    cycle: number
+    cycle = 0
 
     @field({ decoder: GroupSettings })
     settings: GroupSettings
