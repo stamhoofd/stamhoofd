@@ -50,7 +50,7 @@
         </div>
         <hr>
         <div class="">
-            <button class="menu-button button heading">
+            <button class="menu-button button heading" @click="logout">
                 <span class="icon logout"/>
                 <span>Uitloggen</span>
             </button>
@@ -127,6 +127,13 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageAdmins() {
         this.currentlySelected = "manage-admins"
         this.showDetail(new ComponentWithProperties(AdminsView, {}));
+    }
+
+    logout() {
+        if (!confirm("Ben je zeker dat je wilt uitloggen?")) {
+            return;
+        }
+        SessionManager.currentSession!.logout()
     }
 
     hasAccessToGroup(group: Group) {
