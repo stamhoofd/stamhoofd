@@ -80,21 +80,10 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
             })
         }
 
-        const organization = await Organization.getByID(invite.organizationId)
-
-        if (!organization) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "This invite is invalid or expired",
-                human: "Deze link is niet langer geldig",
-                statusCode: 404
-            })
-        }
-
         return new Response(InviteStruct.create(Object.assign({}, invite, {
             receiver: token ? UserStruct.create(token.user) : null,
             sender: UserStruct.create(sender),
-            organization: OrganizationSimple.create(organization)
+            organization: OrganizationSimple.create(user.organization)
         })));
     }
 }

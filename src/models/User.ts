@@ -29,7 +29,7 @@ export class User extends Model {
     @column({ type: "string", nullable: true })
     firstName: string | null = null;
 
-    @column({ type: "string", nullable: true  })
+    @column({ type: "string", nullable: true })
     lastName: string | null = null;
 
     @column({ type: "string" })
