@@ -21,15 +21,15 @@
             <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                 <div class="input-group">
                     <div>
-                        <input v-model="invite.userDetails.firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                     </div>
                     <div>
-                        <input v-model="invite.userDetails.lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput title="E-mailadres (optioneel)" :validator="validator" v-model="invite.userDetails.email" placeholder="E-mailadres" :required="false"/>
+            <EmailInput :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" v-model="email" placeholder="E-mailadres" :required="!!user"/>
         
             <hr>
             <h2>Geef toegang tot...</h2>
@@ -78,7 +78,7 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, Patch
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager, Keychain } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -114,14 +114,31 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
 
-    invite = NewInvite.create({ userDetails: InviteUserDetails.create({}) })
+    // Use when creating a new user
+    createInvite = NewInvite.create({ 
+        userDetails: InviteUserDetails.create({}), 
+        permissions: Permissions.create({ level: PermissionLevel.None }) 
+    })
+
+    // Use when editing a user
+    patchUser: PatchType<Invite> | null = null
+
+    // use when editing an invite
+    patchInvite: PatchType<Invite> | null = null
 
     groups: SelectableGroup[] = []
-    fullAccess = false
-    writeAccess = false
+    
+    /*fullAccess = false
+    writeAccess = false*/
+
+    @Prop({ default: null })
+    editInvite: Invite | null
+
+    @Prop({ default: null })
+    editUser: User | null
 
     get isNew() {
-        return true
+        return !this.editInvite && !this.editUser
     }
 
     get organization() {
@@ -130,10 +147,31 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     mounted() {
         for (const group of this.organization.groups) {
-            this.groups.push(new SelectableGroup(group, false))
+            
+            this.groups.push(new SelectableGroup(group, (this.user ?? this.invite).permissions?.hasWriteAccess(group.id) ?? false))
         }
     }
-   
+
+    get user() {
+        if (this.editUser) {
+            if (this.patchUser) {
+                return this.editUser.patch(this.patchUser)
+            }
+            return this.editUser
+        }
+        return null;
+    }
+
+    get invite() {
+        if (this.editInvite) {
+            if (this.patchInvite) {
+                return this.editInvite.patch(this.patchInvite)
+            }
+            return this.editInvite
+        }
+        return this.createInvite;
+    }
+
     async deleteMe() {
         if (this.saving) {
             return;
@@ -217,43 +255,202 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                 }
             }
         }
-        this.invite.permissions = permissions
+        this.addPermissionsPatch(permissions)
 
-        // Encrypt keychain items
-        const secret = await Sodium.generateSecretKey()
+        if (this.isNew) {
+            // Encrypt keychain items
+            const secret = await Sodium.generateSecretKey()
+            const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
 
-        const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
+            if (!keychainItem) {
+                throw new Error("Missing organization keychain")
+            }
 
-        if (!keychainItem) {
-            throw new Error("Missing organization keychain")
+            const session = SessionManager.currentSession!
+            const keyPair = await session.decryptKeychainItem(keychainItem)
+
+            const items = new VersionBox([InviteKeychainItem.create({
+                publicKey: keyPair.publicKey,
+                privateKey: keyPair.privateKey
+            })])
+
+            this.createInvite.keychainItems = await Sodium.encryptMessage(JSON.stringify(items.encode({ version: Version })), secret)
+
+            try {
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/invite",
+                    body: this.invite,
+                    decoder: Invite as Decoder<Invite>
+                })
+
+                this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
+                this.saving = false
+            } catch (e) {
+                console.error(e)
+                this.errorBox = new ErrorBox(e)
+                this.saving = false
+            }
+        } else {
+            if (this.user) {
+                if (!this.patchUser) {
+                    // no changes
+                    this.saving = false;
+                    this.pop({ force: true })
+                    return;
+                }
+                // Patch the user
+
+                try {
+                    const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        method: "PATCH",
+                        path: "/user/"+this.user.id,
+                        body: this.patchUser,
+                        decoder: Invite as Decoder<Invite>
+                    })
+
+                    this.pop({ force: true })
+                    this.saving = false
+                } catch (e) {
+                    console.error(e)
+                    this.errorBox = new ErrorBox(e)
+                    this.saving = false
+                }
+            }
         }
 
-        const session = SessionManager.currentSession!
-        const keyPair = await session.decryptKeychainItem(keychainItem)
+       
+    }
 
-        const items = new VersionBox([InviteKeychainItem.create({
-            publicKey: keyPair.publicKey,
-            privateKey: keyPair.privateKey
-        })])
+    /// --------------------------------------------------------
+    /// --------------------- Map helpers ----------------------
+    /// --------------------------------------------------------
 
-        this.invite.keychainItems = await Sodium.encryptMessage(JSON.stringify(items.encode({ version: Version })), secret)
-
-        try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "POST",
-                path: "/invite",
-                body: this.invite,
-                decoder: Invite as Decoder<Invite>
-            })
-
-            this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
-            this.saving = false
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
+    addUserPatch(patch: PartialWithoutMethods<PatchType<User>>) {
+        if (!this.patchUser) {
+            this.patchUser = User.patchType().create(patch)
+        } else {
+            this.patchUser = this.patchUser.patch(User.patchType().create(patch))
         }
     }
+
+    addInviteUserPatch(patch: PartialWithoutMethods<PatchType<InviteUserDetails>>) {
+        this.addInvitePatch({ userDetails: InviteUserDetails.patchType().create(patch) })
+    }
+
+    addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
+        if (this.user) {
+            // User always have permission set, so no need to check if it already is created
+            this.addUserPatch({ permissions: Permissions.patchType().create(patch) })
+            return
+        }
+        // Invite always have permission set, so no need to check if it already is created
+        this.addInvitePatch({ permissions: Permissions.patchType().create(patch) })
+    }
+
+    addInvitePatch(patch: PartialWithoutMethods<PatchType<Invite>>) {
+        if (!this.editInvite) {
+
+            this.createInvite = this.createInvite.patch(NewInvite.patchType().create(patch))
+            return
+        }
+        if (!this.patchInvite) {
+            this.patchInvite = Invite.patchType().create(patch)
+        } else {
+            this.patchInvite = this.patchInvite.patch(Invite.patchType().create(patch))
+        }
+    }
+
+    /// --------------------------------------------------------
+    /// --------------------- Mappers --------------------------
+    /// --------------------------------------------------------
+
+    get firstName() {
+        const user = this.user
+        if (this.user) {
+            return this.user.firstName ?? ""
+        }
+        return this.invite.userDetails?.firstName ?? ""
+    }
+
+    set firstName(firstName: string) {
+        const user = this.user
+        if (this.user) {
+            this.addUserPatch({ firstName: firstName.length == 0 ? null : firstName })
+            return
+        }
+        this.addInviteUserPatch({ firstName: firstName.length == 0 ? null : firstName })
+    }
+
+    get lastName() {
+        const user = this.user
+        if (this.user) {
+            return this.user.lastName ?? ""
+        }
+        return this.invite.userDetails?.lastName ?? ""
+    }
+
+    set lastName(lastName: string) {
+        const user = this.user
+        if (this.user) {
+            this.addUserPatch({ lastName: lastName.length == 0 ? null : lastName })
+            return
+        }
+        this.addInviteUserPatch({ lastName: lastName.length == 0 ? null : lastName })
+    }
+
+    get email() {
+        const user = this.user
+        if (this.user) {
+            return this.user.email ?? ""
+        }
+        return this.invite.userDetails?.email ?? ""
+    }
+
+    set email(email: string | null) {
+        const user = this.user
+        if (this.user) {
+            this.addUserPatch({ email: email ?? this.user.email ?? ""})
+            return
+        }
+        this.addInviteUserPatch({ email: !email || email.length == 0 ? null : email })
+    }
+
+
+    get writeAccess() {
+        const user = this.user ?? this.invite
+        return !!user.permissions && user.permissions.hasWriteAccess()
+    }
+
+    set writeAccess(writeAccess: boolean) {
+        if (writeAccess && this.writeAccess) {
+            return
+        }
+
+        if (writeAccess) {
+            this.addPermissionsPatch({ level: PermissionLevel.Write })
+        } else {
+            this.addPermissionsPatch({ level: PermissionLevel.None })
+        }
+    }
+
+    get fullAccess() {
+        const user = this.user ?? this.invite
+        return !!user.permissions && user.permissions.hasFullAccess()
+    }
+
+    set fullAccess(fullAccess: boolean) {
+        if (fullAccess && this.fullAccess) {
+            return
+        }
+
+        if (fullAccess) {
+            this.addPermissionsPatch({ level: PermissionLevel.Full })
+        } else {
+            this.addPermissionsPatch({ level: this.writeAccess ? PermissionLevel.Write : PermissionLevel.None })
+        }
+    }
+   
 
 
 }

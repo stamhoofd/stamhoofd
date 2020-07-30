@@ -64,11 +64,11 @@ export default class EmailInput extends Vue {
     }
 
     async validate() {
-        this.$emit("input", null)
         this.emailRaw = this.emailRaw.trim().toLowerCase()
 
         if (!this.required && this.emailRaw.length == 0) {
             this.errorBox = null
+            this.$emit("input", null)
             return true
         }
 
@@ -84,7 +84,9 @@ export default class EmailInput extends Vue {
             return false
 
         } else {
-            this.$emit("input", this.emailRaw)
+            if (this.emailRaw !== this.value) {
+                this.$emit("input", this.emailRaw)
+            }
             this.errorBox = null
             return true
         }

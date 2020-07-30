@@ -2,9 +2,7 @@
     <div class="st-view group-members-view">
         <STNavigationBar :sticky="false">
             <template #left>
-                <button v-if="canPop" class="button icon gray arrow-left" @click="pop">
-                    Terug
-                </button>
+                <BackButton slot="left" v-if="canPop" @click="pop"/>
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ group ? group.settings.name : "Alle leden" }}</span>
                     <button class="button more" />
@@ -121,7 +119,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { STNavigationTitle, Spinner } from "@stamhoofd/components";
+import { STNavigationTitle, Spinner, BackButton } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -149,6 +147,7 @@ class SelectableMember {
         STNavigationBar,
         STNavigationTitle,
         STToolbar,
+        BackButton,
         Spinner
     },
     directives: { Tooltip },

@@ -25,6 +25,7 @@
                 <STListItem v-for="invite in invites" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
                     {{ invite.userDetails.firstName || "?" }}
                     <template slot="right">
+                        <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
@@ -91,8 +92,20 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    isExpired(invite: Invite) {
+        return invite.validUntil.getTime() < new Date().getTime()+10*1000
+    }
+
     editAdmin(admin: User) {
-       
+       this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(AdminInviteView, { editUser: admin }) 
+        }).setDisplayStyle("popup"))
+    }
+
+    editInvite(invite: Invite) {
+       this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(AdminInviteView, { editInvite: invite }) 
+        }).setDisplayStyle("popup"))
     }
 }
 
