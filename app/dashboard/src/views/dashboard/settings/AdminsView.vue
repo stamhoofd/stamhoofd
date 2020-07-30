@@ -16,16 +16,21 @@
             <Spinner v-if="loading" />
             <STList v-else>
                 <STListItem v-for="admin in admins" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                    {{ admin.firstName || admin.email }}
+                    <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
+                    <p class="style-description-small">{{ admin.email }}</p>
+
                     <template slot="right">
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
 
                 <STListItem v-for="invite in invites" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                    {{ invite.userDetails.firstName || "?" }}
+                    <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
+                    <p class="style-description-small">{{ invite.userDetails.email }}</p>
+
                     <template slot="right">
                         <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
+                        <p v-else>Uitnodiging nog niet geaccepteerd</p>
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
@@ -88,7 +93,13 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     createAdmin() {
         this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, {}) 
+            root: new ComponentWithProperties(AdminInviteView, {
+                onUpdateInvite: (patched: Invite | null) => {
+                    if (patched) {
+                        this.invites.push(patched)
+                    }
+                }
+            }) 
         }).setDisplayStyle("popup"))
     }
 
@@ -98,13 +109,35 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     editAdmin(admin: User) {
        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, { editUser: admin }) 
+            root: new ComponentWithProperties(AdminInviteView, { 
+                editUser: admin,
+                onUpdateUser: (patched: User | null) => {
+                    const i = this.admins.findIndex(a => a.id === admin.id)
+                    console.log(i)
+
+                    if (i != -1) {
+                        this.admins.splice(i, 1, ...patched ? [patched] : [])
+                    }
+                    
+                }
+            }) ,
+            
         }).setDisplayStyle("popup"))
     }
 
     editInvite(invite: Invite) {
        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, { editInvite: invite }) 
+            root: new ComponentWithProperties(AdminInviteView, { 
+                editInvite: invite,
+                onUpdateInvite: (patched: Invite | null) => {
+                    const i = this.invites.findIndex(a => a.id === invite.id)
+                    console.log(i)
+
+                    if (i != -1) {
+                        this.invites.splice(i, 1, ...patched ? [patched] : [])
+                    }
+                }
+            }),
         }).setDisplayStyle("popup"))
     }
 }

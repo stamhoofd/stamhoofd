@@ -31,7 +31,7 @@
         </main>
 
         <STFloatingFooter>
-            <button class="button secundary" v-if="!loggedIn" @click="tryLogin">Ik heb al een account</button>
+            <button class="button secundary" v-if="!loggedIn" @click="tryLogin" type="button">Ik heb al een account</button>
             <LoadingButton :loading="loading">
                 <button class="button primary" v-if="!loggedIn">
                     <span class="icon lock" />

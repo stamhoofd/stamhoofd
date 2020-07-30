@@ -138,6 +138,12 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     editUser: User | null
 
+    @Prop({ default: null })
+    onUpdateUser: ((user: User | null)  => void) | null
+
+    @Prop({ default: null })
+    onUpdateInvite: ((invite: Invite | null) => void) | null
+
     get isNew() {
         return !this.editInvite && !this.editUser
     }
@@ -240,6 +246,8 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     decoder: Invite as Decoder<Invite>
                 })
 
+                if (this.onUpdateInvite) this.onUpdateInvite(response.data);
+
                 this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
                 this.saving = false
             } catch (e) {
@@ -265,7 +273,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                         decoder: User as Decoder<User>
                     })
 
-                    // todo: apply change
+                    if (this.onUpdateUser) this.onUpdateUser(response.data);
 
                     this.pop({ force: true })
                     this.saving = false
@@ -291,7 +299,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                         decoder: Invite as Decoder<Invite>
                     })
 
-                    // todo: apply change
+                    if (this.onUpdateInvite) this.onUpdateInvite(response.data);
 
                     this.pop({ force: true })
                     this.saving = false
@@ -329,7 +337,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     path: "/user/"+this.user.id,
                 })
 
-                // todo: apply change
+                if (this.onUpdateUser) this.onUpdateUser(null);
                 this.pop({ force: true })
                 this.saving = false
                 
@@ -339,7 +347,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     path: "/invite/"+this.editInvite!.id,
                 })
 
-                // todo: apply change
+                if (this.onUpdateInvite) this.onUpdateInvite(null);
                 this.pop({ force: true })
                 this.saving = false
             }
