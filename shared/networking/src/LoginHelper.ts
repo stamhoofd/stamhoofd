@@ -168,11 +168,13 @@ export class LoginHelper {
         SessionManager.setCurrentSession(session)
     }
 
-    static async signUp(session: Session, email: string, password: string) {
+    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
         const keys = await this.createKeys(password)
 
         const user = NewUser.create({
             email,
+            firstName,
+            lastName,
             publicKey: keys.userKeyPair.publicKey,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,

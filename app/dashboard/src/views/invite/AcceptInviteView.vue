@@ -13,6 +13,17 @@
                 <p class="st-list-description" v-if="invite.sender.firstName">{{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.</p>
 
 
+                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <div class="input-group">
+                        <div>
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                        </div>
+                        <div>
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                        </div>
+                    </div>
+                </STInputBox>
+
                 <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
                 <STInputBox title="Kies een wachtwoord">
@@ -59,7 +70,7 @@ import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import LoginView from '../login/LoginView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -79,6 +90,9 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     secret!: string 
 
     loading = false
+
+    firstName = this.invite.receiver?.firstName ?? this.invite?.userDetails?.firstName ?? "?"
+    lastName = this.invite.receiver?.lastName ?? this.invite.userDetails?.lastName ?? ""
 
     email = this.invite.userDetails?.email ?? ""
     password = ""
@@ -105,17 +119,16 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
         this.loggedIn = !!this.session && this.session.isComplete()
     }
 
-    get firstName() {
-        return this.invite.receiver?.firstName ?? this.invite?.userDetails?.firstName ?? "?"
-    }
-
     tryLogin() {
         const session = SessionManager.getSessionForOrganization(this.invite.organization.id)
         if (session && session.canGetCompleted()) {
             SessionManager.setCurrentSession(session)
             return
         }
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization: this.invite.organization }) }).setDisplayStyle("sheet"))
+        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { 
+            initialEmail: this.email,
+            organization: this.invite.organization
+        }) }).setDisplayStyle("sheet"))
     }
 
     async submit() {
@@ -128,6 +141,23 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
             // First need to create an account in this organization (required)
             if (!this.loggedIn) {
                 const valid = await this.validator.validate()
+
+                const errors = new SimpleErrors()
+                if (this.firstName.length < 2) {
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Vul de voornaam in",
+                        field: "firstName"
+                    }))
+                }
+                if (this.lastName.length < 2) {
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Vul de achternaam in",
+                        field: "lastName"
+                    }))
+                }
+                errors.throwIfNotEmpty()
 
                 if (this.password != this.passwordRepeat) {
                     throw new SimpleError({
@@ -160,7 +190,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                     this.session = new Session(this.invite.organization.id)
                 }
 
-                await LoginHelper.signUp(this.session, this.email, this.password);
+                await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                 (component.componentInstance() as any)?.pop()
             }
 

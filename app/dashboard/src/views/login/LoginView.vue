@@ -57,7 +57,10 @@ export default class LoginView extends Mixins(NavigationMixin){
     session!: Session
     loading = false
 
-    email = ""
+    @Prop({ default: ""})
+    initialEmail!: string
+
+    email = this.initialEmail
     password = ""
 
     mounted() {

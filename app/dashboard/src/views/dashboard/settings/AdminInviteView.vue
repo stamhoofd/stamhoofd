@@ -187,6 +187,21 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         this.saving = true
 
         const errors = new SimpleErrors()
+
+        if (this.firstName.length < 2) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul de voornaam in",
+                field: "firstName"
+            }))
+        }
+        if (this.lastName.length < 2) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul de achternaam in",
+                field: "lastName"
+            }))
+        }
         
         let valid = false
 
