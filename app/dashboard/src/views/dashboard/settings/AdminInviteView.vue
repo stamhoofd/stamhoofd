@@ -306,8 +306,36 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                         method: "PATCH",
                         path: "/user/"+this.user.id,
                         body: this.patchUser,
+                        decoder: User as Decoder<User>
+                    })
+
+                    // todo: apply change
+
+                    this.pop({ force: true })
+                    this.saving = false
+                } catch (e) {
+                    console.error(e)
+                    this.errorBox = new ErrorBox(e)
+                    this.saving = false
+                }
+            } else {
+                if (!this.patchInvite) {
+                    // no changes
+                    this.saving = false;
+                    this.pop({ force: true })
+                    return;
+                }
+                // Patch the user
+
+                try {
+                    const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        method: "PATCH",
+                        path: "/invite/"+this.editInvite!.id,
+                        body: this.patchInvite,
                         decoder: Invite as Decoder<Invite>
                     })
+
+                    // todo: apply change
 
                     this.pop({ force: true })
                     this.saving = false

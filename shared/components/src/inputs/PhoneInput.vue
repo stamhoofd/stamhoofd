@@ -60,29 +60,46 @@ export default class PhoneInput extends Vue {
     }
 
     async validate() {
-        this.$emit("input", null)
 
         if (!this.required && this.phoneRaw.length == 0) {
             this.errorBox = null
+
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
             return true
         }
-        const libphonenumber = await import("libphonenumber-js")
-        const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
+        try {
+            const libphonenumber = await import("libphonenumber-js")
+            const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
 
-        if (!phoneNumber || !phoneNumber.isValid()) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": "Ongeldig GSM-nummer",
-                "field": "phone"
-            }))
-            this.$emit("input", null)
+            if (!phoneNumber || !phoneNumber.isValid()) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Ongeldig GSM-nummer",
+                    "field": "phone"
+                }))
+
+                if (this.value !== null) {
+                    this.$emit("input", null)
+                }
+                return false
+
+            } else {
+                const v = phoneNumber.formatInternational();
+        
+                if (this.value !== v) {
+                    this.$emit("input", v)
+                }
+                this.errorBox = null
+                return true
+            }
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
             return false
-
-        } else {
-            this.$emit("input", phoneNumber.formatInternational())
-            this.errorBox = null
-            return true
         }
+        
     }
 }
 </script>

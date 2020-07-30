@@ -68,7 +68,10 @@ export default class EmailInput extends Vue {
 
         if (!this.required && this.emailRaw.length == 0) {
             this.errorBox = null
-            this.$emit("input", null)
+
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
             return true
         }
 
@@ -80,7 +83,9 @@ export default class EmailInput extends Vue {
                 "message": "Ongeldig e-mailadres",
                 "field": "email"
             }))
-            this.$emit("input", null)
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
             return false
 
         } else {
