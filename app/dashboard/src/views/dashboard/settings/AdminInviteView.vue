@@ -113,6 +113,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
+    deleting = false
 
     // Use when creating a new user
     createInvite = NewInvite.create({ 
@@ -172,53 +173,8 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         return this.createInvite;
     }
 
-    async deleteMe() {
-        if (this.saving) {
-            return;
-        }
-
-        if (!confirm("Ben je zeker dat je deze beheerder wilt verwijderen?")) {
-            return;
-        }
-
-        /*const patch = OrganizationPatch.create({}).patch(this.organizationPatch)
-
-        if (!patch.privateMeta) {
-            patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
-        }
-
-        patch.privateMeta!.emails.addDelete(this.emailId)
-
-        patch.groups = new PatchableArray()
-
-        for (const group of this.groups) {
-            // Check if changed
-            const prev = group.group.privateSettings !== null && group.group.privateSettings.defaultEmailId !== null && group.group.privateSettings.defaultEmailId === this.emailId
-            if (prev) {
-                patch.groups.addPatch(GroupPatch.create({
-                    id: group.group.id,
-                    privateSettings: GroupPrivateSettingsPatch.create({
-                        defaultEmailId: null,
-                    })
-                }))
-            }
-        }
-
-        this.saving = true
-
-        try {
-            await OrganizationManager.patch(patch)
-            this.pop({ force: true })
-            this.saving = false
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
-        }*/
-    }
-   
     async save() {
-        if (this.saving) {
+        if (this.deleting || this.saving) {
             return;
         }
 
@@ -348,6 +304,50 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         }
 
        
+    }
+
+    async deleteMe() {
+        if (this.deleting || this.saving) {
+            return;
+        }
+        
+        if (this.isNew) {
+            return;
+        }
+
+        if (!confirm("Ben je zeker dat je deze beheerder wilt verwijderen?")) {
+            return;
+        }
+
+        this.deleting = true;
+
+        try {
+            if (this.user) {
+                // Patch the user
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "DELETE",
+                    path: "/user/"+this.user.id,
+                })
+
+                // todo: apply change
+                this.pop({ force: true })
+                this.saving = false
+                
+            } else {
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "DELETE",
+                    path: "/invite/"+this.editInvite!.id,
+                })
+
+                // todo: apply change
+                this.pop({ force: true })
+                this.saving = false
+            }
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+            this.saving = false
+        }
     }
 
     /// --------------------------------------------------------
