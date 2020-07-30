@@ -23,7 +23,7 @@
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList class="member-selection-table">
-                    <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
+                    <STListItem v-for="member in members" :key="member.id" :selectable="member.groups.length == 0" class="right-stack left-center" element-name="label" >
                         <Checkbox v-model="member.groups.length > 0 ? true :memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" :disabled="member.groups.length > 0"/>
                         <p>{{ member.details.name }}</p>
                         <p class="member-group" v-if="member.groups.length > 0">Reeds ingeschreven bij {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
@@ -41,12 +41,18 @@
                 </STList>
             </main>
 
-            <STToolbar>
+            <STToolbar v-if="!canRegisterMembers">
                 <button slot="right" class="button primary" @click="addNewMember">
+                    <span class="icon add"/>
+                    <span>Iemand toevoegen</span>
+                </button>
+            </STToolbar>
+            <STToolbar v-else>
+                <button slot="right" class="button secundary" @click="addNewMember">
                     <span class="icon add"/>
                     <span>Nog iemand toevoegen</span>
                 </button>
-                <button slot="right" class="button secundary" @click="registerSelectedMembers">
+                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0">
                     <span>Inschrijven</span>
                     <span class="icon arrow-right"/>
                 </button>
@@ -95,6 +101,19 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
      */
     get registeredMembers() {
         return this.members.filter(m => m.activeRegistrations.length > 0)
+    }
+
+    get canRegisterMembers() {
+        return !!this.members.find(m => m.activeRegistrations.length == 0)
+    }
+
+    get selectedMembers() {
+        return this.members.flatMap((m) => {
+            if (this.memberSelection[m.id] === true) {
+                return [m]
+            }
+            return []
+        })
     }
 
     get members() {
@@ -204,12 +223,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             return
         }
 
-        const selected = this.members.flatMap((m) => {
-            if (this.memberSelection[m.id] === true) {
-                return [m]
-            }
-            return []
-        })
+        const selected = this.selectedMembers;
 
         if (selected.length == 0) {
             this.errorBox = new ErrorBox(new SimpleError({

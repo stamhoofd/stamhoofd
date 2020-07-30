@@ -117,6 +117,17 @@
         &:active {
             transform: scale(0.95, 0.95);
         }
+
+        &:disabled {
+            color: $color-gray-light;
+            background: $color-white-shade;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
     }
 
     &.secundary, &.primary {

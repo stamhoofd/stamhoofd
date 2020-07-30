@@ -3,7 +3,7 @@
         <div class="st-view">
             <main>
                 <h1 v-if="names.length == 2">Hoera! {{ names.join(' en ') }} zijn ingeschreven</h1>
-                <h1 v-else-if="names.length > 1">Hoera! {{ names.splice(0, names.length - 2).join(', ') }} en {{ names[names.length - 1] }} zijn ingeschreven</h1>
+                <h1 v-else-if="names.length > 1">Hoera! {{ names.slice(0, names.length - 1).join(', ') }} en {{ names[names.length - 1] }} zijn ingeschreven</h1>
                 <h1 v-else>Hoera! {{ names[0] }} is ingeschreven</h1>
                 <p>Je kan hier later super gemakkelijk jaarlijks de inschrijving verlengen. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
             </main>
