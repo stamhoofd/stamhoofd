@@ -16,15 +16,24 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="E-mailadres">
-                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
+                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                        <div class="input-group">
+                            <div>
+                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            </div>
+                            <div>
+                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            </div>
+                        </div>
                     </STInputBox>
 
-                    <STInputBox title="Kies een wachtwoord">
+                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+
+                   <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
                         <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
 
-                    <STInputBox title="Herhaal wachtwoord">
+                    <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
                         <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                 </div>
@@ -53,10 +62,10 @@
 
 <script lang="ts">
 import { ObjectData } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
+import { CenteredMessage,ErrorBox, Spinner,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager, Keychain } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -70,17 +79,21 @@ import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts
         STErrorsDefault,
         STInputBox,
         Spinner,
-        BackButton
+        BackButton,
+        EmailInput
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
     @Prop({required: true})
     organization: Organization
     errorBox: ErrorBox | null = null
+    validator = new Validator()
 
     password = ""
     passwordRepeat = ""
     email = ""
+    firstName = ""
+    lastName = ""
 
     loading = false
 
@@ -95,6 +108,47 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             // Generate keys
             this.loading = true
             this.errorBox = null
+
+            const valid = await this.validator.validate()
+
+            const errors = new SimpleErrors()
+            if (this.firstName.length < 2) {
+                errors.addError(new SimpleError({
+                    code: "invalid_field",
+                    message: "Vul jouw voornaam in",
+                    field: "firstName"
+                }))
+            }
+            if (this.lastName.length < 2) {
+                errors.addError(new SimpleError({
+                    code: "invalid_field",
+                    message: "Vul jouw achternaam in",
+                    field: "lastName"
+                }))
+            }
+            errors.throwIfNotEmpty()
+
+            if (this.password != this.passwordRepeat) {
+                throw new SimpleError({
+                    code: "password_do_not_match",
+                    message: "De ingevoerde wachtwoorden komen niet overeen",
+                    field: "passwordRepeat"
+                })
+            }
+
+            if (this.password.length < 14) {
+                throw new SimpleError({
+                    code: "password_too_short",
+                    message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
+                    field: "password"
+                })
+            }
+
+            if (!valid) {
+                this.loading = false 
+                this.errorBox = null
+                return;
+            }
 
             const myWorker = new GenerateWorker();
             const component = new ComponentWithProperties(CenteredMessage, { 
@@ -186,11 +240,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.present(component)
 
         } catch (e) {
+            this.loading = false
             console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
+            this.errorBox = new ErrorBox(e)
             return;
         }
     }

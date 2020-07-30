@@ -40,7 +40,7 @@
                 </STInputBox>
             </div>
 
-            <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox">
+            <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-for="_genderType in genderTypes" :key="_genderType.value" v-model="genderType" :value="_genderType.value">
                         {{ _genderType.name }}

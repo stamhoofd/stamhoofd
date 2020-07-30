@@ -25,26 +25,7 @@
                         >
                     </STInputBox>
 
-                    <STInputBox title="Adres van je vereniging" error-fields="address" :error-box="errorBox">
-                        <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" autocomplete="address-line1">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" autocomplete="postal-code">
-                            </div>
-                            <div>
-                                <input v-model="city" class="input" type="text" placeholder="Gemeente" autocomplete="city">
-                            </div>
-                        </div>
-
-                        <select v-model="country" class="input">
-                            <option value="BE">
-                                België
-                            </option>
-                            <option value="NL">
-                                Nederland
-                            </option>
-                        </select>
-                    </STInputBox>
+                    <AddressInput title="Adres van je vereniging" v-model="address" :validator="validator"/>
                 </div>
 
                 <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox">
@@ -70,7 +51,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -83,22 +64,18 @@ import SignupStructureView from './SignupStructureView.vue';
         Slider,
         STErrorsDefault,
         STInputBox,
-        BackButton
+        BackButton,
+        AddressInput
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {
     name = ""
+    validator = new Validator()
     errorBox: ErrorBox | null = null
-
-    addressLine1 = ""
-    street = ""
-    city = ""
-    postalCode = ""
-    country: Country = "BE"
     expectedMemberCount = 150
+    address: Address | null = null
 
-    goNext() {
-
+    async goNext() {
         try {
             if (this.name.length == 0) {
                 throw new SimpleError({
@@ -117,15 +94,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 })
             }
 
-            let address: Address
+            this.errorBox = null
 
-            try {
-                address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
-            } catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    e.addNamespace("address")
-                }
-                throw e;
+            if (!await this.validator.validate() || !this.address) {
+                return
             }
 
             const defaultStartDate = new Date()
@@ -137,13 +109,14 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
             const organization = Organization.create({
                 name: this.name,
+                uri: "", // ignored by backend for now
                 meta: OrganizationMetaData.create({
                     type: OrganizationType.Other,
                     expectedMemberCount: this.expectedMemberCount,
                     defaultStartDate,
                     defaultEndDate
                 }),
-                address: address,
+                address: this.address,
                 publicKey: "" // placeholder
             })
 

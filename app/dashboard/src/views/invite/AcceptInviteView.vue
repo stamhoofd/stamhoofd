@@ -26,11 +26,11 @@
 
                 <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
-                <STInputBox title="Kies een wachtwoord">
+                <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
                     <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                 </STInputBox>
 
-                <STInputBox title="Herhaal wachtwoord">
+                <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
                     <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                 </STInputBox>
             </template>
@@ -146,14 +146,14 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 if (this.firstName.length < 2) {
                     errors.addError(new SimpleError({
                         code: "invalid_field",
-                        message: "Vul de voornaam in",
+                        message: "Vul jouw voornaam in",
                         field: "firstName"
                     }))
                 }
                 if (this.lastName.length < 2) {
                     errors.addError(new SimpleError({
                         code: "invalid_field",
-                        message: "Vul de achternaam in",
+                        message: "Vul jouw achternaam in",
                         field: "lastName"
                     }))
                 }
@@ -162,14 +162,16 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 if (this.password != this.passwordRepeat) {
                     throw new SimpleError({
                         code: "",
-                        message: "De ingevoerde wachtwoorden komen niet overeen"
+                        message: "De ingevoerde wachtwoorden komen niet overeen",
+                        field: "passwordRepeat"
                     })
                 }
 
-                if (this.password.length < 8) {
+                if (this.password.length < 14) {
                     throw new SimpleError({
                         code: "",
-                        message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan."
+                        message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
+                        field: "password"
                     })
                 }
 
