@@ -4,6 +4,7 @@
             <main>
                 <h1>Je hebt nog niemand ingeschreven</h1>
                 <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
+                <STErrorsDefault :error-box="errorBox" />
             </main>
             <STToolbar>
                 <button class="primary button" slot="right" @click="addNewMember">
@@ -18,6 +19,8 @@
                 <h1 v-else>Wie wil je inschrijven?</h1>
 
                 <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
+
+                <STErrorsDefault :error-box="errorBox" />
 
                 <STList class="member-selection-table">
                     <STListItem v-for="member in members" :key="member.id" :selectable="true" class="right-stack left-center" element-name="label" >
@@ -55,13 +58,13 @@
 <script lang="ts">
 import { Component, Vue, Mixins } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';
 import { Formatter } from '@stamhoofd/utility';
 import TransferPaymentView from './TransferPaymentView.vue';
@@ -73,7 +76,8 @@ import TransferPaymentView from './TransferPaymentView.vue';
         STList,
         STListItem,
         LoadingView,
-        Checkbox
+        Checkbox,
+        STErrorsDefault
     },
     filters: {
         price: Formatter.price
@@ -84,6 +88,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     memberSelection: { [key:string]:boolean; } = {}
     step = 1
     defaultSelection = false
+    errorBox: ErrorBox | null = null
 
     /**
      * Return members that are currently registered in
@@ -198,13 +203,25 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         if (!this.members) {
             return
         }
+
+        const selected = this.members.flatMap((m) => {
+            if (this.memberSelection[m.id] === true) {
+                return [m]
+            }
+            return []
+        })
+
+        if (selected.length == 0) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Selecteer eerst een lid of voeg een nieuw lid toe"
+            }))
+            return;
+        }
+        this.errorBox = null;
+
         this.show(new ComponentWithProperties(FinancialProblemsView, {
-            selectedMembers: this.members.flatMap((m) => {
-                if (this.memberSelection[m.id] === true) {
-                    return [m]
-                }
-                return []
-            })
+            selectedMembers: selected
         }))
     }
 
