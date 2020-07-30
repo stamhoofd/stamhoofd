@@ -144,9 +144,9 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
-    tabs = ["general", "payments", "permissions"];
+    tabs = ["general", "payments"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld", "Toegang"];
+    tabLabels = ["Algemeen", "Lidgeld"];
 
     saving = false
 
