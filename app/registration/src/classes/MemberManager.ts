@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -233,6 +233,43 @@ export class MemberManagerStatic {
         }
 
         return Array.from(addresses.values())
+    }
+
+
+    getPaymentDetailed(payment: Payment) {
+        if (payment instanceof PaymentDetailed) {
+            return payment
+        }
+
+        const detailed = PaymentDetailed.create(Object.assign({
+            registrations: []
+        }, payment))
+
+        if (!MemberManager.members) {
+            return detailed
+        }
+        
+        const groups = OrganizationManager.organization.groups
+        for (const member of MemberManager.members) {
+            for (const registration of member.registrations) {
+                if (registration.payment.id != payment.id) {
+                    continue;
+                }
+
+                const group = groups.find(g => g.id == registration.groupId)
+                if (!group) {
+                    continue;
+                }
+                const reg = RegistrationWithMember.create(
+                    Object.assign({
+                        member,
+                        group
+                    }, registration)
+                );
+                detailed.registrations.push(reg)
+            }
+        }
+        return detailed
     }
 
 }

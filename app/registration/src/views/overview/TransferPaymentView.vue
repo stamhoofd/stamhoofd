@@ -10,7 +10,7 @@
                 <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! <span class="hide-smartphone">Je kan de QR-code scannen met de meeste bank apps.</span></p>
 
                 <div class="payment-split">
-                    <div class="hide-smartphone">
+                    <div class="hide-smartphone" v-if="payment.price > 0">
                         <img v-if="QRCodeUrl" :src="QRCodeUrl" />
                     </div>
                     <div>
@@ -20,11 +20,11 @@
                                     <td>Bedrag</td>
                                     <td>{{ payment.price | price }}</td>
                                 </tr>
-                                <tr>
+                                <tr v-if="payment.price > 0">
                                     <td>Bankrekening</td>
                                     <td>{{ organization.meta.iban }}</td>
                                 </tr>
-                                <tr>
+                                <tr v-if="payment.price > 0">
                                     <td>Gestructureerde mededeling</td>
                                     <td>{{ payment.transferDescription }}</td>
                                 </tr>
@@ -33,10 +33,10 @@
                     </div>
                 </div>
 
-                <p class="warning-box">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
+                <p class="warning-box" v-if="payment.price > 0">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
             </main>
 
-            <STToolbar>
+            <STToolbar v-if="!isPopup">
                 <button slot="right" class="button secundary" v-if="false">
                     Afdrukken
                 </button>
@@ -90,39 +90,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     step = 3
 
     get paymentDetailed() {
-        if (this.payment instanceof PaymentDetailed) {
-            return this.payment
-        }
-
-        const detailed = PaymentDetailed.create(Object.assign({
-            registrations: []
-        }, this.payment))
-
-        if (!MemberManager.members) {
-            return detailed
-        }
-        
-        const groups = OrganizationManager.organization.groups
-        for (const member of MemberManager.members) {
-            for (const registration of member.registrations) {
-                if (registration.payment.id != this.payment.id) {
-                    continue;
-                }
-
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                detailed.registrations.push(reg)
-            }
-        }
-        return detailed
+        return MemberManager.getPaymentDetailed(this.payment)
     }
 
     mounted() {

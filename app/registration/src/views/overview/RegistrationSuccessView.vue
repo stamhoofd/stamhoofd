@@ -48,6 +48,7 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     step = 4
 
     mounted() {
+        console.log(this.payment)
         MemberManager.loadMembers().catch(e => {
             console.error(e)
         })

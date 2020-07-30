@@ -9,7 +9,6 @@ export class OrganizationManagerStatic {
     get organization() {
         return SessionManager.currentSession!.organization!
     }
-    
 }
 
 export const OrganizationManager = new OrganizationManagerStatic()

@@ -26,13 +26,14 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, Spinner, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import TransferPaymentView from './TransferPaymentView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
+import RegistrationSuccessView from './RegistrationSuccessView.vue';
 
 @Component({
     components: {
@@ -99,10 +100,26 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
 
             const payment = response.data
 
+            // We need to update members, to enricht the payment too
+            try {
+                await MemberManager.loadMembers()
+            } catch (ee) {
+                // ignore
+                console.error(ee)
+            }
+
             this.loading = false
-            this.show(new ComponentWithProperties(TransferPaymentView, {
-                payment
-            }))
+
+            if (payment.status == PaymentStatus.Succeeded) {
+                this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                    payment: MemberManager.getPaymentDetailed(payment)
+                }))
+            } else {
+                this.show(new ComponentWithProperties(TransferPaymentView, {
+                    payment
+                }))
+            }
+            
         } catch (e) {
             console.error(e)
             // todo
