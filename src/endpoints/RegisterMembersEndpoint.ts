@@ -42,6 +42,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const now = new Date()
         let totalPrice = 0
 
+        if (request.body.members.length == 0) {
+            throw new SimpleError({
+                code: "empty_data",
+                message: "Oeps, je hebt niemand geselecteerd om in te schrijven"
+            })
+        }
+
         for (const register of request.body.members) {
             const member = members.find(m => m.id == register.memberId)
             if (!member) {
