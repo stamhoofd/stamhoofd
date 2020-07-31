@@ -1,5 +1,36 @@
 export enum UmbrellaOrganization {
-    ScoutsEnGidsenVlaanderen = "ScoutsEnGidsenVlaanderen",
     ChiroNationaal = "ChiroNationaal",
+    ScoutsEnGidsenVlaanderen = "ScoutsEnGidsenVlaanderen",
+    KSA = "KSA",
+    KLJ = "KLJ",
+    FOS = "FOSOpenScouting",
+    JeugdRodeKruis = "JeugdRodeKruis",
     Other = "Other",
+}
+
+
+export class UmbrellaOrganizationHelper {
+    static getName(umbrellaOrganization: UmbrellaOrganization): string {
+        switch(umbrellaOrganization) {
+        case UmbrellaOrganization.ChiroNationaal: return "Chiro Nationaal"
+        case UmbrellaOrganization.ScoutsEnGidsenVlaanderen: return "Scouts & Gidsen Vlaanderen"
+        case UmbrellaOrganization.KSA: return "KSA"
+        case UmbrellaOrganization.KLJ: return "KLJ"
+        case UmbrellaOrganization.FOS: return "FOS Open Scouting"
+        case UmbrellaOrganization.JeugdRodeKruis: return "Jeugd Rode Kruis"
+        case UmbrellaOrganization.Other: return "Andere"
+        }
+    }
+
+    static getList() {
+        const list = Object.values(UmbrellaOrganization)
+        const ob: { name: string; value: UmbrellaOrganization }[] = []
+        for (const item of list) {
+            ob.push({
+                name: this.getName(item),
+                value: item
+            })
+        }
+        return ob
+    }
 }
