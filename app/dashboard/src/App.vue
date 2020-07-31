@@ -34,14 +34,13 @@ function asyncComponent(component: () => Promise<any>, properties = {}) {
 export default class App extends Vue {
     root = new ComponentWithProperties(AuthenticatedView, {
         root: new ComponentWithProperties(SplitViewController, {
-            root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu" */ './views/dashboard/DashboardMenu.vue'), {})
+            root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
         }),
-        //root: new ComponentWithProperties(SplitViewController, {root: new ComponentWithProperties(DashboardMenu, {})}),
         loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
             root: new ComponentWithProperties(OrganizationSelectionView, {}) 
         }),
         noPermissionsRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+            root: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
         }),
     });
 
@@ -56,7 +55,6 @@ export default class App extends Vue {
             const key = parts[2];
             const secret = decodeURIComponent(parts[1]);
 
-            // todo: go to create organization page
             (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
@@ -75,11 +73,14 @@ export default class App extends Vue {
             }).setDisplayStyle("popup"));
         }
 
-        if (parts.length == 1 && parts[0] == 'create-organization') {
+        if (parts.length == 1 && parts[0] == 'aansluiten') {
             // todo: go to create organization page
             /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(CreateShop, {})
             }));*/
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, {
+                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ './views/signup/SignupGeneralView.vue'), {})
+            }).setDisplayStyle("popup"))
         }
 
         if (parts.length == 1 && parts[0] == 'reset-password') {

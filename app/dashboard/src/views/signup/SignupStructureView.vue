@@ -27,14 +27,8 @@
                         <option :value="null" disabled>
                             Maak een keuze
                         </option>
-                        <option value="ScoutsEnGidsenVlaanderen">
-                            Scouts &amp; Gidsen Vlaanderen
-                        </option>
-                        <option value="ChiroNationaal">
-                            Chiro Nationaal
-                        </option>
-                        <option value="Other">
-                            Andere
+                        <option :value="item.value" v-for="item in availableUmbrellaOrganizations" :key="item.value">
+                            {{ item.name }}
                         </option>
                     </select>
                 </STInputBox>
@@ -73,7 +67,7 @@ import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue";
 import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
 import STNavigationTitle from "@stamhoofd/components/src/navigation/STNavigationTitle.vue"
 import STToolbar from "@stamhoofd/components/src/navigation/STToolbar.vue"
-import { Organization, OrganizationGenderType,OrganizationType, UmbrellaOrganization, Version} from "@stamhoofd/structures"
+import { Organization, OrganizationGenderType,OrganizationType, UmbrellaOrganization, Version, OrganizationTypeHelper, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupYearDurationView from './SignupYearDurationView.vue';
@@ -168,72 +162,11 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
     }
 
     get availableTypes() {
-        return [
-            {
-                value: OrganizationType.Youth,
-                name: "Jeugdbeweging",
-            },
-            {
-                value: OrganizationType.Football,
-                name: "Voetbal",
-            },
-            {
-                value: OrganizationType.Tennis,
-                name: "Tennis",
-            },
-            {
-                value: OrganizationType.Golf,
-                name: "Golf",
-            },
-            {
-                value: OrganizationType.Athletics,
-                name: "Atletiek",
-            },
-            {
-                value: OrganizationType.Badminton,
-                name: "Badminton",
-            },
-            {
-                value: OrganizationType.Hockey,
-                name: "Hockey",
-            },
-            {
-                value: OrganizationType.Cycling,
-                name: "Wielrennen",
-            },
-            {
-                value: OrganizationType.Swimming,
-                name: "Zwemmen",
-            },
-            {
-                value: OrganizationType.Dance,
-                name: "Dans",
-            },
-            {
-                value: OrganizationType.Volleyball,
-                name: "Volleybal",
-            },
-            {
-                value: OrganizationType.Basketball,
-                name: "Basketbal",
-            },
-            {
-                value: OrganizationType.Judo,
-                name: "Judo",
-            },
-            {
-                value: OrganizationType.Sport,
-                name: "Andere sport",
-            },
-            {
-                value: OrganizationType.Student,
-                name: "Studentenvereniging",
-            },
-            {
-                value: OrganizationType.Other,
-                name: "Niet in lijst",
-            },
-        ];
+        return OrganizationTypeHelper.getList();
+    }
+
+    get availableUmbrellaOrganizations() {
+        return UmbrellaOrganizationHelper.getList();
     }
 }
 </script>

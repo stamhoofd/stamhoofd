@@ -10,8 +10,9 @@
 
     
         <main>
-            <h1>Groepen</h1>
-            <p>Hier kan je de groepen binnen jouw vereniging beheren en bewerken. Je kan instellen wie zich kan inschrijven bij welke groepen op basis van leeftijd en geslacht. Als op basis van deze restricties, leden toch in meerdere groepen passen, dan krijgen ze de keuze tijdens het inschrijven. Je kan deze daarna nog goedkeuren of verplaatsen</p>
+            <h1 v-if="groups.length == 0">Voeg je leeftijdsgroepen toe</h1>
+            <h1 v-else>Leeftijdsgroepen</h1>
+            <p>Je kan instellen wie zich kan inschrijven bij welk groep op basis van leeftijd en geslacht. Als leden toch in meerdere groepen passen, dan krijgen ze de keuze tijdens het inschrijven.</p>
             <STList>
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description" @click="editGroup(group)">
                     {{ group.settings.name }}

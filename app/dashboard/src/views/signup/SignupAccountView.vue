@@ -179,6 +179,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     (component.componentInstance() as any)?.pop()
 
                     const user =  NewUser.create({
+                        firstName: this.firstName,
+                        lastName: this.lastName,
                         email: this.email,
                         publicKey: userKeyPair.publicKey,
                         publicAuthSignKey: authSignKeyPair.publicKey,

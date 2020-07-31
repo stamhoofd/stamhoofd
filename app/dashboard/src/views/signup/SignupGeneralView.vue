@@ -50,7 +50,7 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -74,6 +74,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     expectedMemberCount = 150
     address: Address | null = null
+
+    mounted() {
+        HistoryManager.setUrl("/aansluiten")
+    }
 
     async goNext() {
         try {

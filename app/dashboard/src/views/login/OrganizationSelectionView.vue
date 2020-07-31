@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
 import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
@@ -72,8 +72,13 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        console.log("mounted organization selection")
+        HistoryManager.setUrl("/")
     }
+
+    activated() {
+        HistoryManager.setUrl("/")
+    }
+
 
     throttleUpdateResults = throttle(this.updateResults.bind(this), 1000);
 

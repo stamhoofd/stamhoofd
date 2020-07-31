@@ -9,7 +9,7 @@
             <input class="input search" placeholder="Zoeken" v-if="false">
         </div>
 
-        <div v-if="organization" class="">
+        <div v-if="groups.length > 0">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user"/>
                 <span>Leden</span>
@@ -28,7 +28,7 @@
                 {{ group.settings.name }}
             </button>
         </div>
-        <hr v-if="fullAccess">
+        <hr v-if="groups.length > 0">
         <div v-if="fullAccess">
             <button class="menu-button button heading" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
                 <span class="icon group"/>
@@ -48,7 +48,7 @@
                 <span>Leiding &amp; beheerders</span>
             </button>
         </div>
-        <hr>
+        <hr v-if="fullAccess">
         <div class="">
             <button class="menu-button button heading" @click="logout">
                 <span class="icon logout"/>
@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { SessionManager } from '@stamhoofd/networking';
@@ -71,18 +71,32 @@ import GroupMembersView from "./groups/GroupMembersView.vue";
 import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
-    organization: Organization = SessionManager.currentSession!.organization!
+    SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
 
+    get organization() {
+        return OrganizationManager.organization
+    }
+
     mounted() {
+        HistoryManager.setUrl("/")
         if (!this.splitViewController?.shouldCollapse()) {
-            this.openGroup(this.groups[0])
+            if (this.groups.length > 0) {
+                this.openGroup(this.groups[0])
+            } else {
+                this.manageGroups()
+            }
         }
+    }
+
+    activated() {
+        HistoryManager.setUrl("/")
     }
 
     get groups() {
