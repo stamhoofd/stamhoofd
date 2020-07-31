@@ -19,7 +19,11 @@ export class Group extends Model {
     @column({ type: "json", decoder: GroupSettings })
     settings: GroupSettings;
 
-    @column({ type: "json", decoder: GroupPrivateSettings })
+    @column({ 
+        type: "json", decoder: GroupPrivateSettings, beforeSave(value) {
+            return value ?? GroupPrivateSettings.create({})
+        } 
+    })
     privateSettings: GroupPrivateSettings;
 
     @column({ type: "string" })

@@ -2,9 +2,11 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, PermissionLevel,Permissions, Token as TokenStruct } from "@stamhoofd/structures";
+import { CreateOrganization, GroupGenderType,GroupSettings,OrganizationGenderType,OrganizationType, PermissionLevel,Permissions, Token as TokenStruct, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+import { group } from 'console';
 
+import { Group } from '../models/Group';
 import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
 import { Token } from '../models/Token';
@@ -135,6 +137,13 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await keychainItem.save()
         }
 
+        // Setup default groups if possible
+        if (organization.meta.type == OrganizationType.Youth && organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+            await this.createSGVGroups(organization)
+        } else if (organization.meta.type == OrganizationType.Youth && organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
+            await this.createChiroGroups(organization)
+        }
+
         // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
         const token = await Token.createToken(user)
 
@@ -145,5 +154,333 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         // An email has been send to confirm your email address
         return new Response(new TokenStruct(token));
+    }
+
+    async createSGVGroups(organization: Organization) {
+        const mixedType = organization.meta.genderType == OrganizationGenderType.OnlyMale ? 
+        GroupGenderType.OnlyMale : 
+            (organization.meta.genderType == OrganizationGenderType.OnlyFemale ? 
+                GroupGenderType.OnlyFemale : 
+                GroupGenderType.Mixed)
+
+        const kapoenen = new Group()
+        kapoenen.organizationId = organization.id
+        kapoenen.settings = GroupSettings.create({
+            name: "Kapoenen",
+            genderType: mixedType,
+            startDate: organization.meta.defaultStartDate,
+            endDate: organization.meta.defaultEndDate,
+            prices: organization.meta.defaultPrices,
+            minAge: 6,
+            maxAge: 7
+        })
+        await kapoenen.save();
+
+        const jin = new Group()
+        jin.organizationId = organization.id
+        jin.settings = GroupSettings.create({
+            name: "Jin",
+            genderType: mixedType,
+            startDate: organization.meta.defaultStartDate,
+            endDate: organization.meta.defaultEndDate,
+            prices: organization.meta.defaultPrices,
+            minAge: 17,
+            maxAge: 17
+        })
+        await jin.save();
+
+        if (organization.meta.genderType == OrganizationGenderType.Mixed) {
+            const wouters = new Group()
+            wouters.organizationId = organization.id
+            wouters.settings = GroupSettings.create({
+                name: "Wouters",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 8,
+                maxAge: 10
+            })
+            await wouters.save();
+
+            const jonggivers = new Group()
+            jonggivers.organizationId = organization.id
+            jonggivers.settings = GroupSettings.create({
+                name: "Jonggivers",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 11,
+                maxAge: 13
+            })
+            await jonggivers.save();
+
+            const givers = new Group()
+            givers.organizationId = organization.id
+            givers.settings = GroupSettings.create({
+                name: "Givers",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 16
+            })
+            await givers.save();
+        }
+
+        if (organization.meta.genderType == OrganizationGenderType.OnlyFemale || organization.meta.genderType == OrganizationGenderType.Separated) {
+            const wouters = new Group()
+            wouters.organizationId = organization.id
+            wouters.settings = GroupSettings.create({
+                name: "Kabouters",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 8,
+                maxAge: 10
+            })
+            await wouters.save();
+
+            const jonggivers = new Group()
+            jonggivers.organizationId = organization.id
+            jonggivers.settings = GroupSettings.create({
+                name: "Jonggidsen",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 11,
+                maxAge: 13
+            })
+            await jonggivers.save();
+
+            const givers = new Group()
+            givers.organizationId = organization.id
+            givers.settings = GroupSettings.create({
+                name: "Gidsen",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 16
+            })
+            await givers.save();
+        }
+
+        if (organization.meta.genderType == OrganizationGenderType.OnlyMale || organization.meta.genderType == OrganizationGenderType.Separated) {
+            const wouters = new Group()
+            wouters.organizationId = organization.id
+            wouters.settings = GroupSettings.create({
+                name: "Welpen",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 8,
+                maxAge: 10
+            })
+            await wouters.save();
+
+            const jonggivers = new Group()
+            jonggivers.organizationId = organization.id
+            jonggivers.settings = GroupSettings.create({
+                name: "Jongverkenners",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 11,
+                maxAge: 13
+            })
+            await jonggivers.save();
+
+            const givers = new Group()
+            givers.organizationId = organization.id
+            givers.settings = GroupSettings.create({
+                name: "Verkenners",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 16
+            })
+            await givers.save();
+        }
+    }
+
+    async createChiroGroups(organization: Organization) {
+        const mixedType = organization.meta.genderType == OrganizationGenderType.OnlyMale ? 
+        GroupGenderType.OnlyMale : 
+            (organization.meta.genderType == OrganizationGenderType.OnlyFemale ? 
+                GroupGenderType.OnlyFemale : 
+                GroupGenderType.Mixed)
+
+        const ribbels = new Group()
+        ribbels.organizationId = organization.id
+        ribbels.settings = GroupSettings.create({
+            name: "Ribbels",
+            genderType: mixedType,
+            startDate: organization.meta.defaultStartDate,
+            endDate: organization.meta.defaultEndDate,
+            prices: organization.meta.defaultPrices,
+            minAge: 6,
+            maxAge: 7
+        })
+        await ribbels.save();
+
+        const speelclub = new Group()
+        speelclub.organizationId = organization.id
+        speelclub.settings = GroupSettings.create({
+            name: "Speelclub",
+            genderType: mixedType,
+            startDate: organization.meta.defaultStartDate,
+            endDate: organization.meta.defaultEndDate,
+            prices: organization.meta.defaultPrices,
+            minAge: 8,
+            maxAge: 9
+        })
+        await speelclub.save();
+
+
+        const aspis = new Group()
+        aspis.organizationId = organization.id
+        aspis.settings = GroupSettings.create({
+            name: "Aspi's",
+            genderType: mixedType,
+            startDate: organization.meta.defaultStartDate,
+            endDate: organization.meta.defaultEndDate,
+            prices: organization.meta.defaultPrices,
+            minAge: 16,
+            maxAge: 17
+        })
+        await aspis.save();
+
+        if (organization.meta.genderType == OrganizationGenderType.Mixed) {
+            const rakwis = new Group()
+            rakwis.organizationId = organization.id
+            rakwis.settings = GroupSettings.create({
+                name: "Rakwi's",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 10,
+                maxAge: 11
+            })
+            await rakwis.save();
+
+            const titos = new Group()
+            titos.organizationId = organization.id
+            titos.settings = GroupSettings.create({
+                name: "Tito's",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 12,
+                maxAge: 13
+            })
+            await titos.save();
+
+            const ketis = new Group()
+            ketis.organizationId = organization.id
+            ketis.settings = GroupSettings.create({
+                name: "Keti's",
+                genderType: GroupGenderType.Mixed,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 15
+            })
+            await ketis.save();
+        }
+
+        if (organization.meta.genderType == OrganizationGenderType.OnlyFemale || organization.meta.genderType == OrganizationGenderType.Separated) {
+            const rakwis = new Group()
+            rakwis.organizationId = organization.id
+            rakwis.settings = GroupSettings.create({
+                name: "Kwiks",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 10,
+                maxAge: 11
+            })
+            await rakwis.save();
+
+            const titos = new Group()
+            titos.organizationId = organization.id
+            titos.settings = GroupSettings.create({
+                name: "Toppers",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 12,
+                maxAge: 13
+            })
+            await titos.save();
+
+            const ketis = new Group()
+            ketis.organizationId = organization.id
+            ketis.settings = GroupSettings.create({
+                name: "Tiptiens",
+                genderType: GroupGenderType.OnlyFemale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 15
+            })
+            await ketis.save();
+        }
+
+        if (organization.meta.genderType == OrganizationGenderType.OnlyMale || organization.meta.genderType == OrganizationGenderType.Separated) {
+            const rakwis = new Group()
+            rakwis.organizationId = organization.id
+            rakwis.settings = GroupSettings.create({
+                name: "Rakkers",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 10,
+                maxAge: 11
+            })
+            await rakwis.save();
+
+            const titos = new Group()
+            titos.organizationId = organization.id
+            titos.settings = GroupSettings.create({
+                name: "Tippers",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 12,
+                maxAge: 13
+            })
+            await titos.save();
+
+            const ketis = new Group()
+            ketis.organizationId = organization.id
+            ketis.settings = GroupSettings.create({
+                name: "Kerels",
+                genderType: GroupGenderType.OnlyMale,
+                startDate: organization.meta.defaultStartDate,
+                endDate: organization.meta.defaultEndDate,
+                prices: organization.meta.defaultPrices,
+                minAge: 14,
+                maxAge: 15
+            })
+            await ketis.save();
+        }
     }
 }
