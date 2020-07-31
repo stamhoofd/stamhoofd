@@ -1,6 +1,4 @@
-
-
-import { SessionManager } from '../../../../shared/networking'
+import { SessionManager } from '@stamhoofd/networking'
 
 /**
  * Convenient access to the organization of the current session

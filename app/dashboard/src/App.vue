@@ -6,17 +6,23 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
-
-import DashboardMenu from './views/dashboard/DashboardMenu.vue';
+import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
+import DashboardMenu from './views/dashboard/DashboardMenu.vue'
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import AcceptInviteView from './views/invite/AcceptInviteView.vue';
 import { SessionManager, NetworkManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
-import NoPermissionsView from './views/login/NoPermissionsView.vue';
+
+function asyncComponent(component: () => Promise<any>, properties = {}) {
+    return new ComponentWithProperties(PromiseView, {
+        promise: async function() {
+            const c = (await component()).default
+            return new ComponentWithProperties(c, properties)
+        }
+    })
+}
 
 // kick off the polyfill!
 //smoothscroll.polyfill();
@@ -27,17 +33,20 @@ import NoPermissionsView from './views/login/NoPermissionsView.vue';
 })
 export default class App extends Vue {
     root = new ComponentWithProperties(AuthenticatedView, {
-        root: new ComponentWithProperties(SplitViewController, {root: new ComponentWithProperties(DashboardMenu, {})}),
+        root: new ComponentWithProperties(SplitViewController, {
+            root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu" */ './views/dashboard/DashboardMenu.vue'), {})
+        }),
+        //root: new ComponentWithProperties(SplitViewController, {root: new ComponentWithProperties(DashboardMenu, {})}),
         loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
             root: new ComponentWithProperties(OrganizationSelectionView, {}) 
         }),
         noPermissionsRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: new ComponentWithProperties(NoPermissionsView, {}) 
+            root: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
         }),
-    })
+    });
 
     mounted() {
-         HistoryManager.activate();
+        HistoryManager.activate();
 
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
@@ -56,6 +65,7 @@ export default class App extends Vue {
                             path: "/invite/"+key,
                             decoder: Invite as Decoder<Invite>
                         })
+                        const AcceptInviteView = await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue');
                         return new ComponentWithProperties(AcceptInviteView, {
                             invite: response.data,
                             secret

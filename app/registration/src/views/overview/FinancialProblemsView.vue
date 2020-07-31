@@ -27,7 +27,7 @@ import { STNavigationBar, STToolbar, STList, STListItem, Spinner, Checkbox, Erro
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import TransferPaymentView from './TransferPaymentView.vue';

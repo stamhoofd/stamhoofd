@@ -63,7 +63,7 @@ import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, 
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';

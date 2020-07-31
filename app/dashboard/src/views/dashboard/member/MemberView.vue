@@ -33,8 +33,6 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Gender } from "@stamhoofd-frontend/models";
-import { Member } from "@stamhoofd-frontend/models";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
@@ -44,7 +42,7 @@ import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Gender } from '@stamhoofd/structures';
 
 @Component({
     components: {

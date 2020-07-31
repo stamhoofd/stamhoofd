@@ -1,5 +1,6 @@
 {
     "name": "@stamhoofd/workers",
     "version": "1.0.0",
-    "private": true
+    "private": true,
+    "sideEffects": false
 }

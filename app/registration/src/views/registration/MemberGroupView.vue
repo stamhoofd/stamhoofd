@@ -60,7 +60,7 @@ import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, S
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {

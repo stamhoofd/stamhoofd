@@ -56,12 +56,11 @@ import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, 
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
 import { Formatter } from '@stamhoofd/utility';
-import QRCode from 'qrcode'
 
 @Component({
     components: {
@@ -98,18 +97,19 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         this.generateQRCode()
     }
 
-    generateQRCode() {
-        const iban = this.organization.meta.iban ?? "";
-        const creditor = OrganizationManager.organization.name
-        const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nLidgeld betalen";
+    async generateQRCode() {
+        try {
+            const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
-        QRCode.toDataURL(message)
-            .then(url => {
-                this.QRCodeUrl = url
-            })
-            .catch(err => {
-                console.error(err)
-            })
+            const iban = this.organization.meta.iban ?? "";
+            const creditor = OrganizationManager.organization.name
+            const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nLidgeld betalen";
+
+            this.QRCodeUrl = await QRCode.toDataURL(message)
+        } catch (e) {
+            console.error(e)
+            return;
+        }
     }
 
     goNext() {

@@ -50,7 +50,6 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Member } from "@stamhoofd-frontend/models";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STToolbar, STInputBox } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";

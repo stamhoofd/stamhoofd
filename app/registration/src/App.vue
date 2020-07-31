@@ -9,16 +9,12 @@ import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import LoginView from './views/login/LoginView.vue';
-import OverviewView from './views/overview/OverviewView.vue';
 import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import { MemberManager } from './classes/MemberManager';
-import RegistrationOverviewView from './views/overview/RegistrationOverviewView.vue';
 
-// kick off the polyfill!
-//smoothscroll.polyfill();
 @Component({
     components: {
         ComponentWithPropertiesInstance
@@ -49,12 +45,14 @@ export default class App extends Vue {
                             await MemberManager.loadMembers();
 
                             if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
+                                const OverviewView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
                                 return new ComponentWithProperties(ModalStackComponent, {
                                     root: new ComponentWithProperties(RegistrationSteps, { 
                                         root: new ComponentWithProperties(OverviewView, {}),
                                     })
                                 })
                             }
+                            const RegistrationOverviewView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/RegistrationOverviewView.vue")).default;
                             return new ComponentWithProperties(ModalStackComponent, {
                                 root: new ComponentWithProperties(RegistrationSteps, { 
                                     root: new ComponentWithProperties(RegistrationOverviewView, {}),

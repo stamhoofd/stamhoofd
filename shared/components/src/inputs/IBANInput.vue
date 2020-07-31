@@ -71,7 +71,7 @@ export default class IBANInput extends Vue {
             return true
         }
 
-        const ibantools = await import('ibantools');
+        const ibantools = await import(/* webpackChunkName: "ibantools" */ 'ibantools');
         const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
        
         

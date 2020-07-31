@@ -39,7 +39,6 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ParentTypeHelper } from "@stamhoofd-frontend/models";
 import { ContextMenu } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
@@ -47,7 +46,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
 
 @Component({
     components: {

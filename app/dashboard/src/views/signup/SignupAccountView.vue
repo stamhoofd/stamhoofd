@@ -159,67 +159,70 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }).setDisplayStyle("overlay");
 
             myWorker.onmessage = async (e) => {
-                const {
-                    userKeyPair,
-                    organizationKeyPair,
-                    authSignKeyPair,
-                    authEncryptionSecretKey
-                } = e.data;
+                try {
+                    const {
+                        userKeyPair,
+                        organizationKeyPair,
+                        authSignKeyPair,
+                        authEncryptionSecretKey
+                    } = e.data;
+                    console.log('Message received from worker');
 
-                const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
-                const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
+                    const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
+                    const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
 
-                console.log(e.data)
+                    const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
+                    const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
+                    
+                    // todo
+                    myWorker.terminate();
+                    (component.componentInstance() as any)?.pop()
 
-                const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
-                const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
-                
-                console.info(e)
-                // todo
-                console.log('Message received from worker');
-                myWorker.terminate();
-                (component.componentInstance() as any)?.pop()
+                    const user =  NewUser.create({
+                        email: this.email,
+                        publicKey: userKeyPair.publicKey,
+                        publicAuthSignKey: authSignKeyPair.publicKey,
+                        authSignKeyConstants,
+                        authEncryptionKeyConstants,
+                        encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey)
+                    });
 
-                const user =  NewUser.create({
-                    email: this.email,
-                    publicKey: userKeyPair.publicKey,
-                    publicAuthSignKey: authSignKeyPair.publicKey,
-                    authSignKeyConstants,
-                    authEncryptionKeyConstants,
-                    encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey)
-                });
+                    const organization = this.organization
+                    organization.publicKey = organizationKeyPair.publicKey
 
-                const organization = this.organization
-                organization.publicKey = organizationKeyPair.publicKey
+                    const item = KeychainItem.create({
+                        publicKey: organization.publicKey,
+                        encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
+                    })
 
-                const item = KeychainItem.create({
-                    publicKey: organization.publicKey,
-                    encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
-                })
+                    // Do netwowrk request to create organization
+                    const response = await NetworkManager.server.request({
+                        method: "POST",
+                        path: "/organizations",
+                        body: CreateOrganization.create({
+                            organization: this.organization,
+                            user,
+                            keychainItems: [
+                                item
+                            ]
+                        }),
+                        decoder: Token
+                    })
 
-                // Do netwowrk request to create organization
-                const response = await NetworkManager.server.request({
-                    method: "POST",
-                    path: "/organizations",
-                    body: CreateOrganization.create({
-                        organization: this.organization,
-                        user,
-                        keychainItems: [
-                            item
-                        ]
-                    }),
-                    decoder: Token
-                })
+                    const session = new Session(organization.id)
+                    session.organization = organization
+                    session.setToken(response.data)
+                    Keychain.addItem(item)
+                    session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
+                    SessionManager.setCurrentSession(session)
 
-                const session = new Session(organization.id)
-                session.organization = organization
-                session.setToken(response.data)
-                Keychain.addItem(item)
-                session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
-                SessionManager.setCurrentSession(session)
-
-                this.loading = false;
-                this.dismiss({ force: true })
+                    this.loading = false;
+                    this.dismiss({ force: true })
+                } catch (e) {
+                    console.error(e);
+                    this.loading = false;
+                    this.errorBox = new ErrorBox(e)
+                }
             }
 
              myWorker.onerror = (e) => {

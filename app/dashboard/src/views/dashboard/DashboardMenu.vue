@@ -62,7 +62,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { OrganizationFactory } from "@stamhoofd-frontend/models";
 import { SessionManager } from '@stamhoofd/networking';
 import { Organization, Group } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";

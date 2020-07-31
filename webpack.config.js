@@ -10,7 +10,11 @@ module.exports = {
     stats: 'none',
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension (so that you don't have to add it explicitly)
-        extensions: [".ts", ".tsx", ".js"]
+        extensions: [".ts", ".tsx", ".js"],
+        alias: {
+            vue$: "vue/dist/vue.runtime.esm.js", // we only need vue runtime, no compilation
+            // ...
+        }
     },
     output: {
         // Production
@@ -58,7 +62,9 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    'style-loader',
+                    process.env.NODE_ENV === 'production' ? 
+                        MiniCssExtractPlugin.loader : // If you enable this, HMR won't work. Replace it with a style loader
+                        'style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     { 
                         loader: 'postcss-loader', 
@@ -73,8 +79,9 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: [
-                    //MiniCssExtractPlugin.loader, // If you enable this, HMR won't work. Replace it with a style loader
-                    'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
+                    process.env.NODE_ENV === 'production' ? 
+                        MiniCssExtractPlugin.loader : // If you enable this, HMR won't work. Replace it with a style loader
+                        'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     {
                         loader: 'postcss-loader',

@@ -51,7 +51,7 @@ import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigat
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 const throttle = (func, limit) => {

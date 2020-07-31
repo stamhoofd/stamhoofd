@@ -77,7 +77,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         return true
     }
 
-    isAlreadySet() {
+    get isAlreadySet() {
         return !!(OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain)
     }
 

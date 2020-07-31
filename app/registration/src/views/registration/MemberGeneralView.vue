@@ -70,7 +70,7 @@ import { Address, Country, Organization, OrganizationMetaData, OrganizationType,
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from './MemberGroupView.vue';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import EmergencyContactView from './EmergencyContactView.vue';

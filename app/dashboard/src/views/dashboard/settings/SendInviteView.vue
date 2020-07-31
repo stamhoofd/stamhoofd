@@ -44,7 +44,6 @@ import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, 
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import QRCode from 'qrcode'
 
 @Component({
     components: {
@@ -102,14 +101,14 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
         this.generateQRCode()
     }
 
-    generateQRCode() {
-        QRCode.toDataURL(this.url, { margin: 0 })
-            .then(url => {
-                this.QRCodeUrl = url
-            })
-            .catch(err => {
-                console.error(err)
-            })
+    async generateQRCode() {
+         try {
+            const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
+            this.QRCodeUrl = await QRCode.toDataURL(this.url, { margin: 0 })
+        } catch (e) {
+            console.error(e)
+            return;
+        }
     }
 
     copyElement(event) {

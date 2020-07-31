@@ -70,7 +70,7 @@ export default class PhoneInput extends Vue {
             return true
         }
         try {
-            const libphonenumber = await import("libphonenumber-js")
+            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
             const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
 
             if (!phoneNumber || !phoneNumber.isValid()) {
