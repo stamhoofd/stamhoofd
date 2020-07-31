@@ -1,5 +1,4 @@
 import { KeyConstants } from "@stamhoofd/structures"
-import sodium, { StringKeyPair } from "libsodium-wrappers";
 
 import { Sodium } from './Sodium'
 
@@ -11,7 +10,7 @@ export enum SensitivityLevel {
 
 export class KeyConstantsHelper {
     static async create(sensitivityLevel: SensitivityLevel): Promise<KeyConstants> {
-        await Sodium.loadIfNeeded();
+        const sodium = await Sodium.getSodium()
 
         // Since the password hash needs to be generated on the client side, we use maximum operations
         // https://libsodium.gitbook.io/doc/password_hashing/default_phf#guidelines-for-choosing-the-parameters
@@ -53,7 +52,7 @@ export class KeyConstantsHelper {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
-        await Sodium.loadIfNeeded();
+        const sodium = await Sodium.getSodium()
 
         const salt = Buffer.from(constants.salt, "base64")
         const opslimit = constants.opslimit // Increase to make the generation of the key slower
@@ -78,7 +77,7 @@ export class KeyConstantsHelper {
         }
         // Todo: validate salt, to check if it is not forged somehow
 
-        await Sodium.loadIfNeeded();
+        const sodium = await Sodium.getSodium()
 
         const salt = Buffer.from(constants.salt, "base64")
         const opslimit = constants.opslimit // Increase to make the generation of the key slower
@@ -103,7 +102,7 @@ export class KeyConstantsHelper {
         }
         // Todo: validate salt, to check if it is not forged somehow
 
-        await Sodium.loadIfNeeded();
+        const sodium = await Sodium.getSodium()
 
         const salt = Buffer.from(constants.salt, "base64")
         const opslimit = constants.opslimit // Increase to make the generation of the key slower
