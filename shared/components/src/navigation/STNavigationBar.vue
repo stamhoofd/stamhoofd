@@ -139,7 +139,7 @@ export default class STNavigationBar extends Vue {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
-        word-wrap: none;
+        white-space: nowrap;
         opacity: 0;
         transition: opacity 0.2s;
         @extend .style-title-small;

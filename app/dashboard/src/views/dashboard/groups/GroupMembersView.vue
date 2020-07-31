@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view group-members-view">
+    <div class="st-view group-members-view background">
         <STNavigationBar :sticky="false">
             <template #left>
                 <BackButton slot="left" v-if="canPop" @click="pop"/>
@@ -9,9 +9,9 @@
                 </STNavigationTitle>
             </template>
             <template #right>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken">
+                <input v-model="searchQuery" class="input search hide-smartphone" placeholder="Zoeken">
 
-                <select v-model="selectedFilter" class="input">
+                <select v-model="selectedFilter" class="input hide-smartphone">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">
                         {{ filter.getName() }}
                     </option>
@@ -46,7 +46,7 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('info')">
+                        <th @click="toggleSort('info')" class="hide-smartphone">
                             Leeftijd
                             <span
                                 class="sort-arrow"
@@ -56,7 +56,7 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('status')">
+                        <th @click="toggleSort('status')" class="hide-smartphone">
                             Status
                             <span
                                 class="sort-arrow"
@@ -82,10 +82,10 @@
                             />
                             {{ member.member.details.name }}
                         </td>
-                        <td class="minor">
+                        <td class="minor hide-smartphone">
                             {{ member.member.details.age }} jaar
                         </td>
-                        <td>{{ member.member.info }}</td>
+                        <td class="hide-smartphone">{{ member.member.info }}</td>
                         <td>
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
@@ -107,7 +107,7 @@
                 <button class="button secundary" @click="openSamenvatting">
                     Samenvatting
                 </button><button class="button primary" @click="openMail">
-                    Mailen
+                    <span class="dropdown-text">Mailen</span>
                     <div class="dropdown" @click.stop="openMailDropdown" />
                 </button>
             </template>
@@ -452,8 +452,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .group-members-view {
-    background: $color-white;
-
     .new-member-bubble {
         display: inline-block;
         vertical-align: middle;
@@ -564,7 +562,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             &:first-child {
                 padding: 0;
-                padding-left: 40px - 10px - 5px;
+                padding-left: 40px - 10px;
+                padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
                 white-space: nowrap;
                 width: 1px;
 
@@ -575,6 +574,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }
             &:last-child {
                 padding-right: 40px;
+                padding-right: calc(var(--st-horizontal-padding, 40px));
                 text-align: right;
             }
         }

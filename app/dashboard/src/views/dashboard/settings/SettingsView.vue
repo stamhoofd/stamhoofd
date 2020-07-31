@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view" id="settings-view">
+    <div class="st-view background" id="settings-view">
         <STNavigationBar title="Instellingen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
@@ -276,7 +276,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         dd {
             font-family: monospace;
             white-space: nowrap;
-            word-wrap: none;
         }
     }
 }

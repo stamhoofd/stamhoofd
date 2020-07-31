@@ -115,7 +115,6 @@ export default class SegmentedControl extends Vue {
                 text-overflow: ellipsis;
                 opacity: 1;
                 overflow: hidden;
-                word-wrap: none;
                 white-space: nowrap;
                 transition: opacity 0.25s;
             }
@@ -133,7 +132,6 @@ export default class SegmentedControl extends Vue {
                 text-overflow: ellipsis;
                 font-weight: 600;
                 overflow: hidden;
-                word-wrap: none;
                 white-space: nowrap;
                 opacity: 0;
                 transition: opacity 0.25s;

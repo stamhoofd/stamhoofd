@@ -4,7 +4,7 @@
             <template #left>
                 <slot name="left" v-bind:step="step" v-bind:canPop="canPop">
                     <transition name="move" mode="out-in">
-                        <div v-if="!canPop" id="logo" alt="Stamhoofd" />
+                        <div v-if="!canPop" id="logo" class="responsive" alt="Stamhoofd" />
                         <div v-else @click.prevent="goBack()">
                             Terug
                         </div>

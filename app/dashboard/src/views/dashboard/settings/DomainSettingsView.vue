@@ -208,7 +208,6 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         dd {
             font-family: monospace;
             white-space: nowrap;
-            word-wrap: none;
         }
     }
 }

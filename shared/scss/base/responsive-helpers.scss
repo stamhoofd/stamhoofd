@@ -1,5 +1,10 @@
 .hide-smartphone {
     @media (max-width: 450px) {
-        display: none;
+        display: none !important;
+    }
+}
+.only-smartphone {
+    @media (min-width: 451px) {
+        display: none !important;
     }
 }

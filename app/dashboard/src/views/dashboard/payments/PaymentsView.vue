@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view background">
         <STNavigationBar title="Overschrijvingen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
 
