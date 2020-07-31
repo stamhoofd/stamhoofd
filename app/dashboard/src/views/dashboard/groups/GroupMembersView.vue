@@ -92,6 +92,8 @@
                     </tr>
                 </tbody>
             </table>
+
+            <p class="warning-box" v-if="!loading && members.length == 0">Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.</p>
         </main>
 
         <STToolbar>
@@ -102,7 +104,7 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary">
+                <button class="button secundary" @click="openSamenvatting">
                     Samenvatting
                 </button><button class="button primary" @click="openMail">
                     Mailen
@@ -117,7 +119,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { TooltipDirective as Tooltip, CenteredMessage } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { STNavigationTitle, Spinner, BackButton } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
@@ -437,6 +439,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             members: this.getSelectedMembers(),
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    openSamenvatting() {
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "health" }).setDisplayStyle("overlay"))
     }
 }
 </script>

@@ -274,6 +274,13 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
         this.sending = false
     }
+
+    shouldNavigateAway() {
+        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
+            return true;
+        }
+        return false;
+    }
 }
 </script>
 

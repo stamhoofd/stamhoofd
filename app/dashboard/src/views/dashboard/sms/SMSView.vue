@@ -193,6 +193,13 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
         window.location.href = url;
     }
+
+    shouldNavigateAway() {
+        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
+            return true;
+        }
+        return false;
+    }
 }
 </script>
 

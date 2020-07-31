@@ -3,8 +3,9 @@
         <div class="centered-message-container">
             <div class="centered-message">
                 <Spinner v-if="type == 'loading'" class="center" />
-                <img v-if="type == 'error'" src="~@stamhoofd/assets/images/icons/color/error.svg" class="center">
-                <img v-if="type == 'success'" src="~@stamhoofd/assets/images/icons/color/success.svg" class="center">
+                <img v-else-if="type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg" />
+                <img v-else-if="type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg" />
+                <span v-else-if="type != 'none'" :class="'center icon '+type" />
                 <h1>{{ title }}</h1>
                 <p>{{ description }}</p>
 
@@ -94,7 +95,7 @@ export default class CenteredMessage extends Vue {
     > *:first-child {
         margin-top: 10px;
     }
-    > img {
+    > .center {
         display: block;
         margin: 0 auto;
     }
