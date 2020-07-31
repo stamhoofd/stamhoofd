@@ -17,11 +17,9 @@ module.exports = {
         }
     },
     output: {
-        // Production
-        //filename: '[name].[contenthash].js',
-        // Development:
-        filename: '[name].[hash].js',
-        chunkFilename: '[name].[hash].js',
+        filename: process.env.NODE_ENV === 'production' ? '[name].[contenthash].js' : '[name].[hash].js',
+        chunkFilename: process.env.NODE_ENV === 'production' ? '[name].[contenthash].js' : '[name].[hash].js',
+        globalObject: 'this' // needed for webworkers
     },
     devServer: {
         contentBase: './dist',

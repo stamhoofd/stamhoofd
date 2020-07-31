@@ -14,7 +14,6 @@ module.exports = merge(common, {
     entry: "./src/index.ts",
     output: {
         path: path.resolve(__dirname, "dist"),
-        globalObject: 'this'
     },
     plugins: [
         new HtmlWebpackPlugin({
