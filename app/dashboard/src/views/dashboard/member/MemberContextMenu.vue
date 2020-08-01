@@ -1,6 +1,6 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem>Groep wijzigen</ContextMenuItem>
+        <ContextMenuItem @click="changeGroup">Groep wijzigen</ContextMenuItem>
 
         <template v-if="member.details && member.details.parents.length > 0">
             <ContextMenuLine />
@@ -32,14 +32,14 @@
         </template>
 
         <ContextMenuLine />
-        <ContextMenuItem>Uitschrijven</ContextMenuItem>
+        <ContextMenuItem @click="deleteRegistration">Uitschrijven</ContextMenuItem>
     </ContextMenu>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu } from "@stamhoofd/components";
+import { ContextMenu, CenteredMessage } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -89,6 +89,14 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
             initialSmsFilter: smsFilter,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    deleteRegistration() {
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
+    }
+
+    changeGroup() {
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
     }
 }
 </script>
