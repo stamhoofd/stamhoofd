@@ -60,6 +60,7 @@
 
         <STToolbar>
             <template slot="right">
+                <button class="button secundary" v-if="!isNew && !user" @click="resendInvite">Opnieuw versturen</button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="save" v-if="isNew">
                         Toevoegen
@@ -144,8 +145,10 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     onUpdateInvite: ((invite: Invite | null) => void) | null
 
+    forceCreate = false
+
     get isNew() {
-        return !this.editInvite && !this.editUser
+        return this.forceCreate || (!this.editInvite && !this.editUser)
     }
 
     get organization() {
@@ -170,7 +173,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     get invite() {
-        if (this.editInvite) {
+        if (this.editInvite && !this.forceCreate) {
             if (this.patchInvite) {
                 return this.editInvite.patch(this.patchInvite)
             }
@@ -261,7 +264,9 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     decoder: Invite as Decoder<Invite>
                 })
 
-                if (this.onUpdateInvite) this.onUpdateInvite(response.data);
+                if (this.onUpdateInvite) {
+                    this.onUpdateInvite(response.data);
+                }
 
                 this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
                 this.saving = false
@@ -329,17 +334,17 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
        
     }
 
-    async deleteMe() {
+    async deleteMe(force: boolean = false) {
         if (this.deleting || this.saving) {
-            return;
+            return false;
         }
         
         if (this.isNew) {
-            return;
+            return false;
         }
 
-        if (!confirm("Ben je zeker dat je deze beheerder wilt verwijderen?")) {
-            return;
+        if (!force && !confirm("Ben je zeker dat je deze beheerder wilt verwijderen?")) {
+            return false;
         }
 
         this.deleting = true;
@@ -352,9 +357,14 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     path: "/user/"+this.user.id,
                 })
 
-                if (this.onUpdateUser) this.onUpdateUser(null);
-                this.pop({ force: true })
-                this.saving = false
+                if (this.onUpdateUser) {
+                    this.onUpdateUser(null);
+                }
+                if (!force) {
+                    this.pop({ force: true })
+                }
+                this.deleting = false
+                return true;
                 
             } else {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
@@ -362,15 +372,21 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     path: "/invite/"+this.editInvite!.id,
                 })
 
-                if (this.onUpdateInvite) this.onUpdateInvite(null);
-                this.pop({ force: true })
-                this.saving = false
+                if (this.onUpdateInvite) {
+                    this.onUpdateInvite(null);
+                }
+                if (!force) {
+                    this.pop({ force: true })
+                }
+                this.deleting = false
+                return true;
             }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
-            this.saving = false
+            this.deleting = false
         }
+        return false;
     }
 
     /// --------------------------------------------------------
@@ -501,9 +517,23 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             this.addPermissionsPatch({ level: this.writeAccess ? PermissionLevel.Write : PermissionLevel.None })
         }
     }
-   
 
+    async resendInvite() {
+        // Delete invite and create it again
+        this.createInvite = NewInvite.create({
+            keychainItems: null,
+            memberIds: this.invite.memberIds,
+            permissions: this.invite.permissions,
+            userDetails: this.invite.userDetails
+        })
 
+        // First delete
+        if (await this.deleteMe(true)) {
+            this.forceCreate = true
+            await this.save()
+            this.forceCreate = false
+        }
+    }
 }
 </script>
 

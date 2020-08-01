@@ -135,6 +135,11 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
                     if (i != -1) {
                         this.invites.splice(i, 1, ...patched ? [patched] : [])
+                    } else {
+                        // Create the invite (it has been regenerated)
+                        if (patched) {
+                            this.invites.push(patched)
+                        }
                     }
                 }
             }),
