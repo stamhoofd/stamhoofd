@@ -42,11 +42,13 @@
 
                         <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
                         <p class="style-description-small">{{ payment.getMemberNames() }}</p>
-                        <p class="style-description-small">Via overschrijving {{ payment.transferDescription }}</p>
+                        <p class="style-description-small" v-if="payment.status == 'Succeeded'">Betaald</p>
+                        <p class="style-description-small" v-else>Betaal via overschrijving {{ payment.transferDescription }}</p>
 
                         <template slot="right">
                             {{ payment.price | price }}
-                            <span class="icon arrow-right" />
+                            <span v-if="payment.status == 'Succeeded'" class="icon green success" />
+                            <span v-else class="icon arrow-right" />
                         </template>
                     </STListItem>
                 </STList>
