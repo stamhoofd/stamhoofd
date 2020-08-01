@@ -22,6 +22,7 @@
     @media (max-width: 400px) {
         --st-horizontal-padding: 15px;
     }
+    
 }
 
 body,
@@ -33,4 +34,7 @@ html {
     -moz-osx-font-smoothing: grayscale;
     color: $color-dark;
     -webkit-overflow-scrolling: auto;
+
+    /* Disabel text resize as this doesn't work across animations */
+    text-size-adjust: none;
 }
