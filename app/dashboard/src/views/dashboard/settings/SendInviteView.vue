@@ -82,6 +82,9 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     get url() {
+        if (process.env.NODE_ENV == "production") {
+            return "https://stamhoofd.app/invite/"+encodeURIComponent(this.secret)+"/"+encodeURIComponent(this.invite.key)
+        }
         return "https://dashboard.stamhoofd.dev/invite/"+encodeURIComponent(this.secret)+"/"+encodeURIComponent(this.invite.key)
     }
 

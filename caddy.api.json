@@ -1,0 +1,71 @@
+{
+    "apps": {
+        "http": {
+            "servers": {
+                "stamhoofd.dev": {
+                    "listen": [
+                        ":443"
+                    ],
+                    "routes": [
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "api.stamhoofd.app",
+                                        "*.api.stamhoofd.app"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:9091"
+                                        }
+                                    ],
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "x-real-ip": [
+                                                    "{http.request.remote}"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "tls": {
+            "automation": {
+                "policies": [
+                    {
+                        "subjects": [
+                            "api.stamhoofd.app",
+                            "*.api.stamhoofd.app"
+                        ],
+                        "on_demand": false,
+                        "issuer": {
+                            "module": "acme",
+                            "challenges": {
+                                "dns": {
+                                    "provider": {
+                                        "name": "lego_deprecated",
+                                        "provider_name": "digitalocean"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "on_demand": true
+                    }
+                ]
+            }
+        }
+    }
+}

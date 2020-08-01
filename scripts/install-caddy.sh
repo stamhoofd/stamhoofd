@@ -1,19 +1,29 @@
 set -e
 
-# install go
+# Download from Website with lego-deprecated
+chmod +x caddy
+mv caddy /usr/bin/
 
-# install xcaddy
-go get -u github.com/caddyserver/xcaddy/cmd/xcaddy
+caddy version
 
-# install caddy with plugins
-xcaddy build --with github.com/caddy-dns/lego-deprecated
 
-# Move caddy to a folder (macos for now)
-# macos: /usr/local/bin/
-mv caddy /usr/local/bin/caddy
+sudo groupadd --system caddy
+sudo useradd --system \
+    --gid caddy \
+    --create-home \
+    --home-dir /var/lib/caddy \
+    --shell /usr/sbin/nologin \
+    --comment "Caddy web server" \
+    caddy
 
-# todo: install to systemd
+# systemd service create
 
-# Build caddy for server
-# docs: https://golang.org/doc/install/source#environment
-#GOOS=linux GOARCH=arm GOARM=6 xcaddy build --with github.com/caddy-dns/lego-deprecated
+# add 
+# [Service]
+# Environment="DO_AUTH_TOKEN=XXXXX"
+
+sudo systemctl daemon-reload
+sudo systemctl enable caddy
+sudo systemctl start caddy
+
+systemctl status caddy

@@ -63,7 +63,7 @@ export default class App extends Vue {
                             path: "/invite/"+key,
                             decoder: Invite as Decoder<Invite>
                         })
-                        const AcceptInviteView = await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue');
+                        const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
                         return new ComponentWithProperties(AcceptInviteView, {
                             invite: response.data,
                             secret

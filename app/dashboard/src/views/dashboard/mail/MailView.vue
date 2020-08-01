@@ -268,7 +268,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 path: "/email",
                 body: emailRequest,
             })
-            this.pop({ force: true })
+            this.dismiss({ force: true })
         } catch (e) {
             console.error(e)
         }
