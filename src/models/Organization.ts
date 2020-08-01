@@ -122,7 +122,7 @@ export class Organization extends Model {
 
     /**
      * Get an Organization by looking at the host of a request
-     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.be
+     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
     static async fromApiHost(host: string): Promise<Organization> {
         const splitted = host.split('.')
@@ -151,9 +151,9 @@ export class Organization extends Model {
     }
 
     getDefaultHost(): string {
-        const defaultDomain = process.env.HOSTNAME;
+        const defaultDomain = process.env.REGISTRATION_HOSTNAME;
         if (!defaultDomain) {
-            throw new Error("Missing hostname in environment")
+            throw new Error("Missing REGISTRATION_HOSTNAME in environment")
         }
         return this.uri + "." + defaultDomain;
     }

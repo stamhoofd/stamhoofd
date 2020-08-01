@@ -88,7 +88,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.CNAME,
                     name: organization.registerDomain+".",
-                    value: "domains."+process.env.HOSTNAME!+"."
+                    value: "domains."+process.env.REGISTRATION_HOSTNAME!+"."
                 }))
             }
 
