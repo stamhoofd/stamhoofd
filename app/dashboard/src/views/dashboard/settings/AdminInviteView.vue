@@ -2,7 +2,7 @@
     <div class="st-view" id="settings-view">
         <STNavigationBar title="Beheerder">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button class="button text" slot="right" v-if="!isNew" @click="deleteMe">
+            <button class="button text" slot="right" v-if="!isNew" @click="deleteMe(false)">
                 <span class="icon trash"/>
                 <span>Verwijderen</span>
             </button>
@@ -416,7 +416,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     addInvitePatch(patch: PartialWithoutMethods<PatchType<Invite>>) {
-        if (!this.editInvite) {
+        if (!this.editInvite || this.forceCreate) {
 
             this.createInvite = this.createInvite.patch(NewInvite.patchType().create(patch))
             return
@@ -522,7 +522,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         // Delete invite and create it again
         this.createInvite = NewInvite.create({
             keychainItems: null,
-            memberIds: this.invite.memberIds,
+            memberIds: null,
             permissions: this.invite.permissions,
             userDetails: this.invite.userDetails
         })

@@ -58,16 +58,32 @@ export default class App extends Vue {
             (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
-                        const response = await NetworkManager.server.request({
-                            method: "GET",
-                            path: "/invite/"+key,
-                            decoder: Invite as Decoder<Invite>
-                        })
-                        const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
-                        return new ComponentWithProperties(AcceptInviteView, {
-                            invite: response.data,
-                            secret
-                        })
+                        try {
+                            const response = await NetworkManager.server.request({
+                                method: "GET",
+                                path: "/invite/"+key,
+                                decoder: Invite as Decoder<Invite>
+                            })
+
+                            if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
+                                // Invalid or almost invalid
+                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                return new ComponentWithProperties(InvalidInviteView, {
+                                    invite: response.data
+                                })
+                            }
+                            const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
+                            return new ComponentWithProperties(AcceptInviteView, {
+                                invite: response.data,
+                                secret
+                            })
+                        } catch (e) {
+                            console.error(e)
+                            // Probably invalid invite
+                            const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                            return new ComponentWithProperties(InvalidInviteView, {})
+                        }
+                        
                     }
                 })
             }).setDisplayStyle("popup"));
