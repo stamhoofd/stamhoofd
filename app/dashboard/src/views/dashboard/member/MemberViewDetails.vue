@@ -99,10 +99,12 @@
                 </li>
             </ul>
 
-            <hr>
+            <template v-if="false">
+                <hr>
 
-            <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
-            <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
+                <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
+                <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
+            </template>
         </div>
     </div>
 </template>
