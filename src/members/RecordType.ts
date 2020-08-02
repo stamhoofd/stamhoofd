@@ -113,6 +113,68 @@ export class RecordTypeHelper {
         }
     }
 
+    static getInternalDescription(type: RecordType): string | null {
+        switch (type) {
+            case RecordType.NoData:
+                return "Dit gezin heeft ervoor gekozen om de steekkaart niet in te vullen omdat er geen toestemming werd gegeven i.v.m. het verzamelen van gevoelige gegevens. Bespreek dit zeker met de ouders.";
+            case RecordType.NoPictures:
+                return "Bij het inschrijven is er geen toestemming gegeven voor het puliceren van foto's op de website of sociale media.";
+            case RecordType.Vegetarian:
+                return "Dit lid eet geen vlees en waarschijnlijk ook geen vis (dat vraag je best eens na). Hou hier rekening mee of bespreek dit met het lid.";
+            case RecordType.Vegan:
+                return "Een veganist eet geen dierlijke producten. Kijk zeker eens bij de links naar mogelijke alternatieven voor bepaalde producten. Bespreek dit ook zeker met het lid.";
+            case RecordType.Halal:
+                return "Kijk in onderstaande artikelen wat een Halal dieet precies inhoudt.";
+            case RecordType.Kosher:
+                return "Kijk in onderstaande artikelen wat een Koosjer dieet precies inhoudt.";
+            case RecordType.NoPermissionForMedicines:
+                return "Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via de steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp. In dit geval hebben de ouders geen toestemming gegeven.";
+            case RecordType.FinancialProblems:
+                return "Tijdens het inschrijven kunnen leden en hun ouders aangeven dat de kost zwaar op hun gezin kan liggen. Spring hier uiterst discreet mee om, maar communiceer dit ook naar de juiste personen om dit discreet te kunnen houden: je wilt absoluut niet dat medeleiding de vraag “heb jij je kampgeld al betaald?” stelt zonder dat ze van iets weten. Neem zeker een kijkje op onderstaande links.";
+        }
+        return null;
+    }
+
+    static getInternalLinks(type: RecordType): {name: string; url: string}[] {
+        switch (type) {
+            case RecordType.NoData:
+                return [
+                    {
+                        "name": "Welke persoonsgegevens worden als gevoelig beschouwd?",
+                        "url": "https://ec.europa.eu/info/law/law-topic/data-protection/reform/rules-business-and-organisations/legal-grounds-processing-data/sensitive-data/what-personal-data-considered-sensitive_nl"
+                    }
+                ]
+            case RecordType.NoPictures:
+                return [
+                    {
+                        "name": "Recht op afbeelding",
+                        "url": "https://www.gegevensbeschermingsautoriteit.be/recht-op-afbeelding"
+                    }
+                ]
+            case RecordType.Vegetarian:
+                return [
+                    {
+                        "name": "Vegetarische recepten van Eva VZW",
+                        "url": "https://www.evavzw.be/recepten"
+                    }
+                ]
+            case RecordType.Vegan:
+                return [
+                    { // todo
+                        "name": "WAT IS HET VERSCHIL TUSSEN EEN VEGETARIËR EN EEN VEGANIST?",
+                        "url": "https://www.watwat.be/eten/wat-het-verschil-tussen-een-vegetarier-en-een-veganist"
+                    }
+                ]
+            case RecordType.Halal:
+                return []; // todo
+            case RecordType.Kosher:
+                return []; // todo
+           case RecordType.FinancialProblems:
+                return []; // todo
+        }
+        return [];
+    }
+
     static getPriority(type: RecordType): string {
         switch (type) {
             case RecordType.NoData:
