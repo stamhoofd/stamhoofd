@@ -59,6 +59,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = token.user.organization
         if (user.permissions.hasFullAccess()) {
             organization.name = request.body.name ?? organization.name
+            organization.website = request.body.website ?? organization.website;
 
             if (request.body.address) {
                 organization.address = organization.address.patch(request.body.address)
