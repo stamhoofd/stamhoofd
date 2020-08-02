@@ -7,10 +7,15 @@ export default {
         let isMouseHover = false;
         let displayedComponent: ComponentWithProperties | null = null;
 
+        if (!binding.value) {
+            return;
+        }
+
         // Add a hover listener
         el.addEventListener(
             "mouseenter",
             (_event) => {
+                
                 if (!isMouseHover) {
                     const parentComponent = vnode.context;
 

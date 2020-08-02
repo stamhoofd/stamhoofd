@@ -508,15 +508,6 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
 
 #member-records-view {
     > main {
-        > h2{
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > hr{
-            @extend .style-hr;
-        }
-
         > .checkbox + .textarea-container {
             padding-bottom: 20px;
             padding-left: 35px;

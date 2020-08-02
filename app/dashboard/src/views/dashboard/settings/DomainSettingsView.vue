@@ -190,17 +190,6 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
 
 
 #settings-view {
-    > main {
-        > h2{
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > hr{
-            @extend .style-hr;
-        }
-    }
-
     .dns-settings {
         padding: 20px 0;
         max-width: 500px;;

@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view" id="settings-view">
+    <div class="st-view">
         <STNavigationBar title="E-mailadressen">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
             <button slot="right" class="button icon close gray" v-if="!canPop && canDismiss" @click="dismiss"/>
@@ -97,32 +97,3 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-#settings-view {
-    > main {
-        > h2{
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > hr{
-            @extend .style-hr;
-        }
-    }
-
-    .dns-settings {
-        padding: 20px 0;
-        max-width: 500px;;
-
-        dd {
-            font-family: monospace;
-            white-space: nowrap;
-        }
-    }
-}
-</style>

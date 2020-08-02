@@ -301,26 +301,3 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-#member-general-view {
-    > main {
-        > h2{
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > h2 + p {
-            @extend .style-description;
-        }
-
-        > hr{
-            @extend .style-hr;
-        }
-
-    }
-}
-</style>

@@ -149,17 +149,6 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #send-invite-view {
-    > main {
-        > h2{
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > hr{
-            @extend .style-hr;
-        }
-    }
-
     .link-box {
         overflow-x: auto;
         text-overflow: visible;

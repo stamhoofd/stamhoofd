@@ -31,6 +31,19 @@
                 }
             }
         }
+
+        > h2 {
+            @extend .style-title-2;
+            padding-bottom: 15px;
+        }
+
+        > h2 + p {
+            @extend .style-description;
+        }
+
+        > hr {
+            @extend .style-hr;
+        }
     }
 
     &.background {

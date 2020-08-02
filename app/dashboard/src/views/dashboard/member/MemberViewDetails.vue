@@ -92,10 +92,13 @@
                 <li
                     v-for="(record, index) in member.details.records"
                     :key="index"
-                    class="more"
-                    :class="RecordTypeHelper.getPriority(record.type)"
+                    :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
+                    @click="openRecordView(record)"
+                    v-tooltip="record.description.length > 0 ? record.description : null"
                 >
-                    {{ record.getText() }}
+                    <span :class="'icon '+getIcon(record)"/>
+                    <span class="text">{{ record.getText() }}</span>
+                    <span class="icon arrow-right-small" v-if="canOpenRecord(record)" />
                 </li>
             </ul>
 
@@ -110,10 +113,11 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations } from '@stamhoofd/structures';
+import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority } from '@stamhoofd/structures';
+import RecordDescriptionView from './records/RecordDescriptionView.vue';
 
 @Component({
     directives: { Tooltip },
@@ -125,6 +129,34 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    canOpenRecord(record: Record) {
+        if (record.description.length > 0) {
+            return true;
+        }
+        if (RecordTypeHelper.getInternalDescription(record.type)) {
+            return true;
+        }
+        if (RecordTypeHelper.getInternalLinks(record.type).length > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    getIcon(record: Record) {
+        switch (RecordTypeHelper.getPriority(record.type)) {
+            case RecordTypePriority.High: return " exclamation-two red"
+            case RecordTypePriority.Medium: return " exclamation yellow"
+            case RecordTypePriority.Low: return " info"
+        }
+    }
+
+    openRecordView(record: Record) {
+        this.show(new ComponentWithProperties(RecordDescriptionView, {
+            member: this.member,
+            record
+        }))
     }
 }
 </script>
@@ -184,69 +216,50 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 .member-records {
     li {
         list-style: none;
-        padding: 11px 15px 8px 40px;
+        padding: 0 10px;
         background: $color-white-shade;
         border-radius: $border-radius;
         margin: 6px 0;
         @extend .style-definition-description;
-
-        &.Low {
-            background-image: url(~@stamhoofd/assets/images/icons/gray/info.svg);
-            background-position: 10px center;
-            background-repeat: no-repeat;
-        }
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        vertical-align: middle;
 
         &.High {
             background: $color-error-background;
             color: $color-error-dark;
-
-            background-image: url(~@stamhoofd/assets/images/icons/color/exclamation-two.svg);
-            background-position: 10px center;
-            background-repeat: no-repeat;
         }
 
         &.Medium {
             background: $color-warning-background;
             color: $color-warning-dark;
-            background-image: url(~@stamhoofd/assets/images/icons/color/exclamation.svg);
-            background-position: 10px center;
-            background-repeat: no-repeat;
+        }
+
+        .icon:first-child {
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .text {
+            padding: 11px 0;
         }
 
         &.more {
-            cursor: pointer;
-            position: relative;
-            padding-right: 40px;
+            cursor: help;
 
-            &::after {
-                content: "";
-                position: absolute;
-                right: 10px;
-                top: 0;
-                bottom: 0;
-                width: 24px;
-                background-image: url(~@stamhoofd/assets/images/icons/gray/arrow-right-small.svg);
-                background-position: left center;
-                background-repeat: no-repeat;
+            .icon:last-child {
+                display: block;
+                flex-shrink: 0;
+                margin-left: auto;
+                padding-left: 5px;
                 transform: translate(0, 0);
                 opacity: 0.5;
                 transition: transform 0.2s, opacity 0.2s;
             }
 
-            &.important {
-                &::after {
-                    background-image: url(~@stamhoofd/assets/images/icons/error-dark/arrow-right-small.svg);
-                }
-            }
-
-            &.warning {
-                &::after {
-                    background-image: url(~@stamhoofd/assets/images/icons/warning-dark/arrow-right-small.svg);
-                }
-            }
-
             &:hover {
-                &::after {
+                .icon:last-child {
                     transform: translate(5px, 0);
                     opacity: 1;
                 }

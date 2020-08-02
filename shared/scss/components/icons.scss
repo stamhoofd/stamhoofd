@@ -21,6 +21,10 @@
         color: $color-error;
     }
 
+    &.yellow {
+        color: $color-warning-primary;
+    }
+
     &.middle {
         vertical-align: middle;
     }
@@ -119,6 +123,18 @@
 
     &.share:after {
         font-icon: url(@stamhoofd/assets/images/icons/share.svg);
+    }
+
+    &.info:after {
+        font-icon: url(@stamhoofd/assets/images/icons/info.svg);
+    }
+
+    &.exclamation:after {
+        font-icon: url(@stamhoofd/assets/images/icons/exclamation.svg);
+    }
+
+    &.exclamation-two:after {
+        font-icon: url(@stamhoofd/assets/images/icons/exclamation-two.svg);
     }
 }
 
