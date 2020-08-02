@@ -44,6 +44,15 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const [invite] = invites
 
+        if (invite.validUntil < new Date()) {
+            throw new SimpleError({
+                code: "expired",
+                message: "This invite is expired",
+                human: "Deze link is niet langer geldig, vraag om deze opnieuw te versturen",
+                statusCode: 400
+            })
+        }
+
         if (invite.receiverId) {
 
             if (invite.receiverId != token.user.id) {
@@ -65,6 +74,7 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 statusCode: 404
             })
         }
+      
 
         if (invite.permissions) {
             // Merge permissions without giving more permissions than the sender, and without reducing the permissions of the reducer
