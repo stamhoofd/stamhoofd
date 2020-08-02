@@ -127,7 +127,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
-    emailId: string | null = this.group?.privateSettings?.defaultEmailId ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+    emailId: string | null = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
     subject = ""
 
     errorBox: ErrorBox | null = null
@@ -145,6 +145,13 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
         return false;
+    }
+
+    activated() {
+        // Update email id if created
+        if (!this.emailId) {
+            this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+        }
     }
 
     changedFile(event) {
@@ -209,8 +216,6 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
             return;
         }
-
-       
 
         try {
             let html = (this.$refs.editor as any).editor!.getHTML();
