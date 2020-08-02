@@ -136,6 +136,30 @@
     &.exclamation-two:after {
         font-icon: url(@stamhoofd/assets/images/icons/exclamation-two.svg);
     }
+
+    &.bold:after {
+        font-icon: url(@stamhoofd/assets/images/icons/bold.svg);
+    }
+
+    &.italic:after {
+        font-icon: url(@stamhoofd/assets/images/icons/italic.svg);
+    }
+
+    &.underline:after {
+        font-icon: url(@stamhoofd/assets/images/icons/underline.svg);
+    }
+
+    &.ul:after {
+        font-icon: url(@stamhoofd/assets/images/icons/ul.svg);
+    }
+
+    &.ol:after {
+        font-icon: url(@stamhoofd/assets/images/icons/ol.svg);
+    }
+
+    &.link:after {
+        font-icon: url(@stamhoofd/assets/images/icons/link.svg);
+    }
 }
 
 .android-icons {

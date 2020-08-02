@@ -13,7 +13,7 @@
             <h2>Privacy</h2>
 
             <Checkbox v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
             </Checkbox>
             <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.

@@ -32,7 +32,7 @@ export default class ReplacePlaceholderMark extends Node {
             },
             group: "inline",
             inline: true,
-            selectable: false,
+            selectable: true,
             draggable: true,
             atom: true,
             toDOM: (node) => [

@@ -218,6 +218,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         try {
+            let styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold;}; ol, ul {list-style-position: inside;}";
             let html = (this.$refs.editor as any).editor!.getHTML();
 
             const element = document.createElement("div")
@@ -228,7 +229,16 @@ export default class MailView extends Mixins(NavigationMixin) {
                 el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
             }
 
-            html = element.innerHTML
+            // add empty paragraph <br>'s
+            const emptyP = element.querySelectorAll("p:empty")
+            for (const el of emptyP) {
+                el.appendChild(document.createElement("br"))
+            }
+
+            let cssDiv = document.createElement('style');
+            cssDiv.innerText = styles;
+
+            html = "<style type=\"text/css\">"+cssDiv.innerHTML+"</style>"+element.innerHTML
             const text = element.textContent
 
             if (!text || text.length < 20) {

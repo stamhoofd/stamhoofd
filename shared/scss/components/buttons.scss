@@ -1,7 +1,7 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
-.link {
+.inline-link {
     &:hover, &:link, &:active, &:visited {
         color: $color-primary;
         font-weight: 600;
