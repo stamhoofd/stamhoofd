@@ -20,5 +20,10 @@ export default class RadioGroup extends Vue {}
         flex-shrink: 0;
         padding-right: 20px;
     }
+
+    &.column {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
 }
 </style>

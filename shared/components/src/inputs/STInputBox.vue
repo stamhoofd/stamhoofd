@@ -1,6 +1,6 @@
 <template>
     <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box">
-        <h4>
+        <h4 v-if="title">
             <label>{{ title }}</label>
             <div class="right">
                 <slot name="right" />

@@ -101,6 +101,33 @@
 
                 <STErrorsDefault :error-box="errorBox" />
             </template>
+
+            <template v-if="tab == 'queue'">
+
+                <STInputBox title="Wachtlijst" error-fields="genderType" :error-box="errorBox" class="max">
+                    <RadioGroup class="column">
+                        <Radio v-model="waitingListType" value="None">Geen wachtlijst</Radio>
+                        <Radio v-model="waitingListType" value="PreRegistrations">Voorinschrijvingen <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven. Bij het openen van de inschrijvingen kan men blijven inschrijven tot het maximaal aantal leden bereikt is. Daarna sluiten de inschrijvingen.</span></Radio>
+                        <Radio v-model="waitingListType" value="ExistingMembersFirst">Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven. Van de nieuwe leden kies je zelf wie je doorlaat.</span></Radio>
+                        <Radio v-model="waitingListType" value="All">Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span></Radio>
+                    </RadioGroup>
+                </STInputBox>
+
+                <template>
+
+                <div class="split-inputs" v-if="waitingListType != 'None'">
+                    <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'InviteOnly'">
+                            <Slider v-model="maxMembers" :max="200"/>
+                        </STInputBox>
+
+                        <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
+                            <DateSelection v-model="preRegistrationsDate" />
+                        </STInputBox>
+                    </div>
+
+                    <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
+                </template>
+            </template>
         </main>
 
         <STToolbar>
@@ -117,9 +144,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, PriceInput, Checkbox } from "@stamhoofd/components";
+import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, PriceInput, Checkbox, Slider } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, GroupPrices } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, GroupPrices, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 
@@ -138,15 +165,16 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         Radio,
         Checkbox,
         AgeInput,
+        Slider,
         Spinner
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
-    tabs = ["general", "payments"];
+    tabs = ["general", "payments", "queue"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld"];
+    tabLabels = ["Algemeen", "Lidgeld", "Wachtlijst"];
 
     saving = false
 
@@ -392,6 +420,54 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         }
     }
 
+    // Waiting list
+
+    get waitingListType() {
+        return this.group.settings.waitingListType
+    }
+
+    set waitingListType(waitingListType: WaitingListType) {
+        if (waitingListType == WaitingListType.PreRegistrations) {
+            const preRegistrationsDate = new Date(this.startDate.getTime())
+            preRegistrationsDate.setDate(preRegistrationsDate.getDate() - 14)
+            this.addSettingsPatch({ preRegistrationsDate })
+        } else {
+            this.addSettingsPatch({ preRegistrationsDate: null })
+        }
+        if (waitingListType != WaitingListType.None) {
+            this.addSettingsPatch({ maxMembers: this.maxMembers ?? 50 })
+        } else {
+            this.addSettingsPatch({ maxMembers: null })
+        }
+        this.addSettingsPatch({ waitingListType })
+    }
+
+    get preRegistrationsDate() {
+        return this.group.settings.preRegistrationsDate
+    }
+
+    set preRegistrationsDate(preRegistrationsDate: Date | null) {
+        this.addSettingsPatch({ preRegistrationsDate })
+    }
+
+    get maxMembers() {
+        return this.group.settings.maxMembers
+    }
+
+    set maxMembers(maxMembers: number | null) {
+        this.addSettingsPatch({ maxMembers })
+    }
+
+    get priorityForFamily() {
+        return this.group.settings.priorityForFamily
+    }
+
+    set priorityForFamily(priorityForFamily: boolean) {
+        this.addSettingsPatch({ priorityForFamily })
+    }
+
+    // Saving
+
     async save() {
         this.saving = true
 
@@ -405,9 +481,13 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-edit-view {
+    .radio-description {
+        display: block;
+        @extend .style-description-small;
+    }
 
 }
 </style>
