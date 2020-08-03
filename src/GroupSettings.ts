@@ -1,7 +1,15 @@
-import { ArrayDecoder,AutoEncoder, DateDecoder, EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
 import { GroupGenderType } from './GroupGenderType';
 import { GroupPrices } from './GroupPrices';
+
+export enum WaitingListType {
+    None = "None",
+    PreRegistrations = "PreRegistrations",
+    ExistingMembersFirst = "ExistingMembersFirst",
+    InviteOnly = "InviteOnly",
+    All = "All"
+}
 
 export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -41,6 +49,21 @@ export class GroupSettings extends AutoEncoder {
         }
     })
     maxAge: number | null = null
+
+    @field({ decoder: new EnumDecoder(WaitingListType), version: 16 })
+    waitingListType: WaitingListType = WaitingListType.None
+
+    @field({ decoder: DateDecoder, nullable: true, version: 16 })
+    preRegistrationsDate: Date | null = null
+
+    @field({ decoder: IntegerDecoder, nullable: true, version: 16 })
+    maxMembers: number | null = null
+
+    /**
+     * Of er voorrang moet gegeven worden aan broers en/of zussen als er wachtlijsten zijn
+     */
+    @field({ decoder: BooleanDecoder, version: 16 })
+    priorityForFamily = true
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()

@@ -1,3 +1,4 @@
 export enum PaymentMethod {
-    Transfer = "Transfer"
+    Transfer = "Transfer",
+    External = "External" // Unknown. Used when addding members that already paid
 }
