@@ -74,3 +74,15 @@ if (w.visualViewport) {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 document.body.addEventListener("touchstart", () => { }, { passive: true });
+
+// Load plausible if not production
+if (process.env.NODE_ENV == "production") {
+    var script = document.createElement('script');
+    script.onload = function () {
+        //do stuff with the script
+        console.log("Plausible loaded")
+    };
+    script.setAttribute("data-domain", "stamhoofd.app");
+    script.src = "https://plausible.io/js/plausible.js";
+    document.head.appendChild(script); //or something of the likes
+}
