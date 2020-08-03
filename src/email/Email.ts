@@ -9,6 +9,7 @@ function sleep(ms: number) {
 
 export type EmailInterfaceBase = {
     to: string;
+    replyTo?: string;
     subject: string;
     text?: string;
     html?: string;
@@ -95,6 +96,7 @@ class Email {
         // send mail with defined transport object
         const mail: any = {
             from: data.from, // sender address
+            replyTo: data.replyTo,
             to: process.env.NODE_ENV === "production" ? data.to : "simon@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text ?? "" // plain text body

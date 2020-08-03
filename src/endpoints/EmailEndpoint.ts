@@ -121,11 +121,18 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         })
 
-        let from = "inschrijvingen@stamhoofd.be"
+        let from = user.organization.uri+"@stamhoofd.be"; // todo: change into .email
+        let replyTo: string | undefined = sender.email;
 
         // Can we send from this e-mail or reply-to?
         if (user.organization.privateMeta.mailDomain && user.organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+user.organization.privateMeta.mailDomain)) {
             from = sender.email
+            replyTo = undefined;
+        }
+
+        // Include name in form field
+        if (sender.name) {
+            from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
         }
 
         const email = request.body
@@ -148,6 +155,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             return {
                 from,
+                replyTo,
                 to: recipient.email,
                 subject: email.subject,
                 text: email.text ?? undefined,
