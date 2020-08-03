@@ -7,7 +7,6 @@ export enum WaitingListType {
     None = "None",
     PreRegistrations = "PreRegistrations",
     ExistingMembersFirst = "ExistingMembersFirst",
-    InviteOnly = "InviteOnly",
     All = "All"
 }
 
