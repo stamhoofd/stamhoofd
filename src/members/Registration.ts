@@ -13,6 +13,7 @@ export class Registration extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     cycle: number
 
+    /// Set registeredAt to null if the member is on the waiting list for now
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null
 
@@ -25,6 +26,7 @@ export class Registration extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date
 
-    @field({ decoder: Payment })
-    payment: Payment
+    /// Payment can be null if the member is on a waiting list
+    @field({ decoder: Payment, nullable: true })
+    payment: Payment | null = null
 }

@@ -38,7 +38,7 @@ export class MemberWithRegistrations extends Member {
     }
     
     get paid(): boolean {
-        return !this.activeRegistrations.find(r => r.payment.status != PaymentStatus.Succeeded)
+        return !this.activeRegistrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
     }
 
     get info(): string {
