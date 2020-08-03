@@ -3,7 +3,7 @@ import { replaceText } from "tiptap-commands";
 
 export default class ReplacePlaceholderMark extends Node {
     get name() {
-        return "replace-placeholder";
+        return "replace_placeholder";
     }
 
     get defaultOptions() {

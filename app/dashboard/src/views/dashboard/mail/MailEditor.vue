@@ -186,7 +186,7 @@ export default class MailEditor extends Vue {
         &.is-active {
             pointer-events: initial;
             visibility: visible;
-            transition: transform 0.2s 1s, opacity 0.2s 1s, visibility 0.2s step-start 1s;
+            transition: transform 0.2s 0.2s, opacity 0.2s 0.2s, visibility 0.2s step-start 0.2s;
             opacity: 1;
             
             transform: translate(0, 0);
