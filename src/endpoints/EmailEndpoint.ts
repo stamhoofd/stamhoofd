@@ -121,7 +121,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         })
 
-        let from = user.organization.uri+"@stamhoofd.be"; // todo: change into .email
+        let from = user.organization.uri+"@stamhoofd.email";
         let replyTo: string | undefined = sender.email;
 
         // Can we send from this e-mail or reply-to?
