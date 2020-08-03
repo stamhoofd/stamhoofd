@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 
-export type RegistrationWithPayment = Registration & { payment: Payment }
+export type RegistrationWithPayment = Registration & { payment: Payment | null }
 export class Registration extends Model {
     static table = "registrations"
 
@@ -21,8 +21,8 @@ export class Registration extends Model {
     @column({ type: "string" })
     groupId: string;
 
-    @column({ type: "string", foreignKey: Registration.payment })
-    paymentId: string
+    @column({ type: "string", nullable: true, foreignKey: Registration.payment })
+    paymentId: string | null = null
 
     @column({ type: "integer" })
     cycle: number;
@@ -59,7 +59,7 @@ export class Registration extends Model {
     getStructure(this: RegistrationWithPayment) {
         return RegistrationStructure.create(
             Object.assign(Object.assign({}, this), {
-                payment: PaymentStructure.create(this.payment)
+                payment: this.payment ? PaymentStructure.create(this.payment) : null
             })
         )
     }

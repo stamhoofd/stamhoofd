@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
-import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -216,7 +216,8 @@ describe("Endpoint.PatchOrganization", () => {
                     startDate: new Date(),
                     endDate: new Date(),
                     genderType: GroupGenderType.Mixed,
-                })
+                }),
+                privateSettings: GroupPrivateSettings.create({})
             })
             changes.addPut(put)
 

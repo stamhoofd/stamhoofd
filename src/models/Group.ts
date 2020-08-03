@@ -88,12 +88,10 @@ export class Group extends Model {
             // Check if we have a registration with a payment
             const registration = Registration.fromRow(row[Registration.table])
             if (registration) {
-                const payment = Payment.fromRow(row[Payment.table])
-                if (!payment) {
-                    throw new Error("Every registration should have a valid payment")
-                }
+                const payment = Payment.fromRow(row[Payment.table]) ?? null
+                // Every registration should have a valid payment (unless they are on the waiting list)
 
-                const regWithPayment: RegistrationWithPayment = registration.setRelation(Registration.payment, payment)
+                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
                 member.registrations.push(regWithPayment)
             }
         }

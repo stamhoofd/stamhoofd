@@ -33,11 +33,11 @@ describe("Endpoint.PatchOrganizationPayments", () => {
 
         const r = Request.buildJson("PATCH", "/v6/organization/payments", organization.getApiHost(), [
             {
-                id: registrations[1].payment.id,
+                id: registrations[1].payment!.id,
                 status: PaymentStatus.Failed
             },
             {
-                id: registrations[2].payment.id,
+                id: registrations[2].payment!.id,
                 status: PaymentStatus.Failed
             }
         ]);
@@ -47,7 +47,7 @@ describe("Endpoint.PatchOrganizationPayments", () => {
         expect(response.body).toBeDefined();
 
         expect(response.body).toHaveLength(3)
-        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.map(r => r.payment.id))
+        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.map(r => r.payment?.id))
     
     });
 

@@ -39,7 +39,7 @@ describe("Endpoint.GetOrganizationPayments", () => {
         expect(response.body).toBeDefined();
 
         expect(response.body).toHaveLength(3)
-        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.map(r => r.payment.id))
+        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.map(r => r.payment?.id))
     
     });
 
