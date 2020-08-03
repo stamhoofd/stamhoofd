@@ -40,7 +40,7 @@ export class Organization extends AutoEncoder {
     /**
      * Only set for users with full access to the organization
      */
-    @field({ decoder: OrganizationPrivateMetaData, nullable: true })
+    @field({ decoder: OrganizationPrivateMetaData, nullable: true, version: 6})
     privateMeta: OrganizationPrivateMetaData | null = null;
 }
 
