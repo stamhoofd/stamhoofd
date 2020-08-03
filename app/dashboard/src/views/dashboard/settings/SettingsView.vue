@@ -62,7 +62,7 @@
             </template>
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
-                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.</p>
+                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.</p>
                 
                 <p class="warning-box" v-if="!organization.privateMeta.mailDomainActive">Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.</p>
 
@@ -76,7 +76,7 @@
             </template>
 
             <template v-else>
-                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
+                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="setupDomain">
