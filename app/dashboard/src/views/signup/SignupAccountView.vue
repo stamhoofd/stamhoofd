@@ -138,6 +138,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
 
             if (this.password.length < 14) {
+                plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "password_too_short",
                     message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
@@ -219,7 +220,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     SessionManager.setCurrentSession(session)
 
                     this.loading = false;
-                    this.dismiss({ force: true })
+                    this.dismiss({ force: true });
+                    plausible('signup');
                 } catch (e) {
                     console.error(e);
                     this.loading = false;

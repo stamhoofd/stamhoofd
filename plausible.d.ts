@@ -1,0 +1,1 @@
+declare const plausible: (name: string, args?: {}) => void;

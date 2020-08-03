@@ -42,6 +42,7 @@ export default class OrganizationSelectionSteps extends Mixins(NavigationMixin){
                 root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
             }).setDisplayStyle("popup")
         )
+        plausible('openSignup');
     }
 }
 </script>

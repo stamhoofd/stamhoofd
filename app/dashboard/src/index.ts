@@ -85,4 +85,10 @@ if (process.env.NODE_ENV == "production") {
     script.setAttribute("data-domain", "stamhoofd.app");
     script.src = "https://plausible.io/js/plausible.js";
     document.head.appendChild(script); //or something of the likes
+    const w = (window as any);
+    w.plausible = w.plausible || function() { (w.plausible.q = w.plausible.q || []).push(arguments) }
+} else {
+    (window as any).plausible = function() {
+        console.log("Debug plausible with args ", arguments)
+    }
 }
