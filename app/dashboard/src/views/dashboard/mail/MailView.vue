@@ -218,7 +218,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         try {
-            let styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold;}; ol, ul {list-style-position: inside;}";
+            let styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold; margin: 0; padding: 0}; h2 {font-size: 20px; font-weight: bold; margin: 0; padding: 0}; h3 {font-size: 16px; font-weight: bold; margin: 0; padding: 0}; ol, ul {list-style-position: inside;}";
             let html = (this.$refs.editor as any).editor!.getHTML();
 
             const element = document.createElement("div")
@@ -227,6 +227,12 @@ export default class MailView extends Mixins(NavigationMixin) {
             const elements = element.querySelectorAll("span.replace-placeholder[data-replace-type='firstName']")
             for (const el of elements) {
                 el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
+            }
+
+            // add force add padding and margin inline
+            const blocks = element.querySelectorAll("h1,h2,h3,p")
+            for (const el of blocks) {
+                (el as any).style.cssText = "margin: 0; padding: 0;"
             }
 
             // add empty paragraph <br>'s
@@ -239,6 +245,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             cssDiv.innerText = styles;
 
             html = "<style type=\"text/css\">"+cssDiv.innerHTML+"</style>"+element.innerHTML
+            console.log(html)
             const text = element.textContent
 
             if (!text || text.length < 20) {
