@@ -20,21 +20,36 @@ export class MemberWithRegistrations extends Member {
     groups: Group[] = []
 
     /**
+     * Groups the member is on the waiting list for
+     */
+    @field({ decoder: new ArrayDecoder(Group), optional: true})
+    waitingGroups: Group[] = []
+
+    /**
      * Pass all the groups of an organization to the member so we can fill in all the groups and registrations that are active
      */
     fillGroups(groups: Group[]) {
         this.activeRegistrations = []
         const groupMap = new Map<string, Group>()
+        const waitlistGroups = new Map<string, Group>()
+
         for (const registration of this.registrations) {
             const group = groups.find(g => g.id == registration.groupId)
+
             if (group) {
                 if (group.cycle == registration.cycle && registration.deactivatedAt === null) {
                     this.activeRegistrations.push(registration)
-                    groupMap.set(group.id, group)
+
+                    if (!registration.waitingList) {
+                        groupMap.set(group.id, group)
+                    } else {
+                        waitlistGroups.set(group.id, group)
+                    }
                 }
             }
         }
         this.groups = Array.from(groupMap.values())
+        this.waitingGroups = Array.from(waitlistGroups.values())
     }
     
     get paid(): boolean {
