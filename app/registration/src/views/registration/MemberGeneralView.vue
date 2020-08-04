@@ -54,9 +54,11 @@
         </main>
 
         <STToolbar>
-            <button  slot="right" class="button primary">
-                Volgende
-            </button>
+            <LoadingButton :loading="loading" slot="right">
+                <button class="button primary">
+                    Volgende
+                </button>
+            </LoadingButton>
         </STToolbar>
     </form>
 </template>
@@ -65,8 +67,8 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact } from "@stamhoofd/structures"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput, LoadingButton } from "@stamhoofd/components"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
@@ -76,6 +78,8 @@ import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import EmergencyContactView from './EmergencyContactView.vue';
 import MemberRecordsView from './MemberRecordsView.vue';
 import { SessionManager } from '@stamhoofd/networking';
+import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
+import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
@@ -90,12 +94,15 @@ import { SessionManager } from '@stamhoofd/networking';
         Radio,
         PhoneInput,
         EmailInput,
-        Checkbox
+        Checkbox,
+        LoadingButton
     }
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     member: MemberWithRegistrations | null
+
+    loading = false
 
     memberDetails: MemberDetails | null = null
    
@@ -111,6 +118,9 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     gender = Gender.Male
     livesAtParents = false
     validator = new Validator()
+
+    // Set if you know if this is an existing member or a new one
+    cachedIsExistingMember: boolean | null = null
 
     mounted() {
         if (this.member && this.member.details) {
@@ -170,7 +180,22 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         return null
     }
 
+    get isExistingMember(): boolean | null {
+        if (this.cachedIsExistingMember !== null) {
+            return this.cachedIsExistingMember
+        }
+        if (this.member && this.member.registrations.length > 0) {
+            return true;
+        }
+
+        // todo: we could check if group cycle > 0 and return false
+        return null;
+    }
+
     async goNext() {
+        if (this.loading) {
+            return;
+        }
         const errors = new SimpleErrors()
         if (this.firstName.length < 2) {
             errors.addError(new SimpleError({
@@ -246,13 +271,42 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 }
 
                 if (possibleGroups.length == 1) {
-                    this.memberDetails.preferredGroupId = possibleGroups[0].id
+
+                    // Check if valid
+                    const group = possibleGroups[0]
+                    if (this.isExistingMember === null && group.shouldKnowExisting()) {
+                        // Ask if exists or not
+                        this.present(new ComponentWithProperties(MemberExistingQuestionView, {
+                            member: this.memberDetails,
+                            handler: (existingMember: boolean, component) => {
+                                this.cachedIsExistingMember = existingMember
+                                component.pop({ force: true});
+                                this.goNext()
+                            }
+                        }).setDisplayStyle("sheet"))
+                        return;
+                    }
+
+                    try {
+                        group.canRegisterInGroup(this.isExistingMember ?? false)
+                    } catch (e) {
+                        this.errorBox = new ErrorBox(e)
+                        return
+                    }
+                    const waitingList = group.isWaitingList(this.isExistingMember ?? false)
+
+                    // todo: not sure, maybe just clear it instead
+                    this.memberDetails.preferredGroups = [PreferredGroup.create({
+                        groupId: possibleGroups[0].id,
+                        waitingList: waitingList,
+                        cycle: possibleGroups[0].cycle
+                    })]
                 } else {
                     // go to group selection
                     this.show(new ComponentWithProperties(MemberGroupView, { 
-                        member: this.memberDetails,
-                        handler: (group: Group, component: MemberGroupView) => {
-                            this.memberDetails!.preferredGroupId = group.id
+                        memberDetails: this.memberDetails,
+                        member: this.member,
+                        handler: (component: MemberGroupView) => {
                             this.goToParents(component)
                         }
                     }))
@@ -265,10 +319,42 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         }
     }
 
-    goToParents(component: NavigationMixin) {
+    async goToParents(component: NavigationMixin) {
         if (!this.memberDetails) {
             return;
         }
+
+        if (this.memberDetails.preferredGroups.length == 0) {
+            // hmm
+            console.warn("Cannot go to parents if no preferred groups are set")
+            return;
+        }
+
+        const waitingList = !!this.memberDetails.preferredGroups.find(g => g.waitingList)
+
+        // todo: if waiting list -> end here
+        if (waitingList) {
+            this.loading = true;
+            (component as any).loading = true;
+
+            try {
+                if (this.member) {
+                    this.member.details = this.memberDetails
+                    await MemberManager.patchAllMembers()
+                } else {
+                    await MemberManager.addMember(this.memberDetails)
+                }
+            } catch (e) {
+                this.errorBox = new ErrorBox(e)
+                this.loading = false;
+                (component as any).loading = false;
+                return;
+            }
+           
+            this.dismiss({ force: true })
+            return;
+        }
+
         const memberDetails = this.memberDetails
         // todo: check age before asking parents
         if (this.memberDetails.age < 18 || this.livesAtParents) {

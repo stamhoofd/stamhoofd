@@ -70,7 +70,7 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
                 method: "POST",
                 path: "/user/members/register",
                 body: RegisterMembers.create({
-                    members: this.selectedMembers.map(m => {
+                    members: this.selectedMembers.flatMap(m => {
                         if (!m.details) {
                             throw new SimpleError({
                                 code: "",
@@ -78,20 +78,22 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
                             })
                         }
 
-                        const group = m.details.getPreferredGroup(groups)
+                        const preferred = m.details.getPreferredGroups(groups)
 
-                        if (!group) {
+                        if (preferred.length == 0) {
                             throw new SimpleError({
                                 code: "",
                                 message: "Nog geen groep gekozen"
                             })
                         }
 
-                        return RegisterMember.create({
+                        return preferred.map(g => RegisterMember.create({
                             memberId: m.id,
-                            groupId: group.id,
-                            reduced: this.reduced
-                        })
+                            groupId: g.id,
+                            reduced: this.reduced,
+                            waitingList: m.details!.doesPreferGroup(g, true)
+                        }))
+                        
                     }),
                     paymentMethod: PaymentMethod.Transfer
                 }),

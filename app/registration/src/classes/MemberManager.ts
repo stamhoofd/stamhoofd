@@ -252,7 +252,7 @@ export class MemberManagerStatic {
         const groups = OrganizationManager.organization.groups
         for (const member of MemberManager.members) {
             for (const registration of member.registrations) {
-                if (registration.payment.id != payment.id) {
+                if (!registration.payment || registration.payment.id != payment.id) {
                     continue;
                 }
 

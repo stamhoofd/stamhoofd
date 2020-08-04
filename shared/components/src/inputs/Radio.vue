@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="radio">
-            <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete">
+            <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled">
             <div>
                 <div />
                 <div><slot /></div>
@@ -31,6 +31,9 @@ export default class Radio extends Vue {
 
     @Prop({})
     modelValue!: any;
+
+    @Prop({ default: false })
+    disabled!: boolean;
 
     get radioButtonValue() {
         return this.modelValue;

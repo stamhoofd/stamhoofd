@@ -24,3 +24,27 @@
     box-sizing: border-box;
     margin: 15px 0;
 }
+
+.info-box {
+    background: $color-primary-background;
+    border-radius: $border-radius;
+    color: $color-dark;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    padding: 15px 15px 15px 40px;
+    box-sizing: border-box;
+    margin: 15px 0;
+    position: relative;
+
+    &::before {
+        position: absolute;
+        content: "";
+        color: $color-primary;
+        font-size: 24px;
+        font-icon: url(@stamhoofd/assets/images/icons/info-filled.svg);
+        left: 12px;
+        top: 50%;
+        transform: translate(0, -50%);
+    }
+}

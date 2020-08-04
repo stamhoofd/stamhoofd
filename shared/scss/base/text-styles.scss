@@ -68,6 +68,20 @@
     line-height: 1.4;
 }
 
+.style-tag {
+    font-size: 14px;
+    font-weight: bold;
+    color: $color-dark;
+    background: $color-primary-background;
+    padding: 7px 10px;
+    border-radius: $border-radius;
+
+    &.warn {
+        color: $color-warning-dark;
+        background: $color-warning-background;
+    }
+}
+
 .style-normal {
     font-size: 16px;
     line-height: 1.4;

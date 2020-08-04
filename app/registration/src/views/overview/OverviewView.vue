@@ -112,6 +112,9 @@ export default class OverviewView extends Mixins(NavigationMixin){
         const groups = OrganizationManager.organization.groups
         for (const member of this.members) {
             for (const registration of member.registrations) {
+                if (!registration.payment) {
+                    continue;
+                }
                 const existing = payments.get(registration.payment.id)
                 const group = groups.find(g => g.id == registration.groupId)
                 if (!group) {
@@ -140,15 +143,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
             return MemberManager.members
         }
         return []
-    }
-
-    memberGetGroup(member: MemberWithRegistrations): Group | null {
-        if (!member.details) {
-            return null
-        }
-
-        const groups = OrganizationManager.organization.groups
-        return member.details.getPreferredGroup(groups)
     }
 
     addNewMember() {

@@ -20,6 +20,7 @@
 
                 <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
+
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList class="member-selection-table">
@@ -27,7 +28,8 @@
                         <Checkbox v-model="member.groups.length > 0 ? true :memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" :disabled="member.groups.length > 0"/>
                         <p>{{ member.details.name }}</p>
                         <p class="member-group" v-if="member.groups.length > 0">Reeds ingeschreven bij {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
-                        <p class="member-group" v-else-if="memberGetGroup(member)">Inschrijven bij {{ memberGetGroup(member).settings.name }}</p>
+                        <p class="member-group" v-else-if="memberGetGroups(member, true).length > 0">Op wachtlijst zetten voor {{ memberGetGroups(member, true).map(g => g.settings.name).join(", ") }}</p>
+                        <p class="member-group" v-else-if="memberGetGroups(member).length > 0">Inschrijven bij {{ memberGetGroups(member).map(g => g.settings.name).join(", ") }}</p>
                         <p class="member-group" v-else>Kies eerst een groep</p>
 
                         <template slot="right">
@@ -123,7 +125,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         for (const member of MemberManager.members) {
             if (this.memberSelection[member.id] === undefined) {
                 // if the member doesn't have any registrations, we select it by default
-                if (member.registrations.length == 0 && this.memberGetGroup(member) !== null) {
+                if (member.registrations.length == 0 && this.memberGetGroups(member).length > 0) {
                     this.$set(this.memberSelection, member.id, true)
                     this.defaultSelection = true
                 } else {
@@ -158,7 +160,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             this.present(errorMessage)
             return
         }
-        if (this.memberGetGroup(member) === null) {
+        if (this.memberGetGroups(member).length == 0) {
             // Disable select until group is chosen
             this.$nextTick(() => {
                 this.memberSelection[member.id] = false;
@@ -166,16 +168,15 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             })
 
             this.present(new ComponentWithProperties(MemberGroupView, {
+                member,
                 memberDetails: member.details,
-                handler: (group: Group, component: MemberGroupView) => {
+                handler: (component: MemberGroupView) => {
                     if (!member.details) {
                         console.error("Member details suddenly gone")
                         return
                     }
                     
                     component.loading = true;
-
-                    member.details.preferredGroupId = group.id
 
                     MemberManager.patchMembers([
                         member
@@ -195,13 +196,13 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
     }
 
-    memberGetGroup(member: MemberWithRegistrations): Group | null {
+    memberGetGroups(member: MemberWithRegistrations, waitlist: boolean | null = null): Group[] {
         if (!member.details) {
-            return null
+            return []
         }
 
         const groups = OrganizationManager.organization.groups
-        return member.details.getPreferredGroup(groups)
+        return member.details.getPreferredGroups(groups, waitlist)
     }
 
     addNewMember() {
