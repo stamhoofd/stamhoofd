@@ -164,53 +164,7 @@ export class MemberDetails extends AutoEncoder {
         return groups.filter(g => this.doesMatchGroup(g))
     }
 
-    /**
-     * Call when the user has selected a given group
-     */
-    validateGroup(group: Group, isExistingMember: boolean) {
-        const preRegistrationDate = group.activePreRegistrationDate
-        if (preRegistrationDate && !isExistingMember) {
-            throw new SimpleError({
-                code: "",
-                message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(preRegistrationDate)+" kunnen ook nieuwe leden inschrijven."
-            })
-        }
-
-        const now = new Date()
-
-        if (group.settings.startDate > now && (!preRegistrationDate || preRegistrationDate < now)) {
-            if (preRegistrationDate) {
-                throw new SimpleError({
-                    code: "",
-                    message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(group.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)
-                })
-            }
-            throw new SimpleError({
-                code: "",
-                message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(group.settings.startDate)
-            })
-        }
-
-        if (group.settings.endDate < now) {
-            throw new SimpleError({
-                code: "",
-                message: "De inschrijvingen voor deze groep zijn gesloten"
-            })
-        }
-    }
-
-    /**
-     * Use this during registration to check if we need to register for waiting list
-     */
-    isWaitingList(group: Group, isExistingMember: boolean): boolean {
-        switch (group.settings.waitingListType) {
-            case WaitingListType.None: return false;
-            case WaitingListType.ExistingMembersFirst: return !isExistingMember;
-            case WaitingListType.All: return true;
-            case WaitingListType.PreRegistrations: return false;
-        }
-    }
-
+    
     /**
      * Return the groups that are currently selected for registration
      */
