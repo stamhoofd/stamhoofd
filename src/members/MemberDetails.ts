@@ -68,7 +68,7 @@ export class MemberDetails extends AutoEncoder {
      * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in
      */
     @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null, field: "preferredGroupId" })
-    @field({ decoder: StringDecoder, version: 17, upgrade: (preferredGroupId: string | null) => {
+    @field({ decoder: new ArrayDecoder(PreferredGroup), version: 17, upgrade: (preferredGroupId: string | null) => {
         if (preferredGroupId === null) {
             return []
         }
