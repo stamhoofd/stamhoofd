@@ -17,7 +17,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@simonbackx/simple-encoding": "~1.9",
+        "@simonbackx/simple-encoding": "~1.10",
         "@simonbackx/simple-errors": "~1.0.0",
         "@types/jest": "^25.1.4",
         "@types/uuid": "^8.0.0",
@@ -31,13 +31,15 @@
         "jest-extended": "^0.11.5",
         "ts-jest": "^25.4.0",
         "ts-node": "^8.6.2",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "@stamhoofd/utility": "~1.0.0"
     },
     "dependencies": {
         "uuid": "^8.2.0"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "~1.9",
-        "@simonbackx/simple-errors": "~1.0.0"
+        "@simonbackx/simple-encoding": "~1.10",
+        "@simonbackx/simple-errors": "~1.0.0",
+        "@stamhoofd/utility": "~1.0.0"
     }
 }

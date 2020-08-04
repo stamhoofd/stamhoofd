@@ -1,8 +1,11 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from "@stamhoofd/utility"
 
 import { Address } from '../Address';
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
+import { WaitingListType } from '../GroupSettings';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
@@ -159,6 +162,58 @@ export class MemberDetails extends AutoEncoder {
 
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
+    }
+
+    private getPreRegistrationDate(group: Group) {
+        if (group.settings.waitingListType !== WaitingListType.PreRegistrations) {
+            return null
+        }
+        if (group.settings.startDate < new Date()) {
+            // Start date is in the past: registrations are open
+            return null
+        }
+        return group.settings.startDate
+    }
+
+    /**
+     * Call when the user has selected a given group
+     */
+    validateGroup(group: Group, isExistingMember: boolean) {
+        const preRegistrationDate = this.getPreRegistrationDate(group)
+        if (preRegistrationDate && !isExistingMember) {
+            throw new SimpleError({
+                code: "",
+                message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(preRegistrationDate)+" kunnen ook nieuwe leden inschrijven."
+            })
+        }
+
+        const now = new Date()
+
+        if (group.settings.startDate > now) {
+            throw new SimpleError({
+                code: "",
+                message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(group.settings.startDate)
+            })
+        }
+
+        if (group.settings.endDate < now) {
+            throw new SimpleError({
+                code: "",
+                message: "De inschrijvingen voor deze groep zijn gesloten"
+            })
+        }
+    }
+
+    /**
+     * Use this during registration to check if we need to register for waiting list
+     */
+    isWaitingList(group: Group, isExistingMember: boolean): boolean {
+        switch (group.settings.waitingListType) {
+            case WaitingListType.None: return false;
+            case WaitingListType.ExistingMembersFirst: return !isExistingMember;
+            case WaitingListType.All: return true;
+            case WaitingListType.PreRegistrations: return false;
+        }
     }
 
     /**
