@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMembers } from "@stamhoofd/structures";
+import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMembers, RegisterResponse } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Payment } from '../models/Payment';
@@ -11,7 +11,7 @@ import { Token } from '../models/Token';
 type Params = {};
 type Query = undefined;
 type Body = RegisterMembers
-type ResponseBody = PaymentStruct
+type ResponseBody = RegisterResponse
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -71,53 +71,69 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.groupId = group.id
             registration.cycle = group.cycle
 
-            let foundPrice: GroupPrices | undefined = undefined
+            if (register.waitingList) {
+                registration.waitingList = true
+                await registration.save()
+            } else {
+                let foundPrice: GroupPrices | undefined = undefined
 
-            // Determine price
-            for (const price of group.settings.prices) {
-                if (!price.startDate || price.startDate <= now) {
-                    foundPrice = price
+                // Determine price
+                for (const price of group.settings.prices) {
+                    if (!price.startDate || price.startDate <= now) {
+                        foundPrice = price
+                    }
                 }
-            }
 
-            if (!foundPrice) {
-                throw new SimpleError({
-                    code: "invalid_member",
-                    message: "We konden geen passende prijs vinden voor deze inschrijving. Contacteer ons zodat we dit probleem kunnen recht zetten"
-                }) 
-            }
+                if (!foundPrice) {
+                    throw new SimpleError({
+                        code: "invalid_member",
+                        message: "We konden geen passende prijs vinden voor deze inschrijving. Contacteer ons zodat we dit probleem kunnen recht zetten"
+                    }) 
+                }
 
-            const price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
-            totalPrice += price
-            registrations.push(registration)
+                const price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
+                totalPrice += price
+                registrations.push(registration)
+            }
         }
 
         // todo: validate payment method
         
-        // Create payment
-        const payment = new Payment()
-        payment.method = request.body.paymentMethod
-        payment.status = PaymentStatus.Pending
-        payment.price = totalPrice
-        payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
-        payment.paidAt = null
+        if (registrations.length > 0) {
+            const payment = new Payment()
+            payment.method = request.body.paymentMethod
+            payment.status = PaymentStatus.Pending
+            payment.price = totalPrice
+            payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
+            payment.paidAt = null
 
-        if (totalPrice == 0) {
-            payment.status = PaymentStatus.Succeeded
-            payment.paidAt = new Date()
-        }
-
-        await payment.save()
-
-        for (const registration of registrations) {
-            registration.paymentId = payment.id
-
-            if (payment.method == PaymentMethod.Transfer) {
-                registration.registeredAt = new Date()
+            if (totalPrice == 0) {
+                payment.status = PaymentStatus.Succeeded
+                payment.paidAt = new Date()
             }
-            await registration.save()
-        }
 
-        return new Response(PaymentStruct.create(payment));
+            await payment.save()
+
+            for (const registration of registrations) {
+                if (!registration.waitingList) {
+                    registration.paymentId = payment.id
+
+                    if (payment.method == PaymentMethod.Transfer) {
+                        registration.registeredAt = new Date()
+                    }
+                }
+                
+                await registration.save()
+            }
+            return new Response(RegisterResponse.create({
+                payment: PaymentStruct.create(payment),
+                members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+            }));
+        }
+        
+        return new Response(RegisterResponse.create({
+            payment: null,
+            members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+        }));
     }
 }

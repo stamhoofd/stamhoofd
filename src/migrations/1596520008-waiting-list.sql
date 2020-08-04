@@ -1,0 +1,1 @@
+ALTER TABLE `registrations` ADD COLUMN `waitingList` tinyint(1) NOT NULL DEFAULT '0' COMMENT '';

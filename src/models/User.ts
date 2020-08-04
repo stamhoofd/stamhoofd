@@ -217,12 +217,12 @@ export class User extends Model {
     }
 
     /**
-     * Fetch all members with their corresponding (valid) registrations and payment
+     * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     async getMembersWithRegistration(): Promise<MemberWithRegistrations[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${User.members.linkTable}\`\n`;
         query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${User.members.linkTable}\`.\`${User.members.linkKeyB}\`\n`
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
         query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += `where \`${User.members.linkTable}\`.\`${User.members.linkKeyA}\` = ?`
@@ -248,12 +248,8 @@ export class User extends Model {
             // Check if we have a registration with a payment
             const registration = Registration.fromRow(row[Registration.table])
             if (registration) {
-                const payment = Payment.fromRow(row[Payment.table])
-                if (!payment) {
-                    throw new Error("Every registration should have a valid payment")
-                }
-
-                const regWithPayment: RegistrationWithPayment = registration.setRelation(Registration.payment, payment)
+                const payment = Payment.fromRow(row[Payment.table]) ?? null
+                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
                 member.registrations.push(regWithPayment)
             }
         }
