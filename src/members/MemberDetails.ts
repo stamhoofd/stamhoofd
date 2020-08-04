@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Address } from '../Address';
 import { Group } from '../Group';
@@ -8,7 +8,19 @@ import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { Record } from './Record';
 
+export class PreferredGroup extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    groupId: string
 
+    /**
+     * Cycle used, in order to invalidate old values
+     */
+    @field({ decoder: IntegerDecoder })
+    cycle: number
+
+    @field({ decoder: BooleanDecoder })
+    waitingList = false
+}
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -52,8 +64,20 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in
      */
-    @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null })
-    preferredGroupId: string | null = null
+    @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null, field: "preferredGroupId" })
+    @field({ decoder: StringDecoder, version: 17, upgrade: (preferredGroupId: string | null) => {
+        if (preferredGroupId === null) {
+            return []
+        }
+        return [
+            PreferredGroup.create({
+                groupId: preferredGroupId,
+                cycle: 0,
+                waitingList: false
+            })
+        ]
+    } })
+    preferredGroups: PreferredGroup[] = []
 
     get name() {
         return this.firstName + " " + this.lastName;
@@ -116,18 +140,35 @@ export class MemberDetails extends AutoEncoder {
         return true
     }
 
+    /**
+     * Return true if this group is currently selected for registration or waiting list
+     */
+    doesPreferGroup(group: Group, waitingList: boolean | null = null): boolean {
+        for (const pref of this.preferredGroups) {
+            if (pref.groupId === group.id && pref.cycle === group.cycle) {
+                if (waitingList !== null) {
+                    if (waitingList !== pref.waitingList) {
+                        continue;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
     }
 
-    getPreferredGroup(groups: Group[]): Group | null {
-        if (this.preferredGroupId) {
-            for (const group of groups) {
-                if (group.id === this.preferredGroupId) {
-                    return group
-                }
+    /**
+     * Return the groups that are currently selected for registration
+     */
+    getPreferredGroups(groups: Group[], waitingList: boolean | null = null): Group | null {
+        for (const group of groups) {
+            if (this.doesPreferGroup(group, waitingList)) {
+                return group
             }
-            return null
         }
 
         // Search for possibilities
