@@ -178,7 +178,13 @@ export class MemberDetails extends AutoEncoder {
 
         const now = new Date()
 
-        if (group.settings.startDate > now) {
+        if (group.settings.startDate > now && (!preRegistrationDate || preRegistrationDate < now)) {
+            if (preRegistrationDate) {
+                throw new SimpleError({
+                    code: "",
+                    message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(group.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)
+                })
+            }
             throw new SimpleError({
                 code: "",
                 message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(group.settings.startDate)
