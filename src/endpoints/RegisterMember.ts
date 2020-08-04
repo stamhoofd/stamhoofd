@@ -11,6 +11,12 @@ export class RegisterMember extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder })
     reduced: boolean
+
+    /**
+     * Set to true to put a member on the waiting list instead of registering it. Please note that the value of this property is validated. You cannot register a new member when waiting lists are enabled
+     */
+    @field({ decoder: BooleanDecoder, version: 16 })
+    waitingList = false
 }
 
 export class RegisterMembers extends AutoEncoder {
