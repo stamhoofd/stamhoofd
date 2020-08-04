@@ -164,19 +164,24 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Return the groups that are currently selected for registration
      */
-    getPreferredGroups(groups: Group[], waitingList: boolean | null = null): Group | null {
+    getPreferredGroups(groups: Group[], waitingList: boolean | null = null): Group[] {
+        const pg: Group[] = []
         for (const group of groups) {
             if (this.doesPreferGroup(group, waitingList)) {
-                return group
+                pg.push(group)
             }
+        }
+
+        if (pg.length > 0) {
+            return pg
         }
 
         // Search for possibilities
         const matching = this.getMatchingGroups(groups)
         if (matching.length == 1) {
-            return matching[0]
+            return [matching[0]]
         }
-        return null
+        return []
     }
 
     updateAddress(oldValue: Address, newValue: Address) {
