@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Payment } from './Payment';
 
@@ -25,6 +25,9 @@ export class Registration extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date
+
+    @field({ decoder: BooleanDecoder, version: 16 })
+    waitingList = false
 
     /// Payment can be null if the member is on a waiting list
     @field({ decoder: Payment, nullable: true })
