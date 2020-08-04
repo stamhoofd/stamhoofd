@@ -164,22 +164,11 @@ export class MemberDetails extends AutoEncoder {
         return groups.filter(g => this.doesMatchGroup(g))
     }
 
-    private getPreRegistrationDate(group: Group) {
-        if (group.settings.waitingListType !== WaitingListType.PreRegistrations) {
-            return null
-        }
-        if (group.settings.startDate < new Date()) {
-            // Start date is in the past: registrations are open
-            return null
-        }
-        return group.settings.startDate
-    }
-
     /**
      * Call when the user has selected a given group
      */
     validateGroup(group: Group, isExistingMember: boolean) {
-        const preRegistrationDate = this.getPreRegistrationDate(group)
+        const preRegistrationDate = group.activePreRegistrationDate
         if (preRegistrationDate && !isExistingMember) {
             throw new SimpleError({
                 code: "",

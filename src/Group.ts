@@ -2,7 +2,7 @@ import { AutoEncoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/si
 import { v4 as uuidv4 } from "uuid";
 
 import { GroupPrivateSettings } from './GroupPrivateSettings';
-import { GroupSettings } from './GroupSettings';
+import { GroupSettings, WaitingListType } from './GroupSettings';
 
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -48,6 +48,20 @@ export class Group extends AutoEncoder {
             return 1
         }
         return 0
+    }
+
+    /**
+     * Return the pre registration date only if is is active right now
+     */
+    get activePreRegistrationDate() {
+        if (this.settings.waitingListType !== WaitingListType.PreRegistrations) {
+            return null
+        }
+        if (this.settings.startDate < new Date()) {
+            // Start date is in the past: registrations are open
+            return null
+        }
+        return this.settings.startDate
     }
 }
 
