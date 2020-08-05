@@ -1,9 +1,11 @@
+import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMembers, RegisterResponse } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
+import { Member, RegistrationWithMember } from '../models/Member';
 import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
@@ -38,7 +40,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const members = await user.getMembersWithRegistration()
         const groups = await Group.where({ organizationId: user.organizationId })
-        const registrations: Registration[] = []
+        
+        const registrations: RegistrationWithMember[] = []
+        const payRegistrations: Registration[] = []
+        
         const now = new Date()
         let totalPrice = 0
 
@@ -48,6 +53,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 message: "Oeps, je hebt niemand geselecteerd om in te schrijven"
             })
         }
+
+        const registrationMemberRelation = new ManyToOneRelation(Member, "member")
+        registrationMemberRelation.foreignKey = "memberId"
 
         for (const register of request.body.members) {
             const member = members.find(m => m.id == register.memberId)
@@ -66,7 +74,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const registration = new Registration()
+            const registration = new Registration().setRelation(registrationMemberRelation, member as Member)
             registration.memberId = member.id
             registration.groupId = group.id
             registration.cycle = group.cycle
@@ -93,13 +101,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 const price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
                 totalPrice += price
-                registrations.push(registration)
+                payRegistrations.push(registration)
             }
+            registrations.push(registration)
         }
 
         // todo: validate payment method
         
-        if (registrations.length > 0) {
+        if (payRegistrations.length > 0) {
             const payment = new Payment()
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Pending
@@ -114,7 +123,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             await payment.save()
 
-            for (const registration of registrations) {
+            for (const registration of payRegistrations) {
                 if (!registration.waitingList) {
                     registration.paymentId = payment.id
 
@@ -128,12 +137,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(RegisterResponse.create({
                 payment: PaymentStruct.create(payment),
                 members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
             }));
         }
         
         return new Response(RegisterResponse.create({
             payment: null,
             members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
         }));
     }
 }

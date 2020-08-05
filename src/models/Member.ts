@@ -1,10 +1,13 @@
 import { column,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMemberWithRegistrations, Payment as PaymentStructure, Registration as RegistrationStructure } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Registration, RegistrationWithPayment } from './Registration';
-
 export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[] }
+
+// Defined here to prevent cycles
+export type RegistrationWithMember = Registration & { member: Member }
+
 export class Member extends Model {
     static table = "members"
 
@@ -60,5 +63,18 @@ export class Member extends Model {
                 registrations: this.registrations.map(r => r.getStructure())
             })
         )
+    }
+
+    static getRegistrationWithMemberStructure(registration: RegistrationWithMember) {
+        return RegistrationWithEncryptedMember.create({
+            id: registration.id,
+            groupId: registration.groupId,
+            cycle: registration.cycle,
+            registeredAt: registration.registeredAt,
+            deactivatedAt: registration.deactivatedAt,
+            createdAt: registration.createdAt,
+            updatedAt: registration.updatedAt,
+            member: EncryptedMember.create(registration.member)
+        })
     }
 }

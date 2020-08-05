@@ -1,3 +1,4 @@
+import { Database } from '@simonbackx/simple-database';
 import { Request } from "@simonbackx/simple-endpoints";
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
@@ -11,10 +12,10 @@ describe("Endpoint.SearchOrganization", () => {
 
     test("Search for a given organization using exact search", async () => {
         const organization = await new OrganizationFactory({
-            name: uuidv4()
+            name: (uuidv4() as string).replace(/-/g, "")
         }).create()
 
-        const r = Request.buildJson("GET", "/v1/organizations/search");
+        const r = Request.buildJson("GET", "/v19/organizations/search");
         r.query = {
             query: organization.name
         };

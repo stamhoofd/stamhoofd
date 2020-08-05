@@ -60,16 +60,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
                 paidAt: p.paidAt,
                 createdAt: p.createdAt,
                 updatedAt: p.updatedAt,
-                registrations: p.registrations.map(r => RegistrationWithEncryptedMember.create({
-                    id: r.id,
-                    groupId: r.groupId,
-                    cycle: r.cycle,
-                    registeredAt: r.registeredAt,
-                    deactivatedAt: r.deactivatedAt,
-                    createdAt: r.createdAt,
-                    updatedAt: r.updatedAt,
-                    member: EncryptedMember.create(r.member)
-                }))
+                registrations: p.registrations.map(r => Member.getRegistrationWithMemberStructure(r))
             })
         }));
     }
