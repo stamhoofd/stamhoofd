@@ -4,7 +4,9 @@
             <main>
                 <h1>{{ text }}</h1>
                 
-                <p>Je kan hier later super gemakkelijk jaarlijks de inschrijving verlengen. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
+                <p v-if="names.length > 0">Je kan hier later super gemakkelijk jaarlijks de inschrijving verlengen. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
+                <p v-else>We houden je op de hoogte als je de inschrijving kan voltooien. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
+
             </main>
 
             <STToolbar>
