@@ -59,12 +59,20 @@ export class Group extends Model {
     /**
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    async getMembersWithRegistration(): Promise<MemberWithRegistrations[]> {
+    async getMembersWithRegistration(waitingList = false): Promise<MemberWithRegistrations[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
-        query += `JOIN \`${Registration.table}\` as reg_filter ON reg_filter.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND reg_filter.\`registeredAt\` is not null\n`
-        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+        
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
 
+        if (waitingList) {
+            query += `JOIN \`${Registration.table}\` as reg_filter ON reg_filter.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND reg_filter.\`waitingList\` = 1\n`
+        } else {
+            query += `JOIN \`${Registration.table}\` as reg_filter ON reg_filter.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND reg_filter.\`registeredAt\` is not null\n`
+        }
+
+        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
         query += `where reg_filter.\`groupId\` = ? AND reg_filter.\`cycle\` = ?`
 
         const [results] = await Database.select(query, [this.id, this.cycle])

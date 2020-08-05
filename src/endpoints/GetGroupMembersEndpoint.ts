@@ -1,3 +1,4 @@
+import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
@@ -5,7 +6,10 @@ import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
 import { Group } from "../models/Group";
 import { Token } from '../models/Token';
 type Params = { id: string };
-type Query = undefined;
+class Query extends AutoEncoder {
+    @field({ decoder: BooleanDecoder, optional: true })
+    waitingList = false
+}
 type Body = undefined
 type ResponseBody = EncryptedMemberWithRegistrations[];
 
@@ -14,6 +18,8 @@ type ResponseBody = EncryptedMemberWithRegistrations[];
  */
 
 export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = Query as Decoder<Query>
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
@@ -46,7 +52,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
         const [group] = groups
-        const members = await group.getMembersWithRegistration()
+        const members = await group.getMembersWithRegistration(request.query.waitingList)
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));
     }
