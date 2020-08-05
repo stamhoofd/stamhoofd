@@ -52,6 +52,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(123 * 2)
         expect(response.body.registrations).toHaveLength(2)
+        expect(response.body.registrations.map(r => r.waitingList)).toEqual([false, false])
     });
 
     test("Add members to waiting list", async () => {
@@ -91,6 +92,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment).toEqual(null)
         expect(response.body.members).toHaveLength(2)
         expect(response.body.registrations).toHaveLength(2)
+        expect(response.body.registrations.map(r => r.waitingList)).toEqual([true, true])
     });
 
     test("Register two new members with reduced price", async () => {
@@ -131,6 +133,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(12 * 2)
         expect(response.body.registrations).toHaveLength(2)
+        expect(response.body.registrations.map(r => r.waitingList)).toEqual([false, false])
     });
 
     test("Register two new members with reduced price after date", async () => {

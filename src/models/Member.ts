@@ -74,7 +74,8 @@ export class Member extends Model {
             deactivatedAt: registration.deactivatedAt,
             createdAt: registration.createdAt,
             updatedAt: registration.updatedAt,
-            member: EncryptedMember.create(registration.member)
+            member: EncryptedMember.create(registration.member),
+            waitingList: registration.waitingList,
         })
     }
 }
