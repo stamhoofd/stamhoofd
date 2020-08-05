@@ -13,6 +13,10 @@ export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
     activeRegistrations: Registration[] = []
 
+    get inactiveRegistrations() {
+        return this.registrations.filter(r => !!this.activeRegistrations.find(r2 => r2.id == r.id))
+    }
+
     /**
      * Groups the member is currently registered for
      */
