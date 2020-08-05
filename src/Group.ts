@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListType } from './GroupSettings';
+import { MemberExistingStatus } from './members/MemberDetails';
 
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -63,11 +64,11 @@ export class Group extends AutoEncoder {
             // Start date is in the past: registrations are open
             return null
         }
-        return this.settings.startDate
+        return this.settings.preRegistrationsDate
     }
 
     /**
-     * Returns true if we need to know if it is a new member before we can know if a group is valid. Else you can default to false
+     * Returns true if we need to know if it is a new member or a brother / siter before we can know if a group is valid. Else you can default to false
      */
     shouldKnowExisting() {
         // Check if group has waiting list
@@ -85,37 +86,77 @@ export class Group extends AutoEncoder {
                 return false;
             }
 
-            // We need to know it
-            return true;
+            if (this.settings.preRegistrationsDate !== null && this.settings.preRegistrationsDate < new Date()) {
+                // Pre registrations have started
+                return true;
+            }
+            // Pre registrations haven't started yet
+            return false
         }
 
         if (this.settings.waitingListType == WaitingListType.ExistingMembersFirst) {
+            // Existing members join the start date
             return true
         }
 
-        return true
+        return false
     }
 
     /**
      * Returns if a user can register in this group (also true if waiting list). Throws errors if not possible
      */
-    canRegisterInGroup(isExistingMember: boolean) {
+    canRegisterInGroup(existingStatus: MemberExistingStatus | null = null) {
         const preRegistrationDate = this.activePreRegistrationDate
-        if (preRegistrationDate && !isExistingMember) {
-            throw new SimpleError({
-                code: "",
-                message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(preRegistrationDate)+" kunnen ook nieuwe leden inschrijven."
-            })
+        if (preRegistrationDate) {
+            // Pre registrations are active
+            if (existingStatus === null || existingStatus.isExpired()) {
+                throw new SimpleError({
+                    code: "missing_existing_status",
+                    message: "Hmm... Er ging iets mis. Normaal hadden we je ergens moeten vragen of je al een bestaand lid aan het inschrijven bent. We hebben deze informatie nodig om verder te kunnen gaan. Contacteer ons als je het probleem niet kan oplossen."
+                })
+            }
+
+            if (existingStatus.isNew) {
+                if (existingStatus.hasFamily) {
+                    if (!this.settings.priorityForFamily) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
+                        })
+                    } else {
+                        // okay
+                    }
+                } else {
+                    if (this.settings.priorityForFamily) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden en hun broers/zussen kunnen momenteel inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
+                        })
+                    } else {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden of broers/zussen inschrijven."
+                        })
+                    }
+                }
+            }
         }
 
         const now = new Date()
 
         if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate < now)) {
             if (preRegistrationDate) {
-                throw new SimpleError({
-                    code: "",
-                    message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)
-                })
+                if (this.settings.priorityForFamily) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)+" voor bestaande leden en hun broers/zussen"
+                    })
+                } else {
+                    throw new SimpleError({
+                        code: "",
+                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)+" voor bestaande leden"
+                    })
+                }
             }
             throw new SimpleError({
                 code: "",
@@ -134,10 +175,10 @@ export class Group extends AutoEncoder {
     /**
      * Use this during registration to check if we need to register for waiting list
      */
-    isWaitingList(isExistingMember: boolean): boolean {
+    isWaitingList(existingStatus: MemberExistingStatus | null = null): boolean {
         switch (this.settings.waitingListType) {
             case WaitingListType.None: return false;
-            case WaitingListType.ExistingMembersFirst: return !isExistingMember;
+            case WaitingListType.ExistingMembersFirst: return existingStatus === null || (existingStatus.isNew && (!this.settings.priorityForFamily || !existingStatus.hasFamily));
             case WaitingListType.All: return true;
             case WaitingListType.PreRegistrations: return false;
         }

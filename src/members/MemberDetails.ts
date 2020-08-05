@@ -1,15 +1,35 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from "@stamhoofd/utility"
 
 import { Address } from '../Address';
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
-import { WaitingListType } from '../GroupSettings';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { Record } from './Record';
+
+// Everything in this file is stored encrypted
+
+export class MemberExistingStatus extends AutoEncoder {
+    /**
+     * Whether this member is new or not
+     */
+    @field({ decoder: BooleanDecoder })
+    isNew: boolean
+
+    /**
+     * Whether this member has an existing brother/sister that was registered in the past year
+     */
+    @field({ decoder: BooleanDecoder })
+    hasFamily: boolean
+
+    @field({ decoder: DateDecoder })
+    lastChanged: Date = new Date()
+
+    isExpired() {
+        return this.lastChanged <= new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 14)
+    }
+}
 
 export class PreferredGroup extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -65,7 +85,8 @@ export class MemberDetails extends AutoEncoder {
     doctor: EmergencyContact | null = null;
 
     /**
-     * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in
+     * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
+     * This can get cleared after registration, but is not needed since we keep track of the group cycle.
      */
     @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null, field: "preferredGroupId" })
     @field({ decoder: new ArrayDecoder(PreferredGroup), version: 17, upgrade: (preferredGroupId: string | null) => {
@@ -81,6 +102,15 @@ export class MemberDetails extends AutoEncoder {
         ]
     } })
     preferredGroups: PreferredGroup[] = []
+
+    /**
+     * During registration, we sometimes need to know if it is an existing member, new member or a broter/sister of an existing member.
+     * We don't ask this information if it is not needed or when we can calculate it automatically based on the member history 
+     * (this behaviour is determined by the shouldKnowExisting method of Group)
+     * We also keep the date that this was asked, in order to invalidate the response in the future.
+     */
+    @field({ decoder: MemberExistingStatus, nullable: true, version: 18 })
+    existingStatus: MemberExistingStatus | null = null
 
     get name() {
         return this.firstName + " " + this.lastName;
@@ -119,6 +149,9 @@ export class MemberDetails extends AutoEncoder {
         return false;
     }
 
+    /**
+     * Check if this member could fit a group, ignoring dates and waiting lists
+     */
     doesMatchGroup(group: Group) {
         if (group.settings.minAge || group.settings.maxAge) {
             
@@ -144,7 +177,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
-     * Return true if this group is currently selected for registration or waiting list
+     * Return true if this group is currently selected for registration or waiting list, or not at all
      */
     doesPreferGroup(group: Group, waitingList: boolean | null = null): boolean {
         for (const pref of this.preferredGroups) {
