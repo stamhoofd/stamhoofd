@@ -66,7 +66,7 @@ export default class MemberViewPayments extends Vue {
     organization = OrganizationManager.organization
 
     get payments() {
-        return this.member.registrations.map(r => r.payment)
+        return this.member.registrations.flatMap(r => r.payment ? [r.payment] : [])
     }
 
     async markPaid() {

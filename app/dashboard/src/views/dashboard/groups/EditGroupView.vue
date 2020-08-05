@@ -56,7 +56,7 @@
                     </STInputBox>
                 </div>
                 <p class="st-list-description">
-                    *De leeftijd die het lid zal worden in het jaar waarin de inschrijvingen starten.
+                    *De leeftijd die het lid zal worden in het jaar waarin de inschrijvingen starten. Ter referentie: leden uit het eerste leerjaar worden 6 jaar in september. Leden uit het eerste secundair worden 12 jaar in september.
                 </p>
 
                 <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
