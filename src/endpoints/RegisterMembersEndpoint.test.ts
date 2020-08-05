@@ -31,12 +31,13 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v5/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return { 
                     memberId: m.id,
                     groupId: group.id,
-                    reduced: false
+                    reduced: false,
+                    waitingList: false
                 }
             }),
             paymentMethod: "Transfer"
@@ -50,6 +51,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.status).toEqual("Pending")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(123 * 2)
+        expect(response.body.registrations).toHaveLength(2)
     });
 
     test("Add members to waiting list", async () => {
@@ -69,7 +71,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v16/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return { 
                     memberId: m.id,
@@ -88,6 +90,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         expect(response.body.payment).toEqual(null)
         expect(response.body.members).toHaveLength(2)
+        expect(response.body.registrations).toHaveLength(2)
     });
 
     test("Register two new members with reduced price", async () => {
@@ -107,12 +110,13 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v5/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,
                     groupId: group.id,
-                    reduced: true
+                    reduced: true,
+                    waitingList: false
                 }
             }),
             paymentMethod: "Transfer"
@@ -126,6 +130,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.status).toEqual("Pending")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(12 * 2)
+        expect(response.body.registrations).toHaveLength(2)
     });
 
     test("Register two new members with reduced price after date", async () => {
@@ -145,12 +150,13 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v5/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,
                     groupId: group.id,
-                    reduced: true
+                    reduced: true,
+                    waitingList: false
                 }
             }),
             paymentMethod: "Transfer"
@@ -164,6 +170,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.status).toEqual("Pending")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(5 * 2)
+        expect(response.body.registrations).toHaveLength(2)
     });
 
     test("Register two new members with normal price after date", async () => {
@@ -183,12 +190,13 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v5/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,
                     groupId: group.id,
-                    reduced: false
+                    reduced: false,
+                    waitingList: false
                 }
             }),
             paymentMethod: "Transfer"
@@ -202,6 +210,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body.payment!.status).toEqual("Pending")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(10 * 2)
+        expect(response.body.registrations).toHaveLength(2)
     });
 
 });
