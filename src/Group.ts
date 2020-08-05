@@ -144,7 +144,9 @@ export class Group extends AutoEncoder {
 
         const now = new Date()
 
-        if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate < now)) {
+        if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
+            // Start date or pre registration date are in the future
+
             if (preRegistrationDate) {
                 if (this.settings.priorityForFamily) {
                     throw new SimpleError({
