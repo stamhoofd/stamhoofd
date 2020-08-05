@@ -1,6 +1,37 @@
 <template>
     <div class="boxed-view">
-        <div class="st-view">
+        <div class="st-view" v-if="waitingMembers.length > 0">
+            <main>
+                <h1>Leden op wachtlijst</h1>
+                <p>Deze leden staan nog op een wachtlijst. We houden je op de hoogte, dan kan je verdere informatie aanvullen en het lidgeld betalen.</p>
+
+                <STList>
+                    <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
+                        <span class="icon clock" slot="left" />
+
+                        <h2 class="payment-period">{{ member.details.name }}</h2>
+                        <p class="style-description-small">Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
+
+                        <template slot="right">
+                            <button class="button text limit-space" @click.stop="editMember(member)">
+                                <span class="icon edit" />
+                                <span>Bewerken</span>
+                            </button>
+                            
+                        </template>
+                    </STListItem>
+                </STList>
+
+            </main>
+            <STToolbar v-if="registeredMembers.length == 0">
+                <button class="primary button" slot="right" @click="addNewMember">
+                    <span class="icon white left add"/>
+                    <span>Lid inschrijven</span>
+                </button>
+            </STToolbar>
+        </div>
+
+        <div class="st-view" v-if="registeredMembers.length > 0">
             <main>
                 <h1>Ingeschreven leden</h1>
                 <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
@@ -10,7 +41,7 @@
                         <span class="icon user" slot="left" />
 
                         <h2 class="payment-period">{{ member.details.name }}</h2>
-                        <p class="style-description-small">{{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
+                        <p class="style-description-small">Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
                             <button class="button text limit-space" @click.stop="editMember(member)">
@@ -96,7 +127,17 @@ export default class OverviewView extends Mixins(NavigationMixin){
         if (!this.members) {
             return []
         }
-        return this.members.filter(m => m.activeRegistrations.length > 0)
+        return this.members.filter(m => m.groups.length > 0)
+    }
+
+    /**
+     * Return members that are currently registered in
+     */
+    get waitingMembers() {
+        if (!this.members) {
+            return []
+        }
+        return this.members.filter(m => m.waitingGroups.length > 0)
     }
 
     getPaymentPeriod(payment: Payment) {

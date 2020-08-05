@@ -24,7 +24,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, PaymentDetailed } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -42,20 +42,14 @@ import OverviewView from './OverviewView.vue';
 })
 export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    payment: PaymentDetailed
+    registrations: RegistrationWithMember[]
 
     MemberManager = MemberManager
     step = 4
-
-    mounted() {
-        console.log(this.payment)
-        MemberManager.loadMembers().catch(e => {
-            console.error(e)
-        })
-    }
+    isStepsPoppable = false
 
     get names() {
-        return this.payment.registrations.map(r => r.member.details?.firstName ?? "")
+        return this.registrations.map(r => r.member.details?.firstName ?? "?")
     }
 
     close() {

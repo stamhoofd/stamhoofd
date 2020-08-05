@@ -1,20 +1,28 @@
 <template>
     <div class="boxed-view">
         <div class="st-view">
-            <main>
-                <h1>De kostprijs van scouting</h1>
+            <main v-if="shouldShow">
+                <h1>Financiële ondersteuning</h1>
+                <p>We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om. Dit is enkel zichtbaar voor de takleiding. </p>
 
-                <p>We doen ons best om de kostprijs van scouting zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om. Dit is enkel zichtbaar voor de takleiding. </p>
+                <STErrorsDefault :error-box="errorBox" />
 
-                <Checkbox v-model="reduced">Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken aan de leiding.</Checkbox>
+                <Checkbox v-model="reduced">Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken</Checkbox>
+            </main>
+            <main v-else>
+                <h1>Bevestig registratie</h1>
+                <p>Heb je alle leden toegevoegd?</p>
+
+                <STErrorsDefault :error-box="errorBox" />
             </main>
 
             <STToolbar>
-                <Spinner slot="right" v-if="loading" />
-                <button slot="right" class="button primary" @click="goNext">
-                    <span>Volgende</span>
-                    <span class="icon arrow-right"/>
-                </button>
+                <LoadingButton slot="right" :loading="loading">
+                    <button class="button primary" @click="goNext">
+                        <span>Registratie bevestigen</span>
+                        <span class="icon arrow-right"/>
+                    </button>
+                </LoadingButton>
             </STToolbar>
         </div>
     </div>
@@ -23,10 +31,10 @@
 <script lang="ts">
 import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, Spinner, Checkbox, ErrorBox } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Checkbox, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -42,10 +50,11 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
         STList,
         STListItem,
         Checkbox,
-        Spinner
+        LoadingButton,
+        STErrorsDefault
     }
 })
-export default class FinancialProblemsView extends Mixins(NavigationMixin){
+export default class FinancialSupportView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     step = 2
 
@@ -54,6 +63,21 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
 
     reduced = false
     loading = false
+    errorBox: ErrorBox | null = null
+
+    get shouldShow() {
+        const groups = OrganizationManager.organization.groups
+        for (const member of this.selectedMembers) {
+            const preferred = member.details?.getPreferredGroups(groups) ?? []
+            for (const group of preferred) {
+                // If not a waiting list, and if it has a reduced price
+                if (!!group.settings!.prices.find(p => p.reducedPrice !== null) && member.details!.doesPreferGroup(group, false)) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 
     async goNext() {
         if (this.loading) {
@@ -97,24 +121,28 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
                     }),
                     paymentMethod: PaymentMethod.Transfer
                 }),
-                decoder: Payment as Decoder<Payment>
+                decoder: RegisterResponse as Decoder<RegisterResponse>
             })
 
-            const payment = response.data
+            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 
-            // We need to update members, to enricht the payment too
-            try {
-                await MemberManager.loadMembers()
-            } catch (ee) {
-                // ignore
-                console.error(ee)
-            }
+            const payment = response.data.payment
 
+            
             this.loading = false
+            const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
+            console.log(registrations)
+
+            if (!payment) {
+                this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                    registrations
+                }))
+                return;
+            }
 
             if (payment.status == PaymentStatus.Succeeded) {
                 this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                    payment: MemberManager.getPaymentDetailed(payment)
+                    registrations
                 }))
             } else {
                 this.show(new ComponentWithProperties(TransferPaymentView, {
@@ -124,7 +152,7 @@ export default class FinancialProblemsView extends Mixins(NavigationMixin){
             
         } catch (e) {
             console.error(e)
-            // todo
+            this.errorBox = new ErrorBox(e)
             this.loading = false
         }
     }

@@ -25,18 +25,25 @@
 
                 <STList class="member-selection-table">
                     <STListItem v-for="member in members" :key="member.id" :selectable="member.groups.length == 0" class="right-stack left-center" element-name="label" >
-                        <Checkbox v-model="member.groups.length > 0 ? true :memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" :disabled="member.groups.length > 0"/>
+                        <Checkbox v-model="member.activeRegistrations.length > 0 ? true :memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" :disabled="member.activeRegistrations.length > 0"/>
                         <p>{{ member.details.name }}</p>
                         <p class="member-group" v-if="member.groups.length > 0">Reeds ingeschreven bij {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
-                        <p class="member-group" v-else-if="memberGetGroups(member, true).length > 0">Op wachtlijst zetten voor {{ memberGetGroups(member, true).map(g => g.settings.name).join(", ") }}</p>
-                        <p class="member-group" v-else-if="memberGetGroups(member).length > 0">Inschrijven bij {{ memberGetGroups(member).map(g => g.settings.name).join(", ") }}</p>
-                        <p class="member-group" v-else>Kies eerst een groep</p>
+                        <p class="member-group" v-if="member.waitingGroups.length > 0">Reeds op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
+                        <template v-if="member.activeRegistrations.length == 0">
+                            <p class="member-group" v-if="memberGetGroups(member, true).length > 0">Op wachtlijst zetten voor {{ memberGetGroups(member, true).map(g => g.settings.name).join(", ") }}</p>
+                            <p class="member-group" v-if="memberGetGroups(member, false).length > 0">Inschrijven bij {{ memberGetGroups(member, false).map(g => g.settings.name).join(", ") }}</p>
+                            <p class="member-group" v-if="memberGetGroups(member).length == 0">Kies eerst een groep</p>
+                        </template>
 
                         <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)">
+                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="memberGetGroups(member).length != 0 || member.activeRegistrations.length > 0">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>
+                            <div class="button text limit-space" v-else>
+                                <span>Kies groep</span>
+                                <span class="icon arrow-right" />
+                            </div>
                             
                         </template>
                     </STListItem>
@@ -73,7 +80,7 @@ import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationW
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import FinancialProblemsView from './FinancialProblemsView.vue';
+import FinancialSupportView from './FinancialSupportView.vue';
 import { Formatter } from '@stamhoofd/utility';
 import TransferPaymentView from './TransferPaymentView.vue';
 
@@ -145,7 +152,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
 
         if (member.groups.length > 0) {
-            // Disable select until group is chosen
             this.$nextTick(() => {
                 this.memberSelection[member.id] = false;
                 console.log(this.memberSelection)
@@ -160,11 +166,12 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             this.present(errorMessage)
             return
         }
+
         if (this.memberGetGroups(member).length == 0) {
+
             // Disable select until group is chosen
             this.$nextTick(() => {
                 this.memberSelection[member.id] = false;
-                console.log(this.memberSelection)
             })
 
             this.present(new ComponentWithProperties(MemberGroupView, {
@@ -196,13 +203,15 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
     }
 
-    memberGetGroups(member: MemberWithRegistrations, waitlist: boolean | null = null): Group[] {
+    memberGetGroups(member: MemberWithRegistrations, waitingList: boolean | null = null): Group[] {
         if (!member.details) {
             return []
         }
 
+        console.log(waitingList)
+
         const groups = OrganizationManager.organization.groups
-        return member.details.getPreferredGroups(groups, waitlist)
+        return member.details.getPreferredGroups(groups, waitingList)
     }
 
     addNewMember() {
@@ -235,7 +244,9 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
         this.errorBox = null;
 
-        this.show(new ComponentWithProperties(FinancialProblemsView, {
+        // todo: check waiting list validations etc
+
+        this.show(new ComponentWithProperties(FinancialSupportView, {
             selectedMembers: selected
         }))
     }

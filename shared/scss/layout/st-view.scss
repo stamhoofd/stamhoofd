@@ -22,7 +22,7 @@
             padding-bottom: 20px;
             @extend .style-title-1;
 
-            + p {
+            + p:not([class]) {
                 @extend .style-description;
                 padding-bottom: 20px;
 
@@ -38,7 +38,9 @@
         }
 
         > h2 + p {
-            @extend .style-description;
+            &:not([class]) {
+                @extend .style-description;
+            }
         }
 
         > hr {

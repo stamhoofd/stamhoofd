@@ -46,11 +46,6 @@
                 </div>
             </div>
 
-            <template v-if="suggestedGroup">
-                <hr>
-                <h2>Leeftijdsgroep: {{ suggestedGroup.settings.name }}</h2>
-                <p>{{ suggestedGroup.settings.description }}</p>
-            </template>
         </main>
 
         <STToolbar>
@@ -119,9 +114,6 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     livesAtParents = false
     validator = new Validator()
 
-    // Set if you know if this is an existing member or a new one
-    cachedIsExistingMember: boolean | null = null
-
     mounted() {
         if (this.member && this.member.details) {
             // Create a deep clone using encoding
@@ -156,40 +148,6 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             age--;
         }
         return age;
-    }
-
-    get suggestedGroup() {
-        if (!this.birthDay) {
-            return null
-        }
-
-        const mem = MemberDetails.create({
-            firstName: this.firstName,
-            lastName: this.lastName,
-            gender: this.gender,
-            phone: null,
-            email: null,
-            birthDay: this.birthDay,
-            address: null
-        })
-        const organizization = OrganizationManager.organization
-        const possibleGroups = mem.getMatchingGroups(organizization.groups)
-        if (possibleGroups.length == 1) {
-            return possibleGroups[0]
-        }
-        return null
-    }
-
-    get isExistingMember(): boolean | null {
-        if (this.cachedIsExistingMember !== null) {
-            return this.cachedIsExistingMember
-        }
-        if (this.member && this.member.registrations.length > 0) {
-            return true;
-        }
-
-        // todo: we could check if group cycle > 0 and return false
-        return null;
     }
 
     async goNext() {
@@ -258,60 +216,14 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             }
             
             if (!this.member || this.member.activeRegistrations.length == 0) {
-                // todo: Get possible groups
-                const organizization = OrganizationManager.organization
-                const possibleGroups = this.memberDetails.getMatchingGroups(organizization.groups)
-
-                if (possibleGroups.length == 0) {
-                    this.errorBox = new ErrorBox(new SimpleError({
-                        code: "",
-                        message: "Oeps, "+this.memberDetails.firstName+" lijkt in geen enkele leeftijdsgroep te passen. Hij is waarschijnlijk te oud of te jong."
-                    }))
-                    return;
-                }
-
-                if (possibleGroups.length == 1) {
-
-                    // Check if valid
-                    const group = possibleGroups[0]
-                    if (this.isExistingMember === null && group.shouldKnowExisting()) {
-                        // Ask if exists or not
-                        this.present(new ComponentWithProperties(MemberExistingQuestionView, {
-                            member: this.memberDetails,
-                            handler: (existingMember: boolean, component) => {
-                                this.cachedIsExistingMember = existingMember
-                                component.pop({ force: true});
-                                this.goNext()
-                            }
-                        }).setDisplayStyle("sheet"))
-                        return;
+                this.show(new ComponentWithProperties(MemberGroupView, { 
+                    memberDetails: this.memberDetails,
+                    member: this.member,
+                    handler: (component: MemberGroupView) => {
+                        this.goToParents(component)
                     }
-
-                    try {
-                        group.canRegisterInGroup(this.isExistingMember ?? false)
-                    } catch (e) {
-                        this.errorBox = new ErrorBox(e)
-                        return
-                    }
-                    const waitingList = group.isWaitingList(this.isExistingMember ?? false)
-
-                    // todo: not sure, maybe just clear it instead
-                    this.memberDetails.preferredGroups = [PreferredGroup.create({
-                        groupId: possibleGroups[0].id,
-                        waitingList: waitingList,
-                        cycle: possibleGroups[0].cycle
-                    })]
-                } else {
-                    // go to group selection
-                    this.show(new ComponentWithProperties(MemberGroupView, { 
-                        memberDetails: this.memberDetails,
-                        member: this.member,
-                        handler: (component: MemberGroupView) => {
-                            this.goToParents(component)
-                        }
-                    }))
-                    return;
-                }
+                }))
+                return;
             }
             
             this.goToParents(this);
@@ -330,7 +242,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const waitingList = !!this.memberDetails.preferredGroups.find(g => g.waitingList)
+        const waitingList = !!this.memberDetails.preferredGroups.find(g => g.waitingList) || (this.member && this.member.waitingGroups.length > 0 && this.member.groups.length == 0)
 
         // todo: if waiting list -> end here
         if (waitingList) {

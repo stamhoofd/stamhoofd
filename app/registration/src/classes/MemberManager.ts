@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember, Member, RegistrationWithEncryptedMember } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -12,6 +12,54 @@ import { OrganizationManager } from './OrganizationManager';
  */
 export class MemberManagerStatic {
     members: MemberWithRegistrations[] | null = null
+
+    async getRegistrationsWithMember(data: RegistrationWithEncryptedMember[]): Promise<RegistrationWithMember[]> {
+
+        const registrations: RegistrationWithMember[] = []
+        const groups = OrganizationManager.organization.groups
+
+        for (const registration of data) {
+            const member = registration.member
+            const keychainItem = Keychain.getItem(member.publicKey)
+
+            let decryptedDetails: MemberDetails | undefined
+            if (!keychainItem) {
+                console.warn("Missing keychain item for member " + member.id)
+            } else {
+                if (!member.encryptedForMember) {
+                    console.warn("encryptedForMember not set for member " + member.id)
+                } else {
+                    try {
+                        const session = SessionManager.currentSession!
+                        const keyPair = await session.decryptKeychainItem(keychainItem)
+                        const json = await Sodium.unsealMessage(member.encryptedForMember, keyPair.publicKey, keyPair.privateKey)
+                        const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
+                        decryptedDetails = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
+                        console.log(decryptedDetails)
+                    } catch (e) {
+                        console.error(e)
+                        console.error("Failed to read member data for " + member.id)
+                    }
+                }
+
+            }
+
+            const decryptedMember = Member.create({
+                id: member.id,
+                details: decryptedDetails,
+                publicKey: member.publicKey
+            })
+
+            const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
+                member: decryptedMember,
+                group: groups.find(g => g.id === registration.groupId)
+            }))
+
+            registrations.push(decryptedRegistration)
+        }
+
+        return registrations
+    }
 
     async setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
@@ -270,6 +318,43 @@ export class MemberManagerStatic {
             }
         }
         return detailed
+    }
+
+    /**
+     * Get registrations that are up to date
+     */
+    getLatestRegistrations(members: Member[]): RegistrationWithMember[] {
+        if (!MemberManager.members) {
+            return []
+        }
+
+        const registrations: RegistrationWithMember[] = []
+        const groups = OrganizationManager.organization.groups
+        for (const member of MemberManager.members) {
+            if (!members.find(m => m.id == member.id)) {
+                continue;
+            }
+
+            for (const registration of member.registrations) {
+                // todo
+                if (registration.createdAt > new Date(new Date().getTime() - 10*1000)) {
+                    continue;
+                }
+
+                const group = groups.find(g => g.id == registration.groupId)
+                if (!group) {
+                    continue;
+                }
+                const reg = RegistrationWithMember.create(
+                    Object.assign({
+                        member,
+                        group
+                    }, registration)
+                );
+                registrations.push(reg)
+            }
+        }
+        return registrations
     }
 
 }
