@@ -166,7 +166,7 @@ export class MemberDetails extends AutoEncoder {
 
     
     /**
-     * Return the groups that are currently selected for registration
+     * Return the groups that are currently selected for registration, optionally filter by waitingList
      */
     getPreferredGroups(groups: Group[], waitingList: boolean | null = null): Group[] {
         const pg: Group[] = []
@@ -179,12 +179,7 @@ export class MemberDetails extends AutoEncoder {
         if (pg.length > 0) {
             return pg
         }
-
-        // Search for possibilities
-        const matching = this.getMatchingGroups(groups)
-        if (matching.length == 1) {
-            return [matching[0]]
-        }
+        
         return []
     }
 
