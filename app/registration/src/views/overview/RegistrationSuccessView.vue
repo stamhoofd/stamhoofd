@@ -2,9 +2,8 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1 v-if="names.length == 2">Hoera! {{ names.join(' en ') }} zijn ingeschreven</h1>
-                <h1 v-else-if="names.length > 1">Hoera! {{ names.slice(0, names.length - 1).join(', ') }} en {{ names[names.length - 1] }} zijn ingeschreven</h1>
-                <h1 v-else>Hoera! {{ names[0] }} is ingeschreven</h1>
+                <h1>{{ text }}</h1>
+                
                 <p>Je kan hier later super gemakkelijk jaarlijks de inschrijving verlengen. Hou wel zeker je wachtwoord goed bij (bij voorkeur met een wachtwoordbeheerder als je het niet gaat onthouden). Omdat we met end-to-end encryptie werken is het herstellen van een vergeten wachtwoord iets meer werk dan je gewoon bent.</p>
             </main>
 
@@ -48,8 +47,44 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     step = 4
     isStepsPoppable = false
 
+    get text() {
+        let t = "Hoera! "
+        const names = this.names
+
+        if (names.length > 0) {
+            if (names.length > 2) {
+                t += names.slice(0, names.length - 1).join(', ')+" en "+names[names.length - 1] +" zijn ingeschreven"
+            } else if (names.length > 1) {
+                t += names.join(' en ')+" zijn ingeschreven"
+            } else {
+                t += names.join('')+" is ingeschreven"
+            }
+        }
+
+        const waitingListNames = this.waitingListNames
+
+        if (waitingListNames.length > 0) {
+            if (names.length > 0) {
+                t += " en "
+            }
+
+            if (waitingListNames.length > 2) {
+                t += waitingListNames.slice(0, waitingListNames.length - 1).join(', ')+" en "+waitingListNames[waitingListNames.length - 1] +" staan op de wachtlijst"
+            } else if (waitingListNames.length > 1) {
+                t += waitingListNames.join(' en ')+" staan op de wachtlijst"
+            } else {
+                t += waitingListNames.join('')+" staat op de wachtlijst"
+            }
+        }
+        return t
+    }
+
     get names() {
-        return this.registrations.map(r => r.member.details?.firstName ?? "?")
+        return this.registrations.filter(r => !r.waitingList).map(r => r.member.details?.firstName ?? "?")
+    }
+
+    get waitingListNames() {
+        return this.registrations.filter(r => r.waitingList).map(r => r.member.details?.firstName ?? "?")
     }
 
     close() {

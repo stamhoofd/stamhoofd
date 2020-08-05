@@ -77,6 +77,9 @@ import { Formatter } from '@stamhoofd/utility';
 })
 export default class TransferPaymentView extends Mixins(NavigationMixin){
     @Prop({ required: true })
+    registrations: RegistrationWithMember[]
+
+    @Prop({ required: true })
     payment: Payment
 
     @Prop({ default: false })
@@ -119,7 +122,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
        
         this.show(new ComponentWithProperties(RegistrationSuccessView, {
-            registrations: this.paymentDetailed.registrations
+            registrations: this.registrations
         }))
     }
 

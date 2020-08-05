@@ -146,7 +146,8 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 }))
             } else {
                 this.show(new ComponentWithProperties(TransferPaymentView, {
-                    payment
+                    payment,
+                    registrations
                 }))
             }
             
