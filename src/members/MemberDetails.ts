@@ -193,6 +193,12 @@ export class MemberDetails extends AutoEncoder {
                     return false
                 }
 
+                try {
+                    group.canRegisterInGroup(this.existingStatus)
+                } catch (e) {
+                    return false;
+                }
+
                 if (waitingList !== null) {
                     if (waitingList !== pref.waitingList) {
                         continue;
