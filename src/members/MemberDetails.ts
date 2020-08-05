@@ -182,6 +182,17 @@ export class MemberDetails extends AutoEncoder {
     doesPreferGroup(group: Group, waitingList: boolean | null = null): boolean {
         for (const pref of this.preferredGroups) {
             if (pref.groupId === group.id && pref.cycle === group.cycle) {
+                // Check if pref waitlist is valid
+                if (group.shouldKnowExisting() && (this.existingStatus == null || this.existingStatus.isExpired())) {
+                    // Became invalid = ignore
+                    return false
+                }
+
+                if (group.isWaitingList(this.existingStatus) !== pref.waitingList) {
+                    // Became invalid = ignore
+                    return false
+                }
+
                 if (waitingList !== null) {
                     if (waitingList !== pref.waitingList) {
                         continue;
