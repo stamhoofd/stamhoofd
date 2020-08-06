@@ -22,6 +22,20 @@ export class Formatter {
         return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
     }
 
+    /**
+     * 1 januari (2020) om 12:00. Year only in different year
+     */
+    static time(date: Date): string {
+        return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
+    }
+
+    /**
+     * 1 januari (2020) om 12:00. Year only in different year
+     */
+    static dateTime(date: Date): string {
+        return this.date(date) + " om "+this.time(date)
+    }
+
     static price(value: number): string {
         const formatted = new Intl.NumberFormat("nl-BE", {
             style: "currency",
