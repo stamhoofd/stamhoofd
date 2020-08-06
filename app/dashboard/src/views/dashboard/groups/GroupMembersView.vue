@@ -4,14 +4,14 @@
             <template #left>
                 <BackButton slot="left" v-if="canPop" @click="pop"/>
                 <STNavigationTitle v-else>
-                    <span class="icon-spacer">{{ group ? group.settings.name : "Alle leden" }}</span>
-                    <button class="button more" />
+                    <span class="icon-spacer">{{ title }}</span>
+                    <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
                 </STNavigationTitle>
             </template>
             <template #right>
                 <input v-model="searchQuery" class="input search hide-smartphone" placeholder="Zoeken">
 
-                <select v-model="selectedFilter" class="input hide-smartphone">
+                <select v-model="selectedFilter" class="input hide-smartphone" v-if="!waitingList">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">
                         {{ filter.getName() }}
                     </option>
@@ -22,8 +22,8 @@
     
         <main>
             <h1 v-if="canPop">
-                <span class="icon-spacer">{{ group ? group.settings.name : "Alle leden" }}</span>
-                <button class="button more" />
+                <span class="icon-spacer">{{ title }}</span>
+                <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
             </h1>
 
             <Spinner class="center" v-if="loading"/>
@@ -57,7 +57,7 @@
                             />
                         </th>
                         <th @click="toggleSort('status')" class="hide-smartphone">
-                            Status
+                            {{ waitingList ? "Op wachtlijst sinds" : "Status"}}
                             <span
                                 class="sort-arrow"
                                 :class="{
@@ -76,8 +76,8 @@
                         </td>
                         <td>
                             <div
-                                v-if="isNew(member.member)"
-                                v-tooltip="'Ingeschreven op ' + registrationDate(member.member)"
+                                v-if="!waitingList && isNew(member.member)"
+                                v-tooltip="'Ingeschreven op ' + formatDate(registrationDate(member.member))"
                                 class="new-member-bubble"
                             />
                             {{ member.member.details.name }}
@@ -85,7 +85,7 @@
                         <td class="minor hide-smartphone">
                             {{ member.member.details.age }} jaar
                         </td>
-                        <td class="hide-smartphone">{{ member.member.info }}</td>
+                        <td class="hide-smartphone">{{ waitingList ? formatDate(registrationDate(member.member)) : member.member.info }}</td>
                         <td>
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
@@ -104,7 +104,7 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" @click="openSamenvatting">
+                <button class="button secundary" @click="openSamenvatting" v-if="!waitingList">
                     Samenvatting
                 </button><button class="button primary" @click="openMail">
                     <span class="dropdown-text">Mailen</span>
@@ -131,8 +131,9 @@ import MailView from "../mail/MailView.vue";
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import { MemberWithRegistrations, Group, Organization } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Organization, WaitingListType } from '@stamhoofd/structures';
 import { MemberManager } from '../../../classes/MemberManager';
+import { Formatter } from '@stamhoofd/utility';
 
 class SelectableMember {
     member: MemberWithRegistrations;
@@ -158,6 +159,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     @Prop()
     group!: Group | null;
 
+    @Prop({ default: false })
+    waitingList!: boolean;
+
     @Prop()
     organization!: Organization | null;
 
@@ -174,7 +178,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     mounted() {
         this.loading = true;
 
-        MemberManager.loadMembers(this.group?.id ?? null).then((members) => {
+        MemberManager.loadMembers(this.group?.id ?? null, this.waitingList).then((members) => {
             this.members = members.map((member) => {
                 return new SelectableMember(member);
             }) ?? [];
@@ -183,20 +187,32 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
         })
+    }
 
-        // todo!
+    openWaitingList() {
+        this.show(new ComponentWithProperties(GroupMembersView, {
+            organization: this.organization,
+            group: this.group,
+            waitingList: true
+        }))
+    }
 
-        /*if (this.group) {
-            this.members = this.group.members?.map((member) => {
-                return new SelectableMember(member);
-            }) ?? [];
-        } else {
-            this.members = this.organization?.groups?.flatMap((group) => {
-                return group.members?.map((member) => {
-                    return new SelectableMember(member);
-                }) ?? [];
-            }) ?? [];
-        }*/
+    get hasWaitingList() {
+        if (this.waitingList) {
+            return false;
+        }
+        if (!this.group) {
+            return false;
+        }
+        return this.group.settings.waitingListType == WaitingListType.All || this.group.settings.waitingListType == WaitingListType.ExistingMembersFirst
+    }
+
+    get title() {
+        return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : "Alle leden")
+    }
+
+    formatDate(date: Date) {
+        return Formatter.dateTime(date)
     }
 
     registrationDate(member: MemberWithRegistrations) {
@@ -208,8 +224,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return new Date()
         }
 
-        if (!reg.registeredAt) {
-            return new Date()
+        if (!reg.registeredAt || this.waitingList) {
+            return reg.createdAt
         }
         
         return reg.registeredAt
@@ -282,6 +298,26 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.sortBy == "status") {
+            if (this.waitingList) {
+                return this.filteredMembers.sort((a, b) => {
+                    if (this.sortDirection == "ASC") {
+                        if (this.registrationDate(a.member) > this.registrationDate(b.member)) {
+                            return 1;
+                        }
+                        if (this.registrationDate(a.member) < this.registrationDate(b.member)) {
+                            return -1;
+                        }
+                        return 0;
+                    }
+                    if (this.registrationDate(a.member) > this.registrationDate(b.member)) {
+                        return -1;
+                    }
+                    if (this.registrationDate(a.member) < this.registrationDate(b.member)) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            }
             return this.filteredMembers.sort((a, b) => {
                 if (this.sortDirection == "ASC") {
                     if (a.member.info.toLowerCase() > b.member.info.toLowerCase()) {

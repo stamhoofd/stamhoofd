@@ -120,7 +120,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     openGroup(group: Group) {
         this.currentlySelected = "group-"+group.id
-        this.showDetail(new ComponentWithProperties(GroupMembersView, { group }));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }));
     }
 
     manageGroups() {

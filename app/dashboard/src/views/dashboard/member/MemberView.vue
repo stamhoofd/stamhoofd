@@ -22,7 +22,7 @@
             <button class="button icon gray more" @click="showContextMenu" />
         </STNavigationTitle>
 
-        <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
+        <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" v-if="payments.length > 0" />
 
         <main>
             <component :is="tab" :member="member" />
@@ -77,6 +77,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     get hasPreviousMember(): boolean {
         return !!this.getPreviousMember(this.member);
+    }
+
+    get payments() {
+        return this.member.registrations.flatMap(r => r.payment ? [r.payment] : [])
     }
 
     goBack() {

@@ -1149,9 +1149,9 @@
     uuid "^8.2.0"
 
 "@stamhoofd/utility@^1":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.6.tgz#e8b26347fffc88ef522ca4420001c3aad106bc84"
-  integrity sha512-0p8nbe3Zyb4K7HVO3qogzm+yds5ZLjITmktIvA2+QIbE34/c62xNMUuxmz4qMjHfnfvurqliThWd740meY5iYA==
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.0.7.tgz#2d98821823687643b73229329975d8384dad30b7"
+  integrity sha512-smgsdXz2kqGTyYJQKw1X+834RGduvjFe/jeWLaZTEl21VMGODfNQyVRW90rmFvLSAu1E4UTKFwgLrWaFI8N7Tw==
 
 "@types/anymatch@*":
   version "1.3.1"

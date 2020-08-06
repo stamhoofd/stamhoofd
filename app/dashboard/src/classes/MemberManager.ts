@@ -95,12 +95,13 @@ export class MemberManagerStatic {
         return members;
     }
 
-    async loadMembers(groupId: string | null = null) {
+    async loadMembers(groupId: string | null = null, waitingList = false) {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupId + "/members",
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            query: waitingList ? { waitingList: true } : {}
         })
         return await this.decryptMembers(response.data)
     }

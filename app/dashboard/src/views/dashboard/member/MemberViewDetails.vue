@@ -6,11 +6,15 @@
                 <dt>Verjaardag</dt>
                 <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
 
-                <dt>Lidnummer</dt>
-                <dd>{{ member.id }}</dd>
+                <template v-if="member.groups.length > 0">
+                    <dt>Groep</dt>
+                    <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
+                </template>
 
-                <dt>Groep</dt>
-                <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
+                 <template v-if="member.waitingGroups.length > 0">
+                    <dt>Wachtlijst</dt>
+                    <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
+                </template>
 
                 <template v-if="member.details.phone">
                     <dt>GSM-nummer</dt>
@@ -78,7 +82,7 @@
             </template>
         </div>
 
-        <div>
+        <div v-if="member.groups.length > 0">
             <h2>
                 <span class="icon-spacer">Steekkaart</span><span
                     v-tooltip="
