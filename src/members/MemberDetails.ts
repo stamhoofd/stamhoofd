@@ -85,6 +85,12 @@ export class MemberDetails extends AutoEncoder {
     doctor: EmergencyContact | null = null;
 
     /**
+     * Last time the records were reviewed
+     */
+    @field({ decoder: DateDecoder })
+    lastReviewed: Date | null = null;
+
+    /**
      * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
      * This can get cleared after registration, but is not needed since we keep track of the group cycle.
      */

@@ -28,6 +28,9 @@ export class RegistrationWithEncryptedMember extends AutoEncoder  {
     @field({ decoder: BooleanDecoder, version: 16 })
     waitingList = false
 
+    @field({ decoder: BooleanDecoder, version: 20 })
+    canRegister = false
+
     @field({ decoder: EncryptedMember })
     member: EncryptedMember
 }

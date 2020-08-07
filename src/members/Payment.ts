@@ -7,15 +7,17 @@ export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string
 
-    @field({ decoder: new EnumDecoder(PaymentMethod) })
-    method: PaymentMethod
+    /// Last selected payment method. Nullable if none has been selected
+    @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
+    method: PaymentMethod | null = null
 
     @field({ decoder: new EnumDecoder(PaymentStatus) })
-    status: PaymentStatus
+    status: PaymentStatus = PaymentStatus.Created
 
     @field({ decoder: IntegerDecoder })
     price: number
 
+    // Transfer description if paid via transfer
     @field({ decoder: StringDecoder, nullable: true })
     transferDescription: string | null = null
 

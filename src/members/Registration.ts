@@ -29,6 +29,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 16 })
     waitingList = false
 
+    @field({ decoder: BooleanDecoder, version: 20 })
+    canRegister = false
+
     /// Payment can be null if the member is on a waiting list
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null = null
