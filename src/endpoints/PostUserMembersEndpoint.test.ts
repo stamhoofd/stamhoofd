@@ -25,7 +25,7 @@ describe("Endpoint.PostUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v3/user/members", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v20/user/members", organization.getApiHost(), {
             addMembers: members,
             updateMembers: [],
             keychainItems: keychainItems
@@ -59,10 +59,12 @@ describe("Endpoint.PostUserMembers", () => {
             id: existingMember.id,
             encryptedForMember: members[0].encryptedForMember,
             encryptedForOrganization: members[0].encryptedForOrganization,
-            publicKey: existingMember.publicKey
+            publicKey: existingMember.publicKey,
+            firstName: existingMember.firstName,
+            placeholder: existingMember.placeholder
         })
 
-        const r = Request.buildJson("POST", "/v3/user/members", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v20/user/members", organization.getApiHost(), {
             addMembers: members,
             updateMembers: [
                 existingMemberEncrypted

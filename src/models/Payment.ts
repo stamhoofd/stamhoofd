@@ -12,8 +12,8 @@ export class Payment extends Model {
     })
     id!: string;
 
-    @column({ type: "string" })
-    method: PaymentMethod;
+    @column({ type: "string", nullable: true })
+    method: PaymentMethod | null = null;
 
     @column({ type: "string" })
     status: PaymentStatus;

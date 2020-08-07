@@ -46,7 +46,6 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             member.organizationId = user.organizationId
             member.encryptedForMember = struct.encryptedForMember
             member.encryptedForOrganization = struct.encryptedForOrganization
-            member.firstName = struct.firstName
             await member.save()
 
             addedMembers.push(member)
@@ -70,7 +69,6 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             member.encryptedForMember = struct.encryptedForMember
             member.encryptedForOrganization = struct.encryptedForOrganization
-            member.firstName = struct.firstName
             await member.save();
         }
 

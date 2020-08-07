@@ -19,6 +19,17 @@ export class Member extends Model {
     })
     id!: string;
 
+    /**
+     * Firstname of this member. This is needed when the password is lost, when the member receives an invite etc. This is the only field that is not stored end-to-end encrypted.
+     * It has been a trade off to keep the system accessible for all users and make the 'password forgot' method not impossibly hard to recover from for non technical users.
+     * It is also needed when the users receives an invite to manage a user without receiving the private key. (in the case the organization added the user manually, and when they send invites)
+     * Additionally, in most e-mails the firstName will get used anyway, so let's not pretend that is is end-to-end encrypted.
+     * It also makes it possible to provide automated e-mails from the server during registration, e.g. "Simon has been registered succesfully!" or "We received the payment for the registration of Simon"
+     * We might consider an option to make this field optional in the future for e.g. religious or political organizations or other organizations where the members should be kept secret.
+     */
+    @column({ type: "string" })
+    firstName: string;
+
     @column({ type: "string" })
     organizationId: string;
 
@@ -27,6 +38,16 @@ export class Member extends Model {
 
     @column({ type: "string", nullable: true })
     encryptedForMember: string | null = null;
+
+    /**
+     * Set to true for members who did not confirm their membership.
+     * E.g. when the member is imported from last year. 
+     * 
+     * If a new member creates an account with the same firstName, lastName and birthDay, it will get merged (except the memberDetails).
+     * This merging behaviour happens in the dashboard in the front-end, not on the server.
+     */
+    @column({ type: "boolean" })
+    placeholder = false;
 
     /**
     * Public key used for encryption

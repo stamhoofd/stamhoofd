@@ -54,6 +54,13 @@ export class Registration extends Model {
     @column({ type: "boolean" })
     waitingList = false
 
+    /**
+     * When a registration is on the waiting list or is invite only, set this to true to allow the user to
+     * register normally.
+     */
+    @column({ type: "boolean" })
+    canRegister = false
+
     @column({ type: "datetime", nullable: true})
     deactivatedAt: Date | null = null
 
