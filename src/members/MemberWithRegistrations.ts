@@ -30,12 +30,19 @@ export class MemberWithRegistrations extends Member {
     waitingGroups: Group[] = []
 
     /**
+     * Groups the member is on the waiting list for and is accepted for
+     */
+    @field({ decoder: new ArrayDecoder(Group), optional: true})
+    acceptedWaitingGroups: Group[] = []
+
+    /**
      * Pass all the groups of an organization to the member so we can fill in all the groups and registrations that are active
      */
     fillGroups(groups: Group[]) {
         this.activeRegistrations = []
         const groupMap = new Map<string, Group>()
         const waitlistGroups = new Map<string, Group>()
+        const acceptedWaitlistGroups = new Map<string, Group>()
 
         for (const registration of this.registrations) {
             const group = groups.find(g => g.id == registration.groupId)
@@ -47,6 +54,9 @@ export class MemberWithRegistrations extends Member {
                     if (!registration.waitingList) {
                         groupMap.set(group.id, group)
                     } else {
+                        if (registration.canRegister) {
+                            acceptedWaitlistGroups.set(group.id, group)
+                        }
                         waitlistGroups.set(group.id, group)
                     }
                 }
@@ -54,6 +64,8 @@ export class MemberWithRegistrations extends Member {
         }
         this.groups = Array.from(groupMap.values())
         this.waitingGroups = Array.from(waitlistGroups.values())
+        this.acceptedWaitingGroups = Array.from(acceptedWaitlistGroups.values())
+
     }
     
     get paid(): boolean {
