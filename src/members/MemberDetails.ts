@@ -182,61 +182,8 @@ export class MemberDetails extends AutoEncoder {
         return true
     }
 
-    /**
-     * Return true if this group is currently selected for registration or waiting list, or not at all
-     */
-    doesPreferGroup(group: Group, waitingList: boolean | null = null): boolean {
-        for (const pref of this.preferredGroups) {
-            if (pref.groupId === group.id && pref.cycle === group.cycle) {
-                // Check if pref waitlist is valid
-                if (group.shouldKnowExisting() && (this.existingStatus == null || this.existingStatus.isExpired())) {
-                    // Became invalid = ignore
-                    return false
-                }
-
-                if (group.isWaitingList(this.existingStatus) !== pref.waitingList) {
-                    // Became invalid = ignore
-                    return false
-                }
-
-                try {
-                    group.canRegisterInGroup(this.existingStatus)
-                } catch (e) {
-                    return false;
-                }
-
-                if (waitingList !== null) {
-                    if (waitingList !== pref.waitingList) {
-                        continue;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
-    }
-
-    
-    /**
-     * Return the groups that are currently selected for registration, optionally filter by waitingList
-     */
-    getPreferredGroups(groups: Group[], waitingList: boolean | null = null): Group[] {
-        const pg: Group[] = []
-        for (const group of groups) {
-            if (this.doesPreferGroup(group, waitingList)) {
-                pg.push(group)
-            }
-        }
-
-        if (pg.length > 0) {
-            return pg
-        }
-        
-        return []
     }
 
     updateAddress(oldValue: Address, newValue: Address) {

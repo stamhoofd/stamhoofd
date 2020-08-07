@@ -5,6 +5,20 @@ import { PaymentStatus } from '../PaymentStatus';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
+export class SelectedGroup {
+    group: Group;
+
+    /**
+     * Whether this group is selected to register on the waiting list
+     */
+    waitingList: boolean
+
+    constructor(group: Group, waitingList: boolean) {
+        this.group = group
+        this.waitingList = waitingList
+    }
+}
+
 export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Registration) })
     registrations: Registration[]
@@ -77,4 +91,62 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
+    /**
+     * Return an instance of SelectedGroup if this group is selected (and still selectable) (contains information about whether it is selected for the waiting list or not)
+     */
+    getSelectedGroup(group: Group): SelectedGroup | null {
+        if (!this.details) {
+            return null
+        }
+
+        for (const pref of this.details.preferredGroups) {
+            if (pref.groupId === group.id && pref.cycle === group.cycle) {
+                // Is this group an acceptedWaitingGroups + not on waiting list?
+                if (this.acceptedWaitingGroups.find(g => g.id == pref.groupId)) {
+                    // Automatically select this group as a non waiting list group
+                    return new SelectedGroup(group, false)
+                }
+
+                // Check if pref waitlist is valid
+                if (group.shouldKnowExisting() && (this.details.existingStatus == null || this.details.existingStatus.isExpired())) {
+                    // We need to know the existing status before we can determine if this group is selectable
+                    return null
+                }
+
+                if (group.isWaitingList(this.details.existingStatus) !== pref.waitingList) {
+                    // Became invalid = ignore
+                    return null
+                }
+
+                try {
+                    group.canRegisterInGroup(this.details.existingStatus)
+                } catch (e) {
+                    // Registrations might be closed
+                    return null;
+                }
+
+                return new SelectedGroup(group, pref.waitingList);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the groups that are currently selected for registration, optionally filter by waitingList
+     */
+    getSelectedGroups(groups: Group[]): SelectedGroup[] {
+        if (!this.details) {
+            return []
+        }
+
+        const selectedGroups: SelectedGroup[] = []
+        for (const group of groups) {
+            const selectedGroup = this.getSelectedGroup(group)
+            if (selectedGroup) {
+                selectedGroups.push(selectedGroup)
+            }
+        }
+
+        return selectedGroups
+    }
 }
