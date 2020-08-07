@@ -87,7 +87,7 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Last time the records were reviewed
      */
-    @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 20 })
     lastReviewed: Date | null = null;
 
     /**
