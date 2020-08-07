@@ -66,6 +66,7 @@ export * from "./src/members/Registration"
 export * from "./src/members/RegistrationWithMember"
 export * from "./src/members/PaymentDetailed"
 export * from "./src/members/PaymentPatch"
+export * from "./src/members/RegistrationPatch"
 
 export * from "./src/members/EncryptedPaymentDetailed"
 export * from "./src/members/RegistrationWithEncryptedMember"
