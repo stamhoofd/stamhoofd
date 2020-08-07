@@ -8,3 +8,4 @@ export class EncryptedMemberWithRegistrations extends EncryptedMember {
     registrations: Registration[]
 }
 
+export const EncryptedMemberWithRegistrationsPatch = EncryptedMemberWithRegistrations.patchType()
