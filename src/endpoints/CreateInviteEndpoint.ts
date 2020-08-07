@@ -82,6 +82,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
                 invite.receiverId = receiver.id
             }
             invite.permissions = request.body.permissions
+            invite.memberIds = request.body.memberIds
         } else {
             if (request.body.receiverId || request.body.permissions) {
                 throw new SimpleError({
