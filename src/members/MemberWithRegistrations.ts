@@ -24,7 +24,7 @@ export class MemberWithRegistrations extends Member {
     groups: Group[] = []
 
     /**
-     * Groups the member is on the waiting list for
+     * Groups the member is on the waiting list for (not accepted)
      */
     @field({ decoder: new ArrayDecoder(Group), optional: true})
     waitingGroups: Group[] = []
@@ -56,8 +56,9 @@ export class MemberWithRegistrations extends Member {
                     } else {
                         if (registration.canRegister) {
                             acceptedWaitlistGroups.set(group.id, group)
+                        } else {
+                            waitlistGroups.set(group.id, group)
                         }
-                        waitlistGroups.set(group.id, group)
                     }
                 }
             }
