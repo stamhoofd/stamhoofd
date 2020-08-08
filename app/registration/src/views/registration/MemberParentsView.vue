@@ -125,15 +125,16 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             this.parents.push(new SelectableParent(parent, true))
         }
 
-        console.warn(MemberManager.getParents())
+        const autoSelect = this.parents.length == 0
 
         // Read parents from membermanager
         for (const parent of MemberManager.getParents()) {
             console.log(parent)
             if (!this.parents.find(p => p.parent.id == parent.id)) {
-                this.parents.push(new SelectableParent(parent, false))
+                this.parents.push(new SelectableParent(parent, autoSelect))
             }
         }
+        this.onChangedSelection()
     }
 
     onChangedSelection() {

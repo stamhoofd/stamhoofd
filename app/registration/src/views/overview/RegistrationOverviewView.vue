@@ -47,13 +47,7 @@
                 </STList>
             </main>
 
-            <STToolbar v-if="!canRegisterMembers">
-                <button slot="right" class="button primary" @click="addNewMember">
-                    <span class="icon add"/>
-                    <span>Iemand toevoegen</span>
-                </button>
-            </STToolbar>
-            <STToolbar v-else>
+            <STToolbar>
                 <button slot="right" class="button secundary" @click="addNewMember">
                     <span class="icon add"/>
                     <span>Nog iemand toevoegen</span>
@@ -97,7 +91,10 @@ import TransferPaymentView from './TransferPaymentView.vue';
 })
 export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+
     memberSelection: { [key:string]:boolean; } = {}
+    selectedMembers: MemberWithRegistrations[] = []
+
     step = 1
     defaultSelection = false
     errorBox: ErrorBox | null = null
@@ -108,6 +105,10 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     }
 
     updateSelection() {
+        if (!MemberManager.members) {
+            return
+        }
+
         for (const member of MemberManager.members) {
             if (this.memberSelection[member.id] === undefined) {
                 // If we already selected some groups for this member, we select it by default
@@ -118,22 +119,9 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                     this.$set(this.memberSelection, member.id, false)
                 }
             }
-        }
-    }
+        }       
 
-    /**
-     * Return members that are currently registered in
-     */
-    get registeredMembers() {
-        return this.members.filter(m => m.activeRegistrations.length > 0)
-    }
-
-    get canRegisterMembers() {
-        return !!this.members.find(m => m.activeRegistrations.length == 0)
-    }
-
-    get selectedMembers() {
-        return this.members.flatMap((m) => {
+        this.selectedMembers = this.members.flatMap((m) => {
             if (this.memberSelection[m.id] === true) {
                 return [m]
             }
@@ -176,6 +164,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     toggleMember(member: MemberWithRegistrations) {
         if (this.memberSelection[member.id]) {
             this.$set(this.memberSelection, member.id, false)
+            this.updateSelection()
             return;
         }
         this.selectMember(member)
@@ -225,6 +214,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
 
         this.$set(this.memberSelection, member.id, true)
+        this.updateSelection()
     }
 
     /**

@@ -48,11 +48,13 @@
             
             <STList v-if="groups.length > 1">
                 <STListItem v-for="group in groups" :key="group.group.id" :selectable="true" element-name="label" class="right-stack left-center" @click="selectGroup(group)">
-                    <Radio slot="left" name="choose-group" :model-value="selectableGroup" :value="group" :disabled="group.askExistingStatus"/>
+                    <Radio slot="left" name="choose-group" :model-value="selectableGroup" :value="group" :disabled="group.askExistingStatus || group.alreadyRegistered || (group.alreadyOnWaitingList && group.willJoinWaitingList)"/>
                     <h2 class="style-title-list">{{ group.group.settings.name }}</h2>
                     <p class="style-description-small" v-if="group.group.settings.description">{{ group.group.settings.description }}</p>
                     <span v-if="group.preRegistrations" class="pre-registrations-label warn">Voorinschrijvingen</span>
                     <span v-if="group.waitingList" class="pre-registrations-label">Wachtlijst</span>
+                    <span v-if="group.alreadyOnWaitingList" class="pre-registrations-label">Op wachtlijst</span>
+                    <span v-if="group.alreadyRegistered" class="pre-registrations-label">Al ingeschreven</span>
                 </STListItem>
             </STList>
 
@@ -188,7 +190,7 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     validateGroup(final: boolean = false): boolean {
         this.errorBox = null
 
-        if (!this.selectedGroup) {
+        if (!this.selectedGroup || !this.selectableGroup) {
             if (final) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: "",
@@ -207,8 +209,8 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         }
 
         try {
-            // tood: invitation
-            this.selectedGroup.group.canRegisterInGroup(this.memberDetails.existingStatus)
+            // todo: invitation
+            this.selectableGroup.canRegister(this.member)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return false

@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember, Member, RegistrationWithEncryptedMember } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember, Member, RegistrationWithEncryptedMember, EmergencyContact } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 import { OrganizationManager } from './OrganizationManager';
 
@@ -241,6 +241,52 @@ export class MemberManagerStatic {
         }
 
         return Array.from(parents.values())
+    }
+
+    /**
+     * Get last updated emergency contact
+     */
+    getEmergencyContact(): EmergencyContact | null {
+        if (!this.members) {
+            return null
+        }
+        let minDate = -1
+        let found: EmergencyContact | null = null
+
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            if (member.details.emergencyContacts.length > 0 && member.details.lastReviewed && member.details.lastReviewed.getTime() > minDate) {
+                minDate = member.details.lastReviewed.getTime()
+                found = member.details.emergencyContacts[0]
+            }
+        }
+
+        return found
+    }
+
+    /**
+     * Get last updated emergency contact
+     */
+    getDoctor(): EmergencyContact | null {
+        if (!this.members) {
+            return null
+        }
+        let minDate = -1
+        let found: EmergencyContact | null = null
+
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            if (member.details.doctor && member.details.lastReviewed && member.details.lastReviewed.getTime() > minDate) {
+                minDate = member.details.lastReviewed.getTime()
+                found = member.details.doctor
+            }
+        }
+
+        return found
     }
 
     updateAddress(oldValue: Address, newValue: Address) {

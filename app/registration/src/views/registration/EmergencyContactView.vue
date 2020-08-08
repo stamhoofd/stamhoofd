@@ -60,6 +60,7 @@ import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolb
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
+import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
@@ -96,6 +97,13 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
             this.name = this.contact.name
             this.title = this.contact.title
             this.phone = this.contact.phone
+        } else {
+            const contact = MemberManager.getEmergencyContact()
+            if (contact) {
+                this.name = contact.name
+                this.title = contact.title
+                this.phone = contact.phone
+            }
         }
     }
 

@@ -292,6 +292,14 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             this.doctorName = this.memberDetails.doctor?.name ?? ""
             this.doctorPhone = this.memberDetails.doctor?.phone ?? ""
         }
+
+        if (!this.memberDetails || !this.memberDetails.doctor) {
+            const doctor = MemberManager.getDoctor()
+            if (doctor) {
+                this.doctorName = doctor.name
+                this.doctorPhone = doctor.phone
+            }
+        }
     }
 
     async goNext() {
