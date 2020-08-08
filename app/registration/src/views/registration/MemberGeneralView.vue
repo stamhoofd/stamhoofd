@@ -18,7 +18,7 @@
                 Gegevens wijzigen van {{ member.details ? member.details.firstName : member.firstName }}
             </h1>
 
-            <p v-if="member && !member.details" class="info-box">Jouw account beschikt niet meer over de sleutel om de gegevens van {{ member.firstName }} te ontcijferen. Dit kan voorkomen als je bijvoorbeeld je wachtwoord was vergeten, of als je uitgenodigd bent om een lid te bewerken. Je moet de gegevens daarom opnieuw ingeven.</p>
+            <p v-if="member && !member.details" class="info-box">Jouw account beschikt niet meer over de sleutel om de gegevens van {{ member.firstName }} te ontcijferen. Dit kan voorkomen als je bijvoorbeeld je wachtwoord was vergeten, of als je ingelogd bent met een ander account dan je oorspronkelijk had gebruikt om {{ member.firstName }} in te schrijven. Je moet de gegevens daarom opnieuw ingeven.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
