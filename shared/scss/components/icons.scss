@@ -160,6 +160,10 @@
     &.link:after {
         font-icon: url(@stamhoofd/assets/images/icons/link.svg);
     }
+
+    &.sync:after {
+        font-icon: url(@stamhoofd/assets/images/icons/sync.svg);
+    }
 }
 
 .android-icons {

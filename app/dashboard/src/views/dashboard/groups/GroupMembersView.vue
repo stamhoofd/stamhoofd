@@ -107,18 +107,22 @@
                 </template>
             </template>
             <template #right>
-                <LoadingButton :loading="actionLoading">
-                    <button class="button primary" @click="allowMembers" v-if="waitingList">
+                <LoadingButton :loading="actionLoading" v-if="waitingList">
+                    <button class="button primary" @click="allowMembers">
                         Toelaten
                     </button>
-                    <button class="button secundary" @click="openSamenvatting" v-if="!waitingList">
+                </LoadingButton>
+                <template v-else>
+                    <button class="button secundary" @click="openSamenvatting">
                         Samenvatting
                     </button>
-                    <button class="button primary" @click="openMail" v-if="!waitingList">
-                        <span class="dropdown-text">Mailen</span>
-                        <div class="dropdown" @click.stop="openMailDropdown" />
-                    </button>
-                </LoadingButton>
+                    <LoadingButton :loading="actionLoading">
+                        <button class="button primary" @click="openMail">
+                            <span class="dropdown-text">Mailen</span>
+                            <div class="dropdown" @click.stop="openMailDropdown" />
+                        </button>
+                    </LoadingButton>
+                </template>
             </template>
         </STToolbar>
     </div>

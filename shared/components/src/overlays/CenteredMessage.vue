@@ -5,6 +5,7 @@
                 <Spinner v-if="type == 'loading'" class="center" />
                 <img v-else-if="type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg" />
                 <img v-else-if="type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg" />
+                <img v-else-if="type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg" />
                 <span v-else-if="type != 'none'" :class="'center icon '+type" />
                 <h1>{{ title }}</h1>
                 <p>{{ description }}</p>

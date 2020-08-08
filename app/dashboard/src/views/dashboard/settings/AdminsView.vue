@@ -11,7 +11,6 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Geef jouw medeleiding toegang.</p>
 
             <Spinner v-if="loading" />
             <STList v-else>

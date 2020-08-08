@@ -45,7 +45,12 @@
 
             <button class="menu-button button heading" @click="manageAdmins" :class="{ selected: currentlySelected == 'manage-admins'}">
                 <span class="icon lock"/>
-                <span>Leiding &amp; beheerders</span>
+                <span>Beheerders</span>
+            </button>
+
+            <button class="menu-button button heading" @click="importMembers" :class="{ selected: currentlySelected == 'import-members'}">
+                <span class="icon sync"/>
+                <span>Leden importeren</span>
             </button>
         </div>
         <hr v-if="fullAccess">
@@ -72,6 +77,7 @@ import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import { CenteredMessage } from '@stamhoofd/components';
 
 
 
@@ -148,6 +154,10 @@ export default class Menu extends Mixins(NavigationMixin) {
             return;
         }
         SessionManager.currentSession!.logout()
+    }
+
+    importMembers() {
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Binnenkort kan je leden importeren via Excel of manueel.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
     }
 
     hasAccessToGroup(group: Group) {
