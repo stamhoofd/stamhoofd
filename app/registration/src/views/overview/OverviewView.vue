@@ -7,15 +7,21 @@
 
                 <STList>
                     <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
-                        <span class="icon clock" slot="left" />
+                        <span class="icon clock" slot="left" v-if="member.acceptedWaitingGroups.length == 0"/>
+                        <span class="icon green success" slot="left" v-else />
 
                         <h2 class="payment-period">{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</h2>
-                        <p class="style-description-small">Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
+                        <p class="style-description-small" v-if="member.waitingGroups.length > 0">Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
+                        <p class="style-description-small" v-if="member.acceptedWaitingGroups.length > 0">Kan zich nu inschrijven voor {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)">
+                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="member.acceptedWaitingGroups.length == 0">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
+                            </button>
+                            <button class="button text limit-space" @click.stop="addNewMember" v-else>
+                                <span>Inschrijven</span>
+                                 <span class="icon arrow-right" />
                             </button>
                             
                         </template>
@@ -137,7 +143,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         if (!this.members) {
             return []
         }
-        return this.members.filter(m => m.waitingGroups.length > 0)
+        return this.members.filter(m => m.waitingGroups.length > 0 || m.acceptedWaitingGroups.length > 0)
     }
 
     getPaymentPeriod(payment: Payment) {
