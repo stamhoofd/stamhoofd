@@ -106,6 +106,8 @@
                 </li>
             </ul>
 
+            <p class="info-box" v-if="member.details.records.length == 0">{{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart</p>
+
             <template v-if="false">
                 <hr>
 
@@ -188,7 +190,9 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }
 
         > p {
-            @extend .style-definition-description;
+            &:not([class]) {
+                @extend .style-definition-description;
+            }
         }
 
         > hr {

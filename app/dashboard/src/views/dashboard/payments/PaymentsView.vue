@@ -10,9 +10,9 @@
 
         <main>
             <h1>Overschrijvingen</h1>
-            <p>Hier kan je de betalingen van het lidgeld opvolgen. We bekijken momenteel een mogelijkheid om dit op een betaalbare manier te automatiseren, maar hier komt veel bij kijken. Online betalingen zijn helaas erg duur, en onbetaalbaar voor veel verenigingen. Moesten jullie het toch overwegen om 39 cent per Bancontact betaling, of 20 cent per Payconiq betaling te betalen, kan je ons contacteren en kunnen we dit voor jullie activeren. Online betalingen bij feitelijke verenigingen zijn helaas niet mogelijk.</p>
     
-            <p class="warning-box">We raden aan om één keer per week de overschrijvingen na te kijken. Daarna kan je dat afbouwen tot één keer per maand. Gebruik de zoekfunctie om het werk te versnellen. De middelste 4 cijfers van een mededeling zijn altijd uniek en kan je gebruiken om te zoeken naar bv. /0015/. Je kan ook zoeken op naam of familienaam van de ouders.</p>
+            <p class="info-box">Op aanvraag kan je online betalingen accepteren via onze betaalpartner. Transactiekosten zijn 31 cent voor Bancontact en 20 cent voor Payconiq.</p>
+            <p class="info-box">We bekijken momenteel een mogelijkheid om in de toekomst automatisch overschrijvingen als betaald te markeren. </p>
 
             <Spinner v-if="loading"/>
             <STList v-else>
