@@ -10,6 +10,13 @@ export enum WaitingListType {
     All = "All"
 }
 
+export enum WaitingListSkipReason {
+    None = "None", // we can skip because there is no waiting list
+    ExistingMember = "ExistingMember",
+    Family = "Family",
+    Invitation = "Invitation"
+}
+
 export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""

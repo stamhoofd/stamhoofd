@@ -4,7 +4,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { GroupPrivateSettings } from './GroupPrivateSettings';
-import { GroupSettings, WaitingListType } from './GroupSettings';
+import { GroupSettings, WaitingListSkipReason,WaitingListType } from './GroupSettings';
 import { MemberExistingStatus } from './members/MemberDetails';
 
 export class Group extends AutoEncoder {
@@ -174,15 +174,56 @@ export class Group extends AutoEncoder {
         }
     }
 
+    get closed() {
+        const now = new Date()
+        const preRegistrationDate = this.activePreRegistrationDate
+
+        if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
+            // Start date or pre registration date are in the future
+
+            return true
+        }
+
+        if (this.settings.endDate < now) {
+            return true
+        }
+        return false
+    }
+
     /**
-     * Use this during registration to check if we need to register for waiting list
+     * Use this during registration to check if we need to register for waiting list. Return null if we can't skip the waiting list
      */
-    isWaitingList(existingStatus: MemberExistingStatus | null = null): boolean {
+    hasWaitingList(): boolean {
         switch (this.settings.waitingListType) {
             case WaitingListType.None: return false;
-            case WaitingListType.ExistingMembersFirst: return existingStatus === null || (existingStatus.isNew && (!this.settings.priorityForFamily || !existingStatus.hasFamily));
+            case WaitingListType.ExistingMembersFirst: return true;
             case WaitingListType.All: return true;
             case WaitingListType.PreRegistrations: return false;
+        }
+    }
+
+    /**
+     * Use this during registration to check if we need to register for waiting list. Return null if we can't skip the waiting list
+     */
+    canSkipWaitingList(existingStatus: MemberExistingStatus | null = null): WaitingListSkipReason | null {
+        switch (this.settings.waitingListType) {
+            case WaitingListType.None: return WaitingListSkipReason.None;
+            case WaitingListType.ExistingMembersFirst: {
+                if (existingStatus === null) {
+                    return null
+                }
+
+                if (existingStatus.isNew) {
+                    if (this.settings.priorityForFamily && existingStatus.hasFamily) {
+                        return WaitingListSkipReason.Family
+                    }
+                    return null
+                }
+
+                return WaitingListSkipReason.ExistingMember
+            }
+            case WaitingListType.All: return null;
+            case WaitingListType.PreRegistrations: return null;
         }
     }
 
