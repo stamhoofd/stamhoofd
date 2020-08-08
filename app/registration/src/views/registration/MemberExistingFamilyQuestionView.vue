@@ -15,16 +15,15 @@
             <STErrorsDefault :error-box="errorBox" />
             <STList>
                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
-                    <Radio slot="left" @click.stop name="choose-answer" v-model="hasFamily" :value="true"/>
-                    <h2 class="style-title-list">Ja, {{ member.firstName }} heeft een broer of zus dat al langer lid is</h2>
-                    <p class="style-description-small">Duid enkel aan voor een reeds broer of zus vorig jaar al ingeschreven was!</p>
-                </STListItem>
-                <STListItem :selectable="true" element-name="label" class="right-stack left-center">
                     <Radio slot="left" @click.stop name="choose-answer" v-model="hasFamily" :value="false"/>
-                    <h2 class="style-title-list">Nee</h2>
+                    <h2 class="style-title-list">Nee, {{ member.firstName }} heeft geen broer/zus die al langer lid is of enkel een broer/zus die ook een nieuw is</h2>
                     <p class="style-description-small">{{ member.firstName }} heeft geen broer of zus dat al langer lid is of enkel een broer / zus die ook een nieuw lid is</p>
                 </STListItem>
-                
+                <STListItem :selectable="true" element-name="label" class="right-stack left-center">
+                    <Radio slot="left" @click.stop name="choose-answer" v-model="hasFamily" :value="true"/>
+                    <h2 class="style-title-list">Ja, {{ member.firstName }} heeft een broer/zus die al langer lid is</h2>
+                    <p class="style-description-small">Duid enkel aan voor een reeds broer of zus vorig jaar al ingeschreven was!</p>
+                </STListItem>
             </STList>
         </main>
 

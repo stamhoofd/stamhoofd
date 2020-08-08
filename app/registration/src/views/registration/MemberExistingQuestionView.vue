@@ -16,12 +16,12 @@
             <STList>
                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
                     <Radio slot="left" @click.stop name="choose-answer" v-model="isNew" :value="true"/>
-                    <h2 class="style-title-list">{{ member.firstName }} is een nieuw lid</h2>
+                    <h2 class="style-title-list">Nee, {{ member.firstName }} is een nieuw lid</h2>
                     <p class="style-description-small">{{ member.firstName }} zal voor de eerste keer ingeschreven worden</p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
                     <Radio slot="left" @click.stop name="choose-answer" v-model="isNew" :value="false"/>
-                    <h2 class="style-title-list">{{ member.firstName }} is een bestaand lid </h2>
+                    <h2 class="style-title-list">Ja, {{ member.firstName }} is een bestaand lid </h2>
                     <p class="style-description-small">{{ member.firstName }} was vorig jaar al ingeschreven</p>
                 </STListItem>
                 
