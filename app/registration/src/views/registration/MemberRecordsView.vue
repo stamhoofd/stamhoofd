@@ -307,29 +307,36 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             return
         }
         this.errorBox =  null;
-        const errors = new SimpleErrors()
-        if (this.doctorName.length < 2) {
-            errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "Vul de naam van de dokter in",
-                field: "doctorName"
-            }))
-        }
 
-        const valid = await this.validator.validate()
-
-        if (!valid || errors.errors.length > 0) {
-            if (errors.errors.length > 0) {
-                this.errorBox = new ErrorBox(errors)
+        if (this.allowData) {
+            const errors = new SimpleErrors()
+            if (this.doctorName.length < 2) {
+                errors.addError(new SimpleError({
+                    code: "invalid_field",
+                    message: "Vul de naam van de dokter in",
+                    field: "doctorName"
+                }))
             }
-            return;
-        }
 
-        this.memberDetails.doctor = EmergencyContact.create({
-            name: this.doctorName,
-            phone: this.doctorPhone,
-            title: "Huisdokter"
-        })
+            const valid = await this.validator.validate()
+
+            if (!valid || errors.errors.length > 0) {
+                if (errors.errors.length > 0) {
+                    this.errorBox = new ErrorBox(errors)
+                }
+                return;
+            }
+
+            this.memberDetails.doctor = EmergencyContact.create({
+                name: this.doctorName,
+                phone: this.doctorPhone,
+                title: "Huisdokter"
+            })
+        } else {
+            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures || r.type == RecordType.NoPermissionForMedicines )
+            this.memberDetails.doctor = null
+        }
+        
         this.memberDetails.lastReviewed = new Date()
 
         this.loading = true
