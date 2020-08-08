@@ -134,7 +134,8 @@ export class MemberManagerStatic {
             placeholder: false
         })
 
-        const { encryptedMembers, keychainItems} = await this.getEncryptedMembers(this.members ?? [])
+        const members = (this.members ?? []).filter(m => !!m.details)
+        const { encryptedMembers, keychainItems} = await this.getEncryptedMembers(members)
         const addMembers = (await this.getEncryptedMembers([decryptedMember])).encryptedMembers
         keychainItems.push(keychainItem)
 

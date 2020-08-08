@@ -510,7 +510,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     registrations: registrationsPatch
                 }))
             }
-            MemberManager.patchMembers(patches)
+            await MemberManager.patchMembers(patches)
         } catch (e) {
             console.error(e)
             // todo
