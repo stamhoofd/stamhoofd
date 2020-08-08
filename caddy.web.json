@@ -35,6 +35,26 @@
                             "match": [
                                 {
                                     "host": [
+                                        "www.stamhoofd.app"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "static_response",
+                                    "status_code": "302",
+                                    "headers": {
+                                        "Location": [
+                                            "https://stamhoofd.app{http.request.uri}"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
                                         "*.stamhoofd.be"
                                     ]
                                 }
@@ -81,6 +101,7 @@
                 "policies": [
                     {
                         "subjects": [
+                            "www.stamhoofd.app",
                             "stamhoofd.app"
                         ],
                         "on_demand": false,
