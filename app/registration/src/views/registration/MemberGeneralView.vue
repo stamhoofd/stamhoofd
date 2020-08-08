@@ -11,9 +11,14 @@
             <h1 v-else-if="wasInvalid">
                 Gegevens aanvullen van {{ member.details ? member.details.firstName : member.firstName }}
             </h1>
+            <h1 v-else-if="!member.details">
+                Gegevens herstellen van {{ member.firstName }}
+            </h1>
             <h1 v-else>
                 Gegevens wijzigen van {{ member.details ? member.details.firstName : member.firstName }}
             </h1>
+
+            <p v-if="member && !member.details" class="info-box">Jouw account beschikt niet meer over de sleutel om de gegevens van {{ member.firstName }} te ontcijferen. Dit kan voorkomen als je bijvoorbeeld je wachtwoord was vergeten, of als je uitgenodigd bent om een lid te bewerken. Je moet de gegevens daarom opnieuw ingeven.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
