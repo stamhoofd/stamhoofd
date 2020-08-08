@@ -1,9 +1,9 @@
 
 
-import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
 /**
@@ -102,6 +102,25 @@ export class MemberManagerStatic {
             path: "/organization/group/" + groupId + "/members",
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             query: waitingList ? { waitingList: true } : {}
+        })
+        return await this.decryptMembers(response.data)
+    }
+
+    getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
+        return new PatchableArray()
+    }
+
+    getPatchArray(): ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]> {
+        return new PatchableArray()
+    }
+
+    async patchMembers(members: ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>) {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            body: members
         })
         return await this.decryptMembers(response.data)
     }

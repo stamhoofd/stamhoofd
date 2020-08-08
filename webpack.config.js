@@ -4,6 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const path = require("path");
 
 module.exports = {
     mode: "development",

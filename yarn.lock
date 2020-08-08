@@ -1118,9 +1118,9 @@
     uuid "^8.2.0"
 
 "@simonbackx/simple-networking@~1.3.0":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.3.tgz#2b2909bfc857cc88cec32757e02eaa29b9dce457"
-  integrity sha512-+QJiIewGQJvRtt17zWF4VxnJLpveWo5GRuaVV1C2qUtXkG1qHbiOlnL5e08gmK3KPgYfQE5q6dYwoF7MHyRHwQ==
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.4.tgz#1886757c114783e957c6ba3a0a30b695a976c25c"
+  integrity sha512-8hBaEp8OAwtUQtgRCZJxrE51NUKIVQCYzHa9BcmMegO7DVADVwjvb03N2/nLGMUmE2hCWe52D93I1hHj1hiVrQ==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
   version "1.6.5"
@@ -1140,13 +1140,6 @@
   integrity sha512-iRk0m1kJgfOpH7u+cZnHyxDTIHIJYIc8mUNv/UwQsc7sCmBtvuTJ2BUwPaZWwFWAGEtB49V6u9OusJCa3KH7kQ==
   dependencies:
     libsodium-wrappers "^0.7.6"
-
-"@stamhoofd/structures@^1":
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.7.5.tgz#eddac5efbbe06216f9415579dae4eaf41c40bc5f"
-  integrity sha512-nbqEdn6g2mGC9OLLgKgyyxuz+v20Dz98mGwPd89knMew153dB7lhQJZYQjxuyGhEO5qvM+Eoqe1rT5R+9jga1w==
-  dependencies:
-    uuid "^8.2.0"
 
 "@stamhoofd/utility@^1":
   version "1.0.7"

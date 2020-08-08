@@ -81,11 +81,14 @@
                                 class="new-member-bubble"
                             />
                             {{ member.member.details.name }}
+                            <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
                         </td>
                         <td class="minor hide-smartphone">
                             {{ member.member.details.age }} jaar
                         </td>
-                        <td class="hide-smartphone">{{ waitingList ? formatDate(registrationDate(member.member)) : member.member.info }}</td>
+                        <td class="hide-smartphone">
+                            {{ waitingList ? formatDate(registrationDate(member.member)) : member.member.info }}
+                        </td>
                         <td>
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
@@ -104,12 +107,18 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" @click="openSamenvatting" v-if="!waitingList">
-                    Samenvatting
-                </button><button class="button primary" @click="openMail">
-                    <span class="dropdown-text">Mailen</span>
-                    <div class="dropdown" @click.stop="openMailDropdown" />
-                </button>
+                <LoadingButton :loading="actionLoading">
+                    <button class="button primary" @click="allowMembers" v-if="waitingList">
+                        Toelaten
+                    </button>
+                    <button class="button secundary" @click="openSamenvatting" v-if="!waitingList">
+                        Samenvatting
+                    </button>
+                    <button class="button primary" @click="openMail" v-if="!waitingList">
+                        <span class="dropdown-text">Mailen</span>
+                        <div class="dropdown" @click.stop="openMailDropdown" />
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
@@ -121,7 +130,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { TooltipDirective as Tooltip, CenteredMessage } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { STNavigationTitle, Spinner, BackButton } from "@stamhoofd/components";
+import { STNavigationTitle, Spinner, BackButton, LoadingButton } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -131,7 +140,7 @@ import MailView from "../mail/MailView.vue";
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import { MemberWithRegistrations, Group, Organization, WaitingListType } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Organization, WaitingListType, EncryptedMemberWithRegistrationsPatch, Registration, Member } from '@stamhoofd/structures';
 import { MemberManager } from '../../../classes/MemberManager';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -151,7 +160,8 @@ class SelectableMember {
         STNavigationTitle,
         STToolbar,
         BackButton,
-        Spinner
+        Spinner,
+        LoadingButton
     },
     directives: { Tooltip },
 })
@@ -175,9 +185,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     loading = false;
 
-    mounted() {
-        this.loading = true;
+    actionLoading = false
 
+    mounted() {
+        this.reload();
+    }
+
+    reload() {
+        this.loading = true;
         MemberManager.loadMembers(this.group?.id ?? null, this.waitingList).then((members) => {
             this.members = members.map((member) => {
                 return new SelectableMember(member);
@@ -456,6 +471,52 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             .map((member: SelectableMember) => {
                 return member.member;
             });
+    }
+
+    canRegister(member: MemberWithRegistrations) {
+        if (!this.group) {
+            return false
+        }
+        return member.registrations.find(r => r.groupId == this.group!.id && r.waitingList && r.canRegister && r.cycle == this.group!.cycle)
+    }
+
+    async allowMembers() {
+        if (this.actionLoading) {
+            return;
+        }
+
+        const members = this.getSelectedMembers().filter(m => !this.group || m.waitingGroups.find(r => r.id === this.group!.id))
+        if (members.length == 0) {
+            return;
+        }
+
+        this.actionLoading = true;
+        try {
+            const patches = MemberManager.getPatchArray()
+            for (const member of members) {
+                const registrationsPatch = MemberManager.getRegistrationsPatchArray()
+
+                const registration = member.registrations.find(r => r.groupId == this.group!.id && r.waitingList == true && r.cycle == this.group!.cycle)
+                if (!registration) {
+                    throw new Error("Not found")
+                }
+                registrationsPatch.addPatch(Registration.patchType().create({
+                    id: registration.id,
+                    canRegister: true
+                }))
+
+                patches.addPatch(EncryptedMemberWithRegistrationsPatch.create({
+                    id: member.id,
+                    registrations: registrationsPatch
+                }))
+            }
+            MemberManager.patchMembers(patches)
+        } catch (e) {
+            console.error(e)
+            // todo
+        }
+        this.actionLoading = false
+        this.reload()
     }
 
     openMail(_event) {

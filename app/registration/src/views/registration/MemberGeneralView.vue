@@ -8,6 +8,9 @@
             <h1 v-if="!member">
                 Wie ga je inschrijven?
             </h1>
+            <h1 v-else-if="wasInvalid">
+                Gegevens aanvullen van {{ member.details.firstName }}
+            </h1>
             <h1 v-else>
                 Gegevens wijzigen van {{ member.details.firstName }}
             </h1>
@@ -95,7 +98,9 @@ import { MemberManager } from '../../classes/MemberManager';
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    member: MemberWithRegistrations | null
+    initialMember: MemberWithRegistrations | null
+
+    member: MemberWithRegistrations | null = this.initialMember
 
     loading = false
 
@@ -114,10 +119,13 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     livesAtParents = false
     validator = new Validator()
 
+    wasInvalid = false
+
     mounted() {
         if (this.member && this.member.details) {
             // Create a deep clone using encoding
-            this.memberDetails = new ObjectData(this.member.details.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+            this.member = new ObjectData(this.member.encode({ version: Version }), { version: Version }).decode(MemberWithRegistrations as Decoder<MemberWithRegistrations>)
+            this.memberDetails = this.member.details
         }
 
         if (this.memberDetails) {
@@ -135,6 +143,8 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             // Recommend the current user's email
             this.email = SessionManager.currentSession?.user?.email ?? null
         }
+
+        this.wasInvalid = !(this.member?.isCompleteForSelectedGroups(OrganizationManager.organization.groups) ?? true)
     }
 
     get age() {
@@ -214,10 +224,18 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                     }))
                 }
             }
+
+            if (this.member) {
+                // Double check if everything is synced
+                this.member.details = this.memberDetails
+            }
             
-            if (!this.member || this.member.activeRegistrations.length == 0) {
+            if (!this.member || this.member.canRegister(OrganizationManager.organization.groups)) {
+                if (!(await this.saveData())) {
+                    return;
+                }
+
                 this.show(new ComponentWithProperties(MemberGroupView, { 
-                    memberDetails: this.memberDetails,
                     member: this.member,
                     handler: (component: MemberGroupView) => {
                         this.goToParents(component)
@@ -231,47 +249,64 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         }
     }
 
+    async saveData() {
+         if (!this.memberDetails) {
+            return false;
+        }
+
+        const o = this.memberDetails
+
+
+
+        try {
+            if (this.member) {
+                await MemberManager.patchAllMembersWith(this.member)
+            } else {
+                const m = await MemberManager.addMember(this.memberDetails)
+                if (!m) {
+                    throw new SimpleError({
+                        code: "expected_member",
+                        message: "Er ging iets mis bij het opslaan."
+                    })
+                }
+                this.member = m
+                this.memberDetails = m.details
+            }
+
+            return true
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+            this.loading = false;
+            return false;
+        }
+    }
+
     async goToParents(component: NavigationMixin) {
         if (!this.memberDetails) {
             return;
         }
 
-        if (this.memberDetails.preferredGroups.length == 0) {
-            // hmm
-            console.warn("Cannot go to parents if no preferred groups are set")
+        // Already save here
+        if (!(await this.saveData())) {
             return;
         }
 
-        const waitingList = !!this.memberDetails.preferredGroups.find(g => g.waitingList) || (this.member && this.member.waitingGroups.length > 0 && this.member.groups.length == 0)
+        if (!this.member) {
+            // we should always have a member
+            console.error("Expected to have a member at the end of the general view")
+            return;
+        }
 
-        // todo: if waiting list -> end here
-        if (waitingList) {
-            this.loading = true;
-            (component as any).loading = true;
-
-            try {
-                if (this.member) {
-                    this.member.details = this.memberDetails
-                    await MemberManager.patchAllMembers()
-                } else {
-                    await MemberManager.addMember(this.memberDetails)
-                }
-            } catch (e) {
-                this.errorBox = new ErrorBox(e)
-                this.loading = false;
-                (component as any).loading = false;
-                return;
-            }
-           
+        // Check if we need to stop here (e.g. because we are only going to register on a waiting list
+        if (!this.member.shouldAskDetails(OrganizationManager.organization.groups)) {
             this.dismiss({ force: true })
             return;
         }
 
-        const memberDetails = this.memberDetails
+        const memberDetails = this.member.details!
         // todo: check age before asking parents
-        if (this.memberDetails.age < 18 || this.livesAtParents) {
+        if (memberDetails.age < 18 || this.livesAtParents) {
             component.show(new ComponentWithProperties(MemberParentsView, { 
-                memberDetails: this.memberDetails,
                 member: this.member
             }))
         } else {
@@ -283,7 +318,6 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                     
                     // go to the steekkaart view
                     component.show(new ComponentWithProperties(MemberRecordsView, { 
-                        memberDetails: memberDetails,
                         member: this.member
                     }))
                 }

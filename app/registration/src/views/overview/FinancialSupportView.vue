@@ -68,10 +68,11 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     get shouldShow() {
         const groups = OrganizationManager.organization.groups
         for (const member of this.selectedMembers) {
-            const preferred = member.details?.getPreferredGroups(groups) ?? []
-            for (const group of preferred) {
+            const preferred = member.getSelectedGroups(groups)
+
+            for (const selected of preferred) {
                 // If not a waiting list, and if it has a reduced price
-                if (!!group.settings!.prices.find(p => p.reducedPrice !== null) && member.details!.doesPreferGroup(group, false)) {
+                if (!!selected.group.settings!.prices.find(p => p.reducedPrice !== null) && !selected.waitingList) {
                     return true
                 }
             }
@@ -102,7 +103,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                             })
                         }
 
-                        const preferred = m.details.getPreferredGroups(groups)
+                        const preferred = m.getSelectedGroups(groups)
 
                         if (preferred.length == 0) {
                             throw new SimpleError({
@@ -113,9 +114,9 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
 
                         return preferred.map(g => RegisterMember.create({
                             memberId: m.id,
-                            groupId: g.id,
+                            groupId: g.group.id,
                             reduced: this.reduced,
-                            waitingList: m.details!.doesPreferGroup(g, true)
+                            waitingList: g.waitingList
                         }))
                         
                     }),

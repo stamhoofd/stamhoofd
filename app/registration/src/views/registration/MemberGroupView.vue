@@ -35,33 +35,37 @@
                 <p>Dit kan later gewijzigd worden indien nodig.</p>
             </template>
             <template v-else>
-                <h1 v-for="group in groups" :key="group.id">
-                    {{ memberDetails.firstName }} inschrijven bij {{ group.settings.name }}
-                    <span v-if="group.activePreRegistrationDate" class="pre-registrations-label warn" slot="right">Voorinschrijvingen</span>
-                    <span v-else-if="group.settings.waitingListType != 'None'" class="pre-registrations-label" slot="right">Wachtlijst</span>
+                <h1 v-for="group in groups" :key="group.group.id">
+                    {{ memberDetails.firstName }} inschrijven bij {{ group.group.settings.name }}
+
+                    <span v-if="group.group.activePreRegistrationDate" class="pre-registrations-label warn">Voorinschrijvingen</span>
+                    <span v-if="group.waitingList !== false" class="pre-registrations-label">Wachtlijst</span>
                 </h1>
-                <p v-if="groups[0].settings.description">{{ groups[0].settings.description }}</p>
+                <p v-if="groups[0].group.settings.description">{{ groups[0].group.settings.description }}</p>
             </template>
             
             <STList v-if="groups.length > 1">
-                <STListItem v-for="group in groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center" @click="selectGroup(group)">
-                    <Radio slot="left" name="choose-group" v-model="selectedGroup" :value="group" :disabled="shouldAskExisting(group)"/>
-                    <h2 class="style-title-list">{{ group.settings.name }}</h2>
-                    <p class="style-description-small" v-if="group.settings.description">{{ group.settings.description }}</p>
-                    <span v-if="group.activePreRegistrationDate" class="pre-registrations-label warn" slot="right">Voorinschrijvingen</span>
-                    <span v-else-if="group.settings.waitingListType != 'None'" class="pre-registrations-label" slot="right">Wachtlijst</span>
+                <STListItem v-for="group in groups" :key="group.group.id" :selectable="true" element-name="label" class="right-stack left-center" @click="selectGroup(group)">
+                    <Radio slot="left" name="choose-group" :model-value="selectableGroup" :value="group" :disabled="group.askExistingStatus"/>
+                    <h2 class="style-title-list">{{ group.group.settings.name }}</h2>
+                    <p class="style-description-small" v-if="group.group.settings.description">{{ group.group.settings.description }}</p>
+                    <span v-if="group.preRegistrations" class="pre-registrations-label warn">Voorinschrijvingen</span>
+                    <span v-if="group.waitingList" class="pre-registrations-label">Wachtlijst</span>
                 </STListItem>
             </STList>
 
-            <p class="warning-box" v-if="isWaitingList">Je komt op de wachtlijst van deze groep omdat het aantal leden gelimiteerd is. Je ontvangt een e-mail zodra je kan inschrijven. Dit wil niet zeggen dat deze groep al volzet is.</p>
-            <p class="info-box" v-else-if="isSkippingWaitingList">
-                <template v-if="selectedGroup.settings.priorityForFamily">
-                    Bestaande leden en hun broers/zussen komen niet op de wachtlijst terecht en kunnen meteen inschrijven
-                </template>
-                <template v-else>
+            <template v-if="selectableGroup && selectableGroup.waitingList">
+                <p class="warning-box" v-if="!selectableGroup.skipReason">Je komt op de wachtlijst van deze groep omdat het aantal leden gelimiteerd is. Je ontvangt een e-mail zodra je kan inschrijven. Dit wil niet zeggen dat deze groep al volzet is.</p>
+                <p class="info-box" v-else-if="selectableGroup.skipReason == 'Family'">
+                    Broers/zussen van bestaande leden komen niet op de wachtlijst terecht en kunnen meteen inschrijven
+                </p>
+                <p class="info-box" v-else-if="selectableGroup.skipReason == 'ExistingMember'">
                     Bestaande leden komen niet op de wachtlijst terecht en kunnen meteen inschrijven
-                </template>
-            </p>
+                </p>
+                <p class="info-box" v-else-if="selectableGroup.skipReason == 'Invitation'">
+                    Je hebt een uitnodiging ontvangen om in te schrijven en kan dus voorbij de wachtlijst
+                </p>
+            </template>
             
             <STErrorsDefault :error-box="errorBox" />
         </main>
@@ -81,7 +85,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, LoadingButton, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -104,11 +108,12 @@ import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
     }
 })
 export default class MemberGroupView extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    member: MemberWithRegistrations | null
-
     @Prop({ required: true })
-    memberDetails: MemberDetails
+    member: MemberWithRegistrations
+
+    get memberDetails(): MemberDetails {
+        return this.member.details!
+    }
 
     @Prop({ required: true })
     handler: (component: MemberGroupView) => void;
@@ -116,7 +121,16 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     // Fow now we only allow to select one group
-    selectedGroup: Group | null = null
+    selectedGroup: SelectedGroup | null = null
+
+    groups: SelectableGroup[] = []
+
+    get selectableGroup(): SelectableGroup | null {
+        if (!this.selectedGroup) {
+            return null
+        }
+        return this.member.getSelectableGroups(OrganizationManager.organization.groups).find(g => g.group.id == this.selectedGroup!.group.id) ?? null
+    }
 
     /// Loading value can get set inside handler by caller
     loading = false
@@ -136,29 +150,15 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         }
 
 
-        const preferred = this.memberDetails.getPreferredGroups(this.groups)[0] ?? null
+        const preferred = this.member?.getSelectedGroups(OrganizationManager.organization.groups)[0] ?? null
+        this.$set(this, "selectedGroup", preferred)
 
-        if (preferred.shouldKnowExisting() && this.memberDetails.existingStatus === null) {
-            // For some reason we didn't ask the existing status (or it became invalid)
-            this.$set(this, "selectedGroup", null)
-        } else {
-            this.$set(this, "selectedGroup", preferred)
-        }
+        this.updateGroups()
     }
 
-    get groups() {
+    updateGroups() {
         const organizization = OrganizationManager.organization
-        return this.memberDetails.getMatchingGroups(organizization.groups)
-    }
-
-    /**
-     * Return false if popup is needed before selecting a group
-     */
-    shouldAskExisting(group: Group): boolean {
-        if (this.memberDetails.existingStatus !== null) {
-            return false
-        }
-        return group.shouldKnowExisting()
+        this.$set(this, "groups", this.member.getSelectableGroups(organizization.groups))
     }
 
     /**
@@ -168,36 +168,24 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         if (!this.selectedGroup) {
             return false
         }
-        return this.selectedGroup.isWaitingList(this.memberDetails.existingStatus)
+        return this.selectedGroup.waitingList
     }
 
-    /**
-     * Return true if the selected group has a waiting list, but he won't get added to it
-     */
-    get isSkippingWaitingList() {
-        if (!this.selectedGroup) {
-            return false
-        }
-
-        return !this.isWaitingList && this.selectedGroup.isWaitingList(MemberExistingStatus.create({
-            isNew: true,
-            hasFamily: false
-        }))
-    }
-
-    selectGroup(group: Group) {
+    selectGroup(group: SelectableGroup) {
         // todo: check if we need to ask if the member already exists
-        if (this.shouldAskExisting(group)) {
+        if (group.askExistingStatus) {
             this.present(new ComponentWithProperties(MemberExistingQuestionView, {
                 member: this.memberDetails,
                 handler: (component) => {
                     component.pop({ force: true});
-                    this.selectGroup(group)
+                    this.updateGroups()
+                    this.selectGroup(this.groups.find(g => g.group.id == group.group.id)!)
                 }
             }).setDisplayStyle("sheet"))
         } else {
-            this.$set(this, "selectedGroup", group)
+            this.$set(this, "selectedGroup", new SelectedGroup(group.group, group.waitingList && !group.skipReason))
         }
+        this.updateGroups()
 
         setTimeout(() => {
             this.validateGroup()
@@ -217,16 +205,17 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
             return false
         }
 
-        if (this.shouldAskExisting(this.selectedGroup)) {
+        if (this.selectableGroup && this.selectableGroup.askExistingStatus) {
             if (final) {
                 // Trigger popup
-                this.selectGroup(this.selectedGroup)
+                this.selectGroup(this.selectableGroup)
             }
             return false
         }
 
         try {
-            this.selectedGroup.canRegisterInGroup(this.memberDetails.existingStatus)
+            // tood: invitation
+            this.selectedGroup.group.canRegisterInGroup(this.memberDetails.existingStatus)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return false
@@ -257,10 +246,12 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         }
 
         this.memberDetails.preferredGroups = [PreferredGroup.create({
-            groupId: this.selectedGroup.id,
-            waitingList: this.selectedGroup.isWaitingList(this.memberDetails.existingStatus),
-            cycle: this.selectedGroup.cycle
+            groupId: this.selectedGroup.group.id,
+            waitingList: this.selectedGroup.waitingList,
+            cycle: this.selectedGroup.group.cycle
         })]
+
+        console.warn(this.memberDetails)
 
         this.handler(this)
     }

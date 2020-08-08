@@ -11,6 +11,7 @@ import { OrganizationManager } from './OrganizationManager';
  * Controls the fetching and decrypting of members
  */
 export class MemberManagerStatic {
+    /// Currently saved members
     members: MemberWithRegistrations[] | null = null
 
     async getRegistrationsWithMember(data: RegistrationWithEncryptedMember[]): Promise<RegistrationWithMember[]> {
@@ -47,7 +48,9 @@ export class MemberManagerStatic {
             const decryptedMember = Member.create({
                 id: member.id,
                 details: decryptedDetails,
-                publicKey: member.publicKey
+                publicKey: member.publicKey,
+                firstName: member.firstName,
+                placeholder: member.placeholder
             })
 
             const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
@@ -97,7 +100,9 @@ export class MemberManagerStatic {
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,
-                registrations: member.registrations
+                registrations: member.registrations,
+                firstName: member.firstName,
+                placeholder: member.placeholder
             })
             decryptedMember.fillGroups(groups)
 
@@ -115,7 +120,7 @@ export class MemberManagerStatic {
         await this.setMembers(response.data)
     }
 
-    async addMember(member: MemberDetails) {
+    async addMember(member: MemberDetails): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
 
         // Create a keypair
@@ -126,7 +131,9 @@ export class MemberManagerStatic {
         const decryptedMember = MemberWithRegistrations.create({
             details: member,
             publicKey: keyPair.publicKey,
-            registrations: []
+            registrations: [],
+            firstName: member.firstName,
+            placeholder: false
         })
 
         // Send the request
@@ -142,6 +149,8 @@ export class MemberManagerStatic {
         })
 
         await MemberManager.setMembers(response.data)
+
+        return this.members?.find(m => m.id == decryptedMember.id) ?? null
     }
 
     async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<EncryptedMember[]> {
@@ -158,15 +167,24 @@ export class MemberManagerStatic {
                     id: member.id,
                     encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
-                    publicKey: member.publicKey
+                    publicKey: member.publicKey,
+                    firstName: member.details.firstName,
+                    placeholder: false
                 })
             )
         }
         return encryptedMembers
     }
 
-    async patchAllMembers() {
-        const encryptedMembers = this.members ? await this.getEncryptedMembers(this.members) : []
+    async patchAllMembersWith(member: MemberWithRegistrations) {
+        const members = this.members ?? []
+        const ex = members.findIndex(m => m.id == member.id)
+        if (ex !== -1) {
+            members.splice(ex, 1, member)
+        } else {
+            members.push(member)
+        }
+        const encryptedMembers = await this.getEncryptedMembers(members)
         if (encryptedMembers.length == 0) {
             return;
         }
@@ -359,4 +377,6 @@ export class MemberManagerStatic {
 
 }
 
-export const MemberManager = new MemberManagerStatic()
+export const MemberManager = new MemberManagerStatic();
+
+(window as any).MemberManager = MemberManager;

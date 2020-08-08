@@ -24,24 +24,21 @@
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList class="member-selection-table">
-                    <STListItem v-for="member in members" :key="member.id" :selectable="member.groups.length == 0" class="right-stack left-center" element-name="label" >
-                        <Checkbox v-model="member.activeRegistrations.length > 0 ? true :memberSelection[member.id]" slot="left" @click.native.stop @change="onSelectMember(member)" :disabled="member.activeRegistrations.length > 0"/>
-                        <p>{{ member.details.name }}</p>
-                        <p class="member-group" v-if="member.groups.length > 0">Reeds ingeschreven bij {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
-                        <p class="member-group" v-if="member.waitingGroups.length > 0">Reeds op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
-                        <template v-if="member.activeRegistrations.length == 0">
-                            <p class="member-group" v-if="memberGetGroups(member, true).length > 0">Op wachtlijst zetten voor {{ memberGetGroups(member, true).map(g => g.settings.name).join(", ") }}</p>
-                            <p class="member-group" v-if="memberGetGroups(member, false).length > 0">Inschrijven bij {{ memberGetGroups(member, false).map(g => g.settings.name).join(", ") }}</p>
-                            <p class="member-group" v-if="memberGetGroups(member).length == 0">Kies eerst een groep</p>
-                        </template>
+                    <STListItem v-for="member in members" :key="member.id" :selectable="member.groups.length == 0" class="right-stack left-center" @click="toggleMember(member)">
+                        <Checkbox v-model="memberSelection[member.id]" slot="left" :manual="true"/>
+                        <p>{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</p>                        
+                        <p class="member-group" v-if="getWaitingListGroups(member).length > 0">Op wachtlijst zetten voor {{ getWaitingListGroups(member).map(g => g.settings.name).join(", ") }}</p>
+                        <p class="member-group" v-else-if="getRegisterGroups(member).length > 0">Inschrijven bij {{ getRegisterGroups(member).map(g => g.settings.name).join(", ") }}</p>
+                        <p class="member-group" v-else-if="member.acceptedWaitingGroups.length > 0">Toegelaten tot {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}, schrijf nu in!</p>
+                        <p class="member-group" v-else>Kies een groep</p>
 
                         <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="memberGetGroups(member).length != 0 || member.activeRegistrations.length > 0">
+                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="isValid(member)">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>
                             <div class="button text limit-space" v-else>
-                                <span>Kies groep</span>
+                                <span>Invullen / nakijken</span>
                                 <span class="icon arrow-right" />
                             </div>
                             
@@ -76,7 +73,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, SelectedGroup } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -105,6 +102,10 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     defaultSelection = false
     errorBox: ErrorBox | null = null
 
+    mounted() {
+        // tdoo: auto prefer all members with only one group option
+    }
+
     /**
      * Return members that are currently registered in
      */
@@ -131,8 +132,8 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         }
         for (const member of MemberManager.members) {
             if (this.memberSelection[member.id] === undefined) {
-                // if the member doesn't have any registrations, we select it by default
-                if (member.registrations.length == 0 && this.memberGetGroups(member).length > 0) {
+                // If we already selected some groups for this member, we select it by default
+                if (member.registrations.length == 0 && this.getSelectedGroups(member).length > 0) {
                     this.$set(this.memberSelection, member.id, true)
                     this.defaultSelection = true
                 } else {
@@ -140,23 +141,52 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 }
             }
         }
-        return MemberManager.members
+        return MemberManager.members.filter(m => this.canRegister(m))
     }
 
-    onSelectMember(member: MemberWithRegistrations) {
+    /**
+     * Whether a member is still selectable to register (e.g. because you can select more groups)
+     */
+    canRegister(member: MemberWithRegistrations) {
+        return member.canRegister(OrganizationManager.organization.groups)
+    }
+
+    /**
+     * Whether a member needs manual validation before it can get selected
+     */
+    isValid(member: MemberWithRegistrations) {
+        // doe we have group selected?
+        const groups = this.getSelectedGroups(member)
+        if (groups.length == 0) {
+            return false
+        }
+
+        // waitingList = true if all groups are waiting lists
+        const waitingList = !groups.find(g => !g.waitingList)
+        
+        // Validate if records are valid and up to date
+        return member.isComplete(waitingList)
+    }
+
+    toggleMember(member: MemberWithRegistrations) {
+        if (this.memberSelection[member.id]) {
+            this.$set(this.memberSelection, member.id, false)
+            return;
+        }
+        this.selectMember(member)
+    }
+
+    selectMember(member: MemberWithRegistrations, preventPopup = false) {
         if (!member.details) {
             return
         }
-        if (this.memberSelection[member.id] === false) {
-            return;
-        }
 
-        if (member.groups.length > 0) {
-            this.$nextTick(() => {
-                this.memberSelection[member.id] = false;
-                console.log(this.memberSelection)
-            })
-
+        if (!this.canRegister(member)) {
+            if (preventPopup) {
+                return false
+            }
+            
+            // todo: improve message
             const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                 type: "error",
                 title: member.details.firstName+" is al ingeschreven", 
@@ -167,51 +197,37 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             return
         }
 
-        if (this.memberGetGroups(member).length == 0) {
+        if (!this.isValid(member)) {
+            // Member is invalid, first complete all information before selecting it
+            if (preventPopup) {
+                return false
+            }
 
-            // Disable select until group is chosen
-            this.$nextTick(() => {
-                this.memberSelection[member.id] = false;
-            })
-
-            this.present(new ComponentWithProperties(MemberGroupView, {
-                member,
-                memberDetails: member.details,
-                handler: (component: MemberGroupView) => {
-                    if (!member.details) {
-                        console.error("Member details suddenly gone")
-                        return
-                    }
-                    
-                    component.loading = true;
-
-                    MemberManager.patchMembers([
-                        member
-                    ]).then(() => {
-                        component.pop({ force: true })
-                        this.memberSelection[member.id] = true;
-                    }).catch(e => {
-                        console.error(e)
-                        component.loading = false
-                        component.errorBox = new ErrorBox(new SimpleError({
-                            code: "",
-                            message: "Er ging iets mis"
-                        }))
-                    })
-                }
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MemberGeneralView, {
+                    initialMember: member
+                })
             }).setDisplayStyle("popup"))
+            return false
         }
+
+        this.$set(this.memberSelection, member.id, true)
     }
 
-    memberGetGroups(member: MemberWithRegistrations, waitingList: boolean | null = null): Group[] {
-        if (!member.details) {
-            return []
-        }
+    /**
+     *  Return the groups a member will get registered in, if active
+     * 
+     */
+    getSelectedGroups(member: MemberWithRegistrations): SelectedGroup[] {
+        return member.getSelectedGroups(OrganizationManager.organization.groups)
+    }
 
-        console.log(waitingList)
+    getWaitingListGroups(member: MemberWithRegistrations): Group[] {
+        return this.getSelectedGroups(member).filter(g => g.waitingList).map(g => g.group)
+    }
 
-        const groups = OrganizationManager.organization.groups
-        return member.details.getPreferredGroups(groups, waitingList)
+    getRegisterGroups(member: MemberWithRegistrations): Group[] {
+        return this.getSelectedGroups(member).filter(g => !g.waitingList).map(g => g.group)
     }
 
     addNewMember() {
@@ -223,7 +239,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
-                member
+                initialMember: member
             })
         }).setDisplayStyle("popup"))
     }

@@ -264,11 +264,12 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
     directives: { Tooltip },
 })
 export default class MemberRecordsView extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    member: MemberWithRegistrations | null
-    
     @Prop({ required: true })
-    memberDetails: MemberDetails
+    member: MemberWithRegistrations
+    
+    get memberDetails(): MemberDetails {
+        return this.member.details!
+    }
 
     organization = OrganizationManager.organization
 
@@ -321,16 +322,12 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             phone: this.doctorPhone,
             title: "Huisdokter"
         })
+        this.memberDetails.lastReviewed = new Date()
 
         this.loading = true
 
         try {
-            if (this.member) {
-                this.member.details = this.memberDetails
-                await MemberManager.patchAllMembers()
-            } else {
-                await MemberManager.addMember(this.memberDetails)
-            }
+            await MemberManager.patchAllMembersWith(this.member)
 
             this.dismiss({ force: true })
         } catch (e) {

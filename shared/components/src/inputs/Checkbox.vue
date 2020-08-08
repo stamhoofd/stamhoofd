@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label class="checkbox">
+        <label class="checkbox" :class="{manual}">
             <input type="checkbox" v-model="checkboxValue" :disabled="disabled">
             <div>
                 <div>
@@ -39,6 +39,10 @@ export default class Checkbox extends Vue {
     @Prop({ default: false })
     disabled!: boolean;
 
+    // Set to true to only allow external changes
+    @Prop({ default: false })
+    manual!: boolean;
+
     get checkboxValue() {
         return this.checked;
     }
@@ -48,3 +52,9 @@ export default class Checkbox extends Vue {
     }
 }
 </script>
+
+<style lang="scss">
+    .checkbox.manual {
+        pointer-events: none;
+    }
+</style>

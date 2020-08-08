@@ -82,11 +82,12 @@ class SelectableParent {
     }
 })
 export default class MemberParentsView extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    member: MemberWithRegistrations | null
-
     @Prop({ required: true })
-    memberDetails: MemberDetails
+    member: MemberWithRegistrations
+
+    get memberDetails(): MemberDetails {
+        return this.member.details!
+    }
 
     errorBox: ErrorBox | null = null
 
