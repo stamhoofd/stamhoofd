@@ -60,7 +60,7 @@ export default class STToolbar extends Vue {}
                 display: none;
             }
 
-            > div .button {
+            > div .button, > div .loading-button {
                 margin-left: 0;
                 margin-right: 0;
                 margin-top: 10px;
