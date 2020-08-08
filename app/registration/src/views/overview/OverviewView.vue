@@ -9,7 +9,7 @@
                     <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
                         <span class="icon clock" slot="left" />
 
-                        <h2 class="payment-period">{{ member.details.name }}</h2>
+                        <h2 class="payment-period">{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</h2>
                         <p class="style-description-small">Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
@@ -40,7 +40,7 @@
                     <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
                         <span class="icon user" slot="left" />
 
-                        <h2 class="payment-period">{{ member.details.name }}</h2>
+                        <h2 class="payment-period">{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</h2>
                         <p class="style-description-small">Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
 
                         <template slot="right">
@@ -193,7 +193,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
     editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
-                member
+                initialMember: member
             })
         }).setDisplayStyle("popup"))
     }

@@ -171,10 +171,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     }
 
     selectMember(member: MemberWithRegistrations, preventPopup = false) {
-        if (!member.details) {
-            return
-        }
-
         if (!this.canRegister(member)) {
             if (preventPopup) {
                 return false
@@ -183,7 +179,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             // todo: improve message
             const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                 type: "error",
-                title: member.details.firstName+" is al ingeschreven", 
+                title: member.firstName+" is al ingeschreven", 
                 description: "Je kan dit lid niet nog eens inschrijven.",
                 closeButton: "Sluiten",
             }).setDisplayStyle("overlay");

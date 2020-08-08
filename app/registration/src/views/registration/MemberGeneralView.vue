@@ -9,10 +9,10 @@
                 Wie ga je inschrijven?
             </h1>
             <h1 v-else-if="wasInvalid">
-                Gegevens aanvullen van {{ member.details.firstName }}
+                Gegevens aanvullen van {{ member.details ? member.details.firstName : member.firstName }}
             </h1>
             <h1 v-else>
-                Gegevens wijzigen van {{ member.details.firstName }}
+                Gegevens wijzigen van {{ member.details ? member.details.firstName : member.firstName }}
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -125,11 +125,15 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     wasInvalid = false
 
     mounted() {
-        if (this.member && this.member.details) {
-            // Create a deep clone using encoding
-            this.member = new ObjectData(this.member.encode({ version: Version }), { version: Version }).decode(MemberWithRegistrations as Decoder<MemberWithRegistrations>)
-            this.memberDetails = this.member.details
-        }
+        if (this.member) {
+            if (this.member.details) {
+                // Create a deep clone using encoding
+                this.member = new ObjectData(this.member.encode({ version: Version }), { version: Version }).decode(MemberWithRegistrations as Decoder<MemberWithRegistrations>)
+                this.memberDetails = this.member.details
+            } else {
+                this.firstName = this.member.firstName
+            }
+        } 
 
         if (this.memberDetails) {
             this.firstName = this.memberDetails.firstName
