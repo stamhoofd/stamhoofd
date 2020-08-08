@@ -36,7 +36,6 @@ export class MemberManagerStatic {
                         const json = await Sodium.unsealMessage(member.encryptedForMember, keyPair.publicKey, keyPair.privateKey)
                         const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
                         decryptedDetails = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
-                        console.log(decryptedDetails)
                     } catch (e) {
                         console.error(e)
                         console.error("Failed to read member data for " + member.id)
@@ -87,7 +86,6 @@ export class MemberManagerStatic {
                         const json = await Sodium.unsealMessage(member.encryptedForMember, keyPair.publicKey, keyPair.privateKey)
                         const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
                         decryptedDetails = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
-                        console.log(decryptedDetails)
                     } catch (e) {
                         console.error(e)
                         console.error("Failed to read member data for " + member.id)
@@ -202,7 +200,7 @@ export class MemberManagerStatic {
             }),
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
-        this.setMembers(response.data)
+        await this.setMembers(response.data)
     }
 
     async patchMembers(members: MemberWithRegistrations[]) {
@@ -222,7 +220,7 @@ export class MemberManagerStatic {
             }),
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
-        this.setMembers(response.data)
+        await this.setMembers(response.data)
     }
 
     /**

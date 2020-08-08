@@ -2,8 +2,8 @@
     <div class="boxed-view">
         <div class="st-view" v-if="members.length == 0">
             <main>
-                <h1>Je hebt nog niemand ingeschreven</h1>
-                <p>Je hebt nog niemand ingeschreven voor dit werkjaar. Begin met iemand in te schrijven.</p>
+                <h1>Voeg de leden toe die je wilt inschrijven</h1>
+                <p>Klik op de knop onderaan en voeg alle leden toe die je wilt inschrijven (bv. broers en zussen).</p>
                 <STErrorsDefault :error-box="errorBox" />
             </main>
             <STToolbar>
@@ -104,6 +104,21 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
     mounted() {
         // tdoo: auto prefer all members with only one group option
+        this.updateSelection()
+    }
+
+    updateSelection() {
+        for (const member of MemberManager.members) {
+            if (this.memberSelection[member.id] === undefined) {
+                // If we already selected some groups for this member, we select it by default
+                if (this.isValid(member) && this.canRegister(member)) {
+                    this.$set(this.memberSelection, member.id, true)
+                    this.defaultSelection = true
+                } else {
+                    this.$set(this.memberSelection, member.id, false)
+                }
+            }
+        }
     }
 
     /**
@@ -130,17 +145,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         if (!MemberManager.members) {
             return []
         }
-        for (const member of MemberManager.members) {
-            if (this.memberSelection[member.id] === undefined) {
-                // If we already selected some groups for this member, we select it by default
-                if (member.registrations.length == 0 && this.getSelectedGroups(member).length > 0) {
-                    this.$set(this.memberSelection, member.id, true)
-                    this.defaultSelection = true
-                } else {
-                    this.$set(this.memberSelection, member.id, false)
-                }
-            }
-        }
+       
         return MemberManager.members.filter(m => this.canRegister(m))
     }
 
@@ -205,7 +210,15 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(MemberGeneralView, {
-                    initialMember: member
+                    initialMember: member,
+                    beforeCloseHandler: () => {
+                        console.log("before close handler")
+                        // Search up to date member
+                        const m = this.members.find(m => m.id == member.id)
+                        if (m) {
+                            this.selectMember(m, true)
+                        }
+                    }
                 })
             }).setDisplayStyle("popup"))
             return false
@@ -232,7 +245,13 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
     addNewMember() {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberGeneralView, {})
+            root: new ComponentWithProperties(MemberGeneralView, {
+                beforeCloseHandler: () => {
+                    console.log("before close handler")
+                    // Search up to date member
+                    this.updateSelection()
+                }
+            })
         }).setDisplayStyle("popup"))
     }
 

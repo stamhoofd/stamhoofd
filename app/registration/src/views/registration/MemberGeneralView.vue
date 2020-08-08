@@ -66,7 +66,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput, LoadingButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup, MemberExistingStatus } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
 import MemberParentsView from './MemberParentsView.vue';
@@ -101,6 +101,9 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     initialMember: MemberWithRegistrations | null
 
     member: MemberWithRegistrations | null = this.initialMember
+
+    @Prop({ default: null })
+    beforeCloseHandler: (() => void) | null;
 
     loading = false
 
@@ -231,16 +234,31 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             }
             
             if (!this.member || this.member.canRegister(OrganizationManager.organization.groups)) {
-                if (!(await this.saveData())) {
+                if (!(await this.saveData(this))) {
                     return;
                 }
 
-                this.show(new ComponentWithProperties(MemberGroupView, { 
-                    member: this.member,
-                    handler: (component: MemberGroupView) => {
-                        this.goToParents(component)
+                // Automatically fill in member existing status if not set or expired
+                if ((this.memberDetails.existingStatus === null || this.memberDetails.existingStatus.isExpired())) {
+                    this.memberDetails.existingStatus = null;
+
+                    if (this.member && this.member.inactiveRegistrations.length > 0) {
+                        // Are these registrations active?
+                        this.memberDetails.existingStatus = MemberExistingStatus.create({
+                            isNew: false,
+                            hasFamily: false, // unknown (doesn't matter atm if not new)
+                        })
                     }
-                }))
+                }
+
+                // Check if we need to ask existing status
+                const shouldAsk = !!this.member!.getSelectableGroups(OrganizationManager.organization.groups).find(g => g.askExistingStatus)
+
+                if (!shouldAsk) {
+                    this.chooseGroup(this)
+                } else {
+                    this.askExistingStatus(this);
+                }
                 return;
             }
             
@@ -249,15 +267,33 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         }
     }
 
-    async saveData() {
+    askExistingStatus(component: NavigationMixin) {
+        component.show(new ComponentWithProperties(MemberExistingQuestionView, {
+            member: this.memberDetails,
+            handler: (component) => {
+                this.chooseGroup(component, true)
+            }
+        }))
+    }
+
+    chooseGroup(component: NavigationMixin, replace: boolean = false) {
+        this.navigationController!.push(new ComponentWithProperties(MemberGroupView, { 
+            member: this.member,
+            handler: (component: MemberGroupView) => {
+                this.goToParents(component)
+            }
+        }), true, replace ? (this.navigationController!.components.length - 1) : 0)
+        return;
+    }
+
+    async saveData(component: { loading: boolean; errorBox: ErrorBox | null }) {
          if (!this.memberDetails) {
             return false;
         }
 
         const o = this.memberDetails
-
-
-
+        component.loading = true
+        
         try {
             if (this.member) {
                 await MemberManager.patchAllMembersWith(this.member)
@@ -273,21 +309,23 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 this.memberDetails = m.details
             }
 
+            component.errorBox = null
+            component.loading = false;
             return true
         } catch (e) {
-            this.errorBox = new ErrorBox(e)
-            this.loading = false;
+            component.errorBox = new ErrorBox(e)
+            component.loading = false;
             return false;
         }
     }
 
-    async goToParents(component: NavigationMixin) {
+    async goToParents(component: NavigationMixin & { loading: boolean; errorBox: ErrorBox | null }) {
         if (!this.memberDetails) {
             return;
         }
 
         // Already save here
-        if (!(await this.saveData())) {
+        if (!(await this.saveData(component))) {
             return;
         }
 
@@ -323,6 +361,8 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 }
             }))
         }
+
+        
     }
 
     shouldNavigateAway() {
@@ -330,6 +370,11 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             return true;
         }
         return false;
+    }
+
+    destroyed() {
+        console.log("destroyed")
+        if (this.beforeCloseHandler) this.beforeCloseHandler()
     }
 }
 </script>

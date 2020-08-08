@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="'Is '+ member.firstName + ' al langer lid?'">
+        <STNavigationBar :title="'Heeft '+ member.firstName + ' een broer of zus die al langer lid is?'">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
             <button slot="right" v-else-if="canDismiss" class="button icon gray close" @click="dismiss" type="button"></button>
         </STNavigationBar>
         
         <main>
             <h1>
-                Is {{ member.firstName }} al langer lid?
+                Heeft {{ member.firstName }} een broer of zus die al langer lid is?
             </h1>
 
             <p class="warning-box">Je kan dit later niet meer wijzigen. Lees goed na!</p>
@@ -15,14 +15,14 @@
             <STErrorsDefault :error-box="errorBox" />
             <STList>
                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
-                    <Radio slot="left" @click.stop name="choose-answer" v-model="isNew" :value="true"/>
-                    <h2 class="style-title-list">{{ member.firstName }} is een nieuw lid</h2>
-                    <p class="style-description-small">{{ member.firstName }} zal voor de eerste keer ingeschreven worden</p>
+                    <Radio slot="left" @click.stop name="choose-answer" v-model="hasFamily" :value="true"/>
+                    <h2 class="style-title-list">Ja, {{ member.firstName }} heeft een broer of zus dat al langer lid is</h2>
+                    <p class="style-description-small">Duid enkel aan voor een reeds broer of zus vorig jaar al ingeschreven was!</p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
-                    <Radio slot="left" @click.stop name="choose-answer" v-model="isNew" :value="false"/>
-                    <h2 class="style-title-list">{{ member.firstName }} is een bestaand lid </h2>
-                    <p class="style-description-small">{{ member.firstName }} was vorig jaar al ingeschreven</p>
+                    <Radio slot="left" @click.stop name="choose-answer" v-model="hasFamily" :value="false"/>
+                    <h2 class="style-title-list">Nee</h2>
+                    <p class="style-description-small">{{ member.firstName }} heeft geen broer of zus dat al langer lid is of enkel een broer / zus die ook een nieuw lid is</p>
                 </STListItem>
                 
             </STList>
@@ -44,7 +44,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, Spinner, BackButton, Checkbox } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberExistingStatus } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberExistingFamilyQuestionView from './MemberExistingFamilyQuestionView.vue';
+import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
@@ -60,7 +60,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         Checkbox
     }
 })
-export default class MemberExistingQuestionView extends Mixins(NavigationMixin) {
+export default class MemberExistingFamilyQuestionView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     member: MemberDetails // will modify
 
@@ -69,14 +69,14 @@ export default class MemberExistingQuestionView extends Mixins(NavigationMixin) 
 
     errorBox: ErrorBox | null = null
 
-    isNew: boolean | null = null
+    hasFamily: boolean | null = null
 
     /// Loading value can get set inside handler by caller
     loading = false
 
     mounted() {
         if (this.member.existingStatus) {
-            this.isNew = this.member.existingStatus.isNew
+            this.hasFamily = this.member.existingStatus.hasFamily
         }
     }
  
@@ -84,7 +84,7 @@ export default class MemberExistingQuestionView extends Mixins(NavigationMixin) 
         if (this.loading) {
             return;
         }
-        if (this.isNew === null) {
+        if (this.hasFamily === null) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "not_selected",
                 message: "Maak een keuze"
@@ -92,28 +92,11 @@ export default class MemberExistingQuestionView extends Mixins(NavigationMixin) 
             return;
         }
         this.errorBox = null
-        
-        if (this.isNew) {
-            this.show(new ComponentWithProperties(MemberExistingFamilyQuestionView, {
-                member: this.member,
-                handler: this.handler
-            }))
-        } else {
-            this.member.existingStatus = MemberExistingStatus.create({
-                isNew: this.isNew,
-                hasFamily: false
-            })
-
-            this.handler(this)
-        }
-        
+        this.member.existingStatus = MemberExistingStatus.create({
+            isNew: true,
+            hasFamily: this.hasFamily
+        })
+        this.handler(this)
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-#group-selection-view {
-}
-</style>

@@ -42,6 +42,8 @@
                     <span v-if="group.waitingList !== false" class="pre-registrations-label">Wachtlijst</span>
                 </h1>
                 <p v-if="groups[0].group.settings.description">{{ groups[0].group.settings.description }}</p>
+                <p v-else-if="!isWaitingList">{{ memberDetails.firstName }} zal worden ingeschreven bij {{ groups[0].group.settings.name }}. Klik volgende om verder te gaan.</p>
+                <p v-else>{{ memberDetails.firstName }} zal op de wachtlijst komen te staan voor {{ groups[0].group.settings.name }}.</p>
             </template>
             
             <STList v-if="groups.length > 1">
@@ -136,24 +138,15 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        // Automatically fill in member existing status if not set or expired
-        if ((this.memberDetails.existingStatus === null || this.memberDetails.existingStatus.isExpired())) {
-            this.memberDetails.existingStatus = null;
-
-            if (this.member && this.member.inactiveRegistrations.length > 0) {
-                // Are these registrations active?
-                this.memberDetails.existingStatus = MemberExistingStatus.create({
-                    isNew: false,
-                    hasFamily: false, // unknown (doesn't matter atm if not new)
-                })
-            }
-        }
-
-
         const preferred = this.member?.getSelectedGroups(OrganizationManager.organization.groups)[0] ?? null
         this.$set(this, "selectedGroup", preferred)
 
         this.updateGroups()
+
+        if (this.groups.length == 1) {
+            this.selectGroup(this.groups[0])
+            return
+        }
     }
 
     updateGroups() {
@@ -229,11 +222,6 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         }
         
         if (!this.selectedGroup) {
-            if (this.groups.length == 1) {
-                this.selectGroup(this.groups[0])
-                return
-            }
-
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "not_selected",
                 message: "Kies een groep voor je verder gaat"
@@ -250,8 +238,6 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
             waitingList: this.selectedGroup.waitingList,
             cycle: this.selectedGroup.group.cycle
         })]
-
-        console.warn(this.memberDetails)
 
         this.handler(this)
     }
