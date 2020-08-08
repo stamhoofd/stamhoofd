@@ -74,7 +74,30 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const registration = new Registration().setRelation(registrationMemberRelation, member as Member)
+            // Check if this member is already registered in this group?
+            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: register.groupId, cycle: group.cycle })
+            let registration: RegistrationWithMember;
+
+            if (existingRegistrations.length > 0) {
+                const existingRegistration = existingRegistrations[0]
+                registration = existingRegistration.setRelation(registrationMemberRelation, member as Member)
+
+                if (existingRegistration.waitingList && register.waitingList) {
+                    // already on waiting list, no need to repeat it
+                    // skip without error
+                    registrations.push(registration)
+                    continue;
+                }
+
+                if (!existingRegistration.waitingList) {
+                    // already registered, no need to put it on the waiting list or register (and pay) again
+                    registrations.push(registration)
+                    continue;
+                }
+            } else {
+                registration = new Registration().setRelation(registrationMemberRelation, member as Member)
+            }
+
             registration.memberId = member.id
             registration.groupId = group.id
             registration.cycle = group.cycle
@@ -83,6 +106,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration.waitingList = true
                 await registration.save()
             } else {
+                registration.waitingList = false
+                registration.canRegister = false
                 let foundPrice: GroupPrices | undefined = undefined
 
                 // Determine price

@@ -47,6 +47,8 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             member.encryptedForMember = struct.encryptedForMember
             member.encryptedForOrganization = struct.encryptedForOrganization
             member.firstName = struct.firstName
+
+            console.log(member)
             await member.save()
 
             addedMembers.push(member)
