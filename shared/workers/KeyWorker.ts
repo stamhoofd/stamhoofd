@@ -24,8 +24,6 @@ async function generateEncryptionKey(password: string, authEncryptionKeyConstant
     console.log("Generating encryption key...");
 
     const authEncryptionKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
-
-    throw new Error("Test error for encryption key problem")
     
     console.log("Done.");
     ctx.postMessage(authEncryptionKey);
