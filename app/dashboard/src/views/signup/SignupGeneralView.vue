@@ -36,7 +36,7 @@
 
         <STToolbar>
             <template #left>
-                Volledig gratis tot je de demo beïndigd
+                Volledig gratis tot je de demo beëindigd
             </template>
             <template #right>
                 <button class="button primary" @click="goNext">

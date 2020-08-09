@@ -1,6 +1,6 @@
 <template>
   <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en number" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
         <div class="input-group">
             <div>
                 <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">

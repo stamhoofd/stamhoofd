@@ -38,13 +38,8 @@ async function generateKeys(password: string) {
     let authSignKeyConstants: KeyConstants
     let authEncryptionKeyConstants: KeyConstants
 
-    if (process.env.NODE_ENV != "production") {
-        authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
-        authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
-    } else {
-        authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
-        authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
-    }
+    authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
+    authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
 
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
     const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
