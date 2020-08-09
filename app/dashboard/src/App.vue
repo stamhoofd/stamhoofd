@@ -14,6 +14,7 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 import { SessionManager, NetworkManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
+import { Logger } from "@stamhoofd/logger"
 
 function asyncComponent(component: () => Promise<any>, properties = {}) {
     return new ComponentWithProperties(PromiseView, {
@@ -78,7 +79,7 @@ export default class App extends Vue {
                                 secret
                             })
                         } catch (e) {
-                            console.error(e)
+                            Logger.error(e)
                             // Probably invalid invite
                             const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
                             return new ComponentWithProperties(InvalidInviteView, {})

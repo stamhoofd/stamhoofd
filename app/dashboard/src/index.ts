@@ -3,17 +3,22 @@ import 'regenerator-runtime/runtime';
 import Vue from "vue";
 
 import * as Sentry from '@sentry/browser';
-import { Vue as VueIntegration, CaptureConsole } from '@sentry/integrations';
+import { Vue as VueIntegration } from '@sentry/integrations';
+
 
 Sentry.init({
   dsn: 'https://b62b02f163f6448594b3c081c1be28e0@o431770.ingest.sentry.io/5383559',
   environment: process.env.NODE_ENV ?? "production",
   integrations: [
-        new VueIntegration({Vue, attachProps: false}),
-        new CaptureConsole({
-            levels: ['error']
-        })
+        new VueIntegration({Vue, attachProps: false})
     ],
+    beforeSend(event, hint) {
+        if (hint) {
+            console.error(hint.originalException || hint.syntheticException);
+        }
+       
+        return event;
+    }
 });
 
 

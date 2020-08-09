@@ -40,6 +40,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import EditGroupView from './EditGroupView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import { Logger } from '@stamhoofd/logger';
 
 @Component({
     components: {
@@ -109,7 +110,7 @@ export default class EditGroupsView extends Mixins(NavigationMixin) {
                     this.present(new ComponentWithProperties(CenteredMessage, { title: "De groep is verwijderd", closeButton: "Sluiten", type: "success" }).setDisplayStyle("overlay"))
                 })
                 .catch(e => {
-                    console.error(e)
+                    Logger.error(e)
                     this.present(new ComponentWithProperties(CenteredMessage, { title: "Er ging iets mis", description: e.human ?? e.message, closeButton: "Sluiten", type: "error" }).setDisplayStyle("overlay"))
                 })
             }

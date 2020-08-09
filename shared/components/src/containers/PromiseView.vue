@@ -8,6 +8,7 @@ import { ComponentWithProperties, NavigationMixin, ComponentWithPropertiesInstan
 import { Component, Prop, Vue, Mixins } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
+import { Logger } from '@stamhoofd/logger';
 
 @Component({
     components: {
@@ -29,7 +30,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
         this.promise.call(this).then((value) => {
            this.root = value
         }).catch(e => {
-            console.error(e);
+            Logger.error(e)
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
             this.dismiss({ force: true });
         })
