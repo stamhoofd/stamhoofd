@@ -61,7 +61,6 @@ export default class ContextMenu extends Vue {
     }
 
     pop() {
-        console.log("pop");
         this.$parent.$parent.$emit("pop");
     }
 

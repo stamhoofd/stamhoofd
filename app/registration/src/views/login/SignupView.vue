@@ -44,13 +44,10 @@ import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
-import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
-import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
-import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { SimpleError } from '@simonbackx/simple-errors';
 

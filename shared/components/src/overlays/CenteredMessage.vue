@@ -42,7 +42,6 @@ export default class CenteredMessage extends Vue {
     closeButton: string | null
 
     pop() {
-        console.log("pop");
         this.$parent.$emit("pop");
     }
 

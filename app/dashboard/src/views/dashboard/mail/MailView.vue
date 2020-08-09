@@ -160,7 +160,6 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         for (const file of event.target.files as FileList) {
-            console.log(file)
             this.files.push(new TmpFile(file.name, file))
         }
         
@@ -245,7 +244,6 @@ export default class MailView extends Mixins(NavigationMixin) {
             cssDiv.innerText = styles;
 
             html = "<style type=\"text/css\">"+cssDiv.innerHTML+"</style>"+element.innerHTML
-            console.log(html)
             const text = element.textContent
 
             if (!text || text.length < 20) {

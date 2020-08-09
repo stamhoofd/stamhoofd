@@ -452,7 +452,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     selectAll(selected: boolean) {
-        console.log("select all")
         this.filteredMembers.forEach((member) => {
             member.selected = selected;
         });

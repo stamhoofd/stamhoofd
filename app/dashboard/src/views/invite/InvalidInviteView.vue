@@ -22,8 +22,6 @@ import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version, Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, TradedInvite } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
-import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
 
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import LoginView from '../login/LoginView.vue';

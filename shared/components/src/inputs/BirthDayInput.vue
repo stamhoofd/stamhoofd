@@ -80,7 +80,6 @@ export default class BirthDayInput extends Vue {
     }
 
     updateDate() {
-        console.log("update date")
         if (this.year && this.month && this.day) {
             this.$emit("input", new Date(this.year, this.month - 1, this.day))
         } else {

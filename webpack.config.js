@@ -62,7 +62,13 @@ module.exports = {
                 test: /\.css$/,
                 use: [
                     process.env.NODE_ENV === 'production' ? 
-                        MiniCssExtractPlugin.loader : // If you enable this, HMR won't work. Replace it with a style loader
+                        { 
+                            loader: MiniCssExtractPlugin.loader,
+                            options: {
+                                esModule: true,
+                            },
+                        
+                        } : // If you enable this, HMR won't work. Replace it with a style loader
                         'style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     { 
@@ -79,7 +85,13 @@ module.exports = {
                 test: /\.scss$/,
                 use: [
                     process.env.NODE_ENV === 'production' ? 
-                        MiniCssExtractPlugin.loader : // If you enable this, HMR won't work. Replace it with a style loader
+                        { 
+                            loader: MiniCssExtractPlugin.loader,
+                            options: {
+                                esModule: true,
+                            },
+                        
+                        } : // If you enable this, HMR won't work. Replace it with a style loader
                         'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     {
@@ -128,7 +140,7 @@ module.exports = {
         new VueLoaderPlugin(), // Allow .vue files
         ...(process.env.NODE_ENV !== 'production') ? [] : [new MiniCssExtractPlugin({ // Make sure CSS is not put inline, but saved to a seperate file
             filename: '[name].[contenthash].css',
-            chunkFilename: '[id].[contenthash].css',
+            //chunkFilename: '[id].[contenthash].css',
         })]
     ]
 };

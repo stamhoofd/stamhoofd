@@ -197,7 +197,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 root: new ComponentWithProperties(MemberGeneralView, {
                     initialMember: member,
                     beforeCloseHandler: () => {
-                        console.log("before close handler")
                         // Search up to date member
                         const m = this.members.find(m => m.id == member.id)
                         if (m) {
@@ -233,7 +232,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
                 beforeCloseHandler: () => {
-                    console.log("before close handler")
                     // Search up to date member
                     this.updateSelection()
                 }

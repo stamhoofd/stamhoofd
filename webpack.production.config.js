@@ -13,6 +13,18 @@ module.exports = merge(common, {
     optimization: {
         minimize: true,
         usedExports: true,
+        splitChunks: {
+            chunks: 'all',
+            minChunks: 2,
+            cacheGroups: {
+                styles: {
+                    name: 'styles',
+                    test: /\.css$/,
+                    chunks: 'all',
+                    enforce: true,
+                },
+            },
+        },
         minimizer: [
             new CssnanoPlugin(),
             new TerserPlugin({

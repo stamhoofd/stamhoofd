@@ -68,10 +68,9 @@ import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { NetworkManager, Session, SessionManager, Keychain } from "@stamhoofd/networking"
+import { NetworkManager, Session, SessionManager, Keychain, LoginHelper } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
 
 @Component({
     components: {
@@ -152,87 +151,23 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
 
-            const myWorker = new GenerateWorker();
             const component = new ComponentWithProperties(CenteredMessage, { 
                 type: "loading",
                 title: "Sleutels aanmaken...", 
                 description: "Dit duurt maar heel even. Met deze sleutels wordt jouw account beveiligd. De lange wiskundige berekeningen zorgen ervoor dat het voor hackers lang duurt om een mogelijk wachtwoord uit te proberen."
             }).setDisplayStyle("overlay");
+            this.present(component)
 
-            myWorker.onmessage = async (e) => {
-                try {
-                    const {
-                        userKeyPair,
-                        organizationKeyPair,
-                        authSignKeyPair,
-                        authEncryptionSecretKey
-                    } = e.data;
-                    console.log('Message received from worker');
+             try {
 
-                    const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
-                    const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
+                await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName)
+                
+                this.loading = false;
+                (component.componentInstance() as any)?.pop()
+                this.dismiss({ force: true });
+                plausible('signup');
 
-                    const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, {version: Version}))
-                    const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, {version: Version}))
-                    
-                    // todo
-                    myWorker.terminate();
-                    (component.componentInstance() as any)?.pop()
-
-                    const user =  NewUser.create({
-                        firstName: this.firstName,
-                        lastName: this.lastName,
-                        email: this.email,
-                        publicKey: userKeyPair.publicKey,
-                        publicAuthSignKey: authSignKeyPair.publicKey,
-                        authSignKeyConstants,
-                        authEncryptionKeyConstants,
-                        encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey)
-                    });
-
-                    const organization = this.organization
-                    organization.publicKey = organizationKeyPair.publicKey
-
-                    const item = KeychainItem.create({
-                        publicKey: organization.publicKey,
-                        encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
-                    })
-
-                    // Do netwowrk request to create organization
-                    const response = await NetworkManager.server.request({
-                        method: "POST",
-                        path: "/organizations",
-                        body: CreateOrganization.create({
-                            organization: this.organization,
-                            user,
-                            keychainItems: [
-                                item
-                            ]
-                        }),
-                        decoder: Token
-                    })
-
-                    const session = new Session(organization.id)
-                    session.organization = organization
-                    session.setToken(response.data)
-                    Keychain.addItem(item)
-                    session.setEncryptionKey(authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
-                    SessionManager.setCurrentSession(session)
-
-                    this.loading = false;
-                    this.dismiss({ force: true });
-                    plausible('signup');
-                } catch (e) {
-                    console.error(e);
-                    this.loading = false;
-                    this.errorBox = new ErrorBox(e)
-                }
-            }
-
-             myWorker.onerror = (e) => {
-                // todo
-                console.error(e);
-                myWorker.terminate();
+            } catch (e) {
                 this.loading = false;
                 (component.componentInstance() as any)?.pop()
 
@@ -243,11 +178,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     closeButton: "Sluiten",
                 }).setDisplayStyle("overlay");
                 this.present(errorMessage)
+                return;
             }
-
-            myWorker.postMessage(this.password);
-            this.present(component)
-
         } catch (e) {
             this.loading = false
             console.error(e)

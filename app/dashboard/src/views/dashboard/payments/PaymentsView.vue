@@ -221,7 +221,6 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
 
             payments.push(payment)
         }
-        console.log("Done.")
 
         // Sort
         payments.sort((a, b) => {

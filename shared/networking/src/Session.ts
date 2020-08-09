@@ -205,7 +205,6 @@ export class Session implements RequestMiddleware {
             path: "/user",
             decoder: NewUser as Decoder<NewUser>
         })
-        console.log(response)
         this.user = response.data
         this.callListeners()
         return response.data
@@ -221,7 +220,6 @@ export class Session implements RequestMiddleware {
             path: "/organization",
             decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>)
         })
-        console.log(response)
         this.organization = response.data.data
 
         Keychain.addItems(response.data.keychainItems)

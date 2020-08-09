@@ -129,10 +129,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             this.show(new ComponentWithProperties(SignupStructureView, { organization }))
         } catch (e) {
             console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
+            this.errorBox = new ErrorBox(e)
             return;
         }
     }

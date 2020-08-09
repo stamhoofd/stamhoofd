@@ -58,8 +58,6 @@ export class ErrorBox {
             }
         }
 
-        console.log("scroll to ", firstElement)
-
         firstElement?.scrollIntoView({
             block: "center",
             behavior: "smooth"

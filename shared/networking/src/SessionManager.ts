@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Version, KeyConstants, ChallengeResponseStruct, Token } from '@stamhoofd/structures';
 import { Session } from './Session';
+import * as Sentry from '@sentry/browser';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -95,11 +96,22 @@ export class SessionManagerStatic {
                 needsResync = false
                 this.addOrganizationToStorage(session.organization)
             }
+            this.setUserId();
             this.callListeners()
         })
 
         if (this.currentSession.canGetCompleted()) {
             this.currentSession.updateData()
+        }
+        this.setUserId();
+    }
+
+    setUserId() {
+        if (this.currentSession && this.currentSession.user) {
+            const id = this.currentSession.user.id;
+            Sentry.configureScope(function(scope) {
+                scope.setUser({"id": id});
+            });
         }
     }
 

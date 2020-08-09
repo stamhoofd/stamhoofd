@@ -112,7 +112,6 @@ export default class MemberView extends Mixins(NavigationMixin) {
     activated() {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
-        console.log(this.member)
     }
 
     deactivated() {

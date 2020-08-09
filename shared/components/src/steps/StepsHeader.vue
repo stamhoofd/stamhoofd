@@ -27,15 +27,12 @@ export default class StepsHeader extends Vue {
     progress!: number;
 
     deactivated() {
-        console.log("Header deactivated");
         // Vue somehow does the binding under the hood. Couldn't find any documentation..?
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("scroll", this.onScroll);
     }
 
     activated() {
-        console.log("Header activated");
-
         // Vue somehow does the binding under the hood. Couldn't find any documentation..?
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("scroll", this.onScroll, { passive: true });

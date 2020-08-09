@@ -145,7 +145,6 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         }
         const p = OrganizationEmail.patchType().create(Object.assign(patch, { id: this.emailId }));
         (this.organizationPatch as any).privateMeta.emails.addPatch(p)
-        console.log(JSON.stringify(this.organizationPatch.encode({ version: Version }), undefined, 4))
     }
 
     get email() {
@@ -161,7 +160,6 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     }
 
     set name(name: string) {
-        console.log("set name: "+name)
         this.addPatch({ name: name })
     }
 

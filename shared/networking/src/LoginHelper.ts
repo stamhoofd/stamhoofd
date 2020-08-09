@@ -1,19 +1,18 @@
-import AuthEncryptionKeyWorker from 'worker-loader!@stamhoofd/workers/LoginAuthEncryptionKey.ts';
-import SignKeysWorker from 'worker-loader!@stamhoofd/workers/LoginSignKeys.ts';
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser } from '@stamhoofd/structures';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization } from '@stamhoofd/structures';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
 import { Session } from './Session';
-import { SimpleError, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { RequestResult } from '@simonbackx/simple-networking';
-import GenerateWorker from 'worker-loader!@stamhoofd/workers/generateAuthKeys.ts';
+import { SimpleError } from '@simonbackx/simple-errors';
+import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
+import { NetworkManager } from './NetworkManager';
+import { Keychain } from './Keychain';
 
 export class LoginHelper {
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
         return new Promise((resolve, reject) => {
-            const myWorker = new SignKeysWorker();
+            const myWorker = new KeyWorker();
 
             myWorker.onmessage = (e) => {
                 const authSignKeys = e.data
@@ -31,6 +30,7 @@ export class LoginHelper {
             }
 
             myWorker.postMessage({
+                type: "signKeys",
                 password,
                 authSignKeyConstants: authSignKeyConstants.encode({ version: Version })
             });
@@ -40,7 +40,7 @@ export class LoginHelper {
     static async createEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants): Promise<string> {
         return new Promise((resolve, reject) => {
             console.log("starting encryption key worker")
-            const myWorker = new AuthEncryptionKeyWorker();
+            const myWorker = new KeyWorker();
 
             myWorker.onmessage = (e) => {
                 const key = e.data
@@ -58,21 +58,20 @@ export class LoginHelper {
             }
 
             myWorker.postMessage({
+                type: "encryptionKey",
                 password,
                 authEncryptionKeyConstants: authEncryptionKeyConstants.encode({ version: Version })
             });
         })
     }
 
-    static async createKeys(password: string): Promise<{ userKeyPair, organizationKeyPair, authSignKeyPair, authEncryptionSecretKey, authSignKeyConstants, authEncryptionKeyConstants }> {
+    static async createKeys(password: string): Promise<{ authSignKeyPair, authEncryptionSecretKey, authSignKeyConstants, authEncryptionKeyConstants }> {
         return new Promise((resolve, reject) => {
-            const myWorker = new GenerateWorker();
+            const myWorker = new KeyWorker();
 
             myWorker.onmessage = (e) => {
                 try {
                     const {
-                        userKeyPair,
-                        organizationKeyPair,
                         authSignKeyPair,
                         authEncryptionSecretKey
                     } = e.data;
@@ -85,8 +84,6 @@ export class LoginHelper {
 
                     // Requset challenge
                     resolve({
-                        userKeyPair,
-                        organizationKeyPair,
                         authSignKeyPair,
                         authEncryptionSecretKey,
                         authSignKeyConstants,
@@ -105,7 +102,10 @@ export class LoginHelper {
                 reject(e)
             }
 
-            myWorker.postMessage(password);
+            myWorker.postMessage({
+                "type": "keys",
+                "password": password
+            });
         })
     }
 
@@ -137,23 +137,16 @@ export class LoginHelper {
             throw new Error("Malicious challenge received")
         }
         console.log("Signing challenge...")
-        console.log(challengeResponse)
-        console.log(authSignKeys)
         const signature = await Sodium.signMessage(challengeResponse.challenge, authSignKeys.privateKey)
         console.log("Sending signature...")
 
-        let tokenResponse: RequestResult<Token>;
-        try {
-            tokenResponse = await session.server.request({
-                method: "POST",
-                path: "/oauth/token",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
-                decoder: Token as Decoder<Token>
-            })
-        } catch (e) {
-            throw e
-        }
+        let tokenResponse = await session.server.request({
+            method: "POST",
+            path: "/oauth/token",
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
+            decoder: Token as Decoder<Token>
+        })
 
         console.log("Set token")
         session.setToken(tokenResponse.data)
@@ -168,18 +161,66 @@ export class LoginHelper {
         SessionManager.setCurrentSession(session)
     }
 
-    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
+    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
         const keys = await this.createKeys(password)
+
+        const userKeyPair = await Sodium.generateEncryptionKeyPair();
+        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
 
         const user = NewUser.create({
             email,
             firstName,
             lastName,
-            publicKey: keys.userKeyPair.publicKey,
+            publicKey: userKeyPair.publicKey,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(keys.userKeyPair.privateKey, keys.authEncryptionSecretKey)
+            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, keys.authEncryptionSecretKey)
+        });
+
+        organization.publicKey = organizationKeyPair.publicKey
+
+        const item = KeychainItem.create({
+            publicKey: organization.publicKey,
+            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
+        })
+
+        // Do netwowrk request to create organization
+        const response = await NetworkManager.server.request({
+            method: "POST",
+            path: "/organizations",
+            body: CreateOrganization.create({
+                organization,
+                user,
+                keychainItems: [
+                    item
+                ]
+            }),
+            decoder: Token
+        })
+
+        const session = new Session(organization.id)
+        session.organization = organization
+        session.setToken(response.data)
+        Keychain.addItem(item)
+        session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
+        SessionManager.setCurrentSession(session)
+    }
+
+    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
+        const keys = await this.createKeys(password)
+
+        const userKeyPair = await Sodium.generateEncryptionKeyPair();
+
+        const user = NewUser.create({
+            email,
+            firstName,
+            lastName,
+            publicKey: userKeyPair.publicKey,
+            publicAuthSignKey: keys.authSignKeyPair.publicKey,
+            authSignKeyConstants: keys.authSignKeyConstants,
+            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
+            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, keys.authEncryptionSecretKey)
         });
 
         // Do netwowrk request to create organization
@@ -191,7 +232,7 @@ export class LoginHelper {
         })
 
         session.setToken(response.data)
-        session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: keys.userKeyPair.privateKey })
+        session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: userKeyPair.privateKey })
         SessionManager.setCurrentSession(session)
     }
 }

@@ -112,7 +112,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 editUser: admin,
                 onUpdateUser: (patched: User | null) => {
                     const i = this.admins.findIndex(a => a.id === admin.id)
-                    console.log(i)
 
                     if (i != -1) {
                         this.admins.splice(i, 1, ...patched ? [patched] : [])
@@ -130,7 +129,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 editInvite: invite,
                 onUpdateInvite: (patched: Invite | null) => {
                     const i = this.invites.findIndex(a => a.id === invite.id)
-                    console.log(i)
 
                     if (i != -1) {
                         this.invites.splice(i, 1, ...patched ? [patched] : [])
