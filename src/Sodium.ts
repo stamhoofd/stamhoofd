@@ -15,7 +15,7 @@ class SodiumStatic {
     }
 
     private async importSodium() {
-        const d = await import("libsodium-wrappers");
+        const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers");
         this.sodium = d.default;
     }
 
