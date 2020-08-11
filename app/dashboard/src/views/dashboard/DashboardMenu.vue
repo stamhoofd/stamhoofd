@@ -9,6 +9,13 @@
             <input class="input search" placeholder="Zoeken" v-if="false">
         </div>
 
+        <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
+            <span class="icon info-filled"/>
+            <span>Documentatie</span>
+        </a>
+
+        <hr v-if="groups.length > 0">
+
         <div v-if="groups.length > 0">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user"/>
@@ -251,6 +258,10 @@ export default class Menu extends Mixins(NavigationMixin) {
     vertical-align: middle;
     overflow: hidden;
     white-space: nowrap;
+
+    &, &:active, &:visited, &:link {
+        text-decoration: none;
+    }
 
     .icon {
         padding-right: 10px;

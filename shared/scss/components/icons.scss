@@ -129,6 +129,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/info.svg);
     }
 
+    &.info-filled:after {
+        font-icon: url(@stamhoofd/assets/images/icons/info-filled.svg);
+    }
+
     &.exclamation:after {
         font-icon: url(@stamhoofd/assets/images/icons/exclamation.svg);
     }
