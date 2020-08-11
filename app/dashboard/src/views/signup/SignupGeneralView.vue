@@ -1,14 +1,15 @@
 <template>
     <div id="signup-general-view" class="st-view">
-        <STNavigationBar title="Jouw vereniging aansluiten">
+        <STNavigationBar title="Stamhoofd gratis uitproberen">
             <button slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         
 
         <main>
             <h1>
-                Jouw vereniging aansluiten
+                Stamhoofd gratis uitproberen
             </h1>
+            <p>Een account maken duurt niet lang en is volledig gratis tot je beslist om het te gaan gebruiken.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
@@ -36,7 +37,7 @@
 
         <STToolbar>
             <template #left>
-                Volledig gratis tot je de demo beëindigd
+                Volledig gratis tot je beslist om het te gaan gebruiken.
             </template>
             <template #right>
                 <button class="button primary" @click="goNext">
