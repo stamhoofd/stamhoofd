@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import { ErrorBox } from "./ErrorBox"
@@ -34,7 +34,14 @@ export default class STErrorsDefault extends Vue {
             this.errors = [];
             return;
         }
-        const errors = val.forFields(this.errorFields.split(","))
+        let errors: SimpleErrors
+        
+        if (this.errorFields == "*") {
+            errors = val.remaining
+        } else {
+            errors = val.forFields(this.errorFields.split(","))
+        }
+        
         this.errors = errors.errors
         val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
     }

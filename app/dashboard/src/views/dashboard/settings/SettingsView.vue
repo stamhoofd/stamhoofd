@@ -48,6 +48,22 @@
             </div>
 
             <hr>
+            <h2>Jouw logo</h2>
+            <p>Als je een logo hebt kan je deze hier toevoegen. Als je geen horizontaal logo kiest plaatsen we de naam van jouw vereniging naast je vierkante logo als daar plaats voor is.</p>
+
+            <div class="split-inputs">
+                <div>
+                    <ImageInput title="Vierkante versie" :validator="validator" v-model="squareLogo" :resolutions="squareLogoResolutions"/>
+                    <p class="st-list-description">Wordt voornamelijk gebruikt op kleine schermen, zoals smartphones. Laat tekst zoveel mogelijk weg uit dit logo.</p>
+                </div>
+                <div>
+                    <ImageInput title="Horizontale versie met tekst (optioneel)" :validator="validator" v-model="horizontalLogo" :resolutions="horizontalLogoResolutions"/>
+
+                    <p class="st-list-description">Voor grotere schermen. Voeg deze zeker toe als je deze hebt.</p>
+                </div>
+            </div>
+
+            <hr>
             <h2>Domeinnaam</h2>
 
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
@@ -120,9 +136,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput } from "@stamhoofd/components";
+import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -142,7 +158,8 @@ import EmailSettingsView from './EmailSettingsView.vue';
         BackButton,
         AddressInput,
         LoadingButton,
-        IBANInput
+        IBANInput,
+        ImageInput
     },
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
@@ -175,6 +192,64 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
         }
         this.$set(this.organizationPatch.meta, "iban", iban)
+    }
+
+    get squareLogoResolutions() {
+        return [
+            ResolutionRequest.create({
+                height: 44,
+                width: 44,
+                fit: ResolutionFit.Cover
+            }),
+            ResolutionRequest.create({
+                height: 44*3,
+                width: 44*3,
+                fit: ResolutionFit.Cover
+            })
+        ]
+    }
+
+    get horizontalLogoResolutions() {
+        return [
+            ResolutionRequest.create({
+                height: 44,
+                width: 300,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 44*3,
+                width: 300*3,
+                fit: ResolutionFit.Inside
+            })
+        ]
+    }
+
+    get squareLogo() {
+        return this.organization.meta.squareLogo
+    }
+
+    set squareLogo(image: Image | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
+        }
+
+        this.organizationPatch.meta.set({
+            squareLogo: image
+        })
+    }
+
+    get horizontalLogo() {
+        return this.organization.meta.horizontalLogo
+    }
+
+    set horizontalLogo(image: Image | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
+        }
+
+        this.organizationPatch.meta.set({
+            horizontalLogo: image
+        })
     }
 
     get website() {
@@ -265,6 +340,46 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         dd {
             font-family: monospace;
             white-space: nowrap;
+        }
+    }
+
+    .logo-placeholder {
+        @extend .style-input;
+        @extend .style-input-shadow;
+        border: $border-width solid $color-gray-light;
+        color: $color-gray;
+        background: white;
+        border-radius: $border-radius;
+        padding: 5px 15px;
+        height: 60px;
+        margin: 0;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, color 0.2s;
+        outline: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+        touch-action: manipulation;
+
+
+        &:hover {
+            border-color: $color-primary-gray-light;
+            color: $color-primary;
+        }
+
+        &:active {
+            border-color: $color-primary;
+            color: $color-primary;
+        }
+
+        &.square {
+            width: 60px;
+        }
+
+        &.horizontal {
+            width: 300px;
         }
     }
 }

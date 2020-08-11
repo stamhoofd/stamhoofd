@@ -2,7 +2,9 @@
     <Steps :root="root" :total-steps="3">
         <template v-slot:left="slotProps">
             <template v-if="!slotProps.canPop">
-                {{ organization.name }}
+                <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }">
+                <img v-if="logoSrc" :src="logoSrc" :srcset="logoSrcSet" class="organization-logo" :class="{ 'only-smartphone': !!logoHorizontalSrc }">
+                <template v-else>{{ organization.name }}</template>
             </template>
             <BackButton v-else @click="popNav" />
         </template>
@@ -44,6 +46,35 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
     get isLoggedIn() {
         return SessionManager.currentSession?.isComplete() ?? false
     }
+
+
+    get logoSrc() {
+        if (!this.organization.meta.squareLogo) {
+            return null
+        }
+        return this.organization.meta.squareLogo.getPathForSize(undefined, 44)
+    }
+
+    get logoSrcSet() {
+        if (!this.organization.meta.squareLogo) {
+            return null
+        }
+        return this.organization.meta.squareLogo.getPathForSize(undefined, 44) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 44*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 44*3)+" 3x"
+    }
+
+     get logoHorizontalSrc() {
+        if (!this.organization.meta.horizontalLogo) {
+            return null
+        }
+        return this.organization.meta.horizontalLogo.getPathForSize(undefined, 44)
+    }
+
+    get logoHorizontalSrcSet() {
+        if (!this.organization.meta.horizontalLogo) {
+            return null
+        }
+        return this.organization.meta.horizontalLogo.getPathForSize(undefined, 44) + " 1x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 44*2)+" 2x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 44*3)+" 3x"
+    }
  
     returnToSite() {
         if (SessionManager.currentSession?.isComplete() ?? false) {
@@ -61,3 +92,14 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
     }
 }
 </script>
+
+<style lang="scss">
+    .organization-logo {
+        max-height: 44px;
+        max-width: 44px;
+
+        &.horizontal {
+            max-width: 30vw
+        }
+    }
+</style>

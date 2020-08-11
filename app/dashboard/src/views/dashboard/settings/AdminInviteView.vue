@@ -123,10 +123,10 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     })
 
     // Use when editing a user
-    patchUser: PatchType<Invite> | null = null
+    patchUser: AutoEncoderPatchType<User> | null = null
 
     // use when editing an invite
-    patchInvite: PatchType<Invite> | null = null
+    patchInvite: AutoEncoderPatchType<Invite> | null = null
 
     groups: SelectableGroup[] = []
     
@@ -395,7 +395,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     addUserPatch(patch: PartialWithoutMethods<PatchType<User>>) {
         if (!this.patchUser) {
-            this.patchUser = User.patchType().create(patch)
+            this.patchUser = User.patch(patch)
         } else {
             this.patchUser = this.patchUser.patch(User.patchType().create(patch))
         }

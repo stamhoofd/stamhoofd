@@ -109,8 +109,12 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
 
     groups: SelectableGroup[] = []
 
+    get privateMetaPatch() {
+        return this.organizationPatch.privateMeta as AutoEncoderPatchType<OrganizationPrivateMetaData> | undefined
+    }
+
     get isNew() {
-        return this.organizationPatch.privateMeta && this.organizationPatch.privateMeta.emails.getPuts().length > 0
+        return this.privateMetaPatch && this.privateMetaPatch.emails.getPuts().length > 0
     }
 
     get organization() {
@@ -180,13 +184,13 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const patch = OrganizationPatch.create({}).patch(this.organizationPatch)
+        const patch = OrganizationPatch.patch(this.organizationPatch)
 
         if (!patch.privateMeta) {
-            patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
+            patch.privateMeta = OrganizationPrivateMetaData.patch({})
         }
 
-        patch.privateMeta!.emails.addDelete(this.emailId)
+        (patch.privateMeta! as AutoEncoderPatchType<OrganizationPrivateMetaData>).emails.addDelete(this.emailId)
 
         patch.groups = new PatchableArray()
 
