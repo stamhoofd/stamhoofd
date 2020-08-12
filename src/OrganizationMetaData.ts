@@ -43,6 +43,9 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: Image, nullable: true, version: 11 })
     squareLogo: Image | null = null
 
+    @field({ decoder: StringDecoder, nullable: true, version: 21 })
+    color: string | null = null
+
     // Deprecated
     @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
     bic = ""
