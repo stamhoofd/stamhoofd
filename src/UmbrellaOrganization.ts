@@ -12,7 +12,7 @@ export enum UmbrellaOrganization {
 export class UmbrellaOrganizationHelper {
     static getName(umbrellaOrganization: UmbrellaOrganization): string {
         switch(umbrellaOrganization) {
-        case UmbrellaOrganization.ChiroNationaal: return "Chiro Nationaal"
+        case UmbrellaOrganization.ChiroNationaal: return "Chirojeugd Vlaanderen"
         case UmbrellaOrganization.ScoutsEnGidsenVlaanderen: return "Scouts & Gidsen Vlaanderen"
         case UmbrellaOrganization.KSA: return "KSA"
         case UmbrellaOrganization.KLJ: return "KLJ"
