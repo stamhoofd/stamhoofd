@@ -144,9 +144,9 @@
     js-tokens "^4.0.0"
 
 "@babel/parser@^7.1.0", "@babel/parser@^7.10.4", "@babel/parser@^7.11.0", "@babel/parser@^7.11.1":
-  version "7.11.2"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.11.2.tgz#0882ab8a455df3065ea2dcb4c753b2460a24bead"
-  integrity sha512-Vuj/+7vLo6l1Vi7uuO+1ngCDNeVmNbTngcJFKCR/oEtz8tKz0CJxZEGmPt9KcIloZhOZ3Zit6xbpXT2MDlS9Vw==
+  version "7.11.3"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.11.3.tgz#9e1eae46738bcd08e23e867bab43e7b95299a8f9"
+  integrity sha512-REo8xv7+sDxkKvoxEywIdsNFiZLybwdI7hcT5uEPyQrSMB4YQ973BfC9OOrD/81MaIjh6UxdulIQXkjmiH3PcA==
 
 "@babel/plugin-syntax-async-generators@^7.8.4":
   version "7.8.4"
@@ -507,9 +507,9 @@
     mysql "^2.18.1"
 
 "@simonbackx/simple-encoding@^1.9":
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.10.2.tgz#bde3c60175d73661366b822cd9c4ae29e567c3a5"
-  integrity sha512-+KWvvg4XXQVRts89Y7IrQMa9PibalMNI2549+16ZGy6RRLcpxXFEUPB6dIbR0REIwCgjV2R93PZVuH5XteSn1g==
+  version "1.11.8"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.11.8.tgz#421dab0c787ee3b92190ef5fdf2ab80e66672bbc"
+  integrity sha512-7IjgUkSZRX7m9xu9eGESIZt4iY+tkHHsXCBhAiuQ2is9aerJqK3UO/kEOXns7Ye8Mr5EdJduiwPrlwWKvGANWQ==
 
 "@simonbackx/simple-endpoints@^1.3.0":
   version "1.3.4"
@@ -531,16 +531,16 @@
     type-detect "4.0.8"
 
 "@stamhoofd/crypto@^1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.3.1.tgz#73db658c31eac79a410a1cc4f84fda1c2e107990"
-  integrity sha512-iRk0m1kJgfOpH7u+cZnHyxDTIHIJYIc8mUNv/UwQsc7sCmBtvuTJ2BUwPaZWwFWAGEtB49V6u9OusJCa3KH7kQ==
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.3.2.tgz#754caea999fa1b00ceabb387858990d10aed8b65"
+  integrity sha512-/NoSbbvcWfGzmW8KQxqmf39UFCnsb7Anzs2ouYHfw3BFlf+INUsSDe3Bq8nY8heVO6VhIbfoZGxTNqPMZ1AHZg==
   dependencies:
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.8.7"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.7.tgz#de85256aeb69adb6c825d9422fab73962208b206"
-  integrity sha512-3ZqsnVDKwCBdIjioLIOHnWUqt95NQg24yammZuAD10ajmEDpZuW5U3GXP0FiEYf6uoHWVERmrDezEca2mwMArw==
+  version "1.8.8"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.8.tgz#81c187c71c94c85e3e45364530a58e327f3ff4ac"
+  integrity sha512-3cuuEz8eSVUF18JtrBS3ys5aI+G/nGyVAivGs9+AcPSLNak0LBuFyAVoiPMsR7OpPCbLPtCBfQbWhKo4jIO70g==
   dependencies:
     uuid "^8.2.0"
 
@@ -924,9 +924,9 @@ atob@^2.1.2:
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
 aws-sdk@^2.720.0:
-  version "2.729.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.729.0.tgz#3d850f7825b94b5d8b2aca58ec096973bc4c7e34"
-  integrity sha512-x5q/+9wM37tBYCmYNGMj+aU9qeXqhbUH0Dz3wlSpAW55+N4NwlBbpqhyCV3oF9bePEJtEnxLGWNXpb9BNWNhew==
+  version "2.731.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.731.0.tgz#a2564d882b943c2080d5100f5021088750cfb5f5"
+  integrity sha512-SUTzpr7gRUpgj0gK03B3YV2ziU1079sZ7jQV2AsmkaexZz50ANXC41Gv1qcLohzkTiPNM344qPZMTo5qeuK7LQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -2072,9 +2072,9 @@ get-stream@^4.0.0:
     pump "^3.0.0"
 
 get-stream@^5.0.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-5.1.0.tgz#01203cdc92597f9b909067c3e656cc1f4d3c4dc9"
-  integrity sha512-EXr1FOzrzTfGeL0gQdeFEvOMm2mzMOglyiOXSTpPC+iAjAKftbr3jpCMWynogwYnM+eSj9sHGc6wjIcDvYiygw==
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-5.2.0.tgz#4966a1795ee5ace65e706c4b7beb71257d6e22d3"
+  integrity sha512-nBF+F1rAZVCu/p7rjzgA+Yb4lfYXrpl7a6VmJrU8wF9I1CKvP/QwPNZHnOlwbTkY6dvtFIzFMSyQXbLoTQPRpA==
   dependencies:
     pump "^3.0.0"
 
@@ -3619,9 +3619,9 @@ once@^1.3.0, once@^1.3.1, once@^1.4.0:
     wrappy "1"
 
 onetime@^5.1.0:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/onetime/-/onetime-5.1.1.tgz#5c8016847b0d67fcedb7eef254751cfcdc7e9418"
-  integrity sha512-ZpZpjcJeugQfWsfyQlshVoowIIQ1qBGSVll4rfDq6JJVO//fesjoX808hXWfBjY+ROZgpKDI5TRSRBSoJiZ8eg==
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/onetime/-/onetime-5.1.2.tgz#d0e96ebb56b07476df1dd9c4806e5237985ca45e"
+  integrity sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==
   dependencies:
     mimic-fn "^2.1.0"
 

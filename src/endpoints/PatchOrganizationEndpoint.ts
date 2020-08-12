@@ -59,17 +59,19 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = token.user.organization
         if (user.permissions.hasFullAccess()) {
             organization.name = request.body.name ?? organization.name
-            organization.website = request.body.website ?? organization.website;
+            if (request.body.website !== undefined) {
+                organization.website = request.body.website;
+            }
 
             if (request.body.address) {
                 organization.address = organization.address.patch(request.body.address)
             }
 
             if (request.body.meta) {
-                organization.meta = organization.meta.patch(request.body.meta)
+                organization.meta.patchOrPut(request.body.meta)
             }
 
-            if (request.body.privateMeta) {
+            if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
             }
 
@@ -123,12 +125,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
             }
 
-            if (struct.settings) {
-                model.settings = model.settings.patch(struct.settings)
-            }
-
+            model.settings.patchOrPut(struct.settings)
+            
             if (struct.privateSettings) {
-                model.privateSettings = model.privateSettings.patch(struct.privateSettings)
+                model.privateSettings.patchOrPut(struct.privateSettings)
             }
             
             await model.save();

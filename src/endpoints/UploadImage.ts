@@ -1,7 +1,7 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors'
-import { Image as ImageStruct } from '@stamhoofd/structures';
+import { Image as ImageStruct, ResolutionRequest,Version } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
 
@@ -10,6 +10,9 @@ type Query = {};
 type Body = undefined
 type ResponseBody = ImageStruct
 
+import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
+
+import { Image } from '../models/Image';
 import { Token } from '../models/Token';
 
 interface FormidableFile {
@@ -42,7 +45,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/backoffice/upload-image", {});
+        const params = Endpoint.parseParameters(request.url, "/upload-image", {});
 
         if (params) {
             return [true, params as Params];
@@ -77,18 +80,30 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
         const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
-        const file = await new Promise<FormidableFile>((resolve, reject) => {
+        const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
             form.parse(request.request.request, (err, fields, file: {file: FormidableFile}) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                resolve(file.file);
+                if (!fields.resolutions) {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Field resolutions is required",
+                        field: "resolutions"
+                    }))
+                }
+                try {   
+                    const resolutions = new ObjectData(JSON.parse(fields.resolutions), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>)
+                    resolve([file.file, resolutions]);
+                } catch (e) {
+                    reject(e)
+                }
             });
         });
 
         const fileContent = await fs.readFile(file.path);
-        //const image = await Image.create(fileContent, file.type ?? undefined)
-        return new Response(ImageStruct.create({}));
+        const image = await Image.create(fileContent, file.type ?? undefined, resolutions)
+        return new Response(ImageStruct.create(image));
     }
 }
