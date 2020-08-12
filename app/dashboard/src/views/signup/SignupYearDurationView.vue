@@ -76,12 +76,11 @@ export default class SignupYearDurationView extends Mixins(NavigationMixin) {
             organization.meta.defaultEndDate = this.endDate
 
             this.show(new ComponentWithProperties(SignupPricesView, { organization }))
+            plausible('signupYearDuration');
         } catch (e) {
             console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
+            this.errorBox = new ErrorBox(e)
+            plausible('signupYearDurationError');
             return;
         }
     }

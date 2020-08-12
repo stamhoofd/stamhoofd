@@ -114,12 +114,11 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
             this.errorBox = null
 
             this.show(new ComponentWithProperties(SignupAccountView, { organization }))
+            plausible('signupPrices');
         } catch (e) {
             console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
+            this.errorBox = new ErrorBox(e)
+            plausible('signupPricesError');
             return;
         }
     }

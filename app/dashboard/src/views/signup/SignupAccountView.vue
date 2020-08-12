@@ -53,7 +53,7 @@
             <template #right>
                 <LoadingButton :loading="loading" >
                     <button class="button primary">
-                        Volgende
+                        Account aanmaken
                     </button>
                 </LoadingButton>
             </template>
@@ -184,6 +184,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.loading = false
             console.error(e)
             this.errorBox = new ErrorBox(e)
+            plausible('signupAccountError');
             return;
         }
     }

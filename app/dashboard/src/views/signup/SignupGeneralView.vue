@@ -41,7 +41,7 @@
             </template>
             <template #right>
                 <button class="button primary" @click="goNext">
-                    Volgende
+                    Aan de slag
                 </button>
             </template>
         </STToolbar>
@@ -102,6 +102,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             this.errorBox = null
 
             if (!await this.validator.validate() || !this.address) {
+                
                 return
             }
 
@@ -126,11 +127,12 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             })
 
             this.errorBox = null
-
             this.show(new ComponentWithProperties(SignupStructureView, { organization }))
+            plausible('signupGeneral');
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
+            plausible('signupGeneralError');
             return;
         }
     }

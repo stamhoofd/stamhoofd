@@ -130,12 +130,11 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
             organization.meta.genderType = this.genderType
 
             this.show(new ComponentWithProperties(SignupYearDurationView, { organization }))
+            plausible('signupStructure');
         } catch (e) {
             console.error(e)
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                console.log("Updated errorbox")
-                this.errorBox = new ErrorBox(e)
-            }
+            this.errorBox = new ErrorBox(e)
+            plausible('signupStructureError');
             return;
         }
     }
