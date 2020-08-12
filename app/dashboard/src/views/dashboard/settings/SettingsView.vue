@@ -44,24 +44,29 @@
 
                     <IBANInput title="Bankrekeningnummer" v-model="iban" :validator="validator"/>
 
+
                 </div>
             </div>
 
             <hr>
-            <h2>Jouw logo</h2>
-            <p>Als je een logo hebt kan je deze hier toevoegen. Als je geen horizontaal logo kiest plaatsen we de naam van jouw vereniging naast je vierkante logo als daar plaats voor is.</p>
+            <h2>Huisstijl</h2>
+            <p>Als je een logo hebt kan je deze hier toevoegen. Je kan kiezen om een vierkant logo, een horizontaal logo of beide te uploaden. We kiezen dan automatisch het beste logo afhankelijk van de schermgrootte.</p>
 
             <div class="split-inputs">
                 <div>
-                    <ImageInput title="Vierkante versie" :validator="validator" v-model="squareLogo" :resolutions="squareLogoResolutions"/>
-                    <p class="st-list-description">Wordt voornamelijk gebruikt op kleine schermen, zoals smartphones. Laat tekst zoveel mogelijk weg uit dit logo.</p>
-                </div>
-                <div>
-                    <ImageInput title="Horizontale versie met tekst (optioneel)" :validator="validator" v-model="horizontalLogo" :resolutions="horizontalLogoResolutions"/>
+                    <ImageInput title="Horizontaal logo" :validator="validator" v-model="horizontalLogo" :resolutions="horizontalLogoResolutions" :required="false"/>
 
-                    <p class="st-list-description">Voor grotere schermen. Voeg deze zeker toe als je deze hebt.</p>
+                    <p class="st-list-description">Beter voor grotere schermen.</p>
+                </div>
+
+                <div>
+                    <ImageInput title="Vierkant logo" :validator="validator" v-model="squareLogo" :resolutions="squareLogoResolutions" :required="false"/>
+                    <p class="st-list-description">Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.</p>
                 </div>
             </div>
+
+            <ColorInput title="Hoofdkleur (optioneel)" v-model="color" :validator="validator" placeholder="Geen kleur" :required="false"/>
+            <p class="st-list-description">Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om het blauwe kleur te behouden.</p>
 
             <hr>
             <h2>Domeinnaam</h2>
@@ -134,11 +139,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput } from "@stamhoofd/components";
+import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -159,7 +164,8 @@ import EmailSettingsView from './EmailSettingsView.vue';
         AddressInput,
         LoadingButton,
         IBANInput,
-        ImageInput
+        ImageInput,
+        ColorInput
     },
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
@@ -199,12 +205,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             ResolutionRequest.create({
                 height: 44,
                 width: 44,
-                fit: ResolutionFit.Cover
+                fit: ResolutionFit.Inside
             }),
             ResolutionRequest.create({
                 height: 44*3,
                 width: 44*3,
-                fit: ResolutionFit.Cover
+                fit: ResolutionFit.Inside
             })
         ]
     }
@@ -224,13 +230,27 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         ]
     }
 
+    get color() {
+        return this.organization.meta.color
+    }
+
+    set color(color: string | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.organizationPatch.meta.set({
+            color
+        })
+    }
+
     get squareLogo() {
         return this.organization.meta.squareLogo
     }
 
     set squareLogo(image: Image | null) {
         if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
         this.organizationPatch.meta.set({
@@ -244,7 +264,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     set horizontalLogo(image: Image | null) {
         if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
         this.organizationPatch.meta.set({
@@ -324,6 +344,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(DNSRecordsView, {})
         }).setDisplayStyle("popup"))
     }
+
+    shouldNavigateAway() {
+        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+            return true;
+        }
+        if (confirm("Ben je zeker dat je de instellingen wilt sluiten zonder op te slaan?")) {
+            return true;
+        }
+        return false;
+    }
+
 }
 </script>
 

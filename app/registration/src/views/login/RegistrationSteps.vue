@@ -4,7 +4,7 @@
             <template v-if="!slotProps.canPop">
                 <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }">
                 <img v-if="logoSrc" :src="logoSrc" :srcset="logoSrcSet" class="organization-logo" :class="{ 'only-smartphone': !!logoHorizontalSrc }">
-                <template v-else>{{ organization.name }}</template>
+                <template v-if="!logoHorizontalSrc && !logoSrc">{{ organization.name }}</template>
             </template>
             <BackButton v-else @click="popNav" />
         </template>

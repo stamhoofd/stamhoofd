@@ -1,10 +1,12 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="image-input-box" :class="{square: isSquare}">
+        <label class="image-input-box" :class="{square: isSquare}" @click="onClick">
+            <span class="icon trash" v-if="!required && value" />
+
             <Spinner v-if="uploading" />
             <span class="icon upload" v-else-if="value == null"/>
             <img :src="src" v-else/>
-            <input type="file" class="file-upload" accept="image/png, image/jpeg" @change="changedFile">
+            <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
 </template>
@@ -54,6 +56,13 @@ export default class ImageInput extends Mixins(NavigationMixin) {
 
     get src() {
         return this.value!.getPathForSize(undefined, 64)
+    }
+
+    onClick(event) {
+        if (!this.required && this.value) {
+            event.preventDefault();
+            this.$emit("input", null)
+        }
     }
 
     changedFile(event) {
@@ -143,6 +152,30 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         position: absolute; // fix max width
         max-height: 33px;
         max-width: 100%;
+    }
+
+    .icon.trash {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(white, 0.9);
+        text-align: center;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        transition: opacity 0.2s;
+    }
+
+    &:hover {
+        .icon.trash {
+            opacity: 1;
+        }
     }
 }
 

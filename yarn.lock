@@ -1166,11 +1166,6 @@
     svgicons2svgfont "9.1.1"
     ttf2woff "2.0.2"
 
-"@simonbackx/simple-encoding@^1.10.1":
-  version "1.11.4"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.11.4.tgz#920af0fe09b7700733e5795874ef512b38a4ab00"
-  integrity sha512-yWKzpNU/uWXiPagLXkH/9bTScv1YRi/Cp2yxE2bR5JQKLvMOflMjxg0SUWJRuiPdg1rGgycp8bIEATeFUnVC/Q==
-
 "@simonbackx/simple-errors@~1.0":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.8.tgz#19f130fdb2b98eca6ff026e1f7bb4179719315db"

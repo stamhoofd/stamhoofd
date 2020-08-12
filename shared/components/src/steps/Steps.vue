@@ -189,7 +189,6 @@ $header-height: 70px;
     }
 
     > main {
-        padding-top: $header-height;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
@@ -197,28 +196,38 @@ $header-height: 70px;
         @media (min-width: 801px) {
             --st-vertical-padding: 60px;
         }
-        --vh-tmp-b: calc(var(--vh, 7px) * 100);
-        --vh-tmp: calc(var(--vh-tmp-b, 7px) - #{$header-height});
-
-        > * {
-            --vh: calc(var(--vh-tmp, 7px) / 100);
-        }
+        
     }
 }
 
 .steps-layout {
     .boxed-view {
+        padding-top: $header-height;
+        min-height: 100vh;
+        min-height: calc(var(--vh, 1vh) * 100);
+        box-sizing: border-box;
+
         @media (min-width: 801px) {
-            padding-bottom: 30px;
+            padding-top: $header-height + 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-bottom: $header-height*2;
         }
 
         > .st-view {
+            width: 100%;
+
             &:not(:only-child) {
                 min-height: auto;
 
                 &:not(:last-child) {
                     border-bottom: $border-width solid $color-white-shade;
                     margin-bottom: 20px;
+
+                    @media (min-width: 801px) {
+                        margin-bottom: 30px;
+                    }
                 }
             }
             
@@ -229,10 +238,6 @@ $header-height: 70px;
                 border-radius: $border-radius;
                 margin: 0 auto;
                 min-height: auto;
-
-                & +.st-view {
-                    margin-top: 40px;;
-                }
             }
         }
     }

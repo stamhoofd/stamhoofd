@@ -1,8 +1,14 @@
 // Colors
-$color-primary: #0053ff;
+
+$color-primary-original: #0053ff;
+
+$color-primary: var(--color-primary, $color-primary-original);
+
 $color-primary-gray-light: #9DB7EC;
 $color-dark: #000716;
-$color-primary-destination: #2700ff;
+
+$color-primary-destination: var(--color-primary, #2700ff);
+
 $color-error: #ff002e;
 $color-error-border: #ffaab9;
 $color-error-border-focus: #ff002e;

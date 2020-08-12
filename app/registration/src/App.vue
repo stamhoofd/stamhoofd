@@ -39,6 +39,12 @@ export default class App extends Vue {
                 session.setOrganization(response.data)
                 SessionManager.setCurrentSession(session)
 
+                // Set color
+                if (response.data.meta.color) {
+                    console.log("Set color "+response.data.meta.color)
+                    document.documentElement.style.setProperty("--color-primary", response.data.meta.color)
+                }
+
                 return new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(PromiseView, {
                         promise: async () => {
