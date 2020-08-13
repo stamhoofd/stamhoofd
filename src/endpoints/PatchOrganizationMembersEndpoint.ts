@@ -66,6 +66,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Check permissions (todo)
 
+            member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
+            member.encryptedForOrganization = patch.encryptedForOrganization ?? member.encryptedForOrganization
+            member.firstName = patch.firstName ?? member.firstName
+            member.publicKey = patch.publicKey ?? member.publicKey
+            await member.save();
+
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
                 const registration = await Registration.getByID(patchRegistration.id)
