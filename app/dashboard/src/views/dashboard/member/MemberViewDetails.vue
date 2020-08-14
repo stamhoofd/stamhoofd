@@ -1,36 +1,45 @@
 <template>
     <div class="member-view-details">
         <div>
-            <h2>Algemeen</h2>
-            <dl class="details-grid">
-                <dt>Verjaardag</dt>
-                <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+            <div class="hover-box">
+                <h2 class="style-with-button">
+                    <div>Algemeen</div>
+                    <div class="hover-show"><button class="button icon gray edit" @click="editMember()"></button></div>
+                </h2>
+                <dl class="details-grid">
+                    <dt>Verjaardag</dt>
+                    <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
 
-                <template v-if="member.groups.length > 0">
-                    <dt>Groep</dt>
-                    <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
-                </template>
+                    <template v-if="member.groups.length > 0">
+                        <dt>Groep</dt>
+                        <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
+                    </template>
 
-                 <template v-if="member.waitingGroups.length > 0">
-                    <dt>Wachtlijst</dt>
-                    <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
-                </template>
+                    <template v-if="member.waitingGroups.length > 0">
+                        <dt>Wachtlijst</dt>
+                        <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
+                    </template>
 
-                <template v-if="member.details.phone">
-                    <dt>GSM-nummer</dt>
-                    <dd>{{ member.details.phone }}</dd>
-                </template>
+                    <template v-if="member.details.phone">
+                        <dt>GSM-nummer</dt>
+                        <dd>{{ member.details.phone }}</dd>
+                    </template>
 
-                <template v-if="member.details.email">
-                    <dt>E-mailadres</dt>
-                    <dd>{{ member.details.email }}</dd>
-                </template>
-            </dl>
+                    <template v-if="member.details.email">
+                        <dt>E-mailadres</dt>
+                        <dd>{{ member.details.email }}</dd>
+                    </template>
+                </dl>
+                </div>
 
             <hr>
 
-            <div v-for="(parent, index) in member.details.parents" :key="index">
-                <h2>{{ ParentTypeHelper.getName(parent.type) }}</h2>
+            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
+                <h2 class="style-with-button">
+                    <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
+                    <div class="hover-show"><button class="button icon gray edit" @click="editParent(parent)"></button></div>
+                </h2>
+
                 <dl class="details-grid">
                     <dt>Naam</dt>
                     <dd>{{ parent.name }}</dd>
@@ -82,14 +91,17 @@
             </template>
         </div>
 
-        <div v-if="member.groups.length > 0">
-            <h2>
-                <span class="icon-spacer">Steekkaart</span><span
-                    v-tooltip="
-                        'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
-                    "
-                    class="icon privacy"
-                />
+        <div v-if="member.groups.length > 0" class="hover-box">
+            <h2 class="style-with-button">
+                <div>
+                    <span class="icon-spacer">Steekkaart</span><span
+                        v-tooltip="
+                            'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
+                        "
+                        class="icon gray privacy"
+                    />
+                </div>
+                <div class="hover-show"><button class="button icon gray edit" @click="editMemberRecords()"></button></div>
             </h2>
 
             <ul class="member-records">
@@ -120,10 +132,13 @@
 
 <script lang="ts">
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { TooltipDirective as Tooltip, ErrorBox } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority } from '@stamhoofd/structures';
+import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority, Parent } from '@stamhoofd/structures';
 import RecordDescriptionView from './records/RecordDescriptionView.vue';
+import EditMemberView from './edit/EditMemberView.vue';
+import EditMemberParentView from './edit/EditMemberParentView.vue';
+import { FamilyManager } from '../../../classes/FamilyManager';
 
 @Component({
     directives: { Tooltip },
@@ -163,6 +178,50 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             member: this.member,
             record
         }))
+    }
+
+    editParent(parent: Parent) {
+        const familyManager = new FamilyManager([this.member]);
+        const displayedComponent = new ComponentWithProperties(EditMemberParentView, {
+            memberDetails: this.member.details,
+            familyManager,
+            parent,
+            handler: async (parent: Parent, component) => {
+                if (component.loading) {
+                    return;
+                }
+                component.loading = true;
+                familyManager.updateParent(parent)
+
+                component.errorBox = null;
+
+                try {
+                    await familyManager.patchAllMembersWith(this.member)
+                    component.loading = false
+                    component.pop({ force: true })
+                } catch (e) {
+                    component.errorBox = new ErrorBox(e)
+                    component.loading = false
+                }
+                
+            }
+        });
+        this.show(displayedComponent);
+    }
+
+    editMember() {
+        const displayedComponent = new ComponentWithProperties(EditMemberView, {
+            member: this.member
+        });
+        this.show(displayedComponent);
+    }
+
+    editMemberRecords() {
+        const displayedComponent = new ComponentWithProperties(EditMemberView, {
+            member: this.member,
+            initialTabIndex: 2
+        });
+        this.show(displayedComponent);
     }
 }
 </script>

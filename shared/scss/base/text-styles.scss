@@ -188,3 +188,16 @@
     @extend .style-description-small;
     color: $color-gray;
 }
+
+.style-with-button {
+    display: flex;
+    flex-direction: row;
+
+    &> *:first-child {
+        flex-grow: 1;
+    }
+
+    &> *:last-child {
+        flex-shrink: 0;
+    }
+}

@@ -1,6 +1,7 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="changeGroup">Groep wijzigen</ContextMenuItem>
+        <ContextMenuItem @click="editMember">Gegevens wijzigen</ContextMenuItem>
 
         <template v-if="member.details && member.details.parents.length > 0">
             <ContextMenuLine />
@@ -47,6 +48,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
+import EditMemberView from './edit/EditMemberView.vue';
 
 @Component({
     components: {
@@ -71,6 +73,16 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
 
     call(phone) {
         window.location.href = "tel://" + phone.replace(" ", "");
+    }
+
+
+    editMember() {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditMemberView, {
+                member: this.member,
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     openMail() {

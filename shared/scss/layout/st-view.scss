@@ -1,22 +1,7 @@
 @use '../base/variables' as *;
 @use '../base/text-styles' as *;
 
-.st-view {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    box-sizing: border-box;
-    padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
-
-    .st-toolbar {
-        margin-top: auto;
-    }
-
-    &.auto {
-        min-height: auto;
-    }
-
+.view {
     > main {
         > h1:first-child {
             padding-bottom: 20px;
@@ -47,6 +32,24 @@
             @extend .style-hr;
         }
     }
+}
+.st-view {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    box-sizing: border-box;
+    padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+
+    .st-toolbar {
+        margin-top: auto;
+    }
+
+    &.auto {
+        min-height: auto;
+    }
+
+    @extend .view;
 
     &.background {
         background: $color-white;

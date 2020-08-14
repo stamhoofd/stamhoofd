@@ -27,7 +27,6 @@ import { Component, Prop, Vue } from "vue-property-decorator";
     },
 })
 export default class SegmentedControl extends Vue {
-    public selectedIndex = 0;
     @Prop({ type: Array })
     public items!: any[];
     @Prop({ default: null })
@@ -36,12 +35,11 @@ export default class SegmentedControl extends Vue {
     @Prop()
     public value!: any;
 
-    mounted() {
-        this.selectedIndex = this.items.indexOf(this.value);
+    get selectedIndex() {
+        return this.items.indexOf(this.value);
     }
 
     selectItem(index) {
-        this.selectedIndex = index;
         this.$emit("input", this.items[index]);
     }
 }

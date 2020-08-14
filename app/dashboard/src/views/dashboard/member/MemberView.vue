@@ -56,7 +56,7 @@ import { MemberWithRegistrations, Gender } from '@stamhoofd/structures';
 export default class MemberView extends Mixins(NavigationMixin) {
     tabs = [MemberViewDetails, MemberViewPayments];
     tab = this.tabs[0];
-    tabLabels = ["Steekkaart", "Betaling"];
+    tabLabels = ["Gegevens", "Betaling"];
 
     @Prop()
     member!: MemberWithRegistrations;

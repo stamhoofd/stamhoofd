@@ -171,6 +171,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 this.loading = false;
                 (component.componentInstance() as any)?.pop()
 
+                plausible('signupAccountKeyError');
                 const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                     type: "error",
                     title: "Er ging iets mis", 

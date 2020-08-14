@@ -49,7 +49,7 @@
 
                 <div>
                     <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator"/>
-                    <EmailInput title="E-mailadres" v-model="email" v-if="age >= 18" :validator="validator"/>
+                    <EmailInput title="E-mailadres van dit lid" placeholder="Enkel van lid zelf" v-model="email" v-if="age >= 18" :validator="validator"/>
                     <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
                 </div>
             </div>
@@ -296,7 +296,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     async saveData(component: { loading: boolean; errorBox: ErrorBox | null }) {
-         if (!this.memberDetails) {
+        if (!this.memberDetails) {
             return false;
         }
 

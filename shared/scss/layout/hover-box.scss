@@ -1,0 +1,15 @@
+@media (hover: hover) {
+    .hover-box {
+        .hover-show {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+    }
+
+    .hover-box:hover {
+        .hover-show {
+            opacity: 1;
+        }
+    }
+
+}
