@@ -12,6 +12,23 @@ export class FamilyManager {
 
     constructor(members: MemberWithRegistrations[]) {
         this.members = members
+
+        if (members.length == 1) {
+            this.loadFamily(members[0].id).catch(e => {
+                console.error(e)
+            })
+        }
+    }
+
+    async loadFamily(id: string) {
+        const session = SessionManager.currentSession!
+        // Send the request
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/members/"+id+"/family",
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+        this.members = await MemberManager.decryptMembers(response.data)
     }
 
     async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<EncryptedMember[]> {
@@ -123,6 +140,26 @@ export class FamilyManager {
         }
 
         return Array.from(addresses.values())
+    }
+
+     /**
+     * List all unique parents of the already existing members
+     */
+    getParents(): Parent[] {
+        if (!this.members) {
+            return []
+        }
+        const parents = new Map<string, Parent>()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            for (const parent of member.details.parents) {
+                parents.set(parent.id, parent)
+            }
+        }
+
+        return Array.from(parents.values())
     }
 
     /**

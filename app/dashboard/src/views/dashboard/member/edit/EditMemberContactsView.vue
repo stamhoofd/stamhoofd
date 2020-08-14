@@ -198,11 +198,11 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         }
         
         // Read parents from membermanager
-        /*for (const parent of MemberManager.getParents()) {
-            if (!this.parents.find(p => p.parent.id == parent.id)) {
-                this.parents.push(new SelectableParent(parent, autoSelect))
+        for (const parent of this.familyManager.getParents()) {
+            if (!parents.find(p => p.parent.id == parent.id)) {
+                parents.push(new SelectableParent(parent, false))
             }
-        }*/
+        }
         this.cachedParents = parents
 
         return parents
