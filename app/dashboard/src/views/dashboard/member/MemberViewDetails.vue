@@ -64,8 +64,12 @@
                 <hr>
             </div>
 
-            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index">
-                <h2>{{ contact.title }}</h2>
+            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box">
+                <h2 class="style-with-button">
+                    <div>{{ contact.title }}</div>
+                    <div class="hover-show"><button class="button icon gray edit" @click="editContact(contact)"></button></div>
+                </h2>
+
                 <dl class="details-grid">
                     <dt>Naam</dt>
                     <dd>{{ contact.name }}</dd>
@@ -77,10 +81,14 @@
                 <hr v-if="index < member.details.emergencyContacts.length - 1">
             </div>
 
-            <template v-if="member.details.doctor">
+            <div v-if="member.details.doctor" class="hover-box">
                 <hr>
 
-                <h2>Huisarts</h2>
+                <h2 class="style-with-button">
+                    <div>Huisarts</div>
+                    <div class="hover-show"><button class="button icon gray edit" @click="editContact(member.details.doctor)"></button></div>
+                </h2>
+
                 <dl class="details-grid">
                     <dt>Naam</dt>
                     <dd>{{ member.details.doctor.name }}</dd>
@@ -88,7 +96,7 @@
                     <dt>Telefoonnummer</dt>
                     <dd>{{ member.details.doctor.phone }}</dd>
                 </dl>
-            </template>
+            </div>
         </div>
 
         <div v-if="member.groups.length > 0" class="hover-box">
@@ -134,11 +142,12 @@
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { TooltipDirective as Tooltip, ErrorBox } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority, Parent } from '@stamhoofd/structures';
+import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority, Parent, EmergencyContact } from '@stamhoofd/structures';
 import RecordDescriptionView from './records/RecordDescriptionView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import { FamilyManager } from '../../../classes/FamilyManager';
+import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 
 @Component({
     directives: { Tooltip },
@@ -178,6 +187,33 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             member: this.member,
             record
         }))
+    }
+
+    editContact(contact: EmergencyContact) {
+        const familyManager = new FamilyManager([this.member]);
+        const displayedComponent = new ComponentWithProperties(EditMemberEmergencyContactView, {
+            memberDetails: this.member.details,
+            familyManager,
+            contact,
+            handler: async (parent: Parent, component) => {
+                if (component.loading) {
+                    return;
+                }
+                component.loading = true;
+                component.errorBox = null;
+
+                try {
+                    await familyManager.patchAllMembersWith(this.member)
+                    component.loading = false
+                    component.pop({ force: true })
+                } catch (e) {
+                    component.errorBox = new ErrorBox(e)
+                    component.loading = false
+                }
+                
+            }
+        });
+        this.show(displayedComponent);
     }
 
     editParent(parent: Parent) {
