@@ -201,7 +201,7 @@ $header-height: 70px;
 }
 
 .steps-layout {
-    .boxed-view {
+    .padded-view, .boxed-view {
         padding-top: $header-height;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
@@ -209,10 +209,15 @@ $header-height: 70px;
 
         @media (min-width: 801px) {
             padding-top: $header-height + 10px;
+            padding-bottom: $header-height*2;
+        }
+    }
+
+    .boxed-view {
+        @media (min-width: 801px) {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-bottom: $header-height*2;
         }
 
         > .st-view {

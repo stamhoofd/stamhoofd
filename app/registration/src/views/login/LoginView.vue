@@ -1,5 +1,5 @@
 <template>
-    <div class="split-login-view">
+    <div class="split-login-view padded-view">
         <form class="login-view st-view auto" @submit.prevent="submit">
             <h1>Inloggen</h1>
             

@@ -1,5 +1,5 @@
 <template>
-    <div class="organization-selection-view">
+    <div class="organization-selection-view padded-view">
         <h1>Kies je vereniging</h1>
         <p>Selecteer de vereniging waar je wilt inloggen.</p>
         <input v-model="query" class="input search" placeholder="Zoek op postcode of naam">
