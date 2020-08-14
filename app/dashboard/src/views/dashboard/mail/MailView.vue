@@ -176,7 +176,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             if (!member.details) {
                 return []
             }
-            return member.details.parents.flatMap((parent) => {
+            const emails = member.details.parents.flatMap((parent) => {
                 if (parent.email) {
                     return [Recipient.create({
                         firstName: parent.firstName,
@@ -191,6 +191,19 @@ export default class MailView extends Mixins(NavigationMixin) {
                 }
                 return [];
             });
+            if (member.details.email) {
+                emails.push(Recipient.create({
+                    firstName: member.details.firstName,
+                    email: member.details.email,
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: member.details.firstName
+                        })
+                    ]
+                }))
+            }
+            return emails;
         });
     }
 
