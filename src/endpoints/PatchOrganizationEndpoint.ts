@@ -125,7 +125,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
             }
 
-            model.settings.patchOrPut(struct.settings)
+            if (struct.settings) {
+                model.settings.patchOrPut(struct.settings)
+            }
             
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
