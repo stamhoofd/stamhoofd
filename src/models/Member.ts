@@ -83,15 +83,22 @@ export class Member extends Model {
      * Fetch all members with their corresponding (valid) registrations and payment
      */
     static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
+        return (await this.getAllWithRegistrations(id))[0] ?? null
+    }
+
+     /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    static async getAllWithRegistrations(...ids: string[]): Promise<MemberWithRegistrations[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
         query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Member.table}\`.\`${Member.primary.name}\` = ?`
+        query += `where \`${Member.table}\`.\`${Member.primary.name}\` IN (?)`
 
-        const [results] = await Database.select(query, [id])
+        const [results] = await Database.select(query, [ids])
         const members: MemberWithRegistrations[] = []
 
         for (const row of results) {
@@ -120,8 +127,24 @@ export class Member extends Model {
             }
         }
 
-        return members[0] ?? null
+        return members
 
+    }
+
+    /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    static async getFamilyWithRegistrations(id: string): Promise<MemberWithRegistrations[]> {
+        let query = `SELECT l2.membersId as id from _members_users l1\n`;
+        query += `JOIN _members_users l2 on l2.usersId = l1.usersId \n`
+        query += `where l1.membersId = ? group by l2.membersId`
+
+        const [results] = await Database.select(query, [id])
+        const ids: string[] = []
+        for (const row of results) {
+            ids.push(row["l2"]["id"])
+        }
+        return await this.getAllWithRegistrations(...ids)
     }
 
     getStructureWithRegistrations(this: MemberWithRegistrations) {
