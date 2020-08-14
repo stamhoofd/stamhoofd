@@ -85,7 +85,8 @@ export class MemberManagerStatic {
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,
-                registrations: member.registrations
+                registrations: member.registrations,
+                firstName: member.firstName
             })
 
             decryptedMember.fillGroups(groups)

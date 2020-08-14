@@ -2,6 +2,7 @@
     <div class="st-view member-view">
         <STNavigationBar :title="member.details.name">
             <template #left>
+                <BackButton v-if="canPop" @click="pop"/>
                 <button v-if="hasPreviousMember" class="button text" @click="goBack">
                     <span class="icon arrow-left" />
                     <span>Vorige</span>
@@ -25,7 +26,7 @@
         <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" v-if="payments.length > 0" />
 
         <main>
-            <component :is="tab" :member="member" />
+            <component :is="tab" :member="member" :family-manager="familyManager"/>
         </main>
     </div>
 </template>
@@ -35,7 +36,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
+import { FemaleIcon, MaleIcon, SegmentedControl, BackButton } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MemberContextMenu from "./MemberContextMenu.vue";
@@ -43,6 +44,7 @@ import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import { MemberWithRegistrations, Gender } from '@stamhoofd/structures';
+import { FamilyManager } from '../../../classes/FamilyManager';
 
 @Component({
     components: {
@@ -51,6 +53,7 @@ import { MemberWithRegistrations, Gender } from '@stamhoofd/structures';
         SegmentedControl,
         MaleIcon,
         FemaleIcon,
+        BackButton
     },
 })
 export default class MemberView extends Mixins(NavigationMixin) {
@@ -61,10 +64,12 @@ export default class MemberView extends Mixins(NavigationMixin) {
     @Prop()
     member!: MemberWithRegistrations;
 
-    @Prop()
+    familyManager = new FamilyManager([this.member]);
+
+    @Prop({ default: null })
     getNextMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
-    @Prop()
+    @Prop({ default: null })
     getPreviousMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
     created() {
@@ -72,10 +77,16 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     get hasNextMember(): boolean {
+        if (!this.getNextMember) {
+            return false
+        }
         return !!this.getNextMember(this.member);
     }
 
     get hasPreviousMember(): boolean {
+        if (!this.getPreviousMember) {
+            return false
+        }
         return !!this.getPreviousMember(this.member);
     }
 

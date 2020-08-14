@@ -97,6 +97,24 @@
                     <dd>{{ member.details.doctor.phone }}</dd>
                 </dl>
             </div>
+
+            <div v-if="familyMembers.length > 0" class="hover-box">
+                <hr>
+
+                <h2 class="style-with-button">
+                    <div v-if="member.details.age <= 30 && familyMembers[0].details.age <= 30">Broers &amp; zussen</div>
+                    <div v-else>Familie</div>
+                </h2>
+
+                <STList>
+                    <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
+                        <h3 class="style-title-list">{{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}</h3>
+                        <p class="style-description">{{ familyMember.groups.map(g => g.settings.name).join(", ") }}</p>
+                        <span class="icon arrow-right-small gray" slot="right" />
+                    </STListItem>
+                </STList>
+            </div>
+
         </div>
 
         <div v-if="member.groups.length > 0" class="hover-box">
@@ -140,7 +158,7 @@
 
 <script lang="ts">
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip, ErrorBox } from "@stamhoofd/components";
+import { TooltipDirective as Tooltip, ErrorBox, STList, STListItem } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority, Parent, EmergencyContact } from '@stamhoofd/structures';
 import RecordDescriptionView from './records/RecordDescriptionView.vue';
@@ -148,17 +166,32 @@ import EditMemberView from './edit/EditMemberView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import { FamilyManager } from '../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
+import MemberView from './MemberView.vue';
 
 @Component({
+    components: {
+        STListItem,
+        STList
+    },
     directives: { Tooltip },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
     member!: MemberWithRegistrations;
 
+    @Prop()
+    familyManager!: FamilyManager;
+
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    gotoMember(member: MemberWithRegistrations) {
+        const component = new ComponentWithProperties(MemberView, {
+            member: member,
+        });
+        this.show(component);
     }
 
     canOpenRecord(record: Record) {
@@ -190,7 +223,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     editContact(contact: EmergencyContact) {
-        const familyManager = new FamilyManager([this.member]);
+        const familyManager = this.familyManager
         const displayedComponent = new ComponentWithProperties(EditMemberEmergencyContactView, {
             memberDetails: this.member.details,
             familyManager,
@@ -217,7 +250,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     editParent(parent: Parent) {
-        const familyManager = new FamilyManager([this.member]);
+        const familyManager = this.familyManager
         const displayedComponent = new ComponentWithProperties(EditMemberParentView, {
             memberDetails: this.member.details,
             familyManager,
@@ -259,6 +292,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         });
         this.show(displayedComponent);
     }
+
+    get familyMembers() {
+        return this.familyManager.members.filter(m => m.id != this.member.id)
+    }
 }
 </script>
 
@@ -279,6 +316,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     > div,
     > div > div {
+        --st-horizontal-padding: 0;
+        
         > h2 {
             @extend .style-title-2;
             margin: 20px 0;

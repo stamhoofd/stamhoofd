@@ -8,7 +8,7 @@ import { MemberManager } from './MemberManager';
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {
     /// Currently saved members
-    members: MemberWithRegistrations[] | null = null
+    members: MemberWithRegistrations[]
 
     constructor(members: MemberWithRegistrations[]) {
         this.members = members
