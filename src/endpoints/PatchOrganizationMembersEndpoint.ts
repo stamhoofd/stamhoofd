@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch } from "@stamhoofd/structures";
 
-import { Member } from '../models/Member';
+import { Member, MemberWithRegistrations } from '../models/Member';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
 type Params = {};
@@ -44,6 +44,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             })
         }
 
+        const members: MemberWithRegistrations[] = []
+
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             // not supported yet
@@ -55,7 +57,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
        // Loop all members one by one
         for (const patch of request.body.getPatches()) {
-            const member = await Member.getByID(patch.id)
+            const member = await Member.getWithRegistrations(patch.id)
             if (!member || member.organizationId != user.organizationId) {
                  throw new SimpleError({
                     code: "permission_denied",
@@ -91,9 +93,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Check if we should create a placeholder payment?
                 await registration.save()
             }
+
+            members.push(member)
         }
 
-        return new Response([]);
+        return new Response(members.map(m => m.getStructureWithRegistrations()));
     }
 
 }

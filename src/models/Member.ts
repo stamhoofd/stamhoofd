@@ -1,7 +1,8 @@
-import { column,Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
+import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
 export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[] }
 
@@ -77,6 +78,51 @@ export class Member extends Model {
     updatedAt: Date
 
     static registrations = new OneToManyRelation(Member, Registration, "registrations", "memberId")
+
+    /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
+        
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
+        query += `where \`${Member.table}\`.\`${Member.primary.name}\` = ?`
+
+        const [results] = await Database.select(query, [id])
+        const members: MemberWithRegistrations[] = []
+
+        for (const row of results) {
+            const foundMember = Member.fromRow(row[Member.table])
+            if (!foundMember) {
+                throw new Error("Expected member in every row")
+            }
+            const _f = foundMember.setManyRelation(Member.registrations, []) as MemberWithRegistrations
+
+            // Seach if we already got this member?
+            const existingMember = members.find(m => m.id == _f.id)
+
+            const member: MemberWithRegistrations = (existingMember ?? _f)
+            if (!existingMember) {
+                members.push(member)
+            }
+
+            // Check if we have a registration with a payment
+            const registration = Registration.fromRow(row[Registration.table])
+            if (registration) {
+                const payment = Payment.fromRow(row[Payment.table]) ?? null
+                // Every registration should have a valid payment (unless they are on the waiting list)
+
+                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
+                member.registrations.push(regWithPayment)
+            }
+        }
+
+        return members[0] ?? null
+
+    }
 
     getStructureWithRegistrations(this: MemberWithRegistrations) {
         return EncryptedMemberWithRegistrations.create(
