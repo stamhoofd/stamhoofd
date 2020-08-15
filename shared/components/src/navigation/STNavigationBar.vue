@@ -49,6 +49,33 @@ export default class STNavigationBar extends Vue {
         }
     }
 
+    addListener() {
+        if (this.scrollElement) {
+            return;
+        }
+        this.scrollElement = this.getScrollElement();
+        if (this.scrollElement === document.documentElement) {
+            window.addEventListener("scroll", this.onScroll, { passive: true });
+        } else {
+            this.scrollElement.addEventListener("scroll", this.onScroll, { passive: true });
+        }
+    }
+
+    mounted() {
+        if (this.sticky) {
+            this.addListener();
+        }
+    }
+
+    activated() {
+        // fix for element not yet in dom
+        window.setTimeout(() => {
+            if (this.sticky) {
+                this.addListener();
+            }
+        }, 500);
+    }
+
     deactivated() {
         if (!this.scrollElement) {
             return;
@@ -57,17 +84,6 @@ export default class STNavigationBar extends Vue {
             window.removeEventListener("scroll", this.onScroll);
         } else {
             this.scrollElement.removeEventListener("scroll", this.onScroll);
-        }
-    }
-
-    activated() {
-        if (this.sticky) {
-            this.scrollElement = this.getScrollElement();
-            if (this.scrollElement === document.documentElement) {
-                window.addEventListener("scroll", this.onScroll, { passive: true });
-            } else {
-                this.scrollElement.addEventListener("scroll", this.onScroll, { passive: true });
-            }
         }
     }
 
