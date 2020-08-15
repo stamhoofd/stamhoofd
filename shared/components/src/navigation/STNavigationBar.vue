@@ -26,7 +26,7 @@ export default class STNavigationBar extends Vue {
     sticky!: boolean;
 
     scrolled = false;
-    scrollElement!: HTMLElement;
+    scrollElement!: HTMLElement | null;
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
         if (!element) {
@@ -85,10 +85,11 @@ export default class STNavigationBar extends Vue {
         } else {
             this.scrollElement.removeEventListener("scroll", this.onScroll);
         }
+        this.scrollElement = null;
     }
 
     onScroll() {
-        const scroll = this.scrollElement.scrollTop;
+        const scroll = this.scrollElement!.scrollTop;
         if (scroll > 50) {
             this.scrolled = true;
         } else if (scroll < 15) {
