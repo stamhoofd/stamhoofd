@@ -93,7 +93,10 @@ export class FamilyManager {
         })
 
         this.setMembers(await MemberManager.decryptMembers(response.data))
-        return this.members?.find(m => m.id == decryptedMember.id) ?? null
+        const m = this.members?.find(m => m.id == decryptedMember.id) ?? null
+
+        MemberManager.callListeners("created", m)
+        return m;
     }
 
     async patchMemberRegistrations(member: MemberWithRegistrations, registrations: PatchableArrayAutoEncoder<Registration>) {

@@ -6,10 +6,31 @@ import { Keychain, SessionManager } from '@stamhoofd/networking'
 import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
+export type MemberChangeEvent = "changedGroup" | "deleted" | "created"
+export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
+
+
 /**
  * Controls the fetching and decrypting of members
  */
 export class MemberManagerStatic {
+    protected listeners: Map<any, MembersChangedListener> = new Map()
+
+    addListener(owner: any, listener: MembersChangedListener) {
+        this.listeners.set(owner, listener)
+    }
+
+    removeListener(owner: any) {
+        this.listeners.delete(owner)
+    }
+
+     callListeners(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
+        for (const listener of this.listeners.values()) {
+            listener(type, member)
+        }
+    }
+
+
     async decryptMembersWithoutRegistrations(data: EncryptedMember[]) {
         // Save keychain items
         const members: Member[] = []
@@ -139,6 +160,8 @@ export class MemberManagerStatic {
             body: patchArray,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
+
+        this.callListeners("deleted", member)
     }
 }
 

@@ -149,7 +149,7 @@ import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import { MemberWithRegistrations, Group, Organization, WaitingListType, EncryptedMemberWithRegistrationsPatch, Registration, Member } from '@stamhoofd/structures';
-import { MemberManager } from '../../../classes/MemberManager';
+import { MemberManager, MemberChangeEvent } from '../../../classes/MemberManager';
 import { Formatter } from '@stamhoofd/utility';
 import EditMemberView from '../member/edit/EditMemberView.vue';
 
@@ -198,6 +198,20 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     mounted() {
         this.reload();
+    }
+
+    onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
+        if (type == "changedGroup" || type == "deleted" || type == "created") {
+            this.reload()
+        }
+    }
+
+    activated() {
+        MemberManager.addListener(this, this.onUpdateMember)
+    }
+
+    deactivated() {
+        MemberManager.removeListener(this)
     }
 
     reload() {
