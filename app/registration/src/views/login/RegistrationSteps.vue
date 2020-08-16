@@ -9,10 +9,13 @@
             <BackButton v-else @click="popNav" />
         </template>
         <template slot="right">
-            <button class="button text limit-space" @click="returnToSite" v-if="organization.website">
+            <button class="button text limit-space" @click="returnToSite" v-if="isLoggedIn">
                 <span class="icon logout"/>
-                <span v-if="isLoggedIn">Uitloggen</span>
-                <span v-else>Terug naar website</span>
+                <span >Uitloggen</span>
+            </button>
+            <button class="button text limit-space" @click="returnToSite" v-else-if="organization.website">
+                <span class="icon logout"/>
+                <span>Terug naar website</span>
             </button>
         </template>
     </Steps>
