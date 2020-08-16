@@ -64,6 +64,12 @@ export default class ToastView extends Mixins(NavigationMixin) {
     cursor: pointer;
     padding: 15px 30px;
     width: 350px;
+    max-width: 100%;
+
+    @media (max-width: 400px) {
+        padding: 15px 20px;
+    }
+
     box-sizing: border-box;
     @extend .style-input-shadow;
     background: $color-primary-light;

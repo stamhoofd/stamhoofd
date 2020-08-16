@@ -86,11 +86,19 @@ export default class ToastBox extends Vue {
     overflow: visible;
     padding: 10px 20px;
     pointer-events:none;   
-    width: 350px;
+    width: 350px + 40px;
+
+    @media (max-width: 400px) {
+        padding: 10px 15px;
+        width: 350px + 30px;
+    }
+
+    max-width: 100vw;
+    box-sizing: border-box;
     transition: transform 0.35s;
 
     &.withOffset {
-        transform: translateY(-70px);
+        transform: translateY(-60px);
     }
 
     > div > div {
