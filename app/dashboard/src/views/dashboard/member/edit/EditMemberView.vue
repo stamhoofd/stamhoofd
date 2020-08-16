@@ -65,6 +65,9 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ default: null })
+    initialFamily!: FamilyManager | null;
+
+    @Prop({ default: null })
     member!: MemberWithRegistrations | null;
 
     @Prop({ default: null })
@@ -72,7 +75,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     tab: any = this.tabs[this.initialTabIndex ?? 0];
 
-    familyManager = new FamilyManager(this.member ? [this.member] : []);
+    familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
     memberDetails = this.member ? this.member.details : null// do not link with member, only link on save!
 

@@ -28,7 +28,7 @@ export class FamilyManager {
             path: "/organization/members/"+id+"/family",
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
-        this.members = await MemberManager.decryptMembers(response.data)
+        this.setMembers(await MemberManager.decryptMembers(response.data))
     }
 
     async getEncryptedMembers(members: MemberWithRegistrations[], withRegistrations = false): Promise<EncryptedMemberWithRegistrations[]> {
@@ -92,7 +92,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
-        this.members = await MemberManager.decryptMembers(response.data)
+        this.setMembers(await MemberManager.decryptMembers(response.data))
         return this.members?.find(m => m.id == decryptedMember.id) ?? null
     }
 
@@ -117,10 +117,11 @@ export class FamilyManager {
 
         const i = this.members.findIndex(_m => _m.id === m.id)
         if (i != -1) {
-            this.members.splice(i, 1, m)
+            this.members[i].copyFrom(m)
         }
 
-        return m
+        member.copyFrom(m)
+        return member
     }
 
     async patchAllMembersWith(member: MemberWithRegistrations) {
@@ -152,7 +153,25 @@ export class FamilyManager {
             body: patchArray,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
-        this.members = await MemberManager.decryptMembers(response.data)
+
+        this.setMembers(await MemberManager.decryptMembers(response.data))
+    }
+
+    setMembers(newMembers: MemberWithRegistrations[]) {
+        const s: MemberWithRegistrations[] = []
+
+        for (const member of newMembers) {
+            const m = this.members.find(_m => _m.id == member.id)
+
+            if (m) {
+                m.copyFrom(member)
+                s.push(m)
+            } else {
+                s.push(member)
+            }
+        }
+
+        this.members = s
     }
 
     updateAddress(oldValue: Address, newValue: Address) {

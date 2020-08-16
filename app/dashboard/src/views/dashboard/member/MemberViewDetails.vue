@@ -12,7 +12,10 @@
 
                     <template v-if="member.groups.length > 0">
                         <dt>Groep</dt>
-                        <dd>{{ member.groups.map(g => g.settings.name).join(", ") }}</dd>
+                        <dd class="hover-box">
+                            {{ member.groups.map(g => g.settings.name).join(", ") }}
+                            <button class="hover-show button icon gray edit" @click="editGroup()"></button>
+                        </dd>
                     </template>
 
                     <template v-if="member.waitingGroups.length > 0">
@@ -169,6 +172,7 @@ import EditMemberParentView from './edit/EditMemberParentView.vue';
 import { FamilyManager } from '../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import MemberView from './MemberView.vue';
+import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 
 @Component({
     components: {
@@ -282,7 +286,17 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     editMember() {
         const displayedComponent = new ComponentWithProperties(EditMemberView, {
-            member: this.member
+            member: this.member,
+            initialFamily: this.familyManager
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
+    }
+
+    editGroup() {
+        const displayedComponent = new ComponentWithProperties(EditMemberGroupView, {
+            member: this.member,
+            memberDetails: this.member.details,
+            familyManager: this.familyManager
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
     }
@@ -290,6 +304,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     editMemberRecords() {
         const displayedComponent = new ComponentWithProperties(EditMemberView, {
             member: this.member,
+            initialFamily: this.familyManager,
             initialTabIndex: 2
         }).setDisplayStyle("popup");
         this.present(displayedComponent);

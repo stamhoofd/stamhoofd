@@ -10,6 +10,12 @@
         .hover-show {
             opacity: 1;
         }
+
+        .hover-box:not(:hover) {
+            .hover-show {
+                opacity: 0;
+            }
+        }
     }
 
 }
