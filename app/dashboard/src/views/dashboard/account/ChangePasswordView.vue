@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ErrorBox, Validator, STErrorsDefault, Toast } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
@@ -92,6 +92,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
             this.dismiss({ force: true });
+            HistoryManager.setUrl("/")
             new Toast('Jouw nieuwe wachtwoord is opgeslagen', "success").show()
         } catch (e) {
             this.loading = false;

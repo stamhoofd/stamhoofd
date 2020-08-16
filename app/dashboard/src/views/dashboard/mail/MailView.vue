@@ -79,7 +79,7 @@
 
 <script lang="ts">
 import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox, STListItem, STList } from "@stamhoofd/components";
+import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox, STListItem, STList, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -302,6 +302,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 body: emailRequest,
             })
             this.dismiss({ force: true })
+            new Toast("Jouw e-mail is verstuurd", "success").show()
         } catch (e) {
             console.error(e)
         }
