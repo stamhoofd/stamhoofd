@@ -65,6 +65,10 @@ export default class SegmentedControl extends Vue {
     overflow: hidden;
     @extend .style-input;
 
+    @media (max-width: 400px) {
+        font-size: 14px;
+    }
+
     & > div {
         flex-grow: 1;
         height: 34px;
