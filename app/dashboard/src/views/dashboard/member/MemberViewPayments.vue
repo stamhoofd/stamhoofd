@@ -48,6 +48,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({ 
     components: { 
@@ -103,6 +104,7 @@ export default class MemberViewPayments extends Vue {
                     payment.status = PaymentStatus.Succeeded
                     // todo: improve this for related payments
                 }
+                MemberManager.callListeners("payment", this.member)
             } finally {
                 this.loading = false
             }

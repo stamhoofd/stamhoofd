@@ -6,7 +6,7 @@ import { Keychain, SessionManager } from '@stamhoofd/networking'
 import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
-export type MemberChangeEvent = "changedGroup" | "deleted" | "created"
+export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
 export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
 
 
