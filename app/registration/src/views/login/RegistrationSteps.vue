@@ -14,7 +14,7 @@
                 <span >Uitloggen</span>
             </button>
             <button class="button text limit-space" @click="returnToSite" v-else-if="organization.website">
-                <span class="icon logout"/>
+                <span class="icon external"/>
                 <span>Terug naar website</span>
             </button>
         </template>

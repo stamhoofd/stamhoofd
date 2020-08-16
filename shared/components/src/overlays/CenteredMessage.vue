@@ -14,7 +14,8 @@
 
                 <LoadingButton v-if="confirmButton" :loading="loading">
                     <button  class="button full" :class="{ destructive: confirmType == 'destructive', primary: confirmType != 'destructive' }" @click="confirm">
-                        {{ confirmButton }}
+                        <span class="icon trash" />
+                        <span>{{ confirmButton }}</span>
                     </button>
                 </LoadingButton>
 

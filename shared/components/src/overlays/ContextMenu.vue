@@ -127,11 +127,26 @@ export default class ContextMenu extends Vue {
 
     .context-menu-item {
         @extend .style-context-menu-item;
-        padding: 10px 20px;
         cursor: pointer;
         user-select: none;
         touch-action: manipulation;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+        > .middle {
+            padding: 10px 20px;
+        }
+
+        > .right {
+            &:empty {
+                display: none;
+            }
+            margin-left: auto;
+            flex-shrink: 0;
+            padding-right: 20px;
+        }
 
         &:hover {
             background: $color-primary;

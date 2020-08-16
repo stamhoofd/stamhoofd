@@ -1,6 +1,11 @@
 <template>
     <div class="context-menu-item" :class="{ clicked: clicked }" @click="onClick">
-        <slot />
+        <div class="middle">
+            <slot />
+        </div>
+        <div class="right">
+            <slot name="right" />
+        </div>
     </div>
 </template>
 

@@ -1,40 +1,55 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem @click="changeGroup">Groep wijzigen</ContextMenuItem>
-        <ContextMenuItem @click="editMember">Gegevens wijzigen</ContextMenuItem>
+        <ContextMenuItem @click="editMember">
+            Wijzig gegevens
+            <span class="icon edit" slot="right"/>
+        </ContextMenuItem>
+
+        <ContextMenuItem @click="changeGroup">
+            Wijzig groep
+            <span class="icon sync" slot="right"/>
+        </ContextMenuItem>
 
         <template v-if="member.details && member.details.parents.length > 0">
             <ContextMenuLine />
             <ContextMenuItem v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
-                {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }}) bellen
+                Bel {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }})
             </ContextMenuItem>
             <ContextMenuItem @click="openSMS('parents')">
                 Ouders SMS'en
             </ContextMenuItem>
             <ContextMenuItem @click="openMail">
-                Ouders mailen
+                Ouders e-mailen
             </ContextMenuItem>
         </template>
         <template v-else-if="member.details && member.details.emergencyContacts.length > 0">
             <ContextMenuLine />
             <ContextMenuItem v-for="contact in member.details.emergencyContacts" :key="contact.id" @click="call(contact.phone)">
-                {{ contact.name }} (noodcontact) bellen
+                Bel {{ contact.name }} (noodcontact)
             </ContextMenuItem>
         </template>
 
         <template v-if="member.details && member.details.phone">
             <ContextMenuLine />
             <ContextMenuItem @click="call(member.details.phone)">
-                {{ member.details.firstName }} bellen
+                Bel {{ member.details.firstName }}
             </ContextMenuItem>
             <ContextMenuItem @click="openSMS('members')">
-                {{ member.details.firstName }} SMS'en
+                SMS {{ member.details.firstName }}
             </ContextMenuItem>
         </template>
 
         <ContextMenuLine />
-        <ContextMenuItem @click="deleteData">Verwijderen</ContextMenuItem>
-        <ContextMenuItem @click="deleteRegistration">Uitschrijven</ContextMenuItem>
+
+        <ContextMenuItem @click="deleteRegistration">
+            Uitschrijven
+            <span class="icon unregister" slot="right"/>
+        </ContextMenuItem>
+        <ContextMenuItem @click="deleteData">
+            <span class="icon trash" slot="right"/>
+            Verwijderen
+        </ContextMenuItem>
+
     </ContextMenu>
 </template>
 

@@ -14,7 +14,7 @@
                         <dt>Groep</dt>
                         <dd class="hover-box">
                             {{ member.groups.map(g => g.settings.name).join(", ") }}
-                            <button class="hover-show button icon gray edit" @click="editGroup()"></button>
+                            <button class="hover-show button icon gray sync" @click="editGroup()"></button>
                         </dd>
                     </template>
 

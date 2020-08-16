@@ -38,7 +38,7 @@
     }
 
     &.help:after {
-        font-icon: url('@stamhoofd/assets/images/icons/gray/help.svg');
+        font-icon: url('@stamhoofd/assets/images/icons/help.svg');
     }
 
     &.arrow-left:after {
@@ -171,6 +171,14 @@
 
     &.upload:after {
         font-icon: url(@stamhoofd/assets/images/icons/upload.svg);
+    }
+
+    &.external:after {
+        font-icon: url(@stamhoofd/assets/images/icons/external.svg);
+    }
+
+    &.unregister:after {
+        font-icon: url(@stamhoofd/assets/images/icons/unregister.svg);
     }
 }
 
