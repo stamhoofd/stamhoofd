@@ -76,12 +76,6 @@
             }
         }
 
-        .lock {
-            background: url(~@stamhoofd/assets/images/icons/white/lock.svg) no-repeat center center;
-            width: 40px;
-            align-self: stretch;
-        }
-
         &:disabled {
             color: $color-gray-light;
             background: $color-white-shade;

@@ -24,6 +24,8 @@
 
             <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
+            <button class="button text" @click="openChangePassword">Wachtwoord wijzigen</button>
+
         </main>
 
         <STToolbar>
@@ -50,6 +52,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DomainSettingsView from './DomainSettingsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
+import ChangePasswordView from './ChangePasswordView.vue';
 
 @Component({
     components: {
@@ -147,6 +150,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
             return true;
         }
         return false;
+    }
+
+    openChangePassword() {
+        this.present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle("sheet"))
     }
 
 }

@@ -219,6 +219,7 @@ export class LoginHelper {
         }
 
         const patch = NewUser.patch({
+            id: session.user!.id,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
@@ -233,7 +234,7 @@ export class LoginHelper {
             decoder: User
         })
 
-        session.updateData()
+        session.setEncryptionKey(keys.authEncryptionSecretKey)
     }
 
     static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {

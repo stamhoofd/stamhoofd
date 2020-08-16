@@ -395,9 +395,9 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     addUserPatch(patch: PartialWithoutMethods<PatchType<User>>) {
         if (!this.patchUser) {
-            this.patchUser = User.patch(patch)
+            this.patchUser = User.patch({ id: this.editUser!.id }).patch(patch)
         } else {
-            this.patchUser = this.patchUser.patch(User.patchType().create(patch))
+            this.patchUser = this.patchUser.patch(patch)
         }
     }
 
