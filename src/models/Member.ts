@@ -90,6 +90,9 @@ export class Member extends Model {
      * Fetch all members with their corresponding (valid) registrations and payment
      */
     static async getAllWithRegistrations(...ids: string[]): Promise<MemberWithRegistrations[]> {
+        if (ids.length == 0) {
+            return []
+        }
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
@@ -144,6 +147,12 @@ export class Member extends Model {
         for (const row of results) {
             ids.push(row["l2"]["id"])
         }
+
+        if (!ids.includes(id)) {
+            // Member has no users
+            ids.push(id)
+        }
+        
         return await this.getAllWithRegistrations(...ids)
     }
 
