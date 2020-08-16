@@ -56,7 +56,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, CenteredMessage } from "@stamhoofd/components";
+import { ContextMenu, CenteredMessage, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -131,7 +131,7 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
             confirmAction: async () => {
                 // todo
                 await MemberManager.deleteMember(this.member)
-
+                new Toast(this.member.firstName+' is verwijderd', "success").show()
             },
             closeButton: "Annuleren", 
         }).setDisplayStyle("overlay"))

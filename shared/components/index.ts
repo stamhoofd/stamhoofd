@@ -38,6 +38,9 @@ export { default as Tooltip } from "./src/overlays/Tooltip.vue"
 export { default as ContextMenu } from "./src/overlays/ContextMenu.vue"
 export { default as ContextMenuItem } from "./src/overlays/ContextMenuItem.vue"
 export { default as ContextMenuLine } from "./src/overlays/ContextMenuLine.vue"
+export { default as ToastBox } from "./src/overlays/ToastBox.vue"
+export { default as ToastView } from "./src/overlays/ToastView.vue"
+export * from "./src/overlays/Toast"
 
 // Directives
 export { default as TooltipDirective } from "./src/directives/Tooltip"

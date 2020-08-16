@@ -35,7 +35,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput, BackButton, LoadingButton } from "@stamhoofd/components"
+import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput, BackButton, LoadingButton, Toast } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, ParentType, ParentTypeHelper, Group } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
@@ -135,7 +135,8 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                 }
 
                 await this.familyManager.patchMemberRegistrations(this.member, patchRegistrations);
-            } else (
+                new Toast("De leeftijdsgroep van "+this.memberDetails.firstName+" is gewijzigd", "success").show()
+            } else {
                 await this.familyManager.addMember(this.memberDetails, [
                     Registration.create({
                         groupId: this.selectedGroup.id,
@@ -145,7 +146,8 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         registeredAt: new Date()
                     })
                 ])
-            )
+                new Toast(this.memberDetails.firstName+' is toegevoegd', "success").show()
+            }
           
             this.errorBox = null
             this.loading = false;

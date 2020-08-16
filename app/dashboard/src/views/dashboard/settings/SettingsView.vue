@@ -141,7 +141,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput } from "@stamhoofd/components";
+import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -322,9 +322,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         this.saving = true
 
-        await OrganizationManager.patch(this.organizationPatch)
+        try {
+            await OrganizationManager.patch(this.organizationPatch)
+            new Toast('De wijzigingen zijn opgeslagen', "success").setWithOffset().show()
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
         this.saving = false
-        //this.pop({ force: true })
     }
 
     setupDomain() {

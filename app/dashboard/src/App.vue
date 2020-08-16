@@ -1,13 +1,14 @@
 <template>
     <div id="app">
         <ModalStackComponent ref="modalStack" :root="root" />
+        <ToastBox />
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, NavigationController } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "vue-property-decorator";
-import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
+import { AuthenticatedView, PromiseView, ToastBox } from '@stamhoofd/components';
 import DashboardMenu from './views/dashboard/DashboardMenu.vue'
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -29,7 +30,8 @@ function asyncComponent(component: () => Promise<any>, properties = {}) {
 //smoothscroll.polyfill();
 @Component({
     components: {
-        ModalStackComponent
+        ModalStackComponent,
+        ToastBox
     },
 })
 export default class App extends Vue {
