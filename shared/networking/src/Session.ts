@@ -239,6 +239,10 @@ export class Session implements RequestMiddleware {
             })
     }
 
+    getUserPrivateKey() {
+        return this.userPrivateKey
+    }
+
     async updateKeys() {
         if (!this.user) {
             throw new Error("Can't update keys if user is not set")

@@ -31,8 +31,8 @@
         <STFloatingFooter>
             <LoadingButton :loading="loading">
                 <button class="button primary full">
-                    <span class="lock" />
-                    Account aanmaken
+                    <span class="icon lock" />
+                    <span>Account aanmaken</span>
                 </button>
             </LoadingButton>
         </STFloatingFooter>

@@ -1,5 +1,5 @@
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization } from '@stamhoofd/structures';
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User } from '@stamhoofd/structures';
+import { Decoder, ObjectData, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
 import { Session } from './Session';
@@ -205,6 +205,47 @@ export class LoginHelper {
         Keychain.addItem(item)
         session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
         SessionManager.setCurrentSession(session)
+    }
+
+    static async changePassword(session: Session, password: string) {
+        const keys = await this.createKeys(password)
+
+        const userPrivateKey = session.getUserPrivateKey();
+        if (!userPrivateKey) {
+            throw new SimpleError({
+                code: "missing_key",
+                message: "Je kan je wachtwoord niet veranderen als je geen toegang hebt tot je encryptie-sleutel."
+            })
+        }
+
+        const patch = NewUser.patch({
+            publicAuthSignKey: keys.authSignKeyPair.publicKey,
+            authSignKeyConstants: keys.authSignKeyConstants,
+            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
+            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, keys.authEncryptionSecretKey)
+        })
+
+        // Do netwowrk request to create organization
+        const response = await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/user/"+session.user!.id,
+            body: patch,
+            decoder: User
+        })
+
+        session.updateData()
+    }
+
+    static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {
+        // Do netwowrk request to create organization
+        const response = await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/user/"+session.user!.id,
+            body: patch,
+            decoder: User
+        })
+
+        session.updateData()
     }
 
     static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {

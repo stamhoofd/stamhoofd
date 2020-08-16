@@ -59,6 +59,11 @@
                 <span class="icon sync"/>
                 <span>Leden importeren</span>
             </button>
+
+            <button class="menu-button button heading" @click="manageAccount" :class="{ selected: currentlySelected == 'manage-account'}">
+                <span class="icon user"/>
+                <span>Mijn account</span>
+            </button>
         </div>
         <hr v-if="fullAccess">
         <div class="">
@@ -85,6 +90,7 @@ import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { CenteredMessage } from '@stamhoofd/components';
+import AccountSettingsView from './account/AccountSettingsView.vue';
 
 
 
@@ -154,6 +160,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageAdmins() {
         this.currentlySelected = "manage-admins"
         this.showDetail(new ComponentWithProperties(AdminsView, {}));
+    }
+
+    manageAccount() {
+        this.currentlySelected = "manage-account"
+        this.showDetail(new ComponentWithProperties(AccountSettingsView, {}));
     }
 
     logout() {
