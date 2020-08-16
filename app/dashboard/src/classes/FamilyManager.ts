@@ -124,6 +124,8 @@ export class FamilyManager {
         }
 
         member.copyFrom(m)
+
+        MemberManager.callListeners("changedGroup", member)
         return member
     }
 
