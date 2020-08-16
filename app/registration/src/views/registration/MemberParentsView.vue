@@ -94,29 +94,23 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     parents: SelectableParent[] = []
 
     editParent(parent: Parent) {
-        if (this.navigationController) {
-            this.navigationController.animationType = "modal"
-        }
-        this.show(new ComponentWithProperties(ParentView, {
+        this.present(new ComponentWithProperties(ParentView, {
             memberDetails: this.memberDetails,
             parent,
             handler: (parent: Parent, component: ParentView) => {
                 component.pop({ force: true })
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     addParent() {
-        if (this.navigationController) {
-            this.navigationController.animationType = "modal"
-        }
-        this.show(new ComponentWithProperties(ParentView, {
+        this.present(new ComponentWithProperties(ParentView, {
             memberDetails: this.memberDetails,
             handler: (parent: Parent, component: ParentView) => {
                 this.memberDetails.parents.push(parent)
                 component.pop({ force: true })
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     mounted() {
@@ -146,10 +140,6 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     }
 
     activated() {
-        if (this.navigationController) {
-            this.navigationController.animationType = "default"
-        }
-
         // Only check for new parents!
         for (const parent of this.memberDetails.parents) {
             if (!this.parents.find(p => p.parent.id == parent.id)) {

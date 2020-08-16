@@ -192,8 +192,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     gotoMember(member: MemberWithRegistrations) {
         const component = new ComponentWithProperties(MemberView, {
             member: member,
-        });
-        this.show(component);
+        }).setDisplayStyle("popup");
+        this.present(component);
     }
 
     canOpenRecord(record: Record) {
@@ -247,8 +247,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                 }
                 
             }
-        });
-        this.show(displayedComponent);
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     editParent(parent: Parent) {
@@ -276,23 +276,23 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                 }
                 
             }
-        });
-        this.show(displayedComponent);
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     editMember() {
         const displayedComponent = new ComponentWithProperties(EditMemberView, {
             member: this.member
-        });
-        this.show(displayedComponent);
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     editMemberRecords() {
         const displayedComponent = new ComponentWithProperties(EditMemberView, {
             member: this.member,
             initialTabIndex: 2
-        });
-        this.show(displayedComponent);
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     get familyMembers() {

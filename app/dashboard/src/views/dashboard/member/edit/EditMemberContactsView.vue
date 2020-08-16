@@ -116,10 +116,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     cachedParents: SelectableParent[] | null = null
 
     editParent(parent: Parent) {
-        if (this.navigationController) {
-            //this.navigationController.animationType = "modal"
-        }
-        this.show(new ComponentWithProperties(EditMemberParentView, {
+        this.present(new ComponentWithProperties(EditMemberParentView, {
             memberDetails: this.memberDetails,
             familyManager: this.familyManager,
             parent,
@@ -133,14 +130,11 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
                 component.pop({ force: true })
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     editEmergencyContact() {
-        if (this.navigationController) {
-            //this.navigationController.animationType = "modal"
-        }
-        this.show(new ComponentWithProperties(EditMemberEmergencyContactView, {
+        this.present(new ComponentWithProperties(EditMemberEmergencyContactView, {
             familyManager: this.familyManager,
             contact: this.memberDetails?.emergencyContacts[0] ?? null,
             handler: (contact: EmergencyContact, component: EditMemberEmergencyContactView) => {
@@ -154,14 +148,11 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
                 component.pop({ force: true })
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     addParent() {
-        if (this.navigationController) {
-            //this.navigationController.animationType = "modal"
-        }
-        this.show(new ComponentWithProperties(EditMemberParentView, {
+        this.present(new ComponentWithProperties(EditMemberParentView, {
             memberDetails: this.memberDetails,
             familyManager: this.familyManager,
             handler: (parent: Parent, component: EditMemberParentView) => {
@@ -174,7 +165,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
                 this.cachedParents = null
                 component.pop({ force: true })
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     get emergencyContacts(): EmergencyContact[]  {
@@ -221,12 +212,6 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
             return []
         })
         this.$emit("change", memberDetails)
-    }
-
-    activated() {
-        if (this.navigationController) {
-            this.navigationController.animationType = "default"
-        }
     }
 
     get selectionCount() {
