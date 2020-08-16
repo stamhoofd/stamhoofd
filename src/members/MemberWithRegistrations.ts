@@ -351,4 +351,20 @@ export class MemberWithRegistrations extends Member {
         return selectableGroups
 
     }
+
+    /**
+     * Instead of listening for changes to a member, editing components can push changes to existing instances
+     */
+    copyFrom(member: MemberWithRegistrations) {
+        this.firstName = member.firstName
+        this.details = member.details
+        this.activeRegistrations = member.activeRegistrations
+        this.waitingGroups = member.waitingGroups
+        this.acceptedWaitingGroups = member.acceptedWaitingGroups
+        
+        if (member.groups !== this.groups) {
+            this.groups.splice(0, this.groups.length, ...member.groups)
+        }
+        this.registrations = member.registrations
+    }
 }

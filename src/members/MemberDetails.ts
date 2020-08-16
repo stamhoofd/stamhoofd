@@ -70,7 +70,7 @@ export class MemberDetails extends AutoEncoder {
     birthDay: Date = new Date("1970-01-01");
 
     @field({ decoder: Address, nullable: true })
-    address: Address | null;
+    address: Address | null = null;
 
     @field({ decoder: new ArrayDecoder(Parent)})
     parents: Parent[] = [];

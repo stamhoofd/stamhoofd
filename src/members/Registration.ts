@@ -1,9 +1,10 @@
 import { AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 
 export class Registration extends AutoEncoder {
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
     id: string
 
     /// You need to look up the group yourself in the organization
@@ -21,10 +22,10 @@ export class Registration extends AutoEncoder {
     deactivatedAt: Date | null = null
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date = new Date()
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date
+    updatedAt: Date = new Date()
 
     @field({ decoder: BooleanDecoder, version: 16 })
     waitingList = false
