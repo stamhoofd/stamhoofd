@@ -33,26 +33,26 @@
                         </div>
                     </STInputBox>
 
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" />
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="E-mailadres van ouder" />
+                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" :required="false" />
+                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="E-mailadres van ouder" :required="false" />
                 </div>
 
                 <div>
                     <STInputBox v-if="availableAddresses.length > 0" title="Kies een adres">
                         <STList>
                             <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
-                                <Radio v-model="address" slot="left" :value="_address"/>
+                                <Radio v-model="selectAddress" slot="left" :value="_address"/>
                                 {{ _address.street }} {{ _address.number }}<br>
                                 {{ _address.postalCode }} {{ _address.city }}
                                 <button slot="right" class="button icon gray edit" @click.stop="doEditAddress(_address)"/>
                             </STListItem>
                             <STListItem element-name="label" :selectable="true" class="left-center">
-                                <Radio v-model="address" slot="left" :value="customAddress"/>
+                                <Radio v-model="selectAddress" slot="left" :value="customAddress"/>
                                 Een ander adres ingeven
                             </STListItem>
                         </STList>
                     </STInputBox>
-                    <AddressInput :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator"/>
+                    <AddressInput :title="!editingAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator" :required="!!editingAddress" />
                 </div>
             </div>
         </main>
@@ -116,7 +116,7 @@ export default class EditMemberParentView extends Mixins(NavigationMixin) {
 
     address: Address | null = null
     customAddress: Address | null = null
-    editingAddress = false
+    editingAddress: Address | null = null
 
     loading = false
 
@@ -157,27 +157,44 @@ export default class EditMemberParentView extends Mixins(NavigationMixin) {
         return addresses
     }
 
+    get selectAddress() {
+        if (this.editingAddress) {
+            return this.editingAddress
+        }
+        return this.address
+    }
+
+    set selectAddress(address: Address | null) {
+        this.address = address
+        this.stopEditAddress()
+    }
+
     get editAddress() {
         return this.address
     }
 
     set editAddress(address: Address | null) {
-        if (this.address && address) {
-            this.familyManager.updateAddress(this.address, address)
+        if (this.editingAddress && address) {
+            this.familyManager.updateAddress(this.editingAddress, address)
             if (this.memberDetails) {
-                this.memberDetails.updateAddress(this.address, address)
+                this.memberDetails.updateAddress(this.editingAddress, address)
             }
+            this.editingAddress = address
         } else {
             if (this.address === this.customAddress) {
                 this.customAddress = address
-            }
+            } 
         }
         this.address = address
     }
 
+    stopEditAddress() {
+        this.editingAddress = null
+    }
+
     doEditAddress(address: Address) {
         this.$set(this, "address", address)
-        this.editingAddress = true
+        this.editingAddress = address
     }
 
     async goNext() {

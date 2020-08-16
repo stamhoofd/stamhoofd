@@ -49,6 +49,8 @@ import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
 import EditMemberView from './edit/EditMemberView.vue';
+import EditMemberGroupView from './edit/EditMemberGroupView.vue';
+import { FamilyManager } from '../../../classes/FamilyManager';
 
 @Component({
     components: {
@@ -108,7 +110,16 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     }
 
     changeGroup() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditMemberGroupView, {
+                member: this.member,
+                memberDetails: this.member.details,
+                familyManager: new FamilyManager([this.member])
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+
+        //this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
     }
 }
 </script>

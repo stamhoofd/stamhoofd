@@ -54,11 +54,13 @@
                         <dd>{{ parent.email }}</dd>
                     </template>
 
-                    <dt>Adres</dt>
-                    <dd>
-                        {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
-                        {{ parent.address.city }}
-                    </dd>
+                    <template v-if="parent.address">
+                        <dt>Adres</dt>
+                        <dd>
+                            {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
+                            {{ parent.address.city }}
+                        </dd>
+                    </template>
                 </dl>
 
                 <hr>

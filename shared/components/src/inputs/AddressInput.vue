@@ -50,6 +50,9 @@ export default class SignupGeneralView extends Vue {
     @Prop({ default: null })
     value: Address | null
 
+    @Prop({ default: false })
+    required: boolean
+
     addressLine1 = ""
     city = ""
     postalCode = ""
@@ -98,6 +101,15 @@ export default class SignupGeneralView extends Vue {
     }
 
     isValid(): boolean {
+        if (!this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
+            this.errorBox = null
+
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
+            return true
+        }
+
         let address: Address
 
         try {

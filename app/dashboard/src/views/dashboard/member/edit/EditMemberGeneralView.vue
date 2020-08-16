@@ -28,9 +28,9 @@
             </div>
 
             <div>
-                <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator"/>
-                <EmailInput title="E-mailadres van dit lid" v-model="email" v-if="age >= 18" placeholder="Enkel van lid zelf" :validator="validator"/>
-                <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
+                <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator" :required="false" />
+                <EmailInput title="E-mailadres van dit lid" v-model="email" v-if="age >= 18" :required="false" placeholder="Enkel van lid zelf" :validator="validator"/>
+                <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
             </div>
         </div>
     </form>

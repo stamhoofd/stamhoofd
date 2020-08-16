@@ -1,11 +1,14 @@
 <template>
     <div class="st-view edit-member-view">
-        <STNavigationBar :title="member.details.name">
+        <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon gray close" @click="pop"></button>
         </STNavigationBar>
-        <STNavigationTitle>
+        <STNavigationTitle v-if="member">
             Wijzig gegevens van {{ member.details.firstName }}
+        </STNavigationTitle>
+        <STNavigationTitle v-else>
+            Nieuw lid toevoegen
         </STNavigationTitle>
 
         <SegmentedControl v-model="changeTab" :items="tabs" :labels="tabLabels"/>
@@ -44,6 +47,7 @@ import EditMemberContactsView from './EditMemberContactsView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { FamilyManager } from "../../../../classes/FamilyManager";
 import EditMemberRecordsView from './EditMemberRecordsView.vue';
+import EditMemberGroupView from './EditMemberGroupView.vue';
 
 @Component({
     components: {
@@ -60,17 +64,17 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     tabLabels = ["Algemeen", "Contacten", "Steekkaart"];
     loading = false
 
-    @Prop()
-    member!: MemberWithRegistrations;
+    @Prop({ default: null })
+    member!: MemberWithRegistrations | null;
 
     @Prop({ default: null })
     initialTabIndex: number | null
 
     tab: any = this.tabs[this.initialTabIndex ?? 0];
 
-    familyManager = new FamilyManager([this.member]);
+    familyManager = new FamilyManager(this.member ? [this.member] : []);
 
-    memberDetails = this.member.details // do not link with member, only link on save!
+    memberDetails = this.member ? this.member.details : null// do not link with member, only link on save!
 
     get changeTab() {
         return this.tab
@@ -92,30 +96,43 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
-        if (!this.memberDetails) {
-            return false;
-        }
+        
         const isValid = await (this.$refs.currentComponent as any).validate()
         if (!isValid) {
             return;
         }
 
-        const o = this.memberDetails
+        if (!this.memberDetails) {
+            return false;
+        }
+
+        if (!this.member) {
+            this.show(new ComponentWithProperties(EditMemberGroupView, {
+                memberDetails: this.memberDetails,
+                familyManager: this.familyManager,
+            }))
+            return;
+        }
+
+        const o = this.member?.details
         this.loading = true
         
         try {
-            this.member.details = this.memberDetails
+            if (this.member) {
+                this.member.details = this.memberDetails
 
-            console.log(this.memberDetails)
-            await this.familyManager.patchAllMembersWith(this.member)
-
+                console.log(this.memberDetails)
+                await this.familyManager.patchAllMembersWith(this.member)
+            }
+          
             this.currentComponent.errorBox = null
             this.loading = false;
-
             this.pop({ force: true })
             return true
         } catch (e) {
-            this.member.details = o
+            if (this.member && o) {
+                this.member.details = o
+            }
             this.currentComponent.errorBox = new ErrorBox(e)
             this.loading = false;
             return false;

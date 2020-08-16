@@ -6,6 +6,10 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
                     <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
+                    <button class="button text" @click="addMember">
+                        <span class="icon add" />
+                        <span>Nieuw</span>
+                    </button>
                 </STNavigationTitle>
             </template>
             <template #right>
@@ -147,6 +151,7 @@ import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 import { MemberWithRegistrations, Group, Organization, WaitingListType, EncryptedMemberWithRegistrationsPatch, Registration, Member } from '@stamhoofd/structures';
 import { MemberManager } from '../../../classes/MemberManager';
 import { Formatter } from '@stamhoofd/utility';
+import EditMemberView from '../member/edit/EditMemberView.vue';
 
 class SelectableMember {
     member: MemberWithRegistrations;
@@ -248,6 +253,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
         
         return reg.registeredAt
+    }
+
+    addMember() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditMemberView, {
+
+            })
+        }).setDisplayStyle("popup"))
     }
 
     isNew(member: MemberWithRegistrations) {
