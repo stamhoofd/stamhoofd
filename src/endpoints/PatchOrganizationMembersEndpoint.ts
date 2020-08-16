@@ -155,6 +155,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             members.push(member)
         }
 
+        // Loop all members one by one
+        for (const id of request.body.getDeletes()) {
+            const member = await Member.getByID(id)
+            if (!member || member.organizationId != user.organizationId) {
+                 throw new SimpleError({
+                    code: "permission_denied",
+                    message: "You don't have permissions to delete this member",
+                    human: "Je hebt geen toegang om dit lid te verwijderen"
+                })
+            }
+
+            await member.delete()
+        }
+
         return new Response(members.map(m => m.getStructureWithRegistrations()));
     }
 
