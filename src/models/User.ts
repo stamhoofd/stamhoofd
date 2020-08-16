@@ -101,6 +101,12 @@ export class User extends Model {
     // Members that were added by this user
     static members = new ManyToManyRelation(User, Member, "members");
 
+    /// Delete users when we delete a member
+    static async deleteForDeletedMember(memberId: string) {
+        const [rows] = await Database.delete(`DELETE ${this.table} FROM ${this.table} JOIN _members_users a ON a.usersId = ${this.table}.id LEFT JOIN _members_users b ON b.usersId = ${this.table}.id AND b.membersId != a.membersId WHERE a.membersId = ? and b.membersId is null and users.permissions is null`, [memberId]);
+        return rows
+    }
+
     /**
      * @param namespace
      * @override@override@override@override@override

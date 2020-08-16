@@ -8,6 +8,7 @@ import { Group } from '../models/Group';
 import { Member, MemberWithRegistrations } from '../models/Member';
 import { Registration, RegistrationWithPayment } from '../models/Registration';
 import { Token } from '../models/Token';
+import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>
@@ -166,6 +167,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
+            await User.deleteForDeletedMember(member.id)
             await member.delete()
         }
 
