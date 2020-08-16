@@ -33,6 +33,7 @@
         </template>
 
         <ContextMenuLine />
+        <ContextMenuItem @click="deleteData">Verwijderen</ContextMenuItem>
         <ContextMenuItem @click="deleteRegistration">Uitschrijven</ContextMenuItem>
     </ContextMenu>
 </template>
@@ -51,6 +52,7 @@ import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures
 import EditMemberView from './edit/EditMemberView.vue';
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({
     components: {
@@ -103,6 +105,21 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
             initialSmsFilter: smsFilter,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    deleteData() {
+        this.present(new ComponentWithProperties(CenteredMessage, { 
+            title: "Wil je alle data van "+this.member.firstName+" verwijderen?", 
+            description: "Dit verwijdert alle data van "+this.member.firstName+", inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.", 
+            confirmType: "destructive",
+            confirmButton: "Verwijderen",
+            confirmAction: async () => {
+                // todo
+                await MemberManager.deleteMember(this.member)
+
+            },
+            closeButton: "Annuleren", 
+        }).setDisplayStyle("overlay"))
     }
 
     deleteRegistration() {

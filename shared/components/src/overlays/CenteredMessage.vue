@@ -10,6 +10,14 @@
                 <h1>{{ title }}</h1>
                 <p>{{ description }}</p>
 
+                <STErrorsDefault :error-box="errorBox" />
+
+                <LoadingButton v-if="confirmButton" :loading="loading">
+                    <button  class="button full" :class="{ destructive: confirmType == 'destructive', primary: confirmType != 'destructive' }" @click="confirm">
+                        {{ confirmButton }}
+                    </button>
+                </LoadingButton>
+
                 <button v-if="closeButton" class="button secundary full" @click="pop">
                     {{ closeButton }}
                 </button>
@@ -22,10 +30,16 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 import Spinner from "../Spinner.vue"
+import STErrorsDefault from "../errors/STErrorsDefault.vue"
+import LoadingButton from "../navigation/LoadingButton.vue"
+
+import { ErrorBox } from '../errors/ErrorBox';
 
 @Component({
     components: {
-        Spinner
+        Spinner,
+        STErrorsDefault,
+        LoadingButton
     }
 })
 export default class CenteredMessage extends Vue {
@@ -40,6 +54,37 @@ export default class CenteredMessage extends Vue {
 
     @Prop({ default: null })
     closeButton: string | null
+
+    @Prop({ default: "normal" })
+    confirmType: string
+
+    @Prop({ default: null })
+    confirmButton: string | null
+
+    @Prop({ default: null })
+    confirmAction: (() => Promise<any>) | null
+
+    loading = false
+    errorBox: ErrorBox | null = null
+
+    async confirm() {
+        if (this.loading) {
+            return;
+        }
+        if (this.confirmAction) {
+            this.loading = true;
+            try {
+                await this.confirmAction()
+            } catch (e) {
+                this.errorBox = new ErrorBox(e)
+                this.loading = false
+                return;
+            }
+            this.errorBox = null
+            this.loading = false
+        }
+        this.pop()
+    }
 
     pop() {
         this.$parent.$emit("pop");
@@ -57,13 +102,35 @@ export default class CenteredMessage extends Vue {
         if (event.defaultPrevented || event.repeat) {
             return;
         }
-        if (!this.closeButton) {
+
+        const key = event.key || event.keyCode;
+
+        if (key === "Escape" || key === "Esc" || key === 27) {
+            if (!this.closeButton) {
+                return;
+            }
+
+            this.pop();
+            event.preventDefault();
+            return;
+        }
+
+        if (!this.confirmButton && !this.closeButton) {
             return
         }
 
-        const key = event.key || event.keyCode;
-        if (key === "Escape" || key === "Esc" || key === 27 || key === "Enter") {
-            this.pop();
+        if (this.confirmButton && this.confirmType == "destructive") {
+            // No default action
+            return;
+        }
+
+
+        if (key === "Enter") {
+            if (this.confirmButton) {
+                this.confirm()
+            } else {
+                this.pop();
+            }
             event.preventDefault();
         }
     }
@@ -91,6 +158,8 @@ export default class CenteredMessage extends Vue {
     width: 350px;
     padding: 20px 20px;
     box-sizing: border-box;
+    max-height: 100vh;
+    overflow: auto;
 
     > *:first-child {
         margin-top: 10px;
@@ -111,7 +180,7 @@ export default class CenteredMessage extends Vue {
         }
     }
 
-    > button {
+    > button, .loading-button {
         margin-top: 15px;
     }
 }

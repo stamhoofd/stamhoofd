@@ -125,6 +125,21 @@ export class MemberManagerStatic {
         })
         return await this.decryptMembers(response.data)
     }
+
+    async deleteMember(member: MemberWithRegistrations) {
+        const patchArray = new PatchableArray()
+        patchArray.addDelete(member.id)
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+    }
 }
 
 export const MemberManager = new MemberManagerStatic()
