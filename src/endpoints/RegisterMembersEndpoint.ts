@@ -2,7 +2,7 @@ import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMembers, RegisterResponse } from "@stamhoofd/structures";
+import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Member, RegistrationWithMember } from '../models/Member';
@@ -54,10 +54,58 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
+        let alreadyRegisteredCount = 0
+        for (const member of members) {
+            if (member.registrations.find(r => {
+                if (r.waitingList) {
+                    return false
+                }
+                const group = groups.find(g => g.id == r.groupId)
+                if (!group) {
+                    return false
+                }
+                if (group.cycle == r.cycle) {
+                    return true
+                }
+                return false
+            })) {
+                alreadyRegisteredCount++;
+            }
+        }
+
+
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
 
+        // Put groups without a family price in front of the row, so we can improve price calculation
+        const sortedMembers: RegisterMember[] = []
+
         for (const register of request.body.members) {
+            const member = members.find(m => m.id == register.memberId)
+            if (!member) {
+                throw new SimpleError({
+                    code: "invalid_member",
+                    message: "Het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen."
+                })
+            }
+
+            const group = groups.find(g => g.id == register.groupId);
+            if (!group) {
+                throw new SimpleError({
+                    code: "invalid_member",
+                    message: "De leeftijdsgroep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
+                })
+            }
+            if (group.settings.prices.find(p => p.familyPrice !== null)) {
+                // append
+                sortedMembers.push(register)
+            } else {
+                // prepend
+                sortedMembers.unshift(register)
+            }
+        }
+
+        for (const register of sortedMembers) {
             const member = members.find(m => m.id == register.memberId)
             if (!member) {
                 throw new SimpleError({
@@ -124,9 +172,16 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     }) 
                 }
 
-                const price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
+                let price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
+                if (foundPrice.familyPrice && alreadyRegisteredCount == 1 && foundPrice.familyPrice < price) {
+                    price = foundPrice.familyPrice
+                }
+                if (foundPrice.extraFamilyPrice && alreadyRegisteredCount >= 2 && foundPrice.extraFamilyPrice < price) {
+                    price = foundPrice.extraFamilyPrice
+                }
                 totalPrice += price
                 payRegistrations.push(registration)
+                alreadyRegisteredCount++;
             }
             registrations.push(registration)
         }

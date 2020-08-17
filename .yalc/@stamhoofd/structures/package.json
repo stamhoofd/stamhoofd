@@ -1,0 +1,27 @@
+{
+    "name": "@stamhoofd/structures",
+    "version": "1.8.10+c65d6773",
+    "main": "./dist/index.js",
+    "module": "./esm/dist/index.js",
+    "types": "./dist/index.d.ts",
+    "license": "UNLICENCED",
+    "sideEffects": false,
+    "files": [
+        "dist",
+        "esm/dist"
+    ],
+    "scripts": {
+        "build": " tsc -b . esm",
+        "build:full": "rm -r ./dist && rm -r ./esm/dist && tsc -b . esm",
+        "test": "jest",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    },
+    "dependencies": {
+        "uuid": "^8.2.0"
+    },
+    "peerDependencies": {
+        "@simonbackx/simple-encoding": "~1.11",
+        "@simonbackx/simple-errors": "~1.0.0",
+        "@stamhoofd/utility": "~1.0.0"
+    }
+}
