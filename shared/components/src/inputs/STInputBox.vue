@@ -1,5 +1,5 @@
 <template>
-    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box">
+    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box" :class="{indent}">
         <h4 v-if="title">
             <label>{{ title }}</label>
             <div class="right">
@@ -26,6 +26,9 @@ export default class STInputBox extends Vue {
     @Prop({ default: ""}) errorFields: string;
     @Prop({ default: null }) errorBox: ErrorBox | null;
 
+    @Prop({ default: false})
+    indent!: boolean
+
     @Prop({ default: ""})
     title!: string
 }
@@ -39,6 +42,14 @@ export default class STInputBox extends Vue {
     padding: 12px 0;
     display: block;
     max-width: 340px;
+
+    &.indent {
+        padding-left: 35px;
+
+        @media (max-width: 400px) {
+            padding-left: 0;
+        }
+    }
 
     > h4 {
         margin: 0;

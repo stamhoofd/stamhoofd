@@ -69,20 +69,19 @@
 
             </template>
             <template v-if="tab == 'payments'">
-                <STInputBox title="Lidgeld" error-fields="price" :error-box="errorBox">
+                <STInputBox title="Standaard tarief" error-fields="price" :error-box="errorBox">
                     <PriceInput v-model="price" placeholder="Gratis" />
                 </STInputBox>
 
                 <Checkbox v-model="enableReducedPrice">
-                    Verminder het lidgeld voor leden met financiële moeilijkheden
+                    Verlaagd tarief voor leden met financiële moeilijkheden
                 </Checkbox>
-
-                <STInputBox v-if="enableReducedPrice" title="Verminderd lidgeld" error-fields="reducedPrice" :error-box="errorBox">
+                <STInputBox v-if="enableReducedPrice" title="Verlaagd tarief" error-fields="reducedPrice" :error-box="errorBox">
                     <PriceInput v-model="reducedPrice" placeholder="Gratis" />
                 </STInputBox>
-
+               
                 <Checkbox v-model="enableLatePrice">
-                    Verminder het lidgeld na een bepaalde datum
+                    Verlaagd tarief na een bepaalde datum
                 </Checkbox>
 
                 <div v-if="enableLatePrice" class="split-inputs">
@@ -90,14 +89,27 @@
                         <DateSelection v-model="latePriceDate" />
                     </STInputBox>
 
-                    <STInputBox title="Lidgeld na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
+                    <STInputBox title="Standaard tarief na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
                         <PriceInput v-model="latePrice" placeholder="Gratis" />
                     </STInputBox>
                 </div>
 
-                <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verminderd lidgeld na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
+                <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verlaagd tarief na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
                     <PriceInput v-model="reducedLatePrice" placeholder="Gratis" />
                 </STInputBox>
+
+                <Checkbox v-model="enableFamilyPrice">
+                    Verlaagd tarief voor broers/zussen
+                </Checkbox>
+                <div class="split-inputs" v-if="enableFamilyPrice">
+                    <STInputBox title="Voor tweede broer/zus" error-fields="reducedPrice" :error-box="errorBox">
+                        <PriceInput v-model="familyPrice" placeholder="Gratis" />
+                    </STInputBox>
+                    <STInputBox title="Daaropvolgende broers/zussen" error-fields="reducedPrice" :error-box="errorBox">
+                        <PriceInput v-model="extraFamilyPrice" placeholder="Gratis" />
+                    </STInputBox>
+                </div>
+                <p class="style-description" v-if="enableFamilyPrice">Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.</p>
 
                 <STErrorsDefault :error-box="errorBox" />
             </template>
@@ -330,6 +342,52 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ prices: patch })
     }
 
+    get enableFamilyPrice() {
+        return !!this.group.settings.prices.find(p => p.familyPrice !== null)
+    }
+
+    set enableFamilyPrice(enable: boolean) {
+        const patch = this.getPricesPatch()
+
+        for (const price of this.group.settings.prices) {
+            if (!enable) {
+                patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice: null, extraFamilyPrice: null }))
+            } else {
+                patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice: price.price, extraFamilyPrice: price.price }))
+            }
+        }
+
+        this.addSettingsPatch({ prices: patch })
+    }
+
+    get familyPrice() {
+        return this.group.settings.prices.find(p => p.startDate == null)?.familyPrice ?? 0
+    }
+
+    set familyPrice(familyPrice: number) {
+        const patch = this.getPricesPatch()
+
+        for (const price of this.group.settings.prices) {
+            patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice }))
+        }
+
+        this.addSettingsPatch({ prices: patch })
+    }
+
+    get extraFamilyPrice() {
+        return this.group.settings.prices.find(p => p.startDate == null)?.extraFamilyPrice ?? 0
+    }
+
+    set extraFamilyPrice(extraFamilyPrice: number) {
+        const patch = this.getPricesPatch()
+
+        for (const price of this.group.settings.prices) {
+            patch.addPatch(GroupPrices.patchType().create({ id: price.id, extraFamilyPrice }))
+        }
+
+        this.addSettingsPatch({ prices: patch })
+    }
+
     get reducedPrice() {
         return this.group.settings.prices.find(p => p.startDate == null)?.reducedPrice ?? 0
     }
@@ -366,7 +424,13 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
             if (!p) {
                 const patch = this.getPricesPatch()
                 // todo: better default date
-                patch.addPut(GroupPrices.create({ startDate: new Date() }))
+                patch.addPut(GroupPrices.create({ 
+                    startDate: new Date(), 
+                    price: this.price, 
+                    reducedPrice: this.enableReducedPrice ? this.reducedPrice : null, 
+                    familyPrice: this.enableFamilyPrice ? this.familyPrice : null, 
+                    extraFamilyPrice: this.enableFamilyPrice ? this.extraFamilyPrice : null
+                }))
                 this.addSettingsPatch({ prices: patch })
             }
         }
