@@ -99,6 +99,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             parent,
             handler: (parent: Parent, component: ParentView) => {
                 component.pop({ force: true })
+                this.checkNewParents()
             }
         }).setDisplayStyle("popup"))
     }
@@ -108,6 +109,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             memberDetails: this.memberDetails,
             handler: (parent: Parent, component: ParentView) => {
                 this.memberDetails.parents.push(parent)
+                this.checkNewParents()
                 component.pop({ force: true })
             }
         }).setDisplayStyle("popup"))
@@ -139,13 +141,18 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
         })
     }
 
-    activated() {
+    checkNewParents() {
         // Only check for new parents!
         for (const parent of this.memberDetails.parents) {
             if (!this.parents.find(p => p.parent.id == parent.id)) {
                 this.parents.push(new SelectableParent(parent, true))
             }
         }
+    }
+
+    activated() {
+        // Only check for new parents!
+        this.checkNewParents()
     }
 
     get selectionCount() {
