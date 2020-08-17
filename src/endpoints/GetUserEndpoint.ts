@@ -35,6 +35,8 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
         }
 
         const st = NewUser.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
             id: user.id,
             email: user.email,
             publicKey: user.publicKey,
