@@ -16,4 +16,16 @@ export class GroupPrices extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     reducedPrice: number | null = null
+
+    /**
+     * Second member in the family
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 22 })
+    familyPrice: number | null = null
+
+    /**
+     * Third or later member
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 22 })
+    extraFamilyPrice: number | null = null
 }
