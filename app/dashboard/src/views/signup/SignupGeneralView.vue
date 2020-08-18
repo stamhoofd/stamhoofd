@@ -97,11 +97,25 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
+        if (this.initialRegisterCode) {
+            localStorage.setItem("savedRegisterCode", this.initialRegisterCode)
+        }
+
+        if (!this.initialRegisterCode) {
+            const saved = localStorage.getItem("savedRegisterCode")
+            if (saved !== null) {
+                this.registerCode = saved
+            }
+        }
+
+
         if (this.registerCode.length > 0) {
             HistoryManager.setUrl("/aansluiten/"+encodeURIComponent(this.registerCode))
         } else {
             HistoryManager.setUrl("/aansluiten")   
         }
+
+        
     }
 
     async goNext() {

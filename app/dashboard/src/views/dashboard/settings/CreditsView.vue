@@ -23,7 +23,7 @@
             
             <Spinner v-if="loading"/>
             <input v-else-if="code" class="input" :value="'https://stamhoofd.app/aansluiten/'+code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
-            <p v-if="code && !loading" class="style-description">Deze link vult de code automatisch in in het formulier.</p>
+            <p v-if="code && !loading" class="style-description">Deze link vult de code automatisch in in het formulier. Hij blijft ook ingevuld als ze later terugkeren naar het formulier.</p>
 
             <template v-if="history.length > 0">
                 <hr>
