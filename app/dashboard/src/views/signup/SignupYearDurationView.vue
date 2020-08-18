@@ -52,6 +52,10 @@ import SignupPricesView from './SignupPricesView.vue';
 export default class SignupYearDurationView extends Mixins(NavigationMixin) {
     @Prop({required: true})
     organization: Organization
+
+    @Prop({required: true})
+    registerCode: string | null;
+    
     errorBox: ErrorBox | null = null
 
     startDate = this.organization.meta.defaultStartDate
@@ -75,7 +79,7 @@ export default class SignupYearDurationView extends Mixins(NavigationMixin) {
             organization.meta.defaultStartDate = this.startDate
             organization.meta.defaultEndDate = this.endDate
 
-            this.show(new ComponentWithProperties(SignupPricesView, { organization }))
+            this.show(new ComponentWithProperties(SignupPricesView, { organization, registerCode: this.registerCode }))
             plausible('signupYearDuration');
         } catch (e) {
             console.error(e)

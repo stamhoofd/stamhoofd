@@ -86,6 +86,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class SignupAccountView extends Mixins(NavigationMixin) {
     @Prop({required: true})
     organization: Organization
+
+    @Prop({required: true})
+    registerCode: string | null;
+
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
@@ -160,7 +164,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
              try {
 
-                await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName)
+                await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
                 
                 this.loading = false;
                 (component.componentInstance() as any)?.pop()

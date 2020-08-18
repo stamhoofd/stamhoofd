@@ -49,6 +49,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/arrow-right-big.svg);
     }
 
+    &.arrow-up:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-up-big.svg);
+    }
+
     &.clock:after {
         font-icon: url(@stamhoofd/assets/images/icons/gray/clock.svg);
     }
@@ -179,6 +183,10 @@
 
     &.unregister:after {
         font-icon: url(@stamhoofd/assets/images/icons/unregister.svg);
+    }
+
+    &.gift:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gift.svg);
     }
 }
 

@@ -161,7 +161,7 @@ export class LoginHelper {
         SessionManager.setCurrentSession(session)
     }
 
-    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
+    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null) {
         const keys = await this.createKeys(password)
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
@@ -194,7 +194,8 @@ export class LoginHelper {
                 user,
                 keychainItems: [
                     item
-                ]
+                ],
+                registerCode
             }),
             decoder: Token
         })

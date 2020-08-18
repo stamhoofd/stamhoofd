@@ -14,6 +14,11 @@
             <span>Documentatie</span>
         </a>
 
+        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-credits'}" @click="manageCredits()">
+            <span class="icon gift"/>
+            <span>Doorverwijs-programma</span>
+        </button>
+
         <hr v-if="groups.length > 0">
 
         <div v-if="groups.length > 0">
@@ -91,6 +96,7 @@ import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { CenteredMessage } from '@stamhoofd/components';
 import AccountSettingsView from './account/AccountSettingsView.vue';
+import CreditsView from './settings/CreditsView.vue';
 
 
 
@@ -165,6 +171,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageAccount() {
         this.currentlySelected = "manage-account"
         this.showDetail(new ComponentWithProperties(AccountSettingsView, {}));
+    }
+
+    manageCredits() {
+        this.currentlySelected = "manage-credits"
+        this.showDetail(new ComponentWithProperties(CreditsView, {}));
     }
 
     logout() {

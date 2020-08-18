@@ -28,6 +28,10 @@
     user-select: none;
     cursor: pointer;
 
+    &:link, &:visited, &:active, &:hover {
+        text-decoration: none;
+    }
+
     &.primary {
         font-size: 18px;
         font-weight: 600;

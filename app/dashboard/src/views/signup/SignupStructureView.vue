@@ -87,6 +87,10 @@ import SignupYearDurationView from './SignupYearDurationView.vue';
 export default class SignupStructureView extends Mixins(NavigationMixin) {
     @Prop({required: true})
     organization: Organization
+
+    @Prop({required: true})
+    registerCode: string | null;
+
     errorBox: ErrorBox | null = null
 
     type: OrganizationType | null = null
@@ -129,7 +133,7 @@ export default class SignupStructureView extends Mixins(NavigationMixin) {
             organization.meta.umbrellaOrganization = this.umbrellaOrganization
             organization.meta.genderType = this.genderType
 
-            this.show(new ComponentWithProperties(SignupYearDurationView, { organization }))
+            this.show(new ComponentWithProperties(SignupYearDurationView, { organization, registerCode: this.registerCode }))
             plausible('signupStructure');
         } catch (e) {
             console.error(e)

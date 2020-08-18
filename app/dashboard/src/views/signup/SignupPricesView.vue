@@ -8,20 +8,19 @@
             <h1>Lidgeld</h1>
             <p>Je kan later nog uitzonderingen voor bepaalde (leeftijds)groepen toevoegen.</p>
 
-            <STInputBox title="Lidgeld" error-fields="price" :error-box="errorBox">
+            <STInputBox title="Standaard tarief" error-fields="price" :error-box="errorBox">
                 <PriceInput v-model="price" placeholder="Gratis" />
             </STInputBox>
 
             <Checkbox v-model="enableReducedPrice">
-                Verminder het lidgeld voor leden met financiële moeilijkheden
+                Verlaagd tarief voor leden met financiële moeilijkheden
             </Checkbox>
-
-            <STInputBox v-if="enableReducedPrice" title="Verminderd lidgeld" error-fields="reducedPrice" :error-box="errorBox">
+            <STInputBox v-if="enableReducedPrice" title="Verlaagd tarief" error-fields="reducedPrice" :error-box="errorBox">
                 <PriceInput v-model="reducedPrice" placeholder="Gratis" />
             </STInputBox>
-
+            
             <Checkbox v-model="enableLatePrice">
-                Verminder het lidgeld na een bepaalde datum
+                Verlaagd tarief na een bepaalde datum
             </Checkbox>
 
             <div v-if="enableLatePrice" class="split-inputs">
@@ -29,14 +28,27 @@
                     <DateSelection v-model="latePriceDate" />
                 </STInputBox>
 
-                <STInputBox title="Lidgeld na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
+                <STInputBox title="Standaard tarief na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
                     <PriceInput v-model="latePrice" placeholder="Gratis" />
                 </STInputBox>
             </div>
 
-            <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verminderd lidgeld na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
+            <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verlaagd tarief na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
                 <PriceInput v-model="reducedLatePrice" placeholder="Gratis" />
             </STInputBox>
+
+            <Checkbox v-model="enableFamilyPrice">
+                Verlaagd tarief voor broers/zussen
+            </Checkbox>
+            <div class="split-inputs" v-if="enableFamilyPrice">
+                <STInputBox title="Voor tweede broer/zus" error-fields="reducedPrice" :error-box="errorBox">
+                    <PriceInput v-model="familyPrice" placeholder="Gratis" />
+                </STInputBox>
+                <STInputBox title="Daaropvolgende broers/zussen" error-fields="reducedPrice" :error-box="errorBox">
+                    <PriceInput v-model="extraFamilyPrice" placeholder="Gratis" />
+                </STInputBox>
+            </div>
+            <p class="style-description" v-if="enableFamilyPrice">Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.</p>
 
             <STErrorsDefault :error-box="errorBox" />
         </main>
@@ -76,6 +88,10 @@ import SignupAccountView from './SignupAccountView.vue';
 export default class SignupPricesView extends Mixins(NavigationMixin) {
     @Prop({required: true})
     organization: Organization
+
+    @Prop({required: true})
+    registerCode: string | null;
+
     errorBox: ErrorBox | null = null
 
     price = 4000
@@ -88,6 +104,10 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
     latePriceDate = new Date(this.organization.meta.defaultStartDate.getTime() + (this.organization.meta.defaultEndDate.getTime() - this.organization.meta.defaultStartDate.getTime())/2)
     reducedLatePrice = 0
 
+    enableFamilyPrice = false
+    familyPrice = 4000
+    extraFamilyPrice = 4000
+
     goNext() {
 
         try {
@@ -98,7 +118,9 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
                 GroupPrices.create({
                     startDate: null,
                     price: this.price,
-                    reducedPrice: this.enableReducedPrice ? this.reducedPrice : null
+                    reducedPrice: this.enableReducedPrice ? this.reducedPrice : null,
+                    familyPrice: this.enableFamilyPrice ? this.familyPrice : null,
+                    extraFamilyPrice: this.enableFamilyPrice ? this.extraFamilyPrice : null,
                 })
             ]
 
@@ -106,14 +128,16 @@ export default class SignupPricesView extends Mixins(NavigationMixin) {
                 prices.push(GroupPrices.create({
                     startDate: this.latePriceDate,
                     price: this.latePrice,
-                    reducedPrice: this.enableReducedPrice ? this.reducedLatePrice : null
+                    reducedPrice: this.enableReducedPrice ? this.reducedLatePrice : null,
+                    familyPrice: this.enableFamilyPrice ? this.familyPrice : null,
+                    extraFamilyPrice: this.enableFamilyPrice ? this.extraFamilyPrice : null,
                 }))
             }
             organization.meta.defaultPrices = prices
             
             this.errorBox = null
 
-            this.show(new ComponentWithProperties(SignupAccountView, { organization }))
+            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }))
             plausible('signupPrices');
         } catch (e) {
             console.error(e)

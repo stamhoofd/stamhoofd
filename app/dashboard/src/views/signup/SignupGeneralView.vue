@@ -27,6 +27,16 @@
                     </STInputBox>
 
                     <AddressInput title="Adres van je vereniging" v-model="address" :validator="validator"/>
+
+                    <STInputBox title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox">
+                        <input
+                            v-model="registerCode"
+                            class="input"
+                            type="text"
+                            placeholder="Optioneel"
+                            autocomplete="off"
+                        >
+                    </STInputBox>
                 </div>
 
                 <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox">
@@ -40,9 +50,11 @@
                 Volledig gratis tot je beslist om het te gaan gebruiken.
             </template>
             <template #right>
-                <button class="button primary" @click="goNext">
-                    Aan de slag
-                </button>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" @click="goNext">
+                        Aan de slag
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
@@ -52,11 +64,12 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput } from "@stamhoofd/components"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput, LoadingButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import SignupStructureView from './SignupStructureView.vue';
+import { SessionManager, NetworkManager } from '@stamhoofd/networking';
 
 @Component({
     components: {
@@ -66,7 +79,8 @@ import SignupStructureView from './SignupStructureView.vue';
         STErrorsDefault,
         STInputBox,
         BackButton,
-        AddressInput
+        AddressInput,
+        LoadingButton
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {
@@ -75,12 +89,15 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     expectedMemberCount = 150
     address: Address | null = null
+    registerCode = ""
+    loading = false
 
     mounted() {
         HistoryManager.setUrl("/aansluiten")
     }
 
     async goNext() {
+        
         try {
             if (this.name.length == 0) {
                 throw new SimpleError({
@@ -99,11 +116,26 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 })
             }
 
+            this.loading = true;
             this.errorBox = null
 
             if (!await this.validator.validate() || !this.address) {
-                
+                this.loading = false;
                 return
+            }
+
+            // Check register code
+            if (this.registerCode.length > 0) {
+                try {
+                    const response = await NetworkManager.server.request({
+                        method: "GET",
+                        path: "/register-code/"+this.registerCode.toUpperCase(),
+                    })
+                } catch (e) {
+                    this.errorBox = new ErrorBox(e)
+                    this.loading = false;
+                    return;
+                }
             }
 
             const defaultStartDate = new Date()
@@ -126,10 +158,12 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 publicKey: "" // placeholder
             })
 
+            this.loading = false;
             this.errorBox = null
-            this.show(new ComponentWithProperties(SignupStructureView, { organization }))
+            this.show(new ComponentWithProperties(SignupStructureView, { organization, registerCode: this.registerCode }))
             plausible('signupGeneral');
         } catch (e) {
+            this.loading = false;
             console.error(e)
             this.errorBox = new ErrorBox(e)
             plausible('signupGeneralError');
