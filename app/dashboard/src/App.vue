@@ -92,13 +92,14 @@ export default class App extends Vue {
             }).setDisplayStyle("popup"));
         }
 
-        if (parts.length == 1 && parts[0] == 'aansluiten') {
+        if (parts.length >= 1 && parts[0] == 'aansluiten') {
             // todo: go to create organization page
             /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(CreateShop, {})
             }));*/
+            const registerCode = parts[1] ?? "";
             (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ './views/signup/SignupGeneralView.vue'), {})
+                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ './views/signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
             }).setDisplayStyle("popup"))
         }
 

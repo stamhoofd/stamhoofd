@@ -66,7 +66,7 @@ import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput, LoadingButton } from "@stamhoofd/components"
 import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupStructureView from './SignupStructureView.vue';
 import { SessionManager, NetworkManager } from '@stamhoofd/networking';
@@ -89,11 +89,19 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     expectedMemberCount = 150
     address: Address | null = null
-    registerCode = ""
+
+    @Prop({ default: "" })
+    initialRegisterCode: string;
+
+    registerCode = this.initialRegisterCode
     loading = false
 
     mounted() {
-        HistoryManager.setUrl("/aansluiten")
+        if (this.registerCode.length > 0) {
+            HistoryManager.setUrl("/aansluiten/"+encodeURIComponent(this.registerCode))
+        } else {
+            HistoryManager.setUrl("/aansluiten")   
+        }
     }
 
     async goNext() {

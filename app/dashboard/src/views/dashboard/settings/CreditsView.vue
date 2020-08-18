@@ -18,6 +18,13 @@
             <Spinner v-if="loading"/>
             <input v-else-if="code" class="input" :value="code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
 
+            <hr>
+            <h2>Jouw doorverwijzingslink</h2>
+            
+            <Spinner v-if="loading"/>
+            <input v-else-if="code" class="input" :value="'https://stamhoofd.app/aansluiten/'+code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
+            <p v-if="code && !loading" class="style-description">Deze link vult de code automatisch in in het formulier.</p>
+
             <template v-if="history.length > 0">
                 <hr>
                 <h2>Geschiedenis</h2>
@@ -28,7 +35,7 @@
                         <span class="icon arrow-down" v-else slot="left"/>
 
                         <h3 class="style-title-list">{{ item.description }}</h3>
-                        <p class="style-description-small">{{ item.date }}</p>
+                        <p class="style-description-small">{{ item.date | date }}</p>
                         <template slot="right">{{ item.change >= 0 ? "+ " : "" }}{{ item.change | price }}</template>
                     </STListItem>
                 </STList>
@@ -68,7 +75,8 @@ import { Formatter } from '@stamhoofd/utility';
         tooltip: TooltipDirective
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price,
+        date: Formatter.date.bind(Formatter)
     }
 })
 export default class CreditsView extends Mixins(NavigationMixin) {
