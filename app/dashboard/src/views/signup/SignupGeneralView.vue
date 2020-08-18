@@ -129,7 +129,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 try {
                     const response = await NetworkManager.server.request({
                         method: "GET",
-                        path: "/register-code/"+this.registerCode.toUpperCase(),
+                        path: "/register-code/"+encodeURIComponent(this.registerCode.toUpperCase()),
                     })
                 } catch (e) {
                     this.errorBox = new ErrorBox(e)

@@ -8,7 +8,7 @@
             <h1>
                 Jouw tegoed: {{ calculated | price }}
             </h1>
-            <p>Breng bevriende verenigingen aan: geef 10 euro cadeau, krijg 25 terug. Actie geldig tot 31 augustus.</p>
+            <p>Breng bevriende verenigingen aan: geef 10 euro cadeau, krijg 25 terug. Actie geldig tot 10 september.</p>
 
             <a href="https://docs.stamhoofd.be/geef-10-euro-cadeau-krijg-25-terug" target="_blank" class="button primary">Info en voorwaarden</a>
 
