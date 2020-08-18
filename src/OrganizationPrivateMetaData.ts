@@ -1,7 +1,27 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
+
+export class CreditItem extends AutoEncoder {
+    /**
+     * Credits in cents
+     */
+    @field({ decoder: IntegerDecoder })
+    change = 0
+
+    /**
+     * Credits in cents
+     */
+    @field({ decoder: DateDecoder })
+    date: Date = new Date()
+
+    /**
+     * Credits in cents
+     */
+    @field({ decoder: StringDecoder })
+    description: string
+}
 
 export class OrganizationPrivateMetaData extends AutoEncoder {
     /**
@@ -30,4 +50,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 9 })
     emails: OrganizationEmail[] = [];
+
+    /**
+     * Credits in cents
+     */
+    @field({ decoder: new ArrayDecoder(CreditItem), version: 23 })
+    credits: CreditItem[] = []
 }

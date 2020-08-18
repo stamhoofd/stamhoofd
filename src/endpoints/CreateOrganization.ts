@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { KeychainItem } from '../KeychainItem';
 import { Organization } from '../Organization';
@@ -23,4 +23,7 @@ export class CreateOrganization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(KeychainItem) })
     keychainItems: KeychainItem[]
+
+    @field({ decoder: StringDecoder, nullable: true, version: 24 })
+    registerCode: string | null = null
 }
