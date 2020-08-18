@@ -118,6 +118,8 @@ export default class Menu extends Mixins(NavigationMixin) {
                 this.manageGroups()
             }
         }
+
+        document.title = "Stamhoofd - "+OrganizationManager.organization.name
     }
 
     activated() {

@@ -39,6 +39,8 @@ export default class App extends Vue {
                 session.setOrganization(response.data)
                 SessionManager.setCurrentSession(session)
 
+                document.title = response.data.name+" - Inschrijven"
+
                 // Set color
                 if (response.data.meta.color) {
                     console.log("Set color "+response.data.meta.color)
