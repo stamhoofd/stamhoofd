@@ -10,10 +10,10 @@
             </h1>
             <p>Breng bevriende verenigingen aan: geef 10 euro cadeau, krijg 25 terug. Actie geldig tot 10 september.</p>
 
-            <a href="https://docs.stamhoofd.be/geef-10-euro-cadeau-krijg-25-terug" target="_blank" class="button primary">Info en voorwaarden</a>
+            <a href="https://docs.stamhoofd.be/geef-10-euro-cadeau-krijg-25-terug" target="_blank" class="button primary">Spelregels</a>
 
             <hr>
-            <h2>Jouw doorverwijscode</h2>
+            <h2>Jouw doorverwijzingscode</h2>
 
             <Spinner v-if="loading"/>
             <input v-else-if="code" class="input" :value="code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
@@ -23,7 +23,7 @@
             
             <Spinner v-if="loading"/>
             <input v-else-if="code" class="input" :value="'https://stamhoofd.app/aansluiten/'+code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
-            <p v-if="code && !loading" class="style-description">Deze link vult de code automatisch in in het formulier. Hij blijft ook ingevuld als ze later terugkeren naar het formulier.</p>
+            <p v-if="code && !loading" class="style-description-small input-info">Deze link vult de code automatisch in in het formulier. Hij blijft ook ingevuld als ze later terugkeren naar het formulier.</p>
 
             <template v-if="history.length > 0">
                 <hr>
@@ -140,3 +140,11 @@ export default class CreditsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
+
+<style lang="scss">
+    #credits-view {
+        .input-info {
+            margin-top: 8px;
+        }
+    }
+</style>
