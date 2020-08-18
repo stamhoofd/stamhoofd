@@ -2,13 +2,14 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, GroupGenderType,GroupSettings,OrganizationGenderType,OrganizationType, PermissionLevel,Permissions, Token as TokenStruct, UmbrellaOrganization } from "@stamhoofd/structures";
+import { CreateOrganization, CreditItem,GroupGenderType,GroupSettings,OrganizationGenderType,OrganizationType, PermissionLevel,Permissions, Token as TokenStruct, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { group } from 'console';
 
 import { Group } from '../models/Group';
 import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
+import { RegisterCode } from '../models/RegisterCode';
 import { Token } from '../models/Token';
 import { User } from "../models/User";
 
@@ -89,9 +90,43 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             // Yay, we can add the keychain items (after creating the organization and user)
         }
 
-        // First create the organization
+         // First create the organization
         // todo: add some duplicate validation
         const organization = new Organization();
+
+        if (request.body.registerCode !== null && request.body.registerCode.length > 0) {
+            const code = await RegisterCode.getByID(request.body.registerCode)
+            if (!code) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "You can only add the organization's keypair to the keychain",
+                    human: "De doorverwijzingscode die je hebt opgegeven is niet langer geldig",
+                    field: "registerCode",
+                });
+            }
+
+            if (code.organizationId) {
+                const otherOrganization = await Organization.getByID(code.organizationId)
+                if (otherOrganization) {
+                    otherOrganization.privateMeta.credits.push(CreditItem.create({
+                        description: "Ingevuld door "+request.body.organization.name,
+                        change: 0
+                    }))
+                    await otherOrganization.save()
+                }
+            }
+
+            organization.serverMeta.usedRegisterCode = code.code
+
+            if (code.value > 0) {
+                organization.privateMeta.credits.push(CreditItem.create({
+                    description: code.description,
+                    change: code.value
+                }))
+            }
+        }
+
+       
         organization.id = request.body.organization.id;
         organization.name = request.body.organization.name;
         organization.publicKey = request.body.organization.publicKey;

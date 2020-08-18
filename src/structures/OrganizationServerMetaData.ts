@@ -6,4 +6,7 @@ export class OrganizationServerMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, optional: true })
     publicDKIMKey?: string
+
+    @field({ decoder: StringDecoder, optional: true, version: 24 })
+    usedRegisterCode?: string
 }

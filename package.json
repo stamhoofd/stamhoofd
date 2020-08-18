@@ -33,6 +33,7 @@
         "@typescript-eslint/parser": "^2.28.0",
         "argon2": "^0.26.1",
         "aws-sdk": "^2.720.0",
+        "base-x": "^3.0.8",
         "dotenv": "^8.2.0",
         "eslint": "^6.8.0",
         "eslint-plugin-jest": "^23.8.2",
