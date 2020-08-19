@@ -1,15 +1,16 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, Token as TokenStruct } from '@stamhoofd/structures';
+import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Challenge } from '../models/Challenge';
 import { Organization } from '../models/Organization';
+import { PasswordToken } from '../models/PasswordToken';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 
 type Params = {};
 type Query = undefined;
-type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct;
+type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct;
 type ResponseBody = ChallengeResponseStruct | TokenStruct;
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -123,6 +124,38 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             const st = new TokenStruct(token);
             return new Response(st);            
+        }
+
+        case "password_token": {
+            const passwordToken = await PasswordToken.getToken(request.body.token)
+            if (!passwordToken) {
+                throw new SimpleError({
+                    code: "invalid_token",
+                    message: "Invalid token",
+                    human: "Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.",
+                    statusCode: 400
+                });
+            }
+
+            // Important to create a new token before adjusting the old token
+            const token = await Token.createToken(passwordToken.user);
+
+            // todo: make token short lived until renewal
+   
+            if (!token) {
+                throw new SimpleError({
+                    code: "error",
+                    message: "Could not generate token",
+                    human: "Er ging iets mis bij het inloggen",
+                    statusCode: 500
+                });
+            }
+
+            // For now we keep the password token because the user might want to reload the page or load it on a different device/browser
+            //await passwordToken.delete();
+
+            const st = new TokenStruct(token);
+            return new Response(st);           
         }
 
         default: {

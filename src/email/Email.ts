@@ -124,7 +124,7 @@ class Email {
      * Send an internal e-mail (from stamhoofd)
      */
     sendInternal(data: EmailInterfaceBase) {
-        const mail = Object.assign({ from: '"Simon van Stamhoofd" <simon@stamhoofd.be>', data})
+        const mail = Object.assign(data, { from: '"Stamhoofd" <hallo@stamhoofd.be>'})
         this.send(mail)
     }
 
@@ -137,7 +137,7 @@ class Email {
 
         this.schedule(() => {
             if (didSend) {
-                return
+                return undefined
             }
             didSend = true;
             return data
