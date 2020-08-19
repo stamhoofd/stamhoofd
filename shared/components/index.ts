@@ -23,6 +23,7 @@ export { default as EmailInput } from "./src/inputs/EmailInput.vue"
 export { default as IBANInput } from "./src/inputs/IBANInput.vue"
 export { default as ImageInput } from "./src/inputs/ImageInput.vue"
 export { default as ColorInput } from "./src/inputs/ColorInput.vue"
+export { default as FileInput } from "./src/inputs/FileInput.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"

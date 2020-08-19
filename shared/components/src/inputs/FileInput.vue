@@ -1,12 +1,14 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="image-input-box" :class="{square: isSquare}" @click="onClick">
-            <span class="icon trash" v-if="!required && value" />
-
+        <label class="file-input-box" @click="onClick" :class="{ center: !value }">
             <Spinner v-if="uploading" />
-            <span class="icon upload" v-else-if="value == null"/>
-            <img :src="src" v-else/>
-            <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
+            <span class="icon center upload" v-else-if="value == null"/>
+
+            <span class="icon file" v-if="value" />
+            <span v-if="value">{{ value.name }}</span>
+
+            <span class="icon trash" v-if="!required && value" @click="deleteMe"/>
+            <input type="file" class="file-upload" accept="application/pdf" @change="changedFile">
         </label>
     </STInputBox>
 </template>
@@ -15,7 +17,7 @@
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { File, ResolutionRequest, Version } from "@stamhoofd/structures";
 import Spinner from "../Spinner.vue";
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 import { SessionManager } from '@stamhoofd/networking';
@@ -27,18 +29,15 @@ import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
         STInputBox
     }
 })
-export default class ImageInput extends Mixins(NavigationMixin) {
+export default class FileInput extends Mixins(NavigationMixin) {
     @Prop({ default: "" }) 
     title: string;
 
     @Prop({ default: null }) 
     validator: Validator | null
-
-    @Prop({ default: null })
-    resolutions: ResolutionRequest[] | null
     
     @Prop({ default: null })
-    value: Image | null;
+    value: File | null;
 
     @Prop({ default: true })
     required!: boolean
@@ -47,21 +46,14 @@ export default class ImageInput extends Mixins(NavigationMixin) {
 
     uploading = false
 
-    get isSquare() {
-        if (this.resolutions == null) {
-            return false
-        }
-        return !!this.resolutions.find(r => r.width == r.height && r.width)
-    }
-
-    get src() {
-        return this.value!.getPathForSize(undefined, 64)
+    deleteMe() {
+        this.$emit("input", null)
     }
 
     onClick(event) {
-        if (!this.required && this.value) {
+        if (this.value) {
+            window.open(this.value.getPublicPath(), 'Privacyvoorwaarden')
             event.preventDefault();
-            this.$emit("input", null)
         }
     }
 
@@ -74,11 +66,9 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         }
 
         const file = event.target.files[0];
-        const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })]
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("resolutions", JSON.stringify(resolutions.map(r => r.encode({ version: Version }))))
 
         this.uploading = true;
         this.errorBox = null;
@@ -86,9 +76,9 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         SessionManager.currentSession!.authenticatedServer
             .request({
                 method: "POST",
-                path: "/upload-image",
+                path: "/upload-file",
                 body: formData,
-                decoder: Image,
+                decoder: File,
                 timeout: 60*1000
             })
             .then(response => {
@@ -100,7 +90,6 @@ export default class ImageInput extends Mixins(NavigationMixin) {
             })
             .finally(() => {
                 this.uploading = false;
-
                  // Clear selection
                 event.target.value = null;
             });
@@ -112,7 +101,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-.image-input-box {
+.file-input-box {
     @extend .style-input;
     @extend .style-input-shadow;
     border: $border-width solid $color-gray-light;
@@ -120,18 +109,22 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     background: white;
     border-radius: $border-radius;
     padding: 5px 15px;
-    height: 60px;
+    height: 50px;
     margin: 0;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     transition: border-color 0.2s, color 0.2s;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     cursor: pointer;
     touch-action: manipulation;
     position: relative;
+
+    &.center {
+        justify-content: center;
+    }
 
 
     &:hover {
@@ -152,28 +145,25 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         display: none;
     }
 
-    img {
-        position: absolute; // fix max width
-        max-height: 33px;
-        max-width: 100%;
+    .icon.file {
+        margin-right: 10px;
+        color: $color-dark;
+
+        &+ span {
+            color: $color-dark;
+        }
     }
 
     .icon.trash {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: rgba(white, 0.9);
-        text-align: center;
         opacity: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
         transition: opacity 0.2s;
+        margin-left: auto;
+        color: $color-gray;
+       
+        &:hover {
+            opacity: 1;
+            color: $color-error;
+        }
     }
 
     &:hover {

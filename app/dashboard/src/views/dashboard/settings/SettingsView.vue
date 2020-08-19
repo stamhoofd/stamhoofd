@@ -124,6 +124,29 @@
                 </button>
             </p>
 
+            <hr>
+            <h2>Jouw privacyvoorwaarden</h2>
+            <p class="st-list-description">Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.</p>
+
+            <STInputBox title="Waar staan jouw privacyvoorwaarden?" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-model="selectedPrivacyType" value="none">Geen</Radio>
+                    <Radio v-model="selectedPrivacyType" value="website">Op onze website</Radio>
+                    <Radio v-model="selectedPrivacyType" value="file">Zelf PDF-bestand aanleveren</Radio>
+                </RadioGroup>
+            </STInputBox>
+
+            <STInputBox title="Volledige link naar privacyvoorwaarden" error-fields="website" :error-box="errorBox" v-if="selectedPrivacyType == 'website'">
+                <input
+                    v-model="privacyPolicyUrl"
+                    class="input"
+                    type="url"
+                    placeholder="bv. https://www.vereniging.be/privacy"
+                />
+            </STInputBox>
+
+            <FileInput v-if="selectedPrivacyType == 'file'" title="Kies een bestand" :validator="validator" v-model="privacyPolicyFile" :required="false"/>
+
         </main>
 
         <STToolbar>
@@ -141,9 +164,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast } from "@stamhoofd/components";
+import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Radio, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast, FileInput} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -160,12 +183,14 @@ import EmailSettingsView from './EmailSettingsView.vue';
         Checkbox,
         DateSelection,
         RadioGroup,
+        Radio,
         BackButton,
         AddressInput,
         LoadingButton,
         IBANInput,
         ImageInput,
-        ColorInput
+        ColorInput,
+        FileInput
     },
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
@@ -174,6 +199,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     saving = false
     temp_organization = OrganizationManager.organization
     showDomainSettings = true
+    selectedPrivacyType = this.temp_organization.meta.privacyPolicyUrl ? "website" : (this.temp_organization.meta.privacyPolicyFile ? "file" : "none")
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
@@ -239,9 +265,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.organizationPatch.meta.set({
-            color
-        })
+        this.$set(this.organizationPatch.meta, "color", color)
     }
 
     get squareLogo() {
@@ -253,9 +277,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.organizationPatch.meta.set({
-            squareLogo: image
-        })
+        this.$set(this.organizationPatch.meta, "squareLogo", image)
     }
 
     get horizontalLogo() {
@@ -267,9 +289,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.organizationPatch.meta.set({
-            horizontalLogo: image
-        })
+        this.$set(this.organizationPatch.meta, "horizontalLogo", image)
     }
 
     get website() {
@@ -279,6 +299,33 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     set website(website: string) {
         this.$set(this.organizationPatch, "website", website.length == 0 ? null : website)
     }
+
+   get privacyPolicyUrl() {
+        return this.organization.meta.privacyPolicyUrl
+    }
+
+    set privacyPolicyUrl(url: string | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.organizationPatch.meta.set({
+            privacyPolicyUrl: url
+        })
+    }
+
+    get privacyPolicyFile() {
+        console.log(this.organization.meta.privacyPolicyFile)
+        return this.organization.meta.privacyPolicyFile
+    }
+
+    set privacyPolicyFile(file: File | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+        this.$set(this.organizationPatch.meta, "privacyPolicyFile", file)
+    }
+    
 
     get address() {
         return this.organization.address
@@ -304,6 +351,18 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (this.organization.website && this.organization.website.length > 0 && !this.organization.website.startsWith("http://") && !this.organization.website.startsWith("https://")) {
             this.website = "http://"+this.organization.website
+        }
+
+        if (this.selectedPrivacyType == "none") {
+            this.privacyPolicyFile = null;
+            this.privacyPolicyUrl = null;
+        } else if (this.selectedPrivacyType == "file") {
+            this.privacyPolicyUrl = null;
+            // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
+        }
+
+        if (this.selectedPrivacyType == "website" && this.organization.meta.privacyPolicyUrl && this.organization.meta.privacyPolicyUrl.length > 0 && !this.organization.meta.privacyPolicyUrl.startsWith("http://") && !this.organization.meta.privacyPolicyUrl.startsWith("https://")) {
+            this.privacyPolicyUrl = "http://"+this.organization.meta.privacyPolicyUrl
         }
 
         let valid = false
