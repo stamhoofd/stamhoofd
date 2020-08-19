@@ -11,6 +11,6 @@ export default async () => {
     await Database.delete("DELETE FROM `payments`");
     await Database.delete("DELETE FROM `members`");
     await Database.delete("DELETE FROM `organizations`");
-
+    await Database.delete("OPTIMIZE TABLE organizations;"); // fix breaking of indexes due to deletes (mysql bug?)
     await Database.end();
 };
