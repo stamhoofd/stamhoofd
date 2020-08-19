@@ -21,6 +21,10 @@
                     <STInputBox title="Herhaal wachtwoord">
                         <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
+
+                    <Checkbox v-model="acceptPrivacy" class="long-text" v-if="privacyUrl">
+                        Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+                    </Checkbox>
                 </div>
                 <div>
                     <div class="warning-box">Gebruik bij voorkeur een wachtwoordbeheerder of kies een sterk wachtwoord dat je kan onthouden.</div>
@@ -45,7 +49,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -81,7 +85,8 @@ const throttle = (func, limit) => {
         STInputBox,
         LoadingButton,
         STErrorsDefault,
-        EmailInput
+        EmailInput,
+        Checkbox
     }
 })
 export default class SignupView extends Mixins(NavigationMixin){
@@ -89,11 +94,22 @@ export default class SignupView extends Mixins(NavigationMixin){
     email = ""
     password = ""
     passwordRepeat = ""
+    acceptPrivacy = false
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
     session = SessionManager.currentSession!
+
+    get privacyUrl() {
+        if (OrganizationManager.organization!.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization!.meta.privacyPolicyUrl
+        }
+        if (OrganizationManager.organization!.meta.privacyPolicyFile) {
+            return OrganizationManager.organization!.meta.privacyPolicyFile.getPublicPath()
+        }
+        return null
+    }
 
     async submit() {
         if (this.loading) {
@@ -114,6 +130,14 @@ export default class SignupView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
                 message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan."
+            }))
+            return;
+        }
+
+        if (!this.acceptPrivacy && !!this.privacyUrl) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "read_privacy",
+                message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
             }))
             return;
         }
