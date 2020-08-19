@@ -3,12 +3,13 @@ import { Data } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 import { ChallengeGrantStruct } from './ChallengeGrantStruct';
+import { PasswordTokenGrantStruct } from './PasswordTokenGrantStruct';
 import { RefreshTokenGrantStruct } from './RefreshTokenGrantStruct';
 import { RequestChallengeGrantStruct } from './RequestChallengeGrantStruct';
 
 /// Only used as input
 export class CreateTokenStruct {
-    static decode(data: Data): ChallengeGrantStruct | RefreshTokenGrantStruct | RequestChallengeGrantStruct {
+    static decode(data: Data): ChallengeGrantStruct | RefreshTokenGrantStruct | RequestChallengeGrantStruct | PasswordTokenGrantStruct {
         const grantType = data.field("grant_type").string;
         if (grantType == "challenge") {
             return ChallengeGrantStruct.decode(data)
@@ -20,6 +21,10 @@ export class CreateTokenStruct {
 
         if (grantType == "request_challenge") {
             return RequestChallengeGrantStruct.decode(data)
+        }
+
+        if (grantType == "password_token") {
+            return PasswordTokenGrantStruct.decode(data)
         }
 
         throw new SimpleError({

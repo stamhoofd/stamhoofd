@@ -32,6 +32,7 @@ export * from "./src/endpoints/PatchMembers"
 export * from "./src/endpoints/RegisterMember"
 export * from "./src/endpoints/EmailRequest"
 export * from "./src/endpoints/RegisterResponse"
+export * from "./src/endpoints/ForgotPasswordRequest"
 
 export * from "./src/DNSRecord"
 export * from "./src/endpoints/OrganizationDomains"
@@ -41,6 +42,7 @@ export * from "./src/endpoints/tokens/ChallengeResponseStruct"
 export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/tokens/CreateTokenStruct"
+export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 
 export * from "./src/endpoints/OrganizationAdmins"
 
