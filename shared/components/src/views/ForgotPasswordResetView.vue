@@ -50,7 +50,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox, Toast, Spinner } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
-import ForgotPasswordView from './ForgotPasswordView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation

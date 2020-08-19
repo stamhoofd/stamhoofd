@@ -84,11 +84,14 @@
                                 v-tooltip="'Ingeschreven op ' + formatDate(registrationDate(member.member))"
                                 class="new-member-bubble"
                             />
-                            {{ member.member.details.name }}
+                            {{ member.member.name }}
                             <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
                         </td>
-                        <td class="minor hide-smartphone">
+                        <td class="minor hide-smartphone" v-if="member.member.details">
                             {{ member.member.details.age }} jaar
+                        </td>
+                        <td class="minor hide-smartphone" v-else>
+                            /
                         </td>
                         <td class="hide-smartphone">
                             {{ waitingList ? formatDate(registrationDate(member.member)) : member.member.info }}

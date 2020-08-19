@@ -41,7 +41,16 @@ export class MemberManagerStatic {
         }
 
         const session = SessionManager.currentSession!
-        const keyPair = await session.decryptKeychainItem(keychainItem)
+        let keyPair: {
+            publicKey: string;
+            privateKey: string;
+        } | undefined = undefined
+        try {
+            keyPair = await session.decryptKeychainItem(keychainItem)
+        } catch (e) {
+            console.error(e)
+            console.error("Invalid keychain item (probably because user encryption key has changed)")
+        }
 
         for (const member of data) {
 
@@ -49,6 +58,8 @@ export class MemberManagerStatic {
 
             if (!member.encryptedForOrganization) {
                 console.warn("encryptedForOrganization not set for member " + member.id)
+            } else if (!keyPair) {
+                // no key
             } else {
                 try {
                     const json = await Sodium.unsealMessage(member.encryptedForOrganization, keyPair.publicKey, keyPair.privateKey)
@@ -60,9 +71,16 @@ export class MemberManagerStatic {
                 }
             }
 
+            if (!decryptedDetails) {
+                decryptedDetails =  new MemberDetails()
+                decryptedDetails.firstName = member.firstName
+                decryptedDetails.setPlaceholder()
+            }
+
             const decryptedMember = Member.create({
                 id: member.id,
-                details: decryptedDetails,
+                firstName: member.firstName,
+                details: decryptedDetails ?? null,
                 publicKey: member.publicKey,
             })
 
@@ -83,7 +101,16 @@ export class MemberManagerStatic {
         }
 
         const session = SessionManager.currentSession!
-        const keyPair = await session.decryptKeychainItem(keychainItem)
+        let keyPair: {
+            publicKey: string;
+            privateKey: string;
+        } | undefined = undefined
+        try {
+            keyPair = await session.decryptKeychainItem(keychainItem)
+        } catch (e) {
+            console.error(e)
+            console.error("Invalid keychain item (probably because user encryption key has changed)")
+        }
 
         for (const member of data) {
 
@@ -91,6 +118,8 @@ export class MemberManagerStatic {
 
             if (!member.encryptedForOrganization) {
                 console.warn("encryptedForOrganization not set for member " + member.id)
+            } else if (!keyPair) {
+                // no key
             } else {
                 try {
                     const json = await Sodium.unsealMessage(member.encryptedForOrganization, keyPair.publicKey, keyPair.privateKey)
@@ -100,6 +129,12 @@ export class MemberManagerStatic {
                     console.error(e)
                     console.error("Failed to read member data for " + member.id)
                 }
+            }
+
+            if (!decryptedDetails) {
+                decryptedDetails =  new MemberDetails()
+                decryptedDetails.firstName = member.firstName
+                decryptedDetails.setPlaceholder()
             }
 
             const decryptedMember = MemberWithRegistrations.create({

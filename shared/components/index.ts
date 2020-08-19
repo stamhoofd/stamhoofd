@@ -67,3 +67,4 @@ export { default as MaleIcon } from "./src/icons/MaleIcon.vue"
 
 
 export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"
+export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vue"

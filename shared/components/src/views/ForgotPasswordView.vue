@@ -26,8 +26,8 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins } from "vue-property-decorator";
-import { SessionManager } from '@stamhoofd/networking';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+import { SessionManager, Session } from '@stamhoofd/networking';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 @Component({
@@ -45,6 +45,9 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
+    @Prop({ default: SessionManager.currentSession })
+    session!: Session
+
     async submit() {
         if (this.loading) {
             return;
@@ -58,7 +61,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
         }
 
         try {
-            const response = await SessionManager.currentSession!.server.request({
+            const response = await this.session.server.request({
                 method: "POST",
                 path: "/forgot-password",
                 body: ForgotPasswordRequest.create({ email: this.email }),

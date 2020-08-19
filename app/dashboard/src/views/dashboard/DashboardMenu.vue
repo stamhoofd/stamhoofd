@@ -84,7 +84,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SessionManager } from '@stamhoofd/networking';
+import { SessionManager, Keychain } from '@stamhoofd/networking';
 import { Organization, Group } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -97,6 +97,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 import { CenteredMessage } from '@stamhoofd/components';
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import CreditsView from './settings/CreditsView.vue';
+import NoKeyView from './NoKeyView.vue';
 
 
 
@@ -120,6 +121,23 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
+
+        this.checkKey()
+    }
+
+    async checkKey() {
+        try {
+            const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
+            if (!keychainItem) {
+                throw new Error("Missing organization keychain")
+            }
+
+            const session = SessionManager.currentSession!
+            const keyPair = await session.decryptKeychainItem(keychainItem)
+
+        } catch (e) {
+            this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
+        }
     }
 
     activated() {

@@ -51,7 +51,6 @@ import { Component, Mixins } from "vue-property-decorator";
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
-import ForgotPasswordView from './ForgotPasswordView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { SimpleError } from '@simonbackx/simple-errors';
 

@@ -33,13 +33,11 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ForgotPasswordView } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import ForgotPasswordView from './ForgotPasswordView.vue';
 
 @Component({
     components: {
@@ -68,7 +66,9 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     gotoPasswordForgot() {
-        this.show(new ComponentWithProperties(ForgotPasswordView, {}))
+        this.show(new ComponentWithProperties(ForgotPasswordView, {
+            session: this.session
+        }))
     }
 
     async submit() {

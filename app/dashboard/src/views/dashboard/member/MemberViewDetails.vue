@@ -33,11 +33,10 @@
                         <dd>{{ member.details.email }}</dd>
                     </template>
                 </dl>
-                </div>
-
-            <hr>
+            </div>
 
             <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
+                <hr>
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
                     <div class="hover-show"><button class="button icon gray edit" @click="editParent(parent)"></button></div>
@@ -65,11 +64,10 @@
                         </dd>
                     </template>
                 </dl>
-
-                <hr>
             </div>
 
             <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box">
+                <hr>
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
                     <div class="hover-show"><button class="button icon gray edit" @click="editContact(contact)"></button></div>
@@ -83,12 +81,10 @@
                     <dd>{{ contact.phone }}</dd>
                 </dl>
 
-                <hr v-if="index < member.details.emergencyContacts.length - 1">
             </div>
 
             <div v-if="member.details.doctor" class="hover-box">
                 <hr>
-
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
                     <div class="hover-show"><button class="button icon gray edit" @click="editContact(member.details.doctor)"></button></div>
@@ -122,7 +118,7 @@
 
         </div>
 
-        <div v-if="member.groups.length > 0" class="hover-box">
+        <div v-if="member.groups.length > 0 && member.details && !member.details.isPlaceholder" class="hover-box">
             <h2 class="style-with-button">
                 <div>
                     <span class="icon-spacer">Steekkaart</span><span
@@ -157,6 +153,9 @@
                 <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
             </template>
+        </div>
+        <div v-if="!member.details || member.details.isPlaceholder">
+            <p class="error-box">Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen sleutel meer hebt.</p>
         </div>
     </div>
 </template>

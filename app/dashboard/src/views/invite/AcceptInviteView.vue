@@ -66,7 +66,6 @@ import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version, Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, TradedInvite } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import ForgotPasswordView from './ForgotPasswordView.vue';
 import LoginView from '../login/LoginView.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 

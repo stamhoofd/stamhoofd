@@ -37,7 +37,6 @@ import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import ForgotPasswordView from './ForgotPasswordView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 @Component({
