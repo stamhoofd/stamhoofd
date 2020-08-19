@@ -66,7 +66,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     width: 350px;
     max-width: 100%;
 
-    @media (max-width: 400px) {
+    @media (max-width: 450px) {
         padding: 15px 20px;
     }
 

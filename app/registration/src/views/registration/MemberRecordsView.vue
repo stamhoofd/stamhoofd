@@ -12,9 +12,13 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" href="/privacy/todo" target="_blank">het privacybeleid</a>.
+            <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
             </Checkbox>
+            <Checkbox v-else v-model="allowData" class="long-text">
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken.
+            </Checkbox>
+
             <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
@@ -302,6 +306,16 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         }
     }
 
+    get privacyUrl() {
+        if (OrganizationManager.organization!.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization!.meta.privacyPolicyUrl
+        }
+        if (OrganizationManager.organization!.meta.privacyPolicyFile) {
+            return OrganizationManager.organization!.meta.privacyPolicyFile.getPublicPath()
+        }
+        return null
+    }
+
     async goNext() {
         if (this.loading) {
             return
@@ -524,7 +538,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             padding-bottom: 20px;
             padding-left: 35px;
 
-            @media (max-width: 400px) {
+            @media (max-width: 450px) {
                 padding-left: 0;
             }
         }

@@ -88,7 +88,7 @@ export default class ToastBox extends Vue {
     pointer-events:none;   
     width: 350px + 40px;
 
-    @media (max-width: 400px) {
+    @media (max-width: 450px) {
         padding: 10px 15px;
         width: 350px + 30px;
     }

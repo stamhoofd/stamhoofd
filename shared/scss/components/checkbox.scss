@@ -109,7 +109,7 @@
         }
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 450px) {
         &.long-text {
             > div  > div:first-child ~ div {
                 font-size: 13px;

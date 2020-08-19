@@ -165,6 +165,22 @@ $header-height: 70px;
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
+
+                .button {
+                    margin: 0 5px;
+
+                    @media (max-width: 450px) {
+                        margin: 0 10px;
+                    }
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
             }
 
             > .center {

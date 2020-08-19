@@ -171,7 +171,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
         gap: 8px 0;
         position: relative;
 
-        @media (max-width: 400px) {
+        @media (max-width: 450px) {
             margin: 15px calc(-1 * var(--st-horizontal-padding, 40px));
             padding: 20px var(--st-horizontal-padding, 40px);
         }
