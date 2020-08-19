@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import { Component, Vue, Mixins } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
@@ -190,6 +190,10 @@ export default class OverviewView extends Mixins(NavigationMixin){
             return MemberManager.members
         }
         return []
+    }
+
+    mounted() {
+        HistoryManager.setUrl("/")
     }
 
     addNewMember() {

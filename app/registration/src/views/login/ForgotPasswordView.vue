@@ -1,42 +1,77 @@
 <template>
-    <div class="st-view forgot-password-view">
+    <form class="st-view forgot-password-view" @submit.prevent="submit">
         <STNavigationBar title="Wachtwoord vergeten">
-            <button slot="right" class="button icon gray close" @click="pop"></button>
+            <button slot="right" class="button icon gray close" type="button" @click="pop"></button>
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>
+            <div class="warning-box">Als je jouw wachtwoord vergeten bent kan je niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.</div>
 
-            <div class="warning-box">Als je jouw wachtwoord opnieuw instelt zal je tijdelijk geen toegang meer hebben tot jouw gegevens. Deze worden versleuteld opgeslagen, dus het computersysteem zelf kan je geen toegang geven. We kunnen jouw toegang manueel herstellen maar dat kan even duren.</div>
+            <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="E-mailadres">
-                <input class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-            </STInputBox>
+
+            <EmailInput title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" v-model="email" :validator="validator"/>
         </main>
 
         <STFloatingFooter>
-            <button class="button primary full">
-                Versturen
-            </button>
+            <LoadingButton :loading="loading">
+                <button class="button primary full">
+                    Opnieuw instellen
+                </button>
+            </LoadingButton>
         </STFloatingFooter>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import STInputBox from "@stamhoofd/components/src/inputs/STInputBox.vue"
-import STFloatingFooter from "@stamhoofd/components/src/navigation/STFloatingFooter.vue"
-import STNavigationBar from "@stamhoofd/components/src/navigation/STNavigationBar.vue"
+import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
 import { Component, Mixins } from "vue-property-decorator";
+import { SessionManager } from '@stamhoofd/networking';
+import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 @Component({
     components: {
         STNavigationBar,
         STFloatingFooter,
-        STInputBox
+        EmailInput,
+        LoadingButton,
+        STErrorsDefault
     }
 })
 export default class ForgotPasswordView extends Mixins(NavigationMixin){
-    
+    loading = false
+    email = ""
+    validator = new Validator()
+    errorBox: ErrorBox | null = null
+
+    async submit() {
+        if (this.loading) {
+            return;
+        }
+        this.loading = true;
+        this.errorBox = null;
+
+        if (!(await this.validator.validate())) {
+            this.loading = false;
+            return;
+        }
+
+        try {
+            const response = await SessionManager.currentSession!.server.request({
+                method: "POST",
+                path: "/forgot-password",
+                body: ForgotPasswordRequest.create({ email: this.email }),
+            })
+
+            this.dismiss({ force: true })
+            new Toast("Je hebt een e-mail ontvangen waarmee je een nieuw wachtwoord kan instellen", "success").show()
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.loading = false;
+    }
 }
 </script>
 

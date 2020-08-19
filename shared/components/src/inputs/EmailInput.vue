@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input class="input" type="email" :class="{ error: !valid }" v-model="emailRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete"/>
+        <input class="input" type="email" :class="{ error: !valid }" v-model="emailRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete" :disabled="disabled"/>
     </STInputBox>
 </template>
 
@@ -30,6 +30,9 @@ export default class EmailInput extends Vue {
 
     @Prop({ default: true })
     required!: boolean
+
+    @Prop({ default: false })
+    disabled!: boolean
 
     @Prop({ default: "" })
     placeholder!: string

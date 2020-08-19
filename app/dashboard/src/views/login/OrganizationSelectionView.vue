@@ -79,7 +79,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         HistoryManager.setUrl("/")
     }
 
-
     throttleUpdateResults = throttle(this.updateResults.bind(this), 1000);
 
     get defaultOrganizations() {

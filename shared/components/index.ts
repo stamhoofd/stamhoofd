@@ -64,3 +64,6 @@ export { default as Steps } from "./src/steps/Steps.vue"
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
 export { default as MaleIcon } from "./src/icons/MaleIcon.vue"
+
+
+export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"

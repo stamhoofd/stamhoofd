@@ -48,7 +48,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryMa
 import { NetworkManager, SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ForgotPasswordResetView } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 import SignupView from './SignupView.vue';
@@ -90,6 +90,16 @@ export default class LoginView extends Mixins(NavigationMixin){
     password = ""
 
     session = SessionManager.currentSession!
+
+    mounted() {
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
+
+        if (parts.length == 1 && parts[0] == 'reset-password') {
+            // tood: password reset view
+            this.present(new ComponentWithProperties(ForgotPasswordResetView, {}).setDisplayStyle("popup"));
+        }
+    }
 
     gotoPasswordForgot() {
         this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet"))

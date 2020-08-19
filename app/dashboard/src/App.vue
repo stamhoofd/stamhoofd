@@ -8,11 +8,11 @@
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, NavigationController } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "vue-property-decorator";
-import { AuthenticatedView, PromiseView, ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, PromiseView, ToastBox, ForgotPasswordResetView } from '@stamhoofd/components';
 import DashboardMenu from './views/dashboard/DashboardMenu.vue'
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import { SessionManager, NetworkManager } from '@stamhoofd/networking';
+import { SessionManager, NetworkManager, Session } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Logger } from "@stamhoofd/logger"
@@ -52,6 +52,12 @@ export default class App extends Vue {
 
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+
+        if (parts.length == 2 && parts[0] == 'reset-password') {
+            // tood: password reset view
+            const session = new Session(parts[1]);
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup"));
+        }
 
         if (parts.length == 3 && parts[0] == 'invite') {
 

@@ -1,11 +1,14 @@
 <template>
-    <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
-    <ComponentWithPropertiesInstance id="app" :component="root"/>
+    <div id="app">
+        <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
+        <ComponentWithPropertiesInstance :component="root"/>
+        <ToastBox />
+    </div>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, PromiseView } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, PromiseView, ToastBox } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import LoginView from './views/login/LoginView.vue';
@@ -17,7 +20,8 @@ import { MemberManager } from './classes/MemberManager';
 
 @Component({
     components: {
-        ComponentWithPropertiesInstance
+        ComponentWithPropertiesInstance,
+        ToastBox
     },
 })
 export default class App extends Vue {
@@ -82,23 +86,6 @@ export default class App extends Vue {
 
     mounted() {
         HistoryManager.activate();
-
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-
-        if (parts.length == 1 && parts[0] == 'create-organization') {
-            // todo: go to create organization page
-            /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(CreateShop, {})
-            }));*/
-        }
-
-        if (parts.length == 1 && parts[0] == 'reset-password') {
-            // tood: password reset view
-            /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(ForgotPasswordResetView, {})
-            }));*/
-        }
     }
     
 }

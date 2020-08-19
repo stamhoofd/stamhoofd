@@ -208,23 +208,30 @@ export class LoginHelper {
         SessionManager.setCurrentSession(session)
     }
 
-    static async changePassword(session: Session, password: string) {
+    static async changePassword(session: Session, password: string, force = false) {
         const keys = await this.createKeys(password)
 
-        const userPrivateKey = session.getUserPrivateKey();
+        let userPrivateKey = session.getUserPrivateKey();
+        let publicKey: string | undefined = undefined
         if (!userPrivateKey) {
-            throw new SimpleError({
-                code: "missing_key",
-                message: "Je kan je wachtwoord niet veranderen als je geen toegang hebt tot je encryptie-sleutel."
-            })
+            if (!force) {
+                throw new SimpleError({
+                    code: "missing_key",
+                    message: "Je kan je wachtwoord niet veranderen als je geen toegang hebt tot je encryptie-sleutel."
+                })
+            }
+            const userKeyPair = await Sodium.generateEncryptionKeyPair();
+            userPrivateKey = userKeyPair.privateKey
+            publicKey = userKeyPair.publicKey
         }
 
         const patch = NewUser.patch({
             id: session.user!.id,
+            publicKey,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, keys.authEncryptionSecretKey)
+            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey!, keys.authEncryptionSecretKey)
         })
 
         // Do netwowrk request to create organization
