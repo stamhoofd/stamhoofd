@@ -234,7 +234,9 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 })
             }
         }
-        
+
+        // Clear user since permissions have changed
+        this.session!.user = null;
         SessionManager.setCurrentSession(this.session!)
         this.dismiss({ force: true })
     }
