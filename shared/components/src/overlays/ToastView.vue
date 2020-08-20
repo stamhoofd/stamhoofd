@@ -89,6 +89,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
         color: $color-primary;
         margin-left: -10px;
         margin-right: 10px;
+        flex-shrink: 0;
     }
 
     &> .spinner-container {
