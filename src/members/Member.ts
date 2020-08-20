@@ -20,4 +20,11 @@ export class Member extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 20 })
     placeholder = false
+
+    get name() {
+        if (this.details) {
+            return this.details.name
+        }
+        return this.firstName
+    }
 }

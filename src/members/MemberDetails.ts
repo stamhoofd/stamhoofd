@@ -118,6 +118,19 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: MemberExistingStatus, nullable: true, version: 18 })
     existingStatus: MemberExistingStatus | null = null
 
+    /**
+     * Set to true when this is automatically generated because we don't have the data
+     */
+    private _isPlaceholder = false
+
+    get isPlaceholder() {
+        return this._isPlaceholder
+    }
+
+    setPlaceholder() {
+        this._isPlaceholder = true
+    }
+
     get name() {
         return this.firstName + " " + this.lastName;
     }
