@@ -242,6 +242,11 @@ export class LoginHelper {
             decoder: User
         })
 
+        if (session.user) {
+            // Clear user
+            session.user = null;
+        }
+
         session.setEncryptionKey(keys.authEncryptionSecretKey)
     }
 

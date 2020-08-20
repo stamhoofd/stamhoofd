@@ -195,11 +195,18 @@ export class Session implements RequestMiddleware {
 
         // Start loading the user and encryption keys
         if (!preload) {
-            this.updateData()
+            if (this.user) {
+                this.updateKeys().catch(e => console.error(e))
+            } else {
+                this.updateData()
+            }
         }
     }
 
     async fetchUser(): Promise<NewUser> {
+        if (this.user) {
+            return this.user;
+        }
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
