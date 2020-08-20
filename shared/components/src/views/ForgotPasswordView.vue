@@ -45,7 +45,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
-    @Prop({ default: SessionManager.currentSession })
+    @Prop({ default: () => SessionManager.currentSession })
     session!: Session
 
     async submit() {
