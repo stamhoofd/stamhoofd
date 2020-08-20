@@ -42,7 +42,7 @@
                     </STInputBox>
                     <p class="st-list-description">De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.</p>
 
-                    <IBANInput title="Bankrekeningnummer" v-model="iban" :validator="validator"/>
+                    <IBANInput title="Bankrekeningnummer" v-model="iban" :validator="validator" :required="false"/>
 
 
                 </div>
@@ -223,7 +223,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (!this.organizationPatch.meta) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
         }
-        this.$set(this.organizationPatch.meta, "iban", iban)
+        this.$set(this.organizationPatch.meta, "iban", iban ?? "")
     }
 
     get squareLogoResolutions() {
