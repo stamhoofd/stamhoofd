@@ -88,6 +88,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
+            let needsSync = false;
             if (this.reduced) {
                 // Update reduced
                 for (const member of this.selectedMembers) {
@@ -95,8 +96,21 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                         member.details!.records.push(Record.create({
                             type: RecordType.FinancialProblems
                         }))
+                        needsSync = true;
                     }
                 }
+            } else {
+                // Update reduced
+                for (const member of this.selectedMembers) {
+                    const i = member.details!.records.findIndex(r => r.type == RecordType.FinancialProblems)
+                    if (i != -1) {
+                        member.details!.records.splice(i, 1);
+                        needsSync = true;
+                    }
+                }
+            }
+
+            if (needsSync) {
                 await MemberManager.patchAllMembersWith(...this.selectedMembers)
             }
 
