@@ -34,7 +34,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Checkbox, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -88,6 +88,18 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
+            if (this.reduced) {
+                // Update reduced
+                for (const member of this.selectedMembers) {
+                    if (!member.details!.records.find(r => r.type == RecordType.FinancialProblems)) {
+                        member.details!.records.push(Record.create({
+                            type: RecordType.FinancialProblems
+                        }))
+                    }
+                }
+                await MemberManager.patchAllMembersWith(...this.selectedMembers)
+            }
+
             const groups = OrganizationManager.organization.groups
 
 // Create registrations

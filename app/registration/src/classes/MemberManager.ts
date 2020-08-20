@@ -191,14 +191,18 @@ export class MemberManagerStatic {
         return {encryptedMembers, keychainItems}
     }
 
-    async patchAllMembersWith(member: MemberWithRegistrations) {
+    async patchAllMembersWith(...patchMembers: MemberWithRegistrations[]) {
         const members = (this.members ?? []).filter(m => !!m.details)
-        const ex = members.findIndex(m => m.id == member.id)
-        if (ex !== -1) {
-            members.splice(ex, 1, member)
-        } else {
-            members.push(member)
+
+        for (const member of patchMembers) {
+            const ex = members.findIndex(m => m.id == member.id)
+            if (ex !== -1) {
+                members.splice(ex, 1, member)
+            } else {
+                members.push(member)
+            }
         }
+        
         const { encryptedMembers, keychainItems } = await this.getEncryptedMembers(members)
         if (encryptedMembers.length == 0) {
             return;
