@@ -73,10 +73,16 @@ export default class BirthDayInput extends Vue {
     }
 
     @Watch('value', { deep: true })
-    onValueChanged(val: Date) {
-        this.day = val.getDate()
-        this.month = val.getMonth() + 1
-        this.year = val.getFullYear()
+    onValueChanged(val: Date | null) {
+        if (val) {
+            this.day = val.getDate()
+            this.month = val.getMonth() + 1
+            this.year = val.getFullYear()
+        } else {
+            this.day = null;
+            this.month = null;
+            this.year = null;
+        }
     }
 
     updateDate() {
