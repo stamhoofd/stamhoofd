@@ -11,7 +11,7 @@
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
 
-div.spinner {
+.spinner-container  > div.spinner {
     display: inline-block;
     animation: spinner-spin 2s linear infinite;
     width: 28px;
