@@ -1,6 +1,7 @@
 <template>
     <div class="toast-view-container">
-        <div class="toast-view" @click="close">
+        <div class="toast-view" @click="close" :class="toast.icon">
+            <Spinner v-if="toast.icon == 'spinner'"/>
             <span v-if="toast.icon" class="icon" :class="toast.icon"/>
             <span>{{ message }}</span>
         </div>
@@ -11,12 +12,14 @@
 import { ComponentWithProperties, NavigationMixin, FramedComponent } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Mixins } from "vue-property-decorator";
 import { Toast } from './Toast';
+import Spinner from '../Spinner.vue';
 
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view
 */
 @Component({
     components: {
+        Spinner
     }
 })
 export default class ToastView extends Mixins(NavigationMixin) {
@@ -37,6 +40,9 @@ export default class ToastView extends Mixins(NavigationMixin) {
             window.setTimeout(() => {
                 this.close();
             }, this.toast.autohideAfter)
+        }
+        this.toast.doHide = () => {
+            this.close()
         }
     }
 
@@ -90,6 +96,16 @@ export default class ToastView extends Mixins(NavigationMixin) {
         margin-left: -10px;
         margin-right: 10px;
         flex-shrink: 0;
+    }
+
+    &.green {
+        background-color: $color-success-background;
+        color: $color-success-dark;
+    }
+
+    &.red {
+        background-color: $color-error-background;
+        color: $color-error-dark;;
     }
 
     &> .spinner-container {

@@ -135,7 +135,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
         try {
             await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
-            const toast = new Toast('De wijzigingen zijn opgeslagen', "success")
+            const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
             toast.withOffset = true
             toast.show()
         } catch (e) {

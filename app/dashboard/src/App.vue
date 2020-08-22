@@ -8,7 +8,7 @@
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, NavigationController } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "vue-property-decorator";
-import { AuthenticatedView, PromiseView, ToastBox, ForgotPasswordResetView } from '@stamhoofd/components';
+import { AuthenticatedView, PromiseView, ToastBox, ForgotPasswordResetView, Toast } from '@stamhoofd/components';
 import DashboardMenu from './views/dashboard/DashboardMenu.vue'
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';

@@ -242,7 +242,7 @@ export class Session implements RequestMiddleware {
             .catch(e => {
                 console.error(e)
                 // todo: show message
-                this.logout()
+                this.temporaryLogout()
             })
     }
 
@@ -260,6 +260,18 @@ export class Session implements RequestMiddleware {
         }
         this.userPrivateKey = await Sodium.decryptMessage(this.user.encryptedPrivateKey, this.authEncryptionKey)
         this.callListeners()
+    }
+
+    // Logout without clearing this token
+    temporaryLogout() {
+        // We do not call ontoken changed -> prevent saving!!!!
+        if (this.token) {
+            this.token.onChange = () => {
+                // emtpy
+            }
+            this.token = null;
+            this.callListeners()
+        }
     }
 
     logout() {

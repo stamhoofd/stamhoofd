@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="checkbox" :class="{manual}">
-            <input type="checkbox" v-model="checkboxValue" :disabled="disabled">
+            <input type="checkbox" v-model="checkboxValue" :disabled="disabled" ref="checkbox">
             <div>
                 <div>
                     <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,6 +49,13 @@ export default class Checkbox extends Vue {
 
     set checkboxValue(value) {
         this.$emit("change", value)
+
+        // Add support for a model that doesn't change
+        this.$nextTick(() => {
+            if (this.checkboxValue != value) {
+                (this.$refs.checkbox as any).checked = this.checkboxValue;
+            }
+        })
     }
 }
 </script>

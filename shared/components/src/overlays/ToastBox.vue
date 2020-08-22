@@ -113,14 +113,14 @@ export default class ToastBox extends Vue {
     }
 
     .move-leave-to {
-        transform: scale(0.8, 0.8) translate(70%, 0%);
-        transform-origin: right center;
+        transform: scale(0.8, 0.8) translateY(30px);
+        transform-origin: center center;
     }
 
     .move-leave-active {
+        height: 0;
         z-index: -10;
         pointer-events: none;
-        position: absolute;                                                                                                                                                                                                                                                                                                                                                                                                      
     }
 }
 </style>

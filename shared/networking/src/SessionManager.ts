@@ -74,6 +74,14 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
+    clearCurrentSession() {
+        if (this.currentSession) {
+            this.currentSession.removeListener(this)
+        }
+        this.currentSession = null
+        this.callListeners()
+    }
+
     setCurrentSession(session: Session) {
         if (this.currentSession) {
             this.currentSession.removeListener(this)

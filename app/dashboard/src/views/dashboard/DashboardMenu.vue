@@ -50,7 +50,7 @@
                 <span class="icon card"/>
                 <span>Overschrijvingen</span>
             </button>
-            <button class="menu-button button heading" @click="manageSettings" :class="{ selected: currentlySelected == 'manage-settings'}">
+            <button class="menu-button button heading" @click="manageSettings(true)" :class="{ selected: currentlySelected == 'manage-settings'}">
                 <span class="icon settings"/>
                 <span>Instellingen</span>
             </button>
@@ -94,10 +94,11 @@ import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import { CenteredMessage } from '@stamhoofd/components';
+import { CenteredMessage, Toast } from '@stamhoofd/components';
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import CreditsView from './settings/CreditsView.vue';
 import NoKeyView from './NoKeyView.vue';
+import { Decoder } from '@simonbackx/simple-encoding';
 
 
 
@@ -111,8 +112,19 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        HistoryManager.setUrl("/")
-        if (!this.splitViewController?.shouldCollapse()) {
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
+        let didSet = false
+
+        if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
+            this.manageSettings(false)
+            didSet = true
+        }
+
+        if (!didSet) {
+            HistoryManager.setUrl("/")
+        }
+        if (!didSet && !this.splitViewController?.shouldCollapse()) {
             if (this.groups.length > 0) {
                 this.openGroup(this.groups[0])
             } else {
@@ -138,10 +150,6 @@ export default class Menu extends Mixins(NavigationMixin) {
         } catch (e) {
             this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
         }
-    }
-
-    activated() {
-        HistoryManager.setUrl("/")
     }
 
     get groups() {
@@ -178,9 +186,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(PaymentsView, {}));
     }
 
-    manageSettings() {
+    manageSettings(animated: boolean = true) {
         this.currentlySelected = "manage-settings"
-        this.showDetail(new ComponentWithProperties(SettingsView, {}));
+        this.splitViewController!.showDetail(new ComponentWithProperties(SettingsView, {}), animated);
     }
 
     manageAdmins() {

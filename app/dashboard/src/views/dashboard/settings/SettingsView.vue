@@ -147,6 +147,47 @@
 
             <FileInput v-if="selectedPrivacyType == 'file'" title="Kies een bestand" :validator="validator" v-model="privacyPolicyFile" :required="false"/>
 
+            <hr>
+            <h2>Betaalmethodes</h2>
+
+            <Checkbox v-model="enableTransfers">Overschrijvingen (gratis)</Checkbox>
+            <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
+            <Checkbox>Payconiq (20 cent)</Checkbox>
+
+            <hr>
+            <h2>Online betalingen activeren</h2>
+
+            <template v-if="!organization.privateMeta.mollieOnboarding">
+                <p class="st-list-description">Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.</p>
+
+                <p class="st-list-description">
+                    <button class="button text" @click="linkMollie">
+                        <span class="icon link" />
+                        <span>Mollie koppelen</span>
+                    </button>
+                </p>
+            </template>
+            <template v-else>
+                <p class="success-box" v-if="organization.privateMeta.mollieOnboarding.canReceivePayments">Online betalingen via Bancontact zijn actief</p>
+                <p class="warning-box" v-else>Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.</p>
+                <p class="warning-box" v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements">Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen</p>
+
+                <p class="st-list-description" v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'">Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.</p>
+                <p class="st-list-description" v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'">Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).</p>
+
+                <p class="st-list-description">
+                    <LoadingButton :loading="loadingMollie">
+                        <button class="button text" @click="mollieDashboard">
+                            <span class="icon edit" />
+                            <span>Gegevens in Mollie aanvullen of aanpassen</span>
+                        </button>
+                    </LoadingButton>
+                </p>
+            </template>
+
+           
+
+       
         </main>
 
         <STToolbar>
@@ -162,11 +203,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
+import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges, PatchableArray } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Radio, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast, FileInput} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File, PaymentMethod } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -199,6 +240,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     saving = false
     temp_organization = OrganizationManager.organization
     showDomainSettings = true
+    loadingMollie = false
     selectedPrivacyType = this.temp_organization.meta.privacyPolicyUrl ? "website" : (this.temp_organization.meta.privacyPolicyFile ? "file" : "none")
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
@@ -325,7 +367,57 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }
         this.$set(this.organizationPatch.meta, "privacyPolicyFile", file)
     }
+
+    get enableTransfers() {
+        return this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
+    }
+
+    set enableTransfers(enable: boolean) {
+        if (enable == this.enableTransfers) {
+            return;
+        }
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({
+                paymentMethods: new PatchableArray()
+            }))
+        }
+        if (enable) {
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Transfer)
+        } else {
+            if (this.organization.meta.paymentMethods.length == 1) {
+                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
+                return
+            }
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Transfer) 
+        }
+    }
     
+    get enableBancontact() {
+        return this.organization.meta.paymentMethods.includes(PaymentMethod.Bancontact)
+    }
+
+    set enableBancontact(enable: boolean) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({
+                paymentMethods: new PatchableArray()
+            }))
+        }
+
+        if (enable) {
+            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                new Toast("Je kan Bancontact niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je Bancontact betalingen accepteren.", "error red").show();
+                return
+            }
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Bancontact)
+        } else {
+            if (this.organization.meta.paymentMethods.length == 1) {
+                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
+                return
+            }
+
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Bancontact) 
+        }
+    }
 
     get address() {
         return this.organization.address
@@ -383,7 +475,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         try {
             await OrganizationManager.patch(this.organizationPatch)
-            new Toast('De wijzigingen zijn opgeslagen', "success").setWithOffset().show()
+            new Toast('De wijzigingen zijn opgeslagen', "success green").setWithOffset().show()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -417,6 +509,109 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return true;
         }
         return false;
+    }
+
+    linkMollie() {
+        // Start oauth flow
+        const client_id = process.env.NODE_ENV == "development" ? "app_awGyMjwGgRue2zjJBrdkEWuK" : "app_rCR5DwB8pB5zFE7D2f3feQTs"
+        const state = "todo"
+        const scope = "payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write subscriptions.read subscriptions.write"
+        const url = "https://www.mollie.com/oauth2/authorize?client_id="+encodeURIComponent(client_id)+"&state="+encodeURIComponent(state)+"&scope="+encodeURIComponent(scope)+"&response_type=code&approval_prompt=auto&locale=nl_BE"
+
+        window.location.href = url;
+    }
+
+    async doLinkMollie(code: string) {
+        const toast = new Toast("Koppelen...", "spinner").setHide(null).show()
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/mollie/connect",
+                body: {
+                    code
+                },
+                decoder: Organization as Decoder<Organization>
+            })
+
+            SessionManager.currentSession!.setOrganization(response.data)
+            toast.hide()
+            new Toast("Mollie is gekoppeld", "success green").show()
+        } catch (e) {
+            toast.hide()
+            new Toast("Koppelen mislukt", "error red").show()
+        }
+    }
+
+
+    mounted() {
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
+
+        console.log(path);
+
+        if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+
+            if (code && state) {
+                this.doLinkMollie(code);
+            } else {
+                const error = urlParams.get('error') ?? "";
+                if (error) {
+                    new Toast("Koppelen mislukt", "error red").show()
+                }
+            }
+            this.updateMollie();
+        } else {
+            if (this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) {
+                this.updateMollie();
+            }
+        }
+        HistoryManager.setUrl("/settings")
+    }
+
+     async updateMollie() {
+        if (!this.organization.privateMeta?.mollieOnboarding) {
+             return;
+        }
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/mollie/check",
+                decoder: Organization as Decoder<Organization>
+            })
+           
+            SessionManager.currentSession!.setOrganization(response.data)
+        } catch (e) {
+        }
+    }
+
+    async mollieDashboard() {
+        if (this.loadingMollie) {
+            return;
+        }
+        this.loadingMollie = true;
+
+        const tab = window.open('about:blank')!;
+
+        try {
+            const url = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/mollie/dashboard"
+            })
+            console.log(url.data)
+
+            tab.location = url.data as any;
+            tab.focus();
+        } catch (e) {
+            tab.close()
+            this.errorBox = new ErrorBox(e)
+        }
+        
+        this.loadingMollie = false;
     }
 
 }

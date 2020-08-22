@@ -6,11 +6,18 @@ export class Toast {
     icon: string | null
     withOffset = false
 
-    autohideAfter = 5000
+    autohideAfter: number | null = 5000
+
+    doHide: (() => void) | null = null
 
     constructor(message: string, icon: string | null = null) {
         this.message = message
         this.icon = icon
+    }
+
+    setHide(ms: number | null) {
+        this.autohideAfter = ms 
+        return this
     }
 
     setWithOffset() {
@@ -34,5 +41,14 @@ export class Toast {
 
     show() {
         Toast.callListeners(this)
+        return this
+    }
+
+    hide() {
+        if (this.doHide) {
+            this.doHide();
+            this.doHide = null;
+        }
+        return this
     }
 }
