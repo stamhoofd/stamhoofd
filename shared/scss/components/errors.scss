@@ -8,31 +8,42 @@
     font-size: 14px;
     line-height: 1.4;
     font-weight: 500;
-    padding: 15px 15px 15px 40px;
+    padding: 15px 15px 15px 50px;
     box-sizing: border-box;
 }
 
 .warning-box {
-    background: $color-warning-background url("~@stamhoofd/assets/images/icons/color/exclamation.svg") 10px center
-        no-repeat;
+    background: $color-warning-background;
     border-radius: $border-radius;
     color: $color-warning-dark;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     font-weight: 500;
-    padding: 15px 15px 15px 40px;
+    padding: 15px 15px 15px 50px;
     box-sizing: border-box;
     margin: 15px 0;
+    position: relative;
+
+    &::before {
+        position: absolute;
+        content: "";
+        color: $color-warning-primary;
+        font-size: 24px;
+        font-icon: url(@stamhoofd/assets/images/icons/warning.svg);
+        left: 12px;
+        top: 50%;
+        transform: translate(0, -50%);
+    }
 }
 
 .info-box {
     background: $color-primary-background;
     border-radius: $border-radius;
     color: $color-dark;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     font-weight: 500;
-    padding: 15px 15px 15px 40px;
+    padding: 15px 15px 15px 50px;
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
@@ -53,10 +64,10 @@
     background: $color-success-background;
     border-radius: $border-radius;
     color: $color-success-dark;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     font-weight: 500;
-    padding: 15px 15px 15px 40px;
+    padding: 15px 15px 15px 50px;
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
@@ -66,7 +77,7 @@
         content: "";
         color: $color-success;
         font-size: 24px;
-        font-icon: url(@stamhoofd/assets/images/icons/success-line.svg);
+        font-icon: url(@stamhoofd/assets/images/icons/success.svg);
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);

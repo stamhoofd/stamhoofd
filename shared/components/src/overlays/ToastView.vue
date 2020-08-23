@@ -86,7 +86,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     flex-direction: row;
     align-items: center;
 
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     font-weight: 600;
     color: $color-dark;

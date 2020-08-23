@@ -103,7 +103,7 @@
                 </tbody>
             </table>
 
-            <p class="warning-box" v-if="!loading && members.length == 0">Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.</p>
+            <p class="info-box" v-if="!loading && members.length == 0">Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.</p>
         </main>
 
         <STToolbar>

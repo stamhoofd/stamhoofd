@@ -131,7 +131,7 @@
             <STInputBox title="Waar staan jouw privacyvoorwaarden?" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-model="selectedPrivacyType" value="none">Geen</Radio>
-                    <Radio v-model="selectedPrivacyType" value="website">Op onze website</Radio>
+                    <Radio v-model="selectedPrivacyType" value="website">Op jouw website</Radio>
                     <Radio v-model="selectedPrivacyType" value="file">Zelf PDF-bestand aanleveren</Radio>
                 </RadioGroup>
             </STInputBox>
