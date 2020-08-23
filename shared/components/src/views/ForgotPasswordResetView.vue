@@ -77,7 +77,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     validator = new Validator()
     user: NewUser | null = null;
 
-    @Prop({ default: SessionManager.currentSession })
+    @Prop({ default: () => SessionManager.currentSession })
     initialSession!: Session
 
     session: Session | null = null
