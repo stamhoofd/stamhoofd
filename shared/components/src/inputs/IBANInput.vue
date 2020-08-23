@@ -63,11 +63,11 @@ export default class IBANInput extends Vue {
     }
 
     async validate() {
-        this.$emit("input", null)
         this.ibanRaw = this.ibanRaw.trim().toUpperCase()
 
         if (!this.required && this.ibanRaw.length == 0) {
             this.errorBox = null
+            this.$emit("input", null)
             return true
         }
 
