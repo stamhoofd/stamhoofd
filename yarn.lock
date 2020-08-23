@@ -1184,9 +1184,9 @@
   integrity sha512-8hBaEp8OAwtUQtgRCZJxrE51NUKIVQCYzHa9BcmMegO7DVADVwjvb03N2/nLGMUmE2hCWe52D93I1hHj1hiVrQ==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
-  version "1.6.7"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.6.7.tgz#3988cd78982bfc011c6ce15ca6a018d052c8faa5"
-  integrity sha512-BC2gpN1ZkUmTNwdgY6ZSG1p/PHAH08w7++doSSBfP8Dj1PWSgP3dkqp2FtceLCX/YGAjkf+fPEOCizXd8prZxA==
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.6.8.tgz#d722f8f8b83c174ef57962f3a87ca0f967c06070"
+  integrity sha512-S2W5avMNWPLkqnQlpLz5bLI8+KzWWNaFuE63+oEMs+nMzRcjgdEiHlYnc2ewMslKyeryrZwmgqoRmiAbHdAucQ==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.1"
@@ -1203,9 +1203,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.8.13"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.13.tgz#1cf623e77d6e934913a9240c03f783995391c1c3"
-  integrity sha512-usYbJMf55EhbFkkhxfq1XQFht5l4MkwmBdEGA9ngeJPVNTA9b6PFg3rRyjtvmP6r4Lqb8kVYQsuSa3z/5E0+hw==
+  version "1.8.14"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.14.tgz#7c9fd612a90275b0ebaf2232c2e3c80010918b98"
+  integrity sha512-/Lf45tD5/OtI/G4vh0BMvQgWTDvRnz+xLwlzvWQVcxbApS7LSUcVW75wuqOSrRVpeUZKKUR9IjLfK98j5xmp9Q==
   dependencies:
     uuid "^8.2.0"
 
