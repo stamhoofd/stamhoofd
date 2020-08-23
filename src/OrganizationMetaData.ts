@@ -57,7 +57,7 @@ export class OrganizationMetaData extends AutoEncoder {
     color: string | null = null
 
     // Deprecated
-    @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
+    @field({ decoder: StringDecoder, version: 6, optional: true, upgrade: () => "" })
     bic = ""
 
     
