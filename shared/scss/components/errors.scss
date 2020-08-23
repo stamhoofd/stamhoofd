@@ -1,8 +1,7 @@
 @use '@stamhoofd/scss/base/variables' as *;
 
 .error-box {
-    background: $color-error-background url("~@stamhoofd/assets/images/icons/color/exclamation-two.svg") 10px center
-        no-repeat;
+    background: $color-error-background;
     border-radius: $border-radius;
     color: $color-error-dark;
     font-size: 14px;
@@ -10,6 +9,22 @@
     font-weight: 500;
     padding: 15px 15px 15px 50px;
     box-sizing: border-box;
+    position: relative;
+
+    @media (max-width: 450px) {
+        font-size: 14px;
+    }
+
+     &::before {
+        position: absolute;
+        content: "";
+        color: $color-error;
+        font-size: 24px;
+        font-icon: url(@stamhoofd/assets/images/icons/error.svg);
+        left: 12px;
+        top: 50%;
+        transform: translate(0, -50%);
+    }
 }
 
 .warning-box {
@@ -23,6 +38,10 @@
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
+
+    @media (max-width: 450px) {
+        font-size: 14px;
+    }
 
     &::before {
         position: absolute;
@@ -48,6 +67,10 @@
     margin: 15px 0;
     position: relative;
 
+    @media (max-width: 450px) {
+        font-size: 14px;
+    }
+
     &::before {
         position: absolute;
         content: "";
@@ -71,6 +94,10 @@
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
+
+    @media (max-width: 450px) {
+        font-size: 14px;
+    }
 
     &::before {
         position: absolute;

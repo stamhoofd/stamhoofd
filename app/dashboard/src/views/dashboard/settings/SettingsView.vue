@@ -377,9 +377,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return;
         }
         if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({
-                paymentMethods: new PatchableArray()
-            }))
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
         if (enable) {
             (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Transfer)
@@ -397,10 +395,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableBancontact(enable: boolean) {
+        if (enable == this.enableBancontact) {
+            return;
+        }
+
         if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({
-                paymentMethods: new PatchableArray()
-            }))
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
         if (enable) {
@@ -475,6 +475,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         try {
             await OrganizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").setWithOffset().show()
         } catch (e) {
             this.errorBox = new ErrorBox(e)

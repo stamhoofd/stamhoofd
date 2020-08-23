@@ -170,6 +170,10 @@ export default class CenteredMessage extends Vue {
         margin: 0 auto;
     }
 
+    > .loading-button {
+        display: block;
+    }
+
     > h1 {
         padding-bottom: 20px;
         padding-top: 20px;
