@@ -74,6 +74,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import FinancialSupportView from './FinancialSupportView.vue';
 import { Formatter } from '@stamhoofd/utility';
 import TransferPaymentView from './TransferPaymentView.vue';
+import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
     components: {
@@ -266,10 +267,31 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         this.errorBox = null;
 
         // todo: check waiting list validations etc
+        if (this.shouldAskFinancialSupport) {
+            this.show(new ComponentWithProperties(FinancialSupportView, {
+                selectedMembers: selected
+            }))
+        } else {
+            this.show(new ComponentWithProperties(PaymentSelectionView, {
+                selectedMembers: selected
+            }))
+        }
+    }
 
-        this.show(new ComponentWithProperties(FinancialSupportView, {
-            selectedMembers: selected
-        }))
+
+     get shouldAskFinancialSupport() {
+        const groups = OrganizationManager.organization.groups
+        for (const member of this.selectedMembers) {
+            const preferred = member.getSelectedGroups(groups)
+
+            for (const selected of preferred) {
+                // If not a waiting list, and if it has a reduced price
+                if (!!selected.group.settings!.prices.find(p => p.reducedPrice !== null) && !selected.waitingList) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     openPayment(payment: PaymentDetailed) {

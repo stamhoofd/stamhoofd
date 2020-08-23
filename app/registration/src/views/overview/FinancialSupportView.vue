@@ -1,7 +1,7 @@
 <template>
     <div class="boxed-view">
         <div class="st-view">
-            <main v-if="shouldShow">
+            <main>
                 <h1>Financiële ondersteuning</h1>
                 <p>We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om. Dit is enkel zichtbaar voor de takleiding. </p>
 
@@ -9,17 +9,11 @@
 
                 <Checkbox v-model="reduced">Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken</Checkbox>
             </main>
-            <main v-else>
-                <h1>Bevestig registratie</h1>
-                <p>Heb je alle leden toegevoegd?</p>
-
-                <STErrorsDefault :error-box="errorBox" />
-            </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
-                        <span>Registratie bevestigen</span>
+                        <span>Doorgaan</span>
                         <span class="icon arrow-right"/>
                     </button>
                 </LoadingButton>
@@ -42,6 +36,7 @@ import TransferPaymentView from './TransferPaymentView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
     components: {
@@ -64,21 +59,6 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     reduced = false
     loading = false
     errorBox: ErrorBox | null = null
-
-    get shouldShow() {
-        const groups = OrganizationManager.organization.groups
-        for (const member of this.selectedMembers) {
-            const preferred = member.getSelectedGroups(groups)
-
-            for (const selected of preferred) {
-                // If not a waiting list, and if it has a reduced price
-                if (!!selected.group.settings!.prices.find(p => p.reducedPrice !== null) && !selected.waitingList) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
 
     async goNext() {
         if (this.loading) {
@@ -113,70 +93,13 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
             if (needsSync) {
                 await MemberManager.patchAllMembersWith(...this.selectedMembers)
             }
-
-            const groups = OrganizationManager.organization.groups
-
-// Create registrations
-            const response = await session.authenticatedServer.request({
-                method: "POST",
-                path: "/user/members/register",
-                body: RegisterMembers.create({
-                    members: this.selectedMembers.flatMap(m => {
-                        if (!m.details) {
-                            throw new SimpleError({
-                                code: "",
-                                message: "Data is niet leesbaar"
-                            })
-                        }
-
-                        const preferred = m.getSelectedGroups(groups)
-
-                        if (preferred.length == 0) {
-                            throw new SimpleError({
-                                code: "",
-                                message: "Nog geen groep gekozen"
-                            })
-                        }
-
-                        return preferred.map(g => RegisterMember.create({
-                            memberId: m.id,
-                            groupId: g.group.id,
-                            reduced: this.reduced,
-                            waitingList: g.waitingList
-                        }))
-                        
-                    }),
-                    paymentMethod: PaymentMethod.Transfer
-                }),
-                decoder: RegisterResponse as Decoder<RegisterResponse>
-            })
-
-            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
-
-            const payment = response.data.payment
-
             
             this.loading = false
-            const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
-            console.log(registrations)
 
-            if (!payment) {
-                this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                    registrations
-                }))
-                return;
-            }
-
-            if (payment.status == PaymentStatus.Succeeded) {
-                this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                    registrations
-                }))
-            } else {
-                this.show(new ComponentWithProperties(TransferPaymentView, {
-                    payment,
-                    registrations
-                }))
-            }
+            this.show(new ComponentWithProperties(PaymentSelectionView, {
+                reduced: this.reduced,
+                selectedMembers: this.selectedMembers
+            }))
             
         } catch (e) {
             console.error(e)
