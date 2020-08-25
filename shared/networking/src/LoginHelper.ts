@@ -1,4 +1,4 @@
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User } from '@stamhoofd/structures';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel } from '@stamhoofd/structures';
 import { Decoder, ObjectData, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
@@ -200,6 +200,11 @@ export class LoginHelper {
             decoder: Token
         })
 
+        // Auomatically assign all prmissions (frontend side)
+        user.permissions = Permissions.create({
+            level: PermissionLevel.Full
+        })
+
         const session = new Session(organization.id)
         session.organization = organization
         session.setToken(response.data)
@@ -285,6 +290,11 @@ export class LoginHelper {
             body: user,
             decoder: Token
         })
+
+        if (session.user) {
+            // Clear user
+            session.user = null;
+        }
 
         session.setToken(response.data)
         session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: userKeyPair.privateKey })
