@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
@@ -21,6 +21,23 @@ export class CreditItem extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     description: string
+}
+
+export enum MollieStatus {
+    NeedsData = "NeedsData",
+    InReview = "InReview",
+    Completed = "Completed"
+}
+
+export class MollieOnboarding extends AutoEncoder  {
+    @field({ decoder: BooleanDecoder })
+    canReceivePayments = false
+
+    @field({ decoder: BooleanDecoder })
+    canReceiveSettlements = false
+
+    @field({ decoder: new EnumDecoder(MollieStatus)})
+    status: MollieStatus
 }
 
 export class OrganizationPrivateMetaData extends AutoEncoder {
@@ -56,4 +73,8 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(CreditItem), version: 23 })
     credits: CreditItem[] = []
+
+    // readonly
+    @field({ decoder: MollieOnboarding, nullable: true, version: 27})
+    mollieOnboarding: MollieOnboarding | null = null
 }

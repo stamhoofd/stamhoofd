@@ -5,6 +5,7 @@ import { Image } from './files/Image';
 import { GroupPrices } from './GroupPrices';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
+import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 
 export class OrganizationMetaData extends AutoEncoder {
@@ -60,5 +61,6 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 6, optional: true, upgrade: () => "" })
     bic = ""
 
-    
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
+    paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 }
