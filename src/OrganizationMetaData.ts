@@ -57,6 +57,10 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 21 })
     color: string | null = null
 
+    // Deprecated
+    @field({ decoder: StringDecoder, version: 6, optional: true, upgrade: () => "" })
+    bic = ""
+
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 }
