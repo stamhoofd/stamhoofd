@@ -1,7 +1,7 @@
 <template>
     <div class="boxed-view">
         <div class="st-view">
-            <main v-if="!payment || payment.status == 'Pending'">
+            <main v-if="!payment || payment.status != 'Failed'">
                 <h1>Wachten op betaalbevestiging...</h1>
                 <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten, daarna leggen we de inschrijving vast.</p>
 
@@ -13,7 +13,7 @@
                 <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
             </main>
 
-            <STToolbar v-if="payment && payment.status != 'Pending'">
+            <STToolbar v-if="payment && payment.status == 'Failed'">
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="retry">
                         <span>Opnieuw proberen</span>
@@ -88,9 +88,8 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                     }).catch(e => {
                         console.error(e)
                     })  
-                } else {
-                    this.payment = payment
                 }
+                this.payment = payment
             }).catch(e => {
                 // too: handle this
                 console.error(e)

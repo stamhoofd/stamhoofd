@@ -79,7 +79,9 @@
 
                         <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
                         <p class="style-description-small">{{ payment.getMemberNames() }}</p>
-                        <p class="style-description-small" v-if="payment.status == 'Succeeded'">Betaald</p>
+                        <p class="style-description-small" v-if="payment.status == 'Succeeded'">
+                            {{ payment.method == "Transfer" ? 'Betaald via overschrijving' : 'Betaald via Bancontact' }}
+                        </p>
                         <p class="style-description-small" v-else>Betaal via overschrijving {{ payment.transferDescription }}</p>
 
                         <template slot="right">
