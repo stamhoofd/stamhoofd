@@ -162,8 +162,13 @@ export default class Menu extends Mixins(NavigationMixin) {
                 this.whatsNewBadge = (WhatsNewCount - c).toString()
             }
         } else {
-            localStorage.setItem("what-is-new", (WhatsNewCount - 1 ).toString());
-            this.whatsNewBadge = "1"
+            if (WhatsNewCount == 1) {
+                // Only once for existing users
+                localStorage.setItem("what-is-new", (WhatsNewCount - 1 ).toString());
+                this.whatsNewBadge = "1"
+            } else {
+                localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
+            }
         }
     }
 
