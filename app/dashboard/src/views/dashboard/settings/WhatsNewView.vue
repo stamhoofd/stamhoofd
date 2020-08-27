@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view background" id="credits-view">
+    <div class="st-view background" id="whatsnew-view">
         <STNavigationBar title="Gratis en open-source">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
@@ -8,9 +8,9 @@
             <h1>Wat is er nieuw?</h1>
 
             <hr>
-            <h2>Koppel zelf Bancontact (27 augustus)</h2>
+            <h2>Koppel zelf Bancontact + snelkoppeling naar inschrijvingspagina (27 augustus)</h2>
             <p>Via een nieuwe knop in het instellingen menu kan je nu zelf Bancontact activeren. Nadat je op die knop hebt gedrukt moet je een account aanmaken bij Mollie (onze betaalpartner). Doe dat enkel via die knop, anders kan je geen gebruik maken van de voordeligere tarieven die we via Stamhoofd hebben verkregen. Je hebt een VZW nodig om betalingen via Bancontact te accepteren. </p>
-
+            <p>We hebben ook een fout verholpen dat je geen domeinnaam kon koppelen als daar een liggend streepje in voorkwam.</p>
             <hr>
             <h2>
                 Stamhoofd is nu volledig gratis en open-source (25 augustus)
@@ -64,9 +64,12 @@ export default class WhatsNewView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-    #credits-view {
-        .input-info {
-            margin-top: 8px;
+    @use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+    #whatsnew-view {
+        main > p {
+            margin-bottom: 15px;
+            @extend .style-description;
         }
     }
 </style>

@@ -280,7 +280,8 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
 
      get shouldAskFinancialSupport() {
-        const groups = OrganizationManager.organization.groups
+        return true;
+        /*const groups = OrganizationManager.organization.groups
         for (const member of this.selectedMembers) {
             const preferred = member.getSelectedGroups(groups)
 
@@ -291,7 +292,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 }
             }
         }
-        return false
+        return false*/
     }
 
     openPayment(payment: PaymentDetailed) {

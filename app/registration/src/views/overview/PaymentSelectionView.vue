@@ -73,6 +73,10 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     selectedPaymentMethod: PaymentMethod | null = null
 
+    mounted() {
+        this.selectedPaymentMethod = this.paymentMethods[0] ?? null
+    }
+
     get paymentMethods() {
         return OrganizationManager.organization.meta.paymentMethods
     }
