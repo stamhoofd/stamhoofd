@@ -12,7 +12,7 @@ Inside one of the app directories, run `yarn serve` to start a development serve
 
 ### Linking shared dependencies
 
-We use shared dependencies between front and back end. In order to debug changes in multiple repositories, you need to use `yalc`. Use `yarn build && yalc publish --push` in one of the dependencies and use `yalc link @stamhoofd/stamhoofd-structures` once (for example, change the name of the dependency). To undo the linking, use `yarn yalc:clear`. After the dependencies are deployed and have new version numbers, you'll need to upgrade the dependencies without yalc.
+We use shared dependencies between front and back end. In order to debug changes in multiple repositories, you need to use `yalc`. Use `yarn build && yalc publish --push` in one of the dependencies and use `yalc link @stamhoofd/stamhoofd-structures` once (for example, change the name of the dependency). Restart webpack development servers after linking. To undo the linking, use `yarn yalc:clear`. Restart webpack development servers after unlinking. After the dependencies are deployed and have new version numbers, you'll need to upgrade the dependencies without yalc.
 
 Note: `yarn link` (not to confuse with `yalc link`) does not work reliable, avoid using it.
 
