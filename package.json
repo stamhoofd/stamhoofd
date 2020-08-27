@@ -11,7 +11,8 @@
         "upgrade:internal": "yarn upgrade --scope simonbackx && yarn upgrade --scope stamhoofd",
         "caddy:development": "export $(cat .env | xargs) && caddy run --resume",
         "caddy:development:config": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.json",
-        "caddy:development:config-watch": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json"
+        "caddy:development:config-watch": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
+        "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
     },
     "dependencies": {
         "@babel/runtime": "^7.10.5",

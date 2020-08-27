@@ -8,7 +8,13 @@ In development, Caddy is also used, but you'll need to setup port forwarding for
 
 ## Development
 
-Inside a services directory, run `yarn serve` to start a development server with hot reloading. Use `yarn build` to compile to the `dist/` folder.
+Inside one of the app directories, run `yarn serve` to start a development server with hot reloading. Use `yarn build` to compile to the `dist/` folder.
+
+### Linking shared dependencies
+
+We use shared dependencies between front and back end. In order to debug changes in multiple repositories, you need to use `yalc`. Use `yarn build && yalc publish --push` in one of the dependencies and use `yalc link @stamhoofd/stamhoofd-structures` once (for example, change the name of the dependency). To undo the linking, use `yarn yalc:clear`. After the dependencies are deployed and have new version numbers, you'll need to upgrade the dependencies without yalc.
+
+Note: `yarn link` (not to confuse with `yalc link`) does not work reliable, avoid using it.
 
 ### Development environment
 
