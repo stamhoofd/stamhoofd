@@ -2,6 +2,7 @@ export enum RecordType {
     // Privacy
     NoData = "NoData",
     NoPictures = "NoPictures",
+    NoGroupPictures=" NoGroupPictures",
 
     // Allergies & diet
     FoodAllergies = "FoodAllergies",
@@ -56,6 +57,8 @@ export class RecordTypeHelper {
                 return "Geen toestemming voor verzamelen gevoelige gegevens";
             case RecordType.NoPictures:
                 return "Geen foto's maken";
+            case RecordType.NoGroupPictures:
+                return "Niet op groepsfoto's";
             case RecordType.FoodAllergies:
                 return "Allergisch voor voeding";
             case RecordType.MedicineAllergies:
@@ -119,6 +122,8 @@ export class RecordTypeHelper {
                 return "Dit gezin heeft ervoor gekozen om de steekkaart niet in te vullen omdat er geen toestemming werd gegeven i.v.m. het verzamelen van gevoelige gegevens. Bespreek dit zeker met de ouders.";
             case RecordType.NoPictures:
                 return "Bij het inschrijven is er geen toestemming gegeven voor het puliceren van foto's op de website of sociale media.";
+            case RecordType.NoGroupPictures:
+                return "Bij het inschrijven is er geen toestemming gegeven voor het puliceren van groepsfoto's op de website of sociale media.";
             case RecordType.Vegetarian:
                 return "Dit lid eet geen vlees en waarschijnlijk ook geen vis (dat vraag je best eens na). Hou hier rekening mee of bespreek dit met het lid.";
             case RecordType.Vegan:
@@ -180,6 +185,8 @@ export class RecordTypeHelper {
             case RecordType.NoData:
                 return RecordTypePriority.High;
             case RecordType.NoPictures:
+                return RecordTypePriority.High;
+            case RecordType.NoGroupPictures:
                 return RecordTypePriority.High;
             case RecordType.FoodAllergies:
                 return RecordTypePriority.Medium;
