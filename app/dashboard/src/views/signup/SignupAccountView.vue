@@ -162,7 +162,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }).setDisplayStyle("overlay");
             this.present(component)
 
-             try {
+            try {
 
                 await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
                 
@@ -173,7 +173,12 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
             } catch (e) {
                 this.loading = false;
-                (component.componentInstance() as any)?.pop()
+                (component.componentInstance() as any)?.pop();
+
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    // Show normal errors
+                    throw e;
+                }
 
                 plausible('signupAccountKeyError');
                 const errorMessage = new ComponentWithProperties(CenteredMessage, { 

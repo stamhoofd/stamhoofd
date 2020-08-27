@@ -7,6 +7,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
 import { NetworkManager } from './NetworkManager';
 import { Keychain } from './Keychain';
+import * as Sentry from '@sentry/browser';
 
 export class LoginHelper {
 
@@ -26,7 +27,8 @@ export class LoginHelper {
                 // todo
                 console.error(e);
                 myWorker.terminate();
-                reject(e)
+                reject(e);
+                Sentry.captureException(e);
             }
 
             myWorker.postMessage({
@@ -54,7 +56,8 @@ export class LoginHelper {
                 // todo
                 console.error(e);
                 myWorker.terminate();
-                reject(e)
+                reject(e);
+                Sentry.captureException(e);
             }
 
             myWorker.postMessage({
@@ -96,10 +99,10 @@ export class LoginHelper {
             }
 
             myWorker.onerror = (e) => {
-                // todo
                 console.error(e);
                 myWorker.terminate();
-                reject(e)
+                reject(e);
+                Sentry.captureException(e);
             }
 
             myWorker.postMessage({

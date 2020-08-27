@@ -9,7 +9,7 @@
             <h1>
                 Aan de slag met Stamhoofd
             </h1>
-            <p>Een account maken duurt niet lang en is volledig gratis, voor altijd.</p>
+            <p>Een account maken duurt niet lang en is gratis.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
@@ -126,7 +126,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                     field: "name"
                 })
             }
-            if (this.name.length < 3) {
+            if (this.name.length < 4) {
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "",
