@@ -11,7 +11,8 @@
         "test": "yarn build:full && jest",
         "migrations": "ts-node ./migrations.ts",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "upgrade:internal": "yarn upgrade --scope stamhoofd && yarn upgrade --scope simonbackx"
+        "upgrade:internal": "yarn upgrade --scope stamhoofd && yarn upgrade --scope simonbackx",
+        "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
     },
     "devDependencies": {
         "@types/libsodium-wrappers": "^0.7.7",
