@@ -11,9 +11,6 @@
         <main>
             <h1>Overschrijvingen</h1>
     
-            <p class="info-box">Op aanvraag kan je online betalingen accepteren via onze betaalpartner. Transactiekosten zijn 31 cent voor Bancontact en 20 cent voor Payconiq.</p>
-            <p class="info-box">We bekijken momenteel een mogelijkheid om in de toekomst automatisch overschrijvingen als betaald te markeren. </p>
-
             <Spinner v-if="loading"/>
             <STList v-else>
                 <STListItem v-for="payment in filteredPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
@@ -32,7 +29,10 @@
                     </template>
                 </STListItem>
             </STList>
-            
+
+            <p class="info-box" v-if="!loading && payments.length == 0 && filteredPayments.length == 0">Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt als een lid bij het inschrijven de betaalmethode 'overschrijven' kiest.</p>
+            <p class="info-box" v-else-if="!loading && filteredPayments.length == 0">Geen zoekresultaten</p>
+
         </main>
 
         <STToolbar v-if="canMarkNotPaid || canMarkPaid">
@@ -53,7 +53,7 @@
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, CenteredMessage, BackButton, Spinner, TooltipDirective, LoadingButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch, EncryptedPaymentDetailed, PaymentDetailed, RegistrationWithMember, PaymentStatus, PaymentPatch } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupSettings, OrganizationPatch, EncryptedPaymentDetailed, PaymentDetailed, RegistrationWithMember, PaymentStatus, PaymentPatch, PaymentMethod } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -193,6 +193,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
     }
 
     async setPayments(encryptedPayments: EncryptedPaymentDetailed[]) {
+        encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
 
         // Decrypt data
@@ -244,7 +245,6 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
         })
 
-        console.log("Received response. Decryping...")
         await this.setPayments(response.data)
     }
 

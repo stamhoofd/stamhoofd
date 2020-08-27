@@ -19,9 +19,10 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-credits'}" @click="manageCredits()">
+        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-whats-new'}" @click="manageWhatsNew()">
             <span class="icon gift"/>
-            <span>Groot nieuws</span>
+            <span>Wat is er nieuw?</span>
+            <span class="bubble" v-if="whatsNewBadge">{{ whatsNewBadge }}</span>
         </button>
 
         <hr v-if="groups.length > 0">
@@ -101,9 +102,10 @@ import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { CenteredMessage, Toast } from '@stamhoofd/components';
 import AccountSettingsView from './account/AccountSettingsView.vue';
-import CreditsView from './settings/CreditsView.vue';
 import NoKeyView from './NoKeyView.vue';
 import { Decoder } from '@simonbackx/simple-encoding';
+import WhatsNewView from './settings/WhatsNewView.vue';
+import { WhatsNewCount } from '../../classes/WhatsNewCount';
 
 
 
@@ -111,6 +113,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 export default class Menu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
+    whatsNewBadge = ""
 
     get organization() {
         return OrganizationManager.organization
@@ -151,6 +154,17 @@ export default class Menu extends Mixins(NavigationMixin) {
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
 
         this.checkKey()
+
+        const currentCount = localStorage.getItem("what-is-new")
+        if (currentCount) {
+            const c = parseInt(currentCount)
+            if (!isNaN(c) && WhatsNewCount - c > 0) {
+                this.whatsNewBadge = (WhatsNewCount - c).toString()
+            }
+        } else {
+            localStorage.setItem("what-is-new", (WhatsNewCount - 1 ).toString());
+            this.whatsNewBadge = "1"
+        }
     }
 
     async checkKey() {
@@ -217,9 +231,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(AccountSettingsView, {}));
     }
 
-    manageCredits() {
-        this.currentlySelected = "manage-credits"
-        this.showDetail(new ComponentWithProperties(CreditsView, {}));
+    manageWhatsNew() {
+        this.currentlySelected = "manage-whats-new"
+        this.showDetail(new ComponentWithProperties(WhatsNewView, {}));
+        this.whatsNewBadge = ""
     }
 
     logout() {
@@ -331,6 +346,22 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     .icon {
         padding-right: 10px;
+    }
+
+    .bubble {
+        margin-left: auto;
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        display: block;
+        background: $color-primary;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 20px;
+        vertical-align: middle;
+        color: $color-white;
     }
 
     &:active {

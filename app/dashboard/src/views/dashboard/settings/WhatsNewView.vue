@@ -5,9 +5,16 @@
         </STNavigationBar>
 
         <main>
-            <h1>
-                Stamhoofd is nu volledig gratis en open-source
-            </h1>
+            <h1>Wat is er nieuw?</h1>
+
+            <hr>
+            <h2>Koppel zelf Bancontact (27 augustus)</h2>
+            <p>Via een nieuwe knop in het instellingen menu kan je nu zelf Bancontact activeren. Nadat je op die knop hebt gedrukt moet je een account aanmaken bij Mollie (onze betaalpartner). Doe dat enkel via die knop, anders kan je geen gebruik maken van de voordeligere tarieven die we via Stamhoofd hebben verkregen. Je hebt een VZW nodig om betalingen via Bancontact te accepteren. </p>
+
+            <hr>
+            <h2>
+                Stamhoofd is nu volledig gratis en open-source (25 augustus)
+            </h2>
             <p>Alles wat je kent blijft, maar je hoeft niets meer te betalen om het te gebruiken. Zin om mee te bouwen aan Stamhoofd? Open dan zeker een issue of pull request in onze Github repositories.</p>
         </main>
     </div>
@@ -27,6 +34,7 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import ChangePasswordView from './ChangePasswordView.vue';
 import { Formatter } from '@stamhoofd/utility';
+import { WhatsNewCount } from "../../../classes/WhatsNewCount"
 
 @Component({
     components: {
@@ -47,7 +55,11 @@ import { Formatter } from '@stamhoofd/utility';
         date: Formatter.date.bind(Formatter)
     }
 })
-export default class CreditsView extends Mixins(NavigationMixin) {
+export default class WhatsNewView extends Mixins(NavigationMixin) {
+    mounted() {
+        // Mark whatsnew count
+        localStorage.setItem("what-is-new", WhatsNewCount.toString());
+    }
 }
 </script>
 

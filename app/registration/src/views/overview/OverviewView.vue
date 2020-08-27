@@ -74,7 +74,7 @@
                 <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
                 <STList>
-                    <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="true" @click="openPayment(payment)">
+                    <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
                         <span class="icon card" slot="left" />
 
                         <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
@@ -103,7 +103,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryMa
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, PaymentMethod } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -210,8 +210,15 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }).setDisplayStyle("popup"))
     }
 
+    canOpenPayment(payment: PaymentDetailed) {
+        return payment.method == PaymentMethod.Transfer
+    }
+
     openPayment(payment: PaymentDetailed) {
-            this.present(new ComponentWithProperties(NavigationController, {
+        if (!this.canOpenPayment(payment)) {
+            return;
+        }
+        this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(TransferPaymentView, {
                 payment,
                 isPopup: true

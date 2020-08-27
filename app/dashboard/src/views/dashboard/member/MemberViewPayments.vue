@@ -2,16 +2,23 @@
     <div class="view-payments">
         <main>
             <div v-for="payment in payments" >
-                <h2>Betaling <span class="icon success green" v-if="payment.status == 'Succeeded'"/></h2>
+                <h2>Betaling</h2>
                 <dl class="details-grid" >
                     <dt>Bedrag</dt>
                     <dd>{{ payment.price | price }}</dd>
 
-                    <dt>Bankrekening</dt>
-                    <dd>{{ organization.meta.iban }}</dd>
+                    <template v-if="payment.method == 'Transfer'">
+                        <dt>Bankrekening</dt>
+                        <dd>{{ organization.meta.iban }}</dd>
 
-                    <dt>Mededeling</dt>
-                    <dd>{{ payment.transferDescription }}</dd>
+                        <dt>Mededeling</dt>
+                        <dd>{{ payment.transferDescription }}</dd>
+                    </template>
+
+                    <template v-if="payment.method == 'Bancontact'">
+                        <dt>Betaald via </dt>
+                        <dd>Bancontact</dd>
+                    </template>
 
                     <dt>Status</dt>
                     <dd v-if="payment.status == 'Succeeded'">
@@ -21,6 +28,8 @@
                         Nog niet betaald
                     </dd>
                 </dl>
+
+                <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">Betaald op {{ payment.paidAt | date }}</p>
             </div>
         </main>
 
@@ -49,6 +58,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { MemberManager } from '../../../classes/MemberManager';
+import { FamilyManager } from '../../../classes/FamilyManager';
 
 @Component({ 
     components: { 
@@ -56,12 +66,17 @@ import { MemberManager } from '../../../classes/MemberManager';
         LoadingButton
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price,
+        date: Formatter.dateTime.bind(Formatter)
     }
 })
 export default class MemberViewPayments extends Vue {
     @Prop()
     member!: MemberWithRegistrations;
+
+    @Prop()
+    familyManager!: FamilyManager;
+    
     loading = false
 
     organization = OrganizationManager.organization
@@ -100,15 +115,34 @@ export default class MemberViewPayments extends Vue {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
                 })
-                for (const payment of this.payments) {
-                    payment.status = PaymentStatus.Succeeded
-                    // todo: improve this for related payments
-                }
+                this.updatePayments(response.data)
                 MemberManager.callListeners("payment", this.member)
             } finally {
                 this.loading = false
             }
             
+        }
+    }
+
+    updatePayments(payments: EncryptedPaymentDetailed[]) {
+        for (const payment of payments) {
+            // We loop all members of this family because they might have shared payments
+            for (const member of this.familyManager.members) {
+                for (const r of member.registrations) {
+                    const memberPayment = r.payment
+                    if (memberPayment && payment.id == memberPayment.id) {
+                        // Copy usefull data
+                        memberPayment.status = payment.status
+                        memberPayment.paidAt = payment.paidAt
+
+                        memberPayment.transferDescription = payment.transferDescription
+                        memberPayment.price = payment.price
+                        memberPayment.method = payment.method
+                        memberPayment.updatedAt = payment.updatedAt
+                        memberPayment.createdAt = payment.createdAt
+                    }
+                }
+            }
         }
     }
 
@@ -142,12 +176,9 @@ export default class MemberViewPayments extends Vue {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
                 })
-                for (const payment of this.payments) {
-                    if (payment.status == PaymentStatus.Succeeded) {
-                        payment.status = PaymentStatus.Pending
-                    }
-                    // todo: improve this for related payments
-                }
+
+                this.updatePayments(response.data)
+                MemberManager.callListeners("payment", this.member)
             } finally {
                 this.loading = false
             }

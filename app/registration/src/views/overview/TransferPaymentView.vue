@@ -33,7 +33,8 @@
                     </div>
                 </div>
 
-                <p class="warning-box" v-if="payment.price > 0">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
+                <p class="success-box" v-if="payment.price > 0 && payment.status == 'Succeeded'">We hebben de betaling ontvangen.</p>
+                <p class="warning-box" v-else-if="payment.price > 0">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
             </main>
 
             <STToolbar v-if="!isPopup">
