@@ -35,6 +35,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import SignupGeneralView from '../signup/SignupGeneralView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { SessionManager } from '@stamhoofd/networking';
+import PaymentPendingView from '../overview/PaymentPendingView.vue';
 
 @Component({
     components: {

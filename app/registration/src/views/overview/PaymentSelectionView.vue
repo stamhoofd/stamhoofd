@@ -123,10 +123,15 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                         }))
                         
                     }),
-                    paymentMethod: PaymentMethod.Transfer
+                    paymentMethod: this.selectedPaymentMethod
                 }),
                 decoder: RegisterResponse as Decoder<RegisterResponse>
             })
+
+            if (response.data.paymentUrl) {
+                window.location.href = response.data.paymentUrl;
+                return;
+            }
 
             MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 

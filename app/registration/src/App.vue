@@ -56,6 +56,19 @@ export default class App extends Vue {
                         promise: async () => {
                             await MemberManager.loadMembers();
 
+                            const path = window.location.pathname;
+                            const parts = path.substring(1).split("/");
+
+                            if (parts.length == 1 && parts[0] == 'payment') {
+                                // tood: password reset view
+                                const PaymentPendingView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/PaymentPendingView.vue")).default
+                                return new ComponentWithProperties(ModalStackComponent, {
+                                    root: new ComponentWithProperties(RegistrationSteps, { 
+                                        root: new ComponentWithProperties(PaymentPendingView, {}),
+                                    })
+                                })
+                            }
+
                             if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
                                 const OverviewView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
                                 return new ComponentWithProperties(ModalStackComponent, {

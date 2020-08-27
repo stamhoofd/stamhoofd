@@ -16,7 +16,7 @@
 
         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-credits'}" @click="manageCredits()">
             <span class="icon gift"/>
-            <span>Jouw tegoed</span>
+            <span>Groot nieuws</span>
         </button>
 
         <hr v-if="groups.length > 0">

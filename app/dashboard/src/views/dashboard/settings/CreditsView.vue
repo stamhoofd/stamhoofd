@@ -1,46 +1,14 @@
 <template>
     <div class="st-view background" id="credits-view">
-        <STNavigationBar title="Jouw tegoed">
+        <STNavigationBar title="Gratis en open-source">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
 
         <main>
             <h1>
-                Jouw tegoed: {{ calculated | price }}
+                Stamhoofd is nu volledig gratis en open-source
             </h1>
-            <p>Breng bevriende verenigingen aan: geef 10 euro cadeau, krijg 25 terug. Actie geldig tot 10 september.</p>
-
-            <a href="https://docs.stamhoofd.be/geef-10-euro-cadeau-krijg-25-terug" target="_blank" class="button primary">Spelregels</a>
-
-            <hr>
-            <h2>Jouw doorverwijzingscode</h2>
-
-            <Spinner v-if="loading"/>
-            <input v-else-if="code" class="input" :value="code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
-
-            <hr>
-            <h2>Jouw doorverwijzingslink</h2>
-            
-            <Spinner v-if="loading"/>
-            <input v-else-if="code" class="input" :value="'https://stamhoofd.app/aansluiten/'+code" @click="copyElement" v-tooltip="'Klik om te kopiëren'" readonly/>
-            <p v-if="code && !loading" class="style-description-small input-info">Deze link vult de code automatisch in in het formulier. Hij blijft ook ingevuld als ze later terugkeren naar het formulier.</p>
-
-            <template v-if="history.length > 0">
-                <hr>
-                <h2>Geschiedenis</h2>
-                <STList>
-                    <STListItem v-for="(item, index) in history" :key="index" class="left-center right-description">
-                        <span class="icon arrow-up" v-if="item.change > 0" slot="left"/>
-                        <span class="icon clock" v-else-if="item.change == 0" slot="left"/>
-                        <span class="icon arrow-down" v-else slot="left"/>
-
-                        <h3 class="style-title-list">{{ item.description }}</h3>
-                        <p class="style-description-small">{{ item.date | date }}</p>
-                        <template slot="right">{{ item.change >= 0 ? "+ " : "" }}{{ item.change | price }}</template>
-                    </STListItem>
-                </STList>
-            </template>
-
+            <p>Alles wat je kent blijft, maar je hoeft niets meer te betalen om het te gebruiken. Zin om mee te bouwen aan Stamhoofd? Open dan zeker een issue of pull request in onze Github repositories.</p>
         </main>
     </div>
 </template>
@@ -80,64 +48,6 @@ import { Formatter } from '@stamhoofd/utility';
     }
 })
 export default class CreditsView extends Mixins(NavigationMixin) {
-    loading = true;
-    code: string | null = null
-
-    mounted() {
-        this.loadCode()
-    }
-
-    async loadCode() {
-        this.loading = true;
-
-        try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/register-code",
-            })
-            this.code = response.data as string
-        } catch (e) {
-            console.error(e);
-            
-        }
-        this.loading = false
-        
-    }
-    
-    get history() {
-        return (OrganizationManager.organization!.privateMeta?.credits ?? []).slice().reverse()
-    }
-
-    get calculated() {
-        return this.history.reduce((a, b) => {
-            return a + b.change
-        }, 0)
-    }
-
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
 }
 </script>
 

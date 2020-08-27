@@ -7,9 +7,9 @@
 
         <main>
             <h1>
-                Stamhoofd gratis uitproberen
+                Aan de slag met Stamhoofd
             </h1>
-            <p>Een account maken duurt niet lang en is volledig gratis tot je beslist om het te gaan gebruiken.</p>
+            <p>Een account maken duurt niet lang en is volledig gratis, voor altijd.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
@@ -46,9 +46,6 @@
         </main>
 
         <STToolbar>
-            <template #left>
-                Volledig gratis tot je beslist om het te gaan gebruiken.
-            </template>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="goNext">

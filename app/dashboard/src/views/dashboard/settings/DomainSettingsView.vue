@@ -70,7 +70,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     
     validateDomain() {
         const d = this.mailDomain;
-        if (!d.match(/^[a-zA-Z0-9]+\.[a-zA-Z]+$/)) {
+        if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
             return false
         } else {
         }

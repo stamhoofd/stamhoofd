@@ -152,7 +152,7 @@
 
             <Checkbox v-model="enableTransfers">Overschrijvingen (gratis)</Checkbox>
             <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
-            <Checkbox>Payconiq (20 cent)</Checkbox>
+            <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
 
             <hr>
             <h2>Online betalingen activeren</h2>
@@ -184,10 +184,6 @@
                     </LoadingButton>
                 </p>
             </template>
-
-           
-
-       
         </main>
 
         <STToolbar>
@@ -388,6 +384,18 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             }
             (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Transfer) 
         }
+    }
+
+    get enablePayconiq() {
+        return false
+    }
+
+    set enablePayconiq(enable: boolean) {
+        if (enable == this.enablePayconiq) {
+            return;
+        }
+
+        new Toast("Om Payconiq te activeren moet je eerst aansluiten bij Payconiq via jouw bank. Daarna kunnen we bij Payconiq een code aanvragen die we nodig hebben om betalingen te verwerken. Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
     }
     
     get enableBancontact() {
