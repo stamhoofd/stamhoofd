@@ -1,5 +1,5 @@
 <template>
-    <Steps :root="root" :total-steps="3">
+    <Steps :root="root" :total-steps="3" ref="steps">
         <template v-slot:left="slotProps">
             <template v-if="!slotProps.canPop">
                 <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }" @click="returnToSite">
@@ -109,7 +109,7 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
     }
 
     popNav() {
-        (this.root.componentInstance() as any).navigationController.pop();
+        (this.$refs.steps as any).navigationController.pop();
     }
 }
 </script>

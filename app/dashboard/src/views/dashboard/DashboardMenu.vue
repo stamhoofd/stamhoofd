@@ -14,6 +14,11 @@
             <span>Documentatie</span>
         </a>
 
+        <a class="menu-button button heading" :href="registerUrl" target="_blank">
+            <span class="icon external"/>
+            <span>Jouw inschrijvingspagina</span>
+        </a>
+
         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-credits'}" @click="manageCredits()">
             <span class="icon gift"/>
             <span>Groot nieuws</span>
@@ -109,6 +114,17 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+    
+    get registerUrl() {
+        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
+            return "https://"+this.organization.registerDomain
+        } 
+
+        if (process.env.NODE_ENV == "production") {
+            return "https://"+this.organization.uri+'.stamhoofd.be'
+        }
+        return "https://"+this.organization.uri+'.stamhoofd.dev'
     }
 
     mounted() {

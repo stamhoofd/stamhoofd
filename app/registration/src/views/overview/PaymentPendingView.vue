@@ -12,6 +12,14 @@
                 <h1>Betaling mislukt</h1>
                 <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
             </main>
+
+            <STToolbar v-if="payment && payment.status != 'Pending'">
+                <LoadingButton slot="right" :loading="loading">
+                    <button class="button primary" @click="retry">
+                        <span>Opnieuw proberen</span>
+                    </button>
+                </LoadingButton>
+            </STToolbar>
         </div>
     </div>
 </template>
@@ -19,7 +27,7 @@
 <script lang="ts">
 import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Spinner, ErrorBox } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Spinner, ErrorBox, LoadingButton } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember, EncryptedPaymentDetailed, PaymentStatus } from '@stamhoofd/structures';
@@ -30,6 +38,7 @@ import OverviewView from './OverviewView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
     components: {
@@ -38,11 +47,13 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
         STList,
         STListItem,
         LoadingView,
+        LoadingButton,
         Spinner
     }
 })
 export default class PaymentPendingView extends Mixins(NavigationMixin){
     payment: EncryptedPaymentDetailed | null = null
+    loading = false
 
     MemberManager = MemberManager
     step = 4
@@ -53,6 +64,11 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
+    }
+
+    retry() {
+        const navigation = this.navigationController
+        navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
     }
 
     poll() {
@@ -68,7 +84,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                 if (payment.status == PaymentStatus.Succeeded) {
                     MemberManager.getRegistrationsWithMember(payment.registrations).then( (registrations) => {
                         const navigation = this.navigationController
-                        navigation?.push(new ComponentWithProperties(RegistrationSuccessView, { registrations }), false, 1, true)
+                        navigation?.push(new ComponentWithProperties(RegistrationSuccessView, { registrations }), true, 1)
                     }).catch(e => {
                         console.error(e)
                     })  

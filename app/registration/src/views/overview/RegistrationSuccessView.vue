@@ -10,10 +10,12 @@
             </main>
 
             <STToolbar>
-                <button slot="right" class="button primary" @click="close">
-                    <span>Sluiten</span>
-                    <span class="icon arrow-right"/>
-                </button>
+                <LoadingButton slot="right" :loading="loading" >
+                    <button class="button primary" @click="close">
+                        <span>Sluiten</span>
+                        <span class="icon arrow-right"/>
+                    </button>
+                </LoadingButton>
             </STToolbar>
         </div>
     </div>
@@ -22,7 +24,7 @@
 <script lang="ts">
 import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
+import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, LoadingButton } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
@@ -38,7 +40,8 @@ import OverviewView from './OverviewView.vue';
         STList,
         STListItem,
         LoadingView,
-        Checkbox
+        Checkbox,
+        LoadingButton
     }
 })
 export default class RegistrationSuccessView extends Mixins(NavigationMixin){
@@ -48,6 +51,7 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     step = 4
     isStepsPoppable = false
+    loading = false
 
     get text() {
         let t = "Hoera! "
@@ -89,8 +93,14 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
         return this.registrations.filter(r => r.waitingList).map(r => r.member.details?.firstName ?? "?")
     }
 
-    close() {
+    async close() {
+        if (this.loading) {
+            return;
+        }
+        this.loading = true;
+        await MemberManager.loadMembers()
         this.navigationController!.push(new ComponentWithProperties(OverviewView, {}), true, this.navigationController!.components.length, true)
+        this.loading = false;
     }
 
 }
