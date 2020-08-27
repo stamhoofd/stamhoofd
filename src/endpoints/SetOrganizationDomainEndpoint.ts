@@ -56,7 +56,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
             // Validate domains
             // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^[a-zA-Z0-9]+\.[a-zA-Z0-9]+\.[a-zA-Z]+$/)) {
+            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
                 throw new SimpleError({
                     code: "invalid_domain",
                     message: "registerDomain is invalid",
@@ -66,7 +66,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             }
             
             // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-            if (request.body.mailDomain !== null && !request.body.mailDomain.match(/^[a-zA-Z0-9]+\.[a-zA-Z]+$/)) {
+            if (request.body.mailDomain !== null && !request.body.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
                 throw new SimpleError({
                     code: "invalid_domain",
                     message: "mailDomain is invalid",

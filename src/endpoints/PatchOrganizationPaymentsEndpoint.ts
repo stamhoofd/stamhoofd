@@ -2,7 +2,7 @@ import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simpl
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMember,EncryptedPaymentDetailed, PaymentPatch,RegistrationWithEncryptedMember } from "@stamhoofd/structures";
+import { EncryptedMember,EncryptedPaymentDetailed, PaymentPatch,PaymentStatus,RegistrationWithEncryptedMember } from "@stamhoofd/structures";
 
 import { Member } from '../models/Member';
 import { Payment } from '../models/Payment';
@@ -60,7 +60,16 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                     message: "Payment with id "+patch.id+" does not exist"
                 })
             }
-            model.status = patch.status ?? model.status
+            if (patch.status) {
+                if (model.status != PaymentStatus.Succeeded && model.paidAt === null && patch.status == PaymentStatus.Succeeded) {
+                    model.paidAt = new Date()
+                } else if (model.paidAt !== null && patch.status != PaymentStatus.Succeeded) {
+                    model.paidAt = null
+                }
+
+                model.status = patch.status
+            }
+
         }
 
         for (const payment of payments) {
