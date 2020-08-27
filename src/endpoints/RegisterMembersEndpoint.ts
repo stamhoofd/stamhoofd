@@ -1,15 +1,17 @@
+import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse } from "@stamhoofd/structures";
+import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Member, RegistrationWithMember } from '../models/Member';
+import { MolliePayment } from '../models/MolliePayment';
+import { MollieToken } from '../models/MollieToken';
 import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
-
 type Params = {};
 type Query = undefined;
 type Body = RegisterMembers
@@ -105,7 +107,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        for (const register of sortedMembers) {
+        mainLoop: for (const register of sortedMembers) {
             const member = members.find(m => m.id == register.memberId)
             if (!member) {
                 throw new SimpleError({
@@ -124,25 +126,26 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: register.groupId, cycle: group.cycle })
-            let registration: RegistrationWithMember;
+            let registration: RegistrationWithMember | undefined = undefined;
 
-            if (existingRegistrations.length > 0) {
-                const existingRegistration = existingRegistrations[0]
+            for (const existingRegistration of existingRegistrations) {
                 registration = existingRegistration.setRelation(registrationMemberRelation, member as Member)
 
                 if (existingRegistration.waitingList && register.waitingList) {
                     // already on waiting list, no need to repeat it
                     // skip without error
                     registrations.push(registration)
-                    continue;
+                    continue mainLoop;
                 }
 
-                if (!existingRegistration.waitingList) {
+                if (!existingRegistration.waitingList && existingRegistration.registeredAt !== null) {
                     // already registered, no need to put it on the waiting list or register (and pay) again
                     registrations.push(registration)
-                    continue;
+                    continue mainLoop;
                 }
-            } else {
+            }
+
+            if (!registration) {
                 registration = new Registration().setRelation(registrationMemberRelation, member as Member)
             }
 
@@ -214,10 +217,56 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 
                 await registration.save()
             }
+
+            let paymentUrl: string | null = null
+            if (payment.method == PaymentMethod.Bancontact) {
+                
+                // Mollie payment
+                const token = await MollieToken.getTokenFor(user.organizationId)
+                if (!token) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Betaling via Bancontact is onbeschikbaar"
+                    })
+                }
+                const profileId = await token.getProfileId()
+                if (!profileId) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Betaling via Bancontact is tijdelijk onbeschikbaar"
+                    })
+                }
+                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                const molliePayment = await mollieClient.payments.create({
+                     amount: {
+                        currency: 'EUR',
+                        value: (totalPrice / 100).toFixed(2)
+                    },
+                    method: molliePaymentMethod.bancontact,
+                    testmode: process.env.NODE_ENV != 'production',
+                    profileId,
+                    description: 'Inschrijving bij '+user.organization.name,
+                    redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),
+                    webhookUrl: 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                    metadata: {
+                        paymentId: payment.id,
+                    },
+                });
+                console.log(molliePayment)
+                paymentUrl = molliePayment.getCheckoutUrl()
+
+                // Save payment
+                const dbPayment = new MolliePayment()
+                dbPayment.paymentId = payment.id
+                dbPayment.mollieId = molliePayment.id
+                await dbPayment.save();
+            }
+
             return new Response(RegisterResponse.create({
                 payment: PaymentStruct.create(payment),
                 members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
+                paymentUrl
             }));
         }
         

@@ -1,4 +1,4 @@
-import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { column,Database,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
@@ -84,6 +84,43 @@ export class Member extends Model {
      */
     static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
         return (await this.getAllWithRegistrations(id))[0] ?? null
+    }
+
+     /**
+     * Fetch all registrations with members with their corresponding (valid) registrations and payment
+     */
+    static async getRegistrationWithMembersForPayment(paymentId: string): Promise<RegistrationWithMember[]> {
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
+        
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
+        query += `where \`${Payment.table}\`.\`${Payment.primary.name}\` = ?`
+
+        const [results] = await Database.select(query, [paymentId])
+        const registrations: RegistrationWithMember[] = []
+
+         // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
+        const registrationMemberRelation = new ManyToOneRelation(Member, "member")
+        registrationMemberRelation.foreignKey = Member.registrations.foreignKey
+
+        for (const row of results) {
+            const registration = Registration.fromRow(row[Registration.table])
+            if (!registration) {
+                throw new Error("Expected registration in every row")
+            }
+
+            const foundMember = Member.fromRow(row[Member.table])
+            if (!foundMember) {
+                throw new Error("Expected member in every row")
+            }
+            
+            const _f = registration.setRelation(registrationMemberRelation, foundMember)           
+            registrations.push(_f)
+        }
+
+        return registrations
     }
 
      /**

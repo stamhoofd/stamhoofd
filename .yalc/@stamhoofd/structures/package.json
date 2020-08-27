@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/structures",
-    "version": "1.8.12+c13b0cdd",
+    "version": "1.8.15+bfc28ccf",
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
