@@ -522,7 +522,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     linkMollie() {
         // Start oauth flow
-        const client_id = process.env.NODE_ENV == "development" ? "app_awGyMjwGgRue2zjJBrdkEWuK" : "app_rCR5DwB8pB5zFE7D2f3feQTs"
+        const client_id = process.env.NODE_ENV == "development" ? "app_8mK3BCPCqd8sSkQmuNC8xmgu" : "app_awGyMjwGgRue2zjJBrdkEWuK"
         const state = "todo"
         const scope = "payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write subscriptions.read subscriptions.write"
         const url = "https://www.mollie.com/oauth2/authorize?client_id="+encodeURIComponent(client_id)+"&state="+encodeURIComponent(state)+"&scope="+encodeURIComponent(scope)+"&response_type=code&approval_prompt=auto&locale=nl_BE"
