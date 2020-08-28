@@ -230,6 +230,9 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 this.memberDetails.records.push(Record.create({
                     type: RecordType.NoPictures
                 }))
+                this.memberDetails.records.push(Record.create({
+                    type: RecordType.NoGroupPictures
+                }))
                 if (this.memberDetails.age < 18) {
                     this.memberDetails.records.push(Record.create({
                         type: RecordType.NoPermissionForMedicines
