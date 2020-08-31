@@ -30,11 +30,11 @@
                     <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
                    <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
 
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                 </div>
 

@@ -13,7 +13,7 @@
             </STInputBox>
 
             <STInputBox title="Herhaal wachtwoord">
-                <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
             </STInputBox>
         </main>
 
