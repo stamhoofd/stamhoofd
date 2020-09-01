@@ -275,6 +275,6 @@ export class User extends Model {
         if (organization.id != this.organizationId) {
             throw new Error("Unexpected permission failure")
         }
-        return this.permissions && this.permissions.hasReadAccess() ? await organization.getPrivateStructure() : await organization.getStructure()
+        return this.permissions && this.permissions.hasReadAccessForAtLeastOneGroup() ? await organization.getPrivateStructure() : await organization.getStructure()
     }
 }
