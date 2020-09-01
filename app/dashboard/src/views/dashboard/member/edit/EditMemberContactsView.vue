@@ -34,7 +34,7 @@
             <h2 :class="{ 'style-with-button': emergencyContacts.length == 0}">
                 <span>Noodcontact</span>
                 <div v-if="emergencyContacts.length == 0">
-                    <button type="button" class="button text" @click="addParent">
+                    <button type="button" class="button text" @click="addEmergencyContact">
                         <span class="icon add" />
                         <span>Toevoegen</span>
                     </button>
@@ -131,6 +131,10 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
                 component.pop({ force: true })
             }
         }).setDisplayStyle("popup"))
+    }
+
+    addEmergencyContact() {
+        this.editEmergencyContact()
     }
 
     editEmergencyContact() {
