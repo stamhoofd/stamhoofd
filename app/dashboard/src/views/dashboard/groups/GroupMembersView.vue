@@ -111,7 +111,7 @@
 
         <STToolbar>
             <template #left>
-                {{ selectionCount ? selectionCount : "Geen" }} leden geselecteerd
+                {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "lid" : "leden" }} geselecteerd
                 <template v-if="selectionCountHidden">
                     ({{ selectionCountHidden }} verborgen)
                 </template>
@@ -127,7 +127,7 @@
                         Samenvatting
                     </button>
                     <LoadingButton :loading="actionLoading">
-                        <button class="button primary" @click="openMail">
+                        <button class="button primary" @click="openMail" :disabled="selectionCount == 0">
                             <span class="dropdown-text">Mailen</span>
                             <div class="dropdown" @click.stop="openMailDropdown" />
                         </button>
@@ -566,6 +566,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     openMailDropdown(event) {
+        if (this.selectionCount == 0) {
+            return;
+        }
         const displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
@@ -598,6 +601,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 }
 
 .data-table {
+    user-select: none;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     width: 100%;
     width: calc(100% + 2 * var(--st-horizontal-padding, 40px));
