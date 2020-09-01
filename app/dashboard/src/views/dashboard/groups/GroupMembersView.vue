@@ -36,8 +36,7 @@
                     <tr>
                         <th>
                             <Checkbox
-                                :value="selectionCount >= filteredMembers.length && filteredMembers.length"
-                                @change="selectAll($event)"
+                                v-model="selectAll"
                             />
                         </th>
                         <th @click="toggleSort('name')">
@@ -481,7 +480,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.present(component);
     }
 
-    selectAll(selected: boolean) {
+    get selectAll() {
+        return this.selectionCount >= this.filteredMembers.length && this.filteredMembers.length > 0
+    }
+
+    set selectAll(selected: boolean) {
         this.filteredMembers.forEach((member) => {
             member.selected = selected;
         });
