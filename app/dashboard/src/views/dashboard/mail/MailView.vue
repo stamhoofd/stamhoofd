@@ -28,7 +28,7 @@
                     <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
                 </STInputBox>
                 <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
-                    <button slot="right" class="button text" @click="manageEmails">
+                    <button slot="right" class="button text" @click="manageEmails" v-if="fullAccess">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
