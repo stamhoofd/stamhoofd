@@ -77,4 +77,8 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     // readonly
     @field({ decoder: MollieOnboarding, nullable: true, version: 27})
     mollieOnboarding: MollieOnboarding | null = null
+
+    // Only set for admins
+    @field({ decoder: StringDecoder, nullable: true, version: 29 })
+    payconiqApiKey: string | null = null
 }
