@@ -152,8 +152,19 @@ export class MemberManagerStatic {
         return members;
     }
 
-    async loadMembers(groupId: string | null = null, waitingList = false) {
+    async loadMembers(groupId: string | null = null, waitingList = false): Promise<MemberWithRegistrations[]> {
         const session = SessionManager.currentSession!
+
+        if (groupId === null) {
+            const members: MemberWithRegistrations[] = []
+            for (const group of session.organization!.groups) {
+                if (session.user!.permissions!.hasReadAccess(group.id)) {
+                    members.push(...(await this.loadMembers(group.id, waitingList)))
+                }
+            }
+            // remove duplicates
+            return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
+        }
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupId + "/members",

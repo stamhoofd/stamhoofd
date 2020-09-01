@@ -31,7 +31,7 @@
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user"/>
                 <span>Leden</span>
-                <button class="button" v-if="fullReadAccess && false">
+                <button class="button" v-if="groups.length > 1">
                     Alle
                 </button>
             </button>
@@ -198,12 +198,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     openAll() {
-        if (!this.fullReadAccess) {
+        if (this.groups.length <= 1) {
             return;
         }
-        return;
         this.currentlySelected = "group-all"
-        //this.showDetail(new ComponentWithProperties(GroupMembersView, { organization: this.mockOrganization }));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }));
     }
 
     openGroup(group: Group) {

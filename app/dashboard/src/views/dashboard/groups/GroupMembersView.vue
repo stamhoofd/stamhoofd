@@ -79,13 +79,17 @@
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
                         <td>
-                            <div
-                                v-if="!waitingList && isNew(member.member)"
-                                v-tooltip="'Ingeschreven op ' + formatDate(registrationDate(member.member))"
-                                class="new-member-bubble"
-                            />
-                            {{ member.member.name }}
-                            <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
+                            <h2 class="style-title-list">
+                                <div
+                                    v-if="!waitingList && isNew(member.member)"
+                                    v-tooltip="'Ingeschreven op ' + formatDate(registrationDate(member.member))"
+                                    class="new-member-bubble"
+                                />
+                                {{ member.member.name }}
+                                <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
+                            </h2>
+                            <p class="style-description-small" v-if="!group">{{ member.member.groups.map(g => g.settings.name ).join(", ") }}</p>
+                            <p class="style-description-small only-smartphone">{{ member.member.details.age }} jaar</p>
                         </td>
                         <td class="minor hide-smartphone" v-if="member.member.details">
                             {{ member.member.details.age }} jaar
@@ -184,9 +188,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
     waitingList!: boolean;
 
-    @Prop()
-    organization!: Organization | null;
-
     members: SelectableMember[] = [];
     searchQuery = "";
     filters = [new NoFilter(), new NotPaidFilter(), new FoodAllergyFilter(), new CanNotSwimFilter()];
@@ -232,7 +233,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     openWaitingList() {
         this.show(new ComponentWithProperties(GroupMembersView, {
-            organization: this.organization,
             group: this.group,
             waitingList: true
         }))
