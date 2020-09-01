@@ -66,7 +66,12 @@
                 <span>Beheerders</span>
             </button>
 
-            <button class="menu-button button heading" @click="importMembers" :class="{ selected: currentlySelected == 'import-members'}">
+            <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen">
+                <span class="icon sync"/>
+                <span>Groepsadministratie</span>
+            </button>
+
+            <button class="menu-button button heading" @click="importMembers" v-else :class="{ selected: currentlySelected == 'import-members'}">
                 <span class="icon sync"/>
                 <span>Leden importeren</span>
             </button>
@@ -91,7 +96,7 @@ import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-nav
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { SessionManager, Keychain } from '@stamhoofd/networking';
-import { Organization, Group } from '@stamhoofd/structures';
+import { Organization, Group, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import EditGroupsView from './groups/EditGroupsView.vue';
@@ -128,6 +133,10 @@ export default class Menu extends Mixins(NavigationMixin) {
             return "https://"+this.organization.uri+'.stamhoofd.be'
         }
         return "https://"+this.organization.uri+'.stamhoofd.dev'
+    }
+
+    get isSGV() {
+        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 
     mounted() {
@@ -248,6 +257,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.currentSession!.logout()
     }
 
+    syncScoutsEnGidsen() {
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Je kan binnenkort alle gegevens van Stamhoofd automatisch in de groepsadministratie plaatsen. Je hoeft dan zelf niet alles in de groepsadministratie over te typen. We lanceren deze functie zeker voor de deadline waarop de groepsadministratie in orde moeten zijn voor leden.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
+    }
+
     importMembers() {
         this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Binnenkort kan je leden importeren via Excel of manueel.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
     }
@@ -350,6 +363,14 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     .icon {
         padding-right: 10px;
+        flex-shrink: 0;
+    }
+
+    > span {
+         text-overflow: ellipsis;
+        vertical-align: middle;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .bubble {
