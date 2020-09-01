@@ -113,7 +113,7 @@
             <template #left>
                 {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "lid" : "leden" }} geselecteerd
                 <template v-if="selectionCountHidden">
-                    ({{ selectionCountHidden }} verborgen)
+                    (waarvan {{ selectionCountHidden }} verborgen)
                 </template>
             </template>
             <template #right>
@@ -161,7 +161,7 @@ import EditMemberView from '../member/edit/EditMemberView.vue';
 
 class SelectableMember {
     member: MemberWithRegistrations;
-    selected = false;
+    selected = true;
 
     constructor(member: MemberWithRegistrations) {
         this.member = member;
@@ -412,7 +412,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get selectionCount(): number {
         let val = 0;
-        this.filteredMembers.forEach((member) => {
+        this.members.forEach((member) => {
             if (member.selected) {
                 val++;
             }
@@ -481,7 +481,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get selectAll() {
-        return this.selectionCount >= this.filteredMembers.length && this.filteredMembers.length > 0
+        return this.selectionCount - this.selectionCountHidden >= this.filteredMembers.length && this.filteredMembers.length > 0
     }
 
     set selectAll(selected: boolean) {
@@ -500,7 +500,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     getSelectedMembers(): MemberWithRegistrations[] {
-        return this.filteredMembers
+        return this.members
             .filter((member: SelectableMember) => {
                 return member.selected;
             })
