@@ -10,10 +10,17 @@
         </STNavigationTitle>
 
         <main>
-            <p class="warning-box" v-if="emails.length == 0">Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
-                <span class="icon settings" />
-                <span>Wijzigen</span>
-            </button></p>
+            <template v-if="emails.length == 0">
+                <p class="warning-box" v-if="fullAccess">
+                    Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
+                    <span class="icon settings" />
+                        <span>Wijzigen</span>
+                    </button>
+                </p>
+                <p class="warning-box" v-else>
+                    Een administrator van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
+                </p>
+            </template>
 
 
             <div class="split-inputs">
@@ -136,6 +143,10 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     deleteAttachment(index) {
         this.files.splice(index, 1)
+    }
+
+    get fullAccess() {
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
     }
 
     get fileWarning() {
