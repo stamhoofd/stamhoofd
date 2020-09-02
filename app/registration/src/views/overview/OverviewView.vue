@@ -214,7 +214,8 @@ export default class OverviewView extends Mixins(NavigationMixin){
     editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
-                initialMember: member
+                initialMember: member,
+                editOnly: true
             })
         }).setDisplayStyle("popup"))
     }

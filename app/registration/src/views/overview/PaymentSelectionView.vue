@@ -33,7 +33,8 @@
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
-                        <span>Betalen</span>
+                        <span v-if="willPay">Betalen</span>
+                        <span v-else>Doorgaan</span>
                         <span class="icon arrow-right"/>
                     </button>
                 </LoadingButton>
@@ -48,7 +49,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin } from "@s
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Radio, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record, SelectedGroup } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -116,6 +117,22 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             case PaymentMethod.Transfer: return null
             case PaymentMethod.Bancontact: return null
         }
+    }
+
+    getSelectedGroups(member: MemberWithRegistrations): SelectedGroup[] {
+        return member.getSelectedGroups(OrganizationManager.organization.groups)
+    }
+
+    getRegisterGroups(member: MemberWithRegistrations): Group[] {
+        return this.getSelectedGroups(member).filter(g => !g.waitingList).map(g => g.group)
+    }
+
+    get willPay() {
+        if (!this.selectedMembers.find(m => this.getRegisterGroups(m).length > 0)) {
+            // only waiting list
+            return false
+        }
+        return true;
     }
 
     getOS(): string {

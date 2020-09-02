@@ -110,6 +110,9 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     beforeCloseHandler: (() => void) | null;
 
+    @Prop({ default: false })
+    editOnly: boolean
+
     loading = false
 
     memberDetails: MemberDetails | null = null
@@ -242,7 +245,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 this.member.details = this.memberDetails
             }
             
-            if (!this.member || this.member.canRegister(OrganizationManager.organization.groups)) {
+            if (!this.editOnly && (!this.member || this.member.canRegister(OrganizationManager.organization.groups))) {
                 if (!(await this.saveData(this))) {
                     return;
                 }

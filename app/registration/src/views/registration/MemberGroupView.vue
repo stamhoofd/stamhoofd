@@ -190,6 +190,8 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     }
 
     async validateGroup(final: boolean = false): Promise<boolean> {
+        this.errorBox = null;
+        
         if (!this.selectedGroup || !this.selectableGroup) {
             if (final) {
                 this.errorBox = new ErrorBox(new SimpleError({

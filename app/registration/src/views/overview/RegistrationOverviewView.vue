@@ -52,8 +52,12 @@
                     <span class="icon add"/>
                     <span>Nog iemand toevoegen</span>
                 </button>
-                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0">
+                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0" v-if="!hasWaitingList">
                     <span>Inschrijven</span>
+                    <span class="icon arrow-right"/>
+                </button>
+                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0" v-else>
+                    <span>Inschrijven (of wachtlijst)</span>
                     <span class="icon arrow-right"/>
                 </button>
             </STToolbar>
@@ -105,6 +109,10 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         
         // tdoo: auto prefer all members with only one group option
         this.updateSelection()
+    }
+
+    get hasWaitingList() {
+        return this.selectedMembers.find(m => this.getWaitingListGroups(m).length > 0)
     }
 
     updateSelection() {
@@ -280,7 +288,9 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
 
      get shouldAskFinancialSupport() {
-        return true;
+         // do not ask for waiting list
+        return !!this.selectedMembers.find(m => this.getRegisterGroups(m).length > 0);
+        
         /*const groups = OrganizationManager.organization.groups
         for (const member of this.selectedMembers) {
             const preferred = member.getSelectedGroups(groups)
