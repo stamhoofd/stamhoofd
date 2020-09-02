@@ -9,7 +9,16 @@
                 <STList>
                     <STListItem v-for="paymentMethod in paymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
                         <Radio slot="left" name="choose-payment-method" v-model="selectedPaymentMethod" :value="paymentMethod"/>
-                        {{ getName(paymentMethod) }}
+                        <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">{{ getName(paymentMethod) }}</h2>
+                        <p class="style-description-small" v-if="getDescription(paymentMethod)">{{ getDescription(paymentMethod) }}</p>
+
+                        <div v-if="paymentMethod == 'Payconiq' && selectedPaymentMethod == paymentMethod" class="payment-app-banner">
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg"/>
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg"/>
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg"/>
+                        </div>
+
+                        <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo"/>
                     </STListItem>
                 </STList>
 
@@ -50,6 +59,7 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
 import PaymentPendingView from './PaymentPendingView.vue';
 import PayconiqBannerView from './PayconiqBannerView.vue';
 import PayconiqButtonView from './PayconiqButtonView.vue';
+import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
 
 @Component({
     components: {
@@ -86,9 +96,25 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Payconiq by Bancontact"
-            case PaymentMethod.Transfer: return "Overschrijving"
+            case PaymentMethod.Payconiq: return "Payconiq (aangeraden)"
+            case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
+        }
+    }
+
+    getDescription(paymentMethod: PaymentMethod): string {
+        switch (paymentMethod) {
+            case PaymentMethod.Payconiq: return "Betaal mobiel met de Payconiq by Bancontact app, de KBC-app of de ING-app."
+            case PaymentMethod.Transfer: return ""
+            case PaymentMethod.Bancontact: return ""
+        }
+    }
+
+    getLogo(paymentMethod: PaymentMethod): string | null {
+        switch (paymentMethod) {
+            case PaymentMethod.Payconiq: return payconiqLogo
+            case PaymentMethod.Transfer: return null
+            case PaymentMethod.Bancontact: return null
         }
     }
 
@@ -277,5 +303,22 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
+.payment-method-logo {
+    max-height: 30px;
+}
+
+.payment-app-logo {
+    height: 30px;
+}
+
+.payment-app-banner {
+    display: flex;
+    flex-direction: row;
+    padding-top: 10px;
+
+    > * {
+        margin-right: 15px
+    }
+}
 
 </style>

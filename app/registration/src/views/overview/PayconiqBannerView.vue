@@ -15,7 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>Of gebruik de app van</p>
+        <p>Of scan met de app van</p>
         <p><a class="button simple" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help"/></a> <a class="button simple" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help"/></a></p>
     </div>
 </template>
@@ -165,8 +165,8 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             justify-content: center;
 
             img {
-                width: 250px;
-                height: 250px;
+                width: 240px;
+                height: 240px;
             }
             margin-bottom: 20px;
 
