@@ -3,7 +3,7 @@
         <div class="padding-group">
             <figure id="logo" />
             <button id="organization-switcher" @click="switchOrganization">
-                {{ organization.name }}
+                <span class="text">{{ organization.name }}</span>
             </button>
 
             <input class="input search" placeholder="Zoeken" v-if="false">
@@ -292,6 +292,19 @@ export default class Menu extends Mixins(NavigationMixin) {
     @extend .style-interactive-small;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     transition: opacity 0.2s;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
+   
+    > .text {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: auto;
+        min-width: none;
+    }
 
     &:active {  
         opacity: 0.4;
