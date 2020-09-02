@@ -6,6 +6,8 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
                     <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
+                    <span class="style-tag" :class="{ error: isFull}" v-if="!loading && maxMembers">{{ members.length }} / {{ maxMembers }}</span>
+
                     <button class="button text" @click="addMember">
                         <span class="icon add" />
                         <span>Nieuw</span>
@@ -215,6 +217,20 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     deactivated() {
         MemberManager.removeListener(this)
+    }
+
+    get isFull() {
+        if (!this.group || this.group.settings.maxMembers === null) {
+            return false;
+        }
+        return this.members.length >= this.group.settings.maxMembers
+    }
+
+    get maxMembers() {
+         if (!this.group || this.group.settings.maxMembers === null) {
+            return 0;
+        }
+        return this.group.settings.maxMembers
     }
 
     reload() {

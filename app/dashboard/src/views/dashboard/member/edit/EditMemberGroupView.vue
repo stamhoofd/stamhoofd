@@ -135,7 +135,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                 }
 
                 await this.familyManager.patchMemberRegistrations(this.member, patchRegistrations);
-                new Toast("De leeftijdsgroep van "+this.memberDetails.firstName+" is gewijzigd", "success").show()
+                new Toast("De leeftijdsgroep van "+this.memberDetails.firstName+" is gewijzigd", "success green").show()
             } else {
                 await this.familyManager.addMember(this.memberDetails, [
                     Registration.create({
@@ -146,7 +146,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         registeredAt: new Date()
                     })
                 ])
-                new Toast(this.memberDetails.firstName+' is toegevoegd', "success").show()
+                new Toast(this.memberDetails.firstName+' is toegevoegd', "success green").show()
             }
           
             this.errorBox = null

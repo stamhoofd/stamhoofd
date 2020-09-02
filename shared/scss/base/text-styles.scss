@@ -80,6 +80,11 @@
         color: $color-warning-dark;
         background: $color-warning-background;
     }
+
+    &.error {
+        color: $color-error-dark;
+        background: $color-error-background;
+    }
 }
 
 .style-normal {
