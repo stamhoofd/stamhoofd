@@ -80,7 +80,7 @@
                         <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
                         <p class="style-description-small">{{ payment.getMemberNames() }}</p>
                         <p class="style-description-small" v-if="payment.status == 'Succeeded'">
-                            {{ payment.method == "Transfer" ? 'Betaald via overschrijving' : 'Betaald via Bancontact' }}
+                            {{ paymentMethodName(payment.method) }}
                         </p>
                         <p class="style-description-small" v-else>Betaal via overschrijving {{ payment.transferDescription }}</p>
 
@@ -150,6 +150,15 @@ export default class OverviewView extends Mixins(NavigationMixin){
 
     getPaymentPeriod(payment: Payment) {
         return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
+    }
+
+    paymentMethodName(method: PaymentMethod) {
+        switch (method) {
+            case PaymentMethod.Transfer: return "Betaald via overschrijving"
+            case PaymentMethod.Bancontact: return "Betaald via Bancontact"
+            case PaymentMethod.Payconiq: return "Betaald via Payconiq by Bancontact"
+        }
+        return "Onbekende betaalmethode"
     }
 
     get payments() {

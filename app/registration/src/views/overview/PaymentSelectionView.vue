@@ -91,6 +91,47 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         }
     }
 
+    getOS(): string {
+        var userAgent = navigator.userAgent || navigator.vendor;
+
+        if (/android/i.test(userAgent)) {
+            return "android";
+        }
+
+        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+            // Different sms protocol
+            return "macOS-old";
+        }
+
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return "iOS";
+        }
+
+        // iPad on iOS 13 detection
+        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+            return "macOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+            return "windows";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+            return "android";
+        }
+
+        return "unknown"
+    }
+
     async goNext() {
         if (this.loading || !this.selectedPaymentMethod) {
             return
@@ -139,8 +180,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
             if (response.data.paymentUrl) {
                 if (this.selectedPaymentMethod == PaymentMethod.Payconiq && payment) {
-                    // todo: only on desktop
-                    this.present(new ComponentWithProperties(PayconiqBannerView, { paymentUrl: response.data.paymentUrl }).setDisplayStyle("sheet"))
+                    if (this.getOS() == "android" || this.getOS() == "iOS") {
+                        (window.location as any) = response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id));
+                    } else {
+                        // only on desktop
+                        this.present(new ComponentWithProperties(PayconiqBannerView, { paymentUrl: response.data.paymentUrl }).setDisplayStyle("sheet"))
+                    }
                     this.show(new ComponentWithProperties(PaymentPendingView, {
                         paymentId: payment.id
                     }))
