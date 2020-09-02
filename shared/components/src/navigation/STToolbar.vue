@@ -75,8 +75,9 @@ export default class STToolbar extends Vue {}
                 flex-direction: column;
 
                 &> .button {
-                        width: 100%;
-                        justify-content: center;
+                    width: 100%;
+                    box-sizing: border-box;
+                    justify-content: center;
                 }
             }
         }

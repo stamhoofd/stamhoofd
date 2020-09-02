@@ -49,6 +49,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
 import PaymentPendingView from './PaymentPendingView.vue';
 import PayconiqBannerView from './PayconiqBannerView.vue';
+import PayconiqButtonView from './PayconiqButtonView.vue';
 
 @Component({
     components: {
@@ -181,7 +182,9 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             if (response.data.paymentUrl) {
                 if (this.selectedPaymentMethod == PaymentMethod.Payconiq && payment) {
                     if (this.getOS() == "android" || this.getOS() == "iOS") {
-                        (window.location as any) = response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id));
+                        this.present(new ComponentWithProperties(PayconiqButtonView, { 
+                            paymentUrl: response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
+                        }));
                     } else {
                         // only on desktop
                         this.present(new ComponentWithProperties(PayconiqBannerView, { paymentUrl: response.data.paymentUrl }).setDisplayStyle("sheet"))

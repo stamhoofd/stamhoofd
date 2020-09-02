@@ -6,6 +6,7 @@
                 <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten, daarna leggen we de inschrijving vast.</p>
 
                 <Spinner />
+
             </main>
 
             <main v-else>
@@ -13,7 +14,7 @@
                 <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
             </main>
 
-            <STToolbar v-if="payment && payment.status == 'Failed'">
+            <STToolbar v-if="payment && (payment.status == 'Failed' || payment.method == 'Payconiq')">
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="retry">
                         <span>Opnieuw proberen</span>
@@ -70,8 +71,16 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     }
 
     retry() {
-        const navigation = this.navigationController
-        navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
+        if (confirm("Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.")) {
+            const navigation = this.navigationController
+
+            if (navigation!.components.length > 1) {
+                this.pop();
+            } else {
+                navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
+            }
+        }
+        
     }
 
     poll() {
