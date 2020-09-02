@@ -27,9 +27,17 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     user-select: none;
     cursor: pointer;
+    color: inherit;
 
     &:link, &:visited, &:active, &:hover {
         text-decoration: none;
+        color: inherit;
+    }
+
+    &.simple {
+         &:active {
+            opacity: 0.4;
+        }
     }
 
     &.primary {

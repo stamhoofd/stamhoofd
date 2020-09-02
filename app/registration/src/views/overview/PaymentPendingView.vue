@@ -66,6 +66,9 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     pollCount = 0
     timer: any = null
 
+    @Prop({ default: null })
+    finishedHandler: (() => void) | null
+
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
     }
@@ -108,6 +111,9 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             }).finally(() => {
                 this.pollCount++;
                 if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                    if (this.finishedHandler) {
+                        this.finishedHandler();
+                    }
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));

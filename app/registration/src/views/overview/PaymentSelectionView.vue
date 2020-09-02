@@ -180,23 +180,61 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             const payment = response.data.payment
 
             if (response.data.paymentUrl) {
+                let finishedHandler: (() => void) | null = null
                 if (this.selectedPaymentMethod == PaymentMethod.Payconiq && payment) {
                     if (this.getOS() == "android" || this.getOS() == "iOS") {
                         const url = response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
                         const href = document.createElement("a")
                         href.href = url
+                        
+                        let t = new Date().getTime()
+
+                        const listener = function() {
+                            if (document.hidden) {
+                                console.log("Detected hidden")
+                                // Payconiq app has opened
+                                t -= 3000
+                            }
+                        };
+
+                        const listen = document.addEventListener("visibilitychange", listener);
                         href.click();
-                        this.present(new ComponentWithProperties(PayconiqButtonView, { 
-                            paymentUrl: url
-                        }));
+
+                        window.setTimeout(() => {
+                            if (!document.hidden) {
+                                const t2 = new Date().getTime()
+
+                                if (t2 - t <= 3000) {
+                                    const component = new ComponentWithProperties(PayconiqButtonView, { 
+                                        paymentUrl: url
+                                    })
+                                    this.present(component);
+                                    finishedHandler = () => {
+                                        (component.componentInstance() as any)?.pop()
+                                    }
+                                }
+                            }
+                            document.removeEventListener("visibilitychange", listener)
+                        }, 200)
+                       
                     } else {
                         // only on desktop
-                        this.present(new ComponentWithProperties(PayconiqBannerView, { paymentUrl: response.data.paymentUrl }).setDisplayStyle("sheet"))
+                        const component = new ComponentWithProperties(PayconiqBannerView, { 
+                            paymentUrl: response.data.paymentUrl, 
+                            initialPayment: payment,
+                            presentingController: this.navigationController!
+                         }).setDisplayStyle("sheet")
+                        this.present(component)
+                        this.loading = false;
+                        return;
                     }
-                    this.show(new ComponentWithProperties(PaymentPendingView, {
-                        paymentId: payment.id
-                    }))
-                    this.loading = false
+                    window.setTimeout(() => {
+                        this.loading = false
+                        this.show(new ComponentWithProperties(PaymentPendingView, {
+                            paymentId: payment.id,
+                            finishedHandler
+                        }))
+                    }, 2100)
                 } else {
                     window.location.href = response.data.paymentUrl;
                 }

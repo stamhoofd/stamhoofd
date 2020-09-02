@@ -151,8 +151,8 @@
             <h2>Betaalmethodes</h2>
 
             <Checkbox v-model="enableTransfers">Overschrijvingen (gratis)</Checkbox>
-            <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
             <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
+            <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
 
             <hr>
             <h2>Payconiq activeren</h2>

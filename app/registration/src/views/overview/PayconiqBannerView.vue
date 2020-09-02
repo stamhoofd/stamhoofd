@@ -1,31 +1,35 @@
 <template>
     <div class="payconiq-banner-view">
-        <button class="payconiq-close button icon close white" @click="dismiss"/>
+        <button class="payconiq-close button icon close white" @click="close"/>
         <h1>Scan en betaal met Payconiq by Bancontact</h1>
 
         <div class="payconiq-logo" />
 
-        <div class="qr-code">
-            <img :src="qrCodeSrc"/>
+        <div class="qr-code" :class="{ scanned: payment.status == 'Pending'}">
+            <img :src="qrCodeSrc" v-if="payment.status == 'Pending' || payment.status == 'Created'"/>
         </div>
 
-        <LoadingButton :loading="loading" >
-            <p class="price" @click="test">
-                € 40,00
+        <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
+            <p class="price">
+                {{ price | price }}
             </p>
         </LoadingButton>
 
         <p>Of gebruik de app van</p>
-        <p><a class="button" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help"/></a> <a class="button" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help"/></a></p>
+        <p><a class="button simple" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help"/></a> <a class="button simple" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help"/></a></p>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin, ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { SessionManager, Session } from '@stamhoofd/networking';
-import { ForgotPasswordRequest } from '@stamhoofd/structures';
+import { ForgotPasswordRequest, EncryptedPaymentDetailed, PaymentStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { MemberManager } from '../../classes/MemberManager';
+import RegistrationSuccessView from './RegistrationSuccessView.vue';
 
 @Component({
     components: {
@@ -34,16 +38,83 @@ import { ForgotPasswordRequest } from '@stamhoofd/structures';
         EmailInput,
         LoadingButton,
         STErrorsDefault
+    },
+    filters: {
+        price: Formatter.price.bind(Formatter)
     }
 })
 export default class PayconiqBannerView extends Mixins(NavigationMixin){
     @Prop({})
     paymentUrl: string;
 
+    @Prop({ default: null })
+    initialPayment: EncryptedPaymentDetailed | null
+
+    payment: EncryptedPaymentDetailed | null = this.initialPayment
+
+    @Prop({})
+    presentingController: NavigationController;
+
+    pollCount = 0
+    timer: any = null
+
     loading = false
 
-    test() {
-        this.loading = !this.loading
+    mounted() {
+        this.timer = setTimeout(this.poll.bind(this), 3000);
+    }
+
+    close() {
+        if (confirm("Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.")) {
+            this.pop();
+        }
+    }
+
+    get price() {
+        return this.payment?.price ?? 0
+    }
+
+    poll() {
+        this.timer = null;
+        const paymentId = this.payment?.id ?? new URL(window.location.href).searchParams.get("id");
+        SessionManager.currentSession!.authenticatedServer
+            .request({
+                method: "POST",
+                path: "/payments/" +paymentId,
+                decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>,
+            }).then(response => {
+                const payment = response.data
+                if (payment.status == PaymentStatus.Succeeded) {
+                    MemberManager.getRegistrationsWithMember(payment.registrations).then( (registrations) => {
+                        this.presentingController.push(new ComponentWithProperties(RegistrationSuccessView, { registrations }), true, 1)
+                        this.dismiss()
+                    }).catch(e => {
+                        console.error(e)
+                    })  
+                }
+
+                if (payment.status == PaymentStatus.Failed) {
+                    // todo: temporary message
+                    this.dismiss()
+                }
+                this.payment = payment
+            }).catch(e => {
+                // too: handle this
+                console.error(e)
+            }).finally(() => {
+                this.pollCount++;
+                if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                    return;
+                }
+                this.timer = setTimeout(this.poll.bind(this), 3000);
+            });
+    }
+
+    beforeDestroy() {
+        if (this.timer) {
+            clearTimeout(this.timer)
+            this.timer = null
+        }
     }
 
     get qrCodeSrc() {
@@ -98,6 +169,12 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
                 height: 250px;
             }
             margin-bottom: 20px;
+
+            &.scanned {
+                img {
+                    opacity: 0.5;
+                }
+            }
         }
 
         p {
@@ -108,6 +185,10 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
         .install {
             margin-bottom: 15px;;
+        }
+
+        .price-loading {
+            --color-primary: white;
         }
 
         .price {

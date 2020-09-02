@@ -156,7 +156,7 @@ export default class MemberViewPayments extends Vue {
             if (payment.status == PaymentStatus.Succeeded) {
                 data.push(PaymentPatch.create({
                     id: payment.id,
-                    status: PaymentStatus.Pending
+                    status: PaymentStatus.Created
                 }))
             }
         }

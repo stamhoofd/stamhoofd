@@ -291,10 +291,10 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         const data: PaymentPatch[] = []
 
         for (const payment of this.payments) {
-            if (payment.selected && payment.payment.status != PaymentStatus.Pending) {
+            if (payment.selected && payment.payment.status != PaymentStatus.Created) {
                 data.push(PaymentPatch.create({
                     id: payment.payment.id,
-                    status: PaymentStatus.Pending
+                    status: PaymentStatus.Created
                 }))
             }
         }
