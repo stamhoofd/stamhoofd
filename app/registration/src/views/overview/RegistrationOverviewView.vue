@@ -296,7 +296,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     }
 
     openPayment(payment: PaymentDetailed) {
-            this.present(new ComponentWithProperties(NavigationController, {
+        this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(TransferPaymentView, {
                 payment,
                 isPopup: true
