@@ -47,6 +47,8 @@ import TransferPaymentView from './TransferPaymentView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import PaymentPendingView from './PaymentPendingView.vue';
+import PayconiqBannerView from './PayconiqBannerView.vue';
 
 @Component({
     components: {
@@ -61,7 +63,7 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
-    step = 2
+    step = 3
 
     @Prop({ required: true })
     selectedMembers: MemberWithRegistrations[]
@@ -83,6 +85,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
+            case PaymentMethod.Payconiq: return "Payconiq by Bancontact"
             case PaymentMethod.Transfer: return "Overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
         }
@@ -132,16 +135,23 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                 decoder: RegisterResponse as Decoder<RegisterResponse>
             })
 
-            if (response.data.paymentUrl) {
-                window.location.href = response.data.paymentUrl;
-                return;
-            }
-
-            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
-
             const payment = response.data.payment
 
-            
+            if (response.data.paymentUrl) {
+                if (this.selectedPaymentMethod == PaymentMethod.Payconiq && payment) {
+                    // todo: only on desktop
+                    this.present(new ComponentWithProperties(PayconiqBannerView, { paymentUrl: response.data.paymentUrl }).setDisplayStyle("sheet"))
+                    this.show(new ComponentWithProperties(PaymentPendingView, {
+                        paymentId: payment.id
+                    }))
+                    this.loading = false
+                } else {
+                    window.location.href = response.data.paymentUrl;
+                }
+                return;
+            }
+            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
+
             this.loading = false
             const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
             console.log(registrations)

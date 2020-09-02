@@ -112,8 +112,6 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import WhatsNewView from './settings/WhatsNewView.vue';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 
-
-
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive

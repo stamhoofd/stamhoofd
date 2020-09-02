@@ -52,6 +52,9 @@ import RegistrationOverviewView from './RegistrationOverviewView.vue';
     }
 })
 export default class PaymentPendingView extends Mixins(NavigationMixin){
+    @Prop({ default: null })
+    paymentId: string | null;
+
     payment: EncryptedPaymentDetailed | null = null
     loading = false
 
@@ -73,7 +76,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     poll() {
         this.timer = null;
-        const paymentId = new URL(window.location.href).searchParams.get("id");
+        const paymentId = this.paymentId ?? new URL(window.location.href).searchParams.get("id");
         SessionManager.currentSession!.authenticatedServer
             .request({
                 method: "POST",

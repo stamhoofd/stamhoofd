@@ -155,6 +155,19 @@
             <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
 
             <hr>
+            <h2>Payconiq activeren</h2>
+            <p class="st-list-description">Vul de API Key die je van Payconiq hebt ontvangen hieronder in.</p>
+
+            <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+                <input
+                    v-model="payconiqApiKey"
+                    class="input"
+                    type="text"
+                    placeholder="API Key van Payconiq"
+                />
+            </STInputBox>
+
+            <hr>
             <h2>Online betalingen activeren</h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
@@ -203,7 +216,7 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, Patch
 import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Radio, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast, FileInput} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File, PaymentMethod } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File, PaymentMethod, OrganizationPrivateMetaData } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -262,6 +275,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
         }
         this.$set(this.organizationPatch.meta, "iban", iban ?? "")
+    }
+
+     get payconiqApiKey() {
+        return this.organization.privateMeta?.payconiqApiKey ?? ""
+    }
+
+    set payconiqApiKey(payconiqApiKey: string) {
+        if (!this.organizationPatch.privateMeta) {
+            this.$set(this.organizationPatch, "privateMeta", OrganizationPrivateMetaData.patchType().create({}))
+        }
+        this.$set(this.organizationPatch.privateMeta!, "payconiqApiKey", payconiqApiKey.length == 0 ? null : payconiqApiKey)
     }
 
     get squareLogoResolutions() {
@@ -387,7 +411,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     get enablePayconiq() {
-        return false
+        return this.organization.meta.paymentMethods.includes(PaymentMethod.Payconiq)
     }
 
     set enablePayconiq(enable: boolean) {
@@ -395,7 +419,24 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return;
         }
 
-        new Toast("Om Payconiq te activeren moet je eerst aansluiten bij Payconiq via jouw bank. Daarna kunnen we bij Payconiq een code aanvragen die we nodig hebben om betalingen te verwerken. Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        if (enable) {
+            if (this.payconiqApiKey.length == 0) {
+                new Toast("Om Payconiq te activeren moet je eerst aansluiten bij Payconiq via jouw bank. Daarna kunnen we bij Payconiq een code aanvragen die we nodig hebben om betalingen te verwerken. Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
+                return;
+            }
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Payconiq)
+        } else {
+            if (this.organization.meta.paymentMethods.length == 1) {
+                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
+                return
+            }
+
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Payconiq) 
+        }
     }
     
     get enableBancontact() {
