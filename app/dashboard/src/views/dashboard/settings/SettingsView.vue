@@ -128,7 +128,7 @@
             <h2>Jouw privacyvoorwaarden</h2>
             <p class="st-list-description">Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.</p>
 
-            <STInputBox title="Waar staan jouw privacyvoorwaarden?" :error-box="errorBox" class="max">
+            <STInputBox title="Waar staan jouw privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-model="selectedPrivacyType" value="none">Geen</Radio>
                     <Radio v-model="selectedPrivacyType" value="website">Op jouw website</Radio>
@@ -136,7 +136,7 @@
                 </RadioGroup>
             </STInputBox>
 
-            <STInputBox title="Volledige link naar privacyvoorwaarden" error-fields="website" :error-box="errorBox" v-if="selectedPrivacyType == 'website'">
+            <STInputBox title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox" v-if="selectedPrivacyType == 'website'">
                 <input
                     v-model="privacyPolicyUrl"
                     class="input"
@@ -156,7 +156,7 @@
 
             <hr>
             <h2>Payconiq activeren</h2>
-            <p class="st-list-description">Vul de API Key die je van Payconiq hebt ontvangen hieronder in.</p>
+            <p class="st-list-description">Vul de API Key die je van Payconiq hebt ontvangen hieronder in. Voor hulp stuur je best een mailtje naar hallo@stamhoofd.be en we helpen we heel graag verder.</p>
 
             <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
                 <input
