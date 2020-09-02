@@ -45,6 +45,7 @@ export * from "./src/endpoints/tokens/CreateTokenStruct"
 export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 
 export * from "./src/endpoints/OrganizationAdmins"
+export * from "./src/endpoints/GroupSizeResponse"
 
 // Grouping
 export * from "./src/grouping/PaginatedResponse"
