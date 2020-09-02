@@ -182,8 +182,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             if (response.data.paymentUrl) {
                 if (this.selectedPaymentMethod == PaymentMethod.Payconiq && payment) {
                     if (this.getOS() == "android" || this.getOS() == "iOS") {
+                        const url = response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
+                        const href = document.createElement("a")
+                        href.href = url
+                        href.click();
                         this.present(new ComponentWithProperties(PayconiqButtonView, { 
-                            paymentUrl: response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
+                            paymentUrl: url
                         }));
                     } else {
                         // only on desktop
