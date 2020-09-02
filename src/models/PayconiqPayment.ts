@@ -114,7 +114,7 @@ export class PayconiqPayment extends Model {
     private static request(method: string, path: string, data = {}, auth: string | null = null): Promise<any> {
         return new Promise((resolve, reject) => {
             const jsonData = JSON.stringify(data);
-            const hostname = "api.ext.payconiq.com"
+            const hostname = process.env.NODE_ENV == 'production' ? "api.payconiq.com" : "api.ext.payconiq.com"
             const base = "https://"+hostname
 
             // Log all communication
