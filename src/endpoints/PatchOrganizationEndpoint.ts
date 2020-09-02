@@ -2,9 +2,12 @@ import { Database } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch } from "@stamhoofd/structures";
+import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod } from "@stamhoofd/structures";
+import { v4 as uuidv4 } from "uuid";
 
 import { Group } from '../models/Group';
+import { PayconiqPayment } from '../models/PayconiqPayment';
+import { Payment } from '../models/Payment';
 import { Token } from '../models/Token';
 
 type Params = {};
@@ -67,13 +70,53 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.address = organization.address.patch(request.body.address)
             }
 
-            if (request.body.meta) {
-                organization.meta.patchOrPut(request.body.meta)
-            }
-
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
+
+                if (request.body.privateMeta.payconiqApiKey === null) {
+                    organization.privateMeta.payconiqApiKey = null;
+                } else {
+                    organization.privateMeta.payconiqApiKey = request.body.privateMeta.payconiqApiKey ?? organization.privateMeta.payconiqApiKey
+
+                   if (!(await PayconiqPayment.createTest(organization))) {
+                       
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "De API key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
+                            field: "payconiqApiKey"
+                        })
+                    }
+                }
             }
+
+            if (request.body.meta) {
+                organization.meta.patchOrPut(request.body.meta)
+
+                // check payconiq + mollie
+                if (!organization.privateMeta.payconiqApiKey) {
+                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
+                    if (i != -1) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.",
+                            field: "paymentMethods"
+                        })
+                    }
+                }
+
+                 // check payconiq + mollie
+                if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact)
+                    if (i != -1) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Je kan Bancontact niet activeren omdat Mollie niet correct gekoppeld is. Schakel Bancontact uit voor je verder gaat.",
+                            field: "paymentMethods"
+                        })
+                    }
+                }
+            }
+
 
             // Save the organization
             await organization.save()

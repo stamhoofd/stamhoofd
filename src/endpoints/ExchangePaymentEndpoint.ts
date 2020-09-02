@@ -9,6 +9,7 @@ import { Member } from '../models/Member';
 import { MolliePayment } from '../models/MolliePayment';
 import { MollieToken } from '../models/MollieToken';
 import { Organization } from '../models/Organization';
+import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
@@ -79,7 +80,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
        
-        if (payment.status == PaymentStatus.Pending && payment.method == PaymentMethod.Bancontact) {
+        if ((payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created ) && payment.method == PaymentMethod.Bancontact) {
             // check status via mollie
             const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
             if (molliePayments.length == 1) {
@@ -112,8 +113,39 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         await payment.save();
                     }
                 } else {
-                    console.warn("Mollie token is missing for organization "+organization.id+" while checking payment status...")
+                    console.warn("Mollie payment is missing for organization "+organization.id+" while checking payment status...")
                 }
+            }
+        } else if ((payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) && payment.method == PaymentMethod.Payconiq) {
+            // Check status
+
+            const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id}, { limit: 1 })
+            if (payconiqPayments.length == 1) {
+                const payconiqPayment = payconiqPayments[0]
+
+                const status = await payconiqPayment.getStatus(organization)
+                payment.status = status
+
+                if (status == PaymentStatus.Succeeded) {
+                    payment.status = PaymentStatus.Succeeded
+                    payment.paidAt = new Date()
+
+                    for (const registration of registrations) {
+                        if (registration.registeredAt === null) {
+                            registration.registeredAt = new Date()
+                            await registration.save();
+                        }
+                    }
+
+                    await payment.save();
+                } else if (status == PaymentStatus.Failed) {
+                    payment.status = PaymentStatus.Failed
+                    await payment.save();
+                } else {
+                    await payment.save();
+                }
+            } else {
+                console.warn("Payconiq payment is missing for organization "+organization.id+" while checking payment status...")
             }
         }
 

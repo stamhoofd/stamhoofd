@@ -546,9 +546,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.8.17"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.17.tgz#f0e76b4d87c42b34fa7fd0366077e29b411db144"
-  integrity sha512-amOmUPgCQFQi8B/BvbYEerghE5+VqqHlRQFG0AS7E8HGSl6QHKQZ5epBO1T0V23HEi//H7JRfa8Tk5oV6Zu8Pw==
+  version "1.8.19"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.8.19.tgz#679f03daa1356e29f1b157af4a6b4d4848655a87"
+  integrity sha512-UY1P6aMHP17VsC0aYTUVnBF93+DiBAfEph9m+1p8CRaaI4HcO1S0O+NThjoqEABvH1irVr0R1WyFOcMVkdLAhw==
   dependencies:
     uuid "^8.2.0"
 

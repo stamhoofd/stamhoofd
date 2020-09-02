@@ -9,6 +9,7 @@ import { Group } from '../models/Group';
 import { Member, RegistrationWithMember } from '../models/Member';
 import { MolliePayment } from '../models/MolliePayment';
 import { MollieToken } from '../models/MollieToken';
+import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
@@ -74,7 +75,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 alreadyRegisteredCount++;
             }
         }
-
 
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
@@ -194,7 +194,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (payRegistrations.length > 0) {
             const payment = new Payment()
             payment.method = request.body.paymentMethod
-            payment.status = PaymentStatus.Pending
+            payment.status = PaymentStatus.Created
             payment.price = totalPrice
             payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
             payment.paidAt = null
@@ -210,7 +210,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (!registration.waitingList) {
                     registration.paymentId = payment.id
 
-                    if (payment.method == PaymentMethod.Transfer) {
+                    if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
                         registration.registeredAt = new Date()
                     }
                 }
@@ -219,47 +219,51 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             let paymentUrl: string | null = null
-            if (payment.method == PaymentMethod.Bancontact) {
-                
-                // Mollie payment
-                const token = await MollieToken.getTokenFor(user.organizationId)
-                if (!token) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "Betaling via Bancontact is onbeschikbaar"
-                    })
-                }
-                const profileId = await token.getProfileId()
-                if (!profileId) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "Betaling via Bancontact is tijdelijk onbeschikbaar"
-                    })
-                }
-                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                const molliePayment = await mollieClient.payments.create({
-                     amount: {
-                        currency: 'EUR',
-                        value: (totalPrice / 100).toFixed(2)
-                    },
-                    method: molliePaymentMethod.bancontact,
-                    testmode: process.env.NODE_ENV != 'production',
-                    profileId,
-                    description: 'Inschrijving bij '+user.organization.name,
-                    redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),
-                    webhookUrl: 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-                    metadata: {
-                        paymentId: payment.id,
-                    },
-                });
-                console.log(molliePayment)
-                paymentUrl = molliePayment.getCheckoutUrl()
+            if (payment.status != PaymentStatus.Succeeded) {
+                if (payment.method == PaymentMethod.Bancontact) {
+                    
+                    // Mollie payment
+                    const token = await MollieToken.getTokenFor(user.organizationId)
+                    if (!token) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Betaling via Bancontact is onbeschikbaar"
+                        })
+                    }
+                    const profileId = await token.getProfileId()
+                    if (!profileId) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Betaling via Bancontact is tijdelijk onbeschikbaar"
+                        })
+                    }
+                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                    const molliePayment = await mollieClient.payments.create({
+                        amount: {
+                            currency: 'EUR',
+                            value: (totalPrice / 100).toFixed(2)
+                        },
+                        method: molliePaymentMethod.bancontact,
+                        testmode: process.env.NODE_ENV != 'production',
+                        profileId,
+                        description: 'Inschrijving bij '+user.organization.name,
+                        redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),
+                        webhookUrl: 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                        metadata: {
+                            paymentId: payment.id,
+                        },
+                    });
+                    console.log(molliePayment)
+                    paymentUrl = molliePayment.getCheckoutUrl()
 
-                // Save payment
-                const dbPayment = new MolliePayment()
-                dbPayment.paymentId = payment.id
-                dbPayment.mollieId = molliePayment.id
-                await dbPayment.save();
+                    // Save payment
+                    const dbPayment = new MolliePayment()
+                    dbPayment.paymentId = payment.id
+                    dbPayment.mollieId = molliePayment.id
+                    await dbPayment.save();
+                } else if (payment.method == PaymentMethod.Payconiq) {
+                    paymentUrl = await PayconiqPayment.createPayment(payment, user.organization)
+                }
             }
 
             return new Response(RegisterResponse.create({
