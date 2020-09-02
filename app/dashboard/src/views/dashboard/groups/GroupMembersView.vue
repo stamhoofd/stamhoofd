@@ -165,8 +165,9 @@ class SelectableMember {
     member: MemberWithRegistrations;
     selected = true;
 
-    constructor(member: MemberWithRegistrations) {
+    constructor(member: MemberWithRegistrations, selected: boolean = true) {
         this.member = member;
+        this.selected = selected
     }
 }
 
@@ -200,6 +201,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     loading = false;
 
     actionLoading = false
+    cachedWaitingList: boolean | null = null
 
     mounted() {
         this.reload();
@@ -233,16 +235,28 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return this.group.settings.maxMembers
     }
 
+    checkWaitingList() {
+        MemberManager.loadMembers(this.group?.id ?? null, true).then((members) => {
+            this.cachedWaitingList = members.length > 0
+        }).catch((e) => {
+            console.error(e)
+        })
+    }
+
     reload() {
         this.loading = true;
         MemberManager.loadMembers(this.group?.id ?? null, this.waitingList).then((members) => {
             this.members = members.map((member) => {
-                return new SelectableMember(member);
+                return new SelectableMember(member, !this.waitingList);
             }) ?? [];
         }).catch((e) => {
             console.error(e)
         }).finally(() => {
             this.loading = false
+
+            if (!this.waitingList && this.group && this.group.settings.maxMembers !== null) {
+                this.checkWaitingList()
+            }
         })
     }
 
@@ -256,6 +270,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get hasWaitingList() {
         if (this.waitingList) {
             return false;
+        }
+        if (this.cachedWaitingList !== null) {
+            return this.cachedWaitingList
         }
         if (!this.group) {
             return false;

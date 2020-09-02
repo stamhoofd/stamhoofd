@@ -89,7 +89,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, LoadingButton, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup, GroupSizeResponse } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup, GroupSizeResponse, WaitingListSkipReason } from "@stamhoofd/structures"
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -217,28 +217,34 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
         }
 
         if (!this.selectedGroup.waitingList && this.selectedGroup.group.settings.maxMembers !== null) {
-            this.loading = true;
+            if (this.selectableGroup.skipReason == WaitingListSkipReason.Invitation) {
+                // we have an invitation: skip maximum check
+            } else {
+                this.loading = true;
 
-            try {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
-                    method: "GET",
-                    path: "/organization/groups/"+this.selectedGroup.group.id+"/size",
-                    decoder: GroupSizeResponse as Decoder<GroupSizeResponse>
-                });
-                this.loading = false
+                try {
+                    const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        method: "GET",
+                        path: "/organization/groups/"+this.selectedGroup.group.id+"/size",
+                        decoder: GroupSizeResponse as Decoder<GroupSizeResponse>
+                    });
+                    this.loading = false
 
-                if (response.data.occupied >= response.data.maximum) {
-                    this.errorBox = new ErrorBox(new SimpleError({
-                        code: "not_selected",
-                        message: "Deze leeftijdsgroep is al volzet! Je kan hier niet meer voor inschrijven."
-                    }))
-                    return false;
+                    if (response.data.occupied >= response.data.maximum) {
+                        this.errorBox = new ErrorBox(new SimpleError({
+                            code: "not_selected",
+                            message: "Deze leeftijdsgroep is al volzet! Je kan hier niet meer voor inschrijven."
+                        }))
+                        this.selectedGroup.waitingList = true
+                        return false;
+                    }
+                } catch (e) {
+                    this.loading = false;
+                    this.errorBox = new ErrorBox(e)
+                    return false
                 }
-            } catch (e) {
-                this.loading = false;
-                this.errorBox = new ErrorBox(e)
-                return false
             }
+           
         }
 
         return true
