@@ -73,20 +73,23 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
 
-                if (request.body.privateMeta.payconiqApiKey === null) {
-                    organization.privateMeta.payconiqApiKey = null;
-                } else {
-                    organization.privateMeta.payconiqApiKey = request.body.privateMeta.payconiqApiKey ?? organization.privateMeta.payconiqApiKey
+                if (request.body.privateMeta.payconiqApiKey !== undefined) {
+                    if (request.body.privateMeta.payconiqApiKey === null) {
+                        organization.privateMeta.payconiqApiKey = null;
+                    } else {
+                        organization.privateMeta.payconiqApiKey = request.body.privateMeta.payconiqApiKey ?? organization.privateMeta.payconiqApiKey
 
-                   if (!(await PayconiqPayment.createTest(organization))) {
-                       
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "De API key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
-                            field: "payconiqApiKey"
-                        })
+                    if (!(await PayconiqPayment.createTest(organization))) {
+                        
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "De API key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
+                                field: "payconiqApiKey"
+                            })
+                        }
                     }
                 }
+                
             }
 
             if (request.body.meta) {
