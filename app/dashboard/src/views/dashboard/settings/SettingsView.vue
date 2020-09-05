@@ -474,7 +474,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableIDEAL(enable: boolean) {
-        if (enable == this.enableBancontact) {
+        if (enable == this.enableIDEAL) {
             return;
         }
 
