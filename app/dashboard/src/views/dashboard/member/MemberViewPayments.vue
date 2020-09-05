@@ -20,6 +20,16 @@
                         <dd>Bancontact</dd>
                     </template>
 
+                    <template v-if="payment.method == 'iDEAL'">
+                        <dt>Betaald via </dt>
+                        <dd>iDEAL</dd>
+                    </template>
+
+                    <template v-if="payment.method == 'Payconiq'">
+                        <dt>Betaald via </dt>
+                        <dd>Payconiq</dd>
+                    </template>
+
                     <dt>Status</dt>
                     <dd v-if="payment.status == 'Succeeded'">
                         Betaald

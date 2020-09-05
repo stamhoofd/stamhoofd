@@ -100,6 +100,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             case PaymentMethod.Payconiq: return "Payconiq (aangeraden)"
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
+            case PaymentMethod.iDEAL: return "iDEAL"
         }
     }
 
@@ -108,6 +109,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             case PaymentMethod.Payconiq: return "Betaal mobiel met de Payconiq by Bancontact app, de KBC-app of de ING-app."
             case PaymentMethod.Transfer: return ""
             case PaymentMethod.Bancontact: return ""
+            case PaymentMethod.iDEAL: return ""
         }
     }
 
@@ -116,6 +118,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             case PaymentMethod.Payconiq: return payconiqLogo
             case PaymentMethod.Transfer: return null
             case PaymentMethod.Bancontact: return null
+            case PaymentMethod.iDEAL: return null
         }
     }
 

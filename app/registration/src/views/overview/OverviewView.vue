@@ -156,6 +156,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         switch (method) {
             case PaymentMethod.Transfer: return "Betaald via overschrijving"
             case PaymentMethod.Bancontact: return "Betaald via Bancontact"
+            case PaymentMethod.iDEAL: return "Betaald via iDEAL"
             case PaymentMethod.Payconiq: return "Betaald via Payconiq by Bancontact"
         }
         return "Onbekende betaalmethode"

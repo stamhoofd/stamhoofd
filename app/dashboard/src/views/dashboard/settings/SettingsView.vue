@@ -149,14 +149,16 @@
 
             <hr>
             <h2>Betaalmethodes</h2>
+            <p>Voor je gemak raden we aan om Payconiq te gebruiken, op die manier hoef je zelf geen betalingen op te volgen. Bovendien is Payconiq sowieso een redelijk goedkoop betaalmiddel.</p>
 
-            <Checkbox v-model="enableTransfers">Overschrijvingen (gratis)</Checkbox>
+            <Checkbox v-model="enableTransfers">Overschrijvingen (gratis, maar zelf op te volgen)</Checkbox>
             <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
             <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
+            <Checkbox v-model="enableIDEAL">iDEAL (29 cent)</Checkbox>
 
             <hr>
             <h2>Payconiq activeren</h2>
-            <p class="st-list-description">Vul de API Key die je van Payconiq hebt ontvangen hieronder in. Voor hulp stuur je best een mailtje naar hallo@stamhoofd.be en we helpen we heel graag verder.</p>
+            <p class="st-list-description">Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. We bezorgen je dan de nodige contracten die we daarna aan Payconiq bezorgen. Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.</p>
 
             <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
                 <input
@@ -467,6 +469,36 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Bancontact) 
         }
     }
+
+    get enableIDEAL() {
+        return this.organization.meta.paymentMethods.includes(PaymentMethod.iDEAL)
+    }
+
+    set enableIDEAL(enable: boolean) {
+        if (enable == this.enableBancontact) {
+            return;
+        }
+
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        if (enable) {
+            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                new Toast("Je kan iDEAL niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je iDEAL betalingen accepteren.", "error red").show();
+                return
+            }
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.iDEAL)
+        } else {
+            if (this.organization.meta.paymentMethods.length == 1) {
+                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
+                return
+            }
+
+            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.iDEAL) 
+        }
+    }
+
 
     get address() {
         return this.organization.address
