@@ -61,6 +61,8 @@ import PaymentPendingView from './PaymentPendingView.vue';
 import PayconiqBannerView from './PayconiqBannerView.vue';
 import PayconiqButtonView from './PayconiqButtonView.vue';
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
+import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
+import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 
 @Component({
     components: {
@@ -92,7 +94,33 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get paymentMethods() {
-        return OrganizationManager.organization.meta.paymentMethods
+        const methods = OrganizationManager.organization.meta.paymentMethods
+        const r: PaymentMethod[] = []
+
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
+        }
+
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.iDEAL) && OrganizationManager.organization.address.country == "NL") {
+            r.push(PaymentMethod.iDEAL)
+        }
+
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.Bancontact)) {
+            r.push(PaymentMethod.Bancontact)
+        }
+
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.iDEAL) && OrganizationManager.organization.address.country == "BE") {
+            r.push(PaymentMethod.iDEAL)
+        }
+
+        // Others
+        r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL))
+
+        return r
     }
 
     getName(paymentMethod: PaymentMethod): string {
@@ -117,8 +145,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: return payconiqLogo
             case PaymentMethod.Transfer: return null
-            case PaymentMethod.Bancontact: return null
-            case PaymentMethod.iDEAL: return null
+            case PaymentMethod.Bancontact: return bancontactLogo
+            case PaymentMethod.iDEAL: return idealLogo
         }
     }
 

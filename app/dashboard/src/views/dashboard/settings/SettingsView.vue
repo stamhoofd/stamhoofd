@@ -149,7 +149,6 @@
 
             <hr>
             <h2>Betaalmethodes</h2>
-            <p>Voor je gemak raden we aan om Payconiq te gebruiken, op die manier hoef je zelf geen betalingen op te volgen. Bovendien is Payconiq sowieso een redelijk goedkoop betaalmiddel.</p>
 
             <Checkbox v-model="enableTransfers">Overschrijvingen (gratis, maar zelf op te volgen)</Checkbox>
             <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
@@ -183,7 +182,7 @@
                 </p>
             </template>
             <template v-else>
-                <p class="success-box" v-if="organization.privateMeta.mollieOnboarding.canReceivePayments">Online betalingen via Bancontact zijn actief</p>
+                <p class="success-box" v-if="organization.privateMeta.mollieOnboarding.canReceivePayments">Online betalingen via Bancontact of iDEAL zijn geactiveerd (je kan ze hierboven aanzetten).</p>
                 <p class="warning-box" v-else>Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.</p>
                 <p class="warning-box" v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements">Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen</p>
 

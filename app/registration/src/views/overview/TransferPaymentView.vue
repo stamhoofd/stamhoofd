@@ -7,7 +7,7 @@
 
             <main>
                 <h1>Lidgeld overschrijven</h1>
-                <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! <span class="hide-smartphone">Je kan de QR-code scannen met de meeste bank apps.</span></p>
+                <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! <span class="hide-smartphone" v-if="isBelgium">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
 
                 <div class="payment-split">
                     <div class="hide-smartphone" v-if="payment.price > 0">
@@ -99,6 +99,10 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     mounted() {
         this.generateQRCode()
+    }
+
+    isBelgium() {
+        return this.organization.address.country == "BE"
     }
 
     async generateQRCode() {
