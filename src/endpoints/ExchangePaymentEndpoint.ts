@@ -1,9 +1,8 @@
-import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
-import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database';
+import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMember,EncryptedPaymentDetailed, PaymentMethod,PaymentStatus, RegistrationWithEncryptedMember } from "@stamhoofd/structures";
+import { EncryptedPaymentDetailed, PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
 
 import { Member } from '../models/Member';
 import { MolliePayment } from '../models/MolliePayment';
@@ -80,7 +79,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
        
-        if ((payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created ) && payment.method == PaymentMethod.Bancontact) {
+        if ((payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created ) && (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL)) {
             // check status via mollie
             const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
             if (molliePayments.length == 1) {

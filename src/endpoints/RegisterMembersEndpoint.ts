@@ -220,21 +220,21 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             let paymentUrl: string | null = null
             if (payment.status != PaymentStatus.Succeeded) {
-                if (payment.method == PaymentMethod.Bancontact) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
                     
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(user.organizationId)
                     if (!token) {
                         throw new SimpleError({
                             code: "",
-                            message: "Betaling via Bancontact is onbeschikbaar"
+                            message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is onbeschikbaar"
                         })
                     }
                     const profileId = await token.getProfileId()
                     if (!profileId) {
                         throw new SimpleError({
                             code: "",
-                            message: "Betaling via Bancontact is tijdelijk onbeschikbaar"
+                            message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is tijdelijk onbeschikbaar"
                         })
                     }
                     const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -243,7 +243,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             currency: 'EUR',
                             value: (totalPrice / 100).toFixed(2)
                         },
-                        method: molliePaymentMethod.bancontact,
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
                         testmode: process.env.NODE_ENV != 'production',
                         profileId,
                         description: 'Inschrijving bij '+user.organization.name,
