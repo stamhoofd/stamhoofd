@@ -66,7 +66,7 @@
                 <span>Beheerders</span>
             </button>
 
-            <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen">
+            <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}">
                 <span class="icon sync"/>
                 <span>Groepsadministratie</span>
             </button>
@@ -111,6 +111,7 @@ import NoKeyView from './NoKeyView.vue';
 import { Decoder } from '@simonbackx/simple-encoding';
 import WhatsNewView from './settings/WhatsNewView.vue';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
+import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -144,6 +145,11 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
             this.manageSettings(false)
+            didSet = true
+        }
+
+        if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
+            this.syncScoutsEnGidsen()
             didSet = true
         }
 
@@ -256,7 +262,8 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     syncScoutsEnGidsen() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Je kan binnenkort alle gegevens van Stamhoofd automatisch in de groepsadministratie plaatsen. Je hoeft dan zelf niet alles in de groepsadministratie over te typen. We lanceren deze functie zeker voor de deadline waarop de groepsadministratie in orde moeten zijn voor leden.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
+         this.currentlySelected = "manage-sgv-groepsadministratie"
+        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));
     }
 
     importMembers() {

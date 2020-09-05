@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background" id="whatsnew-view">
-        <STNavigationBar title="Gratis en open-source">
+        <STNavigationBar title="Wat is er nieuw?">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
         </STNavigationBar>
 

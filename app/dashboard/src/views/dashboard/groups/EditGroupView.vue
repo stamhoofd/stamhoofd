@@ -548,10 +548,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-edit-view {
-    .radio-description {
-        display: block;
-        @extend .style-description-small;
-    }
+    
 
 }
 </style>

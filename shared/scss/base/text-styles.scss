@@ -206,3 +206,8 @@
         flex-shrink: 0;
     }
 }
+
+.radio-description {
+    display: block;
+    @extend .style-description-small;
+}
