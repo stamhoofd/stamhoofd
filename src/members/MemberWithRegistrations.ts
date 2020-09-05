@@ -199,7 +199,8 @@ export class MemberWithRegistrations extends Member {
                     return null
                 }
 
-                if (selectable.willJoinWaitingList !== pref.waitingList) {
+                if (selectable.willJoinWaitingList && !pref.waitingList) {
+                    // we do allow joining the waiting list if it is not required (e.g. when a pre register group is full)
                     return null
                 }
 
