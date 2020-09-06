@@ -91,7 +91,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
     sync() {
         // todo
-        SGVGroepsadministratie.downloadTest()
+        SGVGroepsadministratie.downloadAll()
     }
 
     login() {

@@ -1177,9 +1177,9 @@
     uuid "^8.2.0"
 
 "@simonbackx/simple-networking@~1.3.0":
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.6.tgz#cb0de85daba6cb97e615331f5cc25f251caa3fb6"
-  integrity sha512-SUiT5UfmXYmn5CngXB8NQO8Yx9jcuI0YSSM96Jjm5yDUGiFrLKGb37xbOz2+g7f2tcKxwhFgZxAr3exubdzhCw==
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.7.tgz#cb4e0fc906f81146c7f47bcfc6884c7c19b5a096"
+  integrity sha512-207ugU5mtuaJLLEojbz4gpLGX5U3TSkjaXRTMI4N+vt9WGy+xK6oGa7i21xaYTqPiWoNb+1adDbzD16hN+5PPQ==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
   version "1.6.8"
