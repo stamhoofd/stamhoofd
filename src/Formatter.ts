@@ -1,5 +1,6 @@
 export class Formatter {
     static slug(name: string): string {
+        name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
     }
 
