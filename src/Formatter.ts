@@ -23,6 +23,15 @@ export class Formatter {
         return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
     }
 
+     /**
+     * 01/01/2020
+     */
+    static dateNumber(date: Date): string {
+        const year = date.getFullYear()
+        return (date.getDate()+"").padStart(2, "0") + "/" + (this.month(date.getMonth() + 1)+"").padStart(2, "0") + "/"+year
+    }
+
+
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
