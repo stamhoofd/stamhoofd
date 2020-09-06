@@ -22,7 +22,7 @@
             <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
-            <Checkbox v-if="allowGroupPictures" v-model="allowPictures" class="long-text">
+            <Checkbox v-if="!allowGroupPictures" v-model="allowPictures" class="long-text">
                 {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
             <Checkbox v-if="!allowPictures" v-model="allowGroupPictures" class="long-text">
@@ -352,8 +352,10 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                 title: "Huisdokter"
             })
         } else {
-            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures||r.type == RecordType.OnlyGroupPictures || r.type == RecordType.NoPermissionForMedicines )
+            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures|| r.type == RecordType.NoPermissionForMedicines )
             this.memberDetails.doctor = null
+            //geen idee of je dit bedoelt met wegfilteren
+            this.memberDetails.OnlyGroupPictures =null
         }
         
         this.memberDetails.lastReviewed = new Date()
@@ -378,7 +380,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled) }
 
     get allowOnlyGroupPictures() { return !this.getBooleanType(RecordType.OnlyGroupPictures) }
-    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, !enabled) }
+    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled) }
 
     get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
     set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.NoPermissionForMedicines, !enabled) }
