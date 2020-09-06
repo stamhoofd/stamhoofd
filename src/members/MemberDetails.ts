@@ -56,6 +56,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder })
     lastName = "";
 
+    @field({ decoder: StringDecoder, version: 30, nullable: true })
+    memberNumber: string | null = null;
+
     @field({ decoder: new EnumDecoder(Gender) })
     gender: Gender = Gender.Other;
 
