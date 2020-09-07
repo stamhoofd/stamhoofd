@@ -25,8 +25,8 @@
             <Checkbox v-if="!allowGroupPictures" v-model="allowPictures" class="long-text">
                 {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
-            <Checkbox v-if="!allowPictures" v-model="allowGroupPictures" class="long-text">
-                {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd in groep voor publicatie op de website en sociale media van {{ organization.name }}.
+            <Checkbox v-model="allowGroupPictures" class="long-text">
+                Er mogen tijdens de activiteiten groepsfoto's gemomen worden met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
 
 
@@ -354,8 +354,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         } else {
             this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures|| r.type == RecordType.NoPermissionForMedicines )
             this.memberDetails.doctor = null
-            //geen idee of je dit bedoelt met
-            this.memberDetails.OnlyGroupPictures =null
+            
         }
         
         this.memberDetails.lastReviewed = new Date()
@@ -379,7 +378,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
     set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled) }
 
-    get allowOnlyGroupPictures() { return !this.getBooleanType(RecordType.OnlyGroupPictures) }
+    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.OnlyGroupPictures) }
     set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled) }
 
     get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
