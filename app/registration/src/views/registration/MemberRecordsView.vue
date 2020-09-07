@@ -13,10 +13,10 @@
             <h2>Privacy</h2>
 
             <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
             </Checkbox>
             <Checkbox v-else v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
             </Checkbox>
 
             <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
@@ -354,7 +354,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         } else {
             this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures|| r.type == RecordType.NoPermissionForMedicines )
             this.memberDetails.doctor = null
-            //geen idee of je dit bedoelt met wegfilteren
+            //geen idee of je dit bedoelt met
             this.memberDetails.OnlyGroupPictures =null
         }
         
