@@ -288,7 +288,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
     get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
     set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled)} 
     
-    get allowOnlyGroupPictures() { return !this.getBooleanType(RecordType.OnlyGroupPictures) }
+    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.OnlyGroupPictures) }
     set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled)}
 
     get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
