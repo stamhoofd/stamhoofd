@@ -30,8 +30,8 @@ export class StringCompare {
 
     static typoCount(original: string, compareWith: string) {
         // remove special chars + lowercase
-        original = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ");
-        compareWith = compareWith.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ");
+        original = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
+        compareWith = compareWith.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
         return Math.max(original.length, compareWith.length) - this.compare(original, compareWith)
     }
 }
