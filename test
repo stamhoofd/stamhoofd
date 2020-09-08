@@ -1,9 +1,0 @@
-localhost:3000
-
-reverse_proxy {
-    to www.example.com:443
-    header_up Host {http.reverse_proxy.upstream.host}
-    transport http {
-        tls
-    }
-}

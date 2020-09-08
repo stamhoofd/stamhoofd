@@ -89,9 +89,10 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         return SGVGroepsadministratie.hasToken
     }
 
-    sync() {
+    async sync() {
         // todo
-        SGVGroepsadministratie.downloadAll()
+        await SGVGroepsadministratie.downloadAll()
+        await SGVGroepsadministratie.sync(this)
     }
 
     login() {

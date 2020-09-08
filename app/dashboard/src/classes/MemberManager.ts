@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
 export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
@@ -180,6 +180,51 @@ export class MemberManagerStatic {
 
     getPatchArray(): ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]> {
         return new PatchableArray()
+    }
+
+     async getEncryptedMembers(members: MemberWithRegistrations[], withRegistrations = false): Promise<EncryptedMemberWithRegistrations[]> {
+        const encryptedMembers: EncryptedMemberWithRegistrations[] = [];
+
+        for (const member of members) {
+            if (!member.details) {
+                throw new Error("Can't save member with undefined details!")
+            }
+            const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
+
+            encryptedMembers.push(
+                EncryptedMemberWithRegistrations.create({
+                    id: member.id,
+                    encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
+                    encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
+                    publicKey: member.publicKey,
+                    firstName: member.details.firstName,
+                    placeholder: false,
+                    registrations: withRegistrations ? member.registrations : []
+                })
+            )
+        }
+        return encryptedMembers
+    }
+
+    async patchMemberDetails(member: MemberWithRegistrations): Promise<MemberWithRegistrations | null> {
+        const encrypted = await this.getEncryptedMembers([member])
+
+        const patchArray = new PatchableArray()
+        for (const m of encrypted) {
+            patchArray.addPatch(EncryptedMemberWithRegistrationsPatch.create({
+                encryptedForOrganization: m.encryptedForOrganization,
+                encryptedForMember: m.encryptedForMember
+            }))
+        }
+
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+        return (await this.decryptMembers(response.data))[0] ?? null
     }
 
     async patchMembers(members: ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>) {

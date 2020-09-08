@@ -1,13 +1,28 @@
 import { Toast } from '@stamhoofd/components';
 import { Server, Request, RequestMiddleware, RequestResult } from '@simonbackx/simple-networking';
 import { ObjectData, DateDecoder, AutoEncoder, field, IntegerDecoder, ArrayDecoder, Decoder, StringDecoder, BooleanDecoder } from '@simonbackx/simple-encoding';
-import { Gender, Country, CountryDecoder, Organization } from '@stamhoofd/structures';
+import { Gender, Country, CountryDecoder, Organization, MemberWithRegistrations, RecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/networking';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { OrganizationManager } from './OrganizationManager';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { MemberManager } from './MemberManager';
+import { NavigationMixin, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
+import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
+import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
+import { getPatch } from './SGVGroepsadministratieSync';
 
-class SGVLid {
+export interface SGVLidMatch {
+    stamhoofd: MemberWithRegistrations
+    sgv: SGVLid
+}
+
+export interface SGVLidMatchVerify extends SGVLidMatch {
+    verify: boolean
+}
+
+export class SGVLid {
     id: string;
     firstName: string;
     lastName: string;
@@ -37,15 +52,60 @@ class SGVLid {
 
     static decode(data: ObjectData) {
         const g = data.field("waarden").field("be.vvksm.groepsadmin.model.column.GeslachtColumn").string
+        const date = data.field("waarden").field("be.vvksm.groepsadmin.model.column.GeboorteDatumColumn").string
+        
+        const splitted = date.split("/")
+        if (splitted.length != 3) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Expected DD/MM/YYYY formatted string",
+                field: data.addToCurrentField("waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn")
+            })
+        }
+
+        const year = parseInt(splitted[2])
+        const month = parseInt(splitted[1])
+        const day = parseInt(splitted[0])
+
+         if (isNaN(year) || isNaN(month) || isNaN(day) || day > 31 || month > 12 || year > 2200 || year < 1900) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Expected DD/MM/YYYY formatted string",
+                field: data.addToCurrentField("waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn")
+            })
+        }
 
         return new SGVLid({
             id: data.field("id").string,
             firstName: data.field("waarden").field("be.vvksm.groepsadmin.model.column.VoornaamColumn").string,
             lastName: data.field("waarden").field("be.vvksm.groepsadmin.model.column.AchternaamColumn").string,
-            birthDay: new Date(data.field("waarden").field("be.vvksm.groepsadmin.model.column.GeboorteDatumColumn").string),
+            birthDay: new Date(year, month-1, day, 12),
             lidNummer: data.field("waarden").field("be.vvksm.groepsadmin.model.column.LidNummerColumn").string,
             gender: g == "V" ? Gender.Female : (g == "M" ? Gender.Male : Gender.Other),
         })
+    }
+
+    isEqual(member: MemberWithRegistrations) {
+        return StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.birthDay)) == 0 
+    }
+
+    isProbablyEqual(member: MemberWithRegistrations) {
+        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.birthDay))
+
+        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+            return true;
+        }
+        return false;
+    }
+
+    isProbablyEqualLastResort(member: MemberWithRegistrations) {
+        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+
+        if (t <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+            return true;
+        }
+        return false;
     }
 }
 
@@ -284,11 +344,33 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
     }
 
+    /**
+     * Geef terug of dit een normaal lid is, of leiding/vrijwilliger/los lid
+     */
+    isNormaalLid() {
+
+    }
+
     async setFilter() {
         await this.workAroundAuthenticatedServer.request({
             method: "PATCH",
             path: "/ledenlijst/filter/huidige",
-            body: {"criteria":{"groepen":["O2209G"],"functies":["d5f75b320b812440010b812554790354","d5f75b320b812440010b812555de03a2","d5f75b320b812440010b8125567703cb","d5f75b320b812440010b812555d603a0","d5f75b320b812440010b8125565203c1","d5f75b320b812440010b812555c1039b"],"geslacht":"vrouw"},"kolommen":["be.vvksm.groepsadmin.model.column.LidNummerColumn","be.vvksm.groepsadmin.model.column.VoornaamColumn","be.vvksm.groepsadmin.model.column.AchternaamColumn","be.vvksm.groepsadmin.model.column.GeboorteDatumColumn","be.vvksm.groepsadmin.model.column.GeslachtColumn"],"groepen":[],"sortering":["be.vvksm.groepsadmin.model.column.LidNummerColumn"],"type":"lid","links":[{"rel":"self","href":"https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/ledenlijst/filter/huidige","method":"GET","secties":[]},{"rel":"self","href":"https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/ledenlijst/filter/huidige","method":"PATCH","secties":[]}]}
+            body: {
+                "criteria":{
+                    "groepen":["O2209G"],
+                    "oudleden": false,
+                },
+                "kolommen":[
+                    "be.vvksm.groepsadmin.model.column.LidNummerColumn",
+                    "be.vvksm.groepsadmin.model.column.VoornaamColumn",
+                    "be.vvksm.groepsadmin.model.column.AchternaamColumn",
+                    "be.vvksm.groepsadmin.model.column.GeboorteDatumColumn",
+                    "be.vvksm.groepsadmin.model.column.GeslachtColumn"
+                ],
+                "groepen":[],
+                "sortering":["be.vvksm.groepsadmin.model.column.LidNummerColumn"],
+                "type":"lid",
+            }
         })
     }
 
@@ -340,6 +422,172 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             throw e;
         }
         
+    }
+
+    async sync(component: NavigationMixin) {
+        // Members that are missing in groepsadmin
+        let newMembers: MemberWithRegistrations[] = []
+
+        const matchedMembers: SGVLidMatch[] = []
+
+        // Start! :D
+        const allMembers = await MemberManager.loadMembers(null, false)
+
+        for (const member of allMembers) {
+            if (!member.details) {
+                throw new SimpleError({
+                    code: "",
+                    message: "We konden niet synchroniseren omdat de gegevens van "+member.firstName+" ontbreken (achternaam ontbreekt ook). Vul dit lid eerst verder aan in Stamhoofd."
+                })
+            }
+            const sgvMember = this.leden.find((sgvLid) => {
+                return sgvLid.isEqual(member)
+            })
+
+            if (sgvMember) {
+                matchedMembers.push({
+                    stamhoofd: member,
+                    sgv: sgvMember
+                })
+
+            } else {
+                newMembers.push(member)
+            }
+        }
+
+        const probablyEqualList: SGVLidMatch[] = []
+
+        newMembers = newMembers.filter((member) => {
+            const sgvMember = this.leden.find((sgvLid) => {
+                return sgvLid.isProbablyEqual(member)
+            }) ?? this.leden.find((sgvLid) => {
+                return sgvLid.isProbablyEqualLastResort(member)
+            })
+            if (sgvMember) {
+                probablyEqualList.push({
+                    stamhoofd: member,
+                    sgv: sgvMember
+                })
+                return false
+            }
+            return true;
+        })
+
+        console.log("matched members:")
+        console.log(matchedMembers)
+
+        console.log("newMembers:")
+        console.log(newMembers)
+
+        console.log("Manual verify probably equal list:")
+        console.log(probablyEqualList)
+
+        if (probablyEqualList.length > 0) {
+            component.present(new ComponentWithProperties(SGVVerifyProbablyEqualView, {
+                matches: probablyEqualList,
+                onVerified: (verified: SGVLidMatchVerify[]) => {
+                    for (const member of verified) {
+                        if (member.verify) {
+                            matchedMembers.push(member)
+                        } else {
+                            newMembers.push(member.stamhoofd)
+                        }
+                    }
+                    this.doSync(component, matchedMembers, newMembers, allMembers)
+                }   
+            }).setDisplayStyle("popup"))
+            return;
+        }
+
+        await this.doSync(component, matchedMembers, newMembers, allMembers)
+    }
+
+    async doSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], allMembers: MemberWithRegistrations[]) {
+        // todo: filter new members by first searching for old members in groepsadmin and activatign them again > creating new matches
+
+        // Determine the missing members by checking the matches
+        const oldMembers: SGVLid[] = []
+
+        for (const member of this.leden) {
+            const found = matched.find(m => m.sgv.id == member.id)
+            if (!found) {
+                oldMembers.push(member)
+            }
+        }
+
+        if (oldMembers.length > 0) {
+            // Show a window
+            component.present(new ComponentWithProperties(SGVOldMembersView, {
+                members: oldMembers,
+                setAction: (action: "delete" | "import" | "nothing") => {
+                    this.doSyncDo(component, matched, newMembers, oldMembers, action)
+                }
+            }).setDisplayStyle("popup"))
+            return;
+        }
+
+        await this.doSyncDo(component, matched, newMembers, oldMembers, "nothing")
+    }
+
+    async doSyncDo(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing") {
+        // todo: import or delete
+        const deletedMembers: SGVLid[] = []
+        if (action == "delete") {
+            // todo: delete
+            deletedMembers.push(...oldMembers)
+        }
+        if (action == "import") {
+            // todo: import
+            //importedMembers.push(...newMembers)
+        }
+
+        // Start syncing...
+        for (const match of matched) {
+            await this.syncLid(match)
+        }
+
+         // Start creating
+        for (const member of newMembers) {
+            await this.createLid(member)
+        }
+
+        // Show report
+        component.present(new ComponentWithProperties(SGVReportView, {
+            updatedMembers: matched.map(m => m.stamhoofd),
+            createdMembers: newMembers,
+            deletedMembers: deletedMembers,
+            importedMembers: [],
+        }).setDisplayStyle("popup"))
+    }
+
+    async syncLid(match: SGVLidMatch) {
+        console.log("syncing "+match.stamhoofd.firstName);
+        const details = match.stamhoofd.details!
+
+        // Fetch full member from SGV
+        const response = await this.workAroundAuthenticatedServer.request<any>({
+            method: "GET",
+            path: "/lid/"+match.sgv.id
+        })
+
+        const lid = response.data;
+
+        console.log("syncing "+match.stamhoofd.firstName);
+        const patch = getPatch(lid, details)
+
+        console.log(lid)
+        console.info(patch)
+
+        await sleep(250);
+    }
+
+    
+    /**
+     * Create a new one in SGV
+     */
+    async createLid(member: MemberWithRegistrations) {
+        console.log("creating "+member.firstName);
+        await sleep(250);
     }
 
     checkUrl(): boolean | null {
