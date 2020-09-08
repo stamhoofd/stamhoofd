@@ -76,13 +76,13 @@ export function getPatch(details: MemberDetails, lid: any): any {
 
 // Versimpel een huisnummer bus combinatie voor vergelijkingen
 // 1 A 3 R => 1A 3R
-// A B 2 C => AB2C
-// AB 3 D => AB3D
+// A B 2 C => AB 2C
+// AB 3 D => AB 3D
 // 14/11 => 14 11
 // 14 bus 11 => 14 11
 // 14B => 14B
-// 1B3 45 => 1B3 45
-function splitStreetNumber(huisnummer: string): {number: string, bus: string} {
+// 1B 3 45 => 1B 3 45
+export function splitStreetNumber(huisnummer: string): {number: string, bus: string} {
     // Stap 1: verwijder alle speciale tekens
     const cleaned = huisnummer.toUpperCase().replace(/[^0-9A-Z]+/g, ' ')
     const parts = cleaned.split(' ')
@@ -107,10 +107,11 @@ function splitStreetNumber(huisnummer: string): {number: string, bus: string} {
         const starts_digit = /\d+/.test(part.substr(0, 1));
         const ends_digit = /\d+/.test(part.substr(part.length - 1, 1));
 
-        if (str == '' || prev_ends_digit !== starts_digit || (!prev_ends_digit && !starts_digit)) {
+        if (str == '' || (!starts_digit)) {
             // Als A 3 of 3 A
             // of A A
             // Aan elkaar schrijven
+            
         } else {
             str += ' ';
         }

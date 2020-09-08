@@ -1,5 +1,5 @@
 import { MemberDetails, Address, Parent } from "@stamhoofd/structures";
-import { getPatch } from './SGVGroepsadministratieSync';
+import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
 
 
 describe("Groepsadministratie Sync", () => {
@@ -116,6 +116,63 @@ describe("Groepsadministratie Sync", () => {
         expect(p2.adressen[0].id).not.toEqual("SGVID")
     })
 
+    test("Huisnummer opsplitsen", () => {
+        expect(splitStreetNumber("13 bus 3")).toMatchObject({
+            number: "13",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13/3")).toMatchObject({
+            number: "13",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13 3")).toMatchObject({
+            number: "13",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13A3")).toMatchObject({
+            number: "13A3",
+            bus: ""
+        })
+
+        expect(splitStreetNumber("13A 3")).toMatchObject({
+            number: "13A",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13 A 3")).toMatchObject({
+            number: "13A",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13AA 3")).toMatchObject({
+            number: "13AA",
+            bus: "3"
+        })
+
+        expect(splitStreetNumber("13AA")).toMatchObject({
+            number: "13AA",
+            bus: ""
+        })
+
+        expect(splitStreetNumber("1")).toMatchObject({
+            number: "1",
+            bus: ""
+        })
+
+        expect(splitStreetNumber("101")).toMatchObject({
+            number: "101",
+            bus: ""
+        })
+
+        expect(splitStreetNumber("A12")).toMatchObject({
+            number: "A12",
+            bus: ""
+        })
+
+    });
 
     test("Only one postadres", () => {
         const details = MemberDetails.create({
