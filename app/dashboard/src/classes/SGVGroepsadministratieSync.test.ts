@@ -1,4 +1,4 @@
-import { MemberDetails, Address, Parent } from "@stamhoofd/structures";
+import { MemberDetails, Address, Parent, ParentType } from "@stamhoofd/structures";
 import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
 
 
@@ -223,6 +223,106 @@ describe("Groepsadministratie Sync", () => {
             land: "BE",
             postadres: false
         })
+    })
+
+    test("Keep contact id", () => {
+        const details = MemberDetails.create({
+            parents: [
+                Parent.create({
+                    firstName: "Simon",
+                    lastName: "Backx",
+                    type: ParentType.Father,
+                    address: Address.create({
+                        street: "Teststraat",
+                        number: "11",
+                        city: "Gent",
+                        postalCode: "9000",
+                        country: "BE"
+                    })
+                }),
+                Parent.create({
+                    firstName: "Test",
+                    lastName: "Achternaam",
+                    type: ParentType.Other,
+                    address: Address.create({
+                        street: "Andere",
+                        number: "11",
+                        city: "Gent",
+                        postalCode: "9000",
+                        country: "BE"
+                    })
+                })
+            ]
+        })
+
+
+        const sgv = {
+            adressen: [
+                {
+                    id: "SGVID",
+                    straat: "Teststraat",
+                    nummer: "11",
+                    gemeente: "Gent",
+                    postcode: "9000",
+                    telefoon: "",
+                    "status": "normaal",
+                    "postadres": true,
+                    "positie": {
+                        "latitude": 51,
+                        "longitude": 3.8
+                    },
+                    land: "BE",
+                    "omschrijving": "",
+                    "unknownSGVProperty": "test"
+                }
+            ],
+            contacten: [
+                {
+                    "id": "SGVIDOUDER1",
+                    "voornaam": "Simon",
+                    "achternaam": "Backx",
+                    "gsm": "",
+                    "email": "",
+                    "rol": "moeder",
+                    "adres": "SGVID"
+                },
+                {
+                    "id": "SGVIDOUDER2",
+                    "voornaam": "Oude",
+                    "achternaam": "Backx",
+                    "gsm": "",
+                    "email": "",
+                    "rol": "vader",
+                    "adres": "SGVID"
+                }
+            ]
+        };
+
+        const p = getPatch(details, sgv)
+        expect(p.adressen).toHaveLength(2)
+        expect(p.contacten).toHaveLength(2)
+
+        expect(p.contacten[0]).toMatchObject({
+             "id": "SGVIDOUDER1",
+            "voornaam": "Simon",
+            "achternaam": "Backx",
+            "gsm": "",
+            "email": "",
+            "rol": "vader",
+            "adres": "SGVID"
+        })
+
+        expect(p.contacten[1]).toMatchObject({
+            "voornaam": "Test",
+            "achternaam": "Achternaam",
+            "gsm": "",
+            "email": "",
+            "rol": "voogd",
+        })
+
+        expect(p.contacten[1].id).toBeDefined()
+        expect(p.contacten[1].adres).toEqual(p.adressen[1].id)
+        
     })
 
 });

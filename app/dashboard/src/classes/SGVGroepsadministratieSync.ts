@@ -221,11 +221,10 @@ function parentToSGV(parent: Parent, adressen: Map<string, string>): any {
         voornaam: parent.firstName,
         achternaam: parent.lastName,
         adres: adressen.get(parent.address!.toString()),
+        gsm: parent.phone ?? "",
+        email: parent.email ?? "",
         rol: parent.type == ParentType.Father ? "vader" : (parent.type == ParentType.Mother ? "moeder" : "voogd"),
         showme: true,
-
-        // Generate random id
-        id: (new Date().getTime())+""+Math.floor((Math.random()*100000))
     }
 }
 
@@ -235,7 +234,7 @@ function createOrUpdateParent(parent: Parent, contacten: any, adressen: Map<stri
 
     if (existingContact) {
         // Override fields
-        return Object.assign(existingContact, updated)
+        return Object.assign({}, existingContact, updated)
     } else {
         updated.id = (new Date().getTime())+""+Math.floor((Math.random()*100000))
         return updated
