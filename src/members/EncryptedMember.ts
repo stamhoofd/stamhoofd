@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder,DateDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 export class EncryptedMember extends AutoEncoder {
@@ -19,6 +19,12 @@ export class EncryptedMember extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 20 })
     placeholder = false
+
+    @field({ decoder: DateDecoder })
+    createdAt: Date = new Date()
+
+    @field({ decoder: DateDecoder })
+    updatedAt: Date = new Date()
 }
 
 export const EncryptedMemberPatch = EncryptedMember.patchType()

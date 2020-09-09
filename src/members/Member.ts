@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder,DateDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { MemberDetails } from './MemberDetails';
@@ -20,6 +20,12 @@ export class Member extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 20 })
     placeholder = false
+
+    @field({ decoder: DateDecoder })
+    createdAt: Date = new Date()
+
+    @field({ decoder: DateDecoder })
+    updatedAt: Date = new Date()
 
     get name() {
         if (this.details) {
