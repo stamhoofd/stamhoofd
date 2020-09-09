@@ -40,7 +40,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "dashboard.stamhoofd.dev"
+                                        "dashboard.stamhoofd.dev",
+                                        "stamhoofd.app"
                                     ]
                                 }
                             ],
@@ -260,6 +261,7 @@
                         "subjects": [
                             "stamhoofd.dev",
                             "*.stamhoofd.dev",
+                            "stamhoofd.app",
                             "*.api.stamhoofd.dev",
                             "login.sgv.stamhoofd.dev",
                             "groepsadmin.sgv.stamhoofd.dev"

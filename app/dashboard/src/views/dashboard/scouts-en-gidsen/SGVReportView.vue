@@ -9,11 +9,22 @@
             <h1>
                 Synchronisatie-rapport
             </h1>
+
+            <div class="error-box" v-for="error in report.errors" @click="handleError(error)" :class="{ selectable: canClickError(error)}">
+                <h2 class="style-title-list" v-if="error.member">{{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span class="icon arrow-right-small" v-if="canClickError(error)"/></h2>
+                {{ error.human || error.message }}
+
+                
+            </div>
+
+            <div class="warning-box" v-for="warning in report.warnings">
+                {{ warning }}
+            </div>
         
             <hr>
             <h2>Nieuwe leden toegevoegd in de groepsadministratie</h2>
             <STList>
-                <STListItem v-for="member in createdMembers" :key="member.id">
+                <STListItem v-for="member in report.created" :key="member.id">
                     <div>
                         <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
                         <p class="style-description-small">{{ member.details.birthDay | date }}</p>
@@ -24,7 +35,7 @@
             <hr>
             <h2>Aangepaste leden in de groepsadministratie</h2>
             <STList>
-                <STListItem v-for="member in updatedMembers" :key="member.id">
+                <STListItem v-for="member in report.synced" :key="member.id">
                     <div>
                         <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
                         <p class="style-description-small">{{ member.details.birthDay | date }}</p>
@@ -35,7 +46,7 @@
             <hr>
             <h2>Geschrapt in de groepsadministratie</h2>
             <STList>
-                <STListItem v-for="member in deletedMembers" :key="member.id">
+                <STListItem v-for="member in report.deleted" :key="member.id">
                     <div>
                         <h2 class="style-title-list">{{ member.firstName }} {{ member.lastName }}</h2>
                         <p class="style-description-small">{{ member.birthDay | date }}</p>
@@ -46,7 +57,7 @@
             <hr>
             <h2>Geïmporteerd in Stamhoofd</h2>
             <STList>
-                <STListItem v-for="member in importedMembers" :key="member.id">
+                <STListItem v-for="member in report.imported" :key="member.id">
                     <div>
                         <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
                         <p class="style-description-small">{{ member.details.birthDay | date }}</p>
@@ -79,6 +90,8 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DNSRecordsView from './DNSRecordsView.vue';
 import { SGVLid, SGVLidMatch, SGVLidMatchVerify } from '../../../classes/SGVGroepsadministratie';
 import { Formatter } from '@stamhoofd/utility';
+import { SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
+import MemberView from '../member/MemberView.vue';
 
 @Component({
     components: {
@@ -100,16 +113,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ required: true })
-    createdMembers: MemberWithRegistrations[]
-
-    @Prop({ required: true })
-    updatedMembers: MemberWithRegistrations[]
-
-    @Prop({ required: true })
-    deletedMembers: SGVLid[]
-
-    @Prop({ required: true })
-    importedMembers: MemberWithRegistrations[]
+    report: SGVSyncReport
 
     async goNext() {
         if (this.loading) {
@@ -118,6 +122,16 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
 
         this.dismiss({ force: true })
     }
+
+    canClickError(error) {
+        return (error.member && error.member.details)
+    }
+
+    handleError(error) {
+        if (error.member && error.member.details) {
+            this.present(new ComponentWithProperties(MemberView, { member: error.member }).setDisplayStyle("popup"))
+        }
+    } 
 }
 
 </script>

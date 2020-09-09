@@ -19,13 +19,27 @@
                 <li>Adressen en ouders correct instellen</li>
                 <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober)</li>
                 <li>Lidnummers ophalen</li>
-                <li>Leden importeren</li>
+                <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan moet je per tussentak een groepseigen functie maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Doe je dat niet, dan schrijven we woudlopers automatisch in als wouters.</li>
+                <li>(binnenkort) Leden importeren</li>
+            </ul>
+
+            <hr>
+            <h2>Wat moet je nog zelf doen?</h2>
+
+            <ul>
+                <li>De functies van leiding en vrijwilligers goed instellen in de groepsadministratie (deze informatie staat niet in Stamhoofd)</li>
+                <li>Als leiding niet inschrijft via Stamhoofd: deze zelf toevoegen en wijzigen</li>
+                <li>Gestopte leiding/vrijwilligers schrappen</li>
+                <li>We kunnen het e-mailadres niet wijzigen van leden die een login hebben in de groepsadministratie</li>
             </ul>
 
         </main>
 
         <STToolbar>
             <template slot="right">
+                <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank" class="button secundary">
+                    Naar groepsadministratie
+                </a>
                 <LoadingButton :loading="loading" >
                     <button class="button primary" v-if="isLoggedIn" @click="sync">
                         Synchroniseren
@@ -92,7 +106,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
     async sync() {
         // todo
         await SGVGroepsadministratie.downloadAll()
-        await SGVGroepsadministratie.sync(this)
+        await SGVGroepsadministratie.matchAndSync(this)
     }
 
     login() {

@@ -1,17 +1,57 @@
 import { Toast } from '@stamhoofd/components';
 import { Server, Request, RequestMiddleware, RequestResult } from '@simonbackx/simple-networking';
-import { ObjectData, DateDecoder, AutoEncoder, field, IntegerDecoder, ArrayDecoder, Decoder, StringDecoder, BooleanDecoder } from '@simonbackx/simple-encoding';
+import { ObjectData, DateDecoder, AutoEncoder, field, IntegerDecoder, ArrayDecoder, Decoder, StringDecoder, BooleanDecoder, Data } from '@simonbackx/simple-encoding';
 import { Gender, Country, CountryDecoder, Organization, MemberWithRegistrations, RecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/networking';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { OrganizationManager } from './OrganizationManager';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors, isSimpleErrors } from '@simonbackx/simple-errors';
 import { MemberManager } from './MemberManager';
 import { NavigationMixin, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
-import { getPatch } from './SGVGroepsadministratieSync';
+import { getPatch, SGVSyncReport } from './SGVGroepsadministratieSync';
+
+export class SGVFoutDecoder implements Decoder<SimpleError> {
+
+    decode(data: ObjectData): SimpleError {
+        const message = data.field("beschrijving").string
+        const field = data.optionalField("veld")?.string
+        return new SimpleError({
+            code: "SGVError",
+            message,
+            field,
+        })
+        
+    }
+    
+}
+
+export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
+    decode(data: ObjectData): SimpleErrors {
+        const fouten = data.optionalField("fouten")
+        if (fouten) {
+            return new SimpleErrors(...fouten.array(new SGVFoutDecoder()))
+        }
+        const titel = data.field("titel").string
+        return new SimpleErrors(new SimpleError({
+            code: "SGVError",
+            message: titel
+        }))
+    }
+}
+
+export class SGVMemberError extends Error {
+    member: MemberWithRegistrations | SGVLid
+    error: Error
+
+    constructor(member: MemberWithRegistrations | SGVLid, error: Error) {
+        super(error.message);
+        this.member = member
+        this.error = error
+    }
+}
 
 export interface SGVLidMatch {
     stamhoofd: MemberWithRegistrations
@@ -196,7 +236,8 @@ class SGVGFunctieResponse extends AutoEncoder {
 class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string} | null = null // null to keep reactive
     clientId = "groep-O2209G-Prins-Boudewijn-Wetteren"
-    redirectUri = "https://stamhoofd.be"
+    redirectUri = "https://stamhoofd.app/oauth/sgv"
+    dryRun = false
     
     /**
      * List of all members (pretty low in memory because we don't save a lot of data)
@@ -344,13 +385,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
     }
 
-    /**
-     * Geef terug of dit een normaal lid is, of leiding/vrijwilliger/los lid
-     */
-    isNormaalLid() {
-
-    }
-
     async setFilter() {
         await this.workAroundAuthenticatedServer.request({
             method: "PATCH",
@@ -385,13 +419,15 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         await this.setFilter()
 
+        this.leden = []
+
         try {
             let offset = 0
             let total = 1
 
             while (offset < total) {
                 // prevent brute force attack, spread the load
-                await sleep(250)
+                await sleep(500);
                 const response = await this.authenticatedServer.request({
                     method: "GET",
                     path: "/ledenlijst",
@@ -424,7 +460,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         
     }
 
-    async sync(component: NavigationMixin) {
+    async matchAndSync(component: NavigationMixin) {
         // Members that are missing in groepsadmin
         let newMembers: MemberWithRegistrations[] = []
 
@@ -493,16 +529,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                             newMembers.push(member.stamhoofd)
                         }
                     }
-                    this.doSync(component, matchedMembers, newMembers, allMembers)
+                    this.prepareSync(component, matchedMembers, newMembers, allMembers)
                 }   
             }).setDisplayStyle("popup"))
             return;
         }
 
-        await this.doSync(component, matchedMembers, newMembers, allMembers)
+        await this.prepareSync(component, matchedMembers, newMembers, allMembers)
     }
 
-    async doSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], allMembers: MemberWithRegistrations[]) {
+    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], allMembers: MemberWithRegistrations[]) {
         // todo: filter new members by first searching for old members in groepsadmin and activatign them again > creating new matches
 
         // Determine the missing members by checking the matches
@@ -520,43 +556,61 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             component.present(new ComponentWithProperties(SGVOldMembersView, {
                 members: oldMembers,
                 setAction: (action: "delete" | "import" | "nothing") => {
-                    this.doSyncDo(component, matched, newMembers, oldMembers, action)
+                    this.sync(component, matched, newMembers, oldMembers, action)
                 }
             }).setDisplayStyle("popup"))
             return;
         }
 
-        await this.doSyncDo(component, matched, newMembers, oldMembers, "nothing")
+        await this.sync(component, matched, newMembers, oldMembers, "nothing")
     }
 
-    async doSyncDo(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing") {
+    async sync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing") {
+        const report = new SGVSyncReport()
+
         // todo: import or delete
         const deletedMembers: SGVLid[] = []
+
         if (action == "delete") {
             // todo: delete
             deletedMembers.push(...oldMembers)
+            for (const mem of oldMembers) {
+                report.addWarning("Not yet deleted: "+mem.firstName+" "+mem.lastName)
+            }
         }
+
         if (action == "import") {
             // todo: import
-            //importedMembers.push(...newMembers)
+            //importedMembers.push(...oldMembers)
+
+            for (const mem of oldMembers) {
+                report.addWarning("Not yet imported: "+mem.firstName+" "+mem.lastName)
+            }
         }
 
         // Start syncing...
         for (const match of matched) {
-            await this.syncLid(match)
+            try {
+                await this.syncLid(match)
+                report.markSynced(match.stamhoofd)
+            } catch (e) {
+                report.addError(new SGVMemberError(match.stamhoofd, e))
+            }
         }
 
          // Start creating
         for (const member of newMembers) {
-            await this.createLid(member)
+            try {
+                await this.createLid(member)
+                report.markCreated(member)
+            } catch (e) {
+                report.addError(new SGVMemberError(member, e))
+            }
         }
 
         // Show report
         component.present(new ComponentWithProperties(SGVReportView, {
-            updatedMembers: matched.map(m => m.stamhoofd),
-            createdMembers: newMembers,
-            deletedMembers: deletedMembers,
-            importedMembers: [],
+            report
         }).setDisplayStyle("popup"))
     }
 
@@ -570,15 +624,37 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             path: "/lid/"+match.sgv.id
         })
 
+
         const lid = response.data;
 
         console.log("syncing "+match.stamhoofd.firstName);
-        const patch = getPatch(lid, details)
+        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies)
 
         console.log(lid)
         console.info(patch)
 
-        await sleep(250);
+        if (!this.dryRun) {
+            await sleep(500);
+
+            try {
+                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                    method: "PATCH",
+                    path: "/lid/"+match.sgv.id+"?bevestig=true",
+                    body: patch
+                })
+                console.log(updateResponse)
+
+            } catch (e) {
+                console.error(e)
+
+                // todoo!!!!!!sd!f!!!!!!!!!!!
+                this.dryRun = true;
+                throw e;
+            }
+            
+        }
+
+        await sleep(500);
     }
 
     
@@ -619,7 +695,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     get loginServer() {
         // We use our own proxy server to https://login.scoutsengidsenvlaanderen.be, because the CORS headers are not set correctly
         // As soon as SGV has fixed this, we can switch back to https://login.scoutsengidsenvlaanderen.be
-        return new Server("https://login.sgv.stamhoofd.dev")
+        //return new Server("https://login.sgv.stamhoofd.dev")
+        return new Server("https://login.scoutsengidsenvlaanderen.be")
     }
 
     get workAroundServer() {
@@ -628,7 +705,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // is een proxy te gebruiken die de origin header wegknipt.
         // Als er niet snel een fix komt van S&GV moeten we beter een app uitbrengen waar de connectie in kan geplaatst worden
         // zonder proxy, omdat we dan de headers kunnen manipuleren zonder server... #browserstruggles
-        return new Server("https://groepsadmin.sgv.stamhoofd.dev/groepsadmin/rest-ga")
+        //return new Server("https://groepsadmin.sgv.stamhoofd.dev/groepsadmin/rest-ga")
+        return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }
 
     get server() {
@@ -656,6 +734,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             throw new Error("Could not authenticate request without token")
         }
 
+        request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
     }
 

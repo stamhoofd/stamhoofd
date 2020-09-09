@@ -1,5 +1,6 @@
-import { MemberDetails, Address, Parent, ParentType } from "@stamhoofd/structures";
+import { MemberDetails, Address, Parent, ParentType, Group, GroupSettings } from "@stamhoofd/structures";
 import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
+import groepFuncties from './SGVDefaultFuncties.json';
 
 
 describe("Groepsadministratie Sync", () => {
@@ -76,7 +77,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv)
+        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
         expect(p.adressen).toHaveLength(1)
         expect(p.adressen[0]).toMatchObject({
             id: "SGVID",
@@ -89,7 +90,7 @@ describe("Groepsadministratie Sync", () => {
             postadres: true
         })
 
-        const p2 = getPatch(details2, sgv)
+        const p2 = getPatch(details2, sgv, "groepnummer", [], [], groepFuncties)
         expect(p2.adressen).toHaveLength(2)
 
         expect(p2.adressen[1]).toMatchObject({
@@ -204,7 +205,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv)
+        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.adressen[0]).toMatchObject({
             straat: "Teststraat",
@@ -298,7 +299,7 @@ describe("Groepsadministratie Sync", () => {
             ]
         };
 
-        const p = getPatch(details, sgv)
+        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.contacten).toHaveLength(2)
 
@@ -324,5 +325,123 @@ describe("Groepsadministratie Sync", () => {
         expect(p.contacten[1].adres).toEqual(p.adressen[1].id)
         
     })
+
+    test("Keep existing functies, remove managed functies", () => {
+         const details = MemberDetails.create({
+            parents: []
+        })
+
+
+        const sgv = {
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                },
+                { // will get removed = managed by stamhoofd
+                    "functie": "d5f75b320b812440010b812555c1039b",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const j = Group.create({
+            settings: GroupSettings.create({
+                name: "Jin",
+                startDate: new Date(),
+                endDate: new Date()
+            })
+        })
+
+        const g = Group.create({
+            settings: GroupSettings.create({
+                name: "Kapoenen",
+                startDate: new Date(),
+                endDate: new Date()
+            })
+        })
+
+        const wl = Group.create({
+            settings: GroupSettings.create({
+                name: "Woudlopers",
+                startDate: new Date(),
+                endDate: new Date()
+            })
+        })
+
+        const p = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties)
+        const p2 = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl], groepFuncties) // only delete jin if jin is inside stamhoofd
+        const p3 = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties.slice(0, groepFuncties.length - 1)) // if woudlopers is nog defined in groepsadmin -> check if to wouters
+
+        expect(p.functies).toHaveLength(5);
+        expect(p2.functies).toHaveLength(5);
+        expect(p3.functies).toHaveLength(5);
+
+        expect(p.functies[0]).toMatchObject({
+            "functie": "859",
+            "begin": "123",
+            "einde": "586"
+        })
+        expect(p2.functies[0]).toMatchObject({
+            "functie": "859",
+            "begin": "123",
+            "einde": "586"
+        })
+        
+        expect(p.functies[1]).toMatchObject({
+            "functie": "notmanaged",
+            "begin": "123",
+        })
+        expect(p2.functies[1]).toMatchObject({
+            "functie": "notmanaged",
+            "begin": "123",
+        })
+        expect(p.functies[1].einde).not.toBeDefined()
+        expect(p2.functies[1].einde).not.toBeDefined()
+
+        expect(p.functies[2]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555de03a2",
+        })
+        expect(p.functies[2].einde).not.toBeDefined()
+        expect(p2.functies[3]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555de03a2",
+        })
+        expect(p2.functies[3].einde).not.toBeDefined()
+
+
+        expect(p.functies[3]).toMatchObject({
+            "functie": "woudloperscustom",
+        })
+        expect(p.functies[3].einde).not.toBeDefined()
+
+        expect(p2.functies[4]).toMatchObject({
+            "functie": "woudloperscustom",
+        })
+        expect(p2.functies[4].einde).not.toBeDefined()
+
+        expect(p3.functies[3]).toMatchObject({
+            "functie": "d5f75b320b812440010b8125567703cb", // when woutloper is missing in groepsadmin => to wouters
+        })
+        expect(p3.functies[3].einde).not.toBeDefined()
+
+        // Ended functies
+        expect(p.functies[4]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555c1039b",
+            "begin": "123",
+        })
+        expect(p2.functies[2]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555c1039b",
+            "begin": "123",
+        })
+        expect(p.functies[4].einde).toBeDefined()
+        expect(p2.functies[2].einde).not.toBeDefined() // do not end this, since this is managed by stamhoofd
+    });
 
 });
