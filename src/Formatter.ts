@@ -1,3 +1,10 @@
+ function pad(number) {
+    if (number < 10) {
+        return '0' + number;
+    }
+    return number;
+}
+
 export class Formatter {
     static slug(name: string): string {
         name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -29,6 +36,17 @@ export class Formatter {
     static dateNumber(date: Date): string {
         const year = date.getFullYear()
         return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + "/"+year
+    }
+
+    static isoBelgian(date: Date) {
+      return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) +
+        ':' + pad(date.getMinutes()) +
+        ':' + pad(date.getSeconds()) +
+        '.' + (date.getMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+        '+02:00';
     }
 
 
