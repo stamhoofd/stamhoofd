@@ -39,6 +39,14 @@ export class Formatter {
     }
 
     /**
+     * 2020-01-31
+     */
+    static dateIso(date: Date): string {
+        const year = date.getFullYear()
+        return year+"-"+((date.getMonth() + 1)+"").padStart(2, "0")+"-"+(date.getDate()+"").padStart(2, "0")
+    }
+
+    /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
     static time(date: Date): string {
