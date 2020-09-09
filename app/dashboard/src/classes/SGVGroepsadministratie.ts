@@ -11,7 +11,8 @@ import { NavigationMixin, ComponentWithProperties } from '@simonbackx/vue-app-na
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
-import { getPatch, SGVSyncReport } from './SGVGroepsadministratieSync';
+import { getPatch, SGVSyncReport, buildGroupMapping } from './SGVGroepsadministratieSync';
+import { LinkedErrors } from '@sentry/browser/dist/integrations';
 
 export class SGVFoutDecoder implements Decoder<SimpleError> {
 
@@ -55,10 +56,12 @@ export class SGVMemberError extends Error {
 
 export interface SGVLidMatch {
     stamhoofd: MemberWithRegistrations
-    sgv: SGVLid
+    sgvId: string
 }
 
-export interface SGVLidMatchVerify extends SGVLidMatch {
+export interface SGVLidMatchVerify {
+    stamhoofd: MemberWithRegistrations
+    sgv: SGVLid
     verify: boolean
 }
 
@@ -69,9 +72,6 @@ export class SGVLid {
     lidNummer: string;
     gender: Gender;
     birthDay: Date;
-
-    foundInStamhoofd = false
-    hasBeenUpdated = false
 
     constructor(object: {
         id: string;
@@ -147,6 +147,36 @@ export class SGVLid {
         }
         return false;
     }
+}
+
+
+export class SGVZoekLid extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder, field: "voornaam" })
+    firstName: string;
+
+    @field({ decoder: StringDecoder, field: "achternaam" })
+    lastName: string;
+
+    isEqual(member: MemberWithRegistrations) {
+        return StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName) == 0
+    }
+
+    isProbablyEqual(member: MemberWithRegistrations) {
+        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+
+        if (t <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+            return true;
+        }
+        return false;
+    }
+}
+
+class SGVZoekenResponse extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(SGVZoekLid) })
+    leden: SGVZoekLid[];
 }
 
 class SGVLedenResponse extends AutoEncoder {
@@ -385,13 +415,17 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
     }
 
-    async setFilter() {
+    async setManagedFilter() {
+        // alleen leden met functies downloaden waarvoor Stamhoofd verantwoordelijk is
+        const mapping = buildGroupMapping(OrganizationManager.organization.groups, this.functies)
+        
         await this.workAroundAuthenticatedServer.request({
             method: "PATCH",
             path: "/ledenlijst/filter/huidige",
             body: {
                 "criteria":{
-                    "groepen":["O2209G"],
+                    "functies": Array.from(mapping.keys()),
+                    "groepen": [this.groupNumber ],
                     "oudleden": false,
                 },
                 "kolommen":[
@@ -408,6 +442,34 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         })
     }
 
+    /**
+     * Voor we een lid als 'nieuw' beschouwen moeten we echt zeker zijn
+     */
+    async zoekGelijkaardig(member: MemberWithRegistrations): Promise<SGVZoekLid | undefined> {
+        const response = await this.workAroundAuthenticatedServer.request({
+            method: "GET",
+            path: "/zoeken/gelijkaardig",
+            query: {
+                voornaam: member.details!.firstName,
+                achternaam: member.details!.lastName,
+            },
+            decoder: SGVZoekenResponse as Decoder<SGVZoekenResponse>
+        })
+        if (response.data.leden.length > 0) {
+            for (const lid of response.data.leden) {
+                if (lid.isEqual(member)) {
+                    return lid
+                }
+            }
+
+            for (const lid of response.data.leden) {
+                if (lid.isProbablyEqual(member)) {
+                    return lid
+                }
+            }
+        }
+    }
+
     async downloadAll() {
         if (await this.setGroupIfNeeded() == false) {
             return;
@@ -417,10 +479,22 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         const toast = new Toast("Leden ophalen...", "spinner").setHide(null).show()
 
-        await this.setFilter()
+        await this.setManagedFilter()
 
-        this.leden = []
+        try {
+            this.leden = await this.downloadWithCurrentFilter()
+            console.log(this.leden)
+            toast.hide()
+            new Toast("Leden ophalen gelukt", "success green").show()
+        } catch (e) {
+            toast.hide()
+            console.error(e)
+            new Toast("Leden ophalen mislukt", "error red").show()
+        }
+    }
 
+    async downloadWithCurrentFilter() {
+        const leden: SGVLid[] = []
         try {
             let offset = 0
             let total = 1
@@ -439,25 +513,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 })
                 console.log(response)
 
-                this.leden.push(...response.data.leden)
+                leden.push(...response.data.leden)
 
                 // Set new offset
                 offset = response.data.offset + response.data.aantal
                 total = response.data.totaal
             }
-
-            console.log(this.leden)
-
-            toast.hide()
-            new Toast("Leden ophalen gelukt", "success green").show()
-        
         } catch (e) {
-            toast.hide()
-            console.error(e)
-            new Toast("Leden ophalen mislukt", "error red").show()
             throw e;
         }
-        
+        return leden;
     }
 
     async matchAndSync(component: NavigationMixin) {
@@ -483,15 +548,27 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             if (sgvMember) {
                 matchedMembers.push({
                     stamhoofd: member,
-                    sgv: sgvMember
+                    sgvId: sgvMember.id
                 })
 
             } else {
-                newMembers.push(member)
+                console.log("Lid niet gevonden, zoeken in groepsadmin...")
+                const gelijkaardig = await this.zoekGelijkaardig(member)
+                if (gelijkaardig) {
+                    console.log("Gevonden!")
+                    matchedMembers.push({
+                        stamhoofd: member,
+                        sgvId: gelijkaardig.id
+                    })
+                } else {
+                    console.log("Is echt een nieuw lid!")
+                    newMembers.push(member)
+                }
+                await sleep(500)
             }
         }
 
-        const probablyEqualList: SGVLidMatch[] = []
+        const probablyEqualList: SGVLidMatchVerify[] = []
 
         newMembers = newMembers.filter((member) => {
             const sgvMember = this.leden.find((sgvLid) => {
@@ -502,7 +579,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             if (sgvMember) {
                 probablyEqualList.push({
                     stamhoofd: member,
-                    sgv: sgvMember
+                    sgv: sgvMember,
+                    verify: true
                 })
                 return false
             }
@@ -524,7 +602,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 onVerified: (verified: SGVLidMatchVerify[]) => {
                     for (const member of verified) {
                         if (member.verify) {
-                            matchedMembers.push(member)
+                            matchedMembers.push({
+                                stamhoofd: member.stamhoofd,
+                                sgvId: member.sgv.id
+                            })
                         } else {
                             newMembers.push(member.stamhoofd)
                         }
@@ -545,7 +626,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const oldMembers: SGVLid[] = []
 
         for (const member of this.leden) {
-            const found = matched.find(m => m.sgv.id == member.id)
+            const found = matched.find(m => m.sgvId == member.id)
             if (!found) {
                 oldMembers.push(member)
             }
@@ -621,7 +702,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Fetch full member from SGV
         const response = await this.workAroundAuthenticatedServer.request<any>({
             method: "GET",
-            path: "/lid/"+match.sgv.id
+            path: "/lid/"+match.sgvId
         })
 
 
@@ -639,7 +720,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             try {
                 const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
                     method: "PATCH",
-                    path: "/lid/"+match.sgv.id+"?bevestig=true",
+                    path: "/lid/"+match.sgvId+"?bevestig=true",
                     body: patch
                 })
                 console.log(updateResponse)

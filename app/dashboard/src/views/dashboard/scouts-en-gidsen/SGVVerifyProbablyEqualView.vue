@@ -77,7 +77,7 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     loading = false
 
     @Prop({ required: true })
-    matches: SGVLidMatch[]
+    matches: SGVLidMatchVerify[]
 
     verifiedMatches: SGVLidMatchVerify[] = []
 
@@ -85,11 +85,12 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     onVerified: (verified: SGVLidMatchVerify[]) => void
 
     mounted() {
+        // clone
         this.verifiedMatches = this.matches.map(m => {
             return {
                 sgv: m.sgv,
                 stamhoofd: m.stamhoofd,
-                verify: true
+                verify: m.verify
             }
         })
     }

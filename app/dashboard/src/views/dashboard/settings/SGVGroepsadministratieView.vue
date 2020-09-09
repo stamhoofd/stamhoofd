@@ -56,7 +56,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup } from "@stamhoofd/components";
+import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup, Toast } from "@stamhoofd/components";
 import { SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -104,9 +104,20 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
     }
 
     async sync() {
-        // todo
-        await SGVGroepsadministratie.downloadAll()
-        await SGVGroepsadministratie.matchAndSync(this)
+        if (this.loading) {
+            return;
+        }
+        this.loading = true
+
+        try {
+            await SGVGroepsadministratie.downloadAll()
+            await SGVGroepsadministratie.matchAndSync(this)
+        } catch (e) {
+            // todo
+            console.error(e)
+            new Toast(e.message, "error").show()
+        }
+        this.loading = false
     }
 
     login() {

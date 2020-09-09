@@ -10,11 +10,13 @@
                 Synchronisatie-rapport
             </h1>
 
-            <div class="error-box" v-for="error in report.errors" @click="handleError(error)" :class="{ selectable: canClickError(error)}">
-                <h2 class="style-title-list" v-if="error.member">{{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span class="icon arrow-right-small" v-if="canClickError(error)"/></h2>
-                {{ error.human || error.message }}
+            <div class="error-box-parent" v-for="error in report.errors">
+                <div class="error-box" @click="handleError(error)" :class="{ selectable: canClickError(error)}">
+                    <h2 class="style-title-list" v-if="error.member">{{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span class="icon arrow-right-small" v-if="canClickError(error)"/></h2>
+                    {{ error.human || error.message }}
 
-                
+                    
+                </div>
             </div>
 
             <div class="warning-box" v-for="warning in report.warnings">
