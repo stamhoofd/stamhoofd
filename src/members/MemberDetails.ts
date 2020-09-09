@@ -94,6 +94,12 @@ export class MemberDetails extends AutoEncoder {
     lastReviewed: Date | null = null;
 
     /**
+     * Last time this member was synced with an external database (e.g. umbrella organization)
+     */
+    @field({ decoder: DateDecoder, nullable: true, version: 31 })
+    lastSynced: Date | null = null;
+
+    /**
      * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
      * This can get cleared after registration, but is not needed since we keep track of the group cycle.
      */
