@@ -38,18 +38,6 @@ export class Formatter {
         return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + "/"+year
     }
 
-    static isoBelgian(date: Date) {
-      return date.getFullYear() +
-        '-' + pad(date.getMonth() + 1) +
-        '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) +
-        ':' + pad(date.getMinutes()) +
-        ':' + pad(date.getSeconds()) +
-        '.' + (date.getMilliseconds() / 1000).toFixed(3).slice(2, 5) +
-        '+02:00';
-    }
-
-
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
