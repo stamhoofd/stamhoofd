@@ -31,6 +31,7 @@ export class SGVFoutDecoder implements Decoder<SimpleError> {
 
 export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
     decode(data: ObjectData): SimpleErrors {
+        // Support multiple random error formats
         const fouten = data.optionalField("fouten")
         if (fouten) {
             const arr = fouten.array(new SGVFoutDecoder())
@@ -38,6 +39,16 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
                 return new SimpleErrors(...arr)
             }
         }
+
+        const msg = data.optionalField("msg")?.string
+
+        if (msg) {
+            return new SimpleErrors(new SimpleError({
+                code: "SGVError",
+                message: msg
+            }))
+        }
+
         const titel = data.field("titel").string
         const beschrijving = data.optionalField("beschrijving")?.string
         return new SimpleErrors(new SimpleError({
@@ -300,7 +311,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
      async getToken(code: string) {
-        const toast = new Toast("Inloggen...", "spinner").setHide(null).show()
+        const toast = new Toast("Inloggen...", "spinner").setWithOffset().setHide(null).show()
 
         try {
             const response: RequestResult<any> = await this.loginServer.request({
@@ -326,11 +337,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             // Maybe: redirect_uri
             toast.hide()
-            new Toast("Ingelogd bij groepsadministratie", "success green").show()
+            new Toast("Ingelogd bij groepsadministratie", "success green").setWithOffset().show()
         } catch (e) {
             console.error(e)
             toast.hide()
-            new Toast("Inloggen mislukt", "error red").show()
+            new Toast("Inloggen mislukt", "error red").setWithOffset().show()
         }
     }
 
@@ -645,7 +656,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
     }
 
-    async sync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing") {
+    async sync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing", onStatusChange?: (status: string, progress: number) => void) {
+
+        let progress = 0
+        const total = (action != "nothing" ? oldMembers.length : 0) + matched.length + newMembers.length
+
         const report = new SGVSyncReport()
 
         // todo: import or delete
@@ -653,17 +668,25 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         if (action == "delete") {
             // todo: delete
+            
             deletedMembers.push(...oldMembers)
             for (const mem of oldMembers) {
+                if (onStatusChange) {
+                    onStatusChange(mem.firstName+" "+mem.lastName+" schrappen...", progress/total)
+                    progress++;
+
+                }
                 report.addWarning("Not yet deleted: "+mem.firstName+" "+mem.lastName)
             }
-        }
-
-        if (action == "import") {
+        } else if (action == "import") {
             // todo: import
             //importedMembers.push(...oldMembers)
 
             for (const mem of oldMembers) {
+                if (onStatusChange) {
+                    onStatusChange(mem.firstName+" "+mem.lastName+" importeren...", progress/total)
+                    progress++;
+                }
                 report.addWarning("Not yet imported: "+mem.firstName+" "+mem.lastName)
             }
         }
@@ -671,6 +694,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Start syncing...
         for (const match of matched) {
             try {
+                if (onStatusChange) {
+                    onStatusChange(match.stamhoofd.details!.firstName+" "+match.stamhoofd.details!.lastName+" aanpassen...", progress/total)
+                    progress++;
+                }
                 await this.syncLid(match, report)
                 report.markSynced(match.stamhoofd)
             } catch (e) {
@@ -681,6 +708,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
          // Start creating
         for (const member of newMembers) {
             try {
+                if (onStatusChange) {
+                    onStatusChange(member.details!.firstName+" "+member.details!.lastName+" toevoegen...", progress/total)
+                    progress++;
+                }
                 await this.createLid(member, report)
                 report.markCreated(member)
             } catch (e) {

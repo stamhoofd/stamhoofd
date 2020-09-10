@@ -108,7 +108,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             return;
         }
         this.loading = true
-        const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setHide(null).show()
+        const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setWithOffset().setHide(null).show()
 
         try {
             await SGVGroepsadministratie.downloadAll()
@@ -118,19 +118,22 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             toast.hide();
 
             const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
-            const toast2 = new Toast("Synchroniseren...", "spinner").setHide(null).show()
+            const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setWithOffset().setHide(null).show()
 
             try {
-                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action)
+                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
+                    toast2.message = status
+                    toast2.setProgress(progress)
+                })
             } finally {
                 toast2.hide()
             }
 
-            new Toast("Synchronisatie voltooid", "success green").show()
+            new Toast("Synchronisatie voltooid", "success green").setWithOffset().show()
         } catch (e) {
             toast.hide()
             console.error(e)
-            new Toast(e.message, "error red").show()
+            new Toast(e.message, "error red").setWithOffset().show()
         }
         this.loading = false
     }

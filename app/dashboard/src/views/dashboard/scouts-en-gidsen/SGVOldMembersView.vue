@@ -7,7 +7,7 @@
 
         <main>
             <h1>
-                Wil je deze leden importeren of schrappen in de Groepsadministratie?
+                Wil je deze leden importeren in Stamhoofd of schrappen in de Groepsadministratie?
             </h1>
             <p>Er staan leden in de Groepsadministratie die nog niet in Stamhoofd staan. Je kan deze importeren, ofwel schrappen in de groepsadministratie (omdat ze gestopt zijn).</p>
         
@@ -24,15 +24,15 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" @click="doDelete">
-                    <span>Schrappen</span>
+                <button class="button destructive" @click="doDelete">
+                    <span class="icon trash"/><span>Schrappen</span>
                 </button>
                 <button class="button secundary" @click="doImport">
-                    <span>Importeren</span>
+                    <span class="icon download"/><span>Importeren</span>
                 </button>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="doNothing">
-                        Niets doen
+                        Behouden
                     </button>
                 </LoadingButton>
             </template>
