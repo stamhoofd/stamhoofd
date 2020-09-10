@@ -11,7 +11,7 @@ import { NavigationMixin, ComponentWithProperties } from '@simonbackx/vue-app-na
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
-import { getPatch, SGVSyncReport, buildGroupMapping } from './SGVGroepsadministratieSync';
+import { getPatch, SGVSyncReport, buildGroupMapping, schrappen } from './SGVGroepsadministratieSync';
 import { LinkedErrors } from '@sentry/browser/dist/integrations';
 
 export class SGVFoutDecoder implements Decoder<SimpleError> {
@@ -85,7 +85,6 @@ export class SGVLid {
     firstName: string;
     lastName: string;
     lidNummer: string;
-    gender: Gender;
     birthDay: Date;
 
     constructor(object: {
@@ -93,7 +92,6 @@ export class SGVLid {
         firstName: string;
         lastName: string;
         lidNummer: string;
-        gender: Gender;
         birthDay: Date;
     }) {
         this.id = object.id
@@ -102,11 +100,9 @@ export class SGVLid {
         this.birthDay = object.birthDay
 
         this.lidNummer = object.lidNummer
-        this.gender = object.gender
     }
 
     static decode(data: ObjectData) {
-        const g = data.field("waarden").field("be.vvksm.groepsadmin.model.column.GeslachtColumn").string
         const date = data.field("waarden").field("be.vvksm.groepsadmin.model.column.GeboorteDatumColumn").string
         
         const splitted = date.split("/")
@@ -135,8 +131,7 @@ export class SGVLid {
             firstName: data.field("waarden").field("be.vvksm.groepsadmin.model.column.VoornaamColumn").string,
             lastName: data.field("waarden").field("be.vvksm.groepsadmin.model.column.AchternaamColumn").string,
             birthDay: new Date(year, month-1, day, 12),
-            lidNummer: data.field("waarden").field("be.vvksm.groepsadmin.model.column.LidNummerColumn").string,
-            gender: g == "V" ? Gender.Female : (g == "M" ? Gender.Male : Gender.Other),
+            lidNummer: data.field("waarden").field("be.vvksm.groepsadmin.model.column.LidNummerColumn").string
         })
     }
 
@@ -279,7 +274,7 @@ class SGVGFunctieResponse extends AutoEncoder {
 }
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
-    token: {accessToken: string; refreshToken: string} | null = null // null to keep reactive
+    token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
     clientId = "groep-O2209G-Prins-Boudewijn-Wetteren"
     redirectUri = "https://stamhoofd.app/oauth/sgv"
     dryRun = false
@@ -310,7 +305,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         window.location.href = url;
     }
 
-     async getToken(code: string) {
+    async getToken(code: string) {
         const toast = new Toast("Inloggen...", "spinner").setWithOffset().setHide(null).show()
 
         try {
@@ -332,7 +327,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             this.token = {
                 accessToken: response.data.access_token,
-                refreshToken: response.data.refresh_token
+                refreshToken: response.data.refresh_token,
+                validUntil: new Date(new Date().getTime() + response.data.expires_in * 1000 - 10*1000)
             };
 
             // Maybe: redirect_uri
@@ -342,6 +338,44 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             console.error(e)
             toast.hide()
             new Toast("Inloggen mislukt", "error red").setWithOffset().show()
+        }
+    }
+
+    async refreshToken() {
+        if (!this.token) {
+            throw new SimpleError({
+                code: "",
+                message: "Je bent uitgelogd geraakt"
+            })
+        }
+
+        try {
+            const response: RequestResult<any> = await this.loginServer.request({
+                method: "POST",
+                path: "/auth/realms/scouts/protocol/openid-connect/token",
+                body: {
+                    client_id: this.clientId,
+                    refresh_token: this.token!.refreshToken,
+                    grant_type: "refresh_token",
+                    redirect_uri: this.redirectUri
+                },
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+
+            this.token = {
+                accessToken: response.data.access_token,
+                refreshToken: response.data.refresh_token,
+                validUntil: new Date(new Date().getTime() + response.data.expires_in * 1000 - 10*1000)
+            };
+
+        } catch (e) {
+            console.error(e)
+            throw new SimpleError({
+                code: "",
+                message: "Je bent uitgelogd geraakt"
+            })
         }
     }
 
@@ -674,9 +708,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 if (onStatusChange) {
                     onStatusChange(mem.firstName+" "+mem.lastName+" schrappen...", progress/total)
                     progress++;
-
                 }
-                report.addWarning("Not yet deleted: "+mem.firstName+" "+mem.lastName)
+
+                try {
+                    await this.schrapLid(mem, report)
+                    report.markDeleted(mem)
+                } catch (e) {
+                    report.addError(new SGVMemberError(mem, e))
+                }
             }
         } else if (action == "import") {
             // todo: import
@@ -723,6 +762,44 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         component.present(new ComponentWithProperties(SGVReportView, {
             report
         }).setDisplayStyle("popup"))
+    }
+
+    async schrapLid(lid: SGVLid, report: SGVSyncReport) {
+         // Fetch full member from SGV
+        const response = await this.workAroundAuthenticatedServer.request<any>({
+            method: "GET",
+            path: "/lid/"+lid.id
+        })
+
+        const lidData = response.data;
+        const patch = schrappen( lidData, OrganizationManager.organization.groups, this.functies)
+
+        if (!this.dryRun) {
+            await sleep(250);
+
+            try {
+                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                    method: "PATCH",
+                    path: "/lid/"+lid.id+"?bevestig=true",
+                    body: patch
+                })
+                console.log(updateResponse)
+
+            } catch (e) {
+                console.error(e)
+                throw e;
+            }
+
+            // toodooooo!
+            this.dryRun = true;
+        } else {
+            throw new SimpleError({
+                code: "DRY_RUN",
+                message: "Dry run: skipped"
+            })
+        }
+
+        await sleep(250);
     }
 
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
@@ -882,10 +959,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             throw new Error("Could not authenticate request without token")
         }
 
+        if (this.token.validUntil < new Date()) {
+            // Normally we would need to check if we are already refreshing, but since we only do sync requests this is not needed
+            await this.refreshToken()
+        }
+
         request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
     }
-
 }
 
 

@@ -43,7 +43,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, STList, STListItem} from "@stamhoofd/components";
+import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, STList, STListItem, CenteredMessage} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -102,6 +102,10 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
+
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Nog niet beschikbaar", description: "Het importeren van leden vanaf de groepsadministratie komt er binnenkort aan. Normaal gezien heb je dit nu nog niet echt nodig, omdat alle leden gewoon via Stamhoofd (her)inschrijven. Dit is pas handig al je tijdens het jaar aansluit en niet alle leden via Stamhoofd ingeschreven zijn.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
+        return;
+        
         this.didSetAction = true;
         this.dismiss({ force: true })
         this.setAction("import")

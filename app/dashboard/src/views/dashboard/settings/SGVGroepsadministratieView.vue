@@ -17,7 +17,7 @@
                 <li>Nieuwe leden in groepsadministratie zetten</li>
                 <li>Bestaande leden wijzigen en in de juiste tak zetten</li>
                 <li>Adressen en ouders correct instellen</li>
-                <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober)</li>
+                <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober). Opgelet: we schrappen enkel de functies waarvoor Stamhoofd verantwoordelijk is (de leeftijdsgroepen die in Stamhoofd staan).</li>
                 <li>Lidnummers ophalen</li>
                 <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan moet je per tussentak een groepseigen functie maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Doe je dat niet, dan krijg je een waarschuwing. Woudlopers schrijven we wel automatisch in bij wouters als er geen groepseigen functie is.</li>
                 <li>(binnenkort) Leden importeren. Deze functie is vooral bedoeld als je tijdens het jaar start met Stamhoofd en leden niet opnieuw wil laten inschrijven.</li>

@@ -65,6 +65,46 @@ export class SGVSyncReport {
     }
 }
 
+export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any {
+    const newFuncties: any[] = []
+    const mapping = buildGroupMapping(allGroups, groepFuncties)
+
+    for (const functie of lid.functies ?? []) {
+        // Keep all functies that have been ended
+        if (functie.einde) {
+            newFuncties.push(functie)
+            continue;
+        } 
+
+        // Keep all functies that are not managed by Stamhoofd
+        const info = groepFuncties.find(f => f.id == functie.functie)
+        if (!info) {
+            // Keep.
+            console.warn("Unknown functie "+functie.functie)
+            newFuncties.push(functie)
+            continue
+        }
+
+        if (mapping.has(functie.functie)) {
+            // Managed by stamhoofd
+            // => end this
+            functie.einde = Formatter.dateIso(new Date())
+            newFuncties.push(functie)
+        } else {
+            newFuncties.push(functie)
+            continue
+        }
+
+    }
+
+    // Construct the patch: compare and check the fields that need changes
+    const patch: any = {
+        functies: newFuncties
+    }
+
+    return patch
+}
+
 export function getPatch(details: MemberDetails, lid: any, groepNummer: string, groups: Group[], allGroups: Group[], groepFuncties: any, report?: SGVSyncReport): any {
     const newAddresses: any[] = []
     const newContacts: any[] = []
