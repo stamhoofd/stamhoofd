@@ -184,7 +184,9 @@ export class MemberManagerStatic {
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
                     publicKey: member.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false
+                    placeholder: false,
+                    createdAt: member.createdAt,
+                    updatedAt: member.updatedAt
                 })
             )
         }

@@ -7,7 +7,7 @@
         <main>
             <h1>Groepsadministrie synchroniseren</h1>
 
-            <p class="warning-box">We raden echt heel sterk aan om alle leden gewoon opnieuw te laten inschrijven de eerste keer dat je overschakelt op Stamhoofd. Op die manier hebben alle ouders een account en kunnen ze tijdens het jaar gegevens wijzigen. Bovendien moet je zelf dan niet meer opvolgen wie nu stopt en wie niet.</p>
+            <p class="warning-box">We raden echt heel sterk aan om alle leden gewoon opnieuw te laten inschrijven de eerste keer dat je overschakelt op Stamhoofd. Op die manier hebben alle ouders een account en kunnen ze tijdens het jaar gegevens wijzigen. Bovendien moet je zelf dan niet meer opvolgen wie nu stopt en wie niet. Dit is ook handig als we later dit jaar de inschrijvingen voor weekends en kampen uitrollen in Stamhoofd.</p>
 
             <hr>
             <h2>Hoe werkt het?</h2>
@@ -19,8 +19,8 @@
                 <li>Adressen en ouders correct instellen</li>
                 <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober)</li>
                 <li>Lidnummers ophalen</li>
-                <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan moet je per tussentak een groepseigen functie maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Doe je dat niet, dan schrijven we woudlopers automatisch in als wouters.</li>
-                <li>(binnenkort) Leden importeren</li>
+                <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan moet je per tussentak een groepseigen functie maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Doe je dat niet, dan krijg je een waarschuwing. Woudlopers schrijven we wel automatisch in bij wouters als er geen groepseigen functie is.</li>
+                <li>(binnenkort) Leden importeren. Deze functie is vooral bedoeld als je tijdens het jaar start met Stamhoofd en leden niet opnieuw wil laten inschrijven.</li>
             </ul>
 
             <hr>
@@ -108,14 +108,29 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             return;
         }
         this.loading = true
+        const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setHide(null).show()
 
         try {
             await SGVGroepsadministratie.downloadAll()
-            await SGVGroepsadministratie.matchAndSync(this)
+            const { matchedMembers, newMembers } = await SGVGroepsadministratie.matchAndSync(this, () => {
+                toast.hide()
+            })
+            toast.hide();
+
+            const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
+            const toast2 = new Toast("Synchroniseren...", "spinner").setHide(null).show()
+
+            try {
+                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action)
+            } finally {
+                toast2.hide()
+            }
+
+            new Toast("Synchronisatie voltooid", "success green").show()
         } catch (e) {
-            // todo
+            toast.hide()
             console.error(e)
-            new Toast(e.message, "error").show()
+            new Toast(e.message, "error red").show()
         }
         this.loading = false
     }

@@ -3,6 +3,34 @@ import { StringCompare, Formatter } from '@stamhoofd/utility';
 import { SGVLid } from './SGVGroepsadministratie';
 import { SimpleError } from '@simonbackx/simple-errors';
 
+function deepEqual(x, y) {
+  if (x === y) {
+    return true;
+  }
+  else if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
+    if (Object.keys(x).length != Object.keys(y).length)
+      return false;
+
+    for (var prop in x) {
+      if (y.hasOwnProperty(prop))
+      {  
+        if (! deepEqual(x[prop], y[prop]))
+          return false;
+      }
+      else
+        return false;
+    }
+
+    return true;
+  }
+  else 
+    return false;
+}
+
+function trim(t: string) {
+    return t.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, "")
+}
+
 export class SGVSyncReport {
     warnings: string[] = []
     errors: Error[] = []
@@ -119,29 +147,33 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     // Map all groepen
     for (const groep of groups) {
         // Find a match in groepsadmin
-        for (const [functieId, _groep] of mapping) {
-            if (groep.id == _groep.id) {
-                const functie =  groepFuncties.find(f => f.id == functieId)
-                const remaingFunctieIndex = remainingFuncties.findIndex(f => f.functie == functie.id)
+        for (const [functieId, _groeps] of mapping) {
+            for (const _groep of _groeps) {
+                if (groep.id == _groep.id) {
+                    const functie =  groepFuncties.find(f => f.id == functieId)
+                    const remaingFunctieIndex = remainingFuncties.findIndex(f => f.functie == functie.id)
 
-                if (remaingFunctieIndex != -1) {
-                    const [spl] = remainingFuncties.splice(remaingFunctieIndex, 1)
-                    newFuncties.push(spl)
-                } else {
-                    newFuncties.push({
-                        groep: groepNummer,
-                        functie: functie.id,
-                        begin: "2020-09-08T14:31:17.816+02:00",
-                    })
+                    if (remaingFunctieIndex != -1) {
+                        const [spl] = remainingFuncties.splice(remaingFunctieIndex, 1)
+                        newFuncties.push(spl)
+                        hasActiveFunctie = true
+                    } else {
+                        newFuncties.push({
+                            groep: groepNummer,
+                            functie: functie.id,
+                            begin: Formatter.dateIso(new Date()),
+                        })
+                        hasActiveFunctie = true
+                    }
+                    // keep looping, a group can be connected to multiple functies if needed
                 }
-                // keep looping, a group can be connected to multiple functies if needed
             }
         }
     }
 
     // Add all remaing functies, but end them
     for (const functie of remainingFuncties) {
-        newFuncties.push(Object.assign({}, functie, { einde: new Date().toISOString() }))
+        newFuncties.push(Object.assign({}, functie, { einde: Formatter.dateIso(new Date()), }))
     }
 
     if (!hasActiveFunctie) {
@@ -162,10 +194,22 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
             geboortedatum: Formatter.dateNumber(details.birthDay).split("/").reverse().join("-"),
             individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
             verminderdlidgeld: details.records.find(r => r.type == RecordType.FinancialProblems) ? true : false,
-        },
-        adressen: newAddresses,
-        contacten: newContacts,
-        functies: newFuncties
+        }
+    }
+
+    if (!lid.adressen || !deepEqual(lid.adressen, newAddresses)) {
+        // Skip updates
+        patch.adressen = newAddresses
+    }
+
+    if (!lid.functies || !deepEqual(lid.functies, newFuncties)) {
+        // Skip updates
+        patch.functies = newFuncties
+    }
+
+    if (!lid.contacten || !deepEqual(lid.contacten, newContacts)) {
+        // Skip updates
+        patch.contacten = newContacts
     }
 
     if (!lid.gebruikersnaam && details.email) {
@@ -180,7 +224,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 /**
  * Returns a list of groepsadmin ids => group that Stamhoofd will handle for this group
  */
-export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group> {
+export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {
         "KAP": ["kapoenen"],
         "KW": ["kabouters", "welpen", "wouters", "woudlopers"],
@@ -193,14 +237,14 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
         ["woudloper", "woudlopers"],
         ["los lid", "losse leden"]
     ]
-    const map = new Map<string, Group>()
+    const map = new Map<string, Group[]>()
     main: for (const groep of groups) {
 
         // Find exact name matches
         for (const functie of groepFuncties) {
             // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
             if (StringCompare.typoCount(functie.beschrijving, groep.settings.name) == 0) {
-                map.set(functie.id, groep)
+                map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
                 continue main;
             }
         }
@@ -215,7 +259,7 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                         for (const groupName2 of matchgroup) {
                             // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
                             if (StringCompare.typoCount(functie.beschrijving, groupName2) == 0) {
-                                map.set(functie.id, groep)
+                                map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
                                 continue main;
                             }
                         }
@@ -236,7 +280,7 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                             throw new Error(code+" niet gevonden :(")
                         }
 
-                        map.set(functie.id, groep)
+                        map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
                         continue main;
                     }
                 }
@@ -310,25 +354,25 @@ export function splitStreetNumber(huisnummer: string): {number: string, bus: str
 }
 
 function isSameAddress(address: Address, sgv: any) {
-    if (StringCompare.typoCount(address.street, sgv.straat) != 0) {
+    if (StringCompare.typoCount(trim(address.street), trim(sgv.straat)) != 0) {
         return false
     }
 
-    if (StringCompare.typoCount(address.city, sgv.gemeente) != 0) {
+    if (StringCompare.typoCount(trim(address.city), trim(sgv.gemeente)) != 0) {
         return false
     }
 
-    if (StringCompare.typoCount(address.postalCode, sgv.postcode) != 0) {
+    if (StringCompare.typoCount(trim(address.postalCode), trim(sgv.postcode)) != 0) {
         return false
     }
 
     const { number, bus } = splitStreetNumber(address.number)
 
-    if (StringCompare.typoCount(number, sgv.nummer) != 0) {
+    if (StringCompare.typoCount(trim(number), trim(sgv.nummer)) != 0) {
         return false
     }
 
-    if (StringCompare.typoCount(bus, sgv.bus ?? "") != 0) {
+    if (StringCompare.typoCount(trim(bus), trim(sgv.bus ?? "")) != 0) {
         return false
     }
 
@@ -371,19 +415,18 @@ function addressToSGV(address: Address): any {
 
 
     return {
-        straat: address.street.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, ""),
-        bus: bus.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, ""),
-        nummer: number.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, ""),
+        straat: trim(address.street),
+        bus: trim(bus),
+        nummer: trim(number),
 
-        postcode: address.postalCode.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, ""),
-        gemeente: address.city.replace(/^[^a-zA-Z0-9]/, "").replace(/[^a-zA-Z0-9]$/, ""),
+        postcode: trim(address.postalCode),
+        gemeente: trim(address.city),
         land: address.country,
 
         status: "normaal",
-        showme: true,
-        hasErrors: false,
         postadres: false,
         omschrijving: "",
+        telefoon: "",
     }
 }
 
@@ -397,7 +440,6 @@ function parentToSGV(parent: Parent, adressen: Map<string, string>): any {
         gsm: parent.phone ?? "",
         email: parent.email ?? "",
         rol: parent.type == ParentType.Father ? "vader" : (parent.type == ParentType.Mother ? "moeder" : "voogd"),
-        showme: true,
     }
 }
 

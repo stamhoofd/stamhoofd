@@ -75,6 +75,7 @@ import { Formatter } from '@stamhoofd/utility';
 })
 export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) {
     loading = false
+    didVerify = false
 
     @Prop({ required: true })
     matches: SGVLidMatchVerify[]
@@ -83,6 +84,9 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
 
     @Prop({ required: true })
     onVerified: (verified: SGVLidMatchVerify[]) => void
+
+    @Prop({ required: true })
+    onCancel: () => void
 
     mounted() {
         // clone
@@ -94,12 +98,18 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
             }
         })
     }
-     
+
+    beforeDestroy() {
+        if (!this.didVerify) {
+            this.onCancel()
+        }
+    }
     
     async goNext() {
         if (this.loading) {
             return;
         }
+        this.didVerify = true;
 
         this.dismiss({ force: true })
         this.onVerified(this.verifiedMatches)

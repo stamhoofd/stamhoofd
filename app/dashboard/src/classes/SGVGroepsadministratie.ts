@@ -33,12 +33,16 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
     decode(data: ObjectData): SimpleErrors {
         const fouten = data.optionalField("fouten")
         if (fouten) {
-            return new SimpleErrors(...fouten.array(new SGVFoutDecoder()))
+            const arr = fouten.array(new SGVFoutDecoder())
+            if (arr.length > 0) {
+                return new SimpleErrors(...arr)
+            }
         }
         const titel = data.field("titel").string
+        const beschrijving = data.optionalField("beschrijving")?.string
         return new SimpleErrors(new SimpleError({
             code: "SGVError",
-            message: titel
+            message: titel + (beschrijving ? (": " + beschrijving) : "")
         }))
     }
 }
@@ -331,29 +335,18 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async setGroupIfNeeded() {
-
         if (!this.groupNumber) {
-            const toast = new Toast("Groep ophalen...", "spinner").setHide(null).show()
-            try {
-                const group = await this.getGroup()
-                toast.hide()
-                if (!group) {
-                    new Toast("We konden jouw scoutsgroep niet vinden in dit groepsadministratie account. Controleer het adres en de naam die je in Stamhoofd hebt ingesteld en zorg dat deze overeen komt met de naam in de groepsadministratie.", "error red").show()
-                    return false;
-                }
-                console.log(group)
-                this.group = group
-                this.groupNumber = group.groepsnummer
-            } catch (e) {
-                toast.hide()
-                console.error(e)
-                new Toast("We konden de groepen niet ophalen in de groepsadministratie.", "error red").show()
-                return false;
+            const group = await this.getGroup()
+            if (!group) {
+                throw new SimpleError({
+                    code: "",
+                    message: "We konden jouw scoutsgroep niet vinden in dit groepsadministratie account. Controleer het adres en de naam die je in Stamhoofd hebt ingesteld en zorg dat deze overeen komt met de naam in de groepsadministratie."
+                })
             }
-           
+            console.log(group)
+            this.group = group
+            this.groupNumber = group.groepsnummer
         }
-
-        return true;
     }
 
     // Search the group
@@ -396,18 +389,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async checkFuncties() {
-        const toast = new Toast("Functies ophalen...", "spinner").setHide(null).show()
-
-        try {
-            await this.getFuncties()
-
-        } finally {
-            toast.hide()
-        }
+        await this.getFuncties()
 
         // Check if this user has access to all the needed groups...
         if (!this.functies.find(f => f.code == 'VGA' || f.code == 'GRL')) {
-            new Toast("Synchroniseren met de groepsadministratie is voorlopig enkel beschikbaar voor groepsleiding of voor de verantwoordelijke van de groepsadministratie (VGA)", "error red").show()
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Synchroniseren met de groepsadministratie is voorlopig enkel beschikbaar voor groepsleiding of voor de verantwoordelijke van de groepsadministratie (VGA)"
@@ -471,23 +456,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async downloadAll() {
-        if (await this.setGroupIfNeeded() == false) {
-            return;
-        }
-
+        await this.setGroupIfNeeded();
         await this.checkFuncties()
-
-        const toast = new Toast("Leden ophalen...", "spinner").setHide(null).show()
-
         await this.setManagedFilter()
 
         try {
             this.leden = await this.downloadWithCurrentFilter()
             console.log(this.leden)
-            toast.hide()
-            new Toast("Leden ophalen gelukt", "success green").show()
         } catch (e) {
-            toast.hide()
             console.error(e)
             new Toast("Leden ophalen mislukt", "error red").show()
         }
@@ -501,7 +477,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             while (offset < total) {
                 // prevent brute force attack, spread the load
-                await sleep(500);
+                await sleep(250);
                 const response = await this.authenticatedServer.request({
                     method: "GET",
                     path: "/ledenlijst",
@@ -525,7 +501,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return leden;
     }
 
-    async matchAndSync(component: NavigationMixin) {
+    async matchAndSync(component: NavigationMixin, onPopup: () => void): Promise<{ matchedMembers, newMembers }> {
         // Members that are missing in groepsadmin
         let newMembers: MemberWithRegistrations[] = []
 
@@ -564,7 +540,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     console.log("Is echt een nieuw lid!")
                     newMembers.push(member)
                 }
-                await sleep(500)
+                await sleep(250)
             }
         }
 
@@ -597,31 +573,41 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         console.log(probablyEqualList)
 
         if (probablyEqualList.length > 0) {
-            component.present(new ComponentWithProperties(SGVVerifyProbablyEqualView, {
-                matches: probablyEqualList,
-                onVerified: (verified: SGVLidMatchVerify[]) => {
-                    for (const member of verified) {
-                        if (member.verify) {
-                            matchedMembers.push({
-                                stamhoofd: member.stamhoofd,
-                                sgvId: member.sgv.id
-                            })
-                        } else {
-                            newMembers.push(member.stamhoofd)
+            return new Promise((resolve, reject) => {
+                onPopup()
+                component.present(new ComponentWithProperties(SGVVerifyProbablyEqualView, {
+                    matches: probablyEqualList,
+                    onCancel: () => {
+                        reject(new SimpleError({
+                            code: "",
+                            message: "Synchronisatie geannuleerd"
+                        }))
+                    },
+                    onVerified: async (verified: SGVLidMatchVerify[]) => {
+                        try {
+                            for (const member of verified) {
+                                if (member.verify) {
+                                    matchedMembers.push({
+                                        stamhoofd: member.stamhoofd,
+                                        sgvId: member.sgv.id
+                                    })
+                                } else {
+                                    newMembers.push(member.stamhoofd)
+                                }
+                            }
+                            resolve({ matchedMembers, newMembers })
+                        } catch (e) {
+                            reject(e)
                         }
-                    }
-                    this.prepareSync(component, matchedMembers, newMembers, allMembers)
-                }   
-            }).setDisplayStyle("popup"))
-            return;
+                    }   
+                }).setDisplayStyle("popup"))
+            });
         }
 
-        await this.prepareSync(component, matchedMembers, newMembers, allMembers)
+        return { matchedMembers, newMembers }
     }
 
-    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], allMembers: MemberWithRegistrations[]) {
-        // todo: filter new members by first searching for old members in groepsadmin and activatign them again > creating new matches
-
+    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[]): Promise<{ oldMembers, action }> {
         // Determine the missing members by checking the matches
         const oldMembers: SGVLid[] = []
 
@@ -633,17 +619,30 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
 
         if (oldMembers.length > 0) {
-            // Show a window
-            component.present(new ComponentWithProperties(SGVOldMembersView, {
-                members: oldMembers,
-                setAction: (action: "delete" | "import" | "nothing") => {
-                    this.sync(component, matched, newMembers, oldMembers, action)
-                }
-            }).setDisplayStyle("popup"))
-            return;
+            return new Promise((resolve, reject) => {
+                // Show a window
+                component.present(new ComponentWithProperties(SGVOldMembersView, {
+                    members: oldMembers,
+                    onCancel: () => {
+                        reject(new SimpleError({
+                            code: "",
+                            message: "Synchronisatie geannuleerd"
+                        }))
+                    },
+                    setAction: async (action: "delete" | "import" | "nothing") => {
+                        try {
+                            resolve({ oldMembers, action })
+                        } catch (e) {
+                            reject(e)
+                        }
+                    }
+                }).setDisplayStyle("popup"))
+            })
         }
 
-        await this.sync(component, matched, newMembers, oldMembers, "nothing")
+        return {
+            oldMembers, action: "nothing"
+        }
     }
 
     async sync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[], oldMembers: SGVLid[], action: "delete" | "import" | "nothing") {
@@ -672,7 +671,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Start syncing...
         for (const match of matched) {
             try {
-                await this.syncLid(match)
+                await this.syncLid(match, report)
                 report.markSynced(match.stamhoofd)
             } catch (e) {
                 report.addError(new SGVMemberError(match.stamhoofd, e))
@@ -682,7 +681,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
          // Start creating
         for (const member of newMembers) {
             try {
-                await this.createLid(member)
+                await this.createLid(member, report)
                 report.markCreated(member)
             } catch (e) {
                 report.addError(new SGVMemberError(member, e))
@@ -695,7 +694,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }).setDisplayStyle("popup"))
     }
 
-    async syncLid(match: SGVLidMatch) {
+    async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
         console.log("syncing "+match.stamhoofd.firstName);
         const details = match.stamhoofd.details!
 
@@ -709,13 +708,20 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const lid = response.data;
 
         console.log("syncing "+match.stamhoofd.firstName);
-        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies)
+        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies, report)
+
+        if (patch.adressen && patch.adressen.length == 0) {
+            throw new SimpleError({
+                code: "",
+                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
+            })
+        }
 
         console.log(lid)
         console.info(patch)
 
         if (!this.dryRun) {
-            await sleep(500);
+            await sleep(250);
 
             try {
                 const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
@@ -727,23 +733,53 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             } catch (e) {
                 console.error(e)
-
-                // todoo!!!!!!sd!f!!!!!!!!!!!
-                this.dryRun = true;
                 throw e;
             }
-            
         }
 
-        await sleep(500);
+        await sleep(250);
     }
 
     
     /**
      * Create a new one in SGV
      */
-    async createLid(member: MemberWithRegistrations) {
+    async createLid(member: MemberWithRegistrations, report: SGVSyncReport) {
         console.log("creating "+member.firstName);
+        const details = member.details!
+
+        const post = getPatch(details, {
+            adressen: [],
+            contacten: [],
+            functies: []
+        }, this.groupNumber!, member.groups, OrganizationManager.organization.groups, this.functies, report)
+
+        if (!post.adressen || post.adressen.length == 0) {
+            throw new SimpleError({
+                code: "",
+                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
+            })
+        }
+
+        console.info(post)
+
+        if (!this.dryRun) {
+            await sleep(250);
+
+            try {
+                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                    method: "POST",
+                    path: "/lid",
+                    body: post
+                })
+                console.log(updateResponse)
+
+            } catch (e) {
+                console.error(e)
+                throw e;
+            }
+        }
+
         await sleep(250);
     }
 

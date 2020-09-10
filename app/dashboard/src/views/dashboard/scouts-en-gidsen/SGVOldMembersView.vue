@@ -71,18 +71,29 @@ import { Formatter } from '@stamhoofd/utility';
 })
 export default class SGVOldMembersView extends Mixins(NavigationMixin) {
     loading = false
+    didSetAction = false
 
     @Prop({ required: true })
     members: SGVLid[]
 
     @Prop({ required: true })
     setAction: (action: "delete" | "import" | "nothing") => void;
+
+    @Prop({ required: true })
+    onCancel: () => void
+
+    beforeDestroy() {
+        if (!this.didSetAction) {
+            this.onCancel()
+        }
+    }
+
     
     async doDelete() {
         if (this.loading) {
             return;
         }
-
+        this.didSetAction = true;
         this.dismiss({ force: true })
         this.setAction("delete")
     }
@@ -91,7 +102,7 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
-
+        this.didSetAction = true;
         this.dismiss({ force: true })
         this.setAction("import")
     }
@@ -100,7 +111,7 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
-
+        this.didSetAction = true;
         this.dismiss({ force: true })
         this.setAction("nothing")
     }

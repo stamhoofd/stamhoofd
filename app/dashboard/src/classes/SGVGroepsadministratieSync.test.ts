@@ -117,6 +117,46 @@ describe("Groepsadministratie Sync", () => {
         expect(p2.adressen[0].id).not.toEqual("SGVID")
     })
 
+    test("No address change", () => {
+        const details = MemberDetails.create({
+            address: Address.create({
+                street: "Teststraat",
+                number: "11",
+                city: "Gent",
+                postalCode: "9000",
+                country: "BE"
+            })
+        })
+
+        const sgv = {
+            adressen: [{
+                id: "SGVID",
+                straat: "Teststraat",
+                nummer: "11",
+                bus: "",
+                gemeente: "Gent",
+                postcode: "9000",
+                telefoon: "",
+                "status": "normaal",
+                "postadres": true,
+                "positie": {
+                    "latitude": 51,
+                    "longitude": 3.8
+                },
+                land: "BE",
+                "omschrijving": "",
+                "unknownSGVProperty": "test",
+                hasErrors: false,
+                showme: true,
+
+            }],
+            contacten: []
+        };
+
+        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
+        expect(p.adressen).not.toBeDefined()
+    })
+
     test("Huisnummer opsplitsen", () => {
         expect(splitStreetNumber("13 bus 3")).toMatchObject({
             number: "13",
