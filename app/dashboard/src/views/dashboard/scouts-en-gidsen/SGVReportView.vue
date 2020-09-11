@@ -22,50 +22,58 @@
             <div class="warning-box" v-for="warning in report.warnings">
                 {{ warning }}
             </div>
+
+            <template v-if="report.deleted.length > 0">
+                <hr>
+                <h2>Geschrapt in de groepsadministratie</h2>
+                <STList>
+                    <STListItem v-for="member in report.deleted" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">{{ member.firstName }} {{ member.lastName }}</h2>
+                            <p class="style-description-small">{{ member.birthDay | date }}</p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
         
-            <hr>
-            <h2>Nieuwe leden toegevoegd in de groepsadministratie</h2>
-            <STList>
-                <STListItem v-for="member in report.created" :key="member.id">
-                    <div>
-                        <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                        <p class="style-description-small">{{ member.details.birthDay | date }}</p>
-                    </div>
-                </STListItem>
-            </STList>
+            <template v-if="report.created.length > 0">
+                <hr>
+                <h2>Nieuwe leden toegevoegd in de groepsadministratie</h2>
+                <STList>
+                    <STListItem v-for="member in report.created" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
+                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
 
-            <hr>
-            <h2>Aangepaste leden in de groepsadministratie</h2>
-            <STList>
-                <STListItem v-for="member in report.synced" :key="member.id">
-                    <div>
-                        <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                        <p class="style-description-small">{{ member.details.birthDay | date }}</p>
-                    </div>
-                </STListItem>
-            </STList>
+            <template v-if="report.synced.length > 0">
+                <hr>
+                <h2>Aangepaste leden in de groepsadministratie</h2>
+                <STList>
+                    <STListItem v-for="member in report.synced" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
+                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
 
-            <hr>
-            <h2>Geschrapt in de groepsadministratie</h2>
-            <STList>
-                <STListItem v-for="member in report.deleted" :key="member.id">
-                    <div>
-                        <h2 class="style-title-list">{{ member.firstName }} {{ member.lastName }}</h2>
-                        <p class="style-description-small">{{ member.birthDay | date }}</p>
-                    </div>
-                </STListItem>
-            </STList>
-
-            <hr>
-            <h2>Geïmporteerd in Stamhoofd</h2>
-            <STList>
-                <STListItem v-for="member in report.imported" :key="member.id">
-                    <div>
-                        <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                        <p class="style-description-small">{{ member.details.birthDay | date }}</p>
-                    </div>
-                </STListItem>
-            </STList>
+            <template v-if="report.imported.length > 0">
+                <hr>
+                <h2>Geïmporteerd in Stamhoofd</h2>
+                <STList>
+                    <STListItem v-for="member in report.imported" :key="member.id">
+                        <div>
+                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
+                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                        </div>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
 
         <STToolbar>

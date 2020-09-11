@@ -1,7 +1,7 @@
 <template>
     <div class="toast-view-container">
         <div class="toast-view" @click="close" :class="toast.icon">
-            <div class="progress" v-if="toast.progress !== undefined" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
+            <div class="progress" v-if="toast.progress !== null" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'"/>
             <span v-else-if="toast.icon" class="icon" :class="toast.icon"/>
             <span>{{ message }}</span>

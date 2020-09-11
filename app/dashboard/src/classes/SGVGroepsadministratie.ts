@@ -462,8 +462,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     "be.vvksm.groepsadmin.model.column.LidNummerColumn",
                     "be.vvksm.groepsadmin.model.column.VoornaamColumn",
                     "be.vvksm.groepsadmin.model.column.AchternaamColumn",
-                    "be.vvksm.groepsadmin.model.column.GeboorteDatumColumn",
-                    "be.vvksm.groepsadmin.model.column.GeslachtColumn"
+                    "be.vvksm.groepsadmin.model.column.GeboorteDatumColumn"
                 ],
                 "groepen":[],
                 "sortering":["be.vvksm.groepsadmin.model.column.LidNummerColumn"],
@@ -839,11 +838,19 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 })
                 console.log(updateResponse)
 
+                // Patch in Stamhoofd
+                if (match.stamhoofd.details && updateResponse.data.verbondsgegevens && match.stamhoofd.details.memberNumber != updateResponse.data.verbondsgegevens.lidnummer) {
+                    match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer
+                    await MemberManager.patchMemberDetails(match.stamhoofd)
+                }
+
             } catch (e) {
                 console.error(e)
                 throw e;
             }
         }
+
+       
 
         await sleep(250);
     }

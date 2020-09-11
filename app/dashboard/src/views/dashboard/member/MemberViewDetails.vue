@@ -7,6 +7,11 @@
                     <div class="hover-show"><button class="button icon gray edit" @click="editMember()"></button></div>
                 </h2>
                 <dl class="details-grid">
+                    <template v-if="member.details.memberNumber">
+                        <dt>Lidnummer</dt>
+                        <dd>{{ member.details.memberNumber }}</dd>
+                    </template>
+
                     <dt>Verjaardag</dt>
                     <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
 

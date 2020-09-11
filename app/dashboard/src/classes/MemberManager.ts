@@ -212,6 +212,7 @@ export class MemberManagerStatic {
         const patchArray = new PatchableArray()
         for (const m of encrypted) {
             patchArray.addPatch(EncryptedMemberWithRegistrationsPatch.create({
+                id: m.id,
                 encryptedForOrganization: m.encryptedForOrganization,
                 encryptedForMember: m.encryptedForMember
             }))
