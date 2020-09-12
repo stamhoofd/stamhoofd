@@ -41,7 +41,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const token = await Token.authenticate(request);
         const user = token.user
 
-        const members = await user.getMembersWithRegistration()
+        const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.where({ organizationId: user.organizationId })
         
         const registrations: RegistrationWithMember[] = []
@@ -268,7 +268,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             return new Response(RegisterResponse.create({
                 payment: PaymentStruct.create(payment),
-                members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+                members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
                 registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
                 paymentUrl
             }));
@@ -276,7 +276,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         
         return new Response(RegisterResponse.create({
             payment: null,
-            members: (await user.getMembersWithRegistration()).map(m => m.getStructureWithRegistrations()),
+            members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
             registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
         }));
     }

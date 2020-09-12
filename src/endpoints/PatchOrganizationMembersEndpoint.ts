@@ -52,7 +52,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
-            const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, [])
+            const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             member.id = struct.id
             member.publicKey = struct.publicKey
             member.organizationId = user.organizationId

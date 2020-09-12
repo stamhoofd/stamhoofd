@@ -1,5 +1,6 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedResponse } from '@stamhoofd/structures';
+import { EncryptedMember, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { MemberFactory } from '../factories/MemberFactory';
@@ -38,7 +39,7 @@ describe("Endpoint.PostUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeAllMembers(members.map(m => Object.assign({ registrations: [] }, m))) // created user won't have any registrations
+        expect(response.body.data.map(m => Object.assign({}, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)).toEqual(members.map(m => Object.assign({ registrations: [], users: [UserStruct.create(user)] }, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)) // created user won't have any registrations
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
     });
 
@@ -79,7 +80,27 @@ describe("Endpoint.PostUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => Object.assign({ registrations: [] }, m)))
+        expect(
+            response.body.data.map(
+                m => 
+                    Object.assign({}, m, { 
+                        updatedAt: undefined, 
+                        createdAt: undefined 
+                    })
+                )
+            .sort(Sorter.byID)
+        ).toEqual(
+            [...members, existingMemberEncrypted].map(
+                m => 
+                Object.assign({ 
+                    registrations: [], 
+                    users: [UserStruct.create(user)] 
+                }, m, { 
+                    updatedAt: undefined, 
+                    createdAt: undefined 
+                })
+            ).sort(Sorter.byID)
+        )
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => m.publicKey))
     });
 });

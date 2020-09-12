@@ -1,4 +1,4 @@
-import { column, Database, ManyToManyRelation,ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { column, Database, ManyToManyRelation,ManyToOneRelation, Model, OneToManyRelation } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
@@ -97,9 +97,6 @@ export class User extends Model {
     updatedAt: Date
 
     static organization = new ManyToOneRelation(Organization, "organization");
-
-    // Members that were added by this user
-    static members = new ManyToManyRelation(User, Member, "members");
 
     /// Delete users when we delete a member
     static async deleteForDeletedMember(memberId: string) {
@@ -227,48 +224,6 @@ export class User extends Model {
 
     async verifyAuthSignature(this: UserForAuthentication, signature: string, message: string) {
         return await Sodium.verifySignature(signature, message, this.publicAuthSignKey)
-    }
-
-    /**
-     * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
-     */
-    async getMembersWithRegistration(): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${User.members.linkTable}\`\n`;
-        query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${User.members.linkTable}\`.\`${User.members.linkKeyB}\`\n`
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
-        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
-
-        query += `where \`${User.members.linkTable}\`.\`${User.members.linkKeyA}\` = ?`
-
-        const [results] = await Database.select(query, [this.id])
-        const members: MemberWithRegistrations[] = []
-
-        for (const row of results) {
-            const foundMember = Member.fromRow(row[Member.table])
-            if (!foundMember) {
-                throw new Error("Expected member in every row")
-            }
-            const _f = foundMember.setManyRelation(Member.registrations, []) as MemberWithRegistrations
-
-            // Seach if we already got this member?
-            const existingMember = members.find(m => m.id == _f.id)
-
-            const member: MemberWithRegistrations = (existingMember ?? _f)
-            if (!existingMember) {
-                members.push(member)
-            }
-
-            // Check if we have a registration with a payment
-            const registration = Registration.fromRow(row[Registration.table])
-            if (registration) {
-                const payment = Payment.fromRow(row[Payment.table]) ?? null
-                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
-                member.registrations.push(regWithPayment)
-            }
-        }
-
-        return members
-
     }
 
     async getOrganizatonStructure(organization: Organization): Promise<OrganizationStruct> {

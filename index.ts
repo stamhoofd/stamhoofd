@@ -29,7 +29,7 @@ const start = async () => {
     router.endpoints.push(new CORSPreflightEndpoint())
 
     const routerServer = new RouterServer(router);
-    routerServer.verbose = false
+    routerServer.verbose = true
     // tmp
     routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",
@@ -39,7 +39,7 @@ const start = async () => {
     };
     routerServer.listen(parseInt(process.env.PORT ?? "9090"));
 
-    const cronInterval = setInterval(crons, 10 * 60 * 1000);
+    const cronInterval = setInterval(crons, 30 * 60 * 1000);
     crons()
 
     const shutdown = () => {

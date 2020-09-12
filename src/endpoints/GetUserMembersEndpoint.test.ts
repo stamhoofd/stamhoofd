@@ -1,13 +1,14 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { MemberFactory } from '../factories/MemberFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { RegistrationFactory } from '../factories/RegistrationFactory';
 import { UserFactory } from '../factories/UserFactory';
+import { Member } from '../models/Member';
 import { Token } from '../models/Token';
-import { User } from '../models/User';
 import { GetUserMembersEndpoint } from './GetUserMembersEndpoint';
 
 
@@ -36,7 +37,28 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeSameMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({ registrations: m.id === members[0].id ? [registration.getStructure()] : [] }, m))))
+
+        expect(
+            response.body.data.map(
+                m => 
+                    Object.assign({}, m, { 
+                        updatedAt: undefined, 
+                        createdAt: undefined 
+                    })
+                )
+            .sort(Sorter.byID)
+        ).toEqual(
+            members.map(
+                m => 
+                Object.assign({ 
+                    registrations: m.id === members[0].id ? [registration.getStructure()] : [], 
+                    users: [UserStruct.create(user)] 
+                }, EncryptedMember.create(m), { 
+                    updatedAt: undefined, 
+                    createdAt: undefined 
+                })
+            ).sort(Sorter.byID)
+        )
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
@@ -102,7 +124,29 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
-        expect(response.body.data).toIncludeSameMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({ registrations: [] }, m))))
+
+        expect(
+            response.body.data.map(
+                m => 
+                    Object.assign({}, m, { 
+                        updatedAt: undefined, 
+                        createdAt: undefined 
+                    })
+                )
+            .sort(Sorter.byID)
+        ).toEqual(
+            members.map(
+                m => 
+                Object.assign({ 
+                    registrations: [], 
+                    users: [UserStruct.create(user)] 
+                }, EncryptedMember.create(m), { 
+                    updatedAt: undefined, 
+                    createdAt: undefined 
+                })
+            ).sort(Sorter.byID)
+        )
+        
         expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
     });
 
@@ -116,7 +160,7 @@ describe("Endpoint.GetUserMembers", () => {
         const userB = await userFactory.create()
 
         // Give userB access to the users
-        await User.members.link(userB, members)
+        await Member.users.reverse("members").link(userB, members)
 
         // Continue as normal
         const token = await Token.createToken(userB)
@@ -130,7 +174,28 @@ describe("Endpoint.GetUserMembers", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(0)
-        expect(response.body.data).toIncludeAllMembers(members.map(m => EncryptedMemberWithRegistrations.create(Object.assign({ registrations: [] }, m))))
+         expect(
+            response.body.data.map(
+                m => 
+                    Object.assign({}, m, { 
+                        updatedAt: undefined, 
+                        createdAt: undefined 
+                    })
+                )
+            .sort(Sorter.byID)
+        ).toEqual(
+            members.map(
+                m => 
+                Object.assign({ 
+                    registrations: [], 
+                    // todo: this will return two users as soon as we fix this issue (currenlty only returning currently signed in user)
+                    users: [UserStruct.create(userB)] 
+                }, EncryptedMember.create(m), { 
+                    updatedAt: undefined, 
+                    createdAt: undefined 
+                })
+            ).sort(Sorter.byID)
+        )
     });
 
     test("Request user details when not signed in is not working", async () => {

@@ -2,6 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, Payment, Registration } from "@stamhoofd/structures";
 
 import { KeychainItem } from '../models/KeychainItem';
+import { Member } from '../models/Member';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 type Params = {};
@@ -30,7 +31,7 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const token = await Token.authenticate(request);
         const user = token.user
 
-        const members = await user.getMembersWithRegistration()
+        const members = await Member.getMembersWithRegistrationForUser(user)
         if (members.length == 0) {
             return new Response(new KeychainedResponse({
                 data: [],

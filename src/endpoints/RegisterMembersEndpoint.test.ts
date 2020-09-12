@@ -48,7 +48,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(RegisterResponse)
 
-        expect(response.body.payment!.status).toEqual("Pending")
+        expect(response.body.payment!.status).toEqual("Created")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(123 * 2)
         expect(response.body.registrations).toHaveLength(2)
@@ -129,7 +129,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(RegisterResponse)
 
-        expect(response.body.payment!.status).toEqual("Pending")
+        expect(response.body.payment!.status).toEqual("Created")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(12 * 2)
         expect(response.body.registrations).toHaveLength(2)
@@ -170,7 +170,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(RegisterResponse)
 
-        expect(response.body.payment!.status).toEqual("Pending")
+        expect(response.body.payment!.status).toEqual("Created")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(5 * 2)
         expect(response.body.registrations).toHaveLength(2)
@@ -210,7 +210,7 @@ describe("Endpoint.RegisterMembers", () => {
         expect(response.body).toBeDefined();
         expect(response.body).toBeInstanceOf(RegisterResponse)
 
-        expect(response.body.payment!.status).toEqual("Pending")
+        expect(response.body.payment!.status).toEqual("Created")
         expect(response.body.payment!.method).toEqual("Transfer")
         expect(response.body.payment!.price).toEqual(10 * 2)
         expect(response.body.registrations).toHaveLength(2)

@@ -1,10 +1,11 @@
-import { column,Database,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember } from '@stamhoofd/structures';
+import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
-export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[] }
+import { User } from './User';
+export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[]; users: User[] }
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member }
@@ -79,6 +80,9 @@ export class Member extends Model {
 
     static registrations = new OneToManyRelation(Member, Registration, "registrations", "memberId")
 
+    // Note: all relations should point to their parents, not the other way around to avoid reference cycles
+    static users = new ManyToManyRelation(Member, User, "users");
+
     /**
      * Fetch all members with their corresponding (valid) registrations and payment
      */
@@ -124,7 +128,7 @@ export class Member extends Model {
     }
 
      /**
-     * Fetch all members with their corresponding (valid) registrations and payment
+     * Fetch all members with their corresponding (valid) registrations, users and payment
      */
     static async getAllWithRegistrations(...ids: string[]): Promise<MemberWithRegistrations[]> {
         if (ids.length == 0) {
@@ -134,6 +138,8 @@ export class Member extends Model {
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
         query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        query += Member.users.joinQuery(Member.table, User.table)+"\n"
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
         query += `where \`${Member.table}\`.\`${Member.primary.name}\` IN (?)`
@@ -146,8 +152,7 @@ export class Member extends Model {
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations, []) as MemberWithRegistrations
-
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id)
 
@@ -156,14 +161,27 @@ export class Member extends Model {
                 members.push(member)
             }
 
-            // Check if we have a registration with a payment
+             // Check if we have a registration with a payment
             const registration = Registration.fromRow(row[Registration.table])
             if (registration) {
-                const payment = Payment.fromRow(row[Payment.table]) ?? null
-                // Every registration should have a valid payment (unless they are on the waiting list)
+                // Check if we already have this registration
+                if (!member.registrations.find(r => r.id == registration.id)) {
+                    const payment = Payment.fromRow(row[Payment.table]) ?? null
+                    // Every registration should have a valid payment (unless they are on the waiting list)
 
-                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
-                member.registrations.push(regWithPayment)
+                    const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
+
+                    member.registrations.push(regWithPayment)
+                }
+            }
+
+            // Check if we have a user
+            const user = User.fromRow(row[User.table])
+            if (user) {
+                // Check if we already have this registration
+                if (!member.users.find(r => r.id == user.id)) {
+                    member.users.push(user)
+                }
             }
         }
 
@@ -193,10 +211,55 @@ export class Member extends Model {
         return await this.getAllWithRegistrations(...ids)
     }
 
+     /**
+     * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
+     */
+    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.users.linkTable}\`\n`;
+        query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${Member.users.linkTable}\`.\`${Member.users.linkKeyA}\`\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
+        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+
+        query += `where \`${Member.users.linkTable}\`.\`${Member.users.linkKeyB}\` = ?`
+
+        const [results] = await Database.select(query, [user.id])
+        const members: MemberWithRegistrations[] = []
+
+        for (const row of results) {
+            const foundMember = Member.fromRow(row[Member.table])
+            if (!foundMember) {
+                throw new Error("Expected member in every row")
+            }
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [
+                user // for now only assign this... Todo: expand with query
+            ])
+
+            // Seach if we already got this member?
+            const existingMember = members.find(m => m.id == _f.id)
+
+            const member: MemberWithRegistrations = (existingMember ?? _f)
+            if (!existingMember) {
+                members.push(member)
+            }
+
+            // Check if we have a registration with a payment
+            const registration = Registration.fromRow(row[Registration.table])
+            if (registration) {
+                const payment = Payment.fromRow(row[Payment.table]) ?? null
+                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
+                member.registrations.push(regWithPayment)
+            }
+        }
+
+        return members
+
+    }
+
     getStructureWithRegistrations(this: MemberWithRegistrations) {
         return EncryptedMemberWithRegistrations.create(
             Object.assign(Object.assign({}, this), {
-                registrations: this.registrations.map(r => r.getStructure())
+                registrations: this.registrations.map(r => r.getStructure()),
+                users: this.users.map(u => UserStruct.create(u)),
             })
         )
     }

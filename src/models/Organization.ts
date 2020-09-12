@@ -200,6 +200,11 @@ export class Organization extends Model {
     async updateDNSRecords() {
         const organization = this;
 
+        if (process.env.NODE_ENV != "production") {
+            // Temporary ignore this
+            return;
+        }
+
         // Check initial status
         let isValidRecords = true
         for (const record of organization.privateMeta.dnsRecords) {
@@ -210,8 +215,7 @@ export class Organization extends Model {
         
         // Revalidate all
         const resolver = new Resolver();
-        const r = Math.random()
-        resolver.setServers(r > 0.33 ? ['1.1.1.1', '8.8.8.8', '8.8.4.4'] : (r > 0.66 ? ['8.8.8.8', '1.1.1.1'] : ['8.8.4.4', '1.1.1.1']));
+        resolver.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
 
         let allValid = true
         for (const record of organization.privateMeta.dnsRecords) {

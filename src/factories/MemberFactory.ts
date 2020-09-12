@@ -171,7 +171,7 @@ export class MemberFactory extends Factory<Options, Member> {
 
         // Give user access to the encrypted data
         if (this.options.user) {
-            await User.members.link(this.options.user, [member])
+            await Member.users.link(member, [this.options.user])
         }
 
         if (this.options.user && this.options.userPrivateKey) {

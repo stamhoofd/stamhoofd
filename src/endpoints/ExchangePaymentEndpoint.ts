@@ -66,7 +66,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
 
         if (user) {
-            const authorizedMembers = (await user.getMembersWithRegistration()).map(m => m.id)
+            const authorizedMembers = (await Member.getMembersWithRegistrationForUser(user)).map(m => m.id)
 
             // Check permissions
             for (const registration of registrations) {

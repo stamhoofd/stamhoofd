@@ -56,11 +56,11 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (addedMembers.length > 0) {
             // Give access to created members
-            await User.members.link(user, addedMembers)
+            await Member.users.reverse("members").link(user, addedMembers)
         }
 
         // Modify members
-        const members = await user.getMembersWithRegistration()
+        const members = await Member.getMembersWithRegistrationForUser(user)
         for (const struct of request.body.updateMembers) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
