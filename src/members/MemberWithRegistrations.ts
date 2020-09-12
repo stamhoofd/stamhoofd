@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '../Group';
 import { WaitingListSkipReason } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
+import { User } from '../User';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
@@ -99,6 +100,9 @@ export class SelectableGroup {
 export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Registration) })
     registrations: Registration[]
+
+    @field({ decoder: new ArrayDecoder(User), version: 32 })
+    users: User[]
 
     // Calculated properties for convenience
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
