@@ -142,7 +142,8 @@ export class MemberManagerStatic {
                 details: decryptedDetails,
                 publicKey: member.publicKey,
                 registrations: member.registrations,
-                firstName: member.firstName
+                firstName: member.firstName,
+                users: member.users
             })
 
             decryptedMember.fillGroups(groups)
@@ -199,7 +200,8 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
-                    registrations: withRegistrations ? member.registrations : []
+                    registrations: withRegistrations ? member.registrations : [],
+                    users: member.users
                 })
             )
         }

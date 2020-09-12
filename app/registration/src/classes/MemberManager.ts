@@ -100,7 +100,8 @@ export class MemberManagerStatic {
                 publicKey: member.publicKey,
                 registrations: member.registrations,
                 firstName: member.firstName,
-                placeholder: member.placeholder
+                placeholder: member.placeholder,
+                users: member.users
             })
             decryptedMember.fillGroups(groups)
 
@@ -131,7 +132,8 @@ export class MemberManagerStatic {
             publicKey: keyPair.publicKey,
             registrations: [],
             firstName: member.firstName,
-            placeholder: false
+            placeholder: false,
+            users: []
         })
 
         const members = (this.members ?? []).filter(m => !!m.details)

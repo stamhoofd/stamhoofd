@@ -152,6 +152,15 @@
 
             <p class="info-box" v-if="member.details.records.length == 0">{{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart</p>
 
+             <template v-if="member.users.length > 0">
+                <hr>
+
+                <h2>Accounts</h2>
+                <p v-for="user in member.users">{{ user.email }}</p>
+
+                <p class="accounts-description">Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.</p>
+            </template>
+
             <template v-if="false">
                 <hr>
 
@@ -359,6 +368,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             border-radius: $border-width/2;
             margin: 30px 0;
         }
+    }
+
+    .accounts-description {
+        @extend .style-definition-description;
+        margin-top: 15px;
     }
 }
 

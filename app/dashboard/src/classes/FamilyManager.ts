@@ -44,7 +44,8 @@ export class FamilyManager {
             publicKey: keyPair.publicKey,
             registrations: registrations,
             firstName: member.firstName,
-            placeholder: true
+            placeholder: true,
+            users: []
         })
 
         const members = (this.members ?? []).filter(m => !!m.details)
