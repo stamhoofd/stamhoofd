@@ -20,10 +20,10 @@ export class EncryptedMember extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 20 })
     placeholder = false
 
-    @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 31 })
     createdAt: Date = new Date()
 
-    @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 31 })
     updatedAt: Date = new Date()
 }
 
