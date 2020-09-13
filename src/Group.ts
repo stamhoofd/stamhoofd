@@ -121,7 +121,7 @@ export class Group extends AutoEncoder {
                     if (!this.settings.priorityForFamily) {
                         throw new SimpleError({
                             code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
                         })
                     } else {
                         // okay
@@ -130,12 +130,12 @@ export class Group extends AutoEncoder {
                     if (this.settings.priorityForFamily) {
                         throw new SimpleError({
                             code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden en hun broers/zussen kunnen momenteel inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden en hun broers/zussen kunnen momenteel inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
                         })
                     } else {
                         throw new SimpleError({
                             code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.date(this.settings.startDate)+" kunnen ook nieuwe leden of broers/zussen inschrijven."
+                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden of broers/zussen inschrijven."
                         })
                     }
                 }
@@ -151,12 +151,12 @@ export class Group extends AutoEncoder {
                 if (this.settings.priorityForFamily) {
                     throw new SimpleError({
                         code: "",
-                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)+" voor bestaande leden en hun broers/zussen"
+                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.dateTime(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.dateTime(preRegistrationDate)+" voor bestaande leden en hun broers/zussen"
                     })
                 } else {
                     throw new SimpleError({
                         code: "",
-                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.date(preRegistrationDate)+" voor bestaande leden"
+                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.dateTime(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.dateTime(preRegistrationDate)+" voor bestaande leden"
                     })
                 }
             }
