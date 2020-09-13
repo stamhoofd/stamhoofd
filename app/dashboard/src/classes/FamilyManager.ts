@@ -49,8 +49,8 @@ export class FamilyManager {
         })
 
         const members = (this.members ?? []).filter(m => !!m.details)
-        const encryptedMembers = await MemberManager.getEncryptedMembers(members)
-        const addMembers = await MemberManager.getEncryptedMembers([decryptedMember], true)
+        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
+        const addMembers = await MemberManager.getEncryptedMembers([decryptedMember])
 
         const patchArray = new PatchableArray()
         for (const m of encryptedMembers) {
@@ -116,7 +116,7 @@ export class FamilyManager {
         } else {
             members.push(member)
         }
-        const encryptedMembers = await MemberManager.getEncryptedMembers(members)
+        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;
         }

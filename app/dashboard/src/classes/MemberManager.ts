@@ -1,6 +1,6 @@
 
 
-import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray, PatchType, AutoEncoderPatchType } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
 import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch } from '@stamhoofd/structures'
@@ -183,7 +183,7 @@ export class MemberManagerStatic {
         return new PatchableArray()
     }
 
-     async getEncryptedMembers(members: MemberWithRegistrations[], withRegistrations = false): Promise<EncryptedMemberWithRegistrations[]> {
+    async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<EncryptedMemberWithRegistrations[]> {
         const encryptedMembers: EncryptedMemberWithRegistrations[] = [];
 
         for (const member of members) {
@@ -200,8 +200,31 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
-                    registrations: withRegistrations ? member.registrations : [],
+                    registrations: member.registrations,
                     users: member.users
+                })
+            )
+        }
+        return encryptedMembers
+    }
+
+    async getEncryptedMembersPatch(members: MemberWithRegistrations[]): Promise<AutoEncoderPatchType<EncryptedMemberWithRegistrations>[]> {
+        const encryptedMembers: AutoEncoderPatchType<EncryptedMemberWithRegistrations>[] = [];
+
+        for (const member of members) {
+            if (!member.details) {
+                throw new Error("Can't save member with undefined details!")
+            }
+            const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
+
+            encryptedMembers.push(
+                EncryptedMemberWithRegistrations.patch({
+                    id: member.id,
+                    encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
+                    encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
+                    publicKey: member.publicKey,
+                    firstName: member.details.firstName,
+                    placeholder: false,
                 })
             )
         }

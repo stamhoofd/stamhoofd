@@ -119,13 +119,19 @@
                 </template>
             </template>
             <template #right>
+                <button class="button secundary" @click="openMail" v-if="waitingList" :disabled="selectionCount == 0">
+                    Mailen
+                </button>
+                <button class="button secundary" @click="allowMembers(false)" v-if="waitingList" :disabled="selectionCount == 0">
+                    Toelating intrekken
+                </button>
                 <LoadingButton :loading="actionLoading" v-if="waitingList">
-                    <button class="button primary" @click="allowMembers">
+                    <button class="button primary" @click="allowMembers(true)" :disabled="selectionCount == 0">
                         Toelaten
                     </button>
                 </LoadingButton>
                 <template v-else>
-                    <button class="button secundary" @click="openSamenvatting">
+                    <button class="button secundary" @click="openSamenvatting" :disabled="selectionCount == 0">
                         Samenvatting
                     </button>
                     <LoadingButton :loading="actionLoading">
@@ -549,12 +555,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return member.registrations.find(r => r.groupId == this.group!.id && r.waitingList && r.canRegister && r.cycle == this.group!.cycle)
     }
 
-    async allowMembers() {
+    async allowMembers(allow = true) {
         if (this.actionLoading) {
             return;
         }
 
-        const members = this.getSelectedMembers().filter(m => !this.group || m.waitingGroups.find(r => r.id === this.group!.id))
+        const members = this.getSelectedMembers().filter(m => !this.group || (allow && m.waitingGroups.find(r => r.id === this.group!.id)) || (!allow && m.acceptedWaitingGroups.find(r => r.id === this.group!.id)))
         if (members.length == 0) {
             return;
         }
@@ -571,7 +577,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
                 registrationsPatch.addPatch(Registration.patchType().create({
                     id: registration.id,
-                    canRegister: true
+                    canRegister: allow
                 }))
 
                 patches.addPatch(EncryptedMemberWithRegistrationsPatch.create({
