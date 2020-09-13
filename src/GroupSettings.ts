@@ -25,15 +25,19 @@ export class GroupSettings extends AutoEncoder {
     description = ""
 
     @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
+        const d2 = new Date(d)
+        d2.setHours(0, 0, 0, 0)
+        return d2
+    } })
     startDate: Date
 
-    /**
-     * Start time of the registrations (in minutes since 0:00, so 30 means 0:30, 60 means 1:00). Timezone of the organization
-     */
-    @field({ decoder: IntegerDecoder, version: 33 })
-    startTime = 0
-
     @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
+        const d2 = new Date(d)
+        d2.setHours(23, 59, 0, 0)
+        return d2
+    } })
     endDate: Date
 
     @field({ decoder: new ArrayDecoder(GroupPrices) })
