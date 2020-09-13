@@ -17,12 +17,12 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "^1.9.2",
+        "@simonbackx/simple-encoding": "~1.12",
         "@simonbackx/simple-errors": "^1.0",
         "@stamhoofd/structures": "^1.0.4"
     },
     "devDependencies": {
-        "@simonbackx/simple-encoding": "^1.9.2",
+        "@simonbackx/simple-encoding": "~1.12",
         "@simonbackx/simple-errors": "^1.0",
         "@stamhoofd/structures": "^1.0.4",
         "@types/jest": "^25.1.4",
