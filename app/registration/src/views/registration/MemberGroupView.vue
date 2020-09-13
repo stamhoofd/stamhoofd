@@ -131,17 +131,19 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
 
     groups: SelectableGroup[] = []
 
+    OrganizationManager = OrganizationManager
+
     get selectableGroup(): SelectableGroup | null {
         if (!this.selectedGroup) {
             return null
         }
-        return this.member.getSelectableGroups(OrganizationManager.organization.groups).find(g => g.group.id == this.selectedGroup!.group.id) ?? null
+        return this.groups.find(g => g.group.id == this.selectedGroup!.group.id) ?? null
     }
 
     /// Loading value can get set inside handler by caller
     loading = false
 
-    mounted() {
+    async mounted() {
         const preferred = this.member?.getSelectedGroups(OrganizationManager.organization.groups)[0] ?? null
         this.$set(this, "selectedGroup", preferred)
 
@@ -149,8 +151,10 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
 
         if (this.groups.length == 1) {
             this.selectGroup(this.groups[0])
-            return
         }
+
+        await OrganizationManager.reloadGroups()
+        this.updateGroups()
     }
 
     updateGroups() {
@@ -235,7 +239,7 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
                     if (response.data.occupied >= response.data.maximum) {
                         this.errorBox = new ErrorBox(new SimpleError({
                             code: "not_selected",
-                            message: "Deze leeftijdsgroep is al volzet! Je kan hier niet meer voor inschrijven."
+                            message: "Deze leeftijdsgroep is jammer genoeg al volzet. Je kan hier niet meer voor inschrijven."
                         }))
                         this.selectedGroup.waitingList = true
                         return false;
@@ -264,6 +268,12 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
             }))
             return;
         }
+
+        if (this.errorBox != null) {
+            await OrganizationManager.reloadGroups()
+            this.updateGroups()
+        }
+
         this.errorBox = null
         if ((await this.validateGroup(true)) == false) {
             return;

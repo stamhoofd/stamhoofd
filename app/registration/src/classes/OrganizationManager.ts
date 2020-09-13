@@ -7,6 +7,10 @@ export class OrganizationManagerStatic {
     get organization() {
         return SessionManager.currentSession!.organization!
     }
+
+    async reloadGroups() {
+        await SessionManager.currentSession!.fetchOrganization()
+    }
 }
 
 export const OrganizationManager = new OrganizationManagerStatic()

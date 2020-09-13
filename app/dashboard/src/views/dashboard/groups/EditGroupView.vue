@@ -132,21 +132,19 @@
                         <Radio v-model="waitingListType" value="All">Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span></Radio>
                     </RadioGroup>
                 </STInputBox>
+               
+                <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'None'">
+                    <Slider v-model="maxMembers" :max="200"/>
+                </STInputBox>
 
-                <template>
-
-                <div class="split-inputs" v-if="waitingListType != 'None'">
-                    <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'InviteOnly'">
-                            <Slider v-model="maxMembers" :max="200"/>
-                        </STInputBox>
-
-                        <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
-                            <DateSelection v-model="preRegistrationsDate" />
-                        </STInputBox>
-                    </div>
-
-                    <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
-                </template>
+                <div class="split-inputs" v-if="waitingListType == 'PreRegistrations'">
+                    <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
+                        <DateSelection v-model="preRegistrationsDate" />
+                    </STInputBox>
+                    
+                    <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator"/> 
+                </div>
+                <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
             </template>
         </main>
 

@@ -51,7 +51,7 @@
                             </STListItem>
                         </STList>
                     </STInputBox>
-                    <AddressInput :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator"/>
+                    <AddressInput :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator" :required="false"/>
                 </div>
             </div>
         </main>

@@ -96,6 +96,7 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
 })
 export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    OrganizationManager = OrganizationManager
 
     memberSelection: { [key:string]:boolean; } = {}
     selectedMembers: MemberWithRegistrations[] = []
