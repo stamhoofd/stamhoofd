@@ -175,13 +175,7 @@ export default class Menu extends Mixins(NavigationMixin) {
                 this.whatsNewBadge = (WhatsNewCount - c).toString()
             }
         } else {
-            if (WhatsNewCount == 1) {
-                // Only once for existing users
-                localStorage.setItem("what-is-new", (WhatsNewCount - 1 ).toString());
-                this.whatsNewBadge = "1"
-            } else {
-                localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
-            }
+            localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
         }
     }
 
@@ -262,8 +256,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     syncScoutsEnGidsen() {
-         this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));
+        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Heel binnenkort kan je de leden uit Stamhoofd automatisch in de groepsadministratie plaatsen, je hoeft dit ondertussen zeker niet zelf te doen.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
+        return;
+        
+        /*this.currentlySelected = "manage-sgv-groepsadministratie"
+        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));*/
     }
 
     importMembers() {
