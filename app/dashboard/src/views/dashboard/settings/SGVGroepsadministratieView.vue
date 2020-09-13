@@ -7,7 +7,7 @@
         <main>
             <h1>Groepsadministrie synchroniseren</h1>
 
-            <p class="warning-box">We raden echt heel sterk aan om alle leden gewoon opnieuw te laten inschrijven de eerste keer dat je overschakelt op Stamhoofd. Op die manier hebben alle ouders een account en kunnen ze tijdens het jaar gegevens wijzigen. Bovendien moet je zelf dan niet meer opvolgen wie nu stopt en wie niet.</p>
+            <p class="warning-box">We raden echt heel sterk aan om alle leden gewoon opnieuw te laten inschrijven de eerste keer dat je overschakelt op Stamhoofd. Op die manier hebben alle ouders een account en kunnen ze tijdens het jaar gegevens wijzigen. Bovendien moet je zelf dan niet meer opvolgen wie nu stopt en wie niet. Dit is ook handig als we later dit jaar de inschrijvingen voor weekends en kampen uitrollen in Stamhoofd.</p>
 
             <hr>
             <h2>Hoe werkt het?</h2>
@@ -17,15 +17,29 @@
                 <li>Nieuwe leden in groepsadministratie zetten</li>
                 <li>Bestaande leden wijzigen en in de juiste tak zetten</li>
                 <li>Adressen en ouders correct instellen</li>
-                <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober)</li>
+                <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober). Opgelet: we schrappen enkel de functies waarvoor Stamhoofd verantwoordelijk is (de leeftijdsgroepen die in Stamhoofd staan).</li>
                 <li>Lidnummers ophalen</li>
-                <li>Leden importeren</li>
+                <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan moet je per tussentak een groepseigen functie maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Doe je dat niet, dan krijg je een waarschuwing. Woudlopers schrijven we wel automatisch in bij wouters als er geen groepseigen functie is.</li>
+                <li>(binnenkort) Leden importeren. Deze functie is vooral bedoeld als je tijdens het jaar start met Stamhoofd en leden niet opnieuw wil laten inschrijven.</li>
+            </ul>
+
+            <hr>
+            <h2>Wat moet je nog zelf doen?</h2>
+
+            <ul>
+                <li>De functies van leiding en vrijwilligers goed instellen in de groepsadministratie (deze informatie staat niet in Stamhoofd)</li>
+                <li>Als leiding niet inschrijft via Stamhoofd: deze zelf toevoegen en wijzigen</li>
+                <li>Gestopte leiding/vrijwilligers schrappen</li>
+                <li>We kunnen het e-mailadres niet wijzigen van leden die een login hebben in de groepsadministratie</li>
             </ul>
 
         </main>
 
         <STToolbar>
             <template slot="right">
+                <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank" class="button secundary">
+                    Naar groepsadministratie
+                </a>
                 <LoadingButton :loading="loading" >
                     <button class="button primary" v-if="isLoggedIn" @click="sync">
                         Synchroniseren
@@ -42,7 +56,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup } from "@stamhoofd/components";
+import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup, Toast } from "@stamhoofd/components";
 import { SessionManager, LoginHelper } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -89,9 +103,39 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         return SGVGroepsadministratie.hasToken
     }
 
-    sync() {
-        // todo
-        SGVGroepsadministratie.downloadTest()
+    async sync() {
+        if (this.loading) {
+            return;
+        }
+        this.loading = true
+        const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setWithOffset().setHide(null).show()
+
+        try {
+            await SGVGroepsadministratie.downloadAll()
+            const { matchedMembers, newMembers } = await SGVGroepsadministratie.matchAndSync(this, () => {
+                toast.hide()
+            })
+            toast.hide();
+
+            const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
+            const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setWithOffset().setHide(null).show()
+
+            try {
+                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
+                    toast2.message = status
+                    toast2.setProgress(progress)
+                })
+            } finally {
+                toast2.hide()
+            }
+
+            new Toast("Synchronisatie voltooid", "success green").setWithOffset().show()
+        } catch (e) {
+            toast.hide()
+            console.error(e)
+            new Toast(e.message, "error red").setWithOffset().show()
+        }
+        this.loading = false
     }
 
     login() {

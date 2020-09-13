@@ -8,6 +8,10 @@
             <h1>Wat is er nieuw?</h1>
 
             <hr>
+            <h2>Bekijk de gekoppelde accounts van elk lid + stuur e-mails naar leden op de wachtlijst (13 september)</h2>
+            <p>Je kan nu zien met welk e-mailadres een ouder of lid kan inloggen om de gegevens van dat lid te wijzigen of te bekijken. Daarnaast nemen we die e-mailadressen ook op als je een e-mail verstuurt naar dat lid. Op de wachtlijst kan je nu e-mails versturen, en we openen automatisch het e-mail scherm als je leden toelaat.</p>
+
+            <hr>
             <h2>Koppel zelf Bancontact + snelkoppeling naar inschrijvingspagina (27 augustus)</h2>
             <p>Via een nieuwe knop in het instellingen menu kan je nu zelf Bancontact activeren. Nadat je op die knop hebt gedrukt moet je een account aanmaken bij Mollie (onze betaalpartner). Doe dat enkel via die knop, anders kan je geen gebruik maken van de voordeligere tarieven die we via Stamhoofd hebben verkregen. Je hebt een VZW nodig om betalingen via Bancontact te accepteren. </p>
             <p>We hebben ook een fout verholpen dat je geen domeinnaam kon koppelen als daar een liggend streepje in voorkwam.</p>

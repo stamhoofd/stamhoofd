@@ -50,7 +50,7 @@ import {
     OrderedList,
     Underline,
 } from "tiptap-extensions";
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 
@@ -60,22 +60,29 @@ import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 export default class MailEditor extends Vue {
     linkUrl = null
     linkMenuIsActive = false
-    editor = new Editor({
-        extensions: [
-            new BulletList(),
-            new HardBreak(),
-            new Heading({ levels: [1, 2, 3, 4, 5] }),
-            new ListItem(),
-            new OrderedList(),
-            new Link({ openOnClick: false }),
-            new Bold(),
-            new Italic(),
-            new Underline(),
-            new History(),
-            new ReplacePlaceholderMark(),
-        ],
-        content: '<p>Dag <span data-replace-type="firstName"></span>,</p>',
-    });
+
+    @Prop({ required: true })
+    hasFirstName: boolean;
+    
+    editor = (() => {
+        console.log(this.hasFirstName)
+        return new Editor({
+            extensions: [
+                new BulletList(),
+                new HardBreak(),
+                new Heading({ levels: [1, 2, 3, 4, 5] }),
+                new ListItem(),
+                new OrderedList(),
+                new Link({ openOnClick: false }),
+                new Bold(),
+                new Italic(),
+                new Underline(),
+                new History(),
+                new ReplacePlaceholderMark(),
+            ],
+            content: this.hasFirstName ? '<p>Dag <span data-replace-type="firstName"></span>,</p>' : '',
+        });
+    })();
 
     beforeDestroy() {
         this.editor.destroy();

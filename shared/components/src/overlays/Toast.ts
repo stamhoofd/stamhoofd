@@ -5,6 +5,7 @@ export class Toast {
     message: string
     icon: string | null
     withOffset = false
+    progress: number | null = null
 
     autohideAfter: number | null = 5000
 
@@ -13,6 +14,11 @@ export class Toast {
     constructor(message: string, icon: string | null = null) {
         this.message = message
         this.icon = icon
+    }
+
+    setProgress(progress: number | null) {
+        this.progress = progress
+        return this
     }
 
     setHide(ms: number | null) {

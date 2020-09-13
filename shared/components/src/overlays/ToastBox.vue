@@ -28,6 +28,7 @@ import ToastView from './ToastView.vue';
 })
 export default class ToastBox extends Vue {
     components: ComponentWithProperties[] = []
+    lastOffset = false
 
     mounted() {
         Toast.addListener(this, this.showToast)
@@ -65,11 +66,17 @@ export default class ToastBox extends Vue {
     }
 
     get withOffset() {
+        if (this.components.length == 0) {
+            return this.lastOffset
+        }
+
         for (const [index, component] of this.components.entries()) {
             if (component.properties.toast && component.properties.toast.withOffset) {
+                this.lastOffset = true;
                 return true
             }
         }
+        this.lastOffset = false;
         return false
     }
 }
@@ -96,13 +103,14 @@ export default class ToastBox extends Vue {
     max-width: 100vw;
     box-sizing: border-box;
     transition: transform 0.35s;
-
+    
     &.withOffset {
         transform: translateY(-60px);
     }
 
     > div > div {
         transition: transform 0.35s, opacity 0.35s;
+        transform: scale(1, 1) translate(0, 0);
     }
 
     .move-enter, .move-leave-to

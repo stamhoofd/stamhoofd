@@ -45,7 +45,7 @@
                     <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 </label>
             </STInputBox>
-            <MailEditor ref="editor"/>
+            <MailEditor ref="editor" :has-first-name="hasFirstName"/>
 
             <p class="warning-box" v-if="fileWarning">We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.</p>
 
@@ -129,13 +129,16 @@ export default class MailView extends Mixins(NavigationMixin) {
     sending = false
 
     @Prop({ default: null })
+    defaultSubject: string | null
+
+    @Prop({ default: null })
     group: Group | null
 
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
     emailId: string | null = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
-    subject = ""
+    subject = this.defaultSubject ?? ""
 
     errorBox: ErrorBox | null = null
 
@@ -182,40 +185,83 @@ export default class MailView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
+    get hasFirstName() {
+        return !this.recipients.find(r => r.firstName == null)
+    }
+
     get recipients(): Recipient[] {
-        return this.members.flatMap((member) => {
+        const recipients: Map<string, Recipient> = new Map()
+
+        for (const member of this.members) {
             if (!member.details) {
-                return []
+                continue
             }
-            const emails = member.details.parents.flatMap((parent) => {
-                if (parent.email) {
-                    return [Recipient.create({
-                        firstName: parent.firstName,
-                        email: parent.email,
-                        replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: parent.firstName
-                            })
-                        ]
-                    })];
+
+            for (const parent of member.details.parents) {
+                if (!parent.email) {
+                    continue;
                 }
-                return [];
-            });
-            if (member.details.email) {
-                emails.push(Recipient.create({
-                    firstName: member.details.firstName,
-                    email: member.details.email,
+
+                if (recipients.has(parent.email) && recipients.get(parent.email)!.firstName) {
+                    continue
+                }
+
+                recipients.set(parent.email, Recipient.create({
+                    firstName: parent.firstName,
+                    email: parent.email,
                     replacements: [
                         Replacement.create({
                             token: "firstName",
-                            value: member.details.firstName
+                            value: parent.firstName
                         })
                     ]
                 }))
             }
-            return emails;
-        });
+
+            for (const user of member.users) {
+                if (!user.email) {
+                    continue;
+                }
+
+                if (recipients.has(user.email)) {
+                    continue
+                }
+
+                recipients.set(user.email, Recipient.create({
+                    firstName: user.firstName,
+                    email: user.email,
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: user.firstName ?? ""
+                        })
+                    ]
+                }))
+            }
+
+            if (!member.details.email) {
+                continue;
+            }
+
+            if (recipients.has(member.details.email)  && recipients.get(member.details.email)!.firstName) {
+                continue
+            }
+
+            recipients.set(member.details.email, Recipient.create({
+                firstName: member.details.firstName,
+                email: member.details.email,
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: member.details.firstName
+                    })
+                ]
+            }))
+        }
+
+        console.log(recipients)
+
+        return Array.from(recipients.values())
     }
 
     get emails() {
