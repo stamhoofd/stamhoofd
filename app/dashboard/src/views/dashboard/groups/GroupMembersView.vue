@@ -119,7 +119,7 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" @click="openMail" v-if="waitingList" :disabled="selectionCount == 0">
+                <button class="button secundary" @click="openMail()" v-if="waitingList" :disabled="selectionCount == 0">
                     Mailen
                 </button>
                 <button class="button secundary" @click="allowMembers(false)" v-if="waitingList" :disabled="selectionCount == 0">
@@ -135,7 +135,7 @@
                         Samenvatting
                     </button>
                     <LoadingButton :loading="actionLoading">
-                        <button class="button primary" @click="openMail" :disabled="selectionCount == 0">
+                        <button class="button primary" @click="openMail()" :disabled="selectionCount == 0">
                             <span class="dropdown-text">Mailen</span>
                             <div class="dropdown" @click.stop="openMailDropdown" />
                         </button>
@@ -592,13 +592,18 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
         this.actionLoading = false
         this.reload()
+
+        if (allow) {
+            this.openMail("Je kan nu inschrijven!")
+        }
     }
 
-    openMail(_event) {
+    openMail(subject = "") {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
                 members: this.getSelectedMembers(),
-                group: this.group
+                group: this.group,
+                defaultSubject: subject
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

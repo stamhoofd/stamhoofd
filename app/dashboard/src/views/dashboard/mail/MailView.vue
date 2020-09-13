@@ -129,13 +129,16 @@ export default class MailView extends Mixins(NavigationMixin) {
     sending = false
 
     @Prop({ default: null })
+    defaultSubject: string | null
+
+    @Prop({ default: null })
     group: Group | null
 
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
     emailId: string | null = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
-    subject = ""
+    subject = this.defaultSubject ?? ""
 
     errorBox: ErrorBox | null = null
 
