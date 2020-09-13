@@ -27,6 +27,12 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: DateDecoder })
     startDate: Date
 
+    /**
+     * Start time of the registrations (in minutes since 0:00, so 30 means 0:30, 60 means 1:00). Timezone of the organization
+     */
+    @field({ decoder: IntegerDecoder, version: 33 })
+    startTime = 0
+
     @field({ decoder: DateDecoder })
     endDate: Date
 
