@@ -17,7 +17,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@simonbackx/simple-encoding": "~1.11",
+        "@simonbackx/simple-encoding": "~1.12",
         "@simonbackx/simple-errors": "~1.0.0",
         "@stamhoofd/utility": "~1.0.0",
         "@types/jest": "^25.1.4",
@@ -38,7 +38,7 @@
         "uuid": "^8.2.0"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "~1.11",
+        "@simonbackx/simple-encoding": "~1.12",
         "@simonbackx/simple-errors": "~1.0.0",
         "@stamhoofd/utility": "~1.0.0"
     }
