@@ -23,7 +23,7 @@
     "dependencies": {
         "@mollie/api-client": "^3.2.4",
         "@simonbackx/simple-database": "^1.11",
-        "@simonbackx/simple-encoding": "^1.9",
+        "@simonbackx/simple-encoding": "~1.12",
         "@simonbackx/simple-endpoints": "^1.3.0",
         "@simonbackx/simple-errors": "^1.0.4",
         "@stamhoofd/crypto": "^1",
