@@ -139,7 +139,7 @@
 
                 <ul class="member-records">
                     <li
-                        v-for="(record, index) in member.details.records"
+                        v-for="(record, index) in sortedRecords"
                         :key="index"
                         :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
                         @click="openRecordView(record)"
@@ -329,6 +329,27 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get familyMembers() {
         return this.familyManager.members.filter(m => m.id != this.member.id)
+    }
+
+    get sortedRecords() {
+        return this.member.details?.records.sort((record1, record2) => {
+            const priority1: string = RecordTypeHelper.getPriority(record1.type);
+            const priority2: string = RecordTypeHelper.getPriority(record2.type)
+
+            if (priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Medium ||
+                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.Low ||
+                priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Low) {
+                return -1;
+            }
+            else if (priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.Medium ||
+                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.High ||
+                priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.High) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        } )
     }
 }
 </script>
