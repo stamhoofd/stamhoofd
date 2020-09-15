@@ -3,7 +3,8 @@ import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version } from "@stamhoofd/structures";
+import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import { Group } from '../models/Group';
 import { Member, RegistrationWithMember } from '../models/Member';
@@ -124,6 +125,25 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
+            const startDate = (group.settings.waitingListType == WaitingListType.PreRegistrations ? group.settings.preRegistrationsDate : group.settings.startDate) ?? group.settings.startDate
+            const endDate = group.settings.endDate
+            const now = new Date()
+            if (now < startDate) {
+                throw new SimpleError({
+                    code: "invalid_member",
+                    message: "Oeps, je kan "+member.firstName+" nog niet inschrijven. Je moet wachten tot ten minste "+Formatter.dateTime(startDate)+"."
+                })
+            }
+
+            if (now > endDate) {
+                throw new SimpleError({
+                    code: "invalid_member",
+                    message: "Oeps, te laat! De inschrijvingen werden gesloten om "+Formatter.dateTime(startDate)+". Je kan "+member.firstName+" niet meer inschrijven."
+                })
+            }
+
+            // 
+
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: register.groupId, cycle: group.cycle })
             let registration: RegistrationWithMember | undefined = undefined;
@@ -157,6 +177,27 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration.waitingList = true
                 await registration.save()
             } else {
+
+                // Check maximum members, but ignore maximum membes if they received an invitation (canRegister)
+                if (!(registration.waitingList && registration.canRegister) && group.settings.waitingListType != WaitingListType.None && group.settings.maxMembers !== null) {
+                    const _members = await group.getMembersWithRegistration(false)
+                    if (_members.length >= group.settings.maxMembers) {
+
+                        if (group.settings.waitingListType != WaitingListType.PreRegistrations) {
+                            throw new SimpleError({
+                                code: "invalid_member",
+                                message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
+                            })
+                        } else {
+                            throw new SimpleError({
+                                code: "invalid_member",
+                                message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
+                            })
+                        }
+                        
+                    }
+                }
+
                 registration.waitingList = false
                 registration.canRegister = false
                 let foundPrice: GroupPrices | undefined = undefined
