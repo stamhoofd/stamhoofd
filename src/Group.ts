@@ -112,7 +112,7 @@ export class Group extends AutoEncoder {
             if (existingStatus === null || existingStatus.isExpired()) {
                 throw new SimpleError({
                     code: "missing_existing_status",
-                    message: "Hmm... Er ging iets mis. Normaal hadden we je ergens moeten vragen of je al een bestaand lid aan het inschrijven bent. We hebben deze informatie nodig om verder te kunnen gaan. Contacteer ons als je het probleem niet kan oplossen."
+                    message: "Hmm... Er ging iets mis. Normaal hadden we je ergens moeten vragen of je al een bestaand lid aan het inschrijven bent. We hebben deze informatie nodig om verder te kunnen gaan. Herlaad de pagina en probeer eens opnieuw. Contacteer ons als je het probleem niet kan oplossen."
                 })
             }
 
