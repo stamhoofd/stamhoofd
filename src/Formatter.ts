@@ -47,7 +47,7 @@ export class Formatter {
     }
 
     /**
-     * 1 januari (2020) om 12:00. Year only in different year
+     * 12:00
      */
     static time(date: Date): string {
         return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
