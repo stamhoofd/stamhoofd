@@ -8,6 +8,10 @@
             <h1>Wat is er nieuw?</h1>
 
             <hr>
+            <h2>Start- en einduur voor inschrijvingen (15 september)</h2>
+            <p>Laat jouw inschrijvingen starten en stoppen om een bepaald uur. Dat kan ook voor je voorinschrijvingen.</p>
+
+            <hr>
             <h2>Bekijk de gekoppelde accounts van elk lid + stuur e-mails naar leden op de wachtlijst (13 september)</h2>
             <p>Je kan nu zien met welk e-mailadres een ouder of lid kan inloggen om de gegevens van dat lid te wijzigen of te bekijken. Daarnaast nemen we die e-mailadressen ook op als je een e-mail verstuurt naar dat lid. Op de wachtlijst kan je nu e-mails versturen, en we openen automatisch het e-mail scherm als je leden toelaat.</p>
 
