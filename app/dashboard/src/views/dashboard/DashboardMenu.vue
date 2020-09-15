@@ -149,7 +149,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
-            this.syncScoutsEnGidsen()
+            this.openSyncScoutsEnGidsen()
             didSet = true
         }
 
@@ -261,6 +261,11 @@ export default class Menu extends Mixins(NavigationMixin) {
         
         /*this.currentlySelected = "manage-sgv-groepsadministratie"
         this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));*/
+    }
+
+    openSyncScoutsEnGidsen() {
+        this.currentlySelected = "manage-sgv-groepsadministratie"
+        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));
     }
 
     importMembers() {
