@@ -1,8 +1,9 @@
 <template>
     <div class="toast-view-container">
         <div class="toast-view" @click="close" :class="toast.icon">
+            <div class="progress" v-if="toast.progress !== null" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'"/>
-            <span v-if="toast.icon" class="icon" :class="toast.icon"/>
+            <span v-else-if="toast.icon" class="icon" :class="toast.icon"/>
             <span>{{ message }}</span>
         </div>
     </div>
@@ -85,11 +86,33 @@ export default class ToastView extends Mixins(NavigationMixin) {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
 
     font-size: 16px;
     line-height: 1.4;
     font-weight: 600;
     color: $color-dark;
+    position: relative;
+    overflow: hidden;
+
+    .progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: $border-width;
+        pointer-events: none;
+        background: $color-primary;
+        border-top-right-radius: $border-width/2;
+        border-bottom-right-radius: $border-width/2;
+        width: 0;
+        opacity: 1;
+        transition: width 0.3s, opacity 0.3s;
+
+        &.hide {
+            transition: width 0.3s, opacity 0.2s 0.3s;
+            opacity: 0;
+        }
+    }
 
     .icon {
         color: $color-primary;
@@ -101,11 +124,19 @@ export default class ToastView extends Mixins(NavigationMixin) {
     &.green {
         background-color: $color-success-background;
         color: $color-success-dark;
+
+        .progress {
+            background: $color-success;
+        }
     }
 
     &.red {
         background-color: $color-error-background;
         color: $color-error-dark;;
+
+        .progress {
+            background: $color-error;
+        }
     }
 
     &> .spinner-container {

@@ -34,7 +34,7 @@ import { Vue, Prop, Component, Watch } from "vue-property-decorator";
         STInputBox
     }
 })
-export default class SignupGeneralView extends Vue {
+export default class AddressInput extends Vue {
     @Prop({ default: "" }) 
     title: string;
 
@@ -50,7 +50,7 @@ export default class SignupGeneralView extends Vue {
     @Prop({ default: null })
     value: Address | null
 
-    @Prop({ default: false })
+    @Prop({ default: true })
     required: boolean
 
     addressLine1 = ""

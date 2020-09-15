@@ -36,6 +36,18 @@
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
                         <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
+
+                    <Checkbox v-model="acceptPrivacy" class="long-text">
+                        Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
+                    </Checkbox>
+
+                    <Checkbox v-model="acceptTerms" class="long-text">
+                        Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    </Checkbox>
+
+                    <Checkbox v-model="acceptDataAgreement" class="long-text">
+                        Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    </Checkbox>
                 </div>
 
                 <div>
@@ -66,7 +78,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator } from "@stamhoofd/components"
+import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager, Keychain, LoginHelper } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -80,7 +92,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STInputBox,
         LoadingButton,
         BackButton,
-        EmailInput
+        EmailInput,
+        Checkbox
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
@@ -100,6 +113,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
     lastName = ""
 
     loading = false
+    acceptPrivacy = false
+    acceptTerms = false
+    acceptDataAgreement = false
 
     async goNext() {
         if (this.loading) {
@@ -147,6 +163,30 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
                     field: "password"
                 })
+            }
+
+            if (!this.acceptPrivacy) {
+                throw new SimpleError({
+                    code: "read_privacy",
+                    message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
+                })
+                return;
+            }
+
+            if (!this.acceptTerms) {
+                throw new SimpleError({
+                    code: "read_privacy",
+                    message: "Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken."
+                })
+                return;
+            }
+
+            if (!this.acceptDataAgreement) {
+                throw new SimpleError({
+                    code: "read_privacy",
+                    message: "Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken."
+                })
+                return;
             }
 
             if (!valid) {

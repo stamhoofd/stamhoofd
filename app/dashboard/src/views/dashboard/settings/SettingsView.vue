@@ -275,7 +275,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (!this.organizationPatch.meta) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
         }
-        this.$set(this.organizationPatch.meta, "iban", iban ?? "")
+        this.$set(this.organizationPatch.meta!, "iban", iban ?? "")
     }
 
      get payconiqApiKey() {
@@ -328,7 +328,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.$set(this.organizationPatch.meta, "color", color)
+        this.$set(this.organizationPatch.meta!, "color", color)
     }
 
     get squareLogo() {
@@ -340,7 +340,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.$set(this.organizationPatch.meta, "squareLogo", image)
+        this.$set(this.organizationPatch.meta!, "squareLogo", image)
     }
 
     get horizontalLogo() {
@@ -352,7 +352,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.$set(this.organizationPatch.meta, "horizontalLogo", image)
+        this.$set(this.organizationPatch.meta!, "horizontalLogo", image)
     }
 
     get website() {
@@ -372,7 +372,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
 
-        this.organizationPatch.meta.set({
+        this.organizationPatch.meta!.set({
             privacyPolicyUrl: url
         })
     }
@@ -386,7 +386,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (!this.organizationPatch.meta) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
-        this.$set(this.organizationPatch.meta, "privacyPolicyFile", file)
+        this.$set(this.organizationPatch.meta!, "privacyPolicyFile", file)
     }
 
     get enableTransfers() {
@@ -401,13 +401,13 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
         }
         if (enable) {
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Transfer)
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Transfer)
         } else {
             if (this.organization.meta.paymentMethods.length == 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Transfer) 
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Transfer) 
         }
     }
 
@@ -429,14 +429,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new Toast("Om Payconiq te activeren moet je eerst aansluiten bij Payconiq via jouw bank. Daarna kunnen we bij Payconiq een code aanvragen die we nodig hebben om betalingen te verwerken. Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
                 return;
             }
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Payconiq)
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Payconiq)
         } else {
             if (this.organization.meta.paymentMethods.length == 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }
 
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Payconiq) 
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Payconiq) 
         }
     }
     
@@ -458,14 +458,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new Toast("Je kan Bancontact niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je Bancontact betalingen accepteren.", "error red").show();
                 return
             }
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Bancontact)
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Bancontact)
         } else {
             if (this.organization.meta.paymentMethods.length == 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }
 
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Bancontact) 
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Bancontact) 
         }
     }
 
@@ -487,14 +487,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new Toast("Je kan iDEAL niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je iDEAL betalingen accepteren.", "error red").show();
                 return
             }
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.iDEAL)
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.iDEAL)
         } else {
             if (this.organization.meta.paymentMethods.length == 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }
 
-            (this.organizationPatch.meta.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.iDEAL) 
+            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.iDEAL) 
         }
     }
 

@@ -40,12 +40,20 @@
                     <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
                         <DateSelection v-model="startDate" />
                     </STInputBox>
+                    <TimeInput v-model="startDate" title="Vanaf" :validator="validator"/> 
+                </div>
+                
 
+                <div class="split-inputs">
                     <STInputBox title="Inschrijven sluit op" error-fields="settings.endDate" :error-box="errorBox">
                         <DateSelection v-model="endDate" />
                     </STInputBox>
+                    <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator"/>
                 </div>
-
+                <p class="st-list-description">
+                    Als de inschrijvingen het hele jaar doorlopen, vul dan hier gewoon een datum in ergens op het einde van het jaar. Let op het jaartal.
+                </p>
+      
                 <div class="split-inputs">
                     <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
                         <AgeInput v-model="minAge" placeholder="Onbeperkt" :nullable="true" />
@@ -124,21 +132,19 @@
                         <Radio v-model="waitingListType" value="All">Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span></Radio>
                     </RadioGroup>
                 </STInputBox>
+               
+                <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'None'">
+                    <Slider v-model="maxMembers" :max="200"/>
+                </STInputBox>
 
-                <template>
-
-                <div class="split-inputs" v-if="waitingListType != 'None'">
-                    <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'InviteOnly'">
-                            <Slider v-model="maxMembers" :max="200"/>
-                        </STInputBox>
-
-                        <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
-                            <DateSelection v-model="preRegistrationsDate" />
-                        </STInputBox>
-                    </div>
-
-                    <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
-                </template>
+                <div class="split-inputs" v-if="waitingListType == 'PreRegistrations'">
+                    <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
+                        <DateSelection v-model="preRegistrationsDate" />
+                    </STInputBox>
+                    
+                    <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator"/> 
+                </div>
+                <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
             </template>
         </main>
 
@@ -156,7 +162,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, PriceInput, Checkbox, Slider } from "@stamhoofd/components";
+import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, PriceInput, Checkbox, Slider, TimeInput, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, GroupPrices, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -178,11 +184,13 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         Checkbox,
         AgeInput,
         Slider,
-        Spinner
+        Spinner,
+        TimeInput
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
+    validator = new Validator()
 
     tabs = ["general", "payments", "queue"];
     tab = this.tabs[0];
@@ -533,6 +541,11 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     // Saving
 
     async save() {
+        const valid = await this.validator.validate()
+
+        if (!valid) {
+            return;
+        }
         this.saving = true
 
         await OrganizationManager.patch(this.organizationPatch)

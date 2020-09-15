@@ -25,6 +25,15 @@
         top: 50%;
         transform: translate(0, -50%);
     }
+
+    &.selectable {
+        cursor: pointer;
+        touch-action: manipulation;
+        
+        &:active {
+            opacity: 0.8;
+        }
+    }
 }
 
 .warning-box {

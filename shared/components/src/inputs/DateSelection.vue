@@ -13,7 +13,11 @@ import DateSelectionView from '../overlays/DateSelectionView.vue';
 
 @Component
 export default class DateSelection extends Mixins(NavigationMixin) {
-    @Prop({ default: new Date() })
+    @Prop({ default: () => {
+        const d = new Date()
+        d.setHours(0, 0, 0, 0)
+        return d
+    } })
     value: Date
 
     get dateText() {
@@ -27,6 +31,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             y: el.getBoundingClientRect().top + el.offsetHeight,
             selectedDay: this.value,
             setDate: (value: Date) => {
+                const d = new Date(value.getTime())
+                d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)
                 this.$emit("input", value)
             }
         });

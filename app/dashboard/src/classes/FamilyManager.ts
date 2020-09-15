@@ -31,30 +31,6 @@ export class FamilyManager {
         this.setMembers(await MemberManager.decryptMembers(response.data))
     }
 
-    async getEncryptedMembers(members: MemberWithRegistrations[], withRegistrations = false): Promise<EncryptedMemberWithRegistrations[]> {
-        const encryptedMembers: EncryptedMemberWithRegistrations[] = [];
-
-        for (const member of members) {
-            if (!member.details) {
-                throw new Error("Can't save member with undefined details!")
-            }
-            const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
-
-            encryptedMembers.push(
-                EncryptedMemberWithRegistrations.create({
-                    id: member.id,
-                    encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
-                    encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
-                    publicKey: member.publicKey,
-                    firstName: member.details.firstName,
-                    placeholder: false,
-                    registrations: withRegistrations ? member.registrations : []
-                })
-            )
-        }
-        return encryptedMembers
-    }
-
      async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
 
@@ -68,12 +44,13 @@ export class FamilyManager {
             publicKey: keyPair.publicKey,
             registrations: registrations,
             firstName: member.firstName,
-            placeholder: true
+            placeholder: true,
+            users: []
         })
 
         const members = (this.members ?? []).filter(m => !!m.details)
-        const encryptedMembers = await this.getEncryptedMembers(members)
-        const addMembers = await this.getEncryptedMembers([decryptedMember], true)
+        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
+        const addMembers = await MemberManager.getEncryptedMembers([decryptedMember])
 
         const patchArray = new PatchableArray()
         for (const m of encryptedMembers) {
@@ -139,7 +116,7 @@ export class FamilyManager {
         } else {
             members.push(member)
         }
-        const encryptedMembers = await this.getEncryptedMembers(members)
+        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;
         }

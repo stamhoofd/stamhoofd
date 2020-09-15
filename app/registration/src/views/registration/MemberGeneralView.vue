@@ -179,6 +179,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
+        let valid = await this.validator.validate()
         const errors = new SimpleErrors()
         if (this.firstName.length < 2) {
             errors.addError(new SimpleError({
@@ -195,15 +196,12 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             }))
         }
 
-        let valid = false
-
         if (errors.errors.length > 0) {
             this.errorBox = new ErrorBox(errors)
+            valid = false
         } else {
             this.errorBox = null
-            valid = true
         }
-        valid = valid && await this.validator.validate()
 
         if (valid) {
             if (this.memberDetails) {

@@ -40,7 +40,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "dashboard.stamhoofd.dev"
+                                        "dashboard.stamhoofd.dev",
+                                        "stamhoofd.app"
                                     ]
                                 }
                             ],
@@ -75,6 +76,169 @@
                             ]
                         },
                         {
+                            "match": [
+                                {
+                                    "host": [
+                                        "login.sgv.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "login.scoutsengidsenvlaanderen.be:443"
+                                        }
+                                    ],
+                                    "transport": {
+                                        "protocol": "http",
+                                        "tls": {}
+                                    },
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "Host": [
+                                                    "login.scoutsengidsenvlaanderen.be"
+                                                ]
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto",
+                                                "Origin",
+                                                "referer"
+                                            ]
+                                        },
+                                        "response": {
+                                            "set": {
+                                                "access-control-allow-origin": [
+                                                    "https://dashboard.stamhoofd.dev"
+                                                ],
+                                                "access-control-allow-methods": [
+                                                    "OPTIONS, GET, POST, PATCH, DELETE"
+                                                ],
+                                                "access-control-allow-headers": [
+                                                    "{http.request.header.access-control-request-headers}"
+                                                ],
+                                                "access-control-max-age": [
+                                                    "86400"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "groepsadmin.sgv.stamhoofd.dev"
+                                    ],
+                                    "method": [
+                                        "OPTIONS"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "groepsadmin.scoutsengidsenvlaanderen.be:443"
+                                        }
+                                    ],
+                                    "transport": {
+                                        "protocol": "http",
+                                        "tls": {}
+                                    },
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "Host": [
+                                                    "groepsadmin.scoutsengidsenvlaanderen.be"
+                                                ]
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto"
+                                            ]
+                                        },
+                                        "response": {
+                                            "set": {
+                                                "access-control-allow-origin": [
+                                                    "https://dashboard.stamhoofd.dev"
+                                                ],
+                                                "access-control-allow-methods": [
+                                                    "OPTIONS, GET, POST, PATCH, DELETE, PUT"
+                                                ],
+                                                "access-control-allow-headers": [
+                                                    "{http.request.header.access-control-request-headers}"
+                                                ],
+                                                "access-control-max-age": [
+                                                    "86400"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "groepsadmin.sgv.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "groepsadmin.scoutsengidsenvlaanderen.be:443"
+                                        }
+                                    ],
+                                    "transport": {
+                                        "protocol": "http",
+                                        "tls": {}
+                                    },
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "Host": [
+                                                    "groepsadmin.scoutsengidsenvlaanderen.be"
+                                                ]
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto",
+                                                "Origin",
+                                                "referer"
+                                            ]
+                                        },
+                                        "response": {
+                                            "set": {
+                                                "access-control-allow-origin": [
+                                                    "https://dashboard.stamhoofd.dev"
+                                                ],
+                                                "access-control-allow-methods": [
+                                                    "OPTIONS, GET, POST, PATCH, DELETE, PUT"
+                                                ],
+                                                "access-control-allow-headers": [
+                                                    "Accept, Content-Type, Accept-Language, accept-encoding, Authorization, Origin, Referer, User-Agent"
+                                                ],
+                                                "access-control-max-age": [
+                                                    "86400"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
@@ -97,7 +261,10 @@
                         "subjects": [
                             "stamhoofd.dev",
                             "*.stamhoofd.dev",
-                            "*.api.stamhoofd.dev"
+                            "stamhoofd.app",
+                            "*.api.stamhoofd.dev",
+                            "login.sgv.stamhoofd.dev",
+                            "groepsadmin.sgv.stamhoofd.dev"
                         ],
                         "on_demand": false,
                         "issuer": {

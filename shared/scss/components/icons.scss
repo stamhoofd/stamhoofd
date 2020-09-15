@@ -177,6 +177,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/upload.svg);
     }
 
+    &.download:after {
+        font-icon: url(@stamhoofd/assets/images/icons/download.svg);
+    }
+
     &.external:after {
         font-icon: url(@stamhoofd/assets/images/icons/external.svg);
     }

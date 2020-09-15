@@ -2,7 +2,7 @@
     "apps": {
         "http": {
             "servers": {
-                "stamhoofd.dev": {
+                "sgv.stamhoofd.app": {
                     "listen": [
                         ":443"
                     ],
@@ -11,75 +11,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "api.stamhoofd.dev",
-                                        "*.api.stamhoofd.dev"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "reverse_proxy",
-                                    "upstreams": [
-                                        {
-                                            "dial": "127.0.0.1:9091"
-                                        }
-                                    ],
-                                    "headers": {
-                                        "request": {
-                                            "set": {
-                                                "x-real-ip": [
-                                                    "{http.request.remote}"
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "dashboard.stamhoofd.dev"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/dashboard/dist/",
-                                    "pass_thru": true
-                                },
-                                {
-                                    "handler": "rewrite",
-                                    "uri": "/index.html"
-                                },
-                                {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/dashboard/dist/"
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "*.stamhoofd.dev"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/registration/dist/"
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "login.sgv.stamhoofd.dev"
+                                        "login.sgv.stamhoofd.app"
                                     ]
                                 }
                             ],
@@ -109,7 +41,7 @@
                                         "response": {
                                             "set": {
                                                 "Access-Control-Allow-Origin:": [
-                                                    "https://dashboard.stamhoofd.dev"
+                                                    "https://stamhoofd.app"
                                                 ],
                                                 "Access-Control-Allow-Methods:": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE"
@@ -130,7 +62,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "groepsadmin.sgv.stamhoofd.dev"
+                                        "groepsadmin.sgv.stamhoofd.app"
                                     ]
                                 }
                             ],
@@ -160,7 +92,7 @@
                                         "response": {
                                             "set": {
                                                 "Access-Control-Allow-Origin:": [
-                                                    "https://dashboard.stamhoofd.dev"
+                                                    "https://stamhoofd.app"
                                                 ],
                                                 "Access-Control-Allow-Methods:": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE"
@@ -176,14 +108,6 @@
                                     }
                                 }
                             ]
-                        },
-                        {
-                            "handle": [
-                                {
-                                    "handler": "file_server",
-                                    "root": "/Users/simon/Documents/Projects/stamhoofd/app/registration/dist/"
-                                }
-                            ]
                         }
                     ]
                 }
@@ -194,11 +118,8 @@
                 "policies": [
                     {
                         "subjects": [
-                            "stamhoofd.dev",
-                            "*.stamhoofd.dev",
-                            "*.api.stamhoofd.dev",
-                            "login.sgv.stamhoofd.dev",
-                            "groepsadmin.sgv.stamhoofd.dev"
+                            "login.sgv.stamhoofd.app",
+                            "groepsadmin.sgv.stamhoofd.app"
                         ],
                         "on_demand": false,
                         "issuer": {
@@ -212,18 +133,8 @@
                                 }
                             }
                         }
-                    },
-                    {
-                        "on_demand": true
                     }
-                ],
-                "on_demand": {
-                    "rate_limit": {
-                        "interval": "1d",
-                        "burst": 50
-                    },
-                    "ask": "http://127.0.0.1:9091/v2/organization-from-domain"
-                }
+                ]
             }
         }
     }

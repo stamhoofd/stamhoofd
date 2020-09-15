@@ -77,6 +77,7 @@ import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    OrganizationManager = OrganizationManager
     step = 3
 
     @Prop({ required: true })
@@ -234,7 +235,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                         if (preferred.length == 0) {
                             throw new SimpleError({
                                 code: "",
-                                message: "Nog geen groep gekozen"
+                                message: "Een gekozen leeftijdsgroep is niet meer geldig. Herlaad de pagina eens en probeer opnieuw."
                             })
                         }
 

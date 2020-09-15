@@ -96,9 +96,9 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
 })
 export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    OrganizationManager = OrganizationManager
 
     memberSelection: { [key:string]:boolean; } = {}
-    selectedMembers: MemberWithRegistrations[] = []
 
     step = 1
     defaultSelection = false
@@ -131,8 +131,10 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 }
             }
         }       
+    }
 
-        this.selectedMembers = this.members.flatMap((m) => {
+    get selectedMembers() {
+        return this.members.flatMap((m) => {
             if (this.memberSelection[m.id] === true) {
                 return [m]
             }

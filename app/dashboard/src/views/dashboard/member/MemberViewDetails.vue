@@ -7,6 +7,11 @@
                     <div class="hover-show"><button class="button icon gray edit" @click="editMember()"></button></div>
                 </h2>
                 <dl class="details-grid">
+                    <template v-if="member.details.memberNumber">
+                        <dt>Lidnummer</dt>
+                        <dd>{{ member.details.memberNumber }}</dd>
+                    </template>
+
                     <dt>Verjaardag</dt>
                     <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
 
@@ -118,34 +123,47 @@
 
         </div>
 
-        <div v-if="member.groups.length > 0 && member.details && !member.details.isPlaceholder" class="hover-box">
-            <h2 class="style-with-button">
-                <div>
-                    <span class="icon-spacer">Steekkaart</span><span
-                        v-tooltip="
-                            'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
-                        "
-                        class="icon gray privacy"
-                    />
-                </div>
-                <div class="hover-show"><button class="button icon gray edit" @click="editMemberRecords()"></button></div>
-            </h2>
+        <div v-if="(member.groups.length > 0 && member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
+            <template v-if="(member.groups.length > 0 && member.details && !member.details.isPlaceholder)">
+                <h2 class="style-with-button">
+                    <div>
+                        <span class="icon-spacer">Steekkaart</span><span
+                            v-tooltip="
+                                'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
+                            "
+                            class="icon gray privacy"
+                        />
+                    </div>
+                    <div class="hover-show"><button class="button icon gray edit" @click="editMemberRecords()"></button></div>
+                </h2>
 
-            <ul class="member-records">
-                <li
-                    v-for="(record, index) in sortedRecords"
-                    :key="index"
-                    :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
-                    @click="openRecordView(record)"
-                    v-tooltip="record.description.length > 0 ? record.description : null"
-                >
-                    <span :class="'icon '+getIcon(record)"/>
-                    <span class="text">{{ record.getText() }}</span>
-                    <span class="icon arrow-right-small" v-if="canOpenRecord(record)" />
-                </li>
-            </ul>
+                <ul class="member-records">
+                    <li
+                        v-for="(record, index) in sortedRecords"
+                        :key="index"
+                        :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
+                        @click="openRecordView(record)"
+                        v-tooltip="record.description.length > 0 ? record.description : null"
+                    >
+                        <span :class="'icon '+getIcon(record)"/>
+                        <span class="text">{{ record.getText() }}</span>
+                        <span class="icon arrow-right-small" v-if="canOpenRecord(record)" />
+                    </li>
+                </ul>
 
-            <p class="info-box" v-if="member.details.records.length == 0">{{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart</p>
+                <p class="info-box" v-if="member.details.records.length == 0">{{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart</p>
+
+                <template v-if="member.users.length > 0">
+                    <hr>
+                </template>
+            </template>
+
+             <template v-if="member.users.length > 0">
+                <h2>Accounts</h2>
+                <p v-for="user in member.users">{{ user.email }}</p>
+
+                <p class="accounts-description">Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.</p>
+            </template>
 
             <template v-if="false">
                 <hr>
@@ -375,6 +393,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             border-radius: $border-width/2;
             margin: 30px 0;
         }
+    }
+
+    .accounts-description {
+        @extend .style-definition-description;
+        margin-top: 15px;
     }
 }
 
