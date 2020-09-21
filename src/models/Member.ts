@@ -94,7 +94,7 @@ export class Member extends Model {
      * Fetch all registrations with members with their corresponding (valid) registrations and payment
      */
     static async getRegistrationWithMembersForPayment(paymentId: string): Promise<RegistrationWithMember[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
         query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
