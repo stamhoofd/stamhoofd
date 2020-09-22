@@ -3,7 +3,11 @@
         <div class="st-view" v-if="members.length == 0">
             <main>
                 <h1>Voeg de leden toe die je wilt inschrijven</h1>
-                <p>Klik op de knop onderaan en voeg alle leden toe die je wilt inschrijven (bv. broers en zussen).</p>
+
+                <p v-if="organizationGender == 'M'">Klik op de knop onderaan en voeg alle broers toe die je wilt inschrijven.</p>
+                <p v-else-if="organizationGender == 'F'">Klik op de knop onderaan en voeg alle zussen toe die je wilt inschrijven.</p>
+                <p v-else>Klik op de knop onderaan en voeg alle leden toe die je wilt inschrijven (bv. broers en zussen).</p>
+
                 <STErrorsDefault :error-box="errorBox" />
             </main>
             <STToolbar>
@@ -18,8 +22,9 @@
                 <h1 v-if="defaultSelection">Wil je nog iemand inschrijven?</h1>
                 <h1 v-else>Wie wil je inschrijven?</h1>
 
-                <p>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
-
+                <p v-if="organizationGender == 'M'">Voeg eventueel broers toe zodat we ze in één keer kunnen afrekenen</p>
+                <p v-else-if="organizationGender == 'F'">Voeg eventueel zussen toe zodat we ze in één keer kunnen afrekenen</p>
+                <p v-else>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
@@ -71,7 +76,7 @@ import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryMa
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage, STErrorsDefault } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, SelectedGroup } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, SelectedGroup, GroupGenderType } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -109,6 +114,18 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
         
         // tdoo: auto prefer all members with only one group option
         this.updateSelection()
+    }
+
+    get organizationGender() {
+        const male = OrganizationManager.organization.groups.find(g => g.settings.genderType == GroupGenderType.OnlyMale || g.settings.genderType == GroupGenderType.Mixed)
+        const female = OrganizationManager.organization.groups.find(g => g.settings.genderType == GroupGenderType.OnlyFemale || g.settings.genderType == GroupGenderType.Mixed)
+        if (male && !female) {
+            return "M"
+        }
+        if (female && !male) {
+            return "F"
+        }
+        return "X"
     }
 
     get hasWaitingList() {

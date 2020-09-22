@@ -8,11 +8,13 @@
             <h1>
                 Er zijn geen beschikbare groepen voor {{ memberDetails.firstName }}
             </h1>
-            <p>{{memberDetails.firstName }} is waarschijnlijk te oud of te jong</p>
 
-            <p class="error-box">
-                Het is niet mogelijk om {{ memberDetails.firstName }} in te schrijven
-            </p>
+            <template v-if="noGenderMatch">
+                <p class="error-box" v-if="organizationGender == 'M'">Deze vereniging is enkel voor jongens. Lees eerst even de informatie op onze website en controleer of je wel bij de juiste vereniging aan het inschrijven bent.</p>
+                <p class="error-box" v-else-if="organizationGender == 'F'">Deze vereniging is enkel voor meisjes. Lees eerst even de informatie op onze website en controleer of je wel bij de juiste vereniging aan het inschrijven bent.</p>
+            </template>
+            <p class="error-box" v-else>{{memberDetails.firstName }} is waarschijnlijk te oud of te jong. Lees eerst even de informatie op onze website.</p>
+
         </main>
 
         <STToolbar>
@@ -89,7 +91,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, LoadingButton, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup, GroupSizeResponse, WaitingListSkipReason } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup, GroupSizeResponse, WaitingListSkipReason, GroupGenderType } from "@stamhoofd/structures"
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -132,6 +134,32 @@ export default class MemberGroupView extends Mixins(NavigationMixin) {
     groups: SelectableGroup[] = []
 
     OrganizationManager = OrganizationManager
+
+    get organizationGender() {
+        const male = OrganizationManager.organization.groups.find(g => g.settings.genderType == GroupGenderType.OnlyMale || g.settings.genderType == GroupGenderType.Mixed)
+        const female = OrganizationManager.organization.groups.find(g => g.settings.genderType == GroupGenderType.OnlyFemale || g.settings.genderType == GroupGenderType.Mixed)
+        if (male && !female) {
+            return "M"
+        }
+        if (female && !male) {
+            return "F"
+        }
+        return "X"
+    }
+
+    get noGenderMatch() {
+        if (!this.member.details) {
+            return false
+        }
+        if (this.member.details.gender == Gender.Male && this.organizationGender == "F") {
+            return true
+        }
+
+        if (this.member.details.gender == Gender.Female && this.organizationGender == "M") {
+            return true
+        }
+        return false;
+    }
 
     get selectableGroup(): SelectableGroup | null {
         if (!this.selectedGroup) {
