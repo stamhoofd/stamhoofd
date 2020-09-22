@@ -25,7 +25,7 @@
             <Checkbox v-model="allowPictures" class="long-text">
                 {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
-            <Checkbox v-if="!allowPictures" v-model="allowGroupPictures" class="long-text">
+            <Checkbox v-if="!allowPictures" v-model="allowOnlyGroupPictures" class="long-text">
                 Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
 
