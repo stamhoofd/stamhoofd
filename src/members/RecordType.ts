@@ -58,7 +58,7 @@ export class RecordTypeHelper {
             case RecordType.NoPictures:
                 return "Geen foto's maken";
             case RecordType.OnlyGroupPictures:
-                return "Enkel op groepsfoto's";
+                return "Wel toestemming voor groepsfoto's";
 
             case RecordType.FoodAllergies:
                 return "Allergisch voor voeding";
@@ -122,9 +122,9 @@ export class RecordTypeHelper {
             case RecordType.NoData:
                 return "Dit gezin heeft ervoor gekozen om de steekkaart niet in te vullen omdat er geen toestemming werd gegeven i.v.m. het verzamelen van gevoelige gegevens. Bespreek dit zeker met de ouders.";
             case RecordType.NoPictures:
-                return "Bij het inschrijven is er geen toestemming gegeven voor het puliceren van foto's op de website of sociale media.";
+                return "Bij het inschrijven is er geen toestemming gegeven voor het publiceren van foto's op de website of sociale media.";
             case RecordType.OnlyGroupPictures:
-                return "Bij het inschrijven is er toestemming gegeven voor het puliceren van groepsfoto's op de website of sociale media.";
+                return "Bij het inschrijven is er wel toestemming gegeven voor het publiceren van groepsfoto's op de website of sociale media.";
             case RecordType.Vegetarian:
                 return "Dit lid eet geen vlees en waarschijnlijk ook geen vis (dat vraag je best eens na). Hou hier rekening mee of bespreek dit met het lid.";
             case RecordType.Vegan:
@@ -151,6 +151,13 @@ export class RecordTypeHelper {
                     }
                 ]
             case RecordType.NoPictures:
+                return [
+                    {
+                        "name": "Recht op afbeelding",
+                        "url": "https://www.gegevensbeschermingsautoriteit.be/recht-op-afbeelding"
+                    }
+                ]
+            case RecordType.OnlyGroupPictures:
                 return [
                     {
                         "name": "Recht op afbeelding",
