@@ -51,6 +51,40 @@ export enum RecordTypePriority {
 }
 
 export class RecordTypeHelper {
+    static getCategory(type: RecordType): string | undefined {
+        switch (type) {
+            case RecordType.NoData:
+            case RecordType.NoPictures:
+            case RecordType.OnlyGroupPictures:
+                return "Privacy";
+
+            case RecordType.Vegetarian:
+            case RecordType.Vegan:
+            case RecordType.Halal:
+            case RecordType.Kosher:
+            case RecordType.Diet:
+                return "Dieet";
+
+            case RecordType.Asthma:
+            case RecordType.Epilepsy:
+            case RecordType.HeartDisease:
+            case RecordType.HayFever:
+            case RecordType.SkinCondition:
+            case RecordType.Rheumatism:
+            case RecordType.SleepWalking:
+            case RecordType.Diabetes:
+            case RecordType.Medicines:
+                return "Gezondheid";
+
+            case RecordType.CanNotSwim:
+            case RecordType.TiredQuickly:
+            case RecordType.CanNotParticipateInSport:
+                return "Sport & Spel";
+        }
+
+        // others: keep name, don't repeat name
+    }
+
     static getName(type: RecordType): string {
         switch (type) {
             case RecordType.NoData:
