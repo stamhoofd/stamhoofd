@@ -190,6 +190,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             const keyPair = await session.decryptKeychainItem(keychainItem)
 
         } catch (e) {
+            console.error(e)
             this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
         }
     }
@@ -252,7 +253,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!confirm("Ben je zeker dat je wilt uitloggen?")) {
             return;
         }
-        SessionManager.currentSession!.logout()
+        SessionManager.logout()
     }
 
     syncScoutsEnGidsen() {

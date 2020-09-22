@@ -181,7 +181,7 @@ export class Session implements RequestMiddleware {
         });
     }
 
-    setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string } | null = null) {
+    async setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string } | null = null) {
         if (!this.token) {
             throw new Error("You can only set the encryption key after setting the token")
         }
@@ -196,17 +196,15 @@ export class Session implements RequestMiddleware {
         // Start loading the user and encryption keys
         if (!preload) {
             if (this.user) {
-                this.updateKeys().catch(e => console.error(e))
+                await this.fetchOrganization()
+                await this.updateKeys()
             } else {
-                this.updateData()
+                await this.updateData()
             }
         }
     }
 
     async fetchUser(): Promise<NewUser> {
-        if (this.user) {
-            return this.user;
-        }
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
@@ -235,15 +233,15 @@ export class Session implements RequestMiddleware {
         return this.organization
     }
 
-    updateData() {
-        this.fetchOrganization()
-            .then(() => this.fetchUser())
-            .then(() => this.updateKeys())
-            .catch(e => {
-                console.error(e)
-                // todo: show message
-                this.temporaryLogout()
-            })
+    async updateData() {
+        try {
+            await this.fetchOrganization()
+            await this.fetchUser()
+            await this.updateKeys()
+        } catch (e) {
+            this.temporaryLogout()
+            throw e;
+        }
     }
 
     getUserPrivateKey() {
@@ -280,6 +278,7 @@ export class Session implements RequestMiddleware {
                 // emtpy
             }
             this.token = null;
+            this.user = null; // force refetch in the future
             this.onTokenChanged();
         }
     }

@@ -74,6 +74,13 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
+    logout() {
+         if (this.currentSession) {
+            this.currentSession.logout()
+        }
+        this.clearCurrentSession()
+    }
+
     clearCurrentSession() {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
@@ -82,11 +89,16 @@ export class SessionManagerStatic {
         this.callListeners()
     }
 
-    setCurrentSession(session: Session) {
+    async setCurrentSession(session: Session) {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
         }
         this.currentSession = session
+
+        if (session.canGetCompleted() && !session.isComplete()) {
+            session.user = null
+            await session.updateData()
+        }
 
         const storage = this.getSessionStorage()
         storage.lastOrganizationId = session.organizationId
@@ -108,9 +120,6 @@ export class SessionManagerStatic {
             this.callListeners()
         })
 
-        if (this.currentSession.canGetCompleted()) {
-            this.currentSession.updateData()
-        }
         this.setUserId();
     }
 

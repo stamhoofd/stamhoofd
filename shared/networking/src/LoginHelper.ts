@@ -159,9 +159,8 @@ export class LoginHelper {
         const user = await session.fetchUser()
         console.log("ok")
         const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
-        session.setEncryptionKey(encryptionKey)
-
-        SessionManager.setCurrentSession(session)
+        await session.setEncryptionKey(encryptionKey)
+        await SessionManager.setCurrentSession(session)
     }
 
     static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null) {
@@ -212,8 +211,8 @@ export class LoginHelper {
         session.organization = organization
         session.setToken(response.data)
         Keychain.addItem(item)
-        session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
-        SessionManager.setCurrentSession(session)
+        await session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
+        await SessionManager.setCurrentSession(session)
     }
 
     static async changePassword(session: Session, password: string, force = false) {
@@ -255,7 +254,7 @@ export class LoginHelper {
             session.user = null;
         }
 
-        session.setEncryptionKey(keys.authEncryptionSecretKey)
+        await session.setEncryptionKey(keys.authEncryptionSecretKey)
     }
 
     static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {
@@ -267,7 +266,7 @@ export class LoginHelper {
             decoder: User
         })
 
-        session.updateData()
+        await session.updateData()
     }
 
     static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
@@ -300,7 +299,7 @@ export class LoginHelper {
         }
 
         session.setToken(response.data)
-        session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: userKeyPair.privateKey })
-        SessionManager.setCurrentSession(session)
+        await session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: userKeyPair.privateKey })
+        await SessionManager.setCurrentSession(session)
     }
 }
