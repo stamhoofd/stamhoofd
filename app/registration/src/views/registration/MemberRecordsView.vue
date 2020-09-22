@@ -13,19 +13,24 @@
             <h2>Privacy</h2>
 
             <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
             </Checkbox>
             <Checkbox v-else v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken.
+                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
             </Checkbox>
 
             <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
-            <Checkbox v-model="allowPictures" class="long-text">
+            <Checkbox v-if="!allowGroupPictures" v-model="allowPictures" class="long-text">
                 {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
             </Checkbox>
+            <Checkbox v-model="allowGroupPictures" class="long-text">
+                Er mogen tijdens de activiteiten groepsfoto's gemomen worden met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
+            </Checkbox>
 
+
+            
             <p v-if="!allowData" class="warning-box">
                 Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
             </p>
@@ -347,8 +352,9 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                 title: "Huisdokter"
             })
         } else {
-            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures || r.type == RecordType.NoPermissionForMedicines )
+            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures|| r.type == RecordType.NoPermissionForMedicines )
             this.memberDetails.doctor = null
+            
         }
         
         this.memberDetails.lastReviewed = new Date()
@@ -367,9 +373,13 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
 
     get allowData() { return !this.getBooleanType(RecordType.NoData) }
     set allowData(enabled: boolean) { this.setBooleanType(RecordType.NoData, !enabled) }
-
+    
+    
     get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
     set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled) }
+
+    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.OnlyGroupPictures) }
+    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled) }
 
     get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
     set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.NoPermissionForMedicines, !enabled) }
