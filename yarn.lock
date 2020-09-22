@@ -507,9 +507,9 @@
     safe-buffer "^5.1.2"
 
 "@simonbackx/simple-database@^1.11":
-  version "1.11.8"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.11.8.tgz#2414d6ba31fe5e25f9afbc9a02f562de72384372"
-  integrity sha512-VEthUUBQ1DN0UfuyUJuHMHZAjbAbrwKc++Vz5+32IdNzFCeFgwqp9bUiXmgcuBkz4qFrIYer4HdLPo/lRY5R7w==
+  version "1.11.9"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.11.9.tgz#c280aaab672314847c3fee360e6a576aa386a653"
+  integrity sha512-LlBVGX2KaGEP2NoOgyoVzaYkjH+a5IVK4JIKBiL5YljiCm/zLQsiTSVqAKsMcyJ3gegNOztvgn5QBgKn7SiyFA==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -546,9 +546,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.10.6"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.10.6.tgz#ee68e9397ec7d26b20138f270c2433431d38b7a0"
-  integrity sha512-OG1vg9XxM/9CcuLjyZALybRrkWvoXR4FIQ90IJbN35w+ouGYLbM3hfPwNCSgoxgtkTT0P6DMnoMid6lTZTSryA==
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.11.0.tgz#3a16c3b813f99e2e162f3a21d4fdef2047ef9016"
+  integrity sha512-UHUfr2G7cqabEglP7diNHjrBZZjCyZFHzV1r6pHtmJ14A01kaYFbhkfQRc/U+63D26Bgv0Sd/yfy8IAuHHehtQ==
   dependencies:
     uuid "^8.2.0"
 
