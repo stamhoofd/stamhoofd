@@ -1212,9 +1212,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.11.0.tgz#3a16c3b813f99e2e162f3a21d4fdef2047ef9016"
-  integrity sha512-UHUfr2G7cqabEglP7diNHjrBZZjCyZFHzV1r6pHtmJ14A01kaYFbhkfQRc/U+63D26Bgv0Sd/yfy8IAuHHehtQ==
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.11.1.tgz#d222111cd7db2e5735ca1f5a99165c0a30c717ed"
+  integrity sha512-IAjwZ8EWBMETcyjp71MATDxsi/UnFAdwc21KJiLySDCInFOs0lAxDvcml99DtF2pTYwhFYcf6bW+dBO0lSaUvA==
   dependencies:
     uuid "^8.2.0"
 
