@@ -4,18 +4,18 @@ export enum RecordType {
     NoPictures = "NoPictures",
     OnlyGroupPictures=" OnlyGroupPictures",
 
-    // Allergies & diet
-    FoodAllergies = "FoodAllergies",
-    MedicineAllergies = "MedicineAllergies",
-    HayFever = "HayFever",
-    OtherAllergies = "OtherAllergies",
-
     // Diet
     Vegetarian = "Vegetarian",
     Vegan = "Vegan",
     Halal = "Halal",
     Kosher = "Kosher",
     Diet = "Diet",
+
+    // Allergies & diet
+    FoodAllergies = "FoodAllergies",
+    MedicineAllergies = "MedicineAllergies",
+    HayFever = "HayFever",
+    OtherAllergies = "OtherAllergies",
 
     // Health, hygiene and sleep
     Asthma = "Asthma",
@@ -73,7 +73,6 @@ export class RecordTypeHelper {
             case RecordType.Rheumatism:
             case RecordType.SleepWalking:
             case RecordType.Diabetes:
-            case RecordType.Medicines:
                 return "Gezondheid";
 
             case RecordType.CanNotSwim:
