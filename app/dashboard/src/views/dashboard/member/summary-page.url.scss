@@ -1,0 +1,94 @@
+@use "@stamhoofd/scss/base/reset";
+@use "@stamhoofd/scss/elements/body";
+@use "@stamhoofd/scss/base/text-styles" as *;
+@use "@stamhoofd/scss/components/errors";
+
+body {
+    margin: 15mm 10mm;
+    -webkit-print-color-adjust: exact !important;
+}
+
+h1 {
+    @extend .style-title-1;
+    padding-bottom: 20px;
+    margin-top: -10mm;
+}
+
+img {
+    float: right;
+    height: 8mm;
+}
+
+h2 {
+    @extend .style-title-small;
+    padding-bottom: 15px;
+    padding-top: 30px;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+hr {
+    @extend .style-hr;
+    margin: 30px 0;
+}
+
+dl, dt, dd {
+    page-break-before: avoid;
+    page-break-inside: avoid;
+}
+
+dd {
+    white-space: pre-wrap;
+}
+
+.summary-details-grid {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    gap: 5px 15px;
+
+    &.small {
+        grid-template-columns: 150px 1fr;
+    }
+
+    &.tiny {
+        grid-template-columns: auto 1fr;
+    }
+
+    dt {
+        @extend .style-definition-term;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    dd {
+        @extend .style-definition-description;
+        font-size: 12px;
+        font-weight: 500;
+    }
+}
+
+.warning-box {
+    font-size: 12px;
+    margin: 0;
+    padding: 10px 10px 10px 40px;
+
+    &::before {
+        font-size: 16px;
+    }
+}
+
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax(250px, 1fr) );
+    gap: 35px 10px;
+    margin-top: 20px;
+
+    div {
+        page-break-inside: avoid;
+    }
+
+    h2 {
+        padding-top: 0px;
+    }
+}

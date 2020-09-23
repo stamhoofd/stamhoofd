@@ -82,7 +82,27 @@ module.exports = {
             // this will apply to both plain `.css` files
             // AND `<style>` blocks in `.vue` files
             {
+                test: /\.url.scss$/,
+                use: [
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: (loader) => [
+                                // Add the plugin
+                                new IconfontWebpackPlugin(loader),
+                                autoprefixer
+                            ]
+                        }
+                    },
+                    'sass-loader',
+                ]
+            },
+            // this will apply to both plain `.css` files
+            // AND `<style>` blocks in `.vue` files
+            {
                 test: /\.scss$/,
+                exclude:  /\.url.scss$/,
                 use: [
                     process.env.NODE_ENV === 'production' ? 
                         { 

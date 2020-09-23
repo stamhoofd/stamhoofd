@@ -401,20 +401,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 }
 
-.details-grid {
-    display: grid;
-    grid-template-columns: 40% 60%;
-    gap: 8px 15px;
-
-    dt {
-        @extend .style-definition-term;
-    }
-
-    dd {
-        @extend .style-definition-description;
-    }
-}
-
 .member-records {
     li {
         list-style: none;

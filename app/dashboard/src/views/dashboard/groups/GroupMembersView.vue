@@ -166,6 +166,7 @@ import { MemberWithRegistrations, Group, Organization, WaitingListType, Encrypte
 import { MemberManager, MemberChangeEvent } from '../../../classes/MemberManager';
 import { Formatter } from '@stamhoofd/utility';
 import EditMemberView from '../member/edit/EditMemberView.vue';
+import MemberSummaryView from '../member/MemberSummaryView.vue';
 
 class SelectableMember {
     member: MemberWithRegistrations;
@@ -354,34 +355,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.sortBy == "name") {
-            return this.filteredMembers.sort((a, b) => {
-                if (!a.member.details && !b.member.details) {
-                    return 0
-                }
-                if (!a.member.details) {
-                    return 1
-                }
-                if (!b.member.details) {
-                    return -1
-                }
-
-                if (this.sortDirection == "ASC") {
-                    if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
-                        return 1;
-                    }
-                    if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
-                        return -1;
-                    }
-                    return 0;
-                }
-                if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
-                    return -1;
-                }
-                if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
-                    return 1;
-                }
-                return 0;
-            });
+            const s = Member.sorterByName(this.sortDirection)
+            return this.filteredMembers.sort((a, b) => s(a.member, b.member));
         }
 
         if (this.sortBy == "status") {
@@ -622,7 +597,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     openSamenvatting() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "health" }).setDisplayStyle("overlay"))
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberSummaryView, {
+                members: this.getSelectedMembers(),
+                group: this.group
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+
+        //this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "health" }).setDisplayStyle("overlay"))
     }
 }
 </script>

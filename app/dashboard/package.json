@@ -11,11 +11,15 @@
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
-        "@stamhoofd/scss": "1.0.0",
         "@stamhoofd/logger": "1.0.0",
+        "@stamhoofd/scss": "1.0.0",
         "ibantools": "^3.1.0",
+        "pdfkit": "^0.11.0",
         "tiptap": "^1.27.1",
         "tiptap-extensions": "^1.29.1",
         "xlsx": "^0.16.3"
+    },
+    "devDependencies": {
+        "@types/pdfkit": "^0.10.6"
     }
 }
