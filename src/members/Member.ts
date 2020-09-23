@@ -37,29 +37,29 @@ export class Member extends AutoEncoder {
 
     static sorterByName(sortDirection = "ASC") {
         return (a, b) => {
-            if (!a.member.details && !b.member.details) {
+            if (!a.details && !b.details) {
                 return 0
             }
-            if (!a.member.details) {
+            if (!a.details) {
                 return 1
             }
-            if (!b.member.details) {
+            if (!b.details) {
                 return -1
             }
 
             if (sortDirection == "ASC") {
-                if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
+                if (a.details.name.toLowerCase() > b.details.name.toLowerCase()) {
                     return 1;
                 }
-                if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
+                if (a.details.name.toLowerCase() < b.details.name.toLowerCase()) {
                     return -1;
                 }
                 return 0;
             }
-            if (a.member.details.name.toLowerCase() > b.member.details.name.toLowerCase()) {
+            if (a.details.name.toLowerCase() > b.details.name.toLowerCase()) {
                 return -1;
             }
-            if (a.member.details.name.toLowerCase() < b.member.details.name.toLowerCase()) {
+            if (a.details.name.toLowerCase() < b.details.name.toLowerCase()) {
                 return 1;
             }
             return 0;
