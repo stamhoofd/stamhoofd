@@ -14,10 +14,13 @@ export enum RecordType {
     // Allergies & diet
     FoodAllergies = "FoodAllergies",
     MedicineAllergies = "MedicineAllergies",
-    HayFever = "HayFever",
     OtherAllergies = "OtherAllergies",
 
+    // Medicines
+    NoPermissionForMedicines = "NoPermissionForMedicines",
+
     // Health, hygiene and sleep
+    HayFever = "HayFever",
     Asthma = "Asthma",
     BedWaters = "BedWaters",
     Epilepsy = "Epilepsy",
@@ -26,18 +29,14 @@ export enum RecordType {
     Rheumatism = "Rheumatism",
     SleepWalking = "SleepWalking",
     Diabetes = "Diabetes",
-    Medicines = "Medicines",
     SpecialHealthCare = "SpecialHealthCare",
+    Medicines = "Medicines",
 
     // Sport, games, social
     CanNotSwim = "CanNotSwim",
     TiredQuickly = "TiredQuickly",
     CanNotParticipateInSport = "CanNotParticipateInSport",
     SpecialSocialCare = "SpecialSocialCare",
-
-    // Medicines
-    NoPermissionForMedicines = "NoPermissionForMedicines",
-
     FinancialProblems = "FinancialProblems",
 
     // Other
