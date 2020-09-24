@@ -44,10 +44,7 @@
                                         "response": {
                                             "set": {
                                                 "access-control-allow-origin": [
-                                                    "{http.request.header.origin}"
-                                                ],
-                                                "Vary": [
-                                                    "Origin"
+                                                    "https://stamhoofd.app"
                                                 ],
                                                 "access-control-allow-methods": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE"
@@ -102,10 +99,7 @@
                                         "response": {
                                             "set": {
                                                 "access-control-allow-origin": [
-                                                    "{http.request.header.origin}"
-                                                ],
-                                                "Vary": [
-                                                    "Origin"
+                                                    "https://stamhoofd.app"
                                                 ],
                                                 "access-control-allow-methods": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE, PUT"
@@ -159,10 +153,7 @@
                                         "response": {
                                             "set": {
                                                 "access-control-allow-origin": [
-                                                    "{http.request.header.origin}"
-                                                ],
-                                                "Vary": [
-                                                    "Origin"
+                                                    "https://stamhoofd.app"
                                                 ],
                                                 "access-control-allow-methods": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE, PUT"

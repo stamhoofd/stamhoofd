@@ -69,6 +69,7 @@
             <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}">
                 <span class="icon sync"/>
                 <span>Groepsadministratie</span>
+                 <span class="bubble" v-if="whatsNewBadge">1</span>
             </button>
 
             <button class="menu-button button heading" @click="importMembers" v-else :class="{ selected: currentlySelected == 'import-members'}">
@@ -257,11 +258,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     syncScoutsEnGidsen() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Heel binnenkort kan je de leden uit Stamhoofd automatisch in de groepsadministratie plaatsen, je hoeft dit ondertussen zeker niet zelf te doen.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
-        return;
-        
-        /*this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));*/
+        this.openSyncScoutsEnGidsen()
     }
 
     openSyncScoutsEnGidsen() {

@@ -323,8 +323,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 }
             })
 
-            console.log(response)
-
             this.token = {
                 accessToken: response.data.access_token,
                 refreshToken: response.data.refresh_token,
@@ -388,7 +386,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     message: "We konden jouw scoutsgroep niet vinden in dit groepsadministratie account. Controleer het adres en de naam die je in Stamhoofd hebt ingesteld en zorg dat deze overeen komt met de naam in de groepsadministratie."
                 })
             }
-            console.log(group)
             this.group = group
             this.groupNumber = group.groepsnummer
         }
@@ -401,7 +398,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             path: "/groep",
             decoder: SGVGroepResponse as Decoder<SGVGroepResponse>
         })
-        console.log(response)
 
         const organization = OrganizationManager.organization
 
@@ -428,9 +424,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             },
             decoder: SGVGFunctieResponse as Decoder<SGVGFunctieResponse>
         })
-        console.log(response)
         this.functies = response.data.functies
-        console.log(this.functies)
     }
 
     async checkFuncties() {
@@ -506,7 +500,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         try {
             this.leden = await this.downloadWithCurrentFilter()
-            console.log(this.leden)
         } catch (e) {
             console.error(e)
             new Toast("Leden ophalen mislukt", "error red").show()
@@ -531,8 +524,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     },
                     decoder: SGVLedenResponse as Decoder<SGVLedenResponse>
                 })
-                console.log(response)
-
                 leden.push(...response.data.leden)
 
                 // Set new offset
@@ -572,16 +563,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 })
 
             } else {
-                console.log("Lid niet gevonden, zoeken in groepsadmin...")
+                // Lid niet gevonden, zoeken in groepsadmin...
                 const gelijkaardig = await this.zoekGelijkaardig(member)
                 if (gelijkaardig) {
-                    console.log("Gevonden!")
+                    // Gevonden
                     matchedMembers.push({
                         stamhoofd: member,
                         sgvId: gelijkaardig.id
                     })
                 } else {
-                    console.log("Is echt een nieuw lid!")
+                    // Is echt een nieuw lid
                     newMembers.push(member)
                 }
                 await sleep(250)
@@ -607,14 +598,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             return true;
         })
 
-        console.log("matched members:")
+        /*console.log("matched members:")
         console.log(matchedMembers)
 
         console.log("newMembers:")
         console.log(newMembers)
 
         console.log("Manual verify probably equal list:")
-        console.log(probablyEqualList)
+        console.log(probablyEqualList)*/
 
         if (probablyEqualList.length > 0) {
             return new Promise((resolve, reject) => {
@@ -695,13 +686,9 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const total = (action != "nothing" ? oldMembers.length : 0) + matched.length + newMembers.length
 
         const report = new SGVSyncReport()
-
-        // todo: import or delete
         const deletedMembers: SGVLid[] = []
 
-        if (action == "delete") {
-            // todo: delete
-            
+        if (action == "delete") {            
             deletedMembers.push(...oldMembers)
             for (const mem of oldMembers) {
                 if (onStatusChange) {
@@ -782,15 +769,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     path: "/lid/"+lid.id+"?bevestig=true",
                     body: patch
                 })
-                console.log(updateResponse)
 
             } catch (e) {
                 console.error(e)
                 throw e;
             }
-
-            // toodooooo!
-            this.dryRun = true;
         } else {
             throw new SimpleError({
                 code: "DRY_RUN",
@@ -802,7 +785,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
-        console.log("syncing "+match.stamhoofd.firstName);
         const details = match.stamhoofd.details!
 
         // Fetch full member from SGV
@@ -814,7 +796,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
         const lid = response.data;
 
-        console.log("syncing "+match.stamhoofd.firstName);
         const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies, report)
 
         if (patch.adressen && patch.adressen.length == 0) {
@@ -823,9 +804,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
             })
         }
-
-        console.log(lid)
-        console.info(patch)
 
         if (!this.dryRun) {
             await sleep(250);
@@ -836,7 +814,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     path: "/lid/"+match.sgvId+"?bevestig=true",
                     body: patch
                 })
-                console.log(updateResponse)
 
                 // Patch in Stamhoofd
                 if (match.stamhoofd.details && updateResponse.data.verbondsgegevens && match.stamhoofd.details.memberNumber != updateResponse.data.verbondsgegevens.lidnummer) {
@@ -860,7 +837,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
      * Create a new one in SGV
      */
     async createLid(member: MemberWithRegistrations, report: SGVSyncReport) {
-        console.log("creating "+member.firstName);
         const details = member.details!
 
         const post = getPatch(details, {
@@ -876,8 +852,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             })
         }
 
-        console.info(post)
-
         if (!this.dryRun) {
             await sleep(250);
 
@@ -887,7 +861,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     path: "/lid",
                     body: post
                 })
-                console.log(updateResponse)
 
             } catch (e) {
                 console.error(e)

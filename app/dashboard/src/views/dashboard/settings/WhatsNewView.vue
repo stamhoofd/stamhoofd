@@ -8,6 +8,10 @@
             <h1>Wat is er nieuw?</h1>
 
             <hr>
+            <h2>Synchroniseer met de groepsadministratie van Scouts &amp; Gidsen Vlaanderen (25 september)</h2>
+            <p>Je hebt er even op moeten wachten, maar vanaf vandaag kan je alle leden automatisch in de groepsadministratie plaatsen en aanpassen.</p>
+
+            <hr>
             <h2>Bekijk en print samenvattingen af (24 september)</h2>
             <p>Vanaf nu kan je een samenvatting opvragen en afdrukken van de leden die je selecteert. Die kan je meenemen tijdens een activiteit, op weekend of kamp.</p>
 

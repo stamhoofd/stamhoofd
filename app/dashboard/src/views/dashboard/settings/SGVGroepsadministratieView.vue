@@ -5,13 +5,13 @@
         </STNavigationBar>
 
         <main>
-            <h1>Groepsadministrie synchroniseren</h1>
+            <h1>Groepsadministratie synchroniseren</h1>
 
-            <p class="warning-box">We raden echt heel sterk aan om alle leden gewoon opnieuw te laten inschrijven de eerste keer dat je overschakelt op Stamhoofd. Op die manier hebben alle ouders een account en kunnen ze tijdens het jaar gegevens wijzigen. Bovendien moet je zelf dan niet meer opvolgen wie nu stopt en wie niet. Dit is ook handig als we later dit jaar de inschrijvingen voor weekends en kampen uitrollen in Stamhoofd.</p>
+            <p class="info-box">Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be</p>
 
             <hr>
             <h2>Hoe werkt het?</h2>
-            <p>Stamhoofd voegt alle leden toe in de groepsadministratie en maakt de nodige wijzigingen. Dat doen we op basis van de voor, achternaam en geboortedatum.</p>
+            <p>Stamhoofd voegt alle leden toe in de groepsadministratie en maakt de nodige wijzigingen. Dat doen we op basis van de voor, achternaam en geboortedatum. Leden die op elkaar lijken proberen we zoveel mogelijk te 'matchen' met elkaar.</p>
 
             <ul>
                 <li>Nieuwe leden in groepsadministratie zetten</li>
@@ -97,7 +97,12 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
     mounted() {
         SGVGroepsadministratie.checkUrl();
         HistoryManager.setUrl("/scouts-en-gidsen-vlaanderen")
+
+        if (WhatsNewCount as any == 5) {
+            localStorage.setItem("what-is-new", WhatsNewCount.toString());
+        }
     }
+
 
     get isLoggedIn() {
         return SGVGroepsadministratie.hasToken
