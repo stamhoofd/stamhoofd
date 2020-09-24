@@ -2,7 +2,7 @@ export enum RecordType {
     // Privacy
     NoData = "NoData",
     NoPictures = "NoPictures",
-    OnlyGroupPictures=" OnlyGroupPictures",
+    OnlyGroupPictures = "OnlyGroupPictures",
 
     // Diet
     Vegetarian = "Vegetarian",
