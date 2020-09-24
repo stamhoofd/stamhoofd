@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { RecordType, RecordTypeHelper } from "./RecordType";
 
 // Temporary fix for space in enum....
-export class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
+class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
     enum: E;
 
     constructor(e: E) {
