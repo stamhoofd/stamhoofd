@@ -8,7 +8,7 @@
             <h1>Wat is er nieuw?</h1>
 
             <hr>
-            <h2>Bekijk en print samenvattingen af (23 september)</h2>
+            <h2>Bekijk en print samenvattingen af (24 september)</h2>
             <p>Vanaf nu kan je een samenvatting opvragen en afdrukken van de leden die je selecteert. Die kan je meenemen tijdens een activiteit, op weekend of kamp.</p>
 
             <hr>
