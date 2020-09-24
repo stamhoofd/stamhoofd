@@ -4,14 +4,14 @@
 @use "@stamhoofd/scss/components/errors";
 
 body {
-    margin: 15mm 10mm;
+    margin: 25mm 10mm;
     -webkit-print-color-adjust: exact !important;
 }
 
 h1 {
     @extend .style-title-1;
     padding-bottom: 20px;
-    margin-top: -10mm;
+    margin-top: -15mm;
 }
 
 img {

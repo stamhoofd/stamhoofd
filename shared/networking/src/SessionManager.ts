@@ -97,7 +97,15 @@ export class SessionManagerStatic {
 
         if (session.canGetCompleted() && !session.isComplete()) {
             session.user = null
-            await session.updateData()
+
+            try {
+                await session.updateData()
+            } catch (e) {
+                // Undo
+                console.log(e)
+                this.clearCurrentSession()
+                return;
+            }
         }
 
         const storage = this.getSessionStorage()

@@ -49,13 +49,17 @@
 
          <STToolbar>
             <template #right>
-                <button class="button secundary" @click="createPDF(true)">
-                    Contacten afdrukken
+                <button class="button secundary" @click="createPDF(false, true)">
+                    <span class="icon download"/><span>Steekkaart</span>
+                </button>
+
+                <button class="button secundary" @click="createPDF(true, false)">
+                    <span class="icon download"/><span>Noodcontacten</span>
                 </button>
 
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="createPDF(false)">
-                        Afdrukken
+                    <button class="button primary" @click="createPDF(true, true)">
+                        <span class="icon download"/><span>Alles</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -77,8 +81,21 @@ import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import { MemberWithRegistrations, Gender, RecordType, RecordTypeHelper, Member, Group, ParentTypeHelper } from '@stamhoofd/structures';
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { Sorter } from '@stamhoofd/utility';
-import logoSrc from '@stamhoofd/assets/images/logo/logo-horizontal.png'
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import logoSrc from '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png'
+import metropolisMedium from '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2'
+import metropolisBold from '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
+import PDFKit from "pdfkit"
+
+const mm = 2.834666666666667 // = 1 mm
+
+const margin = 15 * mm
+const docWidth = 595.28
+const docHeight = 841.89
+
+const colorDark = "#000716"
+const colorBorder = "#e7e7e7"
+const colorGray = "#868686"
 
 class SamenvattingGroep {
     title = ""
@@ -185,9 +202,197 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         return div.innerHTML;
     }
 
+    async newCreatePDF(contacts = false, steekkaart = false) {
+        const PDFDocument = (await import("../../../pdfkit.standalone")).default as PDFKit.PDFDocument
+        let title = "Samenvatting"
+
+        if (contacts && !steekkaart) {
+            title = "Noodcontacten"
+        }
+        if (!contacts && steekkaart) {
+            title = "Steekkaart"
+        }
+
+        if (this.group) {
+            title += " "+this.group.settings.name
+        }
+
+        const buffer = await new Promise<Buffer>(resolve => {
+            const doc = new PDFDocument({ size: [docWidth, docHeight], margin: 10*mm, bufferPages: true });
+
+            doc.registerFont('metropolisMedium', metropolisMedium);
+            doc.registerFont('metropolisBold', metropolisBold);
+
+            const bufs: any[] = [];
+            doc.on('data', function (d) { bufs.push(d); });
+            doc.on('end', function () {
+                const buf = Buffer.concat(bufs);
+                resolve(buf)
+            });
+
+            // logo
+            doc.image(logoSrc, docWidth - margin - 30*mm, margin, { width: 30*mm })
+
+            doc.fontSize(20);
+            doc.fillColor(colorDark);
+
+            doc.font('metropolisBold').text(title, margin, margin, { align: 'left', width: docWidth - margin*2 })
+
+            doc.fontSize(9);
+            doc.fillColor(colorGray);
+            doc.font('metropolisMedium').text("Bewaar dit document op een veilige plaats en vernietig het na gebruik.", margin, doc.y + 2*mm, { align: 'left', width: docWidth - margin*2 })
 
 
-    async createPDF(onlyContacts = false) {
+            // Draw boxes...
+            if (steekkaart) {
+                doc.moveDown(2);
+                this.drawBoxes(doc, 1, this.createSamenvattingSteekkaart())
+            }
+           
+            if (contacts) {
+                doc.moveDown(2);
+                this.drawBoxes(doc, 3, this.createContacts())
+            }
+        
+            // Page numbers
+            // see the range of buffered pages
+            const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+            const end = range.start + range.count
+
+            // Title
+            if (range.count > 1) {
+                for (let i = range.start; i < end; i++) {
+                    doc.switchToPage(i);
+                    doc.fontSize(9);
+                    doc.fillColor(colorGray);
+                    doc.font('metropolisMedium');
+                    doc.text(title+` - ${i + 1} / ${range.count}`, margin, docHeight - margin, { align: "right", baseline: "bottom", width: docWidth - margin*2 });
+                }
+            }
+
+            // manually flush pages that have been buffered
+            doc.flushPages();
+            
+            doc.end();
+        });
+
+        var blob = new Blob([buffer], {type: "application/pdf"});
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        var fileName = Formatter.slug(title)+".pdf";
+        link.download = fileName;
+        link.click();
+    }
+
+    drawBoxes(doc: PDFKit.PDFDocument, columns: number, data: SamenvattingGroep[]) {
+        
+        const columnGap = 5*mm
+        const width = (docWidth - margin*2 + columnGap)/columns - columnGap
+        let y = doc.y
+
+        while(data.length > 0) {        
+            let maxHeight = 0;
+            
+            const cp = data.slice()
+            for (let index = 0; index < columns; index++) {
+                const next = cp.shift()
+                if (!next) {
+                    // done
+                    break;
+                }
+                console.log(next)
+                let height = this.drawBox(doc, next, margin, y, width, true);
+                if (height > maxHeight) {
+                    maxHeight = height
+                }
+            }
+
+            if (y + maxHeight > docHeight - margin) {
+                // Go to next page
+                doc.addPage()
+                doc.moveTo(margin, margin)
+                y = margin
+            }
+
+            for (let index = 0; index < columns; index++) {
+                const next = data.shift()
+                if (!next) {
+                    // done
+                    break;
+                }
+
+                console.log(margin + index*width + columnGap*index, y)
+                this.drawBox(doc, next, margin + index*width + columnGap*index, y, width, false);
+            }
+
+            y += maxHeight
+            y += columnGap
+     }
+    }
+
+    drawBox(doc: PDFKit.PDFDocument, data: SamenvattingGroep, x: number, y: number, width: number, calcHeight: boolean) {
+        console.log("drawbox")
+        // Calculate height + width
+        // Check if we need to start on a new page
+        let height = 0;
+        const gap = 1.5 * mm;
+
+        // Title
+        doc.fontSize(13);
+        doc.fillColor(colorDark);
+        doc.font('metropolisBold');
+
+        if (!calcHeight) {
+            doc.text(data.title, x, y + height, { align: 'left', width })
+        }
+        height += doc.heightOfString(data.title, { align: 'left', width })
+        height += 4*mm;
+
+        // Items
+        doc.fontSize(9);
+
+        // Calculate width of titles
+        let maxWidth = width / 5; // Minimum width to keep differences between multiple columns comparable
+        for (const [title, text] of data.items) {
+            doc.fillColor(colorDark);
+            doc.font('metropolisMedium');
+
+            const w = doc.widthOfString(title, { align: 'left', width: width / 2, lineGap: gap })
+            if (w > maxWidth) {
+                maxWidth = w
+            }
+        }
+
+        if (maxWidth > width / 2 - 5*mm) {
+            maxWidth = width/2 - 5*mm
+        }
+
+        for (const [title, text] of data.items) {
+            doc.fillColor(colorDark);
+            doc.font('metropolisMedium');
+            let h = 0;
+
+            h = Math.max(h, doc.heightOfString(title, { align: 'left', width: maxWidth, lineGap: gap }))
+            if (!calcHeight) {
+                doc.text(title, x, y + height, { align: 'left', width: maxWidth, lineGap: gap })
+            }
+
+            doc.fillColor(colorGray);
+            doc.font('metropolisMedium');
+
+            h = Math.max(h, doc.heightOfString(text, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap }))
+            if (!calcHeight) {
+                doc.text(text, x + maxWidth + 5*mm, y + height, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap })
+            }
+            height += h + gap
+        }
+
+        return height
+    }
+
+
+
+    async createPDF(contacts = false, steekkaart = false) {
         if (this.loading) {
             return;
         }
@@ -195,106 +400,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         this.errorBox = null;
 
         try {
-            const samenvatting = this.createSamenvattingSteekkaart()
-
-            const printWin = window.open('about:blank')!;
-            const css = (await import("./summary-page.url.scss")).default.toString()
-            console.log(css)
-            printWin.focus();
-
-            const url = window.location.hostname
-            console.log(url)
-            const name = this.group?.settings?.name ?? ""
-            let html = ""
-
-            html += `
-            <!DOCTYPE html>
-            <html lang="en">
-
-            <head>
-                <meta charset="utf-8" />
-                <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-                <title>Samenvatting ${name}</title>
-                <base href="https://${url}/">
-                <style>
-                    ${css}
-                </style>
-            </head>
-
-            <body>
-                <img src="${logoSrc}" alt="Stamhoofd" /><h1>${onlyContacts ? 'Noodcontacten' : 'Samenvatting'} ${name}</h1>
-                <p class="warning-box">Bewaar dit document op een veilige plaats en vernietig het na gebruik.</p>`;
-
-            const els = document.createElement("div")
-
-            if (!onlyContacts) {
-                for (const group of samenvatting) {
-                    const title = document.createElement("h2")
-                    title.innerText = group.title
-                    els.appendChild(title);
-
-                    const definitionGroup = document.createElement("dl")
-                    definitionGroup.className = "summary-details-grid small"
-
-
-                    for (const [text, key] of group.items) {
-                        const def = document.createElement("dt")
-                        const d = document.createElement("dd")
-
-                        def.innerText = text
-                        d.innerText = key
-
-                        definitionGroup.appendChild(def)
-                        definitionGroup.appendChild(d)
-                    }
-
-                    els.appendChild(definitionGroup)
-
-                }
-            }
-
-           
-
-            const columns = document.createElement("div")
-            columns.className = "columns"
-
-            for (const group of this.createContacts()) {
-                const div = document.createElement("div")
-                const title = document.createElement("h2")
-                title.innerText = group.title
-                div.appendChild(title);
-
-                const definitionGroup = document.createElement("dl")
-                definitionGroup.className = "summary-details-grid tiny"
-
-                for (const [text, key] of group.items) {
-                    const def = document.createElement("dt")
-                    const d = document.createElement("dd")
-
-                    def.innerText = text
-                    d.innerText = key
-
-                    definitionGroup.appendChild(def)
-                    definitionGroup.appendChild(d)
-                }
-
-                div.appendChild(definitionGroup)
-                columns.appendChild(div);
-            }
-            if (!onlyContacts) {
-                els.appendChild(document.createElement("hr"))
-            }
-            els.appendChild(columns)
-            html += els.innerHTML;
-
-            html += `</body></html>`;
-
-            printWin.document.write(html);
-
-            setTimeout(() => {
-                printWin.print();
-                printWin.close();
-            }, 1000)
+            await this.newCreatePDF(contacts, steekkaart)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
