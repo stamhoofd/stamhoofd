@@ -157,15 +157,18 @@ export class SessionManagerStatic {
 
     getSessionStorage(): SessionStorage {
         // Loop thru organizations
-
-        const json = localStorage.getItem('organizations')
-        if (json) {
-            try {
-                const parsed = JSON.parse(json)
-                return new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
-            } catch (e) {
-                console.error(e)
+        try {
+            const json = localStorage.getItem('organizations')
+            if (json) {
+                try {
+                    const parsed = JSON.parse(json)
+                    return new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
+                } catch (e) {
+                    console.error(e)
+                }
             }
+        } catch (e) {
+            console.error(e)
         }
         return SessionStorage.create({})
     }

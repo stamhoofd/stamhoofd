@@ -82,9 +82,6 @@ import MemberViewPayments from "./MemberViewPayments.vue";
 import { MemberWithRegistrations, Gender, RecordType, RecordTypeHelper, Member, Group, ParentTypeHelper } from '@stamhoofd/structures';
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import logoSrc from '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png'
-import metropolisMedium from '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2'
-import metropolisBold from '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
 import PDFKit from "pdfkit"
 
 const mm = 2.834666666666667 // = 1 mm
@@ -217,6 +214,10 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
             title += " "+this.group.settings.name
         }
 
+        const logoSrc = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
+        const metropolisMedium = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
+        const metropolisBold = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
+
         const buffer = await new Promise<Buffer>(resolve => {
             const doc = new PDFDocument({ size: [docWidth, docHeight], margin: 10*mm, bufferPages: true });
 
@@ -300,7 +301,6 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     // done
                     break;
                 }
-                console.log(next)
                 let height = this.drawBox(doc, next, margin, y, width, true);
                 if (height > maxHeight) {
                     maxHeight = height
@@ -320,8 +320,6 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     // done
                     break;
                 }
-
-                console.log(margin + index*width + columnGap*index, y)
                 this.drawBox(doc, next, margin + index*width + columnGap*index, y, width, false);
             }
 
@@ -331,7 +329,6 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
     }
 
     drawBox(doc: PDFKit.PDFDocument, data: SamenvattingGroep, x: number, y: number, width: number, calcHeight: boolean) {
-        console.log("drawbox")
         // Calculate height + width
         // Check if we need to start on a new page
         let height = 0;
