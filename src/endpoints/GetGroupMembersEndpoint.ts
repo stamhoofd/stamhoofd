@@ -1,9 +1,14 @@
+import { OneToManyRelation } from '@simonbackx/simple-database';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
 
+import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
+import { MemberFactory } from '../factories/MemberFactory';
 import { Group } from "../models/Group";
+import { Member } from '../models/Member';
+import { RegistrationWithPayment } from '../models/Registration';
 import { Token } from '../models/Token';
 type Params = { id: string };
 class Query extends AutoEncoder {
@@ -53,6 +58,15 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         const [group] = groups
         const members = await group.getMembersWithRegistration(request.query.waitingList)
+
+        if (process.env.NODE_ENV == "development" && members.length == 0) {
+            const m = await new EncryptedMemberFactory({ organization: user.organization }).createMultiple(25)
+            for (const [enc, keychain] of m) {
+                const member = new Member().setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
+                Object.assign(member, enc)
+                members.push(member)
+            }
+        }
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));
     }

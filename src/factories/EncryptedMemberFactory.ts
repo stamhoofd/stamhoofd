@@ -105,7 +105,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
             return i.type != "NoData";
         });
 
-        memberDetails.records.sort((a, b) => {
+       /* memberDetails.records.sort((a, b) => {
             const pA = RecordTypeHelper.getPriority(a.type);
             const pB = RecordTypeHelper.getPriority(b.type);
             if (pA == pB) {
@@ -132,7 +132,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
             // Not possible
             throw new Error("Method records sorting failure")
-        });
+        });*/
 
         // Sort
 
@@ -158,6 +158,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
         memberDetails.doctor.name = "Dr. " + memberDetails.doctor.name;
 
         const member = new EncryptedMember()
+        member.firstName = memberDetails.firstName
         member.publicKey = memberKeyPair.publicKey
 
         // Encrypt the details

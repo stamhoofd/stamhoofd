@@ -6,7 +6,7 @@ interface Options {}
 export class RecordFactory extends Factory<Options, Record> {
     create(): Promise<Record> {
         return Promise.resolve(Record.create({
-            type: this.randomArray(Object.keys(RecordType))
+            type: this.randomArray(Object.values(RecordType))
         }));
     }
 }
