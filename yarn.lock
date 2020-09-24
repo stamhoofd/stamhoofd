@@ -1213,9 +1213,9 @@
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.11.6"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.11.6.tgz#53785556e0a7f8bba2ce6dcc55313c85a3d77e9c"
-  integrity sha512-ae48cQAg1U0dD6UzRdGk0a2iFm2I6O6KbGw070ELXcuoFS/H35yv4ANnUWKSgwZc3msXDc0pE5CpGz2ad5kpMw==
+  version "1.11.8"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.11.8.tgz#ce5b51ee3659ef01be1306a67e77ea566bcfcfc4"
+  integrity sha512-Iv20D6i4+o6tEun/v2uMCPPbHlmS/A3VA01/Ds+Frlj4xEtpJwjjHuPR13vFa2viIGV4V6OcPkxToXzYbYglMg==
   dependencies:
     uuid "^8.2.0"
 
@@ -7835,14 +7835,7 @@ prosemirror-keymap@1.1.4, prosemirror-keymap@^1.0.0, prosemirror-keymap@^1.1.2:
     prosemirror-state "^1.0.0"
     w3c-keyname "^2.2.0"
 
-prosemirror-model@1.11.2, prosemirror-model@^1.11.2:
-  version "1.11.2"
-  resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.11.2.tgz#3ce08172b465bc725c8808c18c2e9378fe69418d"
-  integrity sha512-+gM+x1VUfGAyKR/g0bK7FC46fVNq0xVVL859QAQ7my2p5HzKrPps/pSbYn7T50XTG2r2IhZJChsUFUBHtcoN0Q==
-  dependencies:
-    orderedmap "^1.1.0"
-
-prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.8.1:
+prosemirror-model@1.11.2, prosemirror-model@1.9.1, prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.11.2, prosemirror-model@^1.8.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.9.1.tgz#8c08cf556f593c5f015548d2c1a6825661df087f"
   integrity sha512-Qblh8pm1c7Ll64sYLauwwzjimo/tFg1zW3Q3IWhKRhvfOEgRKqa6dC5pRrAa+XHOIjBFEYrqbi52J5bqA2dV8Q==

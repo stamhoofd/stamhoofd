@@ -377,9 +377,11 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
             doc.fillColor(colorGray);
             doc.font('metropolisMedium');
 
-            h = Math.max(h, doc.heightOfString(text, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap }))
+            const t = text.replaceAll(" ", " ")
+
+            h = Math.max(h, doc.heightOfString(t, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap }))
             if (!calcHeight) {
-                doc.text(text, x + maxWidth + 5*mm, y + height, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap })
+                doc.text(t, x + maxWidth + 5*mm, y + height, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap })
             }
             height += h + gap
         }
