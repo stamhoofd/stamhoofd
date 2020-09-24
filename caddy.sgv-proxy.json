@@ -30,26 +30,90 @@
                                     "headers": {
                                         "request": {
                                             "set": {
-                                                "host": [
+                                                "Host": [
                                                     "login.scoutsengidsenvlaanderen.be"
-                                                ],
-                                                "origin": [
-                                                    "https://login.scoutsengidsenvlaanderen.be"
                                                 ]
-                                            }
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto",
+                                                "Origin",
+                                                "referer"
+                                            ]
                                         },
                                         "response": {
                                             "set": {
-                                                "Access-Control-Allow-Origin:": [
-                                                    "https://stamhoofd.app"
+                                                "access-control-allow-origin": [
+                                                    "{http.request.header.origin}"
                                                 ],
-                                                "Access-Control-Allow-Methods:": [
+                                                "Vary": [
+                                                    "Origin"
+                                                ],
+                                                "access-control-allow-methods": [
                                                     "OPTIONS, GET, POST, PATCH, DELETE"
                                                 ],
-                                                "Access-Control-Allow-Headers": [
+                                                "access-control-allow-headers": [
                                                     "{http.request.header.access-control-request-headers}"
                                                 ],
-                                                "Access-Control-Max-Age": [
+                                                "access-control-max-age": [
+                                                    "86400"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "groepsadmin.sgv.stamhoofd.app"
+                                    ],
+                                    "method": [
+                                        "OPTIONS"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "groepsadmin.scoutsengidsenvlaanderen.be:443"
+                                        }
+                                    ],
+                                    "transport": {
+                                        "protocol": "http",
+                                        "tls": {}
+                                    },
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "Host": [
+                                                    "groepsadmin.scoutsengidsenvlaanderen.be"
+                                                ]
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto"
+                                            ]
+                                        },
+                                        "response": {
+                                            "set": {
+                                                "access-control-allow-origin": [
+                                                    "{http.request.header.origin}"
+                                                ],
+                                                "Vary": [
+                                                    "Origin"
+                                                ],
+                                                "access-control-allow-methods": [
+                                                    "OPTIONS, GET, POST, PATCH, DELETE, PUT"
+                                                ],
+                                                "access-control-allow-headers": [
+                                                    "{http.request.header.access-control-request-headers}"
+                                                ],
+                                                "access-control-max-age": [
                                                     "86400"
                                                 ]
                                             }
@@ -81,26 +145,32 @@
                                     "headers": {
                                         "request": {
                                             "set": {
-                                                "host": [
+                                                "Host": [
                                                     "groepsadmin.scoutsengidsenvlaanderen.be"
-                                                ],
-                                                "origin": [
-                                                    "https://groepsadmin.scoutsengidsenvlaanderen.be"
                                                 ]
-                                            }
+                                            },
+                                            "delete": [
+                                                "x-forwarded-for",
+                                                "x-forwarded-proto",
+                                                "Origin",
+                                                "referer"
+                                            ]
                                         },
                                         "response": {
                                             "set": {
-                                                "Access-Control-Allow-Origin:": [
-                                                    "https://stamhoofd.app"
+                                                "access-control-allow-origin": [
+                                                    "{http.request.header.origin}"
                                                 ],
-                                                "Access-Control-Allow-Methods:": [
-                                                    "OPTIONS, GET, POST, PATCH, DELETE"
+                                                "Vary": [
+                                                    "Origin"
                                                 ],
-                                                "Access-Control-Allow-Headers": [
-                                                    "{http.request.header.access-control-request-headers}"
+                                                "access-control-allow-methods": [
+                                                    "OPTIONS, GET, POST, PATCH, DELETE, PUT"
                                                 ],
-                                                "Access-Control-Max-Age": [
+                                                "access-control-allow-headers": [
+                                                    "Accept, Content-Type, Accept-Language, accept-encoding, Authorization, Origin, Referer, User-Agent"
+                                                ],
+                                                "access-control-max-age": [
                                                     "86400"
                                                 ]
                                             }
