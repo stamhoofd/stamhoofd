@@ -7,9 +7,11 @@
         <main>
             <h1>Wat is er nieuw?</h1>
 
-            <hr>
-            <h2>Synchroniseer met de groepsadministratie van Scouts &amp; Gidsen Vlaanderen (25 september)</h2>
-            <p>Je hebt er even op moeten wachten, maar vanaf vandaag kan je alle leden automatisch in de groepsadministratie plaatsen en aanpassen.</p>
+            <template v-if="isSGV">
+                <hr>
+                <h2>Synchroniseer met de groepsadministratie van Scouts &amp; Gidsen Vlaanderen (25 september)</h2>
+                <p>Plaats automatisch nieuwe leden in de groepsadministratie en pas bestaande leden aan. Daarnaast kan je gestopte leden eenvoudig schrappen.</p>
+            </template>
 
             <hr>
             <h2>Bekijk en print samenvattingen af (24 september)</h2>
@@ -41,7 +43,7 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, Patch
 import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip } from "@stamhoofd/components";
 import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User, OrganizationType, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
@@ -75,6 +77,14 @@ export default class WhatsNewView extends Mixins(NavigationMixin) {
     mounted() {
         // Mark whatsnew count
         localStorage.setItem("what-is-new", WhatsNewCount.toString());
+    }
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get isSGV() {
+        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 }
 </script>
