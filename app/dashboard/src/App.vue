@@ -17,7 +17,7 @@ import { Invite } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Logger } from "@stamhoofd/logger"
 
-function asyncComponent(component: () => Promise<any>, properties = {}) {
+export function asyncComponent(component: () => Promise<any>, properties = {}) {
     return new ComponentWithProperties(PromiseView, {
         promise: async function() {
             const c = (await component()).default
@@ -96,24 +96,6 @@ export default class App extends Vue {
                     }
                 })
             }).setDisplayStyle("popup"));
-        }
-
-        if (parts.length >= 1 && parts[0] == 'aansluiten') {
-            // todo: go to create organization page
-            /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(CreateShop, {})
-            }));*/
-            const registerCode = parts[1] ?? "";
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ './views/signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
-            }).setDisplayStyle("popup"))
-        }
-
-        if (parts.length == 1 && parts[0] == 'reset-password') {
-            // tood: password reset view
-            /*(this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(ForgotPasswordResetView, {})
-            }));*/
         }
     }
 }

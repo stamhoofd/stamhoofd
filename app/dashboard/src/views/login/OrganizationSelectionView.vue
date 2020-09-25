@@ -1,7 +1,7 @@
 <template>
     <div class="organization-selection-view padded-view">
         <h1>Kies je vereniging</h1>
-        <p>Selecteer de vereniging waar je wilt inloggen.</p>
+        <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
         <input v-model="query" class="input search" placeholder="Zoek op postcode of naam">
 
         <Spinner v-if="loading" class="gray center" />
@@ -24,6 +24,7 @@ import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
+import { asyncComponent } from '../../App.vue';
 
 import LoginView from './LoginView.vue';
 
@@ -72,7 +73,17 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
         HistoryManager.setUrl("/")
+
+        if (parts.length >= 1 && parts[0] == 'aansluiten') {
+
+            const registerCode = parts[1] ?? "";
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
+            }).setDisplayStyle("popup"))
+        }
     }
 
     activated() {
@@ -155,13 +166,13 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
 
         > h1 {
-            @extend .style-huge-title-1;
+            @extend .style-title-1;
             padding-bottom: 10px;
         }
 
         > p {
             @extend .style-description;
-            padding-bottom: 10px;
+            padding-bottom: 20px;
         }
 
         > input.search {
