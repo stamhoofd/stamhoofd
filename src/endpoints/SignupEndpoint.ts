@@ -42,10 +42,12 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
         if (!user) {
             // This user already exists, well that is pretty impossible
+            // todo: report success + send an e-mail with message that you need to sign in
             throw new SimpleError({
                 code: "creating_user",
                 message: "Something went wrong while creating the user. Please contact us to resolve this issue.",
-                statusCode: 500
+                human: "Er bestaat al een gebruiker met dit e-mailadres. Je kan inloggen met dit e-mailadres bij deze vereniging.",
+                statusCode: 400
             });
         }
 
