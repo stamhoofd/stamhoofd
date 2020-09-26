@@ -116,8 +116,13 @@ class Email {
             }
         }
 
-        const info = await this.transporter.sendMail(mail);
-        console.log("Message sent: %s", info.messageId);
+        try {
+            const info = await this.transporter.sendMail(mail);
+            console.log("Message sent: %s", info.messageId);
+        } catch (e) {
+            console.error("Failed to send e-mail:")
+            console.error(e);
+        }
     }
 
     /**

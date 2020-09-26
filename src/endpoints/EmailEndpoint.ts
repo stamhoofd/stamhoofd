@@ -69,11 +69,11 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             return value + attachment.content.length
         }, 0)
         
-        if (size > 10*1024*1024*4) {
+        if (size > 9.5*1024*1024) {
             throw new SimpleError({
                 code: "too_big_attachments",
                 message: "Too big attachments",
-                human: "Jouw bijlage is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive.",
+                human: "Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.",
                 field: "attachments"
             })
         }
