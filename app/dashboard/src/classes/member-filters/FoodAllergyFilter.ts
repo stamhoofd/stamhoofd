@@ -4,7 +4,7 @@ import { Filter } from "./Filter";
 
 export class FoodAllergyFilter implements Filter {
     getName(): string {
-        return "Voedingsallergie";
+        return "Voedingsallergie of dieet";
     }
     doesMatch(member: MemberWithRegistrations): boolean {
         if (!member.details) {
@@ -12,7 +12,7 @@ export class FoodAllergyFilter implements Filter {
         }
 
         return member.details.records.some((record) => {
-            return record.type == RecordType.FoodAllergies;
+            return record.type == RecordType.FoodAllergies || record.type == RecordType.Diet;
         });
     }
 }

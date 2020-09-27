@@ -4,3 +4,7 @@ export interface Filter {
     getName(): string;
     doesMatch(member: MemberWithRegistrations): boolean;
 }
+
+export interface DescriptiveFilter {
+    getDescription(member: MemberWithRegistrations): string;
+}

@@ -277,7 +277,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
     clientId = "groep-O2209G-Prins-Boudewijn-Wetteren"
     redirectUri = "https://stamhoofd.app/oauth/sgv"
-    dryRun = false
+    dryRun = process.env.NODE_ENV != "production"
     
     /**
      * List of all members (pretty low in memory because we don't save a lot of data)

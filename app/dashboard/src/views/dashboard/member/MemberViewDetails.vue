@@ -123,8 +123,8 @@
 
         </div>
 
-        <div v-if="(member.groups.length > 0 && member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.groups.length > 0 && member.details && !member.details.isPlaceholder)">
+        <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
+            <template v-if="(member.details && !member.details.isPlaceholder)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span

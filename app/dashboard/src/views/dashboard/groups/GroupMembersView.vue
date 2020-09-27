@@ -30,6 +30,11 @@
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
                 <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
+
+                <button class="button text" @click="addMember">
+                    <span class="icon add" />
+                    <span>Nieuw</span>
+                </button>
             </h1>
 
             <Spinner class="center" v-if="loading"/>
@@ -92,15 +97,13 @@
                             <p class="style-description-small" v-if="!group">{{ member.member.groups.map(g => g.settings.name ).join(", ") }}</p>
                             <p class="style-description-small only-smartphone">{{ member.member.details.age }} jaar</p>
                         </td>
-                        <td class="minor hide-smartphone" v-if="member.member.details">
+                        <td class="minor hide-smartphone" v-if="member.member.details && !member.member.details.isPlaceholder">
                             {{ member.member.details.age }} jaar
                         </td>
                         <td class="minor hide-smartphone" v-else>
                             /
                         </td>
-                        <td class="hide-smartphone">
-                            {{ waitingList ? formatDate(registrationDate(member.member)) : member.member.info }}
-                        </td>
+                        <td class="hide-smartphone member-description"><p v-text="getMemberDescription(member.member)" /></td>
                         <td>
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
@@ -150,14 +153,14 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip, CenteredMessage } from "@stamhoofd/components";
+import { TooltipDirective as Tooltip, CenteredMessage, SegmentedControl } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { STNavigationTitle, Spinner, BackButton, LoadingButton } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { CanNotSwimFilter,FoodAllergyFilter, NoFilter, NotPaidFilter } from "../../../classes/member-filters";
+import { CanNotSwimFilter,FoodAllergyFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
 import MailView from "../mail/MailView.vue";
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberView from "../member/MemberView.vue";
@@ -186,11 +189,16 @@ class SelectableMember {
         STToolbar,
         BackButton,
         Spinner,
-        LoadingButton
+        LoadingButton,
+        SegmentedControl
     },
     directives: { Tooltip },
 })
 export default class GroupMembersView extends Mixins(NavigationMixin) {
+    tabLabels = ["Ingeschreven", "Wachtlijst"]
+    tabs = ["all", "waitingList"]
+    tab = this.tabs[0]
+
     @Prop()
     group!: Group | null;
 
@@ -199,7 +207,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     members: SelectableMember[] = [];
     searchQuery = "";
-    filters = [new NoFilter(), new NotPaidFilter(), new FoodAllergyFilter(), new CanNotSwimFilter()];
+    filters = [new NoFilter(), new NotPaidFilter(), new CanNotSwimFilter(), ...RecordTypeFilter.generateAll()];
     selectedFilter = 0;
     selectionCountHidden = 0;
     sortBy = "info";
@@ -381,25 +389,43 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 });
             }
             return this.filteredMembers.sort((a, b) => {
+                const aa = this.getMemberDescription(a.member).toLowerCase()
+                const bb = this.getMemberDescription(b.member).toLowerCase()
                 if (this.sortDirection == "ASC") {
-                    if (a.member.info.toLowerCase() > b.member.info.toLowerCase()) {
+                    if (aa > bb) {
                         return 1;
                     }
-                    if (a.member.info.toLowerCase() < b.member.info.toLowerCase()) {
+                    if (aa < bb) {
                         return -1;
                     }
                     return 0;
                 }
-                if (a.member.info.toLowerCase() > b.member.info.toLowerCase()) {
+                if (aa > bb) {
                     return -1;
                 }
-                if (a.member.info.toLowerCase() < b.member.info.toLowerCase()) {
+                if (aa < bb) {
                     return 1;
                 }
                 return 0;
             });
         }
         return this.filteredMembers;
+    }
+
+    isDescriptiveFilter() {
+        return !!((this.filters[this.selectedFilter] as any).getDescription)
+    }
+
+    getMemberDescription(member: MemberWithRegistrations) {
+        if (this.waitingList) {
+            return this.formatDate(this.registrationDate(member))
+        }
+
+        if (this.isDescriptiveFilter()) {
+            return (this.filters[this.selectedFilter] as any).getDescription(member)
+        }
+
+        return member.info
     }
 
     get filteredMembers(): SelectableMember[] {
@@ -624,6 +650,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         background: $color-primary;
         margin-left: -10px;
         margin-right: 5px;
+    }
+
+    .member-description > p {
+        white-space: pre-wrap;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 

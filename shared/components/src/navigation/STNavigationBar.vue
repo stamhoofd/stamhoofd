@@ -4,9 +4,11 @@
             <slot name="left" />
         </div>
 
-        <h1>
-            {{ title }}
-        </h1>
+        <slot name="middle">
+            <h1>
+                {{ title }}
+            </h1>
+        </slot>
 
         <div>
             <slot name="right" />

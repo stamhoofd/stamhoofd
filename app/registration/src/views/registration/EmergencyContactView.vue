@@ -17,7 +17,7 @@
                         <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
                     </STInputBox>
 
-                    <STInputBox title="Relatie" error-fields="title" :error-box="errorBox">
+                    <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
                         <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. oma">
                         <datalist id="emergency-contact-types">
                             <option value="Oma" />
@@ -33,6 +33,7 @@
                             <option value="Grootmoeder" />
                         </datalist>
                     </STInputBox>
+                    <p class="style-description-small">*Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.</p>
                 </div>
 
                 <div>

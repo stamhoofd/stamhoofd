@@ -183,12 +183,17 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                     description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
                 }).setDisplayStyle("overlay");
                 this.present(component);
+                try {
+                    if (!this.session) {
+                        this.session = new Session(this.invite.organization.id)
+                    }
 
-                if (!this.session) {
-                    this.session = new Session(this.invite.organization.id)
+                    await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
+                } catch (e) {
+                    (component.componentInstance() as any)?.pop()
+                    throw e;
                 }
-
-                await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
+                
                 (component.componentInstance() as any)?.pop()
             }
 
