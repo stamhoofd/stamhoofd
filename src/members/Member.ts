@@ -18,6 +18,9 @@ export class Member extends AutoEncoder {
     @field({ decoder: StringDecoder })
     publicKey: string
 
+    @field({ decoder: StringDecoder, version: 35 })
+    organizationPublicKey: string
+
     @field({ decoder: BooleanDecoder, version: 20 })
     placeholder = false
 
