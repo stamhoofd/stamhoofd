@@ -82,6 +82,7 @@ export class MemberManagerStatic {
                 firstName: member.firstName,
                 details: decryptedDetails ?? null,
                 publicKey: member.publicKey,
+                organizationPublicKey: member.organizationPublicKey
             })
 
             members.push(decryptedMember)

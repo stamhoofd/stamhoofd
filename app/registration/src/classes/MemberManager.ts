@@ -49,7 +49,8 @@ export class MemberManagerStatic {
                 details: decryptedDetails,
                 publicKey: member.publicKey,
                 firstName: member.firstName,
-                placeholder: member.placeholder
+                placeholder: member.placeholder,
+                organizationPublicKey: member.organizationPublicKey
             })
 
             const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
@@ -185,6 +186,7 @@ export class MemberManagerStatic {
                     encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
                     publicKey: member.publicKey,
+                    organizationPublicKey: member.organizationPublicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
                     createdAt: member.createdAt,
