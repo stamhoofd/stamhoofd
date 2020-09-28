@@ -160,6 +160,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
         const member = new EncryptedMember()
         member.firstName = memberDetails.firstName
         member.publicKey = memberKeyPair.publicKey
+        member.organizationPublicKey = organization.publicKey
 
         // Encrypt the details
         const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))

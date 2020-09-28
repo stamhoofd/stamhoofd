@@ -57,6 +57,12 @@ export class Member extends Model {
     @column({ type: "string" })
     publicKey: string;
 
+    /**
+    * Public key used for encryption of the organization
+    */
+    @column({ type: "string" })
+    organizationPublicKey: string;
+
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {
