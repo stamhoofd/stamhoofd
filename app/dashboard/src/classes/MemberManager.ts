@@ -144,7 +144,8 @@ export class MemberManagerStatic {
                 publicKey: member.publicKey,
                 registrations: member.registrations,
                 firstName: member.firstName,
-                users: member.users
+                users: member.users,
+                organizationPublicKey: member.organizationPublicKey
             })
 
             decryptedMember.fillGroups(groups)
@@ -199,6 +200,7 @@ export class MemberManagerStatic {
                     encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
                     publicKey: member.publicKey,
+                    organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
                     registrations: member.registrations,
@@ -224,6 +226,7 @@ export class MemberManagerStatic {
                     encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
                     publicKey: member.publicKey,
+                    organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
                 })
@@ -240,7 +243,9 @@ export class MemberManagerStatic {
             patchArray.addPatch(EncryptedMemberWithRegistrationsPatch.create({
                 id: m.id,
                 encryptedForOrganization: m.encryptedForOrganization,
-                encryptedForMember: m.encryptedForMember
+                encryptedForMember: m.encryptedForMember,
+                organizationPublicKey: m.organizationPublicKey,
+                publicKey: m.publicKey,
             }))
         }
 

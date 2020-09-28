@@ -99,6 +99,7 @@ export class MemberManagerStatic {
                 id: member.id,
                 details: decryptedDetails,
                 publicKey: member.publicKey,
+                organizationPublicKey: member.organizationPublicKey,
                 registrations: member.registrations,
                 firstName: member.firstName,
                 placeholder: member.placeholder,
@@ -131,6 +132,7 @@ export class MemberManagerStatic {
         const decryptedMember = MemberWithRegistrations.create({
             details: member,
             publicKey: keyPair.publicKey,
+            organizationPublicKey: "", // wait for encryption before setting this
             registrations: [],
             firstName: member.firstName,
             placeholder: false,
@@ -186,7 +188,7 @@ export class MemberManagerStatic {
                     encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
                     encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
                     publicKey: member.publicKey,
-                    organizationPublicKey: member.organizationPublicKey,
+                    organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
                     placeholder: false,
                     createdAt: member.createdAt,

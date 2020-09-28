@@ -45,7 +45,8 @@ export class FamilyManager {
             registrations: registrations,
             firstName: member.firstName,
             placeholder: true,
-            users: []
+            users: [],
+            organizationPublicKey: "" // doesn't matter since we only going to set this when we encrypt it
         })
 
         const members = (this.members ?? []).filter(m => !!m.details)
