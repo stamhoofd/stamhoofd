@@ -1,0 +1,22 @@
+CREATE TABLE `invites` (
+  `id` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  `key` varchar(128) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL COMMENT 'Key needed to access the invite data',
+  `keychainItems` text CHARACTER SET ascii COLLATE ascii_general_ci COMMENT 'Encrypted keychain data that is shared with this user',
+  `organizationId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  `senderId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  `receiverId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  `permissions` json DEFAULT NULL COMMENT 'Only set when you going to give admin permissions',
+  `memberIds` json DEFAULT NULL COMMENT 'Set when you are going to give permissions to access members',
+  `userDetails` json DEFAULT NULL COMMENT 'Auto prefill user information (email, name, ...) when creating the user',
+  `validUntil` datetime NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key` (`key`) USING BTREE,
+  KEY `receiverId` (`receiverId`),
+  KEY `senderId` (`senderId`),
+  KEY `organizationId` (`organizationId`),
+  CONSTRAINT `invites_ibfk_1` FOREIGN KEY (`receiverId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invites_ibfk_2` FOREIGN KEY (`senderId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `invites_ibfk_3` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
