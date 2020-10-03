@@ -33,6 +33,7 @@ export * from "./src/endpoints/RegisterMember"
 export * from "./src/endpoints/EmailRequest"
 export * from "./src/endpoints/RegisterResponse"
 export * from "./src/endpoints/ForgotPasswordRequest"
+export * from "./src/endpoints/ChangeOrganizationKeyRequest"
 
 export * from "./src/DNSRecord"
 export * from "./src/endpoints/OrganizationDomains"
