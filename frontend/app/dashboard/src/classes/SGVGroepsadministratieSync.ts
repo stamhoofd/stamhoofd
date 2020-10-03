@@ -267,7 +267,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {
         "KAP": ["kapoenen"],
-        "KW": ["kabouters", "welpen", "wouters", "woudlopers"],
+        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen"],
         "JGJV": ["jonggidsen", "jongverkenners", "jonggivers"],
         "GVE": ["gidsen", "verkenners", "givers"],
         "AKAB": ["akabe"],
