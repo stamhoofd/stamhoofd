@@ -1,4 +1,4 @@
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel } from '@stamhoofd/structures';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel, ChangeOrganizationKeyRequest } from '@stamhoofd/structures';
 import { Decoder, ObjectData, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
@@ -212,6 +212,27 @@ export class LoginHelper {
         session.setToken(response.data)
         Keychain.addItem(item)
         await session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
+        await SessionManager.setCurrentSession(session)
+    }
+
+    static async changeOrganizationKey(session: Session) {
+        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
+        const item = await session.createKeychainItem(organizationKeyPair)
+
+        // Do netwowrk request to create organization
+        await session.authenticatedServer.request({
+            method: "POST",
+            path: "/organization/change-key",
+            body: ChangeOrganizationKeyRequest.create({
+                publicKey: organizationKeyPair.publicKey,
+                keychainItems: [
+                    item
+                ]
+            })
+        })
+
+        Keychain.addItem(item)
+        await session.updateData()
         await SessionManager.setCurrentSession(session)
     }
 

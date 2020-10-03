@@ -125,6 +125,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/lock.svg);
     }
 
+    &.lock-missing:after {
+        font-icon: url(@stamhoofd/assets/images/icons/lock-missing.svg);
+    }
+
     &.share:after {
         font-icon: url(@stamhoofd/assets/images/icons/share.svg);
     }

@@ -32,16 +32,25 @@
 
             <hr>
             <h2>Andere beheerders hebben geen administrator rechten</h2>
-            <p class="style-description">Contacteer Stamhoofd via hallo@stamhoofd.be. We kunnen je toegang normaal gezien nog herstellen met de hulp van de andere beheerders.</p>
+            <p class="style-description">Geef een bestaande beheerder administrator rechten en volg de stappen hierboven. Opgelet: Je kan geen nieuwe beheerders aanmaken als je de sleutel mist. Voor je verder gaat moet je zeker een nieuwe sleutel aanmaken anders heb je ook geen toegang tot nieuwe leden of aanpassingen.</p>
 
             <hr>
             <h2>Er zijn geen andere beheerders</h2>
-            <p class="style-description">Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. Je kan wel nog de voornaam van de leden zien, de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn. Je moet zelf de rest van de gegevens opnieuw aanvullen of je vraagt aan al je leden om in te loggen en de gegevens nog eens opnieuw op te slaan (neem eerst contact op met hallo@stamhoofd.be als je daaraan begint). Er is geen manier om de gegevens te herstellen zonder hulp van je leden zelf. Neem best contact op met Stamhoofd om je te helpen om de gegevens terug aan te vullen via je leden.</p>
+            <p class="style-description">Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. Je kan wel nog de voornaam van de leden zien, ten minste één e-mailadres en de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn. </p>
+            
+            <ol>
+                <li>Maak een nieuwe sleutel aan via de knop onderaan</li>
+                <li>Vraag aan alle leden om terug naar de inschrijvingspagina te gaan en hun gegevens na te kijken. Het is belangrijk dat ze elk lid 'bewerken' en opslaan (ookal passen ze niets aan). Alle leden kunnen gelukkig nog aan al hun gegevens en moeten niet meer alles nakijken (tenzij ze zelf hun wachtwoord vergeten zijn).</li>
+                <li>Vul eventueel zelf gegevens aan van leden, maar let op: zodra jij de gegevens aanpast verliest ook het lid alle gegevens die hij eerder had ingegeven en worden deze overschreven door jouw wijzigingen (ookal heb je bepaalde velden leeg gelaten).</li>
+            </ol>
 
         </main>
 
         <STToolbar>
             <template slot="right">
+                <button class="button destructive" @click="openNewKey">
+                    <span class="icon trash"/><span>Nieuwe sleutel maken</span>
+                </button>
                 <button class="button primary" @click="dismiss">
                     Doorgaan zonder sleutel
                 </button>
@@ -62,6 +71,7 @@ import DomainSettingsView from './DomainSettingsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import ChangePasswordView from './ChangePasswordView.vue';
+import CreateNewKeyView from './CreateNewKeyView.vue';
 
 @Component({
     components: {
@@ -72,8 +82,9 @@ import ChangePasswordView from './ChangePasswordView.vue';
     },
 })
 export default class NoKeyView extends Mixins(NavigationMixin) {
-    
-
+    openNewKey() {
+        this.present(new ComponentWithProperties(CreateNewKeyView, {}).setDisplayStyle("popup"));
+    }
 }
 </script>
 

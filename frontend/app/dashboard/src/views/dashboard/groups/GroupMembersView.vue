@@ -95,7 +95,7 @@
                                 <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
                             </h2>
                             <p class="style-description-small" v-if="!group">{{ member.member.groups.map(g => g.settings.name ).join(", ") }}</p>
-                            <p class="style-description-small only-smartphone">{{ member.member.details.age }} jaar</p>
+                            <p class="style-description-small only-smartphone" v-if="member.member.details && !member.member.details.isPlaceholder">{{ member.member.details.age }} jaar</p>
                         </td>
                         <td class="minor hide-smartphone" v-if="member.member.details && !member.member.details.isPlaceholder">
                             {{ member.member.details.age }} jaar
@@ -105,6 +105,7 @@
                         </td>
                         <td class="hide-smartphone member-description"><p v-text="getMemberDescription(member.member)" /></td>
                         <td>
+                            <button class="button icon gray lock-missing" v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
