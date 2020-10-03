@@ -17,7 +17,7 @@ Documentation and code is located in the backend folder.
 
 ## Shared
 
-We have some packages that are shared between the frontend and backend. The most important here is `structures`. This package contains all the data structures and how they should be encoded and decoded. This is all versioned, so make sure you keep everything backwards compatible. If you need to add some new data that is stored, you'll probably need to make some changes in this package.
+We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. Make sure you keep everything backwards compatible, read the documantation in [@simonbackx/simple-encoding](https://github.com/simonbackx/simple-encoding). If you need to add some new data, you'll probably need to make some changes in this package.
 
 # Contributing
 
