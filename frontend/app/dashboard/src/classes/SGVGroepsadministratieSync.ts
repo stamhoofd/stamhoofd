@@ -127,6 +127,9 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     }
 
     for (const [index, parent] of details.parents.entries()) {
+        if (!parent.address) {
+            throw new Error("Er ontbreekt een adres bij één van de ouders")
+        }
         if (parent.address && !addressMap.has(parent.address.toString())) {
             const a = createOrUpdateAddress(parent.address, lid.adressen, index + 1)
             newAddresses.push(a)
