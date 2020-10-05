@@ -46,6 +46,7 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             member.organizationId = user.organizationId
             member.encryptedForMember = struct.encryptedForMember
             member.encryptedForOrganization = struct.encryptedForOrganization
+            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
 
             console.log(member)
@@ -74,6 +75,7 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             member.encryptedForOrganization = struct.encryptedForOrganization
             member.firstName = struct.firstName
             member.publicKey = struct.publicKey
+            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             await member.save();
         }
 

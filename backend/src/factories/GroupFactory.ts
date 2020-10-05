@@ -24,8 +24,8 @@ export class GroupFactory extends Factory<Options, Group> {
         group.organizationId = organization.id
         group.settings = GroupSettings.create({
             name: "Group name",
-            startDate: new Date(),
-            endDate: new Date(),
+            startDate: new Date(new Date().getTime() - 10 * 1000),
+            endDate: new Date(new Date().getTime() + 10 * 1000),
             prices: [
                 GroupPrices.create({
                     price: this.options.price ?? 400,

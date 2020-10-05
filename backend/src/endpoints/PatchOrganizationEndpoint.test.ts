@@ -221,9 +221,9 @@ describe("Endpoint.PatchOrganization", () => {
             })
             changes.addPut(put)
 
-            const r = Request.buildJson("PATCH", "/v3/organization", organization.getApiHost(), {
+            const r = Request.buildJson("PATCH", "/v34/organization", organization.getApiHost(), {
                 id: organization.id,
-                groups: changes.encode({ version: 3 }),
+                groups: changes.encode({ version: 34 }),
             });
             r.headers.authorization = "Bearer " + token.accessToken
 

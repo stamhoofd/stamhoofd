@@ -162,6 +162,7 @@ export class MemberFactory extends Factory<Options, Member> {
         member.publicKey = memberKeyPair.publicKey
         member.organizationId = organization.id
         member.firstName = memberDetails.firstName
+        member.organizationPublicKey = organization.publicKey
 
         // Encrypt the details
         const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))

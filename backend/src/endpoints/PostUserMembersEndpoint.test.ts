@@ -61,6 +61,7 @@ describe("Endpoint.PostUserMembers", () => {
             encryptedForMember: members[0].encryptedForMember,
             encryptedForOrganization: members[0].encryptedForOrganization,
             publicKey: existingMember.publicKey,
+            organizationPublicKey: organization.publicKey,
             firstName: existingMember.firstName,
             placeholder: existingMember.placeholder
         })

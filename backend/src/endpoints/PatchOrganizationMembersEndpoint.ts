@@ -58,6 +58,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.organizationId = user.organizationId
             member.encryptedForMember = struct.encryptedForMember
             member.encryptedForOrganization = struct.encryptedForOrganization
+            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
 
             // Created by organization = placeholder
@@ -101,6 +102,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
             member.encryptedForOrganization = patch.encryptedForOrganization ?? member.encryptedForOrganization
+            member.organizationPublicKey = patch.organizationPublicKey ?? member.organizationPublicKey
             member.firstName = patch.firstName ?? member.firstName
             member.publicKey = patch.publicKey ?? member.publicKey
             member.placeholder = patch.placeholder ?? member.placeholder
