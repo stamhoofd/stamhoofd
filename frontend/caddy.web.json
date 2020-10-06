@@ -17,6 +17,71 @@
                             ],
                             "handle": [
                                 {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "match": [
+                                                {
+                                                    "not": [
+                                                        {
+                                                            "path": [
+                                                                "*.js",
+                                                                "*.css",
+                                                                "*.png",
+                                                                "*.svg",
+                                                                "*.ttf",
+                                                                "*.woff",
+                                                                "*.woff2"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "no-cache"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        },
+                                        {
+                                            "match": [
+                                                {
+                                                    "path": [
+                                                        "*.js",
+                                                        "*.css",
+                                                        "*.png",
+                                                        "*.svg",
+                                                        "*.ttf",
+                                                        "*.woff",
+                                                        "*.woff2"
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "max-age=2592000"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        }
+                                    ]
+                                },
+                                {
                                     "handler": "file_server",
                                     "root": "/etc/stamhoofd/dashboard/",
                                     "pass_thru": true
@@ -61,6 +126,71 @@
                             ],
                             "handle": [
                                 {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "match": [
+                                                {
+                                                    "not": [
+                                                        {
+                                                            "path": [
+                                                                "*.js",
+                                                                "*.css",
+                                                                "*.png",
+                                                                "*.svg",
+                                                                "*.ttf",
+                                                                "*.woff",
+                                                                "*.woff2"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "no-cache"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        },
+                                        {
+                                            "match": [
+                                                {
+                                                    "path": [
+                                                        "*.js",
+                                                        "*.css",
+                                                        "*.png",
+                                                        "*.svg",
+                                                        "*.ttf",
+                                                        "*.woff",
+                                                        "*.woff2"
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "max-age=2592000"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        }
+                                    ]
+                                },
+                                {
                                     "handler": "file_server",
                                     "root": "/etc/stamhoofd/registration/",
                                     "pass_thru": true
@@ -77,6 +207,71 @@
                         },
                         {
                             "handle": [
+                                {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "match": [
+                                                {
+                                                    "not": [
+                                                        {
+                                                            "path": [
+                                                                "*.js",
+                                                                "*.css",
+                                                                "*.png",
+                                                                "*.svg",
+                                                                "*.ttf",
+                                                                "*.woff",
+                                                                "*.woff2"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "no-cache"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        },
+                                        {
+                                            "match": [
+                                                {
+                                                    "path": [
+                                                        "*.js",
+                                                        "*.css",
+                                                        "*.png",
+                                                        "*.svg",
+                                                        "*.ttf",
+                                                        "*.woff",
+                                                        "*.woff2"
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "max-age=2592000"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        }
+                                    ]
+                                },
                                 {
                                     "handler": "file_server",
                                     "root": "/etc/stamhoofd/registration/",
