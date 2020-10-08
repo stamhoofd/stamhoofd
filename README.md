@@ -1,6 +1,6 @@
 <p align="center">
 <img src="https://www.stamhoofd.be/images/logo.svg" alt="Stamhoofd" height="50"><br><br>
-Open-source software for clubs and organizations
+Supporting clubs and non-profits with great software
 </p>
 
 # Folder structure
