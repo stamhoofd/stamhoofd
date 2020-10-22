@@ -10,8 +10,8 @@
             <p>Blijf op de hoogte van al onze wijzigingen en krijg als eerste toegang tot nieuwe functies door ons te volgen op <a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Instagram</a> of <a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Facebook</a>.</p>
 
             <hr>
-            <h2>Betere e-mail functies (22 oktober) 💌</h2>
-            <p><a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Meer info</a></p>
+            <h2>Betere e-mail functies en verbeteringen (22 oktober) 💌</h2>
+            <p><a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Wat is er gewijzigd?</a></p>
 
             <template v-if="isSGV">
                 <hr>
