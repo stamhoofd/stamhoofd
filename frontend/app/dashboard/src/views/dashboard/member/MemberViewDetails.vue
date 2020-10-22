@@ -37,6 +37,14 @@
                         <dt>E-mailadres</dt>
                         <dd>{{ member.details.email }}</dd>
                     </template>
+
+                    <template v-if="member.details.address">
+                        <dt>Adres</dt>
+                        <dd>
+                            {{ member.details.address.street }} {{ member.details.address.number }}<br>{{ member.details.address.postalCode }}
+                            {{ member.details.address.city }}
+                        </dd>
+                    </template>
                 </dl>
             </div>
 
