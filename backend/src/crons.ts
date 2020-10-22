@@ -46,10 +46,13 @@ async function checkReplies() {
             console.log("Received message from forwarding queue");
 
             if (message.ReceiptHandle) {
-                await sqs.deleteMessage({
-                    QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding",
-                    ReceiptHandle: message.ReceiptHandle
-                }).promise()
+                if (process.env.NODE_ENV === "production") {
+                    await sqs.deleteMessage({
+                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding",
+                        ReceiptHandle: message.ReceiptHandle
+                    }).promise()
+                    console.log("Deleted from queue");
+                }
             }
 
             try {
