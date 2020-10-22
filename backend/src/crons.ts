@@ -43,8 +43,14 @@ async function checkReplies() {
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("Received message: ");
-            console.log(message.Body)
+            console.log("Received message from forwarding queue");
+
+            if (message.ReceiptHandle) {
+                await sqs.deleteMessage({
+                    QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding",
+                    ReceiptHandle: message.ReceiptHandle
+                }).promise()
+            }
 
             try {
                 if (message.Body) {
@@ -53,7 +59,6 @@ async function checkReplies() {
 
                     if (bounce.Message) {
                         const message = JSON.parse(bounce.Message)
-                        console.log(message)
 
                         // Read message content
                         if (message.mail && message.content && message.receipt) {
@@ -67,46 +72,37 @@ async function checkReplies() {
                                 dmarcVerdict: { status: 'PASS' | string },
                             }
 
-                            const recipients = receipt.recipients
-                            const email = recipients.find(r => r.endsWith("@stamhoofd.email"))
-
-                            if (!email) {
-                                console.error("Unknown receipient")
-                                continue;
-                            }
-
                             if (receipt.spamVerdict.status != "PASS" || receipt.virusVerdict.status != "PASS" || !(receipt.spfVerdict.status == "PASS" || receipt.dkimVerdict.status == "PASS")) {
                                 console.error("Received spam or virus e-mail. Ignoring")
                                 continue;
                             }
 
+                            const recipients = receipt.recipients
+                            const email = recipients.find(r => r.endsWith("@stamhoofd.email"))
+                            let organization: Organization | undefined = undefined
+
+                            if (email) {
+                                // find receipient
+                                const uri = email.substring(0, email.length - "@stamhoofd.email".length)
+                                console.log(uri)
+
+                                organization = await Organization.getByURI(uri)
+                                
+                                if (!organization) {
+                                    console.error("Unknown organization")
+                                    // forward to stamhoofd
+                                }
+                            } else {
+                                console.error("Unknown receipient")  
+                                // forward to stamhoofd
+                            }
+
                             // Send a new e-mail
-
-                            // find receipient
-                            const uri = email.substring(0, email.length - "@stamhoofd.email".length)
-                            console.log(uri)
-
-                            const organization = await Organization.getByURI(uri)
-                            if (!organization) {
-                                console.error("Unknown organization")
-                                // todo: forward to stamhoofd
-                                continue
-                            }
-
-                            const defaultEmail = organization.privateMeta.emails.find(e => e.default)?.email
-
-                            if (!defaultEmail) {
-                                console.error("No default e-mail address")
-                                // todo: forward to stamhoofd
-                                continue
-                            }
-
-                            console.log("todo: forward to "+defaultEmail)       
+                            const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? "hallo@stamhoofd.be"
+                            console.log("Forward to "+defaultEmail)       
                             
                             const parsed = await simpleParser(content);
                             const from = parsed.from?.value[0]?.address
-                            
-
                             const extraDescription = from && from.endsWith("amazonses.com") ? "Er ging iets mis bij het versturen van een e-mail. Het e-mailadres is ongeldig of de ontvanger heeft de e-mail als spam gemarkeerd. Kijk na of dit lid een typefout heeft gemaakt in het e-mailadres en corrigeer dit zeker." : "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd. Normaal antwoorden gebruikers rechtstreeks naar het juiste e-mailadres maar enkele e-mail programma's ondersteunen deze standaard functionaliteit niet en sturen antwoorden altijd naar de verstuurder (en wij kunnen niet versturen vanaf jouw e-mailadres, tenzij je jouw domeinnaam instelt in Stamhoofd). Let op dat je zelf ook naar het juiste e-mailadres antwoordt ("+(from ?? "?")+").";
 
                             let html: string | undefined = undefined
@@ -124,7 +120,7 @@ async function checkReplies() {
                             }
 
                             const options = {
-                                from: email,
+                                from: email ?? recipients[0] ?? "unknown@stamhoofd.be",
                                 to: defaultEmail,
                                 replyTo: parsed.from?.text,
                                 subject: parsed.subject ?? "Doorgestuurd bericht",
@@ -142,10 +138,8 @@ async function checkReplies() {
                                     }]
                                 })
                             }
-                            console.log(options)
 
                             Email.send(options)
-
                         }
                     }
                 }
