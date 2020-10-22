@@ -10,6 +10,8 @@ import Email from '../email/Email';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
 import { User } from './User';
+import { PromiseResult } from 'aws-sdk/lib/request';
+import { AWSError } from 'aws-sdk';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -406,13 +408,14 @@ export class Organization extends Model {
 
         // Check if mail identitiy already exists..
         let exists = false
+        let existing: PromiseResult<SES.GetEmailIdentityResponse, AWSError> | undefined = undefined
         try {
-            const existing = await sesv2.getEmailIdentity({
+            existing = await sesv2.getEmailIdentity({
                 EmailIdentity: this.privateMeta.mailDomain
             }).promise()
             exists = true
 
-            console.log("AWS mail idenitiy exists already")
+            console.log("AWS mail idenitiy exists already: just checking the verification status in AWS")
 
             this.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
         } catch (e) {
@@ -421,7 +424,7 @@ export class Organization extends Model {
         }
 
         if (!exists) {
-            console.log("Creating email identity")
+            console.log("Creating email identity in AWS SES...")
 
             const result = await sesv2.createEmailIdentity({
                 EmailIdentity: this.privateMeta.mailDomain,
@@ -447,6 +450,17 @@ export class Organization extends Model {
                 console.error("Not validated :/")
             }
             this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
+        }
+
+        if (this.registerDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.registerDomain)))) {
+            // Also set a from domain, to increase deliverability even more
+            console.log("Setting mail from domain...")
+            const params = {
+                EmailIdentity: this.privateMeta.mailDomain,
+                BehaviorOnMxFailure: "USE_DEFAULT_VALUE",
+                MailFromDomain: this.registerDomain,
+            };
+            await sesv2.putEmailIdentityMailFromAttributes(params).promise();
         }
     }
 }

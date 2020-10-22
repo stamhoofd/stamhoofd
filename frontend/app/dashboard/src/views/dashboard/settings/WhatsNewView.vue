@@ -7,15 +7,23 @@
         <main>
             <h1>Wat is er nieuw?</h1>
 
+            <p>Blijf op de hoogte van al onze wijzigingen en krijg als eerste toegang tot nieuwe functies door ons te volgen op <a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Instagram</a> of <a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Facebook</a>.</p>
+
+            <hr>
+            <h2>Betere e-mail functies (22 oktober) 💌</h2>
+            <p><a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Meer info</a></p>
+
             <template v-if="isSGV">
                 <hr>
                 <h2>Synchroniseer met de groepsadministratie van Scouts &amp; Gidsen Vlaanderen (25 september)</h2>
                 <p>Plaats automatisch nieuwe leden in de groepsadministratie en pas bestaande leden aan. Daarnaast kan je gestopte leden eenvoudig schrappen.</p>
+                <p><a class="inline-link" href="https://www.facebook.com/stamhoofd/photos/a.115819256519977/338800554221845/" target="_blank">Meer info</a></p>
             </template>
 
             <hr>
             <h2>Bekijk en print samenvattingen af (24 september)</h2>
             <p>Vanaf nu kan je een samenvatting opvragen en afdrukken van de leden die je selecteert. Die kan je meenemen tijdens een activiteit, op weekend of kamp.</p>
+            <p><a class="inline-link" href="https://www.facebook.com/stamhoofd/photos/a.115819256519977/338135777621656/" target="_blank">Meer info</a></p>
 
             <hr>
             <h2>Start- en einduur voor inschrijvingen (15 september)</h2>
