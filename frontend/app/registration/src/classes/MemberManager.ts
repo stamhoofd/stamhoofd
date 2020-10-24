@@ -164,6 +164,7 @@ export class MemberManagerStatic {
     async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<{encryptedMembers: EncryptedMember[], keychainItems: KeychainItem[]}> {
         const encryptedMembers: EncryptedMember[] = [];
         const keychainItems: KeychainItem[] = []
+        const session = SessionManager.currentSession!
 
         for (const member of members) {
             if (!member.details) {
@@ -171,10 +172,20 @@ export class MemberManagerStatic {
             }
             const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
 
-            // Check if we still have the public key of this member.
+            // Check if we still have the private key of this member.
             let keychainItem = Keychain.getItem(member.publicKey)
+
+            if (keychainItem) {
+                try {
+                    await session.decryptKeychainItem(keychainItem)
+                } catch (e) {
+                    console.error(e)
+                    console.error("No longer has access to this members private key, so create a new one instead.")
+                    keychainItem = undefined
+                }
+            }
+
             if (!keychainItem) {
-                const session = SessionManager.currentSession!
                 // Create a keypair
                 const keyPair = await Sodium.generateEncryptionKeyPair()
                 keychainItem = await session.createKeychainItem(keyPair)

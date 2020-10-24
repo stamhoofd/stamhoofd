@@ -2,6 +2,7 @@ import { Organization } from './models/Organization';
 import AWS from 'aws-sdk';
 import { simpleParser } from 'mailparser';
 import Email from './email/Email';
+import { EmailAddress } from './models/EmailAddress';
 
 let isRunningCrons = false
 
@@ -81,24 +82,8 @@ async function checkReplies() {
                             }
 
                             const recipients = receipt.recipients
-                            const email = recipients.find(r => r.endsWith("@stamhoofd.email"))
-                            let organization: Organization | undefined = undefined
-
-                            if (email) {
-                                // find receipient
-                                const uri = email.substring(0, email.length - "@stamhoofd.email".length)
-                                console.log(uri)
-
-                                organization = await Organization.getByURI(uri)
-                                
-                                if (!organization) {
-                                    console.error("Unknown organization")
-                                    // forward to stamhoofd
-                                }
-                            } else {
-                                console.error("Unknown receipient")  
-                                // forward to stamhoofd
-                            }
+                            const email: string | undefined = recipients[0]
+                            let organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined
 
                             // Send a new e-mail
                             const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? "hallo@stamhoofd.be"
@@ -142,7 +127,11 @@ async function checkReplies() {
                                 })
                             }
 
-                            Email.send(options)
+                            if (process.env.NODE_ENV === "production") {
+                                Email.send(options)
+                            } else {
+                                //console.log(options)
+                            }
                         }
                     }
                 }
@@ -159,8 +148,17 @@ async function checkBounces() {
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("Received message: ");
-            console.log(message.Body)
+            console.log("Received bounce message");
+
+            if (message.ReceiptHandle) {
+                if (process.env.NODE_ENV === "production") {
+                    await sqs.deleteMessage({
+                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue",
+                        ReceiptHandle: message.ReceiptHandle
+                    }).promise()
+                    console.log("Deleted from queue");
+                }
+            }
 
             try {
                 if (message.Body) {
@@ -182,16 +180,89 @@ async function checkBounces() {
                             for (const recipient of b.bouncedRecipients) {
                                 const email = recipient.emailAddress
 
-                                if (type === "Permanent") {
-                                    console.log("Received a permanent bounce: "+email)
-                                } else {
-                                    if (recipient.diagnosticCode && (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain")) {
-                                        console.log("Invalid domain: "+email)
+                                if (type === "Permanent" || (recipient.diagnosticCode && (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain"))) {
+                                    const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
+                                    if (organization) {
+                                        const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
+                                        emailAddress.hardBounce = true
+                                        await emailAddress.save()
+                                    } else {
+                                        console.error("Unknown organization for email address "+source)
                                     }
                                 }
 
                             }
                             console.log("For domain "+source)
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+}
+
+async function checkComplaints() {
+    console.log("Checking complaints from AWS SQS")
+    const sqs = new AWS.SQS();
+    const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue", MaxNumberOfMessages: 10 }).promise()
+    if (messages.Messages) {
+        for (const message of messages.Messages) {
+            console.log("Received complaint message");
+            console.log(message)
+
+            if (message.ReceiptHandle) {
+                if (process.env.NODE_ENV === "production") {
+                    await sqs.deleteMessage({
+                        QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue",
+                        ReceiptHandle: message.ReceiptHandle
+                    }).promise()
+                    console.log("Deleted from queue");
+                }
+            }
+
+            try {
+                if (message.Body) {
+                    // decode the JSON value
+                    const complaint = JSON.parse(message.Body)
+                    console.log(complaint)
+
+                    if (complaint.Message) {
+                        const message = JSON.parse(complaint.Message)
+
+                        if (message.notificationType && message.notificationType == "Complaint" && message.complaint) {
+                            const b = message.complaint
+                            const source = message.mail.source
+                            const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
+
+                            const type: "abuse" | "auth-failure" | "fraud" | "not-spam" | "other" | "virus" = b.complaintFeedbackType
+
+                            console.log(type)
+
+                           
+                            if (organization) {
+                                for (const recipient of b.complainedRecipients) {
+                                    const email = recipient.emailAddress
+                                    const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
+                                    emailAddress.markedAsSpam = type !== "not-spam"
+                                    await emailAddress.save()
+                                }
+                            } else {
+                                console.error("Unknown organization for email address "+source)
+                            }
+
+                             if (type == "virus" || type == "fraud") {
+                                console.error("Received virus / fraud complaint!")
+                                console.error(complaint)
+                                if (process.env.NODE_ENV === "production") {
+                                    Email.sendInternal({
+                                        to: "simon@stamhoofd.be",
+                                        subject: "Received a "+type+" email notification",
+                                        text: "We received a "+type+" notification for an e-mail from the organization: "+organization?.name+". Please check and adjust if needed.\n"
+                                    })
+                                }
+                            }
                         }
                     }
                 }
@@ -209,7 +280,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkReplies().then(() => checkBounces()).then(() => checkDNS()).catch(e => {
+        checkComplaints()/*.then(checkReplies).then(checkBounces).then(checkDNS)*/.catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

@@ -108,6 +108,33 @@ export class Organization extends Model {
     }
 
     // Methods
+    static async getByEmail(email: string): Promise<Organization | undefined> {
+        if (email.endsWith("@stamhoofd.email")) {
+            const uri = email.substring(0, email.length - "@stamhoofd.email".length)
+            return await Organization.getByURI(uri)
+        }
+
+        const at = email.indexOf("@");
+        const domain = email.substring(at+1)
+
+        console.log(domain)
+
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE privateMeta->"$.value.mailDomain" = ? LIMIT 1`,
+            [domain]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]);
+    }
+
+    
+
+    // Methods
     static async getByRegisterDomain(host: string): Promise<Organization | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`registerDomain\` = ? LIMIT 1`,
