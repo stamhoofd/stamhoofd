@@ -52,7 +52,7 @@
                     <span class="icon trash"/><span>Nieuwe sleutel maken</span>
                 </button>
                 <button class="button primary" @click="dismiss">
-                    Doorgaan zonder sleutel
+                    Doorgaan
                 </button>
             </template>
         </STToolbar>

@@ -96,21 +96,22 @@ export class MemberManagerStatic {
         const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
         const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
-
-        if (!keychainItem) {
-            throw new Error("Missing organization keychain")
-        }
-
         const session = SessionManager.currentSession!
+
         let keyPair: {
             publicKey: string;
             privateKey: string;
         } | undefined = undefined
-        try {
-            keyPair = await session.decryptKeychainItem(keychainItem)
-        } catch (e) {
-            console.error(e)
-            console.error("Invalid keychain item (probably because user encryption key has changed)")
+
+        if (keychainItem) {
+            try {
+                keyPair = await session.decryptKeychainItem(keychainItem)
+            } catch (e) {
+                console.error(e)
+                console.error("Invalid keychain item (probably because user encryption key has changed)")
+            }
+        } else {
+            console.error("Missing organization keychain item")
         }
 
         for (const member of data) {

@@ -14,9 +14,10 @@
 
             <Spinner v-if="loading" />
             <STList v-else>
-                <STListItem v-for="admin in admins" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
                     <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
                     <p class="style-description-small">{{ admin.email }}</p>
+                    <p class="style-description-small">{{ permissionList(admin) }}</p>
 
                     <template slot="right">
                         <span><span class="icon gray edit" /></span>
@@ -26,6 +27,7 @@
                 <STListItem v-for="invite in invites" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
                     <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
                     <p class="style-description-small">{{ invite.userDetails.email }}</p>
+                    <p class="style-description-small">{{ permissionList(invite) }}</p>
 
                     <template slot="right">
                         <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
@@ -50,6 +52,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import { Decoder } from '@simonbackx/simple-encoding';
 import AdminInviteView from './AdminInviteView.vue';
+import { Sorter } from "@stamhoofd/utility";
 
 @Component({
     components: {
@@ -88,6 +91,51 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    permissionList(user: User | Invite) {
+        if (user.permissions?.hasFullAccess()) {
+            return "Administrator"
+        }
+
+        if (user.permissions?.hasWriteAccess()) {
+            return "Alle groepen"
+        }
+
+        const list: string[] = []
+
+        for (const group of this.organization.groups) {
+            if (user.permissions?.hasWriteAccess(group.id)) {
+                list.push(group.settings.name)
+            }
+        }
+
+        if (list.length == this.organization.groups.length) {
+            return "Alle groepen"
+        }
+
+        return list.join(", ")
+    }
+
+    get sortedAdmins() {
+        return this.admins.sort((a, b) => {
+            const af = a.permissions?.hasFullAccess() ?? false
+            const bf = b.permissions?.hasFullAccess() ?? false
+
+            const ag = this.organization.groups.filter(g => a.permissions?.hasWriteAccess(g.id)) ?? []
+            const bg = this.organization.groups.filter(g => b.permissions?.hasWriteAccess(g.id)) ?? []
+
+            const ac = ag.length
+            const bc = bg.length
+
+            return Sorter.stack(
+                Sorter.byBooleanValue(af, bf), 
+                Sorter.byNumberValue(ac, bc), 
+                ac == 1 && bc == 1 ? Group.defaultSort(ag[0], bg[0]) : 0,
+                Sorter.byStringValue(a.firstName ?? "", b.firstName ?? ""),
+                Sorter.byStringValue(a.lastName ?? "", b.lastName ?? "")
+            )!
+        })
     }
 
     createAdmin() {

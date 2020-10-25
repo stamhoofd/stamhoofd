@@ -9,4 +9,54 @@ export class Sorter {
         }
         return 0;
     }
+
+    static byStringProperty<Field extends keyof any >( a: Record<Field, string>, b: Record<Field, string>, field: Field ) {
+        return this.byStringValue(a[field], b[field])
+    }
+
+    static byStringValue( a: string, b: string ) {
+        const af = a.toLowerCase()
+        const bf = b.toLowerCase()
+
+        if ( af > bf ){
+            return 1;
+        }
+        if ( af < bf ){
+            return -1;
+        }
+        return 0;
+    }
+
+    static byBooleanValue( a: boolean, b: boolean) {
+        if (a === b) {
+            return 0
+        }
+        if (a && !b) {
+            return -1
+        }
+        return 1
+    }
+
+    static byNumberValue( a: number, b: number) {
+        if (a === b) {
+            return 0
+        }
+        if (a > b) {
+            return -1
+        }
+        return 1
+    }
+
+    /**
+     * Return the first non zero value from a list, or zero if all values are zero
+     */
+    static stack(...sortResults: (0 | 1 | -1)[]) {
+        while(sortResults.length > 0) {
+            const f = sortResults.shift()
+            if (f != 0) {
+                return f
+            }
+        }
+        return 0
+    }
 }
