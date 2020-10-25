@@ -900,7 +900,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     get loginServer() {
         // We use our own proxy server to https://login.scoutsengidsenvlaanderen.be, because the CORS headers are not set correctly
         // As soon as SGV has fixed this, we can switch back to https://login.scoutsengidsenvlaanderen.be
-        return new Server("https://login.sgv.stamhoofd.app")
+        //return new Server("https://login.sgv.stamhoofd.app")
         return new Server("https://login.scoutsengidsenvlaanderen.be")
     }
 
@@ -911,11 +911,9 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Als er niet snel een fix komt van S&GV moeten we beter een app uitbrengen waar de connectie in kan geplaatst worden
         // zonder proxy, omdat we dan de headers kunnen manipuleren zonder server... #browserstruggles
         return new Server("https://groepsadmin.sgv.stamhoofd.app/groepsadmin/rest-ga")
-        return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }
 
     get server() {
-        return this.workAroundServer
         return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }
 
