@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -489,5 +489,41 @@ export class Organization extends Model {
             };
             await sesv2.putEmailIdentityMailFromAttributes(params).promise();
         }
+    }
+
+    async getKeyHistory(): Promise<OrganizationKey[]> {
+        const query = "select organizationPublicKey, min(updatedAt) as min, max(updatedAt) as max from members where organizationId = ? group by organizationPublicKey"
+        const [rows] = await Database.select(query, [this.id])
+        const keys: OrganizationKey[] = [
+            OrganizationKey.create({
+                publicKey: this.publicKey,
+                start: this.createdAt
+            })
+        ]
+
+        if (rows.length == 0) {
+            return keys
+        }
+
+        for (const row of rows) {
+            console.log(row)
+            const organizationPublicKey = row["members"]["organizationPublicKey"]
+            const min: Date = row[""]["min"]
+            let max: Date | null = row[""]["max"]
+
+            if (organizationPublicKey == this.publicKey) {
+                keys[0].start = min;
+                continue;
+            }
+
+            keys.push(OrganizationKey.create({
+                publicKey: organizationPublicKey,
+                start: min,
+                end: max
+            }))
+        }
+
+        // Read member + address from first row
+        return keys
     }
 }

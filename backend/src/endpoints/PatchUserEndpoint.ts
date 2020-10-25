@@ -64,7 +64,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
 
         if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {
             // password changes
-            editUser.changePassword(request.body.publicAuthSignKey, request.body.encryptedPrivateKey, request.body.authSignKeyConstants, request.body.authEncryptionKeyConstants)
+            editUser.changePassword(request.body.publicKey, request.body.publicAuthSignKey, request.body.encryptedPrivateKey, request.body.authSignKeyConstants, request.body.authEncryptionKeyConstants)
         }
 
         await editUser.save();

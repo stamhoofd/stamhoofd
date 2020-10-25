@@ -1,10 +1,26 @@
-import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './Address';
 import { Group } from './Group';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
+
+export class OrganizationKey extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    publicKey: string;
+
+    @field({ decoder: DateDecoder })
+    start: Date;
+
+    @field({ decoder: DateDecoder, nullable: true })
+    end: Date | null = null;
+}
+
+export class OrganizationKeyUser extends OrganizationKey {
+    @field({ decoder: BooleanDecoder })
+    hasAccess: boolean = false;
+}
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

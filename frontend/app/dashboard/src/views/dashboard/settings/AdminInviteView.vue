@@ -56,6 +56,27 @@
                 
             </STList>
 
+            <hr>
+            <h2>Encryptiesleutels (geavanceerd)</h2>
+            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan optioneel een sleutel waar jij toegang hebt doorsturen. Dit is handig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels.</p>
+
+            <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
+
+            <STList>
+                <STListItem v-for="key of availableKeys" :key="key.publicKey">
+                    <h2 class="style-title-list">Sleutel 
+                    {{ key.publicKey }}</h2>
+                    <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
+                    <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
+                    <button class="button text" v-if="canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
+
+                    <template #right>
+                        <span class="icon error" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" v-if="!key.hasAccess" />
+                        <span class="icon success green" v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" v-else />
+                    </template>
+                </STListItem>
+            </STList>
+        
         </main>
 
         <STToolbar>
@@ -79,13 +100,15 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, Patch
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager, Keychain } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User, OrganizationKeyUser, KeychainedResponseDecoder } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DNSRecordsView from './DNSRecordsView.vue';
 import { Sodium } from '@stamhoofd/crypto';
 import SendInviteView from './SendInviteView.vue';
+import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
+import { Formatter } from '@stamhoofd/utility';
 
 class SelectableGroup {
     group: Group;
@@ -109,6 +132,12 @@ class SelectableGroup {
         STList,
         STListItem
     },
+    directives: {
+        tooltip: Tooltip
+    },
+    filters: {
+        date: Formatter.date.bind(Formatter)
+    }
 })
 export default class AdminInviteView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
@@ -147,6 +176,9 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     forceCreate = false
 
+    loadingKeys: boolean = false
+    availableKeys: OrganizationKeyUser[] = []
+
     get isNew() {
         return this.forceCreate || (!this.editInvite && !this.editUser)
     }
@@ -155,10 +187,51 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
+    get hasKey() {
+        if (this.loadingKeys) {
+            return true
+        }
+
+        return !!this.availableKeys.find(f => f.publicKey == this.organization.publicKey && f.hasAccess)
+    }
+
+    canShareKey(key: string) {
+        return !!Keychain.getItem(key)
+    }
+
+    async shareKey(key: string) {
+        const item = Keychain.getItem(key)
+        if (!item) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Je hebt zelf geen toegang tot deze sleutel. Vraag aan een andere beheerder die wel toegang heeft tot deze sleutel om toegang te verlenen."
+            }))
+            return
+        }
+        console.log(item)
+        try {
+            const decrypted = await SessionManager.currentSession!.decryptKeychainItem(item)
+        } catch (e) {
+            console.log(e)
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Je hebt zelf geen toegang tot deze sleutel. Vraag aan een andere beheerder die wel toegang heeft tot deze sleutel om toegang te verlenen."
+            }))
+            return
+        }
+    }
+
     mounted() {
         for (const group of this.organization.groups) {
             
             this.groups.push(new SelectableGroup(group, (this.user ?? this.invite).permissions?.hasWriteAccess(group.id) ?? false))
+        }
+
+        if (this.editUser) {
+            this.downloadKeys().catch(e => {
+                console.error(e)
+                this.errorBox = new ErrorBox(e)
+            })
         }
     }
 
@@ -180,6 +253,20 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return this.editInvite
         }
         return this.createInvite;
+    }
+
+    async downloadKeys() {
+         const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins/"+this.editUser!.id+"/keys",
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(OrganizationKeyUser as Decoder<OrganizationKeyUser>))
+        })
+
+        // Load all the keys (so we can check if we have access to all the needed keys or not)
+        Keychain.addItems(response.data.keychainItems)
+
+        // Set the keys
+        this.availableKeys = response.data.data
     }
 
     async save() {

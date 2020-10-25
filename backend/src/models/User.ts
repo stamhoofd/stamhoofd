@@ -211,7 +211,8 @@ export class User extends Model {
         return user;
     }
 
-    changePassword(publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+    changePassword(publicKey: string | undefined, publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+        this.publicKey = publicKey ?? this.publicKey
         this.publicAuthSignKey = publicAuthSignKey
         this.encryptedPrivateKey = encryptedPrivateKey
         this.authSignKeyConstants = authSignKeyConstants

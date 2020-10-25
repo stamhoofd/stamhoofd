@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray, PatchType, AutoEncoderPatchType } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch, KeychainItem } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
 export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
@@ -34,25 +34,34 @@ export class MemberManagerStatic {
     async decryptMembersWithoutRegistrations(data: EncryptedMember[]) {
         // Save keychain items
         const members: Member[] = []
-        const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
-
-        if (!keychainItem) {
-            throw new Error("Missing organization keychain")
-        }
-
         const session = SessionManager.currentSession!
-        let keyPair: {
+        const keychainItems: Map<string, {
             publicKey: string;
             privateKey: string;
-        } | undefined = undefined
-        try {
-            keyPair = await session.decryptKeychainItem(keychainItem)
-        } catch (e) {
-            console.error(e)
-            console.error("Invalid keychain item (probably because user encryption key has changed)")
-        }
+        } | undefined> = new Map()
 
         for (const member of data) {
+            if (!keychainItems.get(member.organizationPublicKey)) {
+                const keychainItem = Keychain.getItem(member.organizationPublicKey)
+
+                let keyPair: {
+                    publicKey: string;
+                    privateKey: string;
+                } | undefined = undefined
+
+                if (keychainItem) {
+                    try {
+                        keyPair = await session.decryptKeychainItem(keychainItem)
+                    } catch (e) {
+                        console.error(e)
+                        console.error("Invalid keychain item (probably because user encryption key has changed)")
+                    }
+                } else {
+                    console.error("Missing organization keychain item")
+                }
+                keychainItems.set(member.organizationPublicKey, keyPair)
+            }
+            const keyPair = keychainItems.get(member.organizationPublicKey)
 
             let decryptedDetails: MemberDetails | undefined
 
@@ -95,26 +104,34 @@ export class MemberManagerStatic {
         // Save keychain items
         const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
-        const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
         const session = SessionManager.currentSession!
-
-        let keyPair: {
+        const keychainItems: Map<string, {
             publicKey: string;
             privateKey: string;
-        } | undefined = undefined
-
-        if (keychainItem) {
-            try {
-                keyPair = await session.decryptKeychainItem(keychainItem)
-            } catch (e) {
-                console.error(e)
-                console.error("Invalid keychain item (probably because user encryption key has changed)")
-            }
-        } else {
-            console.error("Missing organization keychain item")
-        }
+        } | undefined> = new Map()
 
         for (const member of data) {
+            if (!keychainItems.get(member.organizationPublicKey)) {
+                const keychainItem = Keychain.getItem(member.organizationPublicKey)
+
+                let keyPair: {
+                    publicKey: string;
+                    privateKey: string;
+                } | undefined = undefined
+
+                if (keychainItem) {
+                    try {
+                        keyPair = await session.decryptKeychainItem(keychainItem)
+                    } catch (e) {
+                        console.error(e)
+                        console.error("Invalid keychain item (probably because user encryption key has changed)")
+                    }
+                } else {
+                    console.error("Missing organization keychain item")
+                }
+                keychainItems.set(member.organizationPublicKey, keyPair)
+            }
+            const keyPair = keychainItems.get(member.organizationPublicKey)
 
             let decryptedDetails: MemberDetails | undefined
 

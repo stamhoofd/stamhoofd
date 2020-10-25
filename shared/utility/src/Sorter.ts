@@ -47,6 +47,16 @@ export class Sorter {
         return 1
     }
 
+    static byDateValue( a: Date, b: Date) {
+        if (a === b) {
+            return 0
+        }
+        if (a > b) {
+            return -1
+        }
+        return 1
+    }
+
     /**
      * Return the first non zero value from a list, or zero if all values are zero
      */
