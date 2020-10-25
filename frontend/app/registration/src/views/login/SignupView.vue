@@ -52,7 +52,7 @@ import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token
 import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -167,8 +167,14 @@ export default class SignupView extends Mixins(NavigationMixin){
             this.dismiss({ force: true })
             
         } catch (e) {
+            console.log(e)
             this.loading = false;
             (component.componentInstance() as any)?.pop()
+
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                this.errorBox = new ErrorBox(e)
+                return;
+            }
 
             const errorMessage = new ComponentWithProperties(CenteredMessage, { 
                 type: "error",
