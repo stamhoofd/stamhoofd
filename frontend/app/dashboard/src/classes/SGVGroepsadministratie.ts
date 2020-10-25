@@ -393,7 +393,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     // Search the group
     async getGroup(): Promise<SGVGroep | null> {
-        const response = await this.workAroundAuthenticatedServer.request({
+        const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/groep",
             decoder: SGVGroepResponse as Decoder<SGVGroepResponse>
@@ -416,7 +416,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async getFuncties() {
-        const response = await this.workAroundAuthenticatedServer.request({
+        const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/functie",
             query: {
@@ -443,7 +443,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // alleen leden met functies downloaden waarvoor Stamhoofd verantwoordelijk is
         const mapping = buildGroupMapping(OrganizationManager.organization.groups, this.functies)
         
-        await this.workAroundAuthenticatedServer.request({
+        await this.authenticatedServer.request({
             method: "PATCH",
             path: "/ledenlijst/filter/huidige",
             body: {
@@ -469,7 +469,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
      * Voor we een lid als 'nieuw' beschouwen moeten we echt zeker zijn
      */
     async zoekGelijkaardig(member: MemberWithRegistrations): Promise<SGVZoekLid | undefined> {
-        const response = await this.workAroundAuthenticatedServer.request({
+        const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/zoeken/gelijkaardig",
             query: {
@@ -752,7 +752,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async schrapLid(lid: SGVLid, report: SGVSyncReport) {
          // Fetch full member from SGV
-        const response = await this.workAroundAuthenticatedServer.request<any>({
+        const response = await this.authenticatedServer.request<any>({
             method: "GET",
             path: "/lid/"+lid.id
         })
@@ -764,7 +764,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await sleep(250);
 
             try {
-                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                const updateResponse = await this.authenticatedServer.request<any>({
                     method: "PATCH",
                     path: "/lid/"+lid.id+"?bevestig=true",
                     body: patch
@@ -788,7 +788,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const details = match.stamhoofd.details!
 
         // Fetch full member from SGV
-        const response = await this.workAroundAuthenticatedServer.request<any>({
+        const response = await this.authenticatedServer.request<any>({
             method: "GET",
             path: "/lid/"+match.sgvId
         })
@@ -809,7 +809,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await sleep(250);
 
             try {
-                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                const updateResponse = await this.authenticatedServer.request<any>({
                     method: "PATCH",
                     path: "/lid/"+match.sgvId+"?bevestig=true",
                     body: patch
@@ -856,7 +856,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await sleep(250);
 
             try {
-                const updateResponse = await this.workAroundAuthenticatedServer.request<any>({
+                const updateResponse = await this.authenticatedServer.request<any>({
                     method: "POST",
                     path: "/lid",
                     body: post
@@ -904,23 +904,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return new Server("https://login.scoutsengidsenvlaanderen.be")
     }
 
-    get workAroundServer() {
-        // Op dit moment geeft de groepsadmin een 403 error als de origin niet overeen komt met scoutsengidsenvlaanderen.
-        // Dat hangt ook nog eens vast aan de client id, tis niet zo helemaal duidelijk. De enige oplossing op dit moment
-        // is een proxy te gebruiken die de origin header wegknipt.
-        // Als er niet snel een fix komt van S&GV moeten we beter een app uitbrengen waar de connectie in kan geplaatst worden
-        // zonder proxy, omdat we dan de headers kunnen manipuleren zonder server... #browserstruggles
-        return new Server("https://groepsadmin.sgv.stamhoofd.app/groepsadmin/rest-ga")
-    }
-
     get server() {
         return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
-    }
-
-    get workAroundAuthenticatedServer() {
-        const server = this.workAroundServer
-        server.middlewares.push(this)
-        return server
     }
 
     get authenticatedServer() {
