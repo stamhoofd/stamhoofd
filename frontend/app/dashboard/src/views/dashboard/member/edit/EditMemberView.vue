@@ -123,8 +123,6 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         try {
             if (this.member) {
                 this.member.details = this.memberDetails
-
-                console.log(this.memberDetails)
                 await this.familyManager.patchAllMembersWith(this.member)
             }
           
