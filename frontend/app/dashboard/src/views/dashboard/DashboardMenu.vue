@@ -69,7 +69,6 @@
             <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}">
                 <span class="icon sync"/>
                 <span>Groepsadministratie</span>
-                 <span class="bubble" v-if="whatsNewBadge">1</span>
             </button>
 
             <button class="menu-button button heading" @click="importMembers" v-else :class="{ selected: currentlySelected == 'import-members'}">
@@ -179,6 +178,13 @@ export default class Menu extends Mixins(NavigationMixin) {
             }
         } else {
             localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
+        }
+
+        if (this.whatsNewBadge.length > 0) {
+            // show popup
+            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(20*1000).setButton(new ToastButton("Bekijken", () => {
+
+            })).show()
         }
     }
 
