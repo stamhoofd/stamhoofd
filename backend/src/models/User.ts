@@ -1,12 +1,10 @@
-import { column, Database, ManyToManyRelation,ManyToOneRelation, Model, OneToManyRelation } from "@simonbackx/simple-database";
+import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
+import { KeychainItem } from './KeychainItem';
 
-import { Member, MemberWithRegistrations } from './Member';
 import { Organization } from "./Organization";
-import { Payment } from './Payment';
-import { Registration, RegistrationWithPayment } from './Registration';
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
@@ -211,12 +209,24 @@ export class User extends Model {
         return user;
     }
 
-    changePassword(publicKey: string | undefined, publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+    async changePassword(publicKey: string | undefined, publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+        if (publicKey && this.publicKey != publicKey) {
+            // Delete keychain!
+            // First print it to console.error as a temporary backup
+            const keychainItems = await KeychainItem.where({ userId: this.id })
+            console.error("Backup keychain items because publicKey was changed:")
+            console.error(JSON.stringify(keychainItems, undefined, 4))
+            const query = "DELETE FROM `"+KeychainItem.table+"` where userId = ?"
+            await Database.delete(query, [this.id])
+        }
+
         this.publicKey = publicKey ?? this.publicKey
         this.publicAuthSignKey = publicAuthSignKey
         this.encryptedPrivateKey = encryptedPrivateKey
         this.authSignKeyConstants = authSignKeyConstants
         this.authEncryptionKeyConstants = authEncryptionKeyConstants
+
+        // todo: Send a security e-mail
     }
 
     getAuthSignKeyConstants(this: UserForAuthentication): KeyConstants {

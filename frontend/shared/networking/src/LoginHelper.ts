@@ -1,5 +1,5 @@
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel, ChangeOrganizationKeyRequest } from '@stamhoofd/structures';
-import { Decoder, ObjectData, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel, ChangeOrganizationKeyRequest, MyUser, InviteKeychainItem } from '@stamhoofd/structures';
+import { Decoder, ObjectData, AutoEncoderPatchType, ArrayDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from './SessionManager';
 import { Session } from './Session';
@@ -211,7 +211,7 @@ export class LoginHelper {
         session.organization = organization
         session.setToken(response.data)
         Keychain.addItem(item)
-        await session.setEncryptionKey(keys.authEncryptionSecretKey, {user, userPrivateKey: userKeyPair.privateKey})
+        await session.setEncryptionKey(keys.authEncryptionSecretKey, {user: MyUser.create(user), userPrivateKey: userKeyPair.privateKey})
         await SessionManager.setCurrentSession(session)
     }
 
@@ -278,6 +278,38 @@ export class LoginHelper {
         await session.setEncryptionKey(keys.authEncryptionSecretKey)
     }
 
+    static async fixPublicKey(session: Session) {
+        const userPrivateKey = session.getUserPrivateKey();
+        const authEncryptionKey = session.getAuthEncryptionKey()
+        if (!userPrivateKey || !authEncryptionKey) {
+            throw new Error("Encryption key not set")
+        }
+
+        const patch = NewUser.patch({
+            id: session.user!.id,
+            publicKey: await Sodium.getEncryptionPublicKey(userPrivateKey),
+            publicAuthSignKey: session.user!.publicAuthSignKey,
+            authSignKeyConstants: session.user!.authSignKeyConstants,
+            authEncryptionKeyConstants: session.user!.authEncryptionKeyConstants,
+            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey!, authEncryptionKey)
+        })
+
+        // Do netwowrk request to create organization
+        const response = await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/user/"+session.user!.id,
+            body: patch,
+            decoder: User
+        })
+
+        if (session.user) {
+            // Clear user
+            session.user = null;
+        }
+
+        await session.setEncryptionKey(authEncryptionKey)
+    }
+
     static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {
         // Do netwowrk request to create organization
         const response = await session.authenticatedServer.request({
@@ -320,7 +352,27 @@ export class LoginHelper {
         }
 
         session.setToken(response.data)
-        await session.setEncryptionKey(keys.authEncryptionSecretKey, { user, userPrivateKey: userKeyPair.privateKey })
+        await session.setEncryptionKey(keys.authEncryptionSecretKey, { user: MyUser.create(user), userPrivateKey: userKeyPair.privateKey })
         await SessionManager.setCurrentSession(session)
+    }
+
+    static async addToKeychain(session: Session, decryptedKeychainItems: string) {
+        // unbox
+        const keychainItems = new ObjectData(JSON.parse(decryptedKeychainItems), { version: Version }).decode(new VersionBoxDecoder(new ArrayDecoder(InviteKeychainItem as Decoder<InviteKeychainItem>))).data
+
+        // Add the keys to the keychain (if not already present)
+        const encryptedItems: KeychainItem[] = []
+        for (const item of keychainItems) {
+            const encryptedItem = await session.createKeychainItem(item)
+            encryptedItems.push(encryptedItem)
+        }
+
+        if (encryptedItems.length > 0) {
+            const response = await session.authenticatedServer.request({
+                method: "POST",
+                path: "/keychain",
+                body: encryptedItems
+            })
+        }
     }
 }

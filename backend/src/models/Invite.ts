@@ -4,6 +4,7 @@ import { InviteUserDetails,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "./Organization";
+import { User } from './User';
 
 export class Invite extends Model {
     static table = "invites";
@@ -19,7 +20,7 @@ export class Invite extends Model {
     @column({ foreignKey: Invite.organization, type: "string" })
     organizationId: string;
 
-    @column({ type: "string" })
+    @column({ foreignKey: Invite.sender, type: "string" })
     senderId: string;
 
     @column({ type: "string", nullable: true })
@@ -86,6 +87,5 @@ export class Invite extends Model {
     updatedAt: Date
 
     static organization = new ManyToOneRelation(Organization, "organization");
-
-   
+    static sender = new ManyToOneRelation(User, "sender");
 }

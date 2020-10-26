@@ -29,7 +29,7 @@ const start = async () => {
     router.endpoints.push(new CORSPreflightEndpoint())
 
     const routerServer = new RouterServer(router);
-    routerServer.verbose = true
+    routerServer.verbose = false
     // tmp
     routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",

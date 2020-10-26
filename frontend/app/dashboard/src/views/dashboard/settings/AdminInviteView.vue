@@ -58,7 +58,7 @@
 
             <hr>
             <h2>Encryptiesleutels (geavanceerd)</h2>
-            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan optioneel een sleutel waar jij toegang hebt doorsturen. Dit is handig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels.</p>
+            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan optioneel een sleutel waar jij toegang hebt doorsturen. Dit is handig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
 
             <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
 
@@ -68,7 +68,7 @@
                     {{ key.publicKey }}</h2>
                     <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
                     <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
-                    <button class="button text" v-if="canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
+                    <button class="button text" v-if="!key.hasAccess && canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
 
                     <template #right>
                         <span class="icon error" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" v-if="!key.hasAccess" />
@@ -98,7 +98,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder, PatchableArray, VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem } from "@stamhoofd/components";
+import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager, Keychain } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User, OrganizationKeyUser, KeychainedResponseDecoder } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -200,6 +200,10 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     async shareKey(key: string) {
+        if (this.saving) {
+            return;
+        }
+
         const item = Keychain.getItem(key)
         if (!item) {
             this.errorBox = new ErrorBox(new SimpleError({
@@ -209,8 +213,12 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return
         }
         console.log(item)
+        let keyPair: {
+            publicKey: string;
+            privateKey: string;
+        } | undefined = undefined
         try {
-            const decrypted = await SessionManager.currentSession!.decryptKeychainItem(item)
+            keyPair = await SessionManager.currentSession!.decryptKeychainItem(item)
         } catch (e) {
             console.log(e)
             this.errorBox = new ErrorBox(new SimpleError({
@@ -218,6 +226,37 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                 message: "Je hebt zelf geen toegang tot deze sleutel. Vraag aan een andere beheerder die wel toegang heeft tot deze sleutel om toegang te verlenen."
             }))
             return
+        }
+
+        // Create an invite (automatic one)
+        const items = new VersionBox([InviteKeychainItem.create({
+            publicKey: keyPair.publicKey,
+            privateKey: keyPair.privateKey
+        })])
+
+        this.saving = true
+
+        const invite = NewInvite.create({ 
+            userDetails: null,
+            permissions: null,
+            receiverId: this.editUser!.id,
+            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), this.editUser!.publicKey)
+        })
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/invite",
+                body: invite,
+                decoder: Invite as Decoder<Invite>
+            })
+
+            new Toast("Als "+this.editUser!.firstName+" nu inlogt (voor "+Formatter.date(response.data.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
+            this.saving = false
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+            this.saving = false
         }
     }
 

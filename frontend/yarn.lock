@@ -1206,16 +1206,16 @@
     type-detect "4.0.8"
 
 "@stamhoofd/crypto@^1":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.3.3.tgz#0f3eab1f5149ec5ed50fd899fd53c57419a99470"
-  integrity sha512-aYMDH/GCzmoFteVFv+mksocUuU1eZIGmQ70xXkIwUhN0siOdTxdMp4nFU3RM9onDiWAkQfsEH3JRxbUiVyWcRA==
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.3.4.tgz#cfe592d9ae3dcfa7157a03d268909c195b2ef318"
+  integrity sha512-4gwXIjgrHAhQGqtoEFA7ITH+G5EKjD7DSGan3AAookGEg2HJnXi2+HzzRv6sIvoSwbBgYH6xbGk7Twfj5bmquQ==
   dependencies:
     libsodium-wrappers "^0.7.6"
 
 "@stamhoofd/structures@^1":
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.12.3.tgz#24d47624662cc631ece81457344b5bce7c3da2c4"
-  integrity sha512-Y6dulXBJXrZSMBrfi+/dy75MSqbudlxRebu8fUykUWZXR2kPpSW7O8GMynuQAsjawAJnrZKe9J312cZ1A1o68A==
+  version "1.12.6"
+  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.12.6.tgz#567935916abdf5586adf5d5b0f826746f4fda1c2"
+  integrity sha512-yLWQdYhDmuLPTVP6qn+8Du1sVh6CHnP1mCErPwv+20LmCA6DACVFN07JAxqBkszb+1lpJ6NlaCn6yMPP6DEkvg==
   dependencies:
     uuid "^8.2.0"
 

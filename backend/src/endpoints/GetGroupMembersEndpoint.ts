@@ -2,11 +2,12 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { MemberFactory } from '../factories/MemberFactory';
 import { Group } from "../models/Group";
+import { KeychainItem } from '../models/KeychainItem';
 import { Member } from '../models/Member';
 import { RegistrationWithPayment } from '../models/Registration';
 import { Token } from '../models/Token';
@@ -16,7 +17,7 @@ class Query extends AutoEncoder {
     waitingList = false
 }
 type Body = undefined
-type ResponseBody = EncryptedMemberWithRegistrations[];
+type ResponseBody = EncryptedMemberWithRegistrations[] | KeychainedResponse<EncryptedMemberWithRegistrations[]>;
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -68,6 +69,32 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        return new Response(members.map(m => m.getStructureWithRegistrations()));
+        if (request.request.getVersion() <= 35) {
+            // Old
+            return new Response(members.map(m => m.getStructureWithRegistrations()));
+        }
+
+        // New
+        const otherKeys: Set<string> = new Set();
+        for (const member of members) {
+            if (member.organizationPublicKey != user.organization.publicKey) {
+                otherKeys.add(member.organizationPublicKey)
+            }
+        }
+
+        if (otherKeys.size > 0) {
+            // Load the needed keychains the user has access to
+            const keychainItems = await KeychainItem.where({
+                userId: user.id,
+                publicKey: {
+                    sign: "IN",
+                    value: [...otherKeys.values()]
+                }
+            }) 
+
+            return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations()), keychainItems: keychainItems.map(m => KeychainItemStruct.create(m)) }));
+        }
+        
+        return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations()), keychainItems: [] }));
     }
 }

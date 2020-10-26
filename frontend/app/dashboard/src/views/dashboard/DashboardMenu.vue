@@ -96,7 +96,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SessionManager, Keychain } from '@stamhoofd/networking';
+import { SessionManager, Keychain, LoginHelper } from '@stamhoofd/networking';
 import { Organization, Group, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -106,13 +106,15 @@ import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import AdminsView from './settings/AdminsView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import { CenteredMessage, Toast } from '@stamhoofd/components';
+import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import NoKeyView from './NoKeyView.vue';
 import { Decoder } from '@simonbackx/simple-encoding';
 import WhatsNewView from './settings/WhatsNewView.vue';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
+import { Sodium } from "@stamhoofd/crypto";
+import { MemberManager } from "../../classes/MemberManager";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -181,6 +183,40 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     async checkKey() {
+        // Check if public and private key matches
+        const user = SessionManager.currentSession!.user!
+        const privateKey = SessionManager.currentSession!.getUserPrivateKey()!
+        const publicKey = user.publicKey
+
+        if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
+            // Oops! Error with public private key
+            await LoginHelper.fixPublicKey(SessionManager.currentSession!)
+            new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
+        }
+
+
+        if (SessionManager.currentSession!.user!.incomingInvites.length > 0) {
+            for (const invite of user.incomingInvites) {
+                try {
+                    const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
+                    await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
+                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "lock green").setHide(15*1000).show()
+                } catch (e) {
+                    console.error(e)
+                    new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
+                }
+                
+                // Remove invite if succeeded
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/invite/"+encodeURIComponent(invite.key)+"/trade"
+                })
+            }
+
+            // Reload all views
+            MemberManager.callListeners("encryption", null)
+        }
+
         try {
             const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
             if (!keychainItem) {
@@ -192,7 +228,11 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         } catch (e) {
             console.error(e)
-            this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
+
+            // Show warnign instead
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een administrator om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+                this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
+            })).show()
         }
     }
 

@@ -4,8 +4,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Invite as InviteStruct, InviteUserDetails,OrganizationSimple,Permissions,User as UserStruct } from "@stamhoofd/structures";
 
 import { Invite } from '../models/Invite';
-import { Organization } from '../models/Organization';
-import { Token, TokenWithUser } from '../models/Token';
+import { Token } from '../models/Token';
 import { User } from '../models/User';
 type Params = { id: string };
 type Query = undefined;
@@ -15,7 +14,7 @@ type ResponseBody = InviteStruct
 /**
  * Return a list of users and invites for the given organization with admin permissions
  */
-export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchInviteEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = InviteStruct.patchType() as Decoder<AutoEncoderPatchType<InviteStruct>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {

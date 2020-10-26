@@ -80,6 +80,12 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
                 }
                 receiver = receivers[0]
                 invite.receiverId = receiver.id
+
+                // Longer valid than the default, because the keychain items are encrypted with the public key of the receiver, which is stored safely
+                // 2 months valid (is needed for this use case as this happens in the background)
+                const date = new Date(new Date().getTime() + 1000*60*60*24*31*2)
+                date.setMilliseconds(0)
+                invite.validUntil = date
             }
             invite.permissions = request.body.permissions
             invite.memberIds = request.body.memberIds

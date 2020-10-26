@@ -1,5 +1,7 @@
+import { Database } from '@simonbackx/simple-database';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { NewUser } from '@stamhoofd/structures';
+import { MyUser, OrganizationSimple, TradedInvite, User as UserStruct } from '@stamhoofd/structures';
+import { Invite } from '../models/Invite';
 
 import { Token } from '../models/Token';
 import { User } from '../models/User';
@@ -7,7 +9,7 @@ import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = NewUser;
+type ResponseBody = MyUser;
 
 export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
@@ -34,7 +36,21 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             throw new Error("Unexpected error")
         }
 
-        const st = NewUser.create({
+        // Search incoming invites that are valid
+        let invites = await Invite.where({ receiverId: user.id, organizationId: user.organizationId }, { limit: 20 })
+        const d = new Date()
+        d.setTime(d.getTime() - 60*1000) // 1 minute timespan
+        const deleteInvites = invites.filter(i => i.validUntil < d).map(i => i.id)
+        if (deleteInvites.length > 0) {
+            Database.delete("delete from `"+Invite.table+"` where id IN (?)", [deleteInvites]).catch(e => {
+                // No need to wait to delete these invites before returning a response
+                console.error(e)
+            })
+            invites = invites.filter(i => i.validUntil >= d)
+        }
+        const loadedInvites = await Invite.sender.load(invites)
+
+        const st = MyUser.create({
             firstName: user.firstName,
             lastName: user.lastName,
             id: user.id,
@@ -44,7 +60,13 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             authSignKeyConstants: user.authSignKeyConstants,
             authEncryptionKeyConstants: user.authEncryptionKeyConstants,
             encryptedPrivateKey: user.encryptedPrivateKey,
-            permissions: user.permissions
+            permissions: user.permissions,
+            incomingInvites: loadedInvites.map(invite => TradedInvite.create(TradedInvite.create(Object.assign({}, invite, {
+                receiver: UserStruct.create(user),
+                sender: UserStruct.create(invite.sender),
+                organization: OrganizationSimple.create(token.user.organization)
+            })))
+            )
         })
         return new Response(st);      
     

@@ -1,11 +1,24 @@
 export type ToastListener = (toast: Toast) => void
 
+export class ToastButton {
+    text: string;
+    icon: string | null;
+    action: () => void;
+    
+    constructor(text: string, action: () => void, icon: string | null = null) {
+        this.text = text
+        this.action = action
+        this.icon = icon
+    }
+}
+
 export class Toast {
     protected static listeners: Map<any, ToastListener> = new Map()
     message: string
     icon: string | null
     withOffset = false
     progress: number | null = null
+    button: ToastButton | null = null
 
     autohideAfter: number | null = 5000
 
@@ -23,6 +36,11 @@ export class Toast {
 
     setHide(ms: number | null) {
         this.autohideAfter = ms 
+        return this
+    }
+
+    setButton(button: ToastButton | null) {
+        this.button = button 
         return this
     }
 

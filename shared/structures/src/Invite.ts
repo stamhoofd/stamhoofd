@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { InviteUserDetails } from './InviteUserDetails';
 import { Organization, OrganizationSimple } from './Organization';
 import { Permissions } from './Permissions';
-import { User } from './User';
+import { NewUser, User } from './User';
 
 export class InviteKeychainItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -95,4 +95,10 @@ export class Invite extends AutoEncoder {
 export class TradedInvite extends Invite {
     @field({ decoder: StringDecoder, nullable: true })
     keychainItems: string | null = null;
+}
+
+// Put it here for now to avoid circular dependency
+export class MyUser extends NewUser {
+    @field({ decoder: new ArrayDecoder(TradedInvite)  })
+    incomingInvites: TradedInvite[] = []
 }

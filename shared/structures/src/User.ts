@@ -1,6 +1,5 @@
 import { ArrayDecoder, AutoEncoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
-import { Invite, TradedInvite } from './Invite';
 
 import { KeyConstants } from './KeyConstants';
 import { Permissions } from './Permissions';
@@ -42,9 +41,4 @@ export class NewUser extends User {
     // this is the private key that is associated with publicKey
     @field({ decoder: StringDecoder })
     encryptedPrivateKey: string;
-}
-
-export class MyUser extends NewUser {
-    @field({ decoder: new ArrayDecoder(TradedInvite)  })
-    incomingInvites: TradedInvite[] = []
 }

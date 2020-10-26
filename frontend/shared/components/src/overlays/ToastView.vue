@@ -4,7 +4,10 @@
             <div class="progress" v-if="toast.progress !== null" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'"/>
             <span v-else-if="toast.icon" class="icon" :class="toast.icon"/>
-            <span>{{ message }}</span>
+            <div>
+                <div>{{ message }}</div>
+                <button class="button text" v-if="toast.button" @click.stop="clickedButton">{{ toast.button.text }}</button>
+            </div>
         </div>
     </div>
 </template>
@@ -53,6 +56,11 @@ export default class ToastView extends Mixins(NavigationMixin) {
         }
         this.isClosing = true
         this.emitParents("pop", undefined);
+    }
+
+    clickedButton() {
+        this.toast.button!.action()
+        this.close()
     }
 }
 </script>
@@ -139,8 +147,26 @@ export default class ToastView extends Mixins(NavigationMixin) {
         }
     }
 
+    &.yellow {
+        background-color: $color-warning-background;
+        color: $color-warning-dark;;
+
+        .progress {
+            background: $color-warning-primary;
+        }
+
+        .button {
+            color: $color-warning-dark;
+        }
+    }
+
+
     &> .spinner-container {
         margin-right: 75px - 30px - 28px;
+    }
+
+    .button {
+        margin-top: 5px;
     }
 }
 </style>

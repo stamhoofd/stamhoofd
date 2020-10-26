@@ -224,7 +224,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
-        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment") {
+        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment" || type == "encryption") {
             this.reload()
         }
     }

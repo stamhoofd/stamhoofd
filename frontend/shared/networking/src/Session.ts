@@ -2,7 +2,7 @@ import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
-import { KeychainedResponseDecoder, KeychainItem, NewUser, Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
 import { Keychain } from './Keychain'
@@ -14,7 +14,7 @@ type AuthenticationStateListener = () => void
 export class Session implements RequestMiddleware {
     organizationId: string;
     organization: Organization | null = null
-    user: NewUser | null = null
+    user: MyUser | null = null
 
     protected token: ManagedToken | null = null
 
@@ -181,7 +181,7 @@ export class Session implements RequestMiddleware {
         });
     }
 
-    async setEncryptionKey(authEncryptionKey: string, preload: { user: NewUser; userPrivateKey: string } | null = null) {
+    async setEncryptionKey(authEncryptionKey: string, preload: { user: MyUser; userPrivateKey: string } | null = null) {
         if (!this.token) {
             throw new Error("You can only set the encryption key after setting the token")
         }
@@ -204,11 +204,11 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    async fetchUser(): Promise<NewUser> {
+    async fetchUser(): Promise<MyUser> {
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
-            decoder: NewUser as Decoder<NewUser>
+            decoder: MyUser as Decoder<MyUser>
         })
         this.user = response.data
         this.callListeners()
@@ -246,6 +246,10 @@ export class Session implements RequestMiddleware {
 
     getUserPrivateKey() {
         return this.userPrivateKey
+    }
+
+    getAuthEncryptionKey() {
+        return this.authEncryptionKey
     }
 
     async updateKeys() {

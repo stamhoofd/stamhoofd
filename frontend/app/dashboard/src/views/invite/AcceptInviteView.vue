@@ -220,24 +220,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
         
         if (encryptedKeychainItems) {
             const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, this.secret)
-            
-            // unbox
-            const keychainItems = new ObjectData(JSON.parse(decrypted), { version: Version }).decode(new VersionBoxDecoder(new ArrayDecoder(InviteKeychainItem as Decoder<InviteKeychainItem>))).data
-
-            // Add the keys to the keychain (if not already present)
-            const encryptedItems: KeychainItem[] = []
-            for (const item of keychainItems) {
-                const encryptedItem = await this.session!.createKeychainItem(item)
-                encryptedItems.push(encryptedItem)
-            }
-
-            if (encryptedItems.length > 0) {
-                const response = await this.session!.authenticatedServer.request({
-                    method: "POST",
-                    path: "/keychain",
-                    body: encryptedItems
-                })
-            }
+            await LoginHelper.addToKeychain(this.session!, decrypted)
         }
 
         // Clear user since permissions have changed

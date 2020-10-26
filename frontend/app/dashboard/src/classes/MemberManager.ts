@@ -3,10 +3,10 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray, PatchType, AutoEncoderPatchType } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch, KeychainItem } from '@stamhoofd/structures'
+import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch, KeychainItem, KeychainedResponseDecoder } from '@stamhoofd/structures'
 import { OrganizationManager } from './OrganizationManager';
 
-export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
+export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment" | "encryption"
 export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
 
 
@@ -24,7 +24,7 @@ export class MemberManagerStatic {
         this.listeners.delete(owner)
     }
 
-     callListeners(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
+    callListeners(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
         for (const listener of this.listeners.values()) {
             listener(type, member)
         }
@@ -189,10 +189,12 @@ export class MemberManagerStatic {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupId + "/members",
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)),
             query: waitingList ? { waitingList: true } : {}
         })
-        return await this.decryptMembers(response.data)
+
+        Keychain.addItems(response.data.keychainItems)
+        return await this.decryptMembers(response.data.data)
     }
 
     getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
