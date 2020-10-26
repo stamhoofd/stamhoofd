@@ -66,8 +66,7 @@
 
             <STList>
                 <STListItem v-for="key of availableKeys" :key="key.publicKey">
-                    <h2 class="style-title-list">Sleutel 
-                    {{ key.publicKey }}</h2>
+                    <h2 class="style-title-list">Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}</h2>
                     <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
                     <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
                     <button class="button text" v-if="!key.hasAccess && canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
