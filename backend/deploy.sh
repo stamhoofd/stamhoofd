@@ -18,7 +18,7 @@ ssh root@api.stamhoofd.app 'bash' <<'ENDSSH'
     # Do not build tests
     rm src/**/*.test.ts
 
-    yarn install
+    yarn install --production
     yarn build
     yarn migrations
     #pm2 start dist/index.js --time --name stamhoofd
