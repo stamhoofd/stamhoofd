@@ -6,27 +6,35 @@ import { EmailAddress } from './models/EmailAddress';
 
 let isRunningCrons = false
 
+
+let lastDNSCheck: Date | null = null
+let lastDNSId = ""
 async function checkDNS() {
-    let lastId = ""
-
-    while (true) {
-
-        const organizations = await Organization.where({ id: { sign: '>', value: lastId } }, {
-            limit: 10,
-            sort: ["id"]
-        })
-
-        if (organizations.length == 0) {
-            break
-        }
-
-        for (const organization of organizations) {
-            console.log("Checking DNS for "+organization.name)
-            await organization.updateDNSRecords()
-        }
-
-        lastId = organizations[organizations.length - 1].id
+    // Wait an half hour between every complete check
+    if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 30 * 60 * 1000)) {
+        console.log("Skip DNS check")
+        return
     }
+    
+    const organizations = await Organization.where({ id: { sign: '>', value: lastDNSId } }, {
+        limit: 10,
+        sort: ["id"]
+    })
+
+    if (organizations.length == 0) {
+        // Wait an half hour before starting again
+        lastDNSId = ""
+        lastDNSCheck = new Date()
+        return
+    }
+
+    for (const organization of organizations) {
+        console.log("Checking dns for "+organization.name)
+        await organization.updateDNSRecords()
+    }
+
+    lastDNSId = organizations[organizations.length - 1].id
+    
 }
 
 function escapeHtml(unsafe) {
@@ -280,7 +288,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkComplaints()/*.then(checkReplies).then(checkBounces).then(checkDNS)*/.catch(e => {
+        checkComplaints().then(checkReplies).then(checkBounces).then(checkDNS).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

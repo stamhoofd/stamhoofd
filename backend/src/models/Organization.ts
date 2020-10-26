@@ -351,6 +351,8 @@ export class Organization extends Model {
                 organization.privateMeta.mailDomain = organization.privateMeta.pendingMailDomain
                 organization.privateMeta.pendingMailDomain = null;
             }
+            organization.serverMeta.firstInvalidDNSRecords = undefined
+            organization.serverMeta.DNSRecordWarningCount = 0
 
             const wasActive = this.privateMeta.mailDomainActive
 
@@ -382,14 +384,22 @@ export class Organization extends Model {
                 organization.privateMeta.mailDomain = null
             }
 
+            if (!organization.serverMeta.firstInvalidDNSRecords) {
+                console.error("DNS settings became invalid for "+this.name+" ("+this.id+")")
+                organization.serverMeta.firstInvalidDNSRecords = new Date()
+            }
+
             // disable AWS emails
             this.privateMeta.mailDomainActive = false
 
             // save
             await organization.save()
 
-            if (isValidRecords) {
-                // Became invalid -> send an e-mail to the organization admins
+            if (organization.serverMeta.DNSRecordWarningCount < 2 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 2 + (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
+                organization.serverMeta.DNSRecordWarningCount += 1
+                await organization.save()
+
+                // Became invalid for longer than 2 hours -> send an e-mail to the organization admins
                 const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
                 let found = false
 
@@ -400,7 +410,7 @@ export class Organization extends Model {
                         Email.sendInternal({
                             to: user.email,
                             subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                            text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op dashboard.stamhoofd.be -> instellingen?\n\nBedankt!\n\nSimon van Stamhoofd"
+                            text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen?\n\nBedankt!\n\nHet Stamhoofd team"
                         })
                     }
                 }
