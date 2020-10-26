@@ -77,8 +77,8 @@ import { Formatter } from '@stamhoofd/utility';
     }
 })
 export default class TransferPaymentView extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-    registrations: RegistrationWithMember[]
+    @Prop({ default: null })
+    registrations: RegistrationWithMember[] | null
 
     @Prop({ required: true })
     payment: Payment

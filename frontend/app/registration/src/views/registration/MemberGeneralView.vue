@@ -243,7 +243,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 this.member.details = this.memberDetails
             }
             
-            if (!this.editOnly && (!this.member || this.member.canRegister(OrganizationManager.organization.groups))) {
+            if (!this.editOnly && (!this.member || !this.member.hasActiveRegistrations())) {
                 if (!(await this.saveData(this))) {
                     return;
                 }
@@ -347,6 +347,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
 
         // Check if we need to stop here (e.g. because we are only going to register on a waiting list
         if (!this.member.shouldAskDetails(OrganizationManager.organization.groups)) {
+            console.info("Closed general view because we are signing up for a waiting list")
             this.dismiss({ force: true })
             return;
         }

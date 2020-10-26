@@ -164,7 +164,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             return []
         }
        
-        return MemberManager.members.filter(m => this.canRegister(m))
+        return MemberManager.members.filter(m => !m.hasActiveRegistrations())
     }
 
     /**
@@ -201,22 +201,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     }
 
     selectMember(member: MemberWithRegistrations, preventPopup = false) {
-        if (!this.canRegister(member)) {
-            if (preventPopup) {
-                return false
-            }
-            
-            // todo: improve message
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: member.firstName+" is al ingeschreven", 
-                description: "Je kan dit lid niet nog eens inschrijven.",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
-            return
-        }
-
         if (!this.isValid(member)) {
             // Member is invalid, first complete all information before selecting it
             if (preventPopup) {
@@ -236,6 +220,22 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 })
             }).setDisplayStyle("popup"))
             return false
+        }
+
+        if (!this.canRegister(member)) {
+            if (preventPopup) {
+                return false
+            }
+            
+            // todo: improve message
+            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
+                type: "error",
+                title: member.firstName+" is al ingeschreven", 
+                description: "Je kan dit lid niet nog eens inschrijven.",
+                closeButton: "Sluiten",
+            }).setDisplayStyle("overlay");
+            this.present(errorMessage)
+            return
         }
 
         this.$set(this.memberSelection, member.id, true)

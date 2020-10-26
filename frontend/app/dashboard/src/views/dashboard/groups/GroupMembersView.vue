@@ -15,7 +15,7 @@
                 </STNavigationTitle>
             </template>
             <template #right>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken">
+                <input v-model="searchQuery" class="input search" @input="searchQuery = $event.target.value" placeholder="Zoeken">
 
                 <select v-model="selectedFilter" class="input hide-smartphone" v-if="!waitingList">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">

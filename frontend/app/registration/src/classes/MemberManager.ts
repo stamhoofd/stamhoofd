@@ -107,6 +107,8 @@ export class MemberManagerStatic {
             })
             decryptedMember.fillGroups(groups)
 
+            console.log(decryptedMember)
+
             this.members!.push(decryptedMember)
         }
     }

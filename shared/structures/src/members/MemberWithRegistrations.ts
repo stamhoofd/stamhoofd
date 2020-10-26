@@ -278,9 +278,21 @@ export class MemberWithRegistrations extends Member {
     /**
      * Can this member still register in a new group or waiting list?
      */
-    canRegister(groups: Group[]) {
+    hasActiveRegistrations() {
         // todo: atm it is not possible to register a member in multiple groups
         if (this.activeRegistrations.find(r => !r.waitingList)) {
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * Can this member still register in a new group or waiting list?
+     */
+    canRegister(groups: Group[]) {
+        // todo: atm it is not possible to register a member in multiple groups
+        if (this.hasActiveRegistrations()) {
             return false
         }
 
