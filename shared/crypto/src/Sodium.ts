@@ -174,6 +174,16 @@ class SodiumStatic {
         await this.loadIfNeeded();
         return Buffer.from(this.sodium.crypto_box_seal_open(Buffer.from(ciphertext, "base64"), Buffer.from(publicKey, "base64"), Buffer.from(privateKey, "base64"))).toString("utf8");
     }
+
+    async isMatchingEncryptionPublicPrivate(publicKey: string, privateKey: string): Promise<boolean> {
+        await this.loadIfNeeded();
+        return await this.getEncryptionPublicKey(privateKey) === publicKey
+    }
+
+    async getEncryptionPublicKey(privateKey: string): Promise<string> {
+        await this.loadIfNeeded();
+        return Buffer.from(this.sodium.crypto_scalarmult_base(Buffer.from(privateKey, "base64"))).toString("base64")
+    }
 }
 
 export const Sodium = new SodiumStatic();
