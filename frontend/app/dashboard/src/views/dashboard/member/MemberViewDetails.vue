@@ -181,7 +181,7 @@
             </template>
         </div>
         <div v-if="!member.details || member.details.isPlaceholder">
-            <p class="error-box">Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen sleutel meer hebt.</p>
+            <p class="error-box">Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen toegang meer hebt tot de encryptiesleutel van de vereniging die door dit lid gebruikt werd. Vraag een administrator om jou terug toegang te geven (dat kan in beheerders > jouw naam > encryptiesleutels > toegang geven).</p>
         </div>
     </div>
 </template>

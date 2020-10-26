@@ -5,10 +5,10 @@
 
         <main>
             <h1>
-                Oeps! Je mist de encryptie-sleutel!
+                Hoe kan je terug aan de gegevens van leden?
             </h1>
 
-            <p class="style-description">Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de sleutel waarmee je de gegevens van je leden kan ontcijferen. Er zijn enkele oplossingen:</p>
+            <p class="style-description">Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:</p>
 
             <hr>
             <h2>Een andere beheerder met administrator rechten helpt je uit de nood</h2>
@@ -16,19 +16,11 @@
 
             <ol>
                 <li>Ga naar Stamhoofd, klik op "Beheerders" in het menu.</li>
-                <li>Klik rechtsbovenaan op het plusje</li>
-                <li>Vul een naam in. Het e-mailadres mag je leeg laten.</li>
-                <li>Ga verder (aanvinken van toegangsrechten heeft geen impact)</li>
-                <li>Stuur de link naar de beheerder die geen sleutel meer heeft</li>
+                <li>Klik op jouw naam</li>
+                <li>Onderaan bij 'Encryptiesleutels' geef je toegang tot alle sleutels</li>
             </ol>
 
-            <p class="style-description">Jij opent die link en doet het volgende:</p>
-            <ol>
-                <li>Als je nog niet ingelogd bent, klik dan op "ik heb al een account" in het uitnodigingvenster</li>
-                <li>Log in</li>
-                <li>Accepteer de uitnodiging</li>
-                <li>Je hebt nu terug toegang 🥳</li>
-            </ol>
+            <p class="style-description">Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je de een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.</p>
 
             <hr>
             <h2>Andere beheerders hebben geen administrator rechten</h2>
@@ -36,7 +28,7 @@
 
             <hr>
             <h2>Er zijn geen andere beheerders</h2>
-            <p class="style-description">Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. Je kan wel nog de voornaam van de leden zien, ten minste één e-mailadres en de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn. </p>
+            <p class="style-description">Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. De leden zelf kunnen wel nog aan al hun gegevens en hoeven niet alles opnieuw in te geven, via goede communicatie kan je dus relatief eenvoudig alle gegevens terug halen. Je kan ondertussen nog de voornaam van de leden zien, ten minste één e-mailadres en de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn. </p>
             
             <ol>
                 <li>Maak een nieuwe sleutel aan via de knop onderaan</li>
@@ -44,13 +36,13 @@
                 <li>Vul eventueel zelf gegevens aan van leden, maar let op: zodra jij de gegevens aanpast verliest ook het lid alle gegevens die hij eerder had ingegeven en worden deze overschreven door jouw wijzigingen (ookal heb je bepaalde velden leeg gelaten).</li>
             </ol>
 
+            <button class="button destructive" @click="openNewKey">
+                <span class="icon trash"/><span>Alle toegang vernietigen en een nieuwe sleutel maken</span>
+            </button>
         </main>
 
         <STToolbar>
             <template slot="right">
-                <button class="button destructive" @click="openNewKey">
-                    <span class="icon trash"/><span>Nieuwe sleutel maken</span>
-                </button>
                 <button class="button primary" @click="dismiss">
                     Doorgaan
                 </button>

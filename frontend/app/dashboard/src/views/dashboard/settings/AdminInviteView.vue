@@ -58,9 +58,11 @@
 
             <hr>
             <h2>Encryptiesleutels (geavanceerd)</h2>
-            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan optioneel een sleutel waar jij toegang hebt doorsturen. Dit is handig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
+            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
 
             <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
+
+            <Spinner v-if="loadingKeys"/>
 
             <STList>
                 <STListItem v-for="key of availableKeys" :key="key.publicKey">
@@ -98,7 +100,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder, PatchableArray, VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem, Toast } from "@stamhoofd/components";
+import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem, Toast, Spinner } from "@stamhoofd/components";
 import { SessionManager, Keychain } from '@stamhoofd/networking';
 import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User, OrganizationKeyUser, KeychainedResponseDecoder } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -130,7 +132,8 @@ class SelectableGroup {
         LoadingButton,
         EmailInput,
         STList,
-        STListItem
+        STListItem,
+        Spinner
     },
     directives: {
         tooltip: Tooltip
@@ -295,17 +298,25 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     async downloadKeys() {
-         const response = await SessionManager.currentSession!.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/admins/"+this.editUser!.id+"/keys",
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(OrganizationKeyUser as Decoder<OrganizationKeyUser>))
-        })
+        this.loadingKeys = true
 
-        // Load all the keys (so we can check if we have access to all the needed keys or not)
-        Keychain.addItems(response.data.keychainItems)
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/organization/admins/"+this.editUser!.id+"/keys",
+                decoder: new KeychainedResponseDecoder(new ArrayDecoder(OrganizationKeyUser as Decoder<OrganizationKeyUser>))
+            })
 
-        // Set the keys
-        this.availableKeys = response.data.data
+            // Load all the keys (so we can check if we have access to all the needed keys or not)
+            Keychain.addItems(response.data.keychainItems)
+
+            // Set the keys
+            this.availableKeys = response.data.data
+        } catch (e) {
+            console.error(e)
+        }
+        
+        this.loadingKeys = false
     }
 
     async save() {
