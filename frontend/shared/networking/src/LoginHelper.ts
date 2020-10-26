@@ -208,10 +208,11 @@ export class LoginHelper {
         })
 
         const session = new Session(organization.id)
-        session.organization = organization
         session.setToken(response.data)
         Keychain.addItem(item)
-        await session.setEncryptionKey(keys.authEncryptionSecretKey, {user: MyUser.create(user), userPrivateKey: userKeyPair.privateKey})
+
+        // We don't preload anything because the server will make some additional changes to all the data, and we need to refetch everything
+        await session.setEncryptionKey(keys.authEncryptionSecretKey)
         await SessionManager.setCurrentSession(session)
     }
 
