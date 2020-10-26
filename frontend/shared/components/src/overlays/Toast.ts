@@ -23,6 +23,7 @@ export class Toast {
     autohideAfter: number | null = 5000
 
     doHide: (() => void) | null = null
+    action:  (() => void) | null = null
 
     constructor(message: string, icon: string | null = null) {
         this.message = message
@@ -41,6 +42,11 @@ export class Toast {
 
     setButton(button: ToastButton | null) {
         this.button = button 
+        return this
+    }
+
+    setAction(action: (() => void) | null) {
+        this.action = action 
         return this
     }
 

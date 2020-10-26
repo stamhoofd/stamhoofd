@@ -182,9 +182,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (this.whatsNewBadge.length > 0) {
             // show popup
-            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(20*1000).setButton(new ToastButton("Bekijken", () => {
-
-            })).show()
+            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(20*1000).setAction( () => {
+                window.open("https://www.instagram.com/stamhoofd/", "_blank")
+                localStorage.setItem("what-is-new", WhatsNewCount.toString());
+            }).show()
         }
     }
 

@@ -1,13 +1,14 @@
 <template>
     <div class="toast-view-container">
-        <div class="toast-view" @click="close" :class="toast.icon">
+        <div class="toast-view" @click="clicked" :class="toast.icon">
             <div class="progress" v-if="toast.progress !== null" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'"/>
-            <span v-else-if="toast.icon" class="icon" :class="toast.icon"/>
+            <span v-else-if="toast.icon" class="first icon" :class="toast.icon"/>
             <div>
                 <div>{{ message }}</div>
                 <button class="button text" v-if="toast.button" @click.stop="clickedButton">{{ toast.button.text }}</button>
             </div>
+            <span class="icon arrow-right" v-if="toast.action"/>
         </div>
     </div>
 </template>
@@ -47,6 +48,13 @@ export default class ToastView extends Mixins(NavigationMixin) {
         }
         this.toast.doHide = () => {
             this.close()
+        }
+    }
+
+    clicked() {
+        this.close();
+        if (this.toast.action) {
+            this.toast.action()
         }
     }
 
@@ -99,7 +107,12 @@ export default class ToastView extends Mixins(NavigationMixin) {
     font-size: 16px;
     line-height: 1.4;
     font-weight: 600;
-    color: $color-dark;
+    color: $color-primary;
+
+    div, .icon.dark {
+        color: $color-dark;
+    }
+
     position: relative;
     overflow: hidden;
 
@@ -123,10 +136,12 @@ export default class ToastView extends Mixins(NavigationMixin) {
     }
 
     .icon {
-        color: $color-primary;
+        flex-shrink: 0;
+    }
+
+    .icon.first {
         margin-left: -10px;
         margin-right: 10px;
-        flex-shrink: 0;
     }
 
     &.green {
