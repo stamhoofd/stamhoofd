@@ -3,8 +3,31 @@
         display: none !important;
     }
 }
+
+.hide-small {
+    @media (max-width: 600px) {
+        display: none !important;
+    }
+}
+
 .only-smartphone {
     @media (min-width: 451px) {
         display: none !important;
+    }
+}
+
+.only-icon-smartphone {
+    @media (max-width: 450px) {
+        span:not(.icon) {
+            display: none !important;
+        }
+    }
+}
+
+.only-icon-tiny-smartphone {
+    @media (max-width: 350px) {
+        span:not(.icon) {
+            display: none !important;
+        }
     }
 }

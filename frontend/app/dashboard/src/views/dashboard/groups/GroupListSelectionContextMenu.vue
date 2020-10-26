@@ -5,6 +5,9 @@
         </ContextMenuItem>
 
         <ContextMenuLine />-->
+        <ContextMenuItem @click="samenvatting">
+            Samenvatting
+        </ContextMenuItem>
         <ContextMenuItem @click="excel">
             Exporteer als Excel
         </ContextMenuItem>
@@ -22,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
@@ -31,7 +34,8 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
+import MemberSummaryView from "../member/MemberSummaryView.vue";
 
 @Component({
     components: {
@@ -50,6 +54,9 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     @Prop()
     members!: MemberWithRegistrations[];
 
+    @Prop()
+    group: Group;
+
     sms() {
         const displayedComponent = new ComponentWithProperties(SMSView, {
             members: this.members,
@@ -59,6 +66,16 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     mail() {
         const displayedComponent = new ComponentWithProperties(MailView, {
             members: this.members,
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    samenvatting() {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberSummaryView, {
+                members: this.members,
+                group: this.group!
+            })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }

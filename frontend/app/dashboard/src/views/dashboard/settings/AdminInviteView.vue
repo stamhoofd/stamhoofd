@@ -2,7 +2,7 @@
     <div class="st-view" id="settings-view">
         <STNavigationBar title="Beheerder">
             <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button class="button text" slot="right" v-if="!isNew" @click="deleteMe(false)">
+            <button class="button text only-icon-smartphone" slot="right" v-if="!isNew" @click="deleteMe(false)">
                 <span class="icon trash"/>
                 <span>Verwijderen</span>
             </button>

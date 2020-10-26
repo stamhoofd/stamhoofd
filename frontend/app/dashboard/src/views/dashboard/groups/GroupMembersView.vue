@@ -14,14 +14,14 @@
                     </button>
                 </STNavigationTitle>
             </template>
+            <template #middle><div></div></template>
             <template #right>
-                <input v-model="searchQuery" class="input search" @input="searchQuery = $event.target.value" placeholder="Zoeken">
-
-                <select v-model="selectedFilter" class="input hide-smartphone" v-if="!waitingList">
+                <select v-model="selectedFilter" class="input hide-small" v-if="!waitingList">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">
                         {{ filter.getName() }}
                     </option>
                 </select>
+                <input v-model="searchQuery" class="input search" @input="searchQuery = $event.target.value" placeholder="Zoeken">
             </template>
         </STNavigationBar>
 
@@ -135,7 +135,7 @@
                     </button>
                 </LoadingButton>
                 <template v-else>
-                    <button class="button secundary" @click="openSamenvatting" :disabled="selectionCount == 0">
+                    <button class="button secundary hide-smartphone" @click="openSamenvatting" :disabled="selectionCount == 0">
                         Samenvatting
                     </button>
                     <LoadingButton :loading="actionLoading">
@@ -619,6 +619,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY + 10,
             members: this.getSelectedMembers(),
+            group: this.group
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
