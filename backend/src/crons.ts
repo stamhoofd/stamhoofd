@@ -94,7 +94,7 @@ async function checkReplies() {
                             let organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined
 
                             // Send a new e-mail
-                            const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? "hallo@stamhoofd.be"
+                            const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? organization?.privateMeta.emails[0]?.email ?? "hallo@stamhoofd.be"
                             console.log("Forward to "+defaultEmail)       
                             
                             const parsed = await simpleParser(content);
