@@ -75,7 +75,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     
     get user() {
-        return SessionManager.currentSession!.user!
+        return User.create(SessionManager.currentSession!.user!)
     }
 
     userPatch = User.patch({ id: this.user.id })
