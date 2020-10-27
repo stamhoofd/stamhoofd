@@ -56,27 +56,29 @@
                 
             </STList>
 
-            <hr>
-            <h2>Encryptiesleutels</h2>
-            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
+            <template v-if="editUser !== null">
+                <hr>
+                <h2>Encryptiesleutels</h2>
+                <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
 
-            <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
+                <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
 
-            <Spinner v-if="loadingKeys"/>
+                <Spinner v-if="loadingKeys"/>
 
-            <STList>
-                <STListItem v-for="key of availableKeys" :key="key.publicKey">
-                    <h2 class="style-title-list">Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}</h2>
-                    <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
-                    <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
-                    <button class="button text" v-if="!key.hasAccess && canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
+                <STList>
+                    <STListItem v-for="key of availableKeys" :key="key.publicKey">
+                        <h2 class="style-title-list">Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}</h2>
+                        <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
+                        <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
+                        <button class="button text" v-if="!key.hasAccess && canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
 
-                    <template #right>
-                        <span class="icon error" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" v-if="!key.hasAccess" />
-                        <span class="icon success green" v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" v-else />
-                    </template>
-                </STListItem>
-            </STList>
+                        <template #right>
+                            <span class="icon error" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" v-if="!key.hasAccess" />
+                            <span class="icon success green" v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" v-else />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
         
         </main>
 
