@@ -215,6 +215,8 @@ export class User extends Model {
             // First print it to console.error as a temporary backup
             const keychainItems = await KeychainItem.where({ userId: this.id })
             console.error("Backup keychain items because publicKey was changed:")
+            console.error("old: "+this.publicKey)
+            console.error("new: "+publicKey)
             console.error(JSON.stringify(keychainItems, undefined, 4))
             const query = "DELETE FROM `"+KeychainItem.table+"` where userId = ?"
             await Database.delete(query, [this.id])

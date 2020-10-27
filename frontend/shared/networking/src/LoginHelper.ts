@@ -295,6 +295,20 @@ export class LoginHelper {
             encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey!, authEncryptionKey)
         })
 
+        // Gather all keychain items, and check which ones are still valid
+        const keychain = Keychain.items
+
+        // Add the keys to the keychain (if not already present)
+        const decryptedItems: { publicKey: string; privateKey: string }[] = []
+        for (const [_, item] of keychain) {
+            try {
+                const decrypted = await session.decryptKeychainItem(item)
+                decryptedItems.push(decrypted)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
         // Do netwowrk request to create organization
         const response = await session.authenticatedServer.request({
             method: "PATCH",
@@ -309,6 +323,25 @@ export class LoginHelper {
         }
 
         await session.setEncryptionKey(authEncryptionKey)
+
+        // Readd keychains
+        const encryptedItems: KeychainItem[] = []
+        for (const item of decryptedItems) {
+            try {
+                const encryptedItem = await session.createKeychainItem(item)
+                encryptedItems.push(encryptedItem)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        if (encryptedItems.length > 0) {
+            const response = await session.authenticatedServer.request({
+                method: "POST",
+                path: "/keychain",
+                body: encryptedItems
+            })
+        }
     }
 
     static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {

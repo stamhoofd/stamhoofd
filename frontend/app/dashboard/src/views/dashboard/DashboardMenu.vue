@@ -196,9 +196,12 @@ export default class Menu extends Mixins(NavigationMixin) {
         const publicKey = user.publicKey
 
         if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
+
+            // Gather all keychain items, and check which ones are still valid
             // Oops! Error with public private key
             await LoginHelper.fixPublicKey(SessionManager.currentSession!)
             new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
+            MemberManager.callListeners("encryption", null)
         }
 
 

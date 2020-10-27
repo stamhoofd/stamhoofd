@@ -41,6 +41,21 @@ describe("Sodium", () => {
         await expect(Sodium.unsealMessageAuthenticated(cyphertext, senderKeypair.publicKey, senderKeypair.privateKey)).resolves.toEqual(plaintext)
     });
 
+    test("Authenticated public-key encryption with non matching public key", async () => {
+        // Start of with generating a public  / private key pair
+        const oldSenderKeypair = await Sodium.generateEncryptionKeyPair()
+        const senderKeypair = await Sodium.generateEncryptionKeyPair()
+
+        // Encrypt a message and send it to the receiver
+        // We use some special UTF8 characters to test if the encoding is not broken during decryption
+        const plaintext = "😂 👌🏾This is a text 😄"
+        const cyphertext = await Sodium.sealMessageAuthenticated(plaintext, oldSenderKeypair.publicKey, senderKeypair.privateKey)
+
+        // The receiver decrypts the message...
+        await expect(Sodium.unsealMessageAuthenticated(cyphertext, oldSenderKeypair.publicKey, senderKeypair.privateKey)).resolves.toEqual(plaintext)
+        await expect(Sodium.unsealMessageAuthenticated(cyphertext, senderKeypair.publicKey, oldSenderKeypair.privateKey)).resolves.toEqual(plaintext)
+    });
+
     test("Anonymous public-key encryption", async () => {
         // Start of with generating a public  / private key pair
         const receiverKeypair = await Sodium.generateEncryptionKeyPair()
