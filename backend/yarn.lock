@@ -538,24 +538,18 @@
   dependencies:
     type-detect "4.0.8"
 
-"@stamhoofd/crypto@^1":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/crypto/-/crypto-1.3.3.tgz#0f3eab1f5149ec5ed50fd899fd53c57419a99470"
-  integrity sha512-aYMDH/GCzmoFteVFv+mksocUuU1eZIGmQ70xXkIwUhN0siOdTxdMp4nFU3RM9onDiWAkQfsEH3JRxbUiVyWcRA==
+"@stamhoofd/crypto@../shared/crypto":
+  version "1.3.5"
   dependencies:
     libsodium-wrappers "^0.7.6"
 
-"@stamhoofd/structures@^1":
-  version "1.12.6"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/structures/-/structures-1.12.6.tgz#567935916abdf5586adf5d5b0f826746f4fda1c2"
-  integrity sha512-yLWQdYhDmuLPTVP6qn+8Du1sVh6CHnP1mCErPwv+20LmCA6DACVFN07JAxqBkszb+1lpJ6NlaCn6yMPP6DEkvg==
+"@stamhoofd/structures@../shared/structures":
+  version "1.12.8"
   dependencies:
     uuid "^8.2.0"
 
-"@stamhoofd/utility@^1":
+"@stamhoofd/utility@../shared/utility":
   version "1.1.15"
-  resolved "https://registry.yarnpkg.com/@stamhoofd/utility/-/utility-1.1.15.tgz#29dbed03d91e8135b66db7d1c057879f88fbb829"
-  integrity sha512-V86R/aykQWHq6sskmG4Iv3gCxTA1mwf3aqp5m8LCm32ytPJFFRcFLdlnOw0DygcscLgofO/m9dS/9p+YK3J/rg==
 
 "@types/babel__core@^7.1.7":
   version "7.1.9"

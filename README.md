@@ -35,5 +35,45 @@ This is what you need to know:
 To run everything locally, we need to glue all the packages together and build them. We only publish packages to the NPM registry during a release.
 
 1. We use `yarn`. Do not use `npm`. That will break things.
-2. When switching branches or when pulling changes, run `yarn install` first.
-3. Use `yalc` (≠ yarn) to glue local packages together during development. We'll provide some instructions and scripts for this later on.
+2. When switching branches, cloning the repo or when pulling changes, run `yarn install` first in the project root. We use yarn workspaces to glue all packages together in the monorepo. We don't publish individual packages (not anymore, we used to do that).
+3. Use `yarn build` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
+4. Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
+5. Make sure you create `/backend/.env` based on `/backend/.env.template`
+6. Run tests before creating a pull request.
+
+### Backend
+
+Use these commands in `/backend`
+
+<dl>
+  <dt><code>yarn build</code></dt>
+  <dd>Build the backend into the /dist folder, using TypeScript cache if possible.</dd>
+  <dt><code>yarn build:full</code></dt>
+  <dd>Build the backend into the /dist folder, clearing cache before building</dd>
+  <dt><code>yarn start</code></dt>
+  <dd>Run the backend server locally. This will use the <code>/backend/.env</code> file for configuration. You can use .env.template to create your own .env file.</dd>
+  <dt><code>yarn migrations</code></dt>
+  <dd>Run all the migrations. If you don't have the tables in your database, this will also create all the tables. You'll need to create the database yourself (choose your connection details and name in .env)</dd>
+
+  <dt><code>yarn test</code></dt>
+  <dd>Run the tests on a separate test database. You'll need to setup .env.test (same as .env, but please modify it first and make sure <code>NODE_ENV=test</code> is in it)</dd>
+</dl>
+
+### Frontend
+
+You can use the following commands in both `/frontend/app/registration` and `/frontend/app/dashboard` (the current frontend apps)
+
+<dl>
+  <dt><code>yarn build</code></dt>
+  <dd>Build the whole app into /dist, without optimizations (for development)</dd>
+
+  <dt><code>yarn build:production</code></dt>
+  <dd>Build the whole app into /dist, with optimizations</dd>
+
+  <dt><code>yarn serve</code></dt>
+  <dd>Serve the frontend locally with HMR (use this for development in combination with <code>yarn start</code> in the backend)</dd>
+</dl>
+
+### Shared dependencies
+
+All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build`. You can rebuild them all at once by running the same command in the project root.

@@ -4,14 +4,14 @@ import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organizat
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
+import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
+import { PromiseResult } from 'aws-sdk/lib/request';
 
 import Email from '../email/Email';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
 import { User } from './User';
-import { PromiseResult } from 'aws-sdk/lib/request';
-import { AWSError } from 'aws-sdk';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -519,7 +519,7 @@ export class Organization extends Model {
             console.log(row)
             const organizationPublicKey = row["members"]["organizationPublicKey"]
             const min: Date = row[""]["min"]
-            let max: Date | null = row[""]["max"]
+            const max: Date | null = row[""]["max"]
 
             if (organizationPublicKey == this.publicKey) {
                 keys[0].start = min;

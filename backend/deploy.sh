@@ -9,7 +9,7 @@ yarn build
 cd ../utility
 yarn build
 cd ../../backend
-yarn build
+yarn build:full
 rsync -a -e "ssh -T -p 22 -o Compression=no -o StrictHostKeyChecking=accept-new -x" --delete --info=progress2 --filter="+ ./dist" --filter="+ ../shared/*/dist" --filter="+ ../shared/*/esm/dist" --filter=":- ../.gitignore" --exclude "../.git" --exclude "../frontend/" --no-owner --no-group --no-perms -W ../ root@api.stamhoofd.app:/etc/stamhoofd
 
 ssh root@api.stamhoofd.app 'bash' <<'ENDSSH'
