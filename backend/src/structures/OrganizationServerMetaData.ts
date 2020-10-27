@@ -22,5 +22,5 @@ export class OrganizationServerMetaData extends AutoEncoder {
      * When DNS is valid again, this will get cleared
      */
     @field({ decoder: IntegerDecoder, version: 37 })
-    DNSRecordWarningCount: number = 0
+    DNSRecordWarningCount = 0
 }

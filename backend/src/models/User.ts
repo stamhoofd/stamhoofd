@@ -2,8 +2,8 @@ import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from "@
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
-import { KeychainItem } from './KeychainItem';
 
+import { KeychainItem } from './KeychainItem';
 import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };

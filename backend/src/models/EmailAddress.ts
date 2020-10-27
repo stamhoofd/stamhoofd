@@ -1,6 +1,6 @@
 import { column, Database, Model } from '@simonbackx/simple-database';
-import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -32,16 +32,16 @@ export class EmailAddress extends Model {
     email: string;
 
     @column({ type: "boolean" })
-    markedAsSpam: boolean = false;
+    markedAsSpam = false;
 
     @column({ type: "boolean" })
-    hardBounce: boolean = false;
+    hardBounce = false;
 
     @column({ type: "boolean" })
-    unsubscribedMarketing: boolean = false;
+    unsubscribedMarketing = false;
 
     @column({ type: "boolean" })
-    unsubscribedAll: boolean = false;
+    unsubscribedAll = false;
 
     @column({ type: "string" })
     token: string;

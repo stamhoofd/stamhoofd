@@ -12,7 +12,7 @@ describe("Endpoint.SearchOrganization", () => {
 
     test("Search for a given organization using exact search", async () => {
         const organization = await new OrganizationFactory({
-            name: (uuidv4() as string).replace(/-/g, "")
+            name: (uuidv4()).replace(/-/g, "")
         }).create()
 
         const r = Request.buildJson("GET", "/v19/organizations/search");

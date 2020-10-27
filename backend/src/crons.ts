@@ -1,8 +1,9 @@
-import { Organization } from './models/Organization';
 import AWS from 'aws-sdk';
 import { simpleParser } from 'mailparser';
+
 import Email from './email/Email';
 import { EmailAddress } from './models/EmailAddress';
+import { Organization } from './models/Organization';
 
 let isRunningCrons = false
 
@@ -76,12 +77,12 @@ async function checkReplies() {
                         if (message.mail && message.content && message.receipt) {
                             const content = message.content;
                             const receipt = message.receipt as {
-                                recipients: string[],
-                                spamVerdict: { status: 'PASS' | string },
-                                virusVerdict: { status: 'PASS' | string },
-                                spfVerdict: { status: 'PASS' | string },
-                                dkimVerdict: { status: 'PASS' | string },
-                                dmarcVerdict: { status: 'PASS' | string },
+                                recipients: string[];
+                                spamVerdict: { status: 'PASS' | string };
+                                virusVerdict: { status: 'PASS' | string };
+                                spfVerdict: { status: 'PASS' | string };
+                                dkimVerdict: { status: 'PASS' | string };
+                                dmarcVerdict: { status: 'PASS' | string };
                             }
 
                             if (receipt.spamVerdict.status != "PASS" || receipt.virusVerdict.status != "PASS" || !(receipt.spfVerdict.status == "PASS" || receipt.dkimVerdict.status == "PASS")) {
@@ -91,7 +92,7 @@ async function checkReplies() {
 
                             const recipients = receipt.recipients
                             const email: string | undefined = recipients[0]
-                            let organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined
+                            const organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined
 
                             // Send a new e-mail
                             const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? organization?.privateMeta.emails[0]?.email ?? "hallo@stamhoofd.be"
