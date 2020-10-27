@@ -1,7 +1,16 @@
 #!/bin/bash
 set -e
 
-rsync -a -e "ssh -T -p 22 -o Compression=no -x" --delete --info=progress2 --filter=":- .gitignore" --exclude ".git" --no-owner --no-group --no-perms -W ./ root@api.stamhoofd.app:/etc/stamhoofd
+#rsync -a -e "ssh -T -p 22 -o Compression=no -x" --delete --info=progress2 --filter=":- .gitignore" --exclude ".git" --no-owner --no-group --no-perms -W ./ root@api.stamhoofd.app:/etc/stamhoofd
+cd ../shared/structures
+yarn build
+cd ../crypto
+yarn build
+cd ../utility
+yarn build
+cd ../../backend
+yarn build
+rsync -a -e "ssh -T -p 22 -o Compression=no -o StrictHostKeyChecking=accept-new -x" --delete --info=progress2 --filter="+ ./dist" --filter="+ ../shared/*/dist" --filter="+ ../shared/*/esm/dist" --filter=":- ../.gitignore" --exclude "../.git" --exclude "../frontend/" --no-owner --no-group --no-perms -W ../ root@api.stamhoofd.app:/etc/stamhoofd
 
 ssh root@api.stamhoofd.app 'bash' <<'ENDSSH'
     set -e
@@ -13,14 +22,20 @@ ssh root@api.stamhoofd.app 'bash' <<'ENDSSH'
     export PATH="$(yarn global bin):$PATH"
 
     cd /etc/stamhoofd
-    rm -rf node_modules
 
     # Do not build tests
-    rm src/**/*.test.ts
+    rm backend/src/**/*.test.ts
+    rm shared/*/src/**.test.ts
 
-    yarn install
-    yarn build
-    yarn migrations
+    yarn install --production
+
+    cd /etc/stamhoofd/backend
+    node ./dist/migrations.js
+
+    pm2 stop all && pm2 delete all
+    pm2 start dist/index.js --time --name stamhoofd
+    pm2 save
+
     #pm2 start dist/index.js --time --name stamhoofd
-    pm2 restart stamhoofd
+    #pm2 restart stamhoofd
 ENDSSH
