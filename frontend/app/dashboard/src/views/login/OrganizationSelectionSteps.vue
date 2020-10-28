@@ -12,11 +12,9 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { PromiseView } from '@stamhoofd/components';
 import Steps from "@stamhoofd/components/src/steps/Steps.vue"
 import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import SignupGeneralView from '../signup/SignupGeneralView.vue';
-import { PromiseView } from '@stamhoofd/components';
 
 function asyncComponent(component: () => Promise<any>, properties = {}) {
     return new ComponentWithProperties(PromiseView, {
