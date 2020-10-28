@@ -6,32 +6,32 @@
                 <span class="text">{{ organization.name }}</span>
             </button>
 
-            <input class="input search" placeholder="Zoeken" v-if="false">
+            <input v-if="false" class="input search" placeholder="Zoeken">
         </div>
 
         <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
-            <span class="icon info-filled"/>
+            <span class="icon info-filled" />
             <span>Documentatie</span>
         </a>
 
         <a class="menu-button button heading" :href="registerUrl" target="_blank">
-            <span class="icon external"/>
+            <span class="icon external" />
             <span>Jouw inschrijvingspagina</span>
         </a>
 
         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-whats-new'}" @click="manageWhatsNew()">
-            <span class="icon gift"/>
+            <span class="icon gift" />
             <span>Wat is er nieuw?</span>
-            <span class="bubble" v-if="whatsNewBadge">{{ whatsNewBadge }}</span>
+            <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
         <hr v-if="groups.length > 0">
 
         <div v-if="groups.length > 0">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
-                <span class="icon user"/>
+                <span class="icon user" />
                 <span>Leden</span>
-                <button class="button" v-if="groups.length > 1">
+                <button v-if="groups.length > 1" class="button">
                     Alle
                 </button>
             </button>
@@ -48,43 +48,43 @@
         </div>
         <hr v-if="groups.length > 0">
         <div v-if="fullAccess">
-            <button class="menu-button button heading" @click="manageGroups" :class="{ selected: currentlySelected == 'manage-groups'}">
-                <span class="icon group"/>
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-groups'}" @click="manageGroups">
+                <span class="icon group" />
                 <span>Leeftijdsgroepen</span>
             </button>
-            <button class="menu-button button heading" @click="managePayments" :class="{ selected: currentlySelected == 'manage-payments'}"> 
-                <span class="icon card"/>
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments"> 
+                <span class="icon card" />
                 <span>Overschrijvingen</span>
             </button>
-            <button class="menu-button button heading" @click="manageSettings(true)" :class="{ selected: currentlySelected == 'manage-settings'}">
-                <span class="icon settings"/>
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
+                <span class="icon settings" />
                 <span>Instellingen</span>
             </button>
 
-            <button class="menu-button button heading" @click="manageAdmins" :class="{ selected: currentlySelected == 'manage-admins'}">
-                <span class="icon lock"/>
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-admins'}" @click="manageAdmins">
+                <span class="icon lock" />
                 <span>Beheerders</span>
             </button>
 
-            <button class="menu-button button heading" v-if="isSGV" @click="syncScoutsEnGidsen" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}">
-                <span class="icon sync"/>
+            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="syncScoutsEnGidsen">
+                <span class="icon sync" />
                 <span>Groepsadministratie</span>
             </button>
 
-            <button class="menu-button button heading" @click="importMembers" v-else :class="{ selected: currentlySelected == 'import-members'}">
-                <span class="icon sync"/>
+            <button v-else class="menu-button button heading" :class="{ selected: currentlySelected == 'import-members'}" @click="importMembers">
+                <span class="icon sync" />
                 <span>Leden importeren</span>
             </button>
 
-            <button class="menu-button button heading" @click="manageAccount" :class="{ selected: currentlySelected == 'manage-account'}">
-                <span class="icon user"/>
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount">
+                <span class="icon user" />
                 <span>Mijn account</span>
             </button>
         </div>
         <hr v-if="fullAccess">
         <div class="">
             <button class="menu-button button heading" @click="logout">
-                <span class="icon logout"/>
+                <span class="icon logout" />
                 <span>Uitloggen</span>
             </button>
         </div>
@@ -95,25 +95,24 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SessionManager, Keychain, LoginHelper } from '@stamhoofd/networking';
-import { Organization, Group, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
+import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
+import { Sodium } from "@stamhoofd/crypto";
+import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { Group, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
+import { MemberManager } from "../../classes/MemberManager";
+import { OrganizationManager } from '../../classes/OrganizationManager';
+import { WhatsNewCount } from '../../classes/WhatsNewCount';
+import AccountSettingsView from './account/AccountSettingsView.vue';
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
-import PaymentsView from './payments/PaymentsView.vue';
-import SettingsView from './settings/SettingsView.vue';
-import AdminsView from './settings/AdminsView.vue';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
-import AccountSettingsView from './account/AccountSettingsView.vue';
 import NoKeyView from './NoKeyView.vue';
-import { Decoder } from '@simonbackx/simple-encoding';
-import WhatsNewView from './settings/WhatsNewView.vue';
-import { WhatsNewCount } from '../../classes/WhatsNewCount';
+import PaymentsView from './payments/PaymentsView.vue';
+import AdminsView from './settings/AdminsView.vue';
+import SettingsView from './settings/SettingsView.vue';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
-import { Sodium } from "@stamhoofd/crypto";
-import { MemberManager } from "../../classes/MemberManager";
+import WhatsNewView from './settings/WhatsNewView.vue';
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -158,6 +157,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet) {
             HistoryManager.setUrl("/")
         }
+        
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
             if (this.groups.length > 0) {
                 this.openGroup(this.groups[0])
@@ -168,7 +168,9 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
 
-        this.checkKey()
+        this.checkKey().catch(e => {
+            console.error(e)
+        })
 
         const currentCount = localStorage.getItem("what-is-new")
         if (currentCount) {
@@ -279,7 +281,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(PaymentsView, {}));
     }
 
-    manageSettings(animated: boolean = true) {
+    manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
         this.splitViewController!.showDetail(new ComponentWithProperties(SettingsView, {}), animated);
     }
