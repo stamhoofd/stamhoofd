@@ -1,24 +1,26 @@
 <template>
-    <Steps :root="root" :total-steps="3" ref="steps">
+    <Steps ref="steps" :root="root" :total-steps="3">
         <template v-slot:left="slotProps">
             <template v-if="!slotProps.canPop">
                 <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }" @click="returnToSite">
                 <img v-if="logoSrc" :src="logoSrc" :srcset="logoSrcSet" class="organization-logo" :class="{ 'only-smartphone': !!logoHorizontalSrc }" @click="returnToSite">
-                <template v-if="!logoHorizontalSrc && !logoSrc">{{ organization.name }}</template>
+                <template v-if="!logoHorizontalSrc && !logoSrc">
+                    {{ organization.name }}
+                </template>
             </template>
             <BackButton v-else @click="popNav" />
         </template>
         <template slot="right">
-            <a class="button text limit-space" v-if="privacyUrl" :href="privacyUrl" target="_blank">
-                <span class="icon privacy"/>
+            <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
+                <span class="icon privacy" />
                 <span>Privacy</span>
             </a>
-            <button class="button text limit-space" @click="logout" v-if="isLoggedIn">
-                <span class="icon logout"/>
-                <span >Uitloggen</span>
+            <button v-if="isLoggedIn" class="button text limit-space" @click="logout">
+                <span class="icon logout" />
+                <span>Uitloggen</span>
             </button>
-            <button class="button text limit-space" @click="returnToSite" v-if="organization.website">
-                <span class="icon external"/>
+            <button v-if="organization.website" class="button text limit-space" @click="returnToSite">
+                <span class="icon external" />
                 <span>Terug naar website</span>
             </button>
         </template>
@@ -27,15 +29,13 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Steps, BackButton } from "@stamhoofd/components"
+import { BackButton,Steps } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import SignupGeneralView from '../signup/SignupGeneralView.vue';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import { SessionManager } from '@stamhoofd/networking';
-import PaymentPendingView from '../overview/PaymentPendingView.vue';
 
 @Component({
     components: {
@@ -48,11 +48,11 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
     root!: ComponentWithProperties
 
     get privacyUrl() {
-        if (OrganizationManager.organization!.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization!.meta.privacyPolicyUrl
+        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization!.meta.privacyPolicyFile) {
-            return OrganizationManager.organization!.meta.privacyPolicyFile.getPublicPath()
+        if (OrganizationManager.organization.meta.privacyPolicyFile) {
+            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
@@ -96,13 +96,13 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
 
     logout() {
         if (SessionManager.currentSession?.isComplete() ?? false) {
-            SessionManager.currentSession!.logout()
+            SessionManager.currentSession.logout()
             return;
         }
     }
  
     returnToSite() {
-        if (!this.organization.website || (!this.organization.website.startsWith("https://") && !this.organization.website.startsWith("http://"))) {
+        if (!this.organization.website || (!this.organization.website.startsWith("https://") && !this.organization.website.startsWith("http://"))) {
             return
         }
         window.location.href = this.organization.website
