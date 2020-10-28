@@ -82,3 +82,7 @@ export * from "./src/files/ResolutionRequest"
 
 export * from "./src/Invite"
 export * from "./src/InviteUserDetails"
+
+
+// Webshop
+export * from "./src/webshops/WebshopMetaData"
