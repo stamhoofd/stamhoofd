@@ -6,7 +6,8 @@
         "serve": "webpack-dev-server --hot",
         "build": "webpack",
         "build:production": "NODE_ENV=production webpack",
-        "test": "jest"
+        "test": "jest",
+        "lint": "eslint ../.. --ext .js,.jsx,.ts,.tsx,.vue"
     },
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",

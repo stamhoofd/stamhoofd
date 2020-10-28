@@ -1,8 +1,8 @@
 module.exports = {
     root: true,
-    ignorePatterns: ["dist/", "node_modules/"],
+    ignorePatterns: ["dist/", "node_modules/", "app/dashboard/src/pdfkit.standalone.js"],
     parserOptions: {
-        "ecmaVersion": 2017
+        "ecmaVersion": 2017,
     },
     env: {
         "es6": true,

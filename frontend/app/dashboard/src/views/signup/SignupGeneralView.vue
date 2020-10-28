@@ -26,7 +26,7 @@
                         >
                     </STInputBox>
 
-                    <AddressInput title="Adres van je vereniging" v-model="address" :validator="validator"/>
+                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
 
                     <STInputBox title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox">
                         <input
@@ -58,15 +58,14 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, Validator, AddressInput, LoadingButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { NetworkManager } from '@stamhoofd/networking';
+import { Address, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupStructureView from './SignupStructureView.vue';
-import { SessionManager, NetworkManager } from '@stamhoofd/networking';
 
 @Component({
     components: {

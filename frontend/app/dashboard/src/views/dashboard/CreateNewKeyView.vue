@@ -1,7 +1,6 @@
 <template>
-    <div class="st-view background" id="no-key-view">
-        <STNavigationBar title="Sleutel kwijt">
-        </STNavigationBar>
+    <div id="no-key-view" class="st-view background">
+        <STNavigationBar title="Sleutel kwijt" />
 
         <main>
             <h1>
@@ -10,8 +9,12 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <p class="style-description">Maak een nieuwe encryptie-sleutel aan. Jij en alle andere beheerders verliezen toegang tot de data. Je zal alle beheerders opnieuw een uitnodiging moeten versturen die ze moeten accepteren met hun bestaand account.</p>
-            <p class="error-box">Doe dit enkel als er geen andere beheerders zijn die nog toegang hebben! Anders verlies je toegang tot alle gegevens.</p>
+            <p class="style-description">
+                Maak een nieuwe encryptie-sleutel aan. Jij en alle andere beheerders verliezen toegang tot de data. Je zal alle beheerders opnieuw een uitnodiging moeten versturen die ze moeten accepteren met hun bestaand account.
+            </p>
+            <p class="error-box">
+                Doe dit enkel als er geen andere beheerders zijn die nog toegang hebben! Anders verlies je toegang tot alle gegevens.
+            </p>
         </main>
 
         <STToolbar>
@@ -30,17 +33,18 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, EmailInput, Toast } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, patchContainsChanges,PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
+import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, BirthYearInput, Checkbox, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
+import { LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { Address, Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, User,Version } from "@stamhoofd/structures"
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import ChangePasswordView from './ChangePasswordView.vue';
+import DNSRecordsView from './DNSRecordsView.vue';
+import DomainSettingsView from './DomainSettingsView.vue';
+import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({
     components: {

@@ -77,12 +77,11 @@
 
 <script lang="ts">
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, Country, EmergencyContact, Gender, Group, MemberExistingStatus,MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationType, PreferredGroup, Record, RecordType, Version, WaitingListType } from "@stamhoofd/structures"
+import { Address, EmergencyContact, Gender, MemberExistingStatus,MemberWithRegistrations, Record, RecordType, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -213,77 +212,78 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             this.errorBox = null
         }
 
-        if (valid) {
-            if (this.memberDetails) {
-                // Keep all that was already chagned in next steps
-                this.memberDetails.firstName = this.firstName
-                this.memberDetails.lastName = this.lastName
-                this.memberDetails.gender = this.gender
-                this.memberDetails.phone = this.phone
-                this.memberDetails.birthDay = this.birthDay!
-                this.memberDetails.email = this.age >= 18 ? this.email : null
-                this.memberDetails.address = this.livesAtParents ? null : this.address
-            } else {
-                this.memberDetails = MemberDetails.create({
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                    gender: this.gender,
-                    phone: this.phone,
-                    email: this.age >= 18 ? this.email : null,
-                    birthDay: this.birthDay!,
-                    address: this.livesAtParents ? null : this.address
-                })
+        if (!valid) {
+            return
+        }
 
-                // Add default values for records
+        if (this.memberDetails) {
+            // Keep all that was already chagned in next steps
+            this.memberDetails.firstName = this.firstName
+            this.memberDetails.lastName = this.lastName
+            this.memberDetails.gender = this.gender
+            this.memberDetails.phone = this.phone
+            this.memberDetails.birthDay = this.birthDay!
+            this.memberDetails.email = this.age >= 18 ? this.email : null
+            this.memberDetails.address = this.livesAtParents ? null : this.address
+        } else {
+            this.memberDetails = MemberDetails.create({
+                firstName: this.firstName,
+                lastName: this.lastName,
+                gender: this.gender,
+                phone: this.phone,
+                email: this.age >= 18 ? this.email : null,
+                birthDay: this.birthDay!,
+                address: this.livesAtParents ? null : this.address
+            })
+
+            // Add default values for records
+            this.memberDetails.records.push(Record.create({
+                type: RecordType.NoData
+            }))
+            this.memberDetails.records.push(Record.create({
+                type: RecordType.NoPictures
+            }))
+            if (this.memberDetails.age < 18) {
                 this.memberDetails.records.push(Record.create({
-                    type: RecordType.NoData
+                    type: RecordType.NoPermissionForMedicines
                 }))
-                this.memberDetails.records.push(Record.create({
-                    type: RecordType.NoPictures
-                }))
-                if (this.memberDetails.age < 18) {
-                    this.memberDetails.records.push(Record.create({
-                        type: RecordType.NoPermissionForMedicines
-                    }))
-                }
             }
+        }
 
-            if (this.member) {
-                // Double check if everything is synced
-                this.member.details = this.memberDetails
-            }
-            
-            if (!this.editOnly && (!this.member || !this.member.hasActiveRegistrations())) {
-                if (!(await this.saveData(this))) {
-                    return;
-                }
-
-                // Automatically fill in member existing status if not set or expired
-                if ((this.memberDetails.existingStatus === null || this.memberDetails.existingStatus.isExpired())) {
-                    this.memberDetails.existingStatus = null;
-
-                    if (this.member && this.member.inactiveRegistrations.length > 0) {
-                        // Are these registrations active?
-                        this.memberDetails.existingStatus = MemberExistingStatus.create({
-                            isNew: false,
-                            hasFamily: false, // unknown (doesn't matter atm if not new)
-                        })
-                    }
-                }
-
-                // Check if we need to ask existing status
-                const shouldAsk = !!this.member!.getSelectableGroups(OrganizationManager.organization.groups).find(g => g.askExistingStatus)
-
-                if (!shouldAsk) {
-                    this.chooseGroup(this)
-                } else {
-                    this.askExistingStatus(this);
-                }
+        if (this.member) {
+            // Double check if everything is synced
+            this.member.details = this.memberDetails
+        }
+        
+        if (!this.editOnly && (!this.member || !this.member.hasActiveRegistrations())) {
+            if (!(await this.saveData(this))) {
                 return;
             }
-            
-            this.goToParents(this);
-            
+
+            // Automatically fill in member existing status if not set or expired
+            if ((this.memberDetails.existingStatus === null || this.memberDetails.existingStatus.isExpired())) {
+                this.memberDetails.existingStatus = null;
+
+                if (this.member && this.member.inactiveRegistrations.length > 0) {
+                    // Are these registrations active?
+                    this.memberDetails.existingStatus = MemberExistingStatus.create({
+                        isNew: false,
+                        hasFamily: false, // unknown (doesn't matter atm if not new)
+                    })
+                }
+            }
+
+            // Check if we need to ask existing status
+            const shouldAsk = !!this.member!.getSelectableGroups(OrganizationManager.organization.groups).find(g => g.askExistingStatus)
+
+            if (!shouldAsk) {
+                this.chooseGroup(this)
+            } else {
+                this.askExistingStatus(this);
+            }
+            return;
+        } else {
+            await this.goToParents(this);
         }
     }
 
@@ -297,12 +297,14 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     chooseGroup(component: NavigationMixin, replace = false) {
-        this.navigationController!.push(new ComponentWithProperties(MemberGroupView, { 
+        this.navigationController.push(new ComponentWithProperties(MemberGroupView, { 
             member: this.member,
             handler: (component: MemberGroupView) => {
-                this.goToParents(component)
+                this.goToParents(component).catch(e => {
+                    console.error(e)
+                })
             }
-        }), true, replace ? (this.navigationController!.components.length - 1) : 0)
+        }), true, replace ? (this.navigationController.components.length - 1) : 0)
         return;
     }
 
