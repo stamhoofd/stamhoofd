@@ -6,16 +6,16 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, NavigationController } from "@simonbackx/vue-app-navigation";
+import { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { Logger } from "@stamhoofd/logger"
+import { NetworkManager, Session } from '@stamhoofd/networking';
+import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
-import { AuthenticatedView, PromiseView, ToastBox, ForgotPasswordResetView, Toast } from '@stamhoofd/components';
-import DashboardMenu from './views/dashboard/DashboardMenu.vue'
+
 import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import { SessionManager, NetworkManager, Session } from '@stamhoofd/networking';
-import { Invite } from '@stamhoofd/structures';
-import { Decoder } from '@simonbackx/simple-encoding';
-import { Logger } from "@stamhoofd/logger"
 
 export function asyncComponent(component: () => Promise<any>, properties = {}) {
     return new ComponentWithProperties(PromiseView, {

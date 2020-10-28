@@ -29,15 +29,11 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ErrorBox, Validator, STErrorsDefault, Toast } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
-
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast,Validator } from "@stamhoofd/components"
+import { LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
     components: {

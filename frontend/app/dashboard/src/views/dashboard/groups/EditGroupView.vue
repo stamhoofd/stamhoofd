@@ -40,7 +40,7 @@
                     <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
                         <DateSelection v-model="startDate" />
                     </STInputBox>
-                    <TimeInput v-model="startDate" title="Vanaf" :validator="validator"/> 
+                    <TimeInput v-model="startDate" title="Vanaf" :validator="validator" /> 
                 </div>
                 
 
@@ -48,7 +48,7 @@
                     <STInputBox title="Inschrijven sluit op" error-fields="settings.endDate" :error-box="errorBox">
                         <DateSelection v-model="endDate" />
                     </STInputBox>
-                    <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator"/>
+                    <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
                 </div>
                 <p class="st-list-description">
                     Als de inschrijvingen het hele jaar doorlopen, vul dan hier gewoon een datum in ergens op het einde van het jaar. Let op het jaartal.
@@ -74,7 +74,6 @@
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
-
             </template>
             <template v-if="tab == 'payments'">
                 <STInputBox title="Standaard tarief" error-fields="price" :error-box="errorBox">
@@ -109,7 +108,7 @@
                 <Checkbox v-model="enableFamilyPrice">
                     Verlaagd tarief voor broers/zussen
                 </Checkbox>
-                <div class="split-inputs" v-if="enableFamilyPrice">
+                <div v-if="enableFamilyPrice" class="split-inputs">
                     <STInputBox title="Voor tweede broer/zus" error-fields="reducedPrice" :error-box="errorBox">
                         <PriceInput v-model="familyPrice" placeholder="Gratis" />
                     </STInputBox>
@@ -117,34 +116,45 @@
                         <PriceInput v-model="extraFamilyPrice" placeholder="Gratis" />
                     </STInputBox>
                 </div>
-                <p class="style-description" v-if="enableFamilyPrice">Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.</p>
+                <p v-if="enableFamilyPrice" class="style-description">
+                    Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.
+                </p>
 
                 <STErrorsDefault :error-box="errorBox" />
             </template>
 
             <template v-if="tab == 'queue'">
-
                 <STInputBox title="Wachtlijst" error-fields="genderType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
-                        <Radio v-model="waitingListType" value="None">Geen wachtlijst</Radio>
-                        <Radio v-model="waitingListType" value="PreRegistrations">Voorinschrijvingen <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven. Bij het openen van de inschrijvingen kan men blijven inschrijven tot het maximaal aantal leden bereikt is. Daarna sluiten de inschrijvingen.</span></Radio>
-                        <Radio v-model="waitingListType" value="ExistingMembersFirst">Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven. Van de nieuwe leden kies je zelf wie je doorlaat.</span></Radio>
-                        <Radio v-model="waitingListType" value="All">Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span></Radio>
+                        <Radio v-model="waitingListType" value="None">
+                            Geen wachtlijst
+                        </Radio>
+                        <Radio v-model="waitingListType" value="PreRegistrations">
+                            Voorinschrijvingen <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven. Bij het openen van de inschrijvingen kan men blijven inschrijven tot het maximaal aantal leden bereikt is. Daarna sluiten de inschrijvingen.</span>
+                        </Radio>
+                        <Radio v-model="waitingListType" value="ExistingMembersFirst">
+                            Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven. Van de nieuwe leden kies je zelf wie je doorlaat.</span>
+                        </Radio>
+                        <Radio v-model="waitingListType" value="All">
+                            Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span>
+                        </Radio>
                     </RadioGroup>
                 </STInputBox>
                
-                <STInputBox title="Maximaal aantal ingeschreven leden" v-if="waitingListType != 'None'">
-                    <Slider v-model="maxMembers" :max="200"/>
+                <STInputBox v-if="waitingListType != 'None'" title="Maximaal aantal ingeschreven leden">
+                    <Slider v-model="maxMembers" :max="200" />
                 </STInputBox>
 
-                <div class="split-inputs" v-if="waitingListType == 'PreRegistrations'">
-                    <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox" v-if="waitingListType == 'PreRegistrations'">
+                <div v-if="waitingListType == 'PreRegistrations'" class="split-inputs">
+                    <STInputBox v-if="waitingListType == 'PreRegistrations'" title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
                         <DateSelection v-model="preRegistrationsDate" />
                     </STInputBox>
                     
-                    <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator"/> 
+                    <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator" /> 
                 </div>
-                <Checkbox v-model="priorityForFamily" v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'">Naast bestaande leden ook voorrang geven aan broers/zussen</Checkbox>
+                <Checkbox v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
+                    Naast bestaande leden ook voorrang geven aan broers/zussen
+                </Checkbox>
             </template>
         </main>
 
@@ -160,12 +170,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, DateSelection, ErrorBox, FemaleIcon, MaleIcon, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, PriceInput, Checkbox, Slider, TimeInput, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, GroupPrices, WaitingListType } from "@stamhoofd/structures"
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AgeInput, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
+import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 
 @Component({

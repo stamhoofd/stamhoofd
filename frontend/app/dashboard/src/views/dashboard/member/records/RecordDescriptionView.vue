@@ -1,15 +1,19 @@
 <template>
     <div class="st-view record-description-view">
         <STNavigationBar>
-            <BackButton v-if="canPop" @click="pop" slot="left"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
-            <p v-if="info">{{ info }}</p>
+            <p v-if="info">
+                {{ info }}
+            </p>
 
             <template v-if="description">
                 <hr v-if="info">
-                <h2 v-if="info">Opmerking</h2>
+                <h2 v-if="info">
+                    Opmerking
+                </h2>
                 <p>{{ description }}</p>
             </template>
 
@@ -17,15 +21,16 @@
                 <hr>
                 <h2>Handige links</h2>
                 <ul class="links">
-                    <li v-for="link in links" :key="link.url"><a :href="link.url" target="_blank">{{ link.name }}</a></li>
+                    <li v-for="link in links" :key="link.url">
+                        <a :href="link.url" target="_blank">{{ link.name }}</a>
+                    </li>
                 </ul>
             </template>
-                    
         </main>
 
         <STToolbar v-if="false">
             <button slot="right" class="button secundary">
-                <span class="icon trash"/>
+                <span class="icon trash" />
                 <span>Verwijder van de steekkaart</span>
             </button>
         </STToolbar>
@@ -33,16 +38,10 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, BackButton, STToolbar } from "@stamhoofd/components";
+import { BackButton, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { MemberWithRegistrations, Record, RecordTypeHelper } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import MemberContextMenu from "./MemberContextMenu.vue";
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
-import { MemberWithRegistrations, Gender, Record, RecordTypeHelper } from '@stamhoofd/structures';
 
 @Component({
     components: {

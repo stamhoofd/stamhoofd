@@ -1,7 +1,7 @@
 <template>
-    <div class="st-view background" id="account-view">
+    <div id="account-view" class="st-view background">
         <STNavigationBar title="Mijn account">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -22,10 +22,11 @@
                 </div>
             </STInputBox>
 
-            <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-            <button class="button text" @click="openChangePassword">Wachtwoord wijzigen</button>
-
+            <button class="button text" @click="openChangePassword">
+                Wachtwoord wijzigen
+            </button>
         </main>
 
         <STToolbar>
@@ -41,17 +42,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, EmailInput, Toast } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
+import { LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
+import { Component, Mixins } from "vue-property-decorator";
+
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
 import ChangePasswordView from './ChangePasswordView.vue';
 
 @Component({

@@ -1,35 +1,45 @@
 <template>
     <div class="editor">
         <editor-menu-bubble v-slot="{ commands, isActive, menu, getMarkAttrs }" class="menu-bubble" :editor="editor">
-            
-                
             <div :class="{ 'is-active': menu.isActive }" :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`">
-                <form class="menububble__form" v-if="linkMenuIsActive" @submit.prevent="setLinkUrl(commands.link, linkUrl)">
-                    <input class="menububble__input" type="text" v-model="linkUrl" placeholder="https://" ref="linkInput" @keydown.esc="hideLinkMenu"/>
-                    <button @click="setLinkUrl(commands.link, null)" type="button" class="icon trash"></button>
+                <form v-if="linkMenuIsActive" class="menububble__form" @submit.prevent="setLinkUrl(commands.link, linkUrl)">
+                    <input ref="linkInput" v-model="linkUrl" class="menububble__input" type="text" placeholder="https://" @keydown.esc="hideLinkMenu">
+                    <button type="button" class="icon trash" @click="setLinkUrl(commands.link, null)" />
                 </form>
 
                 <template v-else>
-                    <button :class="{ 'is-active': isActive.bold() }" @click="commands.bold" class="icon bold"></button>
-                    <button :class="{ 'is-active': isActive.italic() }" @click="commands.italic" class="icon italic"></button>
-                    <button :class="{ 'is-active': isActive.underline() }" @click="commands.underline" class="icon underline"></button>
-                    <button :class="{ 'is-active': isActive.link() }" @click="showLinkMenu(getMarkAttrs('link'))" class="icon link"></button>
+                    <button :class="{ 'is-active': isActive.bold() }" class="icon bold" @click="commands.bold" />
+                    <button :class="{ 'is-active': isActive.italic() }" class="icon italic" @click="commands.italic" />
+                    <button :class="{ 'is-active': isActive.underline() }" class="icon underline" @click="commands.underline" />
+                    <button :class="{ 'is-active': isActive.link() }" class="icon link" @click="showLinkMenu(getMarkAttrs('link'))" />
 
-                    <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">H1</button>
-                    <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">H2</button>
-                    <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">H3</button>
-                    <button :class="{ 'is-active': isActive.bullet_list() }" @click="commands.bullet_list"   class="icon ul" ></button>
-                    <button :class="{ 'is-active': isActive.ordered_list() }" @click="commands.ordered_list" class="icon ol" ></button>
+                    <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">
+                        H1
+                    </button>
+                    <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">
+                        H2
+                    </button>
+                    <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">
+                        H3
+                    </button>
+                    <button :class="{ 'is-active': isActive.bullet_list() }" class="icon ul" @click="commands.bullet_list" />
+                    <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
                 </template>
             </div>
         </editor-menu-bubble>
-        <editor-floating-menu :editor="editor" v-slot="{ commands, isActive, menu }">
+        <editor-floating-menu v-slot="{ commands, isActive, menu }" :editor="editor">
             <div class="floating-menu" :class="{ 'is-active': menu.isActive }" :style="`top: ${menu.top}px`">
-                <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">H1</button>
-                <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">H2</button>
-                <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">H3</button>
-                <button :class="{ 'is-active': isActive.bullet_list() }" @click="commands.bullet_list"   class="icon ul" ></button>
-                <button :class="{ 'is-active': isActive.ordered_list() }" @click="commands.ordered_list" class="icon ol" ></button>
+                <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">
+                    H1
+                </button>
+                <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">
+                    H2
+                </button>
+                <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">
+                    H3
+                </button>
+                <button :class="{ 'is-active': isActive.bullet_list() }" class="icon ul" @click="commands.bullet_list" />
+                <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
             </div>
         </editor-floating-menu>
         <editor-content :editor="editor" class="editor-content" />

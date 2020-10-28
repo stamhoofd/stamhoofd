@@ -30,12 +30,12 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
+import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
-import SMSView from "../sms/SMSView.vue";
-import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import MemberSummaryView from "../member/MemberSummaryView.vue";
+import SMSView from "../sms/SMSView.vue";
 
 @Component({
     components: {
@@ -74,7 +74,7 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberSummaryView, {
                 members: this.members,
-                group: this.group!
+                group: this.group
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

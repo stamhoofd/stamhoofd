@@ -2,11 +2,11 @@
     <div class="st-view group-members-view background">
         <STNavigationBar :sticky="false">
             <template #left>
-                <BackButton slot="left" v-if="canPop" @click="pop"/>
+                <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
-                    <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
-                    <span class="style-tag" :class="{ error: isFull}" v-if="!loading && maxMembers">{{ members.length }} / {{ maxMembers }}</span>
+                    <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
+                    <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
 
                     <button class="button text" @click="addMember">
                         <span class="icon add" />
@@ -14,22 +14,23 @@
                     </button>
                 </STNavigationTitle>
             </template>
-            <template #middle><div></div></template>
+            <template #middle>
+                <div />
+            </template>
             <template #right>
-                <select v-model="selectedFilter" class="input hide-small" v-if="!waitingList">
+                <select v-if="!waitingList" v-model="selectedFilter" class="input hide-small">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">
                         {{ filter.getName() }}
                     </option>
                 </select>
-                <input v-model="searchQuery" class="input search" @input="searchQuery = $event.target.value" placeholder="Zoeken">
+                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
             </template>
         </STNavigationBar>
-
     
         <main>
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
-                <span class="style-tag" v-if="hasWaitingList" @click="openWaitingList">Wachtlijst</span>
+                <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
 
                 <button class="button text" @click="addMember">
                     <span class="icon add" />
@@ -37,8 +38,8 @@
                 </button>
             </h1>
 
-            <Spinner class="center" v-if="loading"/>
-            <table class="data-table" v-else>
+            <Spinner v-if="loading" class="center" />
+            <table v-else class="data-table">
                 <thead>
                     <tr>
                         <th>
@@ -56,7 +57,7 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('info')" class="hide-smartphone">
+                        <th class="hide-smartphone" @click="toggleSort('info')">
                             Leeftijd
                             <span
                                 class="sort-arrow"
@@ -66,8 +67,8 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('status')" class="hide-smartphone">
-                            {{ waitingList ? "Op wachtlijst sinds" : "Status"}}
+                        <th class="hide-smartphone" @click="toggleSort('status')">
+                            {{ waitingList ? "Op wachtlijst sinds" : "Status" }}
                             <span
                                 class="sort-arrow"
                                 :class="{
@@ -92,27 +93,35 @@
                                     class="new-member-bubble"
                                 />
                                 {{ member.member.name }}
-                                <span class="style-tag warn" v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'">Toegelaten</span>
+                                <span v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'" class="style-tag warn">Toegelaten</span>
                             </h2>
-                            <p class="style-description-small" v-if="!group">{{ member.member.groups.map(g => g.settings.name ).join(", ") }}</p>
-                            <p class="style-description-small only-smartphone" v-if="member.member.details && !member.member.details.isPlaceholder">{{ member.member.details.age }} jaar</p>
+                            <p v-if="!group" class="style-description-small">
+                                {{ member.member.groups.map(g => g.settings.name ).join(", ") }}
+                            </p>
+                            <p v-if="member.member.details && !member.member.details.isPlaceholder" class="style-description-small only-smartphone">
+                                {{ member.member.details.age }} jaar
+                            </p>
                         </td>
-                        <td class="minor hide-smartphone" v-if="member.member.details && !member.member.details.isPlaceholder">
+                        <td v-if="member.member.details && !member.member.details.isPlaceholder" class="minor hide-smartphone">
                             {{ member.member.details.age }} jaar
                         </td>
-                        <td class="minor hide-smartphone" v-else>
+                        <td v-else class="minor hide-smartphone">
                             /
                         </td>
-                        <td class="hide-smartphone member-description"><p v-text="getMemberDescription(member.member)" /></td>
+                        <td class="hide-smartphone member-description">
+                            <p v-text="getMemberDescription(member.member)" />
+                        </td>
                         <td>
-                            <button class="button icon gray lock-missing" v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" />
+                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray lock-missing" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <p class="info-box" v-if="!loading && members.length == 0">Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.</p>
+            <p v-if="!loading && members.length == 0" class="info-box">
+                Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.
+            </p>
         </main>
 
         <STToolbar>
@@ -123,23 +132,23 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" @click="openMail()" v-if="waitingList" :disabled="selectionCount == 0">
+                <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="openMail()">
                     Mailen
                 </button>
-                <button class="button secundary" @click="allowMembers(false)" v-if="waitingList" :disabled="selectionCount == 0">
+                <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="allowMembers(false)">
                     Toelating intrekken
                 </button>
-                <LoadingButton :loading="actionLoading" v-if="waitingList">
-                    <button class="button primary" @click="allowMembers(true)" :disabled="selectionCount == 0">
+                <LoadingButton v-if="waitingList" :loading="actionLoading">
+                    <button class="button primary" :disabled="selectionCount == 0" @click="allowMembers(true)">
                         Toelaten
                     </button>
                 </LoadingButton>
                 <template v-else>
-                    <button class="button secundary hide-smartphone" @click="openSamenvatting" :disabled="selectionCount == 0">
+                    <button class="button secundary hide-smartphone" :disabled="selectionCount == 0" @click="openSamenvatting">
                         Samenvatting
                     </button>
                     <LoadingButton :loading="actionLoading">
-                        <button class="button primary" @click="openMail()" :disabled="selectionCount == 0">
+                        <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
                             <span class="dropdown-text">Mailen</span>
                             <div class="dropdown" @click.stop="openMailDropdown" />
                         </button>
@@ -154,29 +163,29 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip, CenteredMessage, SegmentedControl } from "@stamhoofd/components";
+import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { STNavigationTitle, Spinner, BackButton, LoadingButton } from "@stamhoofd/components";
+import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
+import { EncryptedMemberWithRegistrationsPatch, Group, Member,MemberWithRegistrations, Registration, WaitingListType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { CanNotSwimFilter,FoodAllergyFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
+import { CanNotSwimFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
+import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
 import MailView from "../mail/MailView.vue";
+import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
+import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
-import { MemberWithRegistrations, Group, Organization, WaitingListType, EncryptedMemberWithRegistrationsPatch, Registration, Member } from '@stamhoofd/structures';
-import { MemberManager, MemberChangeEvent } from '../../../classes/MemberManager';
-import { Formatter } from '@stamhoofd/utility';
-import EditMemberView from '../member/edit/EditMemberView.vue';
-import MemberSummaryView from '../member/MemberSummaryView.vue';
 
 class SelectableMember {
     member: MemberWithRegistrations;
     selected = true;
 
-    constructor(member: MemberWithRegistrations, selected: boolean = true) {
+    constructor(member: MemberWithRegistrations, selected = true) {
         this.member = member;
         this.selected = selected
     }

@@ -11,56 +11,58 @@
 
         <main>
             <template v-if="emails.length == 0">
-                <p class="warning-box" v-if="fullAccess">
+                <p v-if="fullAccess" class="warning-box">
                     Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
-                    <span class="icon settings" />
+                        <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
                 </p>
-                <p class="warning-box" v-else>
+                <p v-else class="warning-box">
                     Een administrator van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
                 </p>
             </template>
 
-
             <div class="split-inputs">
-                <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox" >
-                    <input id="mail-subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail" v-model="subject">
+                <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox">
+                    <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
                 </STInputBox>
-                <STInputBox title="Versturen vanaf" v-if="emails.length > 0">
-                    <button slot="right" class="button text" @click="manageEmails" v-if="fullAccess">
+                <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
+                    <button v-if="fullAccess" slot="right" class="button text" @click="manageEmails">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
-                    <select class="input" v-model="emailId">
-                        <option v-for="email in emails" :key="email.id" :value="email.id">{{ email.name ? email.name+" <"+email.email+">" : email.email }}</option>
+                    <select v-model="emailId" class="input">
+                        <option v-for="email in emails" :key="email.id" :value="email.id">
+                            {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
+                        </option>
                     </select>
                 </STInputBox>
             </div>
 
-            <STInputBox title="Bericht" id="message-title" error-fields="message" :error-box="errorBox" class="max">
+            <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
                 <label slot="right" class="button text">
                     <span class="icon add" />
                     <span>Bijlage</span>
                     <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 </label>
             </STInputBox>
-            <MailEditor ref="editor" :has-first-name="hasFirstName"/>
+            <MailEditor ref="editor" :has-first-name="hasFirstName" />
 
-            <p class="warning-box" v-if="fileWarning">We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.</p>
+            <p v-if="fileWarning" class="warning-box">
+                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.
+            </p>
 
             <STList v-if="files.length > 0" title="Bijlages">
                 <STListItem v-for="(file, index) of files" :key="index" class="file-list-item right-description right-stack">
-                    <span class="icon file" slot="left"/>
+                    <span slot="left" class="icon file" />
                     {{ file.name }}
 
                     <template #right>
                         <span>{{ file.size }}</span>
-                        <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)"/></span>
+                        <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
                     </template>
                 </STListItem>
             </STList>
-
         </main>
 
         <STToolbar>
@@ -75,7 +77,7 @@
             </template>
             <template #right>
                 <LoadingButton :loading="sending">
-                    <button class="button primary" @click="send" :disabled="recipients.length == 0 || emails.length == 0">
+                    <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" @click="send">
                         Versturen
                     </button>
                 </LoadingButton>
@@ -85,18 +87,19 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, STInputBox, LoadingButton, ErrorBox, STListItem, STList, Toast } from "@stamhoofd/components";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { MemberWithRegistrations, EmailRequest, Recipient, Replacement, Group, EmailAttachment } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { EmailAttachment,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from '../../../classes/OrganizationManager';
+import EmailSettingsView from '../settings/EmailSettingsView.vue';
 
 class TmpFile {
     name: string;
@@ -287,7 +290,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         try {
-            let styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold; margin: 0; padding: 0}; h2 {font-size: 20px; font-weight: bold; margin: 0; padding: 0}; h3 {font-size: 16px; font-weight: bold; margin: 0; padding: 0}; ol, ul {list-style-position: inside;}";
+            const styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold; margin: 0; padding: 0}; h2 {font-size: 20px; font-weight: bold; margin: 0; padding: 0}; h3 {font-size: 16px; font-weight: bold; margin: 0; padding: 0}; ol, ul {list-style-position: inside;}";
             let html = (this.$refs.editor as any).editor!.getHTML();
 
             const element = document.createElement("div")
@@ -310,7 +313,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 el.appendChild(document.createElement("br"))
             }
 
-            let cssDiv = document.createElement('style');
+            const cssDiv = document.createElement('style');
             cssDiv.innerText = styles;
 
             html = "<style type=\"text/css\">"+cssDiv.innerHTML+"</style>"+element.innerHTML

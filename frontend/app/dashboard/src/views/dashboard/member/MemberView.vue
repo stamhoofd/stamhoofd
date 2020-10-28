@@ -2,7 +2,7 @@
     <div class="st-view member-view">
         <STNavigationBar :title="member.details.name">
             <template #left>
-                <BackButton v-if="canPop" @click="pop"/>
+                <BackButton v-if="canPop" @click="pop" />
                 <button v-if="hasPreviousMember" class="button text" @click="goBack">
                     <span class="icon arrow-left" />
                     <span>Vorige</span>
@@ -23,10 +23,10 @@
             <button class="button icon gray more" @click="showContextMenu" />
         </STNavigationTitle>
 
-        <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" v-if="payments.length > 0" />
+        <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
 
         <main>
-            <component :is="tab" :member="member" :family-manager="familyManager"/>
+            <component :is="tab" :member="member" :family-manager="familyManager" />
         </main>
     </div>
 </template>
@@ -36,15 +36,14 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { FemaleIcon, MaleIcon, SegmentedControl, BackButton } from "@stamhoofd/components";
+import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
+import { Gender,MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { FamilyManager } from '../../../classes/FamilyManager';
 import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
-import { MemberWithRegistrations, Gender } from '@stamhoofd/structures';
-import { FamilyManager } from '../../../classes/FamilyManager';
 
 @Component({
     components: {

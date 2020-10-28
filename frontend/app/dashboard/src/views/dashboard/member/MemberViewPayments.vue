@@ -1,9 +1,9 @@
 <template>
     <div class="view-payments">
         <main>
-            <div v-for="payment in payments" >
+            <div v-for="payment in payments">
                 <h2>Betaling</h2>
-                <dl class="details-grid" >
+                <dl class="details-grid">
                     <dt>Bedrag</dt>
                     <dd>{{ payment.price | price }}</dd>
 
@@ -39,7 +39,9 @@
                     </dd>
                 </dl>
 
-                <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">Betaald op {{ payment.paidAt | date }}</p>
+                <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
+                    Betaald op {{ payment.paidAt | date }}
+                </p>
             </div>
         </main>
 
@@ -47,10 +49,10 @@
             <template #left />
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" v-if="!member.paid" @click="markPaid">
+                    <button v-if="!member.paid" class="button primary" @click="markPaid">
                         Markeer als betaald
                     </button>
-                    <button class="button secundary" v-else @click="markNotPaid">
+                    <button v-else class="button secundary" @click="markNotPaid">
                         Toch niet betaald
                     </button>
                 </LoadingButton>
@@ -60,15 +62,16 @@
 </template>
 
 <script lang="ts">
-import { STToolbar, LoadingButton } from "@stamhoofd/components";
-import { Component, Prop,Vue } from "vue-property-decorator";
-import { MemberWithRegistrations, PaymentStatus, PaymentPatch, EncryptedPaymentDetailed } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
+import { LoadingButton,STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Decoder, ArrayDecoder } from '@simonbackx/simple-encoding';
-import { MemberManager } from '../../../classes/MemberManager';
+import { EncryptedPaymentDetailed,MemberWithRegistrations, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Prop,Vue } from "vue-property-decorator";
+
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { MemberManager } from '../../../classes/MemberManager';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({ 
     components: { 

@@ -1,7 +1,7 @@
 <template>
-    <div class="st-view background" id="settings-view">
+    <div id="settings-view" class="st-view background">
         <STNavigationBar title="Instellingen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -28,7 +28,7 @@
                         >
                     </STInputBox>
 
-                    <AddressInput title="Adres van je vereniging" v-model="address" :validator="validator"/>
+                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
                 </div>
 
                 <div>
@@ -38,13 +38,13 @@
                             class="input"
                             type="url"
                             placeholder="bv. https://www.vereniging.be"
-                        />
+                        >
                     </STInputBox>
-                    <p class="st-list-description">De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.</p>
+                    <p class="st-list-description">
+                        De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.
+                    </p>
 
-                    <IBANInput title="Bankrekeningnummer" v-model="iban" :validator="validator" :required="false"/>
-
-
+                    <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="false" />
                 </div>
             </div>
 
@@ -54,27 +54,37 @@
 
             <div class="split-inputs">
                 <div>
-                    <ImageInput title="Horizontaal logo" :validator="validator" v-model="horizontalLogo" :resolutions="horizontalLogoResolutions" :required="false"/>
+                    <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
 
-                    <p class="st-list-description">Beter voor grotere schermen.</p>
+                    <p class="st-list-description">
+                        Beter voor grotere schermen.
+                    </p>
                 </div>
 
                 <div>
-                    <ImageInput title="Vierkant logo" :validator="validator" v-model="squareLogo" :resolutions="squareLogoResolutions" :required="false"/>
-                    <p class="st-list-description">Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.</p>
+                    <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
+                    <p class="st-list-description">
+                        Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
+                    </p>
                 </div>
             </div>
 
-            <ColorInput title="Hoofdkleur (optioneel)" v-model="color" :validator="validator" placeholder="Geen kleur" :required="false"/>
-            <p class="st-list-description">Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om het blauwe kleur te behouden.</p>
+            <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />
+            <p class="st-list-description">
+                Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om het blauwe kleur te behouden.
+            </p>
 
             <hr>
             <h2>Domeinnaam</h2>
 
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
-                <p class="warning-box">Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.</p>
+                <p class="warning-box">
+                    Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.
+                </p>
                 <p class="st-list-description">
-                    <button class="button secundary" @click="openRecords">DNS-records instellen en verifiëren</button>
+                    <button class="button secundary" @click="openRecords">
+                        DNS-records instellen en verifiëren
+                    </button>
                     <button class="button text" @click="setupDomain">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
@@ -83,9 +93,13 @@
             </template>
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
-                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.</p>
+                <p class="st-list-description">
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                </p>
                 
-                <p class="warning-box" v-if="!organization.privateMeta.mailDomainActive">Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.</p>
+                <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
+                    Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.
+                </p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="setupDomain">
@@ -93,11 +107,12 @@
                         <span>Domeinnaam wijzigen</span>
                     </button>
                 </p>
-
             </template>
 
             <template v-else>
-                <p class="st-list-description">Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.</p>
+                <p class="st-list-description">
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
+                </p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="setupDomain">
@@ -110,10 +125,10 @@
             <hr>
             <h2>E-mailadressen</h2>
             
-            <p class="st-list-description" v-if="organization.privateMeta && organization.privateMeta.mailDomainActive">
+            <p v-if="organization.privateMeta && organization.privateMeta.mailDomainActive" class="st-list-description">
                 Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt die eindigen op @{{ organization.privateMeta.mailDomain }}, kan je e-mails versturen vanaf dat e-mailadres. Bij andere e-mailadressen (bv. {{ organization.uri }}@gmail.com) kunnen we enkel instellen dat leden antwoorden naar dat e-mailadres, de e-mail wordt nog steeds verstuurd vanaf iets@{{ organization.privateMeta.mailDomain }}. Voeg enkel e-mailadressen toe waar je ook e-mails kan op ontvangen.
             </p>
-            <p class="st-list-description" v-else>
+            <p v-else class="st-list-description">
                 Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je het domeinnaam hierboven eerst toevoegt. Bij andere e-mailadressen (bv. {{ organization.uri }}@gmail.com) kunnen we enkel instellen dat leden antwoorden naar dat e-mailadres, de e-mail wordt nog steeds verstuurd vanaf iets@{{ organization.uri }}.stamhoofd.be. Voeg enkel e-mailadressen toe waarop je e-mails kan ontvangen.
             </p>
 
@@ -126,38 +141,56 @@
 
             <hr>
             <h2>Jouw privacyvoorwaarden</h2>
-            <p class="st-list-description">Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.</p>
+            <p class="st-list-description">
+                Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.
+            </p>
 
             <STInputBox title="Waar staan jouw privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio v-model="selectedPrivacyType" value="none">Geen</Radio>
-                    <Radio v-model="selectedPrivacyType" value="website">Op jouw website</Radio>
-                    <Radio v-model="selectedPrivacyType" value="file">Zelf PDF-bestand aanleveren</Radio>
+                    <Radio v-model="selectedPrivacyType" value="none">
+                        Geen
+                    </Radio>
+                    <Radio v-model="selectedPrivacyType" value="website">
+                        Op jouw website
+                    </Radio>
+                    <Radio v-model="selectedPrivacyType" value="file">
+                        Zelf PDF-bestand aanleveren
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
-            <STInputBox title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox" v-if="selectedPrivacyType == 'website'">
+            <STInputBox v-if="selectedPrivacyType == 'website'" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
                 <input
                     v-model="privacyPolicyUrl"
                     class="input"
                     type="url"
                     placeholder="bv. https://www.vereniging.be/privacy"
-                />
+                >
             </STInputBox>
 
-            <FileInput v-if="selectedPrivacyType == 'file'" title="Kies een bestand" :validator="validator" v-model="privacyPolicyFile" :required="false"/>
+            <FileInput v-if="selectedPrivacyType == 'file'" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
 
             <hr>
             <h2>Betaalmethodes</h2>
 
-            <Checkbox v-model="enableTransfers">Overschrijvingen (gratis, maar zelf op te volgen)</Checkbox>
-            <Checkbox v-model="enablePayconiq">Payconiq (20 cent)</Checkbox>
-            <Checkbox v-model="enableBancontact">Bancontact (31 cent)</Checkbox>
-            <Checkbox v-model="enableIDEAL">iDEAL (29 cent)</Checkbox>
+            <Checkbox v-model="enableTransfers">
+                Overschrijvingen (gratis, maar zelf op te volgen)
+            </Checkbox>
+            <Checkbox v-model="enablePayconiq">
+                Payconiq (20 cent)
+            </Checkbox>
+            <Checkbox v-model="enableBancontact">
+                Bancontact (31 cent)
+            </Checkbox>
+            <Checkbox v-model="enableIDEAL">
+                iDEAL (29 cent)
+            </Checkbox>
 
             <hr>
             <h2>Payconiq activeren</h2>
-            <p class="st-list-description">Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. We bezorgen je dan de nodige contracten die we daarna aan Payconiq bezorgen. Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.</p>
+            <p class="st-list-description">
+                Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. We bezorgen je dan de nodige contracten die we daarna aan Payconiq bezorgen. Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.
+            </p>
 
             <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
                 <input
@@ -165,14 +198,16 @@
                     class="input"
                     type="text"
                     placeholder="API Key van Payconiq"
-                />
+                >
             </STInputBox>
 
             <hr>
             <h2>Online betalingen activeren</h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description">Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.</p>
+                <p class="st-list-description">
+                    Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
+                </p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="linkMollie">
@@ -182,12 +217,22 @@
                 </p>
             </template>
             <template v-else>
-                <p class="success-box" v-if="organization.privateMeta.mollieOnboarding.canReceivePayments">Online betalingen via Bancontact of iDEAL zijn geactiveerd (je kan ze hierboven aanzetten).</p>
-                <p class="warning-box" v-else>Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.</p>
-                <p class="warning-box" v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements">Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen</p>
+                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
+                    Online betalingen via Bancontact of iDEAL zijn geactiveerd (je kan ze hierboven aanzetten).
+                </p>
+                <p v-else class="warning-box">
+                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
+                </p>
+                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
+                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
+                </p>
 
-                <p class="st-list-description" v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'">Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.</p>
-                <p class="st-list-description" v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'">Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).</p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
+                </p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
+                </p>
 
                 <p class="st-list-description">
                     <LoadingButton :loading="loadingMollie">
@@ -213,16 +258,17 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Radio, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, IBANInput, ImageInput, ColorInput, Toast, FileInput} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, File, PaymentMethod, OrganizationPrivateMetaData } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
+import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 import DNSRecordsView from './DNSRecordsView.vue';
+import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({

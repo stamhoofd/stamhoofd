@@ -4,7 +4,9 @@
             <div class="hover-box">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
-                    <div class="hover-show"><button class="button icon gray edit" @click="editMember()"></button></div>
+                    <div class="hover-show">
+                        <button class="button icon gray edit" @click="editMember()" />
+                    </div>
                 </h2>
                 <dl class="details-grid">
                     <template v-if="member.details.memberNumber">
@@ -19,7 +21,7 @@
                         <dt>Groep</dt>
                         <dd class="hover-box">
                             {{ member.groups.map(g => g.settings.name).join(", ") }}
-                            <button class="hover-show button icon gray sync" @click="editGroup()"></button>
+                            <button class="hover-show button icon gray sync" @click="editGroup()" />
                         </dd>
                     </template>
 
@@ -52,7 +54,9 @@
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
-                    <div class="hover-show"><button class="button icon gray edit" @click="editParent(parent)"></button></div>
+                    <div class="hover-show">
+                        <button class="button icon gray edit" @click="editParent(parent)" />
+                    </div>
                 </h2>
 
                 <dl class="details-grid">
@@ -83,7 +87,9 @@
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
-                    <div class="hover-show"><button class="button icon gray edit" @click="editContact(contact)"></button></div>
+                    <div class="hover-show">
+                        <button class="button icon gray edit" @click="editContact(contact)" />
+                    </div>
                 </h2>
 
                 <dl class="details-grid">
@@ -93,14 +99,15 @@
                     <dt>GSM-nummer</dt>
                     <dd>{{ contact.phone }}</dd>
                 </dl>
-
             </div>
 
             <div v-if="member.details.doctor" class="hover-box">
                 <hr>
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
-                    <div class="hover-show"><button class="button icon gray edit" @click="editContact(member.details.doctor)"></button></div>
+                    <div class="hover-show">
+                        <button class="button icon gray edit" @click="editContact(member.details.doctor)" />
+                    </div>
                 </h2>
 
                 <dl class="details-grid">
@@ -116,19 +123,26 @@
                 <hr>
 
                 <h2 class="style-with-button">
-                    <div v-if="member.details.age <= 30 && familyMembers[0].details.age <= 30">Broers &amp; zussen</div>
-                    <div v-else>Familie</div>
+                    <div v-if="member.details.age <= 30 && familyMembers[0].details.age <= 30">
+                        Broers &amp; zussen
+                    </div>
+                    <div v-else>
+                        Familie
+                    </div>
                 </h2>
 
                 <STList>
                     <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
-                        <h3 class="style-title-list">{{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}</h3>
-                        <p class="style-description">{{ familyMember.groups.map(g => g.settings.name).join(", ") }}</p>
-                        <span class="icon arrow-right-small gray" slot="right" />
+                        <h3 class="style-title-list">
+                            {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
+                        </h3>
+                        <p class="style-description">
+                            {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
                 </STList>
             </div>
-
         </div>
 
         <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
@@ -142,35 +156,43 @@
                             class="icon gray privacy"
                         />
                     </div>
-                    <div class="hover-show"><button class="button icon gray edit" @click="editMemberRecords()"></button></div>
+                    <div class="hover-show">
+                        <button class="button icon gray edit" @click="editMemberRecords()" />
+                    </div>
                 </h2>
 
                 <ul class="member-records">
                     <li
                         v-for="(record, index) in sortedRecords"
                         :key="index"
+                        v-tooltip="record.description.length > 0 ? record.description : null"
                         :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
                         @click="openRecordView(record)"
-                        v-tooltip="record.description.length > 0 ? record.description : null"
                     >
-                        <span :class="'icon '+getIcon(record)"/>
+                        <span :class="'icon '+getIcon(record)" />
                         <span class="text">{{ record.getText() }}</span>
-                        <span class="icon arrow-right-small" v-if="canOpenRecord(record)" />
+                        <span v-if="canOpenRecord(record)" class="icon arrow-right-small" />
                     </li>
                 </ul>
 
-                <p class="info-box" v-if="member.details.records.length == 0">{{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart</p>
+                <p v-if="member.details.records.length == 0" class="info-box">
+                    {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
+                </p>
 
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
             </template>
 
-             <template v-if="member.users.length > 0">
+            <template v-if="member.users.length > 0">
                 <h2>Accounts</h2>
-                <p v-for="user in member.users">{{ user.email }}</p>
+                <p v-for="user in member.users" :key="user.id">
+                    {{ user.email }}
+                </p>
 
-                <p class="accounts-description">Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.</p>
+                <p class="accounts-description">
+                    Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.
+                </p>
             </template>
 
             <template v-if="false">
@@ -181,23 +203,26 @@
             </template>
         </div>
         <div v-if="!member.details || member.details.isPlaceholder">
-            <p class="error-box">Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen toegang meer hebt tot de encryptiesleutel van de vereniging die door dit lid gebruikt werd. Vraag een administrator om jou terug toegang te geven (dat kan in beheerders > jouw naam > encryptiesleutels > toegang geven).</p>
+            <p class="error-box">
+                Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen toegang meer hebt tot de encryptiesleutel van de vereniging die door dit lid gebruikt werd. Vraag een administrator om jou terug toegang te geven (dat kan in beheerders > jouw naam > encryptiesleutels > toegang geven).
+            </p>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin, ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { TooltipDirective as Tooltip, ErrorBox, STList, STListItem } from "@stamhoofd/components";
+import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { RecordTypeHelper, ParentTypeHelper, MemberWithRegistrations, Record, RecordTypePriority, Parent, EmergencyContact } from '@stamhoofd/structures';
-import RecordDescriptionView from './records/RecordDescriptionView.vue';
-import EditMemberView from './edit/EditMemberView.vue';
-import EditMemberParentView from './edit/EditMemberParentView.vue';
+
 import { FamilyManager } from '../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
-import MemberView from './MemberView.vue';
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
+import EditMemberParentView from './edit/EditMemberParentView.vue';
+import EditMemberView from './edit/EditMemberView.vue';
+import MemberView from './MemberView.vue';
+import RecordDescriptionView from './records/RecordDescriptionView.vue';
 
 @Component({
     components: {

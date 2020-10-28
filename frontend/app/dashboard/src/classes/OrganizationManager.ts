@@ -1,7 +1,6 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
-import { Organization, OrganizationPatch } from '@stamhoofd/structures'
-
 import { SessionManager } from '@stamhoofd/networking'
+import { Organization, OrganizationPatch } from '@stamhoofd/structures'
 
 /**
  * Convenient access to the organization of the current session

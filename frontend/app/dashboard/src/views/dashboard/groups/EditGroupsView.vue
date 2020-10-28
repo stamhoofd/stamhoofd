@@ -1,26 +1,30 @@
 <template>
     <div class="st-view group-list-view">
         <STNavigationBar title="Groepen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
             <button slot="right" class="button text" @click="createGroup">
-                <span class="icon add"/>
+                <span class="icon add" />
                 <span>Nieuw</span>
             </button>
         </STNavigationBar>
 
     
         <main>
-            <h1 v-if="groups.length == 0">Voeg je leeftijdsgroepen toe</h1>
-            <h1 v-else>Leeftijdsgroepen</h1>
+            <h1 v-if="groups.length == 0">
+                Voeg je leeftijdsgroepen toe
+            </h1>
+            <h1 v-else>
+                Leeftijdsgroepen
+            </h1>
             <p>Je kan instellen wie zich kan inschrijven bij welk groep op basis van leeftijd en geslacht. Als leden toch in meerdere groepen passen, dan krijgen ze de keuze tijdens het inschrijven.</p>
             <STList>
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" class="right-stack right-description" @click="editGroup(group)">
                     {{ group.settings.name }}
                     <template slot="right">
                         <span>{{ groupDescription(group) }}</span>
-                        <span v-if="group.settings.genderType == 'OnlyMale'" ><MaleIcon /></span>
+                        <span v-if="group.settings.genderType == 'OnlyMale'"><MaleIcon /></span>
                         <span v-if="group.settings.genderType == 'OnlyFemale'"><FemaleIcon /></span>
-                        <span><button class="button icon gray trash" @click.stop="deleteGroup(group)"/></span>
+                        <span><button class="button icon gray trash" @click.stop="deleteGroup(group)" /></span>
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
@@ -32,15 +36,15 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, MaleIcon, FemaleIcon, CenteredMessage, BackButton } from "@stamhoofd/components";
+import { BackButton,CenteredMessage, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Logger } from '@stamhoofd/logger';
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import EditGroupView from './EditGroupView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { Logger } from '@stamhoofd/logger';
+import EditGroupView from './EditGroupView.vue';
 
 @Component({
     components: {

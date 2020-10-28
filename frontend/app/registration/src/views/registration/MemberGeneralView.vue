@@ -297,7 +297,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     chooseGroup(component: NavigationMixin, replace = false) {
-        this.navigationController.push(new ComponentWithProperties(MemberGroupView, { 
+        this.navigationController?.push(new ComponentWithProperties(MemberGroupView, { 
             member: this.member,
             handler: (component: MemberGroupView) => {
                 this.goToParents(component).catch(e => {
