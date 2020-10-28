@@ -14,43 +14,44 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput title="Geboortedatum" :validator="validator" v-model="birthDay" />
+                <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" />
 
                 <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
                     <RadioGroup>
-                        <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">Man</Radio>
-                        <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">Vrouw</Radio>
-                        <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">Andere</Radio>
+                        <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
+                            Man
+                        </Radio>
+                        <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
+                            Vrouw
+                        </Radio>
+                        <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
+                            Andere
+                        </Radio>
                     </RadioGroup>
                 </STInputBox>
 
-                <Checkbox v-model="livesAtParents" v-if="livesAtParents || (age >= 18 && age <= 27)">Woont bij ouders</Checkbox>
+                <Checkbox v-if="livesAtParents || (age >= 18 && age <= 27)" v-model="livesAtParents">
+                    Woont bij ouders
+                </Checkbox>
             </div>
 
             <div>
-                <AddressInput title="Adres van dit lid" v-model="address" v-if="age >= 18 && !livesAtParents" :validator="validator" :required="false" />
-                <EmailInput title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="age >= 18" v-model="email" v-if="age >= 12" :validator="validator"/>
-                <PhoneInput title="GSM-nummer van dit lid" v-model="phone" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" v-if="age >= 12"/>
+                <AddressInput v-if="age >= 18 && !livesAtParents" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
+                <EmailInput v-if="age >= 11" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="false" :validator="validator" />
+                <PhoneInput v-if="age >= 11" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
             </div>
         </div>
     </form>
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput, LoadingButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup, MemberExistingStatus } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { MemberDetails } from '@stamhoofd/structures';
-import MemberParentsView from './MemberParentsView.vue';
-import MemberGroupView from './MemberGroupView.vue';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import EmergencyContactView from './EmergencyContactView.vue';
-import MemberRecordsView from './MemberRecordsView.vue';
-import { SessionManager } from '@stamhoofd/networking';
-import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components"
+import { Address, Gender, Record, RecordType, Version } from "@stamhoofd/structures"
+import { MemberDetails } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {

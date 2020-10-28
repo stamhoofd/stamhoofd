@@ -35,11 +35,8 @@ async function generateEncryptionKey(password: string, authEncryptionKeyConstant
 async function generateKeys(password: string) {
     console.log("Generating keys and constants...");
 
-    let authSignKeyConstants: KeyConstants
-    let authEncryptionKeyConstants: KeyConstants
-
-    authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
-    authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
+    const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
+    const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
 
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
     const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
@@ -68,7 +65,7 @@ ctx.addEventListener('message', (e) => {
                 setTimeout(function () { throw e; }); 
             });
             return;
-        };
+        }
 
         case "encryptionKey": {
             const password = e.data.password
@@ -78,7 +75,7 @@ ctx.addEventListener('message', (e) => {
                 setTimeout(function () { throw e; }); 
             });
             return;
-        };
+        }
 
         case "keys": {
             const password = e.data.password
