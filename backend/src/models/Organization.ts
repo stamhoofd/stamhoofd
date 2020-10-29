@@ -395,7 +395,7 @@ export class Organization extends Model {
             // save
             await organization.save()
 
-            if (organization.serverMeta.DNSRecordWarningCount < 2 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 2 + (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
+            if (organization.serverMeta.DNSRecordWarningCount < 2 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 2 - (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
                 organization.serverMeta.DNSRecordWarningCount += 1
                 await organization.save()
 
