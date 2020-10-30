@@ -5,6 +5,7 @@ import { Address } from './Address';
 import { Group } from './Group';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
+import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class OrganizationKey extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -19,7 +20,7 @@ export class OrganizationKey extends AutoEncoder {
 
 export class OrganizationKeyUser extends OrganizationKey {
     @field({ decoder: BooleanDecoder })
-    hasAccess: boolean = false;
+    hasAccess = false;
 }
 
 export class Organization extends AutoEncoder {
@@ -58,6 +59,12 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: OrganizationPrivateMetaData, nullable: true, version: 6})
     privateMeta: OrganizationPrivateMetaData | null = null;
+
+    /**
+     * Only set for users with full access to the organization
+     */
+    @field({ decoder: new ArrayDecoder(WebshopPreview), version: 38, upgrade: () => []})
+    webshops: WebshopPreview[] = [];
 }
 
 export class OrganizationSimple extends AutoEncoder {

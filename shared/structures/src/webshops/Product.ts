@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { Image } from '../files/Image';
+
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -69,6 +71,9 @@ export class Product extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder })
     enabled = true
+
+    @field({ decoder: new ArrayDecoder(Image) })
+    images: Image[] = []
 
     @field({ decoder: new EnumDecoder(ProductType) })
     type = ProductType.Product

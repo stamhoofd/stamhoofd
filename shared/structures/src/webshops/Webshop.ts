@@ -5,6 +5,14 @@ import { Category } from './Category';
 import { Product } from './Product';
 import { WebshopMetaData, WebshopPrivateMetaData } from './WebshopMetaData';
 
+export class WebshopPreview extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: WebshopMetaData })
+    meta = WebshopMetaData.create({})
+}
+
 export class Webshop extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -23,3 +31,4 @@ export class PrivateWebshop extends Webshop {
     @field({ decoder: WebshopPrivateMetaData })
     privateMeta = WebshopPrivateMetaData.create({})
 }
+

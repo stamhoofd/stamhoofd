@@ -1,6 +1,6 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
+import { Category, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from './Organization';
@@ -25,8 +25,8 @@ export class Webshop extends Model {
     @column({ type: "string", nullable: true })
     domain: string | null = null;
 
-    // Unique representation of this organization from a string, that is used to provide the default domains
-    // in uri.stamhoofd.be
+    // Unique representation of this webshop from a string, that is used to provide the default domains
+    // in org.stamhoofd.shop/name-of-webshop
     @column({ type: "string" })
     uri: string;
 

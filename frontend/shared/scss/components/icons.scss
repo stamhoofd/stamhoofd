@@ -196,6 +196,10 @@
     &.gift:after {
         font-icon: url(@stamhoofd/assets/images/icons/gift.svg);
     }
+
+    &.basket:after {
+        font-icon: url(@stamhoofd/assets/images/icons/basket.svg);
+    }
 }
 
 .android-icons {

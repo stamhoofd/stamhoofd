@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 37
+export const Version = 38
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -86,3 +86,6 @@ export * from "./src/InviteUserDetails"
 
 // Webshop
 export * from "./src/webshops/WebshopMetaData"
+export * from "./src/webshops/Product"
+export * from "./src/webshops/Category"
+export * from "./src/webshops/Webshop"
