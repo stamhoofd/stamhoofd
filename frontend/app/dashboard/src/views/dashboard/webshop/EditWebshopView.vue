@@ -5,6 +5,10 @@
                 <BackButton v-if="canPop" @click="pop" />
             </template>
             <template #right>
+                <button class="button text" @click="deleteWebshop" v-if="!isNew">
+                    <span class="icon trash" />
+                    <span>Verwijderen</span>
+                </button>
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
@@ -14,9 +18,7 @@
 
         <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
 
-        <main>
-            <component :is="tab" :webshop="patchedWebshop" @patch="patch"/>
-        </main>
+        <component :is="tab" :webshop="patchedWebshop" @patch="patch"/>
 
          <STToolbar>
             <template slot="right">
@@ -45,6 +47,8 @@ import { FamilyManager } from '../../../classes/FamilyManager';
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
+import EditWebshopPageView from './EditWebshopPageView.vue';
+import EditWebshopProductsView from './EditWebshopProductsView.vue';
 
 @Component({
     components: {
@@ -57,7 +61,7 @@ import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
     },
 })
 export default class EditWebshopView extends Mixins(NavigationMixin) {
-    tabs = [EditWebshopGeneralView, EditWebshopGeneralView, EditWebshopGeneralView];
+    tabs = [EditWebshopGeneralView, EditWebshopProductsView, EditWebshopPageView];
     tab = this.tabs[0];
     tabLabels = ["Algemeen", "Artikels", "Pagina"];
 
@@ -91,6 +95,18 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
 
     patch(patch: AutoEncoderPatchType<PrivateWebshop>) {
         this.webshopPatch = this.webshopPatch.patch(patch)
+    }
+
+    async deleteWebshop() {
+        if (!confirm("Ben je zeker dat je deze webshop en alle bijhorende bestellingen definitief wilt verwijderen?")) {
+            return;
+        }
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "DELETE",
+            path: "/webshop/"+this.webshop.id,
+        })
+        new Toast("Webshop verwijderd", "success green").show()
+        this.dismiss({ force: true })
     }
 
     async save() {

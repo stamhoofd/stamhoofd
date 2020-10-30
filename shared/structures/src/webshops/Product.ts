@@ -111,6 +111,6 @@ export class Product extends AutoEncoder {
     })
     prices: ProductPrice[];
 
-    @field({ decoder: new ArrayDecoder(OptionMenu), nullable: true })
-    optionMenus: OptionMenu
+    @field({ decoder: new ArrayDecoder(OptionMenu) })
+    optionMenus: OptionMenu[] = []
 }

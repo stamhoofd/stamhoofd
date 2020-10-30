@@ -28,7 +28,9 @@
             </h1>
 
             <Spinner v-if="loading" class="center" />
-            
+            <p v-if="!loading" class="info-box">
+                Je hebt nog geen bestellingen ontvangen
+            </p>
            
         </main>
     </div>

@@ -1,14 +1,24 @@
 <template>
-    <main class="webshop-view-details">
+    <main class="webshop-view-page">
         <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errorBox">
+        <STInputBox title="Titel" error-fields="meta.title" :error-box="errorBox">
             <input
-                v-model="name"
+                v-model="title"
                 class="input"
                 type="text"
-                placeholder="bv. eetfestijn"
+                placeholder="bv. Bestel je wafels"
                 autocomplete=""
             >
+        </STInputBox>
+
+        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Beschrijving die op jouw webshop staat"
+                autocomplete=""
+            />
         </STInputBox>
 
        
@@ -38,19 +48,28 @@ import RecordDescriptionView from './records/RecordDescriptionView.vue';
     },
     directives: { Tooltip },
 })
-export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
+export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     @Prop()
     webshop!: PrivateWebshop;
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    get name() {
-        return this.webshop.meta.name
+    get title() {
+        return this.webshop.meta.title
     }
 
-    set name(name: string) {
-        const patch = WebshopMetaData.patch({ name })
+    set title(title: string) {
+        const patch = WebshopMetaData.patch({ title })
+        this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get description() {
+        return this.webshop.meta.description
+    }
+
+    set description(description: string) {
+        const patch = WebshopMetaData.patch({ description })
         this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
     }
 
