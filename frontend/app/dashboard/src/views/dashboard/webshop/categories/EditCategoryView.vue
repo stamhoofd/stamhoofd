@@ -1,7 +1,13 @@
 <template>
     <div class="st-view product-edit-view">
         <STNavigationBar :title="isNew ? 'Categorie toevoegen' : name+' bewerken'">
-            <button slot="right" class="button icon close gray" @click="pop" />
+            <template slot="right">
+                <button class="button text" v-if="!isNew" @click="deleteMe">
+                    <span class="icon trash"/>
+                    <span>Verwijderen</span>
+                </button>
+                <button class="button icon close gray" @click="pop" />
+            </template>
         </STNavigationBar>
 
         <main>
@@ -180,6 +186,10 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         }
         const p = PrivateWebshop.patch({})
         p.categories.addDelete(this.category.id)
+
+        for (const id of this.category.productIds) {
+            p.products.addDelete(id)
+        }
         this.saveHandler(p)
         this.pop({ force: true })
     }
