@@ -47,10 +47,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, WaitingListType } from "@stamhoofd/structures"
+import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, Version, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
@@ -113,7 +113,11 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    deleteMe() {
+    async deleteMe() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit artikel wilt verwijderen?", "Verwijderen")) {
+            return
+        }
+
         const p = PrivateWebshop.patch({})
         p.products.addDelete(this.product.id)
         this.saveHandler(p)
@@ -124,7 +128,14 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
+    isChanged() {
+        return patchContainsChanges(this.patchProduct, this.product, { version: Version })
+    }
+
     async shouldNavigateAway() {
+        if (!this.isChanged()) {
+            return true
+        }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 

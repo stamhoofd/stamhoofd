@@ -75,7 +75,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
 
     close() {
         this.isClosing = true
-        this.emitParents("pop", undefined);
+        this.pop({ force: true })
     }
 
     activated() {
@@ -86,31 +86,27 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         document.removeEventListener("keydown", this.onKey);
     }
 
-    hasCloseButton() {
-        return !!this.centeredMessage.buttons.find(b => b.action == null)
-    }
-
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
             return;
         }
 
         const key = event.key || event.keyCode;
+        const closeButton = this.centeredMessage.buttons.find(b => b.type == "secundary")
 
         if (key === "Escape" || key === "Esc" || key === 27) {
-            if (!this.hasCloseButton()) {
+            if (!closeButton) {
                 return;
             }
 
-            this.close();
+            this.onClickButton(closeButton)
             event.preventDefault();
-            event.stopPropagation()
             return;
         }
 
         const confirmButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
 
-        if (!confirmButton && !this.hasCloseButton()) {
+        if (!confirmButton && !closeButton) {
             return
         }
 
@@ -121,7 +117,6 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
                 this.close();
             }
             event.preventDefault();
-            event.stopPropagation()
         }
     }
 

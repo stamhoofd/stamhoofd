@@ -52,10 +52,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, WaitingListType, Webshop } from "@stamhoofd/structures"
+import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator, CenteredMessage } from "@stamhoofd/components";
+import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, Version, WaitingListType, Webshop } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import EditProductView from '../products/EditProductView.vue';
 import ProductRow from "../products/ProductRow.vue"
@@ -174,7 +174,10 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    deleteMe() {
+    async deleteMe() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+            return
+        }
         const p = PrivateWebshop.patch({})
         p.categories.addDelete(this.category.id)
         this.saveHandler(p)
@@ -206,7 +209,19 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     cancel() {
-        this.pop({ force: true })
+        this.pop()
+    }
+
+    isChanged() {
+        return patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        console.log("should navigate away")
+        if (!this.isChanged()) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
     

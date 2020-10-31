@@ -340,8 +340,8 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.whatsNewBadge = ""
     }
 
-    logout() {
-        if (!confirm("Ben je zeker dat je wilt uitloggen?")) {
+    async logout() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             return;
         }
         SessionManager.logout()
