@@ -77,14 +77,9 @@ export default class LoginView extends Mixins(NavigationMixin){
         }
 
         this.loading = true
+        
         // Request the key constants
-
-        const component = new ComponentWithProperties(CenteredMessage, { 
-            type: "loading",
-            title: "Inloggen...", 
-            description: "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even. "
-        }).setDisplayStyle("overlay");
-        this.present(component)
+        const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
 
         try {
             await LoginHelper.login(this.session, this.email, this.password)
@@ -92,16 +87,11 @@ export default class LoginView extends Mixins(NavigationMixin){
         } catch (e) {
             console.error(e)
             this.loading = false;
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: "Inloggen mislukt", 
-                description: e.human ?? e.message ?? "Er ging iets mis",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
+
+            new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
             return;
         } finally {
-            (component.componentInstance() as any)?.pop()
+            component.hide()
         }
     }
 }

@@ -12,7 +12,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <LoadingButton v-for="button in centeredMessage.buttons" :loading="button.loading">
+                <LoadingButton v-for="(button, index) in centeredMessage.buttons" :loading="button.loading" :key="index">
                     <button  class="button full" :class="button.type" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
@@ -86,6 +86,10 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         document.removeEventListener("keydown", this.onKey);
     }
 
+    hasCloseButton() {
+        return !!this.centeredMessage.buttons.find(b => b.action == null)
+    }
+
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
             return;
@@ -94,30 +98,26 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         const key = event.key || event.keyCode;
 
         if (key === "Escape" || key === "Esc" || key === 27) {
-            if (!this.closeButton) {
+            if (!this.hasCloseButton()) {
                 return;
             }
 
-            this.pop();
+            this.close();
             event.preventDefault();
             return;
         }
 
-        if (!this.confirmButton && !this.closeButton) {
+        const confirmButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
+
+        if (!confirmButton && !this.hasCloseButton()) {
             return
         }
 
-        if (this.confirmButton && this.confirmType == "destructive") {
-            // No default action
-            return;
-        }
-
-
         if (key === "Enter") {
-            if (this.confirmButton) {
-                this.confirm()
+            if (confirmButton) {
+                this.onClickButton(confirmButton)
             } else {
-                this.pop();
+                this.close();
             }
             event.preventDefault();
         }

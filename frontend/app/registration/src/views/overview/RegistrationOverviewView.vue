@@ -227,14 +227,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 return false
             }
             
-            // todo: improve message
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: member.firstName+" is al ingeschreven", 
-                description: "Je kan dit lid niet nog eens inschrijven.",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
+            new CenteredMessage(member.firstName+" is al ingeschreven", "Je kan dit lid niet nog eens inschrijven.", "error").addCloseButton().show()
             return
         }
 

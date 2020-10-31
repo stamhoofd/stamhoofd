@@ -357,7 +357,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     importMembers() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Binnenkort kan je leden importeren via Excel of manueel.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
+        new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
     }
 
     hasAccessToGroup(group: Group) {

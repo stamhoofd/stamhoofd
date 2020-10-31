@@ -31,7 +31,7 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Steps } from "@stamhoofd/components"
+import { BackButton,CenteredMessage,CenteredMessageView,Steps } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -110,6 +110,16 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
 
     popNav() {
         (this.$refs.steps as any).navigationController.pop();
+    }
+
+    mounted() {
+        CenteredMessage.addListener(this, (centeredMessage) => {
+            this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+        })
+    }
+
+    beforeDestroy() {
+        CenteredMessage.removeListener(this)
     }
 }
 </script>

@@ -159,37 +159,26 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
         }
 
         this.loading = true
-        // Request the key constants
         
-        const component = new ComponentWithProperties(CenteredMessage, { 
-            type: "loading",
-            title: "Wachtwoord wijzigen...", 
-            description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
-        }).setDisplayStyle("overlay");
-        this.present(component)
+        // Request the key constants
+        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
 
         try {
             await LoginHelper.changePassword(this.session, this.password, true)
             
             this.loading = false;
-            (component.componentInstance() as any)?.pop()
+            component.hide()
 
             SessionManager.setCurrentSession(this.session)
             this.dismiss({ force: true })
             
         } catch (e) {
             this.loading = false;
-            (component.componentInstance() as any)?.pop()
+            component.hide()
 
             this.errorBox = new ErrorBox(e)
 
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: "Er ging iets mis", 
-                description: "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
+            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
             return;
         }
         

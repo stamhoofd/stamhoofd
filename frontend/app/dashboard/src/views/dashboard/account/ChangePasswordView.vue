@@ -77,12 +77,8 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         }
         this.loading = true
 
-        const component = new ComponentWithProperties(CenteredMessage, { 
-            type: "loading",
-            title: "Wachtwoord wijzigen...", 
-            description: "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even. "
-        }).setDisplayStyle("overlay");
-        this.present(component)
+
+        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
 
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
@@ -94,7 +90,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
             return;
         } finally {
-            (component.componentInstance() as any)?.pop()
+            component.hide()
         }
     }
 }

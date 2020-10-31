@@ -36,7 +36,8 @@ export { default as BackButton } from "./src/navigation/BackButton.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
 
 // Overlays
-export { default as CenteredMessage } from "./src/overlays/CenteredMessage.vue"
+export { CenteredMessage, CenteredMessageButton } from "./src/overlays/CenteredMessage"
+export { default as CenteredMessageView } from "./src/overlays/CenteredMessageView.vue"
 export { default as Tooltip } from "./src/overlays/Tooltip.vue"
 export { default as ContextMenu } from "./src/overlays/ContextMenu.vue"
 export { default as ContextMenuItem } from "./src/overlays/ContextMenuItem.vue"

@@ -32,6 +32,12 @@ export class CenteredMessage {
 
     doHide: (() => void) | null = null
 
+    constructor(title: string, description = "", type = "none") {
+        this.title = title
+        this.description = description
+        this.type = type
+    }
+
     static addListener(owner: any, listener: CenteredMessageListener) {
         this.listeners.set(owner, listener)
     }

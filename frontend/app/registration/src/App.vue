@@ -7,8 +7,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, PromiseView, ToastBox } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, PromiseView, ToastBox } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import LoginView from './views/login/LoginView.vue';

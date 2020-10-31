@@ -56,7 +56,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, CenteredMessage, Toast } from "@stamhoofd/components";
+import { ContextMenu, CenteredMessage, CenteredMessageButton, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -123,22 +123,22 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     }
 
     deleteData() {
-        this.present(new ComponentWithProperties(CenteredMessage, { 
-            title: "Wil je alle data van "+this.member.firstName+" verwijderen?", 
-            description: "Dit verwijdert alle data van "+this.member.firstName+", inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.", 
-            confirmType: "destructive",
-            confirmButton: "Verwijderen",
-            confirmAction: async () => {
-                // todo
-                await MemberManager.deleteMember(this.member)
-                new Toast(this.member.firstName+' is verwijderd', "success").show()
-            },
-            closeButton: "Annuleren", 
-        }).setDisplayStyle("overlay"))
+        new CenteredMessage("Wil je alle data van "+this.member.firstName+" verwijderen?", "Dit verwijdert alle data van "+this.member.firstName+", inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
+            .addButton(new CenteredMessageButton("Verwijderen", {
+                action: async () => {
+                    // todo
+                    await MemberManager.deleteMember(this.member)
+                    new Toast(this.member.firstName+' is verwijderd', "success").show()
+                },
+                type: "destructive",
+                icon: "trash"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
     }
 
     deleteRegistration() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
+        new CenteredMessage("Binnenkort beschikbaar!", "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", "clock").addCloseButton().show()
     }
 
     changeGroup() {
@@ -150,8 +150,6 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
-
-        //this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "clock" }).setDisplayStyle("overlay"))
     }
 }
 </script>

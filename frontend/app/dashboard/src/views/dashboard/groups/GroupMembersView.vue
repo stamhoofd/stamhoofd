@@ -641,8 +641,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
-
-        //this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", closeButton: "Sluiten", type: "health" }).setDisplayStyle("overlay"))
     }
 }
 </script>
