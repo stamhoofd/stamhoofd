@@ -53,6 +53,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/arrow-up-big.svg);
     }
 
+    &.arrow-down:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-down-big.svg);
+    }
+
     &.clock:after {
         font-icon: url(@stamhoofd/assets/images/icons/gray/clock.svg);
     }

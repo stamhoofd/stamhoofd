@@ -1,6 +1,7 @@
 <template>
-    <STListItem :selectable="true" @click="editProduct()">
-        {{ product.name }}
+    <STListItem :selectable="true" @click="editCategory()">
+        {{ category.name }}
+
         <template slot="right">
             <button class="button icon arrow-up gray" @click.stop="moveUp"/>
             <button class="button icon arrow-down gray" @click.stop="moveDown"/>
@@ -13,8 +14,9 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STListItem } from "@stamhoofd/components";
-import { PrivateWebshop, Product } from "@stamhoofd/structures"
+import { Category, PrivateWebshop, Product } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import EditCategoryView from './EditCategoryView.vue';
 import EditProductView from './EditProductView.vue';
 
 @Component({
@@ -22,15 +24,16 @@ import EditProductView from './EditProductView.vue';
         STListItem
     },
 })
-export default class ProductRow extends Mixins(NavigationMixin) {
+export default class CategoryRow extends Mixins(NavigationMixin) {
     @Prop({})
-    product: Product
+    category: Category
 
     @Prop({})
     webshop: PrivateWebshop
 
-    editProduct() {
-        this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+    editCategory() {
+        this.present(new ComponentWithProperties(EditCategoryView, { category: this.category, webshop: this.webshop, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+            // This same patch could also patch products ;)
             this.$emit("patch", patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

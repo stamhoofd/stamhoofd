@@ -1,7 +1,14 @@
 <template>
     <div class="st-view product-edit-view">
         <STNavigationBar :title="isNew ? 'Artikel toevoegen' : name+' bewerken'">
-            <button slot="right" class="button icon close gray" @click="pop" />
+            <template slot="right">
+                <button class="button text" v-if="!isNew" @click="deleteMe">
+                    <span class="icon trash"/>
+                    <span>Verwijderen</span>
+                </button>
+                <button class="button icon close gray" @click="pop" />
+            </template>
+            
         </STNavigationBar>
 
         <main>
@@ -11,20 +18,18 @@
             <h1 v-else>
                 {{ name }} bewerken
             </h1>
-          
-                <STErrorsDefault :error-box="errorBox" />
-                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="Naam van dit artikel"
-                        autocomplete=""
-                    >
-                </STInputBox>
-
-
+        
+            <STErrorsDefault :error-box="errorBox" />
+            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van dit artikel"
+                    autocomplete=""
+                >
+            </STInputBox>
            
         </main>
 
@@ -104,7 +109,13 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     save() {
         const p = PrivateWebshop.patch({})
         p.products.addPatch(this.patchProduct)
-        console.log(p)
+        this.saveHandler(p)
+        this.pop({ force: true })
+    }
+
+    deleteMe() {
+        const p = PrivateWebshop.patch({})
+        p.products.addDelete(this.product.id)
         this.saveHandler(p)
         this.pop({ force: true })
     }

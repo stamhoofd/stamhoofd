@@ -27,7 +27,7 @@
             <hr>
             <h2>Artikels</h2>
             <STList>
-                <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)"/>
+                <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)"/>
             </STList>
 
             <p>
@@ -146,8 +146,27 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
-        console.log(patch)
         this.patchWebshop = this.patchWebshop.patch(patch)
+
+        // Delete all products that do not exist any longer
+        const deleteIds = this.patchedCategory.productIds.flatMap(id => {
+            const product = this.patchedWebshop.products.find(p => p.id == id)
+            if (product) {
+                // exists
+                return []
+            }
+            return [id]
+        })
+
+        if (deleteIds.length > 0) {
+            // clean up
+            const cp = Category.patch({ id: this.category.id })
+            for (const id of deleteIds) {
+                cp.productIds.addDelete(id)
+                console.log("Automatically deleted product from this category: "+id)
+            }
+            this.addCategoryPatch(cp)
+        }
     }
 
     save() {
@@ -155,8 +174,39 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
+    deleteMe() {
+        const p = PrivateWebshop.patch({})
+        p.categories.addDelete(this.category.id)
+        this.saveHandler(p)
+        this.pop({ force: true })
+    }
+
+    moveProductUp(product: Product) {
+        const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
+        if (index == -1 || index == 0) {
+            return;
+        }
+
+        const moveTo = index - 2
+        const p = Category.patch({})
+        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo] ?? null)
+        this.addCategoryPatch(p)
+    }
+
+    moveProductDown(product: Product) {
+        const index = this.patchedCategory.productIds.findIndex(c => product.id === c)
+        if (index == -1 || index >= this.patchedCategory.productIds.length - 1) {
+            return;
+        }
+
+        const moveTo = index + 1
+        const p = Category.patch({})
+        p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo])
+        this.addCategoryPatch(p)
+    }
+
     cancel() {
-        // todo
+        this.pop({ force: true })
     }
 
     

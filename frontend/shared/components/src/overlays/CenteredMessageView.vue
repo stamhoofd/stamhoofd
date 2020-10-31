@@ -2,39 +2,37 @@
     <transition appear name="show">
         <div class="centered-message-container">
             <div class="centered-message">
-                <Spinner v-if="type == 'loading'" class="center" />
-                <img v-else-if="type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg" />
-                <img v-else-if="type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg" />
-                <img v-else-if="type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg" />
-                <span v-else-if="type != 'none'" :class="'center icon '+type" />
-                <h1>{{ title }}</h1>
-                <p>{{ description }}</p>
+                <Spinner v-if="centeredMessage.type == 'loading'" class="center" />
+                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg" />
+                <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg" />
+                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg" />
+                <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
+                <h1>{{ centeredMessage.title }}</h1>
+                <p>{{ centeredMessage.description }}</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <LoadingButton v-if="confirmButton" :loading="loading">
-                    <button  class="button full" :class="{ destructive: confirmType == 'destructive', primary: confirmType != 'destructive' }" @click="confirm">
-                        <span class="icon trash" />
-                        <span>{{ confirmButton }}</span>
+                <LoadingButton v-for="button in centeredMessage.buttons" :loading="button.loading">
+                    <button  class="button full" :class="button.type" @click="onClickButton(button)">
+                        <span v-if="button.icon" class="icon" :class="button.icon" />
+                        <span>{{ button.text }}</span>
                     </button>
                 </LoadingButton>
-
-                <button v-if="closeButton" class="button secundary full" @click="pop">
-                    {{ closeButton }}
-                </button>
             </div>
         </div>
     </transition>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Mixins, Prop, Vue } from "vue-property-decorator";
 
 import Spinner from "../Spinner.vue"
 import STErrorsDefault from "../errors/STErrorsDefault.vue"
 import LoadingButton from "../navigation/LoadingButton.vue"
 
 import { ErrorBox } from '../errors/ErrorBox';
+import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 
 @Component({
     components: {
@@ -43,52 +41,41 @@ import { ErrorBox } from '../errors/ErrorBox';
         LoadingButton
     }
 })
-export default class CenteredMessage extends Vue {
-    @Prop({ default: "none" })
-    type: string
+export default class CenteredMessageView extends Mixins(NavigationMixin) {
+    @Prop({ required: true})
+    centeredMessage: CenteredMessage
 
-    @Prop({ default: "" })  
-    title: string
-
-    @Prop({ default: "" })
-    description: string
-
-    @Prop({ default: null })
-    closeButton: string | null
-
-    @Prop({ default: "normal" })
-    confirmType: string
-
-    @Prop({ default: null })
-    confirmButton: string | null
-
-    @Prop({ default: null })
-    confirmAction: (() => Promise<any>) | null
-
-    loading = false
+    isClosing = false
     errorBox: ErrorBox | null = null
 
-    async confirm() {
-        if (this.loading) {
+    mounted() {
+        this.centeredMessage.doHide = () => {
+            this.close()
+        }
+    }
+
+    async onClickButton(button: CenteredMessageButton) {
+        if (button.loading) {
             return;
         }
-        if (this.confirmAction) {
-            this.loading = true;
+        if (button.action) {
+            button.loading = true;
             try {
-                await this.confirmAction()
+                await button.action()
             } catch (e) {
                 this.errorBox = new ErrorBox(e)
-                this.loading = false
+                button.loading = false
                 return;
             }
             this.errorBox = null
-            this.loading = false
+            button.loading = false
         }
-        this.pop()
+        this.close()
     }
 
-    pop() {
-        this.$parent.$emit("pop");
+    close() {
+        this.isClosing = true
+        this.emitParents("pop", undefined);
     }
 
     activated() {
