@@ -478,7 +478,7 @@ describe("Groepsadministratie Sync", () => {
         expect(p2.functies[4].einde).not.toBeDefined()
 
         expect(p3.functies[3]).toMatchObject({
-            "functie": "d5f75b320b812440010b8125567703cb", // when woutloper is missing in groepsadmin => to wouters
+            "functie": "d5f75b320b812440010b8125567703cb", // when woudloper is missing in groepsadmin => to wouters
         })
         expect(p3.functies[3].einde).not.toBeDefined()
 
