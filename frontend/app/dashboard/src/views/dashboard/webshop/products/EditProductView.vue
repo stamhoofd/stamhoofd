@@ -49,7 +49,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
+import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -121,7 +121,11 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     cancel() {
-        // todo
+        this.pop()
+    }
+
+    async shouldNavigateAway() {
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
     

@@ -104,6 +104,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
 
             this.close();
             event.preventDefault();
+            event.stopPropagation()
             return;
         }
 
@@ -120,6 +121,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
                 this.close();
             }
             event.preventDefault();
+            event.stopPropagation()
         }
     }
 

@@ -74,4 +74,23 @@ export class CenteredMessage {
         }
         return this
     }
+
+    static confirm(text: string, confirmText: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            new CenteredMessage(text).addButton(new CenteredMessageButton(confirmText, {
+                action: () => {
+                    resolve(true)
+                    return Promise.resolve()
+                },
+                type: "destructive"
+            })).addButton(new CenteredMessageButton("Annuleren", {
+                action: () => {
+                    resolve(false)
+                    return Promise.resolve()
+                },
+                type: "secundary"
+            })).show()
+        })
+        
+    }
 }
