@@ -314,7 +314,11 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                         for (const groupName2 of matchgroup) {
                             // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
                             if (StringCompare.typoCount(functie.beschrijving, groupName2) == 0) {
-                                map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
+
+                                const current = map.get(functie.id) ?? []
+                                if (!current.find(g => g.id == groep.id)) {
+                                    map.set(functie.id, [...current, groep])
+                                }
                                 //continue main;
                                 break loose;
                             }
@@ -336,7 +340,10 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                             throw new Error(code+" niet gevonden :(")
                         }
 
-                        map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
+                        const current = map.get(functie.id) ?? []
+                        if (!current.find(g => g.id == groep.id)) {
+                            map.set(functie.id, [...current, groep])
+                        }
                         continue main;
                     }
                 }
@@ -354,13 +361,17 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                         throw new Error( age.code+" niet gevonden :(")
                     }
 
-                    map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
+                    const current = map.get(functie.id) ?? []
+                    if (!current.find(g => g.id == groep.id)) {
+                        map.set(functie.id, [...current, groep])
+                    }
                     continue main;
                 }
             }
 
         }
     }
+
 
     return map
 }
