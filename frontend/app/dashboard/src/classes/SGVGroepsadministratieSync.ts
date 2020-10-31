@@ -1,7 +1,8 @@
-import { Gender, RecordType, Address, Parent, ParentType, MemberDetails, Group, MemberWithRegistrations } from '@stamhoofd/structures';
-import { StringCompare, Formatter } from '@stamhoofd/utility';
-import { SGVLid } from './SGVGroepsadministratie';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Address, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType, RecordType } from '@stamhoofd/structures';
+import { Formatter,StringCompare } from '@stamhoofd/utility';
+
+import { SGVLid } from './SGVGroepsadministratie';
 
 function deepEqual(x, y) {
   if (x === y) {
@@ -11,7 +12,7 @@ function deepEqual(x, y) {
     if (Object.keys(x).length != Object.keys(y).length)
       return false;
 
-    for (var prop in x) {
+    for (const prop in x) {
       if (y.hasOwnProperty(prop))
       {  
         if (! deepEqual(x[prop], y[prop]))
@@ -153,7 +154,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     }
 
     const newFuncties: any[] = []
-    var hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
+    let hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
     const mapping = buildGroupMapping(allGroups, groepFuncties)
     const remainingFuncties: any[] = []
 
@@ -270,12 +271,20 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {
         "KAP": ["kapoenen"],
-        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen"],
+        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen", "wolven"],
         "JGJV": ["jonggidsen", "jongverkenners", "jonggivers"],
         "GVE": ["gidsen", "verkenners", "givers"],
         "AKAB": ["akabe"],
         "JIN": ["jin"]
     }
+
+    const defaultAgeMapping = [
+        {code: "KAP", minAge: 6, maxAge: 7},
+        {code: "KW",minAge: 8, maxAge: 10},
+        {code: "JGJV",minAge: 11, maxAge: 13},
+        {code: "GVE",minAge: 14, maxAge: 16},
+        {code: "JIN",minAge: 17, maxAge: 17},
+    ]
     const looseMatches = [
         ["woudloper", "woudlopers"],
         ["los lid", "losse leden"]
@@ -288,12 +297,15 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
             // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
             if (StringCompare.typoCount(functie.beschrijving, groep.settings.name) == 0) {
                 map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
-                continue main;
+
+                // We blijven doorlopen, want sommige takken moeten matchen op meerdere functies (bv. wolven kan matchen op groepseigen wolven + welpen van SGV)
+                //continue main;
+                break;
             }
         }
 
         // Als we een loose map ondersteunen
-        for (const matchgroup of looseMatches) {
+        loose: for (const matchgroup of looseMatches) {
             for (const groupName of matchgroup) {
                 if (StringCompare.typoCount(groupName, groep.settings.name) == 0) {
                     // we got a match group
@@ -303,7 +315,8 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                             // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
                             if (StringCompare.typoCount(functie.beschrijving, groupName2) == 0) {
                                 map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
-                                continue main;
+                                //continue main;
+                                break loose;
                             }
                         }
                     }
@@ -329,6 +342,24 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                 }
             }
         }
+        // And also add based on age if we didn't find a match in groepsadmin
+        if (groep.settings.minAge && groep.settings.minAge <= 18 && groep.settings.maxAge && groep.settings.maxAge <= 18) {
+            // find a match for normal members
+
+            for (const age of defaultAgeMapping) {
+                if (groep.settings.minAge >= age.minAge && groep.settings.minAge <= age.maxAge) {
+                    // Found one
+                    const functie =  groepFuncties.find(f => f.code == age.code)
+                    if (!functie) {
+                        throw new Error( age.code+" niet gevonden :(")
+                    }
+
+                    map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
+                    continue main;
+                }
+            }
+
+        }
     }
 
     return map
@@ -342,7 +373,7 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
 // 14 bus 11 => 14 11
 // 14B => 14B
 // 1B 3 45 => 1B 3 45
-export function splitStreetNumber(huisnummer: string): {number: string, bus: string} {
+export function splitStreetNumber(huisnummer: string): {number: string; bus: string} {
     // Stap 1: verwijder alle speciale tekens
     const cleaned = huisnummer.toUpperCase().replace(/[^0-9A-Z]+/g, ' ')
     const parts = cleaned.split(' ')
@@ -355,7 +386,7 @@ export function splitStreetNumber(huisnummer: string): {number: string, bus: str
         part = part.replace(/BUS/g, '')
 
         // Verwijder beginnende B's => sommige mensen gebruiken dit als BUS
-        if (part[0] == "B") {
+        if (part.startsWith("B")) {
             part = part.substr(1)
         }
 

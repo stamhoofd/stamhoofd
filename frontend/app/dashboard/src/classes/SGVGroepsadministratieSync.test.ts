@@ -1,6 +1,7 @@
-import { MemberDetails, Address, Parent, ParentType, Group, GroupSettings } from "@stamhoofd/structures";
-import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
+import { Address, Group, GroupSettings,MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
+
 import groepFuncties from './SGVDefaultFuncties.json';
+import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
 
 
 describe("Groepsadministratie Sync", () => {
@@ -408,19 +409,29 @@ describe("Groepsadministratie Sync", () => {
             })
         })
 
-        const wl = Group.create({
+        const wl = Group.create({ // Matcht op woudlopers custom functie + welpen
             settings: GroupSettings.create({
                 name: "Woudlopers",
                 startDate: new Date(),
-                endDate: new Date()
+                endDate: new Date(),
+            })
+        })
+
+        const wolf = Group.create({ // Moet matchen op givers op basis van leeftijd
+            settings: GroupSettings.create({
+                name: "Onbestaandenaamwolf",
+                startDate: new Date(),
+                endDate: new Date(),
+                minAge: 16,
+                maxAge: 17
             })
         })
 
         const p = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties)
-        const p2 = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl], groepFuncties) // only delete jin if jin is inside stamhoofd
+        const p2 = getPatch(details, sgv, "groepnummer", [g, wolf], [g, wolf], groepFuncties) // only delete jin if jin is inside stamhoofd
         const p3 = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties.slice(0, groepFuncties.length - 1)) // if woudlopers is nog defined in groepsadmin -> check if to wouters
 
-        expect(p.functies).toHaveLength(5);
+        expect(p.functies).toHaveLength(6);
         expect(p2.functies).toHaveLength(5);
         expect(p3.functies).toHaveLength(5);
 
@@ -462,7 +473,7 @@ describe("Groepsadministratie Sync", () => {
         expect(p.functies[3].einde).not.toBeDefined()
 
         expect(p2.functies[4]).toMatchObject({
-            "functie": "woudloperscustom",
+            "functie": "d5f75b320b812440010b8125565203c1", // givers
         })
         expect(p2.functies[4].einde).not.toBeDefined()
 
@@ -471,8 +482,14 @@ describe("Groepsadministratie Sync", () => {
         })
         expect(p3.functies[3].einde).not.toBeDefined()
 
-        // Ended functies
+        // Tussentakken ook bij bijhorende leeftijdsgroep inschrijven
         expect(p.functies[4]).toMatchObject({
+            "functie": "d5f75b320b812440010b8125567703cb",
+        })
+        expect(p.functies[4].einde).not.toBeDefined()
+
+        // Ended functies
+        expect(p.functies[5]).toMatchObject({
             "functie": "d5f75b320b812440010b812555c1039b",
             "begin": "123",
         })
@@ -480,7 +497,7 @@ describe("Groepsadministratie Sync", () => {
             "functie": "d5f75b320b812440010b812555c1039b",
             "begin": "123",
         })
-        expect(p.functies[4].einde).toBeDefined()
+        expect(p.functies[5].einde).toBeDefined()
         expect(p2.functies[2].einde).not.toBeDefined() // do not end this, since this is managed by stamhoofd
     });
 
