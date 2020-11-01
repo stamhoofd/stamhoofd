@@ -26,6 +26,7 @@ export { default as ColorInput } from "./src/inputs/ColorInput.vue"
 export { default as FileInput } from "./src/inputs/FileInput.vue"
 export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as TimeInput } from "./src/inputs/TimeInput.vue"
+export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"

@@ -204,6 +204,10 @@
 
     &> *:last-child {
         flex-shrink: 0;
+
+        > .button.text {
+            margin: -5px 0;
+        }
     }
 }
 
