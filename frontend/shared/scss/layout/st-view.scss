@@ -17,26 +17,28 @@
             }
         }
 
-        > h2 {
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > h2.style-with-button {
-            > *:first-child {
+        &, > .container {
+             > h2 {
+                @extend .style-title-2;
                 padding-bottom: 15px;
             }
-            padding-bottom: 0;
-        }
 
-        > h2 + p {
-            &:not([class]) {
-                @extend .style-description;
+            > h2.style-with-button {
+                > *:first-child {
+                    padding-bottom: 15px;
+                }
+                padding-bottom: 0;
             }
-        }
 
-        > hr {
-            @extend .style-hr;
+            > h2 + p {
+                &:not([class]) {
+                    @extend .style-description;
+                }
+            }
+
+            > hr {
+                @extend .style-hr;
+            }
         }
     }
 }

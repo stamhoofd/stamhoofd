@@ -69,6 +69,13 @@ export class Formatter {
         return formatted.replace(new RegExp("EUR", "ig"), '€');
     }
 
+    static priceChange(value: number): string {
+        if (value >= 0) {
+            return "+ "+this.price(value)
+        }
+        return "- "+this.price(-value)
+    }
+
     static capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }

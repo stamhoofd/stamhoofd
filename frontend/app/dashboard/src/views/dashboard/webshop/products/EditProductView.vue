@@ -2,13 +2,12 @@
     <div class="st-view product-edit-view">
         <STNavigationBar :title="isNew ? 'Artikel toevoegen' : name+' bewerken'">
             <template slot="right">
-                <button class="button text" v-if="!isNew" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
             </template>
-            
         </STNavigationBar>
 
         <main>
@@ -45,7 +44,7 @@
             <h2 class="style-with-button">
                 <div>Prijzen</div>
                 <div>
-                    <button class="button text">
+                    <button class="button text" @click="addProductPrice">
                         <span class="icon add" />
                         <span>Prijs</span>
                     </button>
@@ -53,15 +52,21 @@
             </h2>
             <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
             
-            <STInputBox error-fields="price" :error-box="errorBox">
+            <STInputBox v-if="patchedProduct.prices.length == 1" error-fields="price" :error-box="errorBox">
                 <PriceInput v-model="price" placeholder="Gratis" />
             </STInputBox>
+
+            <STList v-else>
+                <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+            </STList>
+
+            <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
 
             <hr>
             <h2 class="style-with-button">
                 <div>Keuzemenu's</div>
                 <div>
-                    <button class="button text">
+                    <button class="button text" @click="addOptionMenu">
                         <span class="icon add" />
                         <span>Keuzemenu toevoegen</span>
                     </button>
@@ -73,17 +78,17 @@
             <h2 class="style-with-button">
                 <div>Foto</div>
                 <div>
-                    <button class="button text" v-if="image" @click="image = null">
-                        <span class="icon trash"/>
+                    <button v-if="image" class="button text" @click="image = null">
+                        <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Foto uploaden'" :resolutions="resolutions"/>
+                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Foto uploaden'" :resolutions="resolutions" />
                 </div>
             </h2>
             <p>Foto’s worden altijd bijgeknipt tot een vierkant als ze in het overzicht getoond worden. Je hoeft foto's zelf niet bij te knippen. Een portretfoto wordt dus langs boven en onder afgeknipt, en een foto in landschapsoriëntatie wordt links en rechts afgeknipt. In de detailweergave is het soms mogelijk dat we links en rechts nog wat meer plaats hebben en de foto dus wat breder kunnen tonen.</p>
 
-            <img v-if="image" :src="imageSrc" class="image" />
-            <img v-if="image" :src="imageSrc2" class="image" />
+            <img v-if="image" :src="imageSrc" class="image">
+            <img v-if="image" :src="imageSrc2" class="image">
             
             <hr>
             <h2>
@@ -97,7 +102,6 @@
             <Checkbox>
                 Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
             </Checkbox>
-
         </main>
 
         <STToolbar>
@@ -114,11 +118,16 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, UploadButton, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Image, Organization, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WaitingListType } from "@stamhoofd/structures"
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import EditOptionMenuView from './EditOptionMenuView.vue';
+import EditProductPriceView from './EditProductPriceView.vue';
+import OptionMenuSection from "./OptionMenuSection.vue"
+import ProductPriceRow from "./ProductPriceRow.vue"
 
 @Component({
     components: {
@@ -132,10 +141,12 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         PriceInput,
         Radio,
         Checkbox,
-        AgeInput,
         Slider,
         Spinner,
-        UploadButton
+        UploadButton,
+        ProductPriceRow,
+        STList,
+        OptionMenuSection
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -247,6 +258,60 @@ export default class EditProductView extends Mixins(NavigationMixin) {
             return null
         }
         return image.getPathForSize(500, 500)
+    }
+
+    addPatch(patch: AutoEncoderPatchType<Product>) {
+        this.patchProduct = this.patchProduct.patch(patch)
+    }
+
+    addOptionMenu() {
+        const optionMenu = OptionMenu.create({})
+        const p = Product.patch({ id: this.product.id })
+        p.optionMenus.addPut(optionMenu)
+        
+        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+            // Merge both patches
+            this.patchProduct = this.patchProduct.patch(p).patch(patch)
+
+            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        }}).setDisplayStyle("popup"))
+    }
+
+    addProductPrice() {
+        const price = ProductPrice.create({})
+        const p = Product.patch({ id: this.product.id })
+        p.prices.addPut(price)
+        
+        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+            // Merge both patches
+            this.patchProduct = this.patchProduct.patch(p).patch(patch)
+
+            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        }}).setDisplayStyle("sheet"))
+    }
+
+    movePriceUp(price: ProductPrice) {
+        const index = this.patchedProduct.prices.findIndex(c => price.id === c.id)
+        if (index == -1 || index == 0) {
+            return;
+        }
+
+        const moveTo = index - 2
+        const p = Product.patch({})
+        p.prices.addMove(price.id, this.patchedProduct.prices[moveTo]?.id ?? null)
+        this.addPatch(p)
+    }
+
+    movePriceDown(price: ProductPrice) {
+        const index = this.patchedProduct.prices.findIndex(c => price.id === c.id)
+        if (index == -1 || index >= this.patchedProduct.prices.length - 1) {
+            return;
+        }
+
+        const moveTo = index + 1
+        const p = Product.patch({})
+        p.prices.addMove(price.id, this.patchedProduct.prices[moveTo].id)
+        this.addPatch(p)
     }
 
     save() {

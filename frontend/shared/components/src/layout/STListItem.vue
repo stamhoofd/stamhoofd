@@ -85,12 +85,24 @@ export default class STListItem extends Vue {
                     margin-right: 0;
                 }
             }
+
+            > .button {
+                margin: -5px 5px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
         }
 
         &.no-margin {
             .right {
                 > * {
                     margin: 0;
+                }
+
+                > .button {
+                    margin: -5px 0;
                 }
             }
         }
