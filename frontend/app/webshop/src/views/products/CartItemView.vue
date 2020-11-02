@@ -1,6 +1,7 @@
 <template>
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
+            <span slot="left" class="style-tag">{{ cartItem.unitPrice | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
