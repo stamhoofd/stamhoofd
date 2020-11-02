@@ -15,6 +15,11 @@
                 <span class="icon privacy" />
                 <span>Privacy</span>
             </a>
+
+            <button class="primary button">
+                <span class="icon basket" />
+                <span>Winkelmandje</span>
+            </button>
         </template>
     </Steps>
 </template>
@@ -27,7 +32,7 @@ import { BackButton,CenteredMessage,CenteredMessageView,Steps } from "@stamhoofd
 import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../classes/OrganizationManager';
+import { WebshopManager } from '../classes/WebshopManager';
 
 @Component({
     components: {
@@ -40,23 +45,18 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
     root!: ComponentWithProperties
 
     get privacyUrl() {
-        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization.meta.privacyPolicyUrl
+        if (WebshopManager.organization.meta.privacyPolicyUrl) {
+            return WebshopManager.organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization.meta.privacyPolicyFile) {
-            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
+        if (WebshopManager.organization.meta.privacyPolicyFile) {
+            return WebshopManager.organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return WebshopManager.organization
     }
-
-    get isLoggedIn() {
-        return SessionManager.currentSession?.isComplete() ?? false
-    }
-
 
     get logoSrc() {
         if (!this.organization.meta.squareLogo) {

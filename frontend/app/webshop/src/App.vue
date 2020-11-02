@@ -1,21 +1,23 @@
 <template>
     <div id="app">
         <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
-        <ComponentWithPropertiesInstance :component="root"/>
+        <ComponentWithPropertiesInstance :component="root" />
         <ToastBox />
     </div>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, PromiseView, ToastBox } from '@stamhoofd/components';
-import { Component, Vue } from "vue-property-decorator";
-import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { PromiseView, ToastBox } from '@stamhoofd/components';
+import { NetworkManager } from '@stamhoofd/networking';
+import { OrganizationWithWebshop } from '@stamhoofd/structures';
+import { Component, Vue } from "vue-property-decorator";
+
+import { WebshopManager } from './classes/WebshopManager';
 import CheckoutSteps from './views/CheckoutSteps.vue';
-import WebshopView from '../../dashboard/src/views/dashboard/webshop/WebshopView.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
+import WebshopView from './views/WebshopView.vue';
 
 @Component({
     components: {
@@ -28,28 +30,26 @@ export default class App extends Vue {
         promise: async () => {
             // get organization
             try {
+                const path = window.location.pathname.substring(1).split("/");
                 const response = await NetworkManager.server.request({
                     method: "GET",
-                    path: "/organization-from-domain",
+                    path: "/webshop-from-domain",
                     query: {
-                        domain: window.location.hostname
+                        domain: window.location.hostname,
+                        uri: path[0] ?? null
                     },
-                    decoder: Organization as Decoder<Organization>
+                    decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
 
-                // Set organization and session
-                const session = new Session(response.data.id)
-                session.setOrganization(response.data)
+                WebshopManager.organization = response.data.organization
+                WebshopManager.webshop = response.data.webshop
 
-                document.title = response.data.name+" - Webshop"
+                document.title = WebshopManager.webshop.meta.name +" - "+WebshopManager.organization.name
 
                 // Set color
-                if (response.data.meta.color) {
-                    console.log("Set color "+response.data.meta.color)
-                    document.documentElement.style.setProperty("--color-primary", response.data.meta.color)
+                if (WebshopManager.organization.meta.color) {
+                    document.documentElement.style.setProperty("--color-primary", WebshopManager.organization.meta.color)
                 }
-
-                await SessionManager.setCurrentSession(session)
 
                 return new ComponentWithProperties(ModalStackComponent, {
                     root: new ComponentWithProperties(CheckoutSteps, { 

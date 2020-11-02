@@ -233,3 +233,43 @@
         @extend .style-definition-description;
     }
 }
+
+.main-text-container {
+     > h1:first-child {
+        padding-bottom: 20px;
+        @extend .style-title-1;
+
+        + p:not([class]) {
+            @extend .style-description;
+            padding-bottom: 20px;
+
+            &:last-child {
+                padding-bottom: 0;
+            }
+        }
+    }
+
+    &, > .container {
+            > h2 {
+            @extend .style-title-2;
+            padding-bottom: 15px;
+        }
+
+        > h2.style-with-button {
+            > *:first-child {
+                padding-bottom: 15px;
+            }
+            padding-bottom: 0;
+        }
+
+        > h2 + p {
+            &:not([class]) {
+                @extend .style-description;
+            }
+        }
+
+        > hr {
+            @extend .style-hr;
+        }
+    }
+}

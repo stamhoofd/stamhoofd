@@ -81,4 +81,12 @@ export class OrganizationSimple extends AutoEncoder {
     address: Address;
 }
 
+export class OrganizationWithWebshop extends AutoEncoder {
+    @field({ decoder: Organization })
+    organization: Organization
+
+    @field({ decoder: Webshop })
+    webshop: Webshop
+}
+
 export const OrganizationPatch = Organization.patchType()
