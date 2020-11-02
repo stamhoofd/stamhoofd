@@ -39,9 +39,13 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" @click="addToCart">
+            <button slot="right" class="button primary" @click="addToCart" v-if="oldItem">
                 <span class="icon basket" />
-                <span>Toevoegen aan winkelmandje</span>
+                <span>Opslaan</span>
+            </button>
+            <button slot="right" class="button primary" @click="addToCart" v-else>
+                <span class="icon basket" />
+                <span>Toevoegen</span>
             </button>
         </STToolbar>
     </div>
@@ -50,7 +54,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { NumberInput,Radio,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { NumberInput,Radio,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
@@ -84,6 +88,9 @@ export default class CartItemView extends Mixins(NavigationMixin){
     addToCart() {
         if (this.oldItem) {
             CheckoutManager.cart.removeItem(this.oldItem)
+            new Toast(this.cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
+        } else {
+            new Toast(this.cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
         }
         CheckoutManager.cart.addItem(this.cartItem)
         CheckoutManager.saveCart()
