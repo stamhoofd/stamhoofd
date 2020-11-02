@@ -16,7 +16,7 @@
                 <span>Privacy</span>
             </a>
 
-            <button class="primary button">
+            <button class="primary button" @click="openCart">
                 <span class="icon basket" />
                 <span>Winkelmandje</span>
             </button>
@@ -33,6 +33,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../classes/WebshopManager';
+import CartView from './cart/CartView.vue';
 
 @Component({
     components: {
@@ -101,6 +102,10 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
         CenteredMessage.addListener(this, (centeredMessage) => {
             this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })
+    }
+
+    openCart() {
+        this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
     }
 
     beforeDestroy() {

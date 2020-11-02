@@ -204,6 +204,10 @@
     &.basket:after {
         font-icon: url(@stamhoofd/assets/images/icons/basket.svg);
     }
+
+    &.flag:after {
+        font-icon: url(@stamhoofd/assets/images/icons/flag.svg);
+    }
 }
 
 .android-icons {
