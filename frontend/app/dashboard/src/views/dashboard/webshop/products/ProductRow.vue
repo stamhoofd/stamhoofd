@@ -1,6 +1,13 @@
 <template>
     <STListItem :selectable="true" @click="editProduct()">
-        {{ product.name }}
+        <template slot="left">
+            <img v-if="imageSrc" :src="imageSrc" class="product-row-image" />
+        </template>
+        
+        <h2 class="style-title-list">{{ product.name }}</h2>
+        <p class="style-description" v-if="!product.enabled">Tijdelijk niet beschikbaar</p>
+        <p class="style-description" v-else-if="product.isSoldOut">Uitverkocht</p>
+
         <template slot="right">
             <button class="button icon arrow-up gray" @click.stop="moveUp"/>
             <button class="button icon arrow-down gray" @click.stop="moveDown"/>
@@ -29,6 +36,10 @@ export default class ProductRow extends Mixins(NavigationMixin) {
     @Prop({})
     webshop: PrivateWebshop
 
+    get imageSrc() {
+        return this.product.images[0]?.getPathForSize(80, 80)
+    }
+
     editProduct() {
         this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             this.$emit("patch", patch)
@@ -49,6 +60,12 @@ export default class ProductRow extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
-
+.product-row-image {
+    width: 80px;
+    height: 80px;
+    margin: -5px 0;
+    border-radius: $border-radius;
+}
 </style>
