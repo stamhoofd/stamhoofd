@@ -31,7 +31,7 @@
             </STInputBox>
 
             <STInputBox title="Meer of minkost" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" placeholder="+ 0 euro" />
+                <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
             </STInputBox>
         </main>
 
@@ -125,7 +125,10 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
         this.patchOptionMenu = this.patchOptionMenu.patch(patch)
     }
 
-    save() {
+    async save() {
+        if (!await this.validator.validate()) {
+            return
+        }
         this.saveHandler(this.patchOptionMenu)
         this.pop({ force: true })
     }

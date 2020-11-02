@@ -25,12 +25,6 @@ export class Option extends AutoEncoder {
     name = ""
 
     /**
-     * 
-     */
-    @field({ decoder: BooleanDecoder })
-    default = false;
-
-    /**
      * Price added (can be negative) is always in cents, to avoid floating point errors
      */
     @field({ decoder: IntegerDecoder })

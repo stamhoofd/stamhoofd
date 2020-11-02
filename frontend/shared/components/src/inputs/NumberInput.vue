@@ -1,5 +1,5 @@
 <template>
-    <label class="price-input" :class="{ error: !valid }">
+    <label class="number-input" :class="{ error: !valid }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
@@ -20,7 +20,7 @@
             <span>{{ valueString }}</span>
         </div>
         <div v-else-if="valueString != ''">
-            <span>{{ valueString }}</span> {{ currency }}
+            <span>{{ valueString }}</span> {{ suffix }}
         </div>
         <div v-else>{{ placeholder }}</div>
     </label>
@@ -30,7 +30,7 @@
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component
-export default class PriceInput extends Vue {
+export default class NumberInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
     min!: number | null
@@ -39,17 +39,21 @@ export default class PriceInput extends Vue {
     @Prop({ default: null })
     max!: number | null
 
-    valueString = "40";
+    valueString = "";
     valid = true;
 
     /** Price in cents */
     @Prop({ default: 0 })
     value!: number
 
-    currency = "euro";
+    @Prop({ default: "" })
+    suffix: string;
 
     @Prop({ default: "" })
     placeholder!: string
+
+    @Prop({ default: false })
+    floatingPoint!: boolean // In cents if floating point, never returns floats!
 
     get internalValue() {
         return this.value
@@ -60,7 +64,7 @@ export default class PriceInput extends Vue {
     }
 
     mounted() {
-        this.clean()
+        this.clean(this.internalValue)
     }
 
     @Watch("valueString")
@@ -83,7 +87,7 @@ export default class PriceInput extends Vue {
                 this.valid = true;
 
                 // Remove extra decimals
-                this.internalValue = this.constrain(Math.round(v * 100));
+                this.internalValue = this.constrain(Math.round(v * (this.floatingPoint ? 100 : 1)));
             }
         }
     }
@@ -97,12 +101,12 @@ export default class PriceInput extends Vue {
 
     // Restore invalid input, make the input value again
     // And set valueString
-    clean() {
+    clean(value: number) {
         if (!this.valid) {
             return;
         }
         // Check if has decimals
-        const float = this.internalValue / 100
+        const float = this.value / (this.floatingPoint ? 100 : 1)
         const decimals = float % 1;
         const abs = Math.abs(float);
 
@@ -112,7 +116,7 @@ export default class PriceInput extends Vue {
                 (float < 0 ? "-" : "") +
                 Math.floor(abs) +
                 this.whatDecimalSeparator() +
-                (""+Math.round(Math.abs(decimals) * 100)).padStart(2, "0");
+                 (""+Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, "0");
         } else {
             // Hide decimals
             this.valueString = float + "";
@@ -133,10 +137,12 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        this.internalValue = this.constrain(this.internalValue + add);
+        const v = this.constrain(this.internalValue + add);
+        this.internalValue = v
         this.$nextTick(() => {
-            this.clean();
+            this.clean(v);
         })
+        
     }
 }
 </script>
@@ -146,7 +152,7 @@ export default class PriceInput extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use "~@stamhoofd/scss/components/inputs.scss";
 
-.price-input {
+.number-input {
     @extend .input;
     position: relative;
 

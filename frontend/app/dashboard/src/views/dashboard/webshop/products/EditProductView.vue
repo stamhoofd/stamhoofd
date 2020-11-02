@@ -99,9 +99,20 @@
                 Tijdelijk niet beschikbaar
             </Checkbox>
 
-            <Checkbox>
+            <Checkbox v-model="useStock">
                 Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
             </Checkbox>
+
+            <div class="split-inputs" v-if="useStock">
+                <STInputBox  title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
+                    <NumberInput v-model="stock"  />
+                </STInputBox>
+                <STInputBox title="Waarvan reeds besteld" error-fields="usedStock" :error-box="errorBox">
+                    <NumberInput v-model="usedStock"  />
+                </STInputBox>
+            </div>
+
+            
         </main>
 
         <STToolbar>
@@ -120,7 +131,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, NumberInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -141,7 +152,7 @@ import ProductPriceRow from "./ProductPriceRow.vue"
         PriceInput,
         Radio,
         Checkbox,
-        Slider,
+        NumberInput,
         Spinner,
         UploadButton,
         ProductPriceRow,
@@ -197,6 +208,30 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     set disabled(disabled: boolean) {
         this.patchProduct = this.patchProduct.patch({ enabled: !disabled })
+    }
+
+    get useStock() {
+        return this.patchedProduct.stock !== null
+    }
+
+    set useStock(useStock: boolean) {
+        this.patchProduct = this.patchProduct.patch({ stock: useStock ? (this.patchedProduct.stock ?? 0) : null })
+    }
+
+    get stock() {
+        return this.patchedProduct.stock ?? 0
+    }
+
+    set stock(stock: number) {
+        this.patchProduct = this.patchProduct.patch({ stock })
+    }
+
+    get usedStock() {
+        return this.patchedProduct.usedStock
+    }
+
+    set usedStock(usedStock: number) {
+        this.patchProduct = this.patchProduct.patch({ usedStock })
     }
 
     get price() {
@@ -266,6 +301,8 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     addOptionMenu() {
         const optionMenu = OptionMenu.create({})
+        optionMenu.options[0].name = "Naamloos"
+
         const p = Product.patch({ id: this.product.id })
         p.optionMenus.addPut(optionMenu)
         
