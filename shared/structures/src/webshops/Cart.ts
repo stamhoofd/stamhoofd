@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData } from '@simonbackx/simple-encoding';
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
 
@@ -43,6 +43,21 @@ export class CartItem extends AutoEncoder {
         return this.unitPrice * this.amount
     }
 
+    get description(): string {
+        const descriptions: string[] = []
+        if (this.product.prices.length > 1) {
+            descriptions.push(this.productPrice.name)
+        }
+        for (const option of this.options) {
+            descriptions.push(option.option.name)
+        }
+        return descriptions.join("\n")
+    }
+
+    duplicate(version: number) {
+        return CartItem.decode(new ObjectData(this.encode({ version }), { version }))
+    }
+
 }
 
 export class Cart extends AutoEncoder {
@@ -58,5 +73,15 @@ export class Cart extends AutoEncoder {
             }
         }
         this.items.push(item)
+    }
+
+    removeItem(item: CartItem) {
+        const c = item.id
+        for (const [index, i] of this.items.entries()) {
+            if (i.id === c) {
+                this.items.splice(index, 1)
+                return
+            }
+        }
     }
 }

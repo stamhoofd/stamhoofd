@@ -78,7 +78,13 @@ export default class CartItemView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     cartItem: CartItem
 
+    @Prop({ default: null })
+    oldItem: CartItem | null
+
     addToCart() {
+        if (this.oldItem) {
+            CheckoutManager.cart.removeItem(this.oldItem)
+        }
         CheckoutManager.cart.addItem(this.cartItem)
         CheckoutManager.saveCart()
         this.pop()

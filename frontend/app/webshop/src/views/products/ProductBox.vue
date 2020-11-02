@@ -8,9 +8,7 @@
                 </div>
                 {{ product.name }}
             </h3>
-            <p v-if="product.description" class="description">
-                {{ product.description }}
-            </p>
+            <p v-if="product.description" class="description" v-text="product.description" />
             <p class="price">
                 {{ price | price }}
             </p>
@@ -158,6 +156,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             text-overflow: ellipsis;
             overflow: hidden;
             display: -webkit-box;
+            white-space: pre-wrap;
             line-clamp: 2; /* number of lines to show */
             -webkit-line-clamp: 2; /* number of lines to show */
             -webkit-box-orient: vertical;
