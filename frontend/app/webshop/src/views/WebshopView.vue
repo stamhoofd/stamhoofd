@@ -2,12 +2,12 @@
     <section class="padded-view">
         <div class="webshop-view">
             <figure class="webshop-banner">
-                <img :src="bannerImg">
+                <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
             </figure>
 
             <main>
-                <h1>{{ webshop.meta.name }}</h1>
-                <p>Via ons online formulier kan je op voorhand een gerecht bestellen. Hiermee steun je onze werking op een coronaproof manier. We leveren ook aan huis met een leveringskost van 5 euro.</p>
+                <h1>{{ webshop.meta.title }}</h1>
+                <p v-text="webshop.meta.description" />
 
                 <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop"/>
             </main>
@@ -43,8 +43,20 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return WebshopManager.webshop
     }
 
-    get bannerImg() {
-        return ""
+    get bannerImage() {
+        return this.webshop.meta.coverPhoto?.getResolutionForSize(800, undefined)
+    }
+    
+    get bannerImageWidth() {
+        return this.bannerImage?.width
+    }
+
+    get bannerImageHeight() {
+        return this.bannerImage?.height
+    }
+
+    get bannerImageSrc() {
+        return this.bannerImage?.file.getPublicPath()
     }
 
 }
@@ -62,6 +74,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
         background: $color-gray;
         border-radius: $border-radius;
         margin-bottom: 40px;
+
+        img {
+            border-radius: $border-radius;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
     }
 
     > main {
@@ -70,6 +89,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
         > h1 {
             @extend .style-huge-title-1;
             padding-bottom: 15px;
+
+            + p {
+                 white-space: pre-wrap;
+            }
         }
     }
     

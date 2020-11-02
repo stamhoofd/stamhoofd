@@ -82,6 +82,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
     deleteItem(cartItem: CartItem) {
         CheckoutManager.cart.removeItem(cartItem)
+        CheckoutManager.saveCart()
     }
 
     editCartItem(cartItem: CartItem ) {
