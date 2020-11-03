@@ -18,7 +18,7 @@
 
             <button class="primary button" @click="openCart">
                 <span class="icon basket" />
-                <span>{{ cartCount == 0 ? 'Winkelmandje' : cartCount}}</span>
+                <span>{{ cartCount == 0 ? 'Winkelmandje' : cartCount }}</span>
             </button>
         </template>
     </Steps>
@@ -31,8 +31,8 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,CenteredMessageView,Steps } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { CheckoutManager } from '../classes/CheckoutManager';
 
+import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './cart/CartView.vue';
 
@@ -49,7 +49,7 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     get cartCount() {
-        return CheckoutManager.cart.items.length
+        return CheckoutManager.cart.count
     }
 
     get privacyUrl() {

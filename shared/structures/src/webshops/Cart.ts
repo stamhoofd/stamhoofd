@@ -107,4 +107,8 @@ export class Cart extends AutoEncoder {
             }
         }
     }
+
+    get count() {
+        return this.items.reduce((c, item) => c + item.amount, 0)
+    }
 }
