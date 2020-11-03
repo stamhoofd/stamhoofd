@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
 
@@ -23,6 +23,29 @@ export class CartItem extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amount = 1;
+
+    static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T>  {
+        const c = super.create(object) as CartItem
+
+        // Fill in all default options here
+        for (const optionMenu of c.product.optionMenus) {
+            if (optionMenu.multipleChoice) {
+                continue;
+            }
+
+            if (c.options.find(o => o.optionMenu.id === optionMenu.id)) {
+                continue
+            }
+
+            c.options.push(CartItemOption.create({
+                option: optionMenu.options[0],
+                optionMenu: optionMenu
+            }))
+
+        }
+
+        return c as InstanceType<T>
+    }
 
     /**
      * Unique identifier to check if two cart items are the same

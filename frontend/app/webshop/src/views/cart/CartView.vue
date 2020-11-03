@@ -8,17 +8,19 @@
 
            
             <STList>
-                <STListItem v-for="cartItem in cart.items" :key="cartItem.id" class="cart-item-row" @click="editCartItem(cartItem)" :selectable="true">
+                <STListItem v-for="cartItem in cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
                     <h3>
                         <span>{{ cartItem.product.name }}</span>
                         <span class="icon arrow-right-small gray" />
                     </h3>
-                    <p class="description" v-if="cartItem.description" v-text="cartItem.description" />
+                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
                     <footer>
-                        <p class="price">{{ cartItem.amount }} x {{ cartItem.unitPrice | price }}</p>
+                        <p class="price">
+                            {{ cartItem.amount }} x {{ cartItem.unitPrice | price }}
+                        </p>
                         <div>
-                            <button class="button icon trash gray" @click="deleteItem(cartItem)"/>
+                            <button class="button icon trash gray" @click="deleteItem(cartItem)" />
                         </div>
                     </footer>
 
@@ -27,7 +29,6 @@
                     </figure>
                 </STListItem>
             </STList>
-        
         </main>
 
         <STToolbar>
