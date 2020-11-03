@@ -19,26 +19,34 @@
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="bv. kantine"
-                    autocomplete=""
-                >
-            </STInputBox>
 
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
-                    autocomplete=""
-                />
-            </STInputBox>
+            <div class="split-inputs">
+                <div>
+                    <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
+                        <input
+                            ref="firstInput"
+                            v-model="name"
+                            class="input"
+                            type="text"
+                            placeholder="bv. kantine"
+                            autocomplete=""
+                        >
+                    </STInputBox>
+
+                    <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+                        <textarea
+                            v-model="description"
+                            class="input"
+                            type="text"
+                            placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
+                            autocomplete=""
+                        />
+                    </STInputBox>
+                </div>
+                <div>
+                    <AddressInput v-model="address" title="Adres" :validator="validator" :required="true" />
+                </div>
+            </div>
 
             <EditTimeSlotsSection :timeSlots="patchedTakeoutLocation.timeSlots" @patch="patchTimeSlots" />
         
@@ -60,8 +68,8 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, NumberInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopTakeoutLocation, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, AddressInput, Radio, RadioGroup, SegmentedControl, NumberInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { Address, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopTakeoutLocation, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
 
@@ -74,7 +82,7 @@ import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
         SegmentedControl,
         DateSelection,
         RadioGroup,
-        PriceInput,
+        AddressInput,
         Radio,
         Checkbox,
         NumberInput,
@@ -118,6 +126,14 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
         this.patchTakeoutLocation = this.patchTakeoutLocation.patch({ name })
     }
 
+    get address() {
+        return this.patchedTakeoutLocation.address
+    }
+
+    set address(address: Address) {
+        this.patchTakeoutLocation = this.patchTakeoutLocation.patch({ address })
+    }
+
     get description() {
         return this.patchedTakeoutLocation.description
     }
@@ -134,7 +150,10 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
         this.addPatch(WebshopTakeoutLocation.patch({ timeSlots: patch }))
     }
   
-    save() {
+    async save() {
+        if (!await this.validator.validate()) {
+            return;
+        }
         const p = PrivateWebshop.patch({})
         const meta = WebshopMetaData.patch({})
         meta.takeoutLocations.addPatch(this.patchTakeoutLocation)

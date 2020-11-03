@@ -10,10 +10,13 @@
                 </button>
             </div>
         </h2>
-        <p>Er moet nu geen tijdstip geselecteerd worden bij het plaatsen van een bestelling. Het tijdstip is dus onbepaald en kan je verduidelijken in je beschrijving (bv. na activiteiten afhalen). Dit is handig als het niet echt uitmaakt wanneer ze het komen afhalen (bv. voor kleren). Voeg tijdstippen toe om men een afhaaltijdstip te laten kiezen. </p>
+        <p>Bij het plaatsen van bestellingen kan er gekozen worden tussen verschillende afhaaltijdstippen (als je meerdere keuzes toevoegt), ligt het afhaaltijdstip vast (als je er één hebt) of is het afhaaltijdstip onbepaald (geen keuzes). Dat laatste is handig als je bijvoorbeeld voor of na activiteiten kan afhalen; zet dit dan wel in de beschrijving.</p>
     
+        <p class="info-box" v-if="timeSlots.timeSlots.length == 0">Je hebt geen afhaaltijdstippen toegevoegd, dus er moet geen keuze gemaakt worden. Het afhaaltijdstip van een bestelling is 'onbepaald'. Voeg één of meer keuzes toe als je het afhalen op vaste tijdstippen wilt organiseren.</p>
+        <p class="info-box" v-if="timeSlots.timeSlots.length == 1">Er is maar één keuze, dus we communiceren dit tijdstip gewoon i.v.p. een keuze te geven.</p>
+
         <STList>
-            <STListItem v-for="timeSlot in timeSlots.timeSlots" :key="timeSlot.id" :selectable="true" @click="editTimeSlot(timeSlot)" class="right-description">
+            <STListItem v-for="timeSlot in sortedSlots" :key="timeSlot.id" :selectable="true" @click="editTimeSlot(timeSlot)" class="right-description">
                 {{ timeSlot.date | date }}
 
                 <template slot="right">
@@ -54,6 +57,10 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
         this.$emit("patch", patch)
+    }
+
+    get sortedSlots() {
+        return this.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
     }
    
     addTimeSlot() {

@@ -111,7 +111,10 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
         this.patchTimeSlot = this.patchTimeSlot.patch(patch)
     }
 
-    save() {
+    async save() {
+        if (!await this.validator.validate()) {
+            return;
+        }
         const p = WebshopTimeSlots.patch({})
         p.timeSlots.addPatch(this.patchTimeSlot)
         this.saveHandler(p)

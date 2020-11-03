@@ -96,6 +96,12 @@ export class Formatter {
         return Math.round(bytes / 1000 / 1000 / 10) / 100 + " GB"
     }
 
+    static minutesPadded(minutes: number): string {
+        const h = Math.floor(minutes/60)
+        const m = minutes - h*60
+        return (h+"").padStart(2, "0")+":"+(m+"").padStart(2, "0")
+    }
+
     static minutes(minutes: number): string {
         const h = Math.floor(minutes/60)
         const m = minutes - h*60

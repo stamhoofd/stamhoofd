@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../Address';
@@ -25,6 +26,18 @@ export class WebshopTimeSlot extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     endTime: number = 14*60
+
+    static sort(a: WebshopTimeSlot, b: WebshopTimeSlot){
+        const aa = Formatter.dateIso(a.date)+" "+Formatter.minutesPadded(a.startTime)+" "+Formatter.minutesPadded(a.endTime)
+        const bb = Formatter.dateIso(b.date)+" "+Formatter.minutesPadded(b.startTime)+" "+Formatter.minutesPadded(b.endTime)
+        if (aa < bb) {
+            return -1
+        }
+        if (aa > bb) {
+            return 1
+        }
+        return 0
+    }
 }
 
 /**
