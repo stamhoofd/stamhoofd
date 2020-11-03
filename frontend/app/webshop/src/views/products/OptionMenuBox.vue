@@ -3,12 +3,12 @@
         <h2>{{ optionMenu.name }}</h2>
         <STList>
             <STListItem v-for="option in optionMenu.options" :key="option.id" class="right-description" :selectable="true" element-name="label">
-                <Radio slot="left" v-if="!optionMenu.multipleChoice" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" />
-                <Checkbox slot="left" v-else :checked="isOptionSelected(option)" @change="selectOption(option, $event)"  />
+                <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" />
+                <Checkbox v-else slot="left" :checked="isOptionSelected(option)" @change="selectOption(option, $event)" />
 
                 {{ option.name }}
 
-                <template slot="right">
+                <template v-if="option.price != 0" slot="right">
                     {{ option.price | priceChange }}
                 </template>
             </STListItem>
@@ -18,15 +18,11 @@
 </template>
 
 <script lang="ts">
-import { ObjectData } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { CartItem, CartItemOption, Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { CheckoutManager } from '../../classes/CheckoutManager';
-import CartItemView from './CartItemView.vue';
 
 @Component({
     components: {
