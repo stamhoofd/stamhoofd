@@ -108,6 +108,10 @@ export class Cart extends AutoEncoder {
         }
     }
 
+    get price() {
+        return this.items.reduce((c, item) => c + item.price, 0)
+    }
+
     get count() {
         return this.items.reduce((c, item) => c + item.amount, 0)
     }

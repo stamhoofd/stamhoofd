@@ -1,6 +1,7 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :title="title">
+            <span slot="left" class="style-tag">{{ cart.price | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
@@ -32,6 +33,7 @@
         </main>
 
         <STToolbar>
+            <span slot="left">Totaal: {{ cart.price | price }}</span>
             <button slot="right" class="button primary" @click="goToCheckout">
                 <span class="icon flag" />
                 <span>Bestellen</span>
