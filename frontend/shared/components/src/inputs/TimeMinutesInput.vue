@@ -15,7 +15,7 @@ import { Formatter } from '@stamhoofd/utility';
         STInputBox
     }
 })
-export default class TimeInput extends Vue {
+export default class TimeMinutesInput extends Vue {
     @Prop({ default: "" }) 
     title: string;
 

@@ -33,10 +33,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, STToolbar, SegmentedControl, LoadingButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
@@ -152,6 +152,17 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         }
 
         this.saving = false
+    }
+
+    isChanged() {
+        return this.isNew || patchContainsChanges(this.webshopPatch, this.webshop, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        if (!this.isChanged()) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
 </script>

@@ -5,6 +5,9 @@ import { Address } from '../Address';
 import { Image } from '../files/Image';
 
 export class WebshopTimeSlot extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+    
     /**
      * Day. The time is ignored, and timezone should be same timezone as the webshop/organization
      */
@@ -24,7 +27,13 @@ export class WebshopTimeSlot extends AutoEncoder {
     endTime: number = 14*60
 }
 
-
+/**
+ * Configuration to keep track of available time slots. Can be a fixed number or an infinite amount of time slots
+ */
+export class WebshopTimeSlots extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(WebshopTimeSlot) })
+    timeSlots: WebshopTimeSlot[] = []
+}
 
 export class WebshopTakeoutLocation extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -39,8 +48,8 @@ export class WebshopTakeoutLocation extends AutoEncoder {
     @field({ decoder: Address })
     address: Address
 
-    @field({ decoder: new ArrayDecoder(WebshopTimeSlot) })
-    timeSlots: WebshopTimeSlot[] = []
+    @field({ decoder: WebshopTimeSlots })
+    timeSlots: WebshopTimeSlots = WebshopTimeSlots.create({})
 }
 
 /*
