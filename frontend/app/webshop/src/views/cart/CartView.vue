@@ -44,7 +44,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -52,6 +52,7 @@ import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import LocationSelectionView from '../checkout/LocationSelectionView.vue';
 import CartItemView from '../products/CartItemView.vue';
 
 @Component({
@@ -75,8 +76,12 @@ export default class CartView extends Mixins(NavigationMixin){
         return this.CheckoutMaanger.cart
     }
 
-    goToCheckout() {
-        
+    goToCheckout() { 
+        const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
+        console.log(nav.components[nav.components.length - 1]);
+        console.log((nav.components[nav.components.length - 1] as any).componentInstance());
+        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(LocationSelectionView, {}))
+        this.dismiss({ force: true })
     }
 
     imageSrc(cartItem: CartItem) {
