@@ -48,8 +48,7 @@
                 </div>
             </div>
 
-            <EditTimeSlotsSection :timeSlots="patchedTakeoutLocation.timeSlots" @patch="patchTimeSlots" />
-        
+            <EditTimeSlotsSection :time-slots="patchedTakeoutMethod.timeSlots" @patch="patchTimeSlots" />
         </main>
 
         <STToolbar>
@@ -68,9 +67,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, AddressInput, Radio, RadioGroup, SegmentedControl, NumberInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopTakeoutLocation, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { Address, AnyCheckoutMethodPatch, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
 
 @Component({
@@ -92,17 +92,17 @@ import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
         EditTimeSlotsSection
     },
 })
-export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
+export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
     @Prop({ required: true })
-    takeoutLocation!: WebshopTakeoutLocation
+    takeoutMethod!: WebshopTakeoutMethod
 
     @Prop({ required: true })
     webshop: PrivateWebshop
 
-    patchTakeoutLocation: AutoEncoderPatchType<WebshopTakeoutLocation> = WebshopTakeoutLocation.patch({ id: this.takeoutLocation.id })
+    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod> = WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id })
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
@@ -110,44 +110,44 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
-    get patchedTakeoutLocation() {
-        return this.takeoutLocation.patch(this.patchTakeoutLocation)
+    get patchedTakeoutMethod() {
+        return this.takeoutMethod.patch(this.patchTakeoutMethod)
     }
 
     get isNew() {
-        return this.takeoutLocation.name.length == 0
+        return this.takeoutMethod.name.length == 0
     }
 
     get name() {
-        return this.patchedTakeoutLocation.name
+        return this.patchedTakeoutMethod.name
     }
 
     set name(name: string) {
-        this.patchTakeoutLocation = this.patchTakeoutLocation.patch({ name })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ name })
     }
 
     get address() {
-        return this.patchedTakeoutLocation.address
+        return this.patchedTakeoutMethod.address
     }
 
     set address(address: Address) {
-        this.patchTakeoutLocation = this.patchTakeoutLocation.patch({ address })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ address })
     }
 
     get description() {
-        return this.patchedTakeoutLocation.description
+        return this.patchedTakeoutMethod.description
     }
 
     set description(description: string) {
-        this.patchTakeoutLocation = this.patchTakeoutLocation.patch({ description })
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ description })
     }
 
-    addPatch(patch: AutoEncoderPatchType<WebshopTakeoutLocation>) {
-        this.patchTakeoutLocation = this.patchTakeoutLocation.patch(patch)
+    addPatch(patch: AutoEncoderPatchType<WebshopTakeoutMethod>) {
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch)
     }
    
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch(WebshopTakeoutLocation.patch({ timeSlots: patch }))
+        this.addPatch(WebshopTakeoutMethod.patch({ timeSlots: patch }))
     }
   
     async save() {
@@ -156,7 +156,7 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
         }
         const p = PrivateWebshop.patch({})
         const meta = WebshopMetaData.patch({})
-        meta.takeoutLocations.addPatch(this.patchTakeoutLocation)
+        meta.checkoutMethods.addPatch(this.patchTakeoutMethod)
         p.meta = meta
         this.saveHandler(p)
         this.pop({ force: true })
@@ -169,7 +169,7 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
 
         const p = PrivateWebshop.patch({})
         const meta = WebshopMetaData.patch({})
-        meta.takeoutLocations.addDelete(this.takeoutLocation.id)
+        meta.checkoutMethods.addDelete(this.takeoutMethod.id)
         p.meta = meta
         this.saveHandler(p)
         this.pop({ force: true })
@@ -180,7 +180,7 @@ export default class EditTakeoutLocationView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
-        return patchContainsChanges(this.patchTakeoutLocation, this.takeoutLocation, { version: Version })
+        return patchContainsChanges(this.patchTakeoutMethod, this.takeoutMethod, { version: Version })
     }
 
     async shouldNavigateAway() {

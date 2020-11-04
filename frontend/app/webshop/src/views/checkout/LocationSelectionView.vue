@@ -7,20 +7,23 @@
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList>
-                    <STListItem v-for="takeoutLocation in takeoutLocations" :key="takeoutLocation.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" name="choose-location" v-model="selectedLocation" :value="takeoutLocation"/>
-                        <h2 class="style-title-list">Afhalen: {{ takeoutLocation.name }}</h2>
-                        <p class="style-description-small">{{ takeoutLocation.description }}</p>
+                    <STListItem v-for="takeoutMethod in takeoutMethods" :key="takeoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
+                        <Radio slot="left" v-model="selectedLocation" name="choose-location" :value="takeoutMethod" />
+                        <h2 class="style-title-list">
+                            Afhalen: {{ takeoutMethod.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ takeoutMethod.description }}
+                        </p>
                     </STListItem>
                 </STList>
-
             </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
                         <span>Doorgaan</span>
-                        <span class="icon arrow-right"/>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </STToolbar>
@@ -29,15 +32,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Radio, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record, SelectedGroup, WebshopTakeoutLocation } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
+import { CheckoutMethod, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+
 import { WebshopManager } from '../../classes/WebshopManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import TimeSelectionView from './TimeSelectionView.vue';
 
 @Component({
@@ -56,20 +60,19 @@ export default class LocationSelectionView extends Mixins(NavigationMixin){
 
     loading = false
     errorBox: ErrorBox | null = null
-    selectedLocation: WebshopTakeoutLocation | null = null
+    selectedLocation: CheckoutMethod | null = null
 
     get webshop() {
         return WebshopManager.webshop
     }
 
-    get takeoutLocations() {
-        return this.webshop.meta.takeoutLocations
+    get takeoutMethods() {
+        return this.webshop.meta.checkoutMethods
     }
 
     mounted() {
-        this.selectedLocation = this.webshop.meta.takeoutLocations[0] ?? null
+        this.selectedLocation = this.webshop.meta.checkoutMethods[0] ?? null
     }
-
     
     async goNext() {
         if (this.loading || !this.selectedLocation) {

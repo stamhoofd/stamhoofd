@@ -8,18 +8,22 @@
 
                 <STList>
                     <STListItem v-for="(slot, index) in slots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" name="choose-location" v-model="selectedSlot" :value="slot"/>
-                        {{ slot.date | date }}, tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                        <Radio slot="left" v-model="selectedSlot" name="choose-location" :value="slot" />
+                        <h2 class="style-title-list">
+                            {{ slot.date | dateWithDay }}
+                        </h2> 
+                        <p class="style-description">
+                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                        </p>
                     </STListItem>
                 </STList>
-
             </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
                         <span>Doorgaan</span>
-                        <span class="icon arrow-right"/>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </STToolbar>
@@ -28,16 +32,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Radio, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record, SelectedGroup, WebshopTakeoutLocation, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
-import { WebshopManager } from '../../classes/WebshopManager';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+
+import { WebshopManager } from '../../classes/WebshopManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
 
 @Component({
     components: {
@@ -50,7 +55,7 @@ import { Formatter } from '@stamhoofd/utility';
         STErrorsDefault
     },
     filters: {
-        date: Formatter.date.bind(Formatter),
+        dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
         minutes: Formatter.minutes.bind(Formatter)
     }
 })

@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, ConvertArrayToPatchableArray, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, Patchable, PatchableArrayAutoEncoder, PatchableDecoder, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -48,9 +49,18 @@ export class WebshopTimeSlots extends AutoEncoder {
     timeSlots: WebshopTimeSlot[] = []
 }
 
-export class WebshopTakeoutLocation extends AutoEncoder {
+
+export enum CheckoutMethodType {
+    "Takeout" = "Takeout",
+    "Delivery" = "Delivery"
+}
+
+export class CheckoutMethod extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: new EnumDecoder(CheckoutMethodType) })
+    type: CheckoutMethodType
 
     @field({ decoder: StringDecoder })
     name = ""
@@ -58,11 +68,81 @@ export class WebshopTakeoutLocation extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = ""
 
-    @field({ decoder: Address })
-    address: Address
-
     @field({ decoder: WebshopTimeSlots })
     timeSlots: WebshopTimeSlots = WebshopTimeSlots.create({})
+}
+
+export class WebshopTakeoutMethod extends CheckoutMethod {
+    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Takeout }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    type: CheckoutMethodType.Takeout = CheckoutMethodType.Takeout
+
+    @field({ decoder: Address })
+    address: Address
+}
+
+export class WebshopDeliveryMethod extends CheckoutMethod {
+    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery
+
+    // todo: add supported region here
+    // todo: add delivery costs here (could also add it to checkout method and make it general)
+}
+
+export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod
+export type AnyCheckoutMethodPatch = AutoEncoderPatchType<WebshopTakeoutMethod> | AutoEncoderPatchType<WebshopDeliveryMethod>
+
+export class AnyCheckoutMethodPatchDecoder {
+    static decode(data: Data): AnyCheckoutMethodPatch {
+        const base = data.decode(CheckoutMethod.patchType() as Decoder<AutoEncoderPatchType<CheckoutMethod>>)
+        if (base.type == CheckoutMethodType.Takeout) {
+            return WebshopTakeoutMethod.patchType().decode(data)
+        }
+
+        if (base.type == CheckoutMethodType.Delivery) {
+            return WebshopDeliveryMethod.patchType().decode(data)
+        }
+
+        throw new SimpleError({
+            code: "invalid_field",
+            message: "Unsupported checkout type in patch. Make sure checkout type is always set when patching.",
+            field: data.addToCurrentField("type")
+        })
+    }
+
+    static patchType(): PatchableDecoder<AnyCheckoutMethodPatchDecoder> {
+        // We never allow patches on this type
+        return AnyCheckoutMethodPatchDecoder
+    }
+
+}
+
+export class AnyCheckoutMethodDecoder {
+    static decode(data: Data): AnyCheckoutMethod {
+        const base = data.decode(CheckoutMethod as Decoder<CheckoutMethod>)
+        if (base.type == CheckoutMethodType.Takeout) {
+            return WebshopTakeoutMethod.decode(data)
+        }
+
+        if (base.type == CheckoutMethodType.Delivery) {
+            return WebshopDeliveryMethod.decode(data)
+        }
+
+        throw new SimpleError({
+            code: "invalid_field",
+            message: "Unsupported checkout type",
+            field: data.addToCurrentField("type")
+        })
+    }
+
+    static patchType(): PatchableDecoder<AnyCheckoutMethodPatch> {
+        // We never allow patches on this type
+        return AnyCheckoutMethodPatchDecoder
+    }
+
+    static patchIdentifier(): Decoder<string> {
+        // We never allow patches on this type
+        return StringDecoder
+    }
 }
 
 /*
@@ -116,8 +196,8 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null
 
-    @field({ decoder: new ArrayDecoder(WebshopTakeoutLocation), defaultValue: () => [] })
-    takeoutLocations: WebshopTakeoutLocation[] = []
+    @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
+    checkoutMethods: CheckoutMethod[] = []
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {
