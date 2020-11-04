@@ -2,12 +2,13 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1>Kies je afhaaltijdstip</h1>
+                <h1 v-if="checkoutMethod.type == 'Takeout'">Kies je afhaaltijdstip</h1>
+                <h1 v-else="checkoutMethod.type == 'Delivery'">Kies je leveringstijdstip</h1>
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList>
-                    <STListItem v-for="(slot, index) in slots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
+                    <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
                         <Radio slot="left" v-model="selectedSlot" name="choose-location" :value="slot" />
                         <h2 class="style-title-list">
                             {{ slot.date | dateWithDay }}
@@ -40,6 +41,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { CheckoutManager } from '../../classes/CheckoutManager';
 
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
@@ -64,23 +66,29 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
 
     loading = false
     errorBox: ErrorBox | null = null
-    selectedSlot: WebshopTimeSlot | null = null
+    CheckoutManager = CheckoutManager
 
-    @Prop({})
-    timeSlots: WebshopTimeSlots
+    get checkoutMethod() {
+        return CheckoutManager.checkout.checkoutMethod!
+    }
+
+    get timeSlots(): WebshopTimeSlot[] {
+        return CheckoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
+    }
+
+    get selectedSlot(): WebshopTimeSlot {
+        return CheckoutManager.checkout.timeSlot ?? this.timeSlots[0]
+    }
+
+    set selectedSlot(timeSlot: WebshopTimeSlot) {
+        CheckoutManager.checkout.timeSlot = timeSlot
+        CheckoutManager.saveCheckout()
+    }
 
     get webshop() {
         return WebshopManager.webshop
     }
 
-    get slots() {
-        return this.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
-    }
-
-    mounted() {
-        this.selectedSlot = this.slots[0] ?? null
-    }
-    
     async goNext() {
         if (this.loading || !this.selectedSlot) {
             return

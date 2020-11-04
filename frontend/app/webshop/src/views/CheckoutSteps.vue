@@ -1,5 +1,5 @@
 <template>
-    <Steps ref="steps" :root="root" :total-steps="3">
+    <Steps ref="steps" :root="root" :total-steps="totalSteps">
         <template v-slot:left="slotProps">
             <template v-if="!slotProps.canPop">
                 <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }" @click="returnToSite">
@@ -30,6 +30,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,CenteredMessageView,Steps } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
+import { CheckoutMethodType } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../classes/CheckoutManager';
@@ -50,6 +51,13 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
 
     get cartCount() {
         return CheckoutManager.cart.count
+    }
+
+    get totalSteps() {
+        if (this.CheckoutManager.checkout.checkoutMethod && this.CheckoutManager.checkout.checkoutMethod.type == CheckoutMethodType.Delivery) {
+            return 4
+        }
+        return 3
     }
 
     get privacyUrl() {

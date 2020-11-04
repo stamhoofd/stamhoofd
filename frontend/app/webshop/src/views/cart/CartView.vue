@@ -52,7 +52,7 @@ import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import LocationSelectionView from '../checkout/LocationSelectionView.vue';
+import CheckoutMethodSelectionView from '../checkout/CheckoutMethodSelectionView.vue';
 import CartItemView from '../products/CartItemView.vue';
 
 @Component({
@@ -80,7 +80,7 @@ export default class CartView extends Mixins(NavigationMixin){
         const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
         console.log(nav.components[nav.components.length - 1]);
         console.log((nav.components[nav.components.length - 1] as any).componentInstance());
-        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(LocationSelectionView, {}))
+        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(CheckoutMethodSelectionView, {}))
         this.dismiss({ force: true })
     }
 

@@ -7,13 +7,13 @@
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList>
-                    <STListItem v-for="takeoutMethod in takeoutMethods" :key="takeoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" v-model="selectedLocation" name="choose-location" :value="takeoutMethod" />
+                    <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
+                        <Radio slot="left" v-model="selectedMethod" name="choose-location" :value="checkoutMethod" />
                         <h2 class="style-title-list">
-                            Afhalen: {{ takeoutMethod.name }}
+                            {{ checkoutMethod.type }}: {{ checkoutMethod.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ takeoutMethod.description }}
+                            {{ checkoutMethod.description }}
                         </p>
                     </STListItem>
                 </STList>
@@ -39,6 +39,7 @@ import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STN
 import { SessionManager } from '@stamhoofd/networking';
 import { CheckoutMethod, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { CheckoutManager } from '../../classes/CheckoutManager';
 
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
@@ -55,27 +56,33 @@ import TimeSelectionView from './TimeSelectionView.vue';
         STErrorsDefault
     }
 })
-export default class LocationSelectionView extends Mixins(NavigationMixin){
+export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin){
     step = 2
 
     loading = false
     errorBox: ErrorBox | null = null
-    selectedLocation: CheckoutMethod | null = null
+
+    CheckoutManager = CheckoutManager
 
     get webshop() {
         return WebshopManager.webshop
     }
 
-    get takeoutMethods() {
+    get checkoutMethods() {
         return this.webshop.meta.checkoutMethods
     }
 
-    mounted() {
-        this.selectedLocation = this.webshop.meta.checkoutMethods[0] ?? null
+    get selectedMethod(): CheckoutMethod {
+        return CheckoutManager.checkout.checkoutMethod ?? this.webshop.meta.checkoutMethods[0]
+    }
+
+    set selectedMethod(method: CheckoutMethod) {
+        CheckoutManager.checkout.checkoutMethod = method
+        CheckoutManager.saveCheckout()
     }
     
     async goNext() {
-        if (this.loading || !this.selectedLocation) {
+        if (this.loading || !this.selectedMethod) {
             return
         }
         this.loading = true
@@ -83,7 +90,7 @@ export default class LocationSelectionView extends Mixins(NavigationMixin){
         try {
            // todo
 
-           this.show(new ComponentWithProperties(TimeSelectionView, { timeSlots: this.selectedLocation.timeSlots }))
+           this.show(new ComponentWithProperties(TimeSelectionView, {}))
             
         } catch (e) {
             console.error(e)
