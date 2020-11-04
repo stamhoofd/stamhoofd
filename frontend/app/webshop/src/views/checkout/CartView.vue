@@ -45,14 +45,15 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { CartItem, Version } from '@stamhoofd/structures';
+import { STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { CartItem, CheckoutMethodType, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import CheckoutMethodSelectionView from '../checkout/CheckoutMethodSelectionView.vue';
+import { CheckoutStepsManager } from './CheckoutStepsManager';
+import { WebshopManager } from '../../classes/WebshopManager';
 import CartItemView from '../products/CartItemView.vue';
 
 @Component({
@@ -68,19 +69,29 @@ import CartItemView from '../products/CartItemView.vue';
     }
 })
 export default class CartView extends Mixins(NavigationMixin){
-    CheckoutMaanger = CheckoutManager
+    CheckoutManager = CheckoutManager
 
     title = "Winkelmandje"
 
     get cart() {
-        return this.CheckoutMaanger.cart
+        return this.CheckoutManager.cart
     }
 
     goToCheckout() { 
         const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
         console.log(nav.components[nav.components.length - 1]);
         console.log((nav.components[nav.components.length - 1] as any).componentInstance());
-        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(CheckoutMethodSelectionView, {}))
+
+        const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
+
+        if (!nextStep) {
+            // Not possible
+            new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
+            return;
+        }
+
+        const comp = nextStep.getComponent();
+        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(comp, {}))
         this.dismiss({ force: true })
     }
 

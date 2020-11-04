@@ -2,22 +2,11 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1 v-if="checkoutMethod.type == 'Takeout'">Kies je afhaaltijdstip</h1>
-                <h1 v-else="checkoutMethod.type == 'Delivery'">Kies je leveringstijdstip</h1>
+                <h1>Kies je leveringadres</h1>
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <STList>
-                    <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
-                        <h2 class="style-title-list">
-                            {{ slot.date | dateWithDay }}
-                        </h2> 
-                        <p class="style-description">
-                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
-                        </p>
-                    </STListItem>
-                </STList>
+                todo
             </main>
 
             <STToolbar>
@@ -44,6 +33,7 @@ import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 
 import { WebshopManager } from '../../classes/WebshopManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -61,7 +51,7 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         minutes: Formatter.minutes.bind(Formatter)
     }
 })
-export default class TimeSelectionView extends Mixins(NavigationMixin){
+export default class AddressSelectionView extends Mixins(NavigationMixin){
     step = 3
 
     loading = false
@@ -72,31 +62,18 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         return CheckoutManager.checkout.checkoutMethod!
     }
 
-    get timeSlots(): WebshopTimeSlot[] {
-        return CheckoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
-    }
-
-    get selectedSlot(): WebshopTimeSlot {
-        return CheckoutManager.checkout.timeSlot ?? this.timeSlots[0]
-    }
-
-    set selectedSlot(timeSlot: WebshopTimeSlot) {
-        CheckoutManager.checkout.timeSlot = timeSlot
-        CheckoutManager.saveCheckout()
-    }
-
     get webshop() {
         return WebshopManager.webshop
     }
 
     async goNext() {
-        if (this.loading || !this.selectedSlot) {
+        if (this.loading) {
             return
         }
         this.loading = true
 
         try {
-            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Time, true)
+           const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

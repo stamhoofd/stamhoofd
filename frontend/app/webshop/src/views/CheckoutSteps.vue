@@ -35,7 +35,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
-import CartView from './cart/CartView.vue';
+import CartView from './checkout/CartView.vue';
 
 @Component({
     components: {

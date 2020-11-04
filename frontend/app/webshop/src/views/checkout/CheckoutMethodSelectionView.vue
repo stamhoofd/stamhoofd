@@ -8,7 +8,7 @@
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" v-model="selectedMethod" name="choose-location" :value="checkoutMethod" />
+                        <Radio slot="left" v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
                         <h2 class="style-title-list">
                             {{ checkoutMethod.type }}: {{ checkoutMethod.name }}
                         </h2>
@@ -37,12 +37,14 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { CheckoutMethod, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import AddressSelectionView from './AddressSelectionView.vue';
+import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 import TimeSelectionView from './TimeSelectionView.vue';
 
 @Component({
@@ -73,11 +75,25 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     }
 
     get selectedMethod(): CheckoutMethod {
-        return CheckoutManager.checkout.checkoutMethod ?? this.webshop.meta.checkoutMethods[0]
+        if (this.CheckoutManager.checkout.checkoutMethod) {
+            const search = this.CheckoutManager.checkout.checkoutMethod.id
+            const f = this.webshop.meta.checkoutMethods.find(c => c.id == search)
+            if (f) {
+                return f
+            }
+        }
+        return this.webshop.meta.checkoutMethods[0]
     }
 
     set selectedMethod(method: CheckoutMethod) {
         CheckoutManager.checkout.checkoutMethod = method
+
+        // If this method only has one timeslot, or none, update it
+        if (method.timeSlots.timeSlots.length == 0) {
+            CheckoutManager.checkout.timeSlot = null
+        } else if (method.timeSlots.timeSlots.length == 1) {
+            CheckoutManager.checkout.timeSlot = method.timeSlots.timeSlots[0]
+        }
         CheckoutManager.saveCheckout()
     }
     
@@ -88,10 +104,20 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         this.loading = true
 
         try {
-           // todo
+            // Force a save if nothing changed (to fix timeSlot + updated data)
+            this.selectedMethod = this.selectedMethod
 
-           this.show(new ComponentWithProperties(TimeSelectionView, {}))
-            
+            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Method, true)
+            if (!nextStep) {
+                throw new SimpleError({
+                    code: "missing_config",
+                    message: "Er ging iets mis bij het ophalen van de volgende stap"
+                })
+            }
+            const comp = nextStep!.getComponent()
+
+            this.show(new ComponentWithProperties(comp, {}))
+
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
