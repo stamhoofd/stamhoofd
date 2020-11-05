@@ -114,5 +114,10 @@ export class Webshop extends Model {
         return this.fromRow(rows[0][this.table]);
     }
 
+    // Return the location of the webshop
+    getHost() {
+        return ""
+    }
+
  
 }
