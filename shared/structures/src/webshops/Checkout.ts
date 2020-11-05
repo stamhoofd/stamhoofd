@@ -1,6 +1,8 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 
 import { Address } from '../Address';
+import { PaymentMethod } from '../PaymentMethod';
+import { Cart } from './Cart';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, WebshopTimeSlot } from './WebshopMetaData';
 
 export class Checkout extends AutoEncoder {
@@ -16,4 +18,9 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: Address, nullable: true })
     address: Address | null = null
 
+    @field({ decoder: Cart })
+    cart: Cart = Cart.create({})
+
+    @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
+    paymentMethod: PaymentMethod | null = null
 }

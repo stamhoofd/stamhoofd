@@ -8,20 +8,23 @@
 
                 <STList>
                     <STListItem v-for="paymentMethod in paymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" name="choose-payment-method" v-model="selectedPaymentMethod" :value="paymentMethod"/>
-                        <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">{{ getName(paymentMethod) }}</h2>
-                        <p class="style-description-small" v-if="getDescription(paymentMethod)">{{ getDescription(paymentMethod) }}</p>
+                        <Radio slot="left" v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                        <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
+                            {{ getName(paymentMethod) }}
+                        </h2>
+                        <p v-if="getDescription(paymentMethod)" class="style-description-small">
+                            {{ getDescription(paymentMethod) }}
+                        </p>
 
                         <div v-if="paymentMethod == 'Payconiq' && selectedPaymentMethod == paymentMethod" class="payment-app-banner">
-                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg"/>
-                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg"/>
-                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg"/>
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+                            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
                         </div>
 
-                        <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo"/>
+                        <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo">
                     </STListItem>
                 </STList>
-
             </main>
             <main v-else>
                 <h1>Bevestig registratie</h1>
@@ -35,7 +38,7 @@
                     <button class="button primary" @click="goNext">
                         <span v-if="willPay">Betalen</span>
                         <span v-else>Doorgaan</span>
-                        <span class="icon arrow-right"/>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </STToolbar>
@@ -44,25 +47,26 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingButton, Radio, ErrorBox, STErrorsDefault } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, PaymentMethod, Payment, PaymentStatus, RegisterResponse, KeychainedResponse, RecordType, Record, SelectedGroup } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
-import TransferPaymentView from './TransferPaymentView.vue';
-import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
-import RegistrationSuccessView from './RegistrationSuccessView.vue';
-import PaymentPendingView from './PaymentPendingView.vue';
-import PayconiqBannerView from './PayconiqBannerView.vue';
-import PayconiqButtonView from './PayconiqButtonView.vue';
-import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
+import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
+import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup } from '@stamhoofd/structures';
+import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+
+import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import MemberGroupView from '../registration/MemberGroupView.vue';
+import PayconiqBannerView from './PayconiqBannerView.vue';
+import PayconiqButtonView from './PayconiqButtonView.vue';
+import PaymentPendingView from './PaymentPendingView.vue';
+import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import TransferPaymentView from './TransferPaymentView.vue';
 
 @Component({
     components: {
@@ -168,7 +172,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     getOS(): string {
-        var userAgent = navigator.userAgent || navigator.vendor;
+        const userAgent = navigator.userAgent || navigator.vendor;
 
         if (/android/i.test(userAgent)) {
             return "android";
@@ -189,19 +193,19 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             return "iOS";
         }
 
-        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+        if (navigator.platform.toUpperCase().includes('MAC') ) {
             return "macOS";
         }
 
-        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+        if (navigator.platform.toUpperCase().includes('WIN') ) {
             return "windows";
         }
 
-        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+        if (navigator.platform.toUpperCase().includes('IPHONE') ) {
             return "iOS";
         }
 
-        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+        if (navigator.platform.toUpperCase().includes('ANDROID') ) {
             return "android";
         }
 
