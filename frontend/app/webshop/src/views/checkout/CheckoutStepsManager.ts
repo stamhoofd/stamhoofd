@@ -2,10 +2,6 @@ import { CheckoutMethodType } from '@stamhoofd/structures';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import AddressSelectionView from "./AddressSelectionView.vue"
-import CheckoutMethodSelectionView from "./CheckoutMethodSelectionView.vue"
-import PaymentSelectionView from "./PaymentSelectionView.vue"
-import TimeSelectionView from "./TimeSelectionView.vue"
 
 export enum CheckoutStepType {
     "Method" = "Method",
@@ -25,12 +21,12 @@ export class CheckoutStep {
         this.skipHandler = skipHandler
     }
 
-    getComponent(): any {
+    async getComponent(): Promise<any> {
         switch (this.type) {
-            case CheckoutStepType.Method: return CheckoutMethodSelectionView;
-            case CheckoutStepType.Address: return AddressSelectionView;
-            case CheckoutStepType.Time: return TimeSelectionView;
-            case CheckoutStepType.Payment: return PaymentSelectionView;
+            case CheckoutStepType.Method: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue')).default;
+            case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
+            case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
+            case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
 
             default: {
                 // If you get a compile error here, a type is missing in the switch and you should add it
@@ -43,7 +39,7 @@ export class CheckoutStep {
 
 export class CheckoutStepsManager {
     /// Return all the steps that are confirmed with the current checkout configuration
-    static getActiveSteps(): CheckoutStep[] {
+    static getSteps(): CheckoutStep[] {
         const webshop = WebshopManager.webshop
         const checkout = CheckoutManager.checkout
         const checkoutMethod = checkout.checkoutMethod ?? webshop.meta.checkoutMethods[0]
@@ -104,8 +100,12 @@ export class CheckoutStepsManager {
         return steps
     }
 
+    static getActiveSteps() {
+        return this.getSteps().filter(s => s.active)
+    }
+
     static getNextStep(step: CheckoutStepType | undefined, runSkip = false) {
-        const steps = this.getActiveSteps()
+        const steps = this.getSteps()
         if (!step) {
             return steps[0]
         }

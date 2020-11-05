@@ -2,8 +2,12 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1 v-if="checkoutMethod.type == 'Takeout'">Kies je afhaaltijdstip</h1>
-                <h1 v-else="checkoutMethod.type == 'Delivery'">Kies je leveringstijdstip</h1>
+                <h1 v-if="checkoutMethod.type == 'Takeout'">
+                    Kies je afhaaltijdstip
+                </h1>
+                <h1 v-else-if="checkoutMethod.type == 'Delivery'">
+                    Kies je leveringstijdstip
+                </h1>
 
                 <STErrorsDefault :error-box="errorBox" />
 
@@ -41,8 +45,8 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
-import { CheckoutManager } from '../../classes/CheckoutManager';
 
+import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
@@ -62,7 +66,7 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
     }
 })
 export default class TimeSelectionView extends Mixins(NavigationMixin){
-    step = 3
+    step = -1
 
     loading = false
     errorBox: ErrorBox | null = null
@@ -94,6 +98,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
             return
         }
         this.loading = true
+        this.errorBox = null
 
         try {
             const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Time, true)
@@ -103,7 +108,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
                     message: "Er ging iets mis bij het ophalen van de volgende stap"
                 })
             }
-            const comp = nextStep!.getComponent()
+            const comp = await nextStep.getComponent()
 
             this.show(new ComponentWithProperties(comp, {}))
             

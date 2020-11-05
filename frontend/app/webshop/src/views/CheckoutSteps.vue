@@ -36,6 +36,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
+import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 
 @Component({
     components: {
@@ -48,16 +49,15 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
     root!: ComponentWithProperties
 
     CheckoutManager = CheckoutManager
+    CheckoutStepsManager = CheckoutStepsManager
+    WebshopManager = WebshopManager
 
     get cartCount() {
         return CheckoutManager.cart.count
     }
 
     get totalSteps() {
-        if (this.CheckoutManager.checkout.checkoutMethod && this.CheckoutManager.checkout.checkoutMethod.type == CheckoutMethodType.Delivery) {
-            return 4
-        }
-        return 3
+        return CheckoutStepsManager.getActiveSteps().length
     }
 
     get privacyUrl() {

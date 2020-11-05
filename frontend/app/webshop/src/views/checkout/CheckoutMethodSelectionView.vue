@@ -39,8 +39,8 @@ import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STN
 import { SessionManager } from '@stamhoofd/networking';
 import { CheckoutMethod, CheckoutMethodType, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
-import { CheckoutManager } from '../../classes/CheckoutManager';
 
+import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import AddressSelectionView from './AddressSelectionView.vue';
@@ -59,7 +59,7 @@ import TimeSelectionView from './TimeSelectionView.vue';
     }
 })
 export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin){
-    step = 2
+    step = -1
 
     loading = false
     errorBox: ErrorBox | null = null
@@ -87,13 +87,6 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
 
     set selectedMethod(method: CheckoutMethod) {
         CheckoutManager.checkout.checkoutMethod = method
-
-        // If this method only has one timeslot, or none, update it
-        if (method.timeSlots.timeSlots.length == 0) {
-            CheckoutManager.checkout.timeSlot = null
-        } else if (method.timeSlots.timeSlots.length == 1) {
-            CheckoutManager.checkout.timeSlot = method.timeSlots.timeSlots[0]
-        }
         CheckoutManager.saveCheckout()
     }
     
@@ -102,11 +95,10 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
             return
         }
         this.loading = true
+        this.errorBox = null
 
         try {
             // Force a save if nothing changed (to fix timeSlot + updated data)
-            this.selectedMethod = this.selectedMethod
-
             const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Method, true)
             if (!nextStep) {
                 throw new SimpleError({
@@ -114,7 +106,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
                     message: "Er ging iets mis bij het ophalen van de volgende stap"
                 })
             }
-            const comp = nextStep!.getComponent()
+            const comp = await nextStep.getComponent()
 
             this.show(new ComponentWithProperties(comp, {}))
 

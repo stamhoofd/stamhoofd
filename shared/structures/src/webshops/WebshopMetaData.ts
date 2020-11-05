@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, ConvertArrayToPatchableArray, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, Patchable, PatchableArrayAutoEncoder, PatchableDecoder, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, ConvertArrayToPatchableArray, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, Patchable, PatchableArrayAutoEncoder, PatchableDecoder, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";

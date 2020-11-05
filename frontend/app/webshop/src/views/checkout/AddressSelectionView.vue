@@ -6,7 +6,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                todo
+                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" />
             </main>
 
             <STToolbar>
@@ -25,13 +25,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { AddressInput, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { Address, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
-import { CheckoutManager } from '../../classes/CheckoutManager';
 
+import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
@@ -42,9 +42,9 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STToolbar,
         STList,
         STListItem,
-        Radio,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        AddressInput
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -52,10 +52,11 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
     }
 })
 export default class AddressSelectionView extends Mixins(NavigationMixin){
-    step = 3
+    step = -1
 
     loading = false
     errorBox: ErrorBox | null = null
+    validator = new Validator()
     CheckoutManager = CheckoutManager
 
     get checkoutMethod() {
@@ -66,11 +67,25 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         return WebshopManager.webshop
     }
 
+    get address() {
+        return CheckoutManager.checkout.address
+    }
+
+    set address(address: Address | null) {
+        CheckoutManager.checkout.address = address
+        CheckoutManager.saveCheckout()
+    } 
+
     async goNext() {
         if (this.loading) {
             return
         }
+
+        if (!await this.validator.validate()) {
+            return
+        }
         this.loading = true
+        this.errorBox = null
 
         try {
            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
@@ -80,7 +95,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
                     message: "Er ging iets mis bij het ophalen van de volgende stap"
                 })
             }
-            const comp = nextStep!.getComponent()
+            const comp = await nextStep.getComponent()
 
             this.show(new ComponentWithProperties(comp, {}))
             

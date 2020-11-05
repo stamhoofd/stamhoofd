@@ -2,9 +2,9 @@
     <div class="steps-layout">
         <StepsHeader :progress="totalSteps && step ? ((step - 1) / totalSteps) : 0">
             <template #left>
-                <slot name="left" v-bind:step="step" v-bind:canPop="canPop">
+                <slot name="left" :step="step" :canPop="canPop">
                     <transition name="move" mode="out-in">
-                        <a v-if="!canPop" id="logo" class="responsive" alt="Stamhoofd" href="https://www.stamhoofd.be" target="_blank"/>
+                        <a v-if="!canPop" id="logo" class="responsive" alt="Stamhoofd" href="https://www.stamhoofd.be" target="_blank" />
                         <div v-else @click.prevent="goBack()">
                             Terug
                         </div>
@@ -71,6 +71,9 @@ export default class Steps extends Vue {
         this.$nextTick(() => {
             this.canPop = (this.navigationController.mainComponent?.componentInstance() as any)?.isStepsPoppable ?? (this.navigationController.components.length > 1);
             this.step = (this.navigationController.mainComponent?.componentInstance() as any)?.step ?? 0;
+            if (this.step == -1) {
+               this.step = this.navigationController.components.length 
+            }
         })
         
     }

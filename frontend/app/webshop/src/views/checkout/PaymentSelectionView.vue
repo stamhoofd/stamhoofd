@@ -30,8 +30,8 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
-import { CheckoutManager } from '../../classes/CheckoutManager';
 
+import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 
@@ -51,7 +51,7 @@ import MemberGeneralView from '../registration/MemberGeneralView.vue';
     }
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
-    step = 3
+    step = -1
 
     loading = false
     errorBox: ErrorBox | null = null

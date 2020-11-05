@@ -6,7 +6,7 @@
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
-
+            <STErrorsDefault :error-box="errorBox" />
            
             <STList>
                 <STListItem v-for="cartItem in cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
@@ -34,10 +34,12 @@
 
         <STToolbar>
             <span slot="left">Totaal: {{ cart.price | price }}</span>
-            <button slot="right" class="button primary" @click="goToCheckout">
-                <span class="icon flag" />
-                <span>Bestellen</span>
-            </button>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" @click="goToCheckout">
+                    <span class="icon flag" />
+                    <span>Bestellen</span>
+                </button>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
@@ -45,16 +47,15 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
-import { CartItem, CheckoutMethodType, Version } from '@stamhoofd/structures';
+import { ErrorBox, LoadingButton,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { CheckoutStepsManager } from './CheckoutStepsManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import CartItemView from '../products/CartItemView.vue';
+import { CheckoutStepsManager } from './CheckoutStepsManager';
 
 @Component({
     components: {
@@ -62,6 +63,8 @@ import CartItemView from '../products/CartItemView.vue';
         STToolbar,
         STList,
         STListItem,
+        STErrorsDefault,
+        LoadingButton
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -72,27 +75,41 @@ export default class CartView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     title = "Winkelmandje"
+    loading = false
+    errorBox: ErrorBox | null = null
 
     get cart() {
         return this.CheckoutManager.cart
     }
 
-    goToCheckout() { 
-        const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
-        console.log(nav.components[nav.components.length - 1]);
-        console.log((nav.components[nav.components.length - 1] as any).componentInstance());
-
-        const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
-
-        if (!nextStep) {
-            // Not possible
-            new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
-            return;
+    async goToCheckout() { 
+        if (this.loading) {
+            return
         }
+        this.loading = true
+        this.errorBox = null
 
-        const comp = nextStep.getComponent();
-        (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(comp, {}))
-        this.dismiss({ force: true })
+         try {
+            const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
+            console.log(nav.components[nav.components.length - 1]);
+            console.log((nav.components[nav.components.length - 1] as any).componentInstance());
+
+            const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
+
+            if (!nextStep) {
+                // Not possible
+                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
+                return;
+            }
+
+            const comp = await nextStep.getComponent();
+            (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(comp, {}))
+            this.dismiss({ force: true })
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loading = false
     }
 
     imageSrc(cartItem: CartItem) {
