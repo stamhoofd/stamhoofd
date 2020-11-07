@@ -56,8 +56,11 @@ export default class SuccessView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     CheckoutManager = CheckoutManager
 
-    @Prop({})
-    orderId: string
+    @Prop({ default: null })
+    orderId: string | null
+
+    @Prop({ default: null })
+    paymentId: string | null
 
     mounted() {
         // Clear cart
@@ -66,7 +69,7 @@ export default class SuccessView extends Mixins(NavigationMixin){
     }
    
     async goNext() {
-        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: this.orderId }), true, this.navigationController!.components!.length - 1)
+        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: this.orderId, paymentId: this.paymentId }), true, this.navigationController!.components!.length - 1)
     }
 }
 </script>

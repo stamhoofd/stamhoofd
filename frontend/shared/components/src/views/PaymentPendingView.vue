@@ -3,7 +3,7 @@
         <div class="st-view">
             <main v-if="!payment || payment.status != 'Failed'">
                 <h1>Wachten op betaalbevestiging...</h1>
-                <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten, daarna leggen we de inschrijving vast.</p>
+                <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten.</p>
 
                 <Spinner />
 

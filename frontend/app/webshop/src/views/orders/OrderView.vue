@@ -1,7 +1,7 @@
 <template>
-    <div class="boxed-view">
-        <LoadingView v-if="!order" />
-        <div class="st-view" v-else>
+    <LoadingView v-if="!order" />
+    <div class="boxed-view" v-else>
+        <div class="st-view">
             <main>
                 <h1>Jouw bestelling {{ order.id }}</h1>
 
@@ -43,11 +43,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     CheckoutManager = CheckoutManager
 
-    @Prop({})
-    orderId: string
+    @Prop({ default: null })
+    orderId: string | null
 
-    @Prop({})
-    paymentId: string
+    @Prop({ default: null })
+    paymentId: string | null
 
     order: Order | null = null
 
@@ -82,6 +82,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }).then(response => {
                     const order = response.data
                     this.order = order
+                    HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
                 }).catch(e => {
                     // too: handle this
                     console.error(e)
