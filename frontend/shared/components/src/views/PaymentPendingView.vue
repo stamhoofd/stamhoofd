@@ -30,16 +30,12 @@ import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Spinner, ErrorBox, LoadingButton } from "@stamhoofd/components"
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember, EncryptedPaymentDetailed, PaymentStatus } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
+import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember, EncryptedPaymentDetailed, PaymentStatus, Payment } from '@stamhoofd/structures';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import OverviewView from './OverviewView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
-import RegistrationSuccessView from './RegistrationSuccessView.vue';
-import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
     components: {
@@ -56,18 +52,17 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     @Prop({ default: null })
     paymentId: string | null;
 
-    payment: EncryptedPaymentDetailed | null = null
+    payment: Payment | null = null
     loading = false
 
-    MemberManager = MemberManager
-    step = 4
+    //step = 4 // todo?
     isStepsPoppable = false
 
     pollCount = 0
     timer: any = null
 
-    @Prop({ default: null })
-    finishedHandler: (() => void) | null
+    @Prop({ required: true })
+    finishedHandler: (payment: Payment) => void
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
@@ -80,7 +75,8 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             if (navigation!.components.length > 1) {
                 this.pop();
             } else {
-                navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
+                //navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
+                this.finishedHandler(this.payment!)
             }
         }
         
@@ -96,14 +92,6 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                 decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>,
             }).then(response => {
                 const payment = response.data
-                if (payment.status == PaymentStatus.Succeeded) {
-                    MemberManager.getRegistrationsWithMember(payment.registrations).then( (registrations) => {
-                        const navigation = this.navigationController
-                        navigation?.push(new ComponentWithProperties(RegistrationSuccessView, { registrations }), true, 1)
-                    }).catch(e => {
-                        console.error(e)
-                    })  
-                }
                 this.payment = payment
             }).catch(e => {
                 // too: handle this
@@ -111,9 +99,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             }).finally(() => {
                 this.pollCount++;
                 if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
-                    if (this.finishedHandler) {
-                        this.finishedHandler();
-                    }
+                    this.finishedHandler(this.payment);
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));

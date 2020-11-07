@@ -25,11 +25,10 @@ import { NavigationMixin, ComponentWithProperties, NavigationController } from "
 import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { SessionManager, Session } from '@stamhoofd/networking';
-import { ForgotPasswordRequest, EncryptedPaymentDetailed, PaymentStatus } from '@stamhoofd/structures';
+import { ForgotPasswordRequest, EncryptedPaymentDetailed, PaymentStatus, Payment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Decoder } from '@simonbackx/simple-encoding';
-import { MemberManager } from '../../classes/MemberManager';
-import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import { Server } from '@simonbackx/simple-networking';
 
 @Component({
     components: {
@@ -48,12 +47,15 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     paymentUrl: string;
 
     @Prop({ default: null })
-    initialPayment: EncryptedPaymentDetailed | null
+    initialPayment!: Payment | null
 
-    payment: EncryptedPaymentDetailed | null = this.initialPayment
+    payment: Payment | null = this.initialPayment
 
-    @Prop({})
-    presentingController: NavigationController;
+    @Prop({ required: true })
+    server: Server
+
+    @Prop({ required: true })
+    finishedHandler: (payment: Payment | null) => void
 
     pollCount = 0
     timer: any = null
@@ -77,27 +79,25 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     poll() {
         this.timer = null;
         const paymentId = this.payment?.id ?? new URL(window.location.href).searchParams.get("id");
-        SessionManager.currentSession!.authenticatedServer
+        this.server
             .request({
                 method: "POST",
                 path: "/payments/" +paymentId,
-                decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>,
+                decoder: Payment as Decoder<Payment>,
             }).then(response => {
                 const payment = response.data
+                this.payment = payment
+
                 if (payment.status == PaymentStatus.Succeeded) {
-                    MemberManager.getRegistrationsWithMember(payment.registrations).then( (registrations) => {
-                        this.presentingController.push(new ComponentWithProperties(RegistrationSuccessView, { registrations }), true, 1)
-                        this.dismiss()
-                    }).catch(e => {
-                        console.error(e)
-                    })  
+                    this.finishedHandler(payment)
+                    this.dismiss()
                 }
 
                 if (payment.status == PaymentStatus.Failed) {
                     // todo: temporary message
+                    this.finishedHandler(payment)
                     this.dismiss()
                 }
-                this.payment = payment
             }).catch(e => {
                 // too: handle this
                 console.error(e)
@@ -114,6 +114,10 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         if (this.timer) {
             clearTimeout(this.timer)
             this.timer = null
+        }
+
+        if (!this.payment || (this.payment.status != PaymentStatus.Succeeded && this.payment.status != PaymentStatus.Failed)) {
+            this.finishedHandler(this.payment)
         }
     }
 
@@ -167,6 +171,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             img {
                 width: 240px;
                 height: 240px;
+                transition: opacity 0.2s;
             }
             margin-bottom: 20px;
 

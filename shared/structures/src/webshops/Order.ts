@@ -28,6 +28,9 @@ export class OrderData extends AutoEncoder {
 
 
 export class Order extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string
+
     @field({ decoder: OrderData })
     data: OrderData
 

@@ -1,7 +1,7 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Order as OrderStruct,OrderData, OrderResponse, PaymentMethod,PaymentStatus, Version } from "@stamhoofd/structures";
 
 import { MolliePayment } from '../models/MolliePayment';
@@ -81,6 +81,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await order.save()
 
             let paymentUrl: string | null = null
+            const description = 'Betaling bij '+organization.name+" voor "+webshop.meta.name
             if (payment.status != PaymentStatus.Succeeded) {
                 if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
                     
@@ -108,7 +109,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
                         testmode: process.env.NODE_ENV != 'production',
                         profileId,
-                        description: 'Betaling bij '+organization.name+" voor "+webshop.meta.name,
+                        description,
                         redirectUrl: "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id),
                         webhookUrl: 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                         metadata: {
@@ -125,7 +126,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
                 } else if (payment.method == PaymentMethod.Payconiq) {
-                    paymentUrl = await PayconiqPayment.createPayment(payment, organization)
+                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description)
                 }
             }
 

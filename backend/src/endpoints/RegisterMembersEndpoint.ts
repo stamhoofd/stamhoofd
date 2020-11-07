@@ -260,6 +260,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             let paymentUrl: string | null = null
+            const description = 'Inschrijving bij '+user.organization.name
             if (payment.status != PaymentStatus.Succeeded) {
                 if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
                     
@@ -287,7 +288,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
                         testmode: process.env.NODE_ENV != 'production',
                         profileId,
-                        description: 'Inschrijving bij '+user.organization.name,
+                        description,
                         redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),
                         webhookUrl: 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                         metadata: {
@@ -303,7 +304,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
                 } else if (payment.method == PaymentMethod.Payconiq) {
-                    paymentUrl = await PayconiqPayment.createPayment(payment, user.organization)
+                    paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description)
                 }
             }
 
