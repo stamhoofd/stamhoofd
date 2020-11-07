@@ -16,12 +16,14 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { WebshopManager } from '../classes/WebshopManager';
+import OrderView from './orders/OrderView.vue';
 import CategoryBox from "./products/CategoryBox.vue"
 
 @Component({
@@ -57,6 +59,24 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get bannerImageSrc() {
         return this.bannerImage?.file.getPublicPath()
+    }
+
+    mounted() {
+        const path = this.webshop.removeSuffix(window.location.pathname.substring(1).split("/"));
+        if (path.length == 2 && path[0] == 'order') {
+            // tood: password reset view
+            const orderId = path[1];
+            this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId }), false);
+        } else if (path.length == 1 && path[0] == 'payment') {
+            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server ,finishedHandler: (payment: Payment) => {
+                if (payment.status == PaymentStatus.Succeeded) {
+                    this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id }), false);
+                } else {
+                    this.navigationController!.popToRoot({ force: true })
+                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                }
+            } }), false);
+        }
     }
 
 }

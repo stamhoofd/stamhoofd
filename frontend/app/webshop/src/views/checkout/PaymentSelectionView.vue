@@ -34,6 +34,7 @@ import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import SuccessView from './SuccessView.vue';
 
 @Component({
     components: {
@@ -84,7 +85,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     goToOrder(id: string) {
-
+        this.navigationController!.push(new ComponentWithProperties(SuccessView, { orderId: id }))
     }
    
     async goNext() {
@@ -103,12 +104,20 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             })
 
             const payment = response.data.order.payment
-            if (payment && response.data.paymentUrl) {
-                PaymentHandler.handlePayment(WebshopManager.server, payment, response.data.paymentUrl, this, (payment: Payment) => {
+            if (payment) {
+                PaymentHandler.handlePayment({
+                    server: WebshopManager.server, 
+                    organization: this.organization, 
+                    payment, 
+                    paymentUrl: response.data.paymentUrl, 
+                    component: this
+                }, (payment: Payment) => {
+                    console.log("Success")
                     // success
                     this.loading = false
                     this.goToOrder(response.data.order.id)
                 }, (payment: Payment) => {
+                    console.log(payment)
                     // failure
                     this.loading = false
                 })

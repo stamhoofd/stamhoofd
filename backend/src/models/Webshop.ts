@@ -21,9 +21,14 @@ export class Webshop extends Model {
     organizationId: string;
     
     // A custom domain name that is used to host the webshop application (should be unique)
-    // E.g. inschrijven.scoutswetteren.be
+    // E.g. webshop.scoutswetteren.be
     @column({ type: "string", nullable: true })
     domain: string | null = null;
+
+    // If a domain is used, the optional suffix on that domain
+    // E.g. webshop.scoutswetteren.be/wafelbak
+    @column({ type: "string", nullable: true })
+    domainUri: string | null = null;
 
     // Unique representation of this webshop from a string, that is used to provide the default domains
     // in org.stamhoofd.shop/name-of-webshop
@@ -115,8 +120,14 @@ export class Webshop extends Model {
     }
 
     // Return the location of the webshop
-    getHost() {
-        return ""
+    getHost(this: Webshop & { organization: Organization }) {
+        if (this.domain) {
+            if (this.domainUri) {
+                return this.domain+"/"+this.domainUri
+            }
+            return this.domain
+        }
+        return this.organization.uri+"."+process.env.WEBSHOP_HOSTNAME+"/"+this.uri
     }
 
  

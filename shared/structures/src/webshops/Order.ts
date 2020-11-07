@@ -35,13 +35,13 @@ export class Order extends AutoEncoder {
     data: OrderData
 
     @field({ decoder: Payment, nullable: true })
-    payment: Payment | null = null
+    payment: Payment | null // no default to prevent errors
 
     @field({ decoder: DateDecoder })
     createdAt: Date
 
     @field({ decoder: DateDecoder, nullable: true })
-    paidAt: Date | null = null
+    validAt: Date | null = null
 
 }
 

@@ -6,8 +6,8 @@
             </STNavigationBar>
 
             <main>
-                <h1>Lidgeld overschrijven</h1>
-                <p>Voer de onderstaande overschrijving uit. Vermeld zeker de mededeling in je overschrijving! <span class="hide-smartphone" v-if="isBelgium">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
+                <h1>Bedrag overschrijven</h1>
+                <p>Voer de onderstaande overschrijving uit. <span class="hide-smartphone" v-if="isBelgium">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
 
                 <div class="payment-split">
                     <div class="hide-smartphone" v-if="payment.price > 0">
@@ -54,13 +54,8 @@
 import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGroupView from '../registration/MemberGroupView.vue';
+import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, Organization } from '@stamhoofd/structures';
 import { SimpleError } from '@simonbackx/simple-errors';
-import RegistrationSuccessView from './RegistrationSuccessView.vue';
 import { Formatter } from '@stamhoofd/utility';
 
 @Component({
@@ -77,25 +72,22 @@ import { Formatter } from '@stamhoofd/utility';
     }
 })
 export default class TransferPaymentView extends Mixins(NavigationMixin){
-    @Prop({ default: null })
-    registrations: RegistrationWithMember[] | null
 
     @Prop({ required: true })
     payment: Payment
 
+    @Prop({ required: true }) 
+    organization: Organization
+
     @Prop({ default: false })
     isPopup: boolean
 
-    MemberManager = MemberManager
-    organization = OrganizationManager.organization
+    @Prop({ required: true })
+    finishedHandler: (payment: Payment | null) => void
+
     QRCodeUrl: string | null = null
 
-    step = 3
     isStepsPoppable = false
-
-    get paymentDetailed() {
-        return MemberManager.getPaymentDetailed(this.payment)
-    }
 
     mounted() {
         this.generateQRCode()
@@ -110,8 +102,8 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
             const iban = this.organization.meta.iban ?? "";
-            const creditor = OrganizationManager.organization.name
-            const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nLidgeld betalen";
+            const creditor = this.organization.name
+            const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nBetalen";
 
             this.QRCodeUrl = await QRCode.toDataURL(message)
         } catch (e) {
@@ -126,9 +118,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             return;
         }
        
-        this.show(new ComponentWithProperties(RegistrationSuccessView, {
-            registrations: this.registrations
-        }))
+        this.finishedHandler(this.payment)
     }
 
 }

@@ -5,7 +5,7 @@ CREATE TABLE `webshop_orders` (
   `updatedAt` datetime NOT NULL,
   `webshopId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `paymentId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NULL,
-  `paidAt` datetime DEFAULT NULL,
+  `validAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `paymentId` (`paymentId`),

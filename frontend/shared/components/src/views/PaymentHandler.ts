@@ -1,10 +1,11 @@
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Payment, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { Organization, Payment, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue"
 import PayconiqButtonView from "./PayconiqButtonView.vue"
 import PaymentPendingView from "./PaymentPendingView.vue"
+import TransferPaymentView from "./TransferPaymentView.vue"
 
 export class PaymentHandler {
     static getOS(): string {
@@ -48,9 +49,32 @@ export class PaymentHandler {
         return "unknown"
     }
 
-    static handlePayment(server: Server, payment: Payment, paymentUrl: string, component: NavigationMixin, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
+    static handlePayment(settings: { 
+        server: Server; 
+        organization: Organization; 
+        payment: Payment; 
+        paymentUrl: string | null; 
+        component: NavigationMixin; 
+    }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         let finishedHandler: (() => void) | null = null
-        if (payment.method == PaymentMethod.Payconiq) {
+        const {payment, organization, server, component, paymentUrl } = settings;
+
+        if (payment.method == PaymentMethod.Transfer) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
+                organization,
+                payment,
+                finishedHandler: (payment: Payment) => {
+                    if (finishedHandler) {
+                        // hide payconiq button view if needed
+                        finishedHandler()
+                    }
+
+                    // Always go to success
+                    successHandler(payment)
+                }
+            }), true)
+        } else if (payment.method == PaymentMethod.Payconiq) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
                 const url = paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
                 const href = document.createElement("a")
@@ -127,7 +151,9 @@ export class PaymentHandler {
                 }))
             }, 2100)
         } else {
-            window.location.href = paymentUrl;
+            if (paymentUrl) {
+                window.location.href = paymentUrl;
+            }
         }
     }
 

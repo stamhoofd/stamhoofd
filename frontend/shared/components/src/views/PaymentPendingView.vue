@@ -36,6 +36,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import OverviewView from './OverviewView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
+import { Server } from '@simonbackx/simple-networking';
 
 @Component({
     components: {
@@ -51,6 +52,9 @@ import { Decoder } from '@simonbackx/simple-encoding';
 export default class PaymentPendingView extends Mixins(NavigationMixin){
     @Prop({ default: null })
     paymentId: string | null;
+
+    @Prop({ required: true })
+    server: Server
 
     payment: Payment | null = null
     loading = false
@@ -85,11 +89,11 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     poll() {
         this.timer = null;
         const paymentId = this.paymentId ?? new URL(window.location.href).searchParams.get("id");
-        SessionManager.currentSession!.authenticatedServer
+        this.server
             .request({
                 method: "POST",
                 path: "/payments/" +paymentId,
-                decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>,
+                decoder: Payment as Decoder<Payment>,
             }).then(response => {
                 const payment = response.data
                 this.payment = payment

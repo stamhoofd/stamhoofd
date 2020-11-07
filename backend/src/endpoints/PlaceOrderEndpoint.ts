@@ -37,8 +37,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop) {
+        const webshopWithoutOrganization = await Webshop.getByID(request.params.id)
+        if (!webshopWithoutOrganization) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Webshop not found",
@@ -46,7 +46,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
 
-        const organization = (await Organization.getByID(webshop.organizationId))!
+        const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
+        const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
 
         const validatedCart = request.body.cart
         const totalPrice = validatedCart.price
@@ -75,7 +76,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.paymentId = payment.id
             order.setRelation(Order.payment, payment)
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
-                order.paidAt = new Date()
+                order.validAt = new Date()
             }
 
             await order.save()

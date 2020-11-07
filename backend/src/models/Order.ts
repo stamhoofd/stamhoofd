@@ -48,7 +48,7 @@ export class Order extends Model {
     updatedAt: Date
 
     @column({ type: "datetime", nullable: true })
-    paidAt: Date | null = null
+    validAt: Date | null = null
 
     static webshop = new ManyToOneRelation(Webshop, "webshop");
     static payment = new ManyToOneRelation(Payment, "payment")
