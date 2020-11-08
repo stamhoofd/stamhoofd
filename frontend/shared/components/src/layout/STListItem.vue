@@ -70,6 +70,7 @@ export default class STListItem extends Vue {
     &.right-description {
         .right {
             @extend .style-description;
+            text-align: right;
         }
     }
 

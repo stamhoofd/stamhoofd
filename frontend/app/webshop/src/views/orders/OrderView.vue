@@ -3,9 +3,16 @@
     <div v-else class="boxed-view">
         <div class="st-view order-view">
             <main>
-                <h1>Jouw bestelling</h1>
+                <h1 v-if="success">
+                    Jouw bestelling is geplaatst
+                </h1>
+                <h1 v-else>
+                    Jouw bestelling
+                </h1>
 
-                <p>Denk aan het milieu voor je dit afdrukt.</p>
+                <p v-if="success">
+                    Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.
+                </p>
 
                 <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
                     Opgelet: deze bestelling werd (mogelijks) nog niet betaald. Zorg er zeker voor dat je deze meteen betaald zodat het bedrag op tijd op onze rekening komt.
@@ -89,6 +96,13 @@
                             </template>
                         </STListItem>
                     </template>
+                    <STListItem class="right-description">
+                        Totaal
+
+                        <template slot="right">
+                            {{ order.data.cart.price | price }}
+                        </template>
+                    </STListItem>
                 </STList>
 
                 <hr>
@@ -169,6 +183,9 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     @Prop({ default: null })
     initialOrder!: Order | null
+
+    @Prop({ default: false })
+    success: boolean
 
     order: Order | null = this.initialOrder
 

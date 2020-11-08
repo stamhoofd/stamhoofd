@@ -23,19 +23,16 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, KeychainedResponse, MemberWithRegistrations, OrderData, OrderResponse, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import OrderView from '../orders/OrderView.vue';
 import { CheckoutStepType } from './CheckoutStepsManager';
-import SuccessView from './SuccessView.vue';
 
 @Component({
     components: {
@@ -86,7 +83,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     goToOrder(id: string) {
-        this.navigationController!.push(new ComponentWithProperties(SuccessView, { orderId: id }))
+        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: id, success: true }))
     }
    
     async goNext() {
@@ -126,7 +123,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             }
 
             // Go to success page
-            this.show(new ComponentWithProperties(SuccessView, { order: response.data.order }))
+            this.show(new ComponentWithProperties(OrderView, { initialOrder: response.data.order, success: true }))
             
         } catch (e) {
             console.error(e)

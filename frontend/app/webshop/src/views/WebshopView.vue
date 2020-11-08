@@ -27,7 +27,6 @@ import { Component, Mixins } from "vue-property-decorator";
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
-import SuccessView from './checkout/SuccessView.vue';
 import OrderView from './orders/OrderView.vue';
 import CategoryBox from "./products/CategoryBox.vue"
 
@@ -78,7 +77,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         } else if (path.length == 1 && path[0] == 'payment') {
             this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server ,finishedHandler: (payment: Payment | null) => {
                 if (payment && payment.status == PaymentStatus.Succeeded) {
-                    this.navigationController!.push(new ComponentWithProperties(SuccessView, { paymentId: payment.id }), true, 1);
+                    this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), true, 1);
                 } else {
                     this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                     new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
