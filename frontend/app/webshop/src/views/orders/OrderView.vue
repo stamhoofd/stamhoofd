@@ -143,7 +143,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod } from '@stamhoofd/structures';
+import { CartItem, Order, PaymentMethod, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 

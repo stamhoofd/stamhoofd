@@ -41,7 +41,7 @@
                             />
                         </th>
                         <th @click="toggleSort('name')">
-                            Nummer
+                            Bestelling
                             <span
                                 class="sort-arrow"
                                 :class="{
@@ -51,7 +51,7 @@
                             />
                         </th>
                         <th @click="toggleSort('name')">
-                            Naam
+                            Totaalprijs
                             <span
                                 class="sort-arrow"
                                 :class="{
@@ -74,7 +74,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="order in sortedOrders" :key="order.id">
+                    <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)">
                         <td @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
@@ -83,15 +83,20 @@
                                 {{ order.order.number }}
                             </h2>
                             <p class="style-description-small">
-                                todo
+                                {{ order.order.data.customer.name }}
                             </p>
                         </td>
                         <td class="minor">
-                            {{ order.order.data.customer.name }}
+                            {{ order.order.data.cart.price | price }}
                         </td>
             
                         <td class="hide-smartphone member-description">
-                            todo
+                            <h2 v-if="order.order.data.checkoutMethod" class="style-title-list">
+                                {{ order.order.data.checkoutMethod.name }}
+                            </h2>
+                            <p v-if="order.order.data.timeSlot" class="style-description-small">
+                                {{ order.order.data.timeSlot.date | date }} om {{ order.order.data.timeSlot.startTime | minutes }} - {{ order.order.data.timeSlot.endTime | minutes }}
+                            </p>
                         </td>
                         <td>
                             <button class="button icon gray more" />
@@ -118,12 +123,14 @@ import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Order, PaginatedResponseDecoder, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import OrderView from './OrderView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditWebshopView from './EditWebshopView.vue';
 
-class SelectablOrder {
+class SelectableOrder {
     order: Order;
     selected = true;
 
@@ -144,6 +151,11 @@ class SelectablOrder {
         LoadingButton,
         SegmentedControl
     },
+    filters: {
+        price: Formatter.price.bind(Formatter),
+        date: Formatter.dateWithDay.bind(Formatter),
+        minutes: Formatter.minutes.bind(Formatter),
+    },
     directives: { Tooltip },
 })
 export default class WebshopView extends Mixins(NavigationMixin) {
@@ -152,7 +164,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     webshop: PrivateWebshop | null = null
     loading = false;
 
-    orders: SelectablOrder[] = []
+    orders: SelectableOrder[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
 
     sortBy = "info";
@@ -195,10 +207,12 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/orders",
+            query: this.nextQuery,
             decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>)
         }).then((response) => {
-            this.orders.push(...response.data.results.map(o => new SelectablOrder(o)))
+            this.orders.push(...response.data.results.map(o => new SelectableOrder(o)))
             this.nextQuery = response.data.next ?? null
+            this.loadNextOrders()
         }).catch((e) => {
             console.error(e)
         })
@@ -243,6 +257,10 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         this.filteredOrders.forEach((order) => {
             order.selected = selected;
         });
+    }
+
+    openOrder(order: SelectableOrder) {
+        this.present(new ComponentWithProperties(OrderView, { initialOrder: order.order }).setDisplayStyle("popup"))
     }
 
 }

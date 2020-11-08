@@ -6,8 +6,8 @@ export enum SortDirection {
 }
 
 export class WebshopOrdersQuery extends AutoEncoder {
-    @field({ decoder: IntegerDecoder, nullable: true, optional: true })
-    afterNumber: number | null = null;
+    @field({ decoder: IntegerDecoder, optional: true })
+    afterNumber?: number
 
     @field({ decoder: new EnumDecoder(SortDirection), optional: true })
     sort = SortDirection.Ascending

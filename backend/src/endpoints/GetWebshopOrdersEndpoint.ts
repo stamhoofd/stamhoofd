@@ -63,8 +63,10 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
+        const limit = 5
+
         const orders = await Order.where(q, {
-            limit: 50,
+            limit: limit,
             sort: [{
                 column: "number",
                 direction: request.query.sort == SortDirection.Ascending ? "ASC" : "DESC"
@@ -87,8 +89,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         return new Response(
             new PaginatedResponse({ 
                 results: orders.map(order => OrderStruct.create(order)),
-                next: orders.length >= 50 ? WebshopOrdersQuery.create({
-                    afterNumber: orders[orders.length - 1].number,
+                next: orders.length >= limit ? WebshopOrdersQuery.create({
+                    afterNumber: orders[orders.length - 1].number ?? undefined,
                     sort: request.query.sort
                 }) : undefined
             })
