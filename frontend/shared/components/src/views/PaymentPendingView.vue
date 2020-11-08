@@ -6,7 +6,6 @@
                 <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten.</p>
 
                 <Spinner />
-
             </main>
 
             <main v-else>
@@ -26,17 +25,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Spinner, ErrorBox, LoadingButton } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember, EncryptedPaymentDetailed, PaymentStatus, Payment } from '@stamhoofd/structures';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
-import OverviewView from './OverviewView.vue';
-import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { LoadingButton,LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Payment, PaymentStatus } from '@stamhoofd/structures';
+import { Component, Mixins,  Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -66,7 +60,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     timer: any = null
 
     @Prop({ required: true })
-    finishedHandler: (payment: Payment) => void
+    finishedHandler: (payment: Payment | null) => void
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
@@ -80,7 +74,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                 this.pop();
             } else {
                 //navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
-                this.finishedHandler(this.payment!)
+                this.finishedHandler(this.payment)
             }
         }
         
@@ -97,17 +91,16 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             }).then(response => {
                 const payment = response.data
                 this.payment = payment
-            }).catch(e => {
-                // too: handle this
-                console.error(e)
-            }).finally(() => {
+
                 this.pollCount++;
                 if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
                     this.finishedHandler(this.payment);
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
-            });
+            }).catch(e => {
+                this.finishedHandler(this.payment);
+            })
     }
 
     beforeDestroy() {

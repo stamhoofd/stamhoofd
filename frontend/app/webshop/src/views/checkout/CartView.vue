@@ -46,7 +46,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -54,6 +54,7 @@ import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import { WebshopManager } from '../../classes/WebshopManager';
 import CartItemView from '../products/CartItemView.vue';
 import { CheckoutStepsManager } from './CheckoutStepsManager';
 
@@ -123,6 +124,13 @@ export default class CartView extends Mixins(NavigationMixin){
 
     editCartItem(cartItem: CartItem ) {
         this.present(new ComponentWithProperties(CartItemView, { cartItem: cartItem.duplicate(Version), oldItem: cartItem }).setDisplayStyle("sheet"))
+    }
+
+    activated() {
+        console.log("set cart url")
+        this.$nextTick(() => {
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
+        })
     }
 }
 </script>

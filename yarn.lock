@@ -1212,9 +1212,9 @@
   integrity sha512-gs6Oyy0Ip02oTnbPWa08PId2iVfo0fphEym0O9n+qctDptHO0MQHRwHuEu2uUaIHILaGxSri7mGBDmew4tpI8A==
 
 "@simonbackx/vue-app-navigation@^1.5.0":
-  version "1.6.15"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.6.15.tgz#6956c380532e09ea408f32232d7bce1173b8a373"
-  integrity sha512-UtWis8gs1s92Ok8TavhMwouJt0Hlp75+wu+V6PMDdJMZ/HX7gQvTDqfqmGoCV4kYVX7R0AxpBLYjZMWwqg/Z5Q==
+  version "1.6.21"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.6.21.tgz#8a1024b01509a8e4528f1460422f241de0fc480b"
+  integrity sha512-tO5HTYDUKr9nx5GaSCHCkNzbjefxcSLiu5eKZYNBuKxfjKVNoUzY4v47FtBspIroouXoHQ9cJYGsTeyRIB/j9Q==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.1"
