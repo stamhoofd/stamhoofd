@@ -80,10 +80,10 @@
                         </td>
                         <td>
                             <h2 class="style-title-list">
-                                {{ order.order.number }}
+                                {{ order.order.data.customer.name }}
                             </h2>
                             <p class="style-description-small">
-                                {{ order.order.data.customer.name }}
+                                #{{ order.order.number }}
                             </p>
                         </td>
                         <td class="minor">
@@ -99,7 +99,9 @@
                             </p>
                         </td>
                         <td>
-                            <button class="button icon gray more" />
+                            <span class="style-description-small">{{ order.order.data.cart.price | price }}</span>
+                            <span v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" class="icon success green" v-tooltip="order.order.payment ? 'Betaald op '+order.order.payment.paidAt : 'Zonder betaling'"></span>
+                            <span v-else class="icon clock gray" v-tooltip="'Nog niet betaald'"></span>
                         </td>
                     </tr>
                 </tbody>
