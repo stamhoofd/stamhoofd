@@ -28,10 +28,80 @@
             </h1>
 
             <Spinner v-if="loading" class="center" />
-            <p v-if="!loading" class="info-box">
+            <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
                 Je hebt nog geen bestellingen ontvangen
             </p>
-           
+
+            <table v-else class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <Checkbox
+                                v-model="selectAll"
+                            />
+                        </th>
+                        <th @click="toggleSort('name')">
+                            Nummer
+                            <span
+                                class="sort-arrow"
+                                :class="{
+                                    up: sortBy == 'name' && sortDirection == 'ASC',
+                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                }"
+                            />
+                        </th>
+                        <th @click="toggleSort('name')">
+                            Naam
+                            <span
+                                class="sort-arrow"
+                                :class="{
+                                    up: sortBy == 'name' && sortDirection == 'ASC',
+                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                }"
+                            />
+                        </th>
+                        <th class="hide-smartphone" @click="toggleSort('status')">
+                            Info
+                            <span
+                                class="sort-arrow"
+                                :class="{
+                                    up: sortBy == 'status' && sortDirection == 'ASC',
+                                    down: sortBy == 'status' && sortDirection == 'DESC',
+                                }"
+                            />
+                        </th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="order in sortedOrders" :key="order.id">
+                        <td @click.stop="">
+                            <Checkbox v-model="order.selected" />
+                        </td>
+                        <td>
+                            <h2 class="style-title-list">
+                                {{ order.order.number }}
+                            </h2>
+                            <p class="style-description-small">
+                                todo
+                            </p>
+                        </td>
+                        <td class="minor">
+                            {{ order.order.data.customer.name }}
+                        </td>
+            
+                        <td class="hide-smartphone member-description">
+                            todo
+                        </td>
+                        <td>
+                            <button class="button icon gray more" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+
+            <Spinner v-if="isLoadingOrders" class="center" />
         </main>
     </div>
 </template>
@@ -47,20 +117,21 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EncryptedMemberWithRegistrationsPatch, Group, Member,MemberWithRegistrations, PrivateWebshop, Registration, WaitingListType, WebshopPreview } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Order, PaginatedResponseDecoder, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { CanNotSwimFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
-import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import MailView from "../mail/MailView.vue";
-import EditMemberView from '../member/edit/EditMemberView.vue';
-import MemberContextMenu from "../member/MemberContextMenu.vue";
-import MemberSummaryView from '../member/MemberSummaryView.vue';
-import MemberView from "../member/MemberView.vue";
 import EditWebshopView from './EditWebshopView.vue';
-import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
+
+class SelectablOrder {
+    order: Order;
+    selected = true;
+
+    constructor(order: Order, selected = true) {
+        this.order = order;
+        this.selected = selected
+    }
+}
 
 @Component({
     components: {
@@ -81,8 +152,16 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     webshop: PrivateWebshop | null = null
     loading = false;
 
+    orders: SelectablOrder[] = []
+    nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
+
+    sortBy = "info";
+    sortDirection = "ASC";
+    selectionCountHidden = 0;
+
     mounted() {
         this.reload();
+        this.loadNextOrders()
     }
 
     reload() {
@@ -104,6 +183,45 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         })
     }
 
+    get isLoadingOrders() {
+        return !!this.nextQuery
+    }
+
+    loadNextOrders() {
+        if (!this.nextQuery) {
+            return
+        }
+
+        SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/webshop/"+this.preview.id+"/orders",
+            decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>)
+        }).then((response) => {
+            this.orders.push(...response.data.results.map(o => new SelectablOrder(o)))
+            this.nextQuery = response.data.next ?? null
+        }).catch((e) => {
+            console.error(e)
+        })
+    }
+
+    get selectionCount(): number {
+        let val = 0;
+        this.orders.forEach((order) => {
+            if (order.selected) {
+                val++;
+            }
+        });
+        return val;
+    }
+
+    get filteredOrders() {
+        return this.orders
+    }
+
+    get sortedOrders() {
+        return this.filteredOrders
+    }
+
     get title() {
         return this.webshop?.meta?.name ?? this.preview.meta.name
     }
@@ -116,6 +234,17 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
+
+    get selectAll() {
+        return this.selectionCount - this.selectionCountHidden >= this.filteredOrders.length && this.filteredOrders.length > 0
+    }
+
+    set selectAll(selected: boolean) {
+        this.filteredOrders.forEach((order) => {
+            order.selected = selected;
+        });
+    }
+
 }
 </script>
 
