@@ -16,6 +16,10 @@
                         </div>
                     </div>
                 </STInputBox>
+
+                <EmailInput v-model="email" title="Jouw e-mailadres" :validator="validator" placeholder="Voor bevestingsemail" />
+
+                <PhoneInput v-model="phone" title="Jouw GSM-nummer" :validator="validator" placeholder="Voor dringende info" />
             </main>
 
             <STToolbar>
@@ -33,7 +37,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -49,7 +53,9 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STListItem,
         LoadingButton,
         STErrorsDefault,
-        STInputBox
+        STInputBox,
+        EmailInput,
+        PhoneInput
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -90,6 +96,23 @@ export default class CustomerView extends Mixins(NavigationMixin){
         CheckoutManager.saveCheckout()
     } 
 
+    get email() {
+        return CheckoutManager.checkout.customer.email
+    }
+
+    set email(email: string) {
+        CheckoutManager.checkout.customer.email = email
+        CheckoutManager.saveCheckout()
+    } 
+
+    get phone() {
+        return CheckoutManager.checkout.customer.phone
+    }
+
+    set phone(phone: string) {
+        CheckoutManager.checkout.customer.phone = phone
+        CheckoutManager.saveCheckout()
+    } 
 
     async goNext() {
         if (this.loading) {

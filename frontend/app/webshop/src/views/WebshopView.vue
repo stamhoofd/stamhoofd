@@ -9,14 +9,14 @@
                 <h1>{{ webshop.meta.title }}</h1>
                 <p v-text="webshop.meta.description" />
 
-                <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop"/>
+                <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
             </main>
         </div>
     </section>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -78,6 +78,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 }
             } }), false);
         }
+    }
+
+    activated() {
+        HistoryManager.setUrl(this.webshop.getUrlSuffix())
     }
 
 }
