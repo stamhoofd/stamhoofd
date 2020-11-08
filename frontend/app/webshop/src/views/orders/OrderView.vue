@@ -214,6 +214,10 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     mounted() {
+        if (this.success) {
+            CheckoutManager.cart.items = []
+            CheckoutManager.saveCheckout()
+        }
         if (this.order) {
             HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
             return;

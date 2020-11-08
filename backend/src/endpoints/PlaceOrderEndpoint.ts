@@ -97,9 +97,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const validatedCart = request.body.cart
         const totalPrice = validatedCart.price
 
-        const order = new Order()
+        const order = new Order().setRelation(Order.webshop, webshop)
         order.data = request.body // todo: validate
-        order.setRelation(Order.webshop, webshop)
         order.createdAt = new Date()
         order.createdAt.setMilliseconds(0)
 

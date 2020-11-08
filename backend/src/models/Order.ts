@@ -2,6 +2,8 @@ import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { OrderData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
+import Email from '../email/Email';
+import { Organization } from './Organization';
 import { Payment } from './Payment';
 import { Webshop } from './Webshop';
 import { WebshopCounter } from './WebshopCounter';
@@ -57,10 +59,47 @@ export class Order extends Model {
     static webshop = new ManyToOneRelation(Webshop, "webshop");
     static payment = new ManyToOneRelation(Payment, "payment")
 
-    async markValid() {
+    getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
+        return "https://"+this.webshop.getHost()+"/order/"+this.id
+    }
+
+    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
         this.number = await WebshopCounter.getNextNumber(this.webshopId)
+        await this.save()
+
+        if (this.data.customer.email.length > 0) {
+            const webshop = this.webshop
+            const organization = webshop.organization
+            
+            // Send confirmation e-mail
+            let from = organization.uri+"@stamhoofd.email";
+            const sender = organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
+            let replyTo: string | undefined = sender.email
+
+            // Can we send from this e-mail or reply-to?
+            if (replyTo && organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+organization.privateMeta.mailDomain)) {
+                from = sender.email
+                replyTo = undefined
+            }
+
+            // Include name in form field
+            if (sender.name) {
+                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            }
+
+            const customer = this.data.customer
+
+            // Also send a copy
+            Email.send({
+                from,
+                replyTo,
+                to: sender.email,
+                subject: "["+webshop.meta.name+"] Bestelling "+this.number,
+                text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. Je kan jouw bestelling nakijken via \n"+this.getUrl()+"\n\n"+organization.name,
+            })
+        }
     }
 
 
