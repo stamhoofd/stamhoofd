@@ -12,12 +12,12 @@
                 </slot>
             </template>
             <template #center>
-                <slot name="center">
+                <slot name="center" :step="step" :canPop="canPop">
                     <span v-if="totalSteps && step && step <= totalSteps" class="style-caption">Stap {{ step }} / {{ totalSteps }}</span>
                 </slot>
             </template>
             <template #right>
-                <slot name="right" />
+                <slot name="right" :step="step" :canPop="canPop" />
             </template>
         </StepsHeader>
 

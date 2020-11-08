@@ -7,7 +7,7 @@
 
                 <p>Denk aan het milieu voor je dit afdrukt.</p>
 
-                <p v-if="order.payment.status != 'Succeeded'" class="warning-box">
+                <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
                     Opgelet: deze bestelling werd (mogelijks) nog niet betaald. Zorg er zeker voor dat je deze meteen betaald zodat het bedrag op tijd op onze rekening komt.
                 </p>
 
@@ -19,7 +19,7 @@
                             {{ order.data.customer.name }}
                         </template>
                     </STListItem>
-                    <STListItem class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
+                    <STListItem v-if="order.payment" class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
                         Betaalmethode
 
                         <template slot="right">
@@ -198,6 +198,7 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     mounted() {
         if (this.order) {
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
             return;
         }
         // Load order

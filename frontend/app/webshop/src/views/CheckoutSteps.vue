@@ -10,13 +10,13 @@
             </template>
             <BackButton v-else @click="popNav" />
         </template>
-        <template slot="right">
+        <template v-slot:right="slotProps">
             <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
                 <span class="icon privacy" />
                 <span>Privacy</span>
             </a>
 
-            <button class="primary button" @click="openCart">
+            <button v-if="slotProps.step == 0 && !slotProps.canPop" class="primary button" @click="openCart">
                 <span class="icon basket" />
                 <span>{{ cartCount == 0 ? 'Winkelmandje' : cartCount }}</span>
             </button>
