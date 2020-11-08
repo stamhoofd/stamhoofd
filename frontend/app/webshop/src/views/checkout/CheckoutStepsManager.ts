@@ -1,4 +1,4 @@
-import { CheckoutMethodType } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
@@ -44,15 +44,8 @@ export class CheckoutStepsManager {
     static getSteps(): CheckoutStep[] {
         const webshop = WebshopManager.webshop
         const checkout = CheckoutManager.checkout
-        const checkoutMethod = checkout.checkoutMethod ?? webshop.meta.checkoutMethods[0]
-
-        if (!checkoutMethod) {
-            // Missing configs
-            return []
-        }
-
+        const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === checkout.checkoutMethod?.id) ?? (webshop.meta.checkoutMethods[0] as CheckoutMethod | undefined) ?? null;
         const steps: CheckoutStep[] = []
-
 
         steps.push(
             new CheckoutStep(
@@ -61,7 +54,7 @@ export class CheckoutStepsManager {
                 () => {
                     // Skip behaviour
                     // Set to the only available checkout method
-                    CheckoutManager.checkout.checkoutMethod = WebshopManager.webshop.meta.checkoutMethods[0]
+                    CheckoutManager.checkout.checkoutMethod = WebshopManager.webshop.meta.checkoutMethods.length == 0 ? null : WebshopManager.webshop.meta.checkoutMethods[0]
                     CheckoutManager.saveCheckout()
                 }
             )
@@ -70,7 +63,7 @@ export class CheckoutStepsManager {
         steps.push(
             new CheckoutStep(
                 CheckoutStepType.Address,
-                checkoutMethod.type == CheckoutMethodType.Delivery,
+                checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
                 () => {
                     // Skip behaviour
                     // Clear address
@@ -83,7 +76,7 @@ export class CheckoutStepsManager {
         steps.push(
             new CheckoutStep(
                 CheckoutStepType.Time,
-                checkoutMethod.timeSlots.timeSlots.length > 1,
+                checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
                 () => {
                     // Use default or set to null if none available
                     if (CheckoutManager.checkout.checkoutMethod && CheckoutManager.checkout.checkoutMethod.timeSlots.timeSlots.length == 1) {
@@ -108,10 +101,7 @@ export class CheckoutStepsManager {
 
     static getNextStep(step: CheckoutStepType | undefined, runSkip = false) {
         const steps = this.getSteps()
-        if (!step) {
-            return steps[0]
-        }
-        let next = false
+        let next = step === undefined
         for (const s of steps) {
             if (next) {
                 if (s.active) {

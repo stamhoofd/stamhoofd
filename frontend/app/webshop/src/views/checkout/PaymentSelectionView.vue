@@ -6,7 +6,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <PaymentSelectionList :payment-methods="paymentMethods" :organization="organization" v-model="selectedPaymentMethod" />
+                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
             </main>
 
             <STToolbar>
@@ -25,7 +25,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, PaymentSelectionList, PaymentHandler } from "@stamhoofd/components"
+import { ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, KeychainedResponse, MemberWithRegistrations, OrderData, OrderResponse, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

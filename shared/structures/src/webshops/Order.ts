@@ -11,8 +11,8 @@ export class OrderData extends AutoEncoder {
     @field({ decoder: WebshopTimeSlot, nullable: true })
     timeSlot: WebshopTimeSlot | null = null
     
-    @field({ decoder: AnyCheckoutMethodDecoder })
-    checkoutMethod: CheckoutMethod
+    @field({ decoder: AnyCheckoutMethodDecoder, nullable: true })
+    checkoutMethod: CheckoutMethod | null = null
 
     /**
      * Only needed for delivery

@@ -79,3 +79,4 @@ export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vu
 export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vue"
 export * from "./src/views/PaymentHandler"
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
+export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"

@@ -1,17 +1,17 @@
 <template>
     <div class="boxed-view">
         <div class="st-view">
-            <STNavigationBar title="Overschrijven" v-if="isPopup">
-                <button slot="right" class="button icon gray close" @click="pop"></button>
+            <STNavigationBar v-if="isPopup" title="Overschrijven">
+                <button slot="right" class="button icon gray close" @click="pop" />
             </STNavigationBar>
 
             <main>
                 <h1>Bedrag overschrijven</h1>
-                <p>Voer de onderstaande overschrijving uit. <span class="hide-smartphone" v-if="isBelgium">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
+                <p>Voer de onderstaande overschrijving uit. <span v-if="isBelgium" class="hide-smartphone">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
 
                 <div class="payment-split">
-                    <div class="hide-smartphone" v-if="payment.price > 0">
-                        <img v-if="QRCodeUrl" :src="QRCodeUrl" />
+                    <div v-if="payment.price > 0" class="hide-smartphone">
+                        <img v-if="QRCodeUrl" :src="QRCodeUrl">
                     </div>
                     <div>
                         <table class="payment-transfer-table">
@@ -22,7 +22,7 @@
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Bankrekening</td>
-                                    <td>{{ organization.meta.iban }}</td>
+                                    <td>{{ organization.meta.iban }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Gestructureerde mededeling</td>
@@ -33,17 +33,21 @@
                     </div>
                 </div>
 
-                <p class="success-box" v-if="payment.price > 0 && payment.status == 'Succeeded'">We hebben de betaling ontvangen.</p>
-                <p class="warning-box" v-else-if="payment.price > 0">Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.</p>
+                <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
+                    We hebben de betaling ontvangen.
+                </p>
+                <p v-else-if="payment.price > 0" class="warning-box">
+                    Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.
+                </p>
             </main>
 
             <STToolbar v-if="!isPopup">
-                <button slot="right" class="button secundary" v-if="false">
+                <button v-if="false" slot="right" class="button secundary">
                     Afdrukken
                 </button>
                 <button slot="right" class="button primary" @click="goNext">
                     <span>Ik heb overgeschreven</span>
-                    <span class="icon arrow-right"/>
+                    <span class="icon arrow-right" />
                 </button>
             </STToolbar>
         </div>
@@ -51,12 +55,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, Organization } from '@stamhoofd/structures';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, ErrorBox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Group, MemberWithRegistrations, Organization,Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -82,15 +86,15 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     @Prop({ default: false })
     isPopup: boolean
 
-    @Prop({ required: true })
-    finishedHandler: (payment: Payment | null) => void
+    @Prop({ default: null })
+    finishedHandler: ((payment: Payment | null) => void) | null
 
     QRCodeUrl: string | null = null
 
     isStepsPoppable = false
 
     mounted() {
-        this.generateQRCode()
+        this.generateQRCode().catch(e => console.error(e))
     }
 
     isBelgium() {
@@ -118,7 +122,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             return;
         }
        
-        this.finishedHandler(this.payment)
+        if (this.finishedHandler) {
+            this.finishedHandler(this.payment)
+        }
     }
 
 }

@@ -7,12 +7,26 @@
 
                 <p>Denk aan het milieu voor je dit afdrukt.</p>
 
+                <p v-if="order.payment.status != 'Succeeded'" class="warning-box">
+                    Opgelet: deze bestelling werd (mogelijks) nog niet betaald. Zorg er zeker voor dat je deze meteen betaald zodat het bedrag op tijd op onze rekening komt.
+                </p>
+
                 <STList>
                     <STListItem class="right-description">
                         Naam
 
                         <template slot="right">
                             {{ order.data.customer.name }}
+                        </template>
+                    </STListItem>
+                    <STListItem class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
+                        Betaalmethode
+
+                        <template slot="right">
+                            {{ order.payment.method }}
+
+                            <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
+                            <span v-else class="icon help" />
                         </template>
                     </STListItem>
                     <STListItem v-if="order.validAt" class="right-description">
@@ -113,9 +127,9 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { CartItem, Order } from '@stamhoofd/structures';
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { CartItem, Order, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -168,6 +182,18 @@ export default class OrderView extends Mixins(NavigationMixin){
             text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
             url: WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order!.id,
         }).catch(e => console.error(e))
+    }
+
+    openTransferView() {
+        if (this.order && this.order.payment && this.order.payment.method == PaymentMethod.Transfer) {
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(TransferPaymentView, {
+                    payment: this.order.payment,
+                    organization: WebshopManager.organization,
+                    isPopup: true
+                })
+            }).setDisplayStyle("popup"))
+        }
     }
 
     mounted() {
