@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 import { Webshop } from './Webshop';
+import { WebshopCounter } from './WebshopCounter';
 
 
 export class Order extends Model {
@@ -25,6 +26,9 @@ export class Order extends Model {
     
     @column({ type: "json", decoder: OrderData })
     data: OrderData
+
+    @column({ type: "integer", nullable: true })
+    number: number | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -52,6 +56,12 @@ export class Order extends Model {
 
     static webshop = new ManyToOneRelation(Webshop, "webshop");
     static payment = new ManyToOneRelation(Payment, "payment")
+
+    async markValid() {
+        this.validAt = new Date() // will get flattened AFTER calculations
+        this.validAt.setMilliseconds(0)
+        this.number = await WebshopCounter.getNextNumber(this.webshopId)
+    }
 
 
 }

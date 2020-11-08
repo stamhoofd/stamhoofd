@@ -1,22 +1,83 @@
 <template>
     <LoadingView v-if="!order" />
-    <div class="boxed-view" v-else>
+    <div v-else class="boxed-view">
         <div class="st-view order-view">
             <main>
-                <h1>Jouw bestelling {{ order.id }}</h1>
+                <h1>Jouw bestelling</h1>
 
-                <p>{{ order.validAt || "Not valid" }}</p>
+                <p>Denk aan het milieu voor je dit afdrukt.</p>
 
                 <STList>
-                    <STListItem>
-                        Afhaaldatum
+                    <STListItem class="right-description">
+                        Naam
 
-                        <template slot="right">{{ order.data.timeSlot.date | date }}</template>
+                        <template slot="right">
+                            {{ order.data.customer.name }}
+                        </template>
                     </STListItem>
+                    <STListItem v-if="order.validAt" class="right-description">
+                        Geplaatst op
+                        <template slot="right">
+                            {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                        </template>
+                    </STListItem>
+                    <STListItem class="right-description">
+                        Bestelnummer
+
+                        <template slot="right">
+                            {{ order.number }}
+                        </template>
+                    </STListItem>
+                    <template v-if="order.data.checkoutMethod">
+                        <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Afhaallocatie
+                            </template>
+                            <template v-else>
+                                Leveringsmethode
+                            </template>
+
+                            <template slot="right">
+                                {{ order.data.checkoutMethod.name }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
+                            Adres
+
+                            <template slot="right">
+                                {{ order.data.checkoutMethod.address }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="order.data.address" class="right-description">
+                            Leveringsadres
+
+                            <template slot="right">
+                                {{ order.data.address }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="order.data.timeSlot" class="right-description">
+                            Wanneer afhalen?
+
+                            <template slot="right">
+                                {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="order.data.checkoutMethod.description" class="right-description">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Afhaalopmerkingen
+                            </template>
+                            <template v-else>
+                                Leveringsopmerkingen
+                            </template>
+
+                            <template slot="right">
+                                {{ order.data.checkoutMethod.description }}
+                            </template>
+                        </STListItem>
+                    </template>
                 </STList>
 
                 <hr>
-                <h2>Jouw bestelling</h2>
 
                 <STList>
                     <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
@@ -36,25 +97,30 @@
                         </figure>
                     </STListItem>
                 </STList>
-                
             </main>
+
+            <STToolbar v-if="canShare">
+                <template slot="right">
+                    <button class="button primary" @click="share">
+                        <span class="icon share" />
+                        <span>Doorsturen</span>
+                    </button>
+                </template>
+            </STToolbar>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, LoadingView, PaymentHandler, CenteredMessage } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { CartItem, Group, KeychainedResponse, MemberWithRegistrations, Order, OrderData, OrderResponse, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { CartItem, Order } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins,  Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
 
 @Component({
     components: {
@@ -70,7 +136,10 @@ import MemberGeneralView from '../registration/MemberGeneralView.vue';
     filters: {
         price: Formatter.price.bind(Formatter),
         priceChange: Formatter.priceChange.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter)
+        date: Formatter.dateWithDay.bind(Formatter),
+        dateTime: Formatter.dateTimeWithDay.bind(Formatter),
+        minutes: Formatter.minutes.bind(Formatter),
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     }
 })
 export default class OrderView extends Mixins(NavigationMixin){
@@ -84,9 +153,27 @@ export default class OrderView extends Mixins(NavigationMixin){
     @Prop({ default: null })
     paymentId: string | null
 
-    order: Order | null = null
+    @Prop({ default: null })
+    initialOrder!: Order | null
+
+    order: Order | null = this.initialOrder
+
+    get canShare() {
+        return !!navigator.share
+    }
+
+    share() {
+        navigator.share({
+            title: "Bestelling "+WebshopManager.webshop.meta.name,
+            text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
+            url: WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order!.id,
+        }).catch(e => console.error(e))
+    }
 
     mounted() {
+        if (this.order) {
+            return;
+        }
         // Load order
         if (this.orderId) {
             HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.orderId)

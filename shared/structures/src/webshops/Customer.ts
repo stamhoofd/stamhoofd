@@ -2,14 +2,18 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    firstName: string
+    firstName = ""
     
     @field({ decoder: StringDecoder })
-    lastName: string
+    lastName = ""
 
     @field({ decoder: StringDecoder })
-    email: string
+    email = ""
 
     @field({ decoder: StringDecoder })
-    phone: string
+    phone = ""
+
+    get name() {
+        return this.firstName+" "+this.lastName
+    }
 }

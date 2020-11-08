@@ -23,7 +23,7 @@ export class Formatter {
 
     static weekDay(date: Date): string {
         const monthNames = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"]
-        return monthNames[date.getDay() - 1]
+        return monthNames[date.getDay()]
     }
 
     /**
@@ -39,10 +39,16 @@ export class Formatter {
      * maandag, 1 januari (2020). Year only in different year
      */
     static dateWithDay(date: Date): string {
-        const currentYear = new Date().getFullYear()
-        const year = date.getFullYear()
-        return this.weekDay(date) +", "+date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
+        return this.weekDay(date) +", "+this.date(date)
     }
+
+    /**
+     * maandag, 1 januari (2020). Year only in different year
+     */
+    static dateTimeWithDay(date: Date): string {
+        return this.weekDay(date) +", "+this.dateTime(date)
+    }
+
 
      /**
      * 01/01/2020

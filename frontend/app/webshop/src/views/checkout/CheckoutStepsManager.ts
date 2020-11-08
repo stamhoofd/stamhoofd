@@ -6,6 +6,7 @@ import { WebshopManager } from '../../classes/WebshopManager';
 export enum CheckoutStepType {
     "Method" = "Method",
     "Address" = "Address",
+    "Customer" = "Customer",
     "Time" = "Time",
     "Payment" = "Payment",
 }
@@ -27,6 +28,7 @@ export class CheckoutStep {
             case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
             case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
             case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
+            case CheckoutStepType.Customer: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue')).default;
 
             default: {
                 // If you get a compile error here, a type is missing in the switch and you should add it
@@ -94,7 +96,7 @@ export class CheckoutStepsManager {
                 }
             )
         )
-
+        steps.push(new CheckoutStep(CheckoutStepType.Customer))
         steps.push(new CheckoutStep(CheckoutStepType.Payment))
 
         return steps

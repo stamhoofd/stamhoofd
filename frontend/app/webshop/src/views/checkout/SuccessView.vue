@@ -25,7 +25,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, PaymentSelectionList, PaymentHandler } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, KeychainedResponse, MemberWithRegistrations, OrderData, OrderResponse, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { Group, KeychainedResponse, MemberWithRegistrations, Order, OrderData, OrderResponse, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
@@ -57,6 +57,9 @@ export default class SuccessView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     @Prop({ default: null })
+    order: Order | null
+
+    @Prop({ default: null })
     orderId: string | null
 
     @Prop({ default: null })
@@ -69,7 +72,7 @@ export default class SuccessView extends Mixins(NavigationMixin){
     }
    
     async goNext() {
-        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: this.orderId, paymentId: this.paymentId }), true, this.navigationController!.components!.length - 1)
+        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: this.orderId, paymentId: this.paymentId, initialOrder: this.order }), true, this.navigationController!.components!.length - 1)
     }
 }
 </script>

@@ -1,9 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Address } from '../Address';
 import { Payment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
+import { Customer } from './Customer';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, WebshopTimeSlot } from './WebshopMetaData';
 
 export class OrderData extends AutoEncoder {
@@ -22,6 +23,12 @@ export class OrderData extends AutoEncoder {
     @field({ decoder: Cart })
     cart: Cart = Cart.create({})
 
+    /**
+     * Only needed for delivery
+     */
+    @field({ decoder: Customer, version: 40, upgrade: () => Customer.create({}) })
+    customer: Customer
+
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod: PaymentMethod
 }
@@ -30,6 +37,9 @@ export class OrderData extends AutoEncoder {
 export class Order extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string
+
+    @field({ decoder: IntegerDecoder, nullable: true })
+    number: number | null
 
     @field({ decoder: OrderData })
     data: OrderData

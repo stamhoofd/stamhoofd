@@ -124,7 +124,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                 return;
             }
 
-            // todo
+            // Go to success page
+            this.show(new ComponentWithProperties(SuccessView, { order: response.data.order }))
             
         } catch (e) {
             console.error(e)

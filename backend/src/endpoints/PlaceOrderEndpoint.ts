@@ -17,6 +17,51 @@ type Query = undefined;
 type Body = OrderData
 type ResponseBody = OrderResponse
 
+const Base64 = (function () {
+
+    const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+    const Base64 = function () {
+        //
+    };
+
+    const _encode = function (value) {
+
+        if (typeof(value) !== 'number') {
+            throw 'Value is not number!';
+        }
+
+        let result = '', mod;
+        do {
+            mod = value % 64;
+            result = ALPHA.charAt(mod) + result;
+            value = Math.floor(value / 64);
+        } while(value > 0);
+
+        return result;
+    };
+
+    const _decode = function (value) {
+
+        let result = 0;
+        for (let i = 0, len = value.length; i < len; i++) {
+            result *= 64;
+            result += ALPHA.indexOf(value[i]);
+        }
+
+        return result;
+    };
+
+    Base64.prototype = {
+        constructor: Base64,
+        encode: _encode,
+        decode: _decode
+    };
+
+    return Base64;
+
+})();
+
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
@@ -55,8 +100,11 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const order = new Order()
         order.data = request.body // todo: validate
         order.setRelation(Order.webshop, webshop)
+        order.createdAt = new Date()
+        order.createdAt.setMilliseconds(0)
 
         if (totalPrice == 0) {
+            await order.markValid()
             await order.save()
         } else {
             const payment = new Payment()
@@ -76,7 +124,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.paymentId = payment.id
             order.setRelation(Order.payment, payment)
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
-                order.validAt = new Date()
+                await order.markValid()
             }
 
             await order.save()
@@ -138,7 +186,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
         
         return new Response(OrderResponse.create({
-            order: OrderStruct.create(order)
+            order: OrderStruct.create(Object.assign({}, order, { payment: null }))
         }));
     }
 }
