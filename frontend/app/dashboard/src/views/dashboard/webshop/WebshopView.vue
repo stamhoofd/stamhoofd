@@ -276,7 +276,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         }
 
         if (this.sortBy == "name") {
-            return this.filteredOrders.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? -1 : 1));
+            return this.filteredOrders.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? 1 : -1));
         }
 
         if (this.sortBy == "checkout") {
