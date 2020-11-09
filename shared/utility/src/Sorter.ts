@@ -66,7 +66,8 @@ export class Sorter {
      */
     static stack(...sortResults: (0 | 1 | -1)[]) {
         while(sortResults.length > 0) {
-            const f = sortResults.shift()
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const f = sortResults.shift()!
             if (f != 0) {
                 return f
             }

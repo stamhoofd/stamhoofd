@@ -135,7 +135,7 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Order, PaginatedResponseDecoder, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -280,17 +280,21 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         }
 
         if (this.sortBy == "checkout") {
-            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(
-                (a.order.data.timeSlot?.date?.getTime() ?? 0) + ((a.order.data.timeSlot?.startTime ?? 0) + (a.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60, 
-                (b.order.data.timeSlot?.date?.getTime() ?? 0) + ((b.order.data.timeSlot?.startTime ?? 0) + (b.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60
-                ) 
+            return this.filteredOrders.sort((a, b) => Sorter.stack(
+                    Sorter.byNumberValue(
+                        (a.order.data.timeSlot?.date?.getTime() ?? 0) + ((a.order.data.timeSlot?.startTime ?? 0) + (a.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60, 
+                        (b.order.data.timeSlot?.date?.getTime() ?? 0) + ((b.order.data.timeSlot?.startTime ?? 0) + (b.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60
+                    ),
+                    Sorter.byStringValue(a.order.data.checkoutMethod?.id ?? "", b.order.data.checkoutMethod?.id ?? "")
+                )
                 * (this.sortDirection == "ASC" ? -1 : 1));
         }
 
         if (this.sortBy == "payment") {
-            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(a.order.data.cart.price, b.order.data.cart.price)
-                 
-                * (this.sortDirection == "ASC" ? -1 : 1));
+            return this.filteredOrders.sort((a, b) => Sorter.stack(
+                Sorter.byBooleanValue((a.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded, (b.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded), 
+                Sorter.byNumberValue(a.order.data.cart.price, b.order.data.cart.price)
+            ) * (this.sortDirection == "ASC" ? -1 : 1));
         }
 
 
