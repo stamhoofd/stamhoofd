@@ -43,6 +43,16 @@
                                 v-model="selectAll"
                             />
                         </th>
+                        <th class="hide-smartphone tiny" @click="toggleSort('number')" >
+                            Nummer
+                            <span
+                                class="sort-arrow"
+                                :class="{
+                                    up: sortBy == 'number' && sortDirection == 'ASC',
+                                    down: sortBy == 'number' && sortDirection == 'DESC',
+                                }"
+                            />
+                        </th>
                         <th @click="toggleSort('name')">
                             Bestelling
                             <span
@@ -53,27 +63,26 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('name')">
-                            Totaalprijs
-                            <span
-                                class="sort-arrow"
-                                :class="{
-                                    up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC',
-                                }"
-                            />
-                        </th>
-                        <th class="hide-smartphone" @click="toggleSort('status')">
+                        <th class="hide-smartphone" @click="toggleSort('checkout')">
                             Info
                             <span
                                 class="sort-arrow"
                                 :class="{
-                                    up: sortBy == 'status' && sortDirection == 'ASC',
-                                    down: sortBy == 'status' && sortDirection == 'DESC',
+                                    up: sortBy == 'checkout' && sortDirection == 'ASC',
+                                    down: sortBy == 'checkout' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
-                        <th>Betaling</th>
+                        <th @click="toggleSort('payment')">
+                            Betaling
+                            <span
+                                class="sort-arrow"
+                                :class="{
+                                    up: sortBy == 'payment' && sortDirection == 'ASC',
+                                    down: sortBy == 'payment' && sortDirection == 'DESC',
+                                }"
+                            />
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,18 +90,17 @@
                         <td @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
+                        <td class="hide-smartphone tiny">
+                            #{{ order.order.number }}
+                        </td>
                         <td>
                             <h2 class="style-title-list">
                                 {{ order.order.data.customer.name }}
                             </h2>
-                            <p class="style-description-small">
+                            <p class="only-smartphone style-description-small">
                                 #{{ order.order.number }}
                             </p>
                         </td>
-                        <td class="minor">
-                            {{ order.order.data.cart.price | price }}
-                        </td>
-            
                         <td class="hide-smartphone member-description">
                             <h2 v-if="order.order.data.checkoutMethod" class="style-title-list">
                                 {{ order.order.data.checkoutMethod.name }}
@@ -128,7 +136,7 @@ import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Order, PaginatedResponseDecoder, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import OrderView from './OrderView.vue';
@@ -172,7 +180,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     orders: SelectableOrder[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
 
-    sortBy = "info";
+    sortBy = "number";
     sortDirection = "ASC";
     selectionCountHidden = 0;
     searchQuery = "";
@@ -180,6 +188,18 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     mounted() {
         this.reload();
         this.loadNextOrders()
+    }
+
+     toggleSort(field: string) {
+        if (this.sortBy == field) {
+            if (this.sortDirection == "ASC") {
+                this.sortDirection = "DESC";
+            } else {
+                this.sortDirection = "ASC";
+            }
+            return;
+        }
+        this.sortBy = field;
     }
 
     reload() {
@@ -251,6 +271,29 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     }
 
     get sortedOrders() {
+        if (this.sortBy == "number") {
+            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0) * (this.sortDirection == "ASC" ? -1 : 1));
+        }
+
+        if (this.sortBy == "name") {
+            return this.filteredOrders.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? -1 : 1));
+        }
+
+        if (this.sortBy == "checkout") {
+            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(
+                (a.order.data.timeSlot?.date?.getTime() ?? 0) + ((a.order.data.timeSlot?.startTime ?? 0) + (a.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60, 
+                (b.order.data.timeSlot?.date?.getTime() ?? 0) + ((b.order.data.timeSlot?.startTime ?? 0) + (b.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60
+                ) 
+                * (this.sortDirection == "ASC" ? -1 : 1));
+        }
+
+        if (this.sortBy == "payment") {
+            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(a.order.data.cart.price, b.order.data.cart.price)
+                 
+                * (this.sortDirection == "ASC" ? -1 : 1));
+        }
+
+
         return this.filteredOrders
     }
 

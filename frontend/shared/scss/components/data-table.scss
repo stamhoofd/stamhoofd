@@ -1,0 +1,126 @@
+@use '../base/variables' as *;
+@use '../base/text-styles';
+
+.data-table {
+    user-select: none;
+    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    width: 100%;
+    width: calc(100% + 2 * var(--st-horizontal-padding, 40px));
+    border-collapse: separate;
+
+    thead {
+        text-align: left;
+        font-weight: 600;
+
+        th {
+            background: $color-white;
+            position: sticky;
+            top: 0;
+            border-bottom: $border-width solid $color-white-shade;
+            @extend .style-table-head;
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+
+            &:first-child {
+                padding-left: 0;
+            }
+
+            .sort-arrow {
+                vertical-align: middle;
+                width: 24px;
+                height: 24px;
+                display: inline-block;
+                background: transparent;
+
+                &.up {
+                    background: url(~@stamhoofd/assets/images/icons/gray/arrow-up-small.svg) no-repeat center center;
+                }
+                &.down {
+                    background: url(~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg) no-repeat center center;
+                }
+            }
+        }
+    }
+
+    tbody {
+        td {
+            padding: 15px 10px;
+
+            &:first-child {
+                padding-left: 0;
+            }
+        }
+
+        tr {
+            transition: background-color 0.15s;
+            cursor: pointer;
+            touch-action: manipulation;
+
+            td {
+                border-top: $border-width-thin solid $color-white-shade;
+                transition: border-top-color 0.15s;
+
+                &:first-child {
+                    border-top: 0;
+                }
+
+                @extend .style-normal;
+
+                &.minor {
+                    @extend .style-description;
+                }
+            }
+
+            &:first-child {
+                td {
+                    border-top: 0;
+                }
+            }
+
+            @media (hover: hover) {
+                &:hover {
+                    background-color: $color-primary-lighter;
+                }
+            }
+
+            &:active {
+                background-color: $color-primary-light;
+            }
+        }
+    }
+
+    thead,
+    tbody {
+        th,
+        td {
+            vertical-align: middle;
+
+            &.tiny {
+                width: 50px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            &:first-child {
+                padding: 0;
+                padding-left: 40px - 10px;
+                padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
+                white-space: nowrap;
+                width: 1px;
+
+                .checkbox {
+                    margin: 0;
+                    padding: 10px;
+                }
+            }
+            &:last-child {
+                padding-right: 40px;
+                padding-right: calc(var(--st-horizontal-padding, 40px));
+                text-align: right;
+            }
+        }
+    }
+}

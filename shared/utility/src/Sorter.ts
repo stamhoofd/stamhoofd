@@ -14,6 +14,10 @@ export class Sorter {
         return this.byStringValue(a[field], b[field])
     }
 
+    static byNumberProperty<Field extends keyof any >( a: Record<Field, number>, b: Record<Field, number>, field: Field ) {
+        return this.byNumberValue(a[field], b[field])
+    }
+
     static byStringValue( a: string, b: string ) {
         const af = a.toLowerCase()
         const bf = b.toLowerCase()
@@ -60,7 +64,7 @@ export class Sorter {
     /**
      * Return the first non zero value from a list, or zero if all values are zero
      */
-    static stack(...sortResults: (0 | 1 | -1)[]) {
+    static stack(...sortResults: (0 | 1 | -1)[]) {
         while(sortResults.length > 0) {
             const f = sortResults.shift()
             if (f != 0) {
