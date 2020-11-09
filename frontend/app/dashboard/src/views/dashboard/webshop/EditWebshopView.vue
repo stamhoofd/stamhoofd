@@ -40,15 +40,16 @@ import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, STToolbar, SegmentedControl, LoadingButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Gender,MemberWithRegistrations, PrivateWebshop, Version, Webshop } from '@stamhoofd/structures';
+import { Gender,MemberWithRegistrations, PrivateWebshop, Version, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { FamilyManager } from '../../../classes/FamilyManager';
+import { GlobalEventBus } from '../../../classes/EventBus';
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
 import EditWebshopPageView from './EditWebshopPageView.vue';
 import EditWebshopProductsView from './EditWebshopProductsView.vue';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
@@ -130,7 +131,9 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
                 this.isNew = false
 
                 new Toast("Webshop opgeslagen", "success green").show()
-                // todo: open webshop in details view
+
+                OrganizationManager.organization.webshops.push(WebshopPreview.create(this.webshop))
+                GlobalEventBus.sendEvent("new-webshop", this.webshop)
             } else {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "PATCH",
@@ -141,6 +144,9 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
 
                 this.webshopPatch = PrivateWebshop.patch({})
                 this.webshop.set(response.data)
+
+                // Clone data and keep references
+                OrganizationManager.organization.webshops.find(w => w.id == this.webshop.id)?.set(response.data)
 
                 new Toast("Wijzigingen opgeslagen", "success green").show()
             }

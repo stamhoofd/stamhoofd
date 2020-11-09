@@ -17,8 +17,11 @@ export class Webshop extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    /**
+     * Not writeable
+     */
     @field({ decoder: StringDecoder })
-    uri: string;
+    uri = ""
 
     @field({ decoder: StringDecoder, nullable: true })
     domain: string | null = null;

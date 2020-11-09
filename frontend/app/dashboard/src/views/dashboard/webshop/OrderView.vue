@@ -30,7 +30,9 @@
                     Naam
 
                     <template slot="right">
-                        {{ order.data.customer.name }}
+                        <p>{{ order.data.customer.name }}</p>
+                        <p>{{ order.data.customer.phone }}</p>
+                        <p>{{ order.data.customer.email }}</p>
                     </template>
                 </STListItem>
                 <STListItem v-if="order.payment" class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
