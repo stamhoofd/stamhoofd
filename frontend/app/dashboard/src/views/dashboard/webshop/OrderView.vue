@@ -225,6 +225,32 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.navigationController?.push(component, true, 1, false);
     }
 
+    activated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        const key = event.key || event.keyCode;
+
+        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+            this.goBack();
+            event.preventDefault();
+        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+            this.goNext();
+            event.preventDefault();
+        }
+    }
+
     openTransferView() {
         // todo
     }
