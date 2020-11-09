@@ -121,6 +121,23 @@
 
             <Spinner v-if="isLoadingOrders" class="center" />
         </main>
+
+        <STToolbar>
+            <template #left>
+                {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "bestelling" : "bestellingen" }} geselecteerd
+                <template v-if="selectionCountHidden">
+                    (waarvan {{ selectionCountHidden }} verborgen)
+                </template>
+            </template>
+            <template #right>
+                <LoadingButton :loading="actionLoading">
+                    <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
+                        <span class="dropdown-text">Mailen</span>
+                        <div class="dropdown" @click.stop="openMailDropdown" />
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
@@ -142,6 +159,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import OrderView from './OrderView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditWebshopView from './EditWebshopView.vue';
+import MailView from '../mail/MailView.vue';
 
 class SelectableOrder {
     order: Order;
@@ -176,6 +194,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     preview: WebshopPreview ;
     webshop: PrivateWebshop | null = null
     loading = false;
+    actionLoading = false;
 
     orders: SelectableOrder[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
@@ -358,6 +377,34 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             }
         }
         return null;
+    }
+
+    openMail(subject = "") {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MailView, {
+                otherRecipients: this.sortedOrders.flatMap((o) => {
+                    if ( o.order.data.customer.email.length > 0) {
+                        return [o.order.data.customer]
+                    }
+                    return []
+                }),
+                defaultSubject: subject
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    openMailDropdown(event) {
+        if (this.selectionCount == 0) {
+            return;
+        }
+        /*const displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
+            x: event.clientX,
+            y: event.clientY + 10,
+            //members: this.getSelectedMembers(),
+            //group: this.group
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));*/
     }
 
 }

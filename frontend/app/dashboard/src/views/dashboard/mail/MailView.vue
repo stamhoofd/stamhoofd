@@ -127,15 +127,19 @@ class TmpFile {
     },
 })
 export default class MailView extends Mixins(NavigationMixin) {
-    @Prop()
+    @Prop({ default: () => []})
     members!: MemberWithRegistrations[];
+
+    @Prop({ default: () => []})
+    otherRecipients: { firstName?: string; lastName?: string; email: string }[]
+
     sending = false
 
     @Prop({ default: null })
-    defaultSubject: string | null
+    defaultSubject!: string | null
 
     @Prop({ default: null })
-    group: Group | null
+    group!: Group | null
 
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
@@ -262,7 +266,22 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
         }
 
-        console.log(recipients)
+        for (const recipient of this.otherRecipients) {
+            if (recipients.has(recipient.email) && recipients.get(recipient.email)!.firstName) {
+                continue
+            }
+
+            recipients.set(recipient.email, Recipient.create({
+                firstName: recipient.firstName,
+                email: recipient.email,
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: recipient.firstName ?? ""
+                    })
+                ]
+            }))
+        }
 
         return Array.from(recipients.values())
     }
