@@ -1,7 +1,18 @@
 <template>
     <div class="st-view order-view">
         <STNavigationBar :title="'Bestelling ' + order.number">
+            <template #left>
+                <BackButton v-if="canPop" @click="pop" />
+                <button v-if="hasPreviousOrder" class="button text" @click="goBack">
+                    <span class="icon arrow-left" />
+                    <span>Vorige</span>
+                </button>
+            </template>
             <template #right>
+                <button v-if="hasNextOrder" class="button text" @click="goNext">
+                    <span>Volgende</span>
+                    <span class="icon arrow-right" />
+                </button>
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
@@ -168,6 +179,51 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     order: Order | null = this.initialOrder
 
+    @Prop({ default: null })
+    getNextOrder!: (order: Order) => Order | null;
+
+    @Prop({ default: null })
+    getPreviousOrder!: (order: Order) => Order | null;
+
+    get hasNextOrder(): boolean {
+        if (!this.getNextOrder || !this.order) {
+            return false
+        }
+        return !!this.getNextOrder(this.order);
+    }
+
+    get hasPreviousOrder(): boolean {
+        if (!this.getPreviousOrder || !this.order) {
+            return false
+        }
+        return !!this.getPreviousOrder(this.order);
+    }
+
+    goBack() {
+        const order = this.getPreviousOrder(this.order!);
+        if (!order) {
+            return;
+        }
+        const component = new ComponentWithProperties(OrderView, {
+            initialOrder: order,
+            getNextOrder: this.getNextOrder,
+            getPreviousOrder: this.getPreviousOrder,
+        });
+        this.navigationController?.push(component, true, 1, true);
+    }
+
+    goNext() {
+        const order = this.getNextOrder(this.order!);
+        if (!order) {
+            return;
+        }
+        const component = new ComponentWithProperties(OrderView, {
+            initialOrder: order,
+            getNextOrder: this.getNextOrder,
+            getPreviousOrder: this.getPreviousOrder,
+        });
+        this.navigationController?.push(component, true, 1, false);
+    }
 
     openTransferView() {
         // todo

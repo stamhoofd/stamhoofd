@@ -15,6 +15,9 @@
             <template #middle>
                 <div />
             </template>
+            <template #right>
+                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+            </template>
         </STNavigationBar>
     
         <main>
@@ -70,7 +73,7 @@
                                 }"
                             />
                         </th>
-                        <th>Acties</th>
+                        <th>Betaling</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -172,6 +175,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     sortBy = "info";
     sortDirection = "ASC";
     selectionCountHidden = 0;
+    searchQuery = "";
 
     mounted() {
         this.reload();
@@ -231,7 +235,19 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     }
 
     get filteredOrders() {
-        return this.orders
+        this.selectionCountHidden = 0
+
+        return this.orders.filter((order: SelectableOrder) => {
+            if (order.order.number+"" == this.searchQuery) {
+                return true;
+            }
+            if (order.order.data.matchQuery(this.searchQuery)) {
+                return true;
+            }
+            this.selectionCountHidden += order.selected ? 1 : 0;
+            return false;
+        });
+
     }
 
     get sortedOrders() {
@@ -262,7 +278,39 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     }
 
     openOrder(order: SelectableOrder) {
-        this.present(new ComponentWithProperties(OrderView, { initialOrder: order.order }).setDisplayStyle("popup"))
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(OrderView, { 
+                initialOrder: order.order,
+                getNextOrder: this.getNextOrder,
+                getPreviousOrder: this.getPreviousOrder,
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    getPreviousOrder(order: Order): Order | null {
+        for (let index = 0; index < this.sortedOrders.length; index++) {
+            const _order = this.sortedOrders[index];
+            if (_order.order.id == order.id) {
+                if (index == 0) {
+                    return null;
+                }
+                return this.sortedOrders[index - 1].order;
+            }
+        }
+        return null;
+    }
+
+    getNextOrder(order: Order): Order | null {
+        for (let index = 0; index < this.sortedOrders.length; index++) {
+            const _order = this.sortedOrders[index];
+            if (_order.order.id == order.id) {
+                if (index == this.sortedOrders.length - 1) {
+                    return null;
+                }
+                return this.sortedOrders[index + 1].order;
+            }
+        }
+        return null;
     }
 
 }
