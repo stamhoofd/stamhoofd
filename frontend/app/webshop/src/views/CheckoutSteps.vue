@@ -18,7 +18,7 @@
 
             <button v-if="slotProps.step == 0 && !slotProps.canPop" class="primary button" @click="openCart">
                 <span class="icon basket" />
-                <span>{{ cartCount == 0 ? 'Winkelmandje' : cartCount }}</span>
+                <span>{{ cartCount }}</span>
             </button>
         </template>
     </Steps>

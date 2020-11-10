@@ -51,6 +51,7 @@ export default class App extends Vue {
         HistoryManager.activate();
 
         CenteredMessage.addListener(this, (centeredMessage) => {
+            console.log(this.$refs.modalStack);
             (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })
 

@@ -24,10 +24,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
+import { GlobalEventBus } from '../classes/EventBus';
 
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
@@ -75,6 +76,20 @@ export default class WebshopView extends Mixins(NavigationMixin){
     canSetUrl = false
 
     mounted() {
+        GlobalEventBus.addListener(this, "checkout", async () => {
+            console.log("goto checkout")
+            const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
+
+            if (!nextStep) {
+                // Not possible
+                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
+                return;
+            }
+
+            const comp = await nextStep.getComponent();
+            this.show(new ComponentWithProperties(comp, {}))
+        })
+
         ComponentWithProperties.debug = true
         const path = this.webshop.removeSuffix(window.location.pathname.substring(1).split("/"));
         if (path.length == 2 && path[0] == 'order') {
@@ -135,6 +150,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
         // For an unknown reason, activated is also called when the view is displayed for the first time
         // so we need to only start setting the url when we were deactivated first
         this.canSetUrl = true
+
+    }
+
+    beforeDestroy() {
+        GlobalEventBus.removeListener(this)
     }
 
     activated() {
@@ -155,6 +175,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .webshop-view {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+    min-height: calc(var(--vh, 1vh) * 100);
 
     .webshop-banner {
         width: 100%;
@@ -183,6 +208,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         }
     }
+
+    padding: 0 var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
     
     @media (min-width: 801px) {
         max-width: 800px;

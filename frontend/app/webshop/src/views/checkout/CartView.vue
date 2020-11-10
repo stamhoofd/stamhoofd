@@ -1,11 +1,13 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :title="title">
-            <span slot="left" class="style-tag">{{ cart.price | price }}</span>
+            <span slot="left" class="style-tag" v-if="cart.items.length > 0">{{ cart.price | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
+
+            <p class="info-box" v-if="cart.items.length == 0">Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.</p>
             <STErrorsDefault :error-box="errorBox" />
            
             <STList>
@@ -32,7 +34,7 @@
             </STList>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="cart.items.length > 0">
             <span slot="left">Totaal: {{ cart.price | price }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goToCheckout">
@@ -52,6 +54,7 @@ import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
+import { GlobalEventBus } from '../../classes/EventBus';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
@@ -91,20 +94,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
          try {
-            const nav = this.modalStackComponent!.$refs.navigationController! as NavigationController;
-            console.log(nav.components[nav.components.length - 1]);
-            console.log((nav.components[nav.components.length - 1] as any).componentInstance());
-
-            const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
-
-            if (!nextStep) {
-                // Not possible
-                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
-                return;
-            }
-
-            const comp = await nextStep.getComponent();
-            (nav.components[nav.components.length - 1] as any).componentInstance().$refs.steps.navigationController.push(new ComponentWithProperties(comp, {}))
+            GlobalEventBus.sendEvent("checkout", "cart")
             this.dismiss({ force: true })
         } catch (e) {
             console.error(e)
@@ -131,6 +121,16 @@ export default class CartView extends Mixins(NavigationMixin){
         this.$nextTick(() => {
             HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
         })
+    }
+
+    mounted() {
+        try {
+            this.cart.validate(WebshopManager.webshop)
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+        }
+        CheckoutManager.saveCart()
     }
 }
 </script>

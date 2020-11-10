@@ -114,4 +114,11 @@ export class Product extends AutoEncoder {
         }
         return this.usedStock >= this.stock
     }
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return this.stock - this.usedStock
+    }
 }

@@ -11,6 +11,7 @@ import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } 
 import { Category, Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import ProductBox from "./ProductBox.vue"
 
 @Component({
@@ -42,7 +43,8 @@ export default class ProductGrid extends Mixins(NavigationMixin){
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
 
-    @media (max-width: 700px) {
+    @media (max-width: 800px) {
+        gap: 0;
         grid-template-columns: 1fr;
     }
 }

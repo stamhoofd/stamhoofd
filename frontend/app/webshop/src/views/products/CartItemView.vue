@@ -35,7 +35,8 @@
 
             <h2>Aantal</h2>
 
-            <NumberInput v-model="cartItem.amount" suffix="stuks" />
+            <NumberInput v-model="cartItem.amount" suffix="stuks" :max="maximumRemaining" :min="1"/>
+            <p class="st-list-description" v-if="cartItem.amount + 1 >= maximumRemaining">Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje zitten</template></p>
         </main>
 
         <STToolbar>
@@ -103,6 +104,31 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     get imageSrc() {
         return this.image?.file?.getPublicPath()
+    }
+
+    get product() {
+        return this.cartItem.product
+    }
+
+    get count() {
+        return CheckoutManager.cart.items.reduce((prev, item) => {
+            if (item.product.id != this.product.id) {
+                return prev
+            }
+            return prev + item.amount
+        }, 0)  - (this.oldItem?.amount ?? 0)
+    }
+
+    get maximumRemaining() {
+        if (this.product.remainingStock === null) {
+            return null
+        }
+
+        return this.product.remainingStock - this.count
+    }
+
+    get remainingStock() {
+        return this.product.remainingStock 
     }
 
 

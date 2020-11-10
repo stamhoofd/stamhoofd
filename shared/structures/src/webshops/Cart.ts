@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
+import { Webshop } from './Webshop';
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -81,6 +83,78 @@ export class CartItem extends AutoEncoder {
         return CartItem.decode(new ObjectData(this.encode({ version }), { version }))
     }
 
+    /**
+     * Update self to the newest available data and throw if it was not able to recover
+     */
+    validate(webshop: Webshop) {
+        const product = webshop.products.find(p => this.product.id)
+        if (!product || !product.enabled) {
+            throw new SimpleError({
+                code: "product_unavailable",
+                message: "Product unavailable",
+                human: this.product.name+" is niet meer beschikbaar"
+            })
+        }
+
+        if (product.isSoldOut) {
+            throw new SimpleError({
+                code: "product_unavailable",
+                message: "Product unavailable",
+                human: this.product.name+" is uitverkocht"
+            })
+        }
+
+        const productPrice = product.prices.find(p => p.id === this.productPrice.id)
+        if (!productPrice) {
+            throw new SimpleError({
+                code: "product_price_unavailable",
+                message: "Product price unavailable",
+                human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
+            })
+        }
+
+        this.product = product
+        this.productPrice = productPrice
+
+        // Check all options
+        const remainingMenus = this.product.optionMenus.slice()
+
+        for (const o of this.options) {
+            const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
+            if (index == -1) {
+                throw new SimpleError({
+                    code: "option_menu_unavailable",
+                    message: "Option menu unavailable",
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
+                })
+            }
+            const menu = remainingMenus.splice(index, 1)[0]
+            const option = menu.options.find(m => m.id === o.option.id)
+
+            if (!option) {
+                throw new SimpleError({
+                    code: "option_unavailable",
+                    message: "Option unavailable",
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
+                })
+            }
+
+            // Update to latest data
+            o.optionMenu = menu
+            o.option = option
+        }
+
+        if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+            throw new SimpleError({
+                code: "missing_menu",
+                message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
+                human: "Er zijn nieuwe keuzemogelijkheden voor "+this.product.name+" waaruit je moet kiezen, voeg het opnieuw toe"
+            })
+        }
+
+        
+    }
+
 }
 
 export class Cart extends AutoEncoder {
@@ -114,5 +188,23 @@ export class Cart extends AutoEncoder {
 
     get count() {
         return this.items.reduce((c, item) => c + item.amount, 0)
+    }
+
+    validate(webshop: Webshop) {
+        const newItems: CartItem[] = []
+        const errors = new SimpleErrors()
+        for (const item of this.items) {
+            try {
+                item.validate(webshop)
+                newItems.push(item)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+
+        // todo: validate stock
+
+        this.items = newItems
+        errors.throwIfNotEmpty()
     }
 }

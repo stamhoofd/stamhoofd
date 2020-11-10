@@ -169,7 +169,7 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     }
 
     get url() {
-        return this.webshop.getUrl(SessionManager.currentSession!.organization!)
+        return "https://"+this.webshop.getUrl(SessionManager.currentSession!.organization!)
     }
 
     get customUrl() {
