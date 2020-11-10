@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { Organization } from '../Organization';
 import { Category } from './Category';
 import { Product } from './Product';
 import { WebshopMetaData, WebshopPrivateMetaData } from './WebshopMetaData';
@@ -37,6 +38,18 @@ export class Webshop extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Category) })
     categories: Category[] = []
+
+    getUrl(organization: Organization): string {
+        if (this.domain) {
+            return this.domain+this.getUrlSuffix()
+        }
+
+        if (process.env.NODE_ENV == "production") {
+             return organization.uri+".stamhoofd.shop"+this.getUrlSuffix()
+        }
+
+        return organization.uri+".shop.stamhoofd.dev"+this.getUrlSuffix()
+    }
 
     getUrlSuffix(): string {
         if (this.domain) {

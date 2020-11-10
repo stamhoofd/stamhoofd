@@ -71,6 +71,18 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             webshop.categories = request.body.categories.applyTo(webshop.categories)
         }
 
+        if (request.body.domain !== undefined) {
+            webshop.domain = request.body.domain
+        }
+
+        if (request.body.domainUri !== undefined) {
+            webshop.domainUri = request.body.domainUri
+        }
+
+        if (request.body.uri !== undefined) {
+            webshop.uri = request.body.uri
+        }
+
         await webshop.save()
         
         errors.throwIfNotEmpty()

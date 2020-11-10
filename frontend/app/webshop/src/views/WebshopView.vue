@@ -1,15 +1,20 @@
 <template>
     <section class="padded-view">
         <div class="webshop-view">
-            <figure class="webshop-banner">
+            <figure v-if="bannerImageSrc" class="webshop-banner">
                 <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
             </figure>
 
             <main>
-                <h1>{{ webshop.meta.title }}</h1>
+                <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
                 <p v-text="webshop.meta.description" />
 
+                <p v-if="webshop.categories.length == 0 && webshop.products.length == 0" class="warning-box">
+                    Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
+                </p>
+
                 <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
+                <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
             </main>
         </div>
     </section>
@@ -29,6 +34,7 @@ import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import CategoryBox from "./products/CategoryBox.vue"
+import ProductGrid from "./products/ProductGrid.vue"
 
 @Component({
     components: {
@@ -38,7 +44,8 @@ import CategoryBox from "./products/CategoryBox.vue"
         STListItem,
         LoadingView,
         Checkbox,
-        CategoryBox
+        CategoryBox,
+        ProductGrid
     },
     filters: {
         price: Formatter.price

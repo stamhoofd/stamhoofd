@@ -22,7 +22,7 @@
         </STInputBox>
 
 
-         <hr>
+        <hr>
         <h2 class="style-with-button">
             <div>Omslagfoto</div>
             <div>
@@ -36,23 +36,70 @@
 
         <img v-if="coverPhoto" :src="coverPhotoSrc" class="image">
 
-       
+        <hr>
+        <h2>Link</h2>
+
+        <Checkbox v-model="hasCustomDomain">
+            Eigen domeinnaam gebruiken
+        </Checkbox>
+
+        <template v-if="hasCustomDomain">
+            <STInputBox title="Eigen link" error-fields="customUrl" :error-box="errorBox" class="max">
+                <input
+                    v-model="customUrl"
+                    class="input"
+                    type="text"
+                    placeholder="bv. shop.domeinnaam.be/wafelbak"
+                    autocomplete=""
+                    @blur="resetCache"
+                >
+            </STInputBox>
+            <p class="st-list-description">
+                Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS wijzigingen moet doen.
+            </p>
+            
+            <template v-if="dnsRecord">
+                <STInputBox title="Stel deze DNS-records in" class="max">
+                    <DNSRecordBox :record="dnsRecord" />
+                </STInputBox>
+            </template>
+        </template>
+
+        <template v-else>
+            <STInputBox title="Eigen achtervoegsel" error-fields="uri" :error-box="errorBox">
+                <input
+                    v-model="uri"
+                    class="input"
+                    type="text"
+                    placeholder="bv. wafelbak"
+                    autocomplete=""
+                    @blur="resetCache"
+                >
+            </STInputBox>
+
+            <STInputBox title="Jouw link" error-fields="url" :error-box="errorBox" class="max">
+                <input
+                    v-tooltip="'Klik om te kopiëren'"
+                    :value="url"
+                    class="input"
+                    type="text"
+                    autocomplete=""
+                    readonly
+                    @click="copyElement"
+                >
+            </STInputBox>
+        </template>
     </main>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip, STInputBox, STErrorsDefault, Validator, UploadButton } from "@stamhoofd/components";
-import { EmergencyContact,Image,MemberWithRegistrations, Parent, ParentTypeHelper, PrivateWebshop, Record, RecordTypeHelper, RecordTypePriority, ResolutionRequest, Webshop, WebshopMetaData } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Tooltip, TooltipDirective, UploadButton, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { DNSRecord, DNSRecordType,Image, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { FamilyManager } from '../../../classes/FamilyManager';
-import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
-import EditMemberGroupView from './edit/EditMemberGroupView.vue';
-import EditMemberParentView from './edit/EditMemberParentView.vue';
-import EditMemberView from './edit/EditMemberView.vue';
-import MemberView from './MemberView.vue';
-import RecordDescriptionView from './records/RecordDescriptionView.vue';
+import DNSRecordBox from './../../../components/DNSRecordBox.vue';
 
 @Component({
     components: {
@@ -60,9 +107,11 @@ import RecordDescriptionView from './records/RecordDescriptionView.vue';
         STList,
         STInputBox,
         STErrorsDefault,
-        UploadButton
+        UploadButton,
+        Checkbox,
+        DNSRecordBox
     },
-    directives: { Tooltip },
+    directives: { Tooltip: TooltipDirective },
 })
 export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     @Prop()
@@ -70,6 +119,10 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
+
+    cachedHasCustomDomain: boolean | null = this.hasCustomDomain
+    cachedCustomUrl: string | null = this.customUrl
+    cachedUri: string | null = this.uri
 
     get title() {
         return this.webshop.meta.title
@@ -87,6 +140,92 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     set description(description: string) {
         const patch = WebshopMetaData.patch({ description })
         this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    resetCache() {
+        this.cachedCustomUrl = null
+        this.cachedUri = null
+    }
+
+    get hasCustomDomain() {
+        if (this.cachedHasCustomDomain) {
+            return this.cachedHasCustomDomain
+        }
+        return !!this.webshop.domain
+    }
+
+    set hasCustomDomain(hasCustomDomain: boolean) {
+        this.cachedHasCustomDomain = hasCustomDomain
+
+        if (!hasCustomDomain) {
+            const patch = PrivateWebshop.patch({  })
+            patch.domain = null
+            patch.domainUri = null
+            this.$emit("patch", patch)
+        } else {
+            // Force patch
+            this.customUrl = this.customUrl as any
+        }
+    }
+
+    get url() {
+        return this.webshop.getUrl(SessionManager.currentSession!.organization!)
+    }
+
+    get customUrl() {
+        if (this.cachedCustomUrl) {
+            return this.cachedCustomUrl
+        }
+
+        if (!this.webshop.domain) {
+            return ""
+        }
+        return this.webshop.getUrl(SessionManager.currentSession!.organization!)
+    }
+
+    set customUrl(customUrl: string) {
+        this.cachedCustomUrl = customUrl
+        const split = customUrl.split("/")
+
+        const patch = PrivateWebshop.patch({  })
+        if (split[0].length == 0) {
+            patch.domain = null
+            patch.domainUri = null
+        } else {
+            patch.domain = split[0]
+
+            if (!split[1] || split[1].length == 0) {
+                patch.domainUri = null
+            } else {
+                patch.domainUri = split[1]
+            }
+        }
+
+        this.$emit("patch", patch)
+    }
+
+    get uri() {
+        return this.webshop.uri
+    }
+
+    set uri(uri: string) {
+        this.cachedUri = uri
+
+        const patch = PrivateWebshop.patch({  })
+        patch.uri = uri
+
+        this.$emit("patch", patch)
+    }
+
+    get dnsRecord() {
+        if (!this.webshop.domain) {
+            return null;
+        }
+        return DNSRecord.create({
+            type: DNSRecordType.CNAME,
+            name: this.webshop.domain+".",
+            value: "domains.stamhoofd.shop"
+        })
     }
 
     get coverPhoto() {
@@ -115,6 +254,31 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
             return null
         }
         return image.getPathForSize(800, undefined)
+    }
+
+    copyElement(event) {
+        event.target.contentEditable = true;
+
+        document.execCommand('selectAll', false);
+        document.execCommand('copy')
+
+        event.target.contentEditable = false;
+
+        const el = event.target;
+        const rect = event.target.getBoundingClientRect();
+
+        // Present
+
+        const displayedComponent = new ComponentWithProperties(Tooltip, {
+            text: "📋 Gekopieerd!",
+            x: event.clientX,
+            y: event.clientY + 10,
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+
+        setTimeout(() => {
+            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
+        }, 1000);
     }
 
   
