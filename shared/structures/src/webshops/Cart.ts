@@ -87,7 +87,7 @@ export class CartItem extends AutoEncoder {
      * Update self to the newest available data and throw if it was not able to recover
      */
     validate(webshop: Webshop) {
-        const product = webshop.products.find(p => this.product.id)
+        const product = webshop.products.find(p => p.id == this.product.id)
         if (!product || !product.enabled) {
             throw new SimpleError({
                 code: "product_unavailable",
