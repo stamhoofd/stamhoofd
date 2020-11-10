@@ -36,7 +36,7 @@
             <h2>Aantal</h2>
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" :max="maximumRemaining" :min="1"/>
-            <p class="st-list-description" v-if="cartItem.amount + 1 >= maximumRemaining">Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje zitten</template></p>
+            <p class="st-list-description" v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining">Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje zitten</template></p>
         </main>
 
         <STToolbar>
