@@ -7,6 +7,7 @@ import { Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd
 import { Member } from '../models/Member';
 import { MolliePayment } from '../models/MolliePayment';
 import { MollieToken } from '../models/MollieToken';
+import { Order } from '../models/Order';
 import { Organization } from '../models/Organization';
 import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
@@ -62,7 +63,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
 
             // if it has orders
-            // todo
+            const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization, payment.id)
             
             if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
                 // check status via mollie
@@ -89,6 +90,10 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                     registration.registeredAt = new Date()
                                     await registration.save();
                                 }
+                            }
+
+                            if (order) {
+                                await order.markValid()
                             }
 
                             await payment.save();
@@ -119,6 +124,10 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                 registration.registeredAt = new Date()
                                 await registration.save();
                             }
+                        }
+
+                        if (order) {
+                            await order.markValid()
                         }
 
                         await payment.save();

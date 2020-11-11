@@ -1,4 +1,4 @@
-import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { OrderData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
@@ -61,6 +61,32 @@ export class Order extends Model {
 
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
         return "https://"+this.webshop.getHost()+"/order/"+this.id
+    }
+
+     /**
+     * Fetch all registrations with members with their corresponding (valid) registrations and payment
+     */
+    static async getForPayment(organization: Organization, paymentId: string): Promise<(Order & { webshop: Webshop & { organization: Organization } }) | undefined> {
+        let query = `SELECT ${Order.getDefaultSelect()}, ${Webshop.getDefaultSelect()} from \`${Order.table}\`\n`;
+        
+        query += `JOIN \`${Webshop.table}\` ON \`${Order.table}\`.\`${Order.webshop.foreignKey}\` = \`${Webshop.table}\`.\`${Webshop.primary.name}\`\n`
+
+        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
+        query += `where \`${Order.table}\`.\`paymentId\` = ? LIMIT 1`
+
+        const [results] = await Database.select(query, [paymentId])
+
+        const orders = Order.fromRows(results, Order.table)
+        if (orders.length != 1) {
+            return undefined;
+        }
+        
+        const webshops = Webshop.fromRows(results, Webshop.table)
+        if (webshops.length != 1) {
+            return undefined;
+        }
+
+        return orders[0].setRelation(Order.webshop, webshops[0].setRelation(Webshop.organization, organization))
     }
 
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
