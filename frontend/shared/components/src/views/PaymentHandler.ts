@@ -53,11 +53,12 @@ export class PaymentHandler {
         server: Server; 
         organization: Organization; 
         payment: Payment; 
+        returnUrl: string | null;
         paymentUrl: string | null; 
         component: NavigationMixin; 
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         let finishedHandler: (() => void) | null = null
-        const {payment, organization, server, component, paymentUrl } = settings;
+        const {payment, organization, server, component, paymentUrl, returnUrl } = settings;
 
         if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -76,7 +77,7 @@ export class PaymentHandler {
             }), true)
         } else if (payment.method == PaymentMethod.Payconiq) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
-                const url = paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
+                const url = paymentUrl+"?returnUrl="+encodeURIComponent(returnUrl ? returnUrl : "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
                 const href = document.createElement("a")
                 href.href = url
                 
