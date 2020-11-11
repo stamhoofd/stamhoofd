@@ -1,8 +1,8 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Order as OrderStruct,OrderData, OrderResponse, PaymentMethod,PaymentStatus, Version } from "@stamhoofd/structures";
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 import { MolliePayment } from '../models/MolliePayment';
 import { MollieToken } from '../models/MollieToken';
@@ -10,7 +10,6 @@ import { Order } from '../models/Order';
 import { Organization } from '../models/Organization';
 import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
-import { Token } from '../models/Token';
 import { Webshop } from '../models/Webshop';
 type Params = { id: string };
 type Query = undefined;
@@ -93,8 +92,18 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
         const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
+        const webshopStruct = WebshopStruct.create(webshop)
 
         const validatedCart = request.body.cart
+        try {
+            validatedCart.validate(webshopStruct)
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                e.addNamespace("cart")
+            }
+            throw e
+        }
+
         const totalPrice = validatedCart.price
 
         const order = new Order().setRelation(Order.webshop, webshop)

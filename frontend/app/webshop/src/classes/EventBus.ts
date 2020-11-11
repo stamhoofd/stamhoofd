@@ -1,5 +1,5 @@
 
-type Listener<E, Value> = (value: Value, type: E) => void
+type Listener<E, Value> = (value: Value, type: E) => Promise<void> | void
 
 /**
  * Controls the fetching and decrypting of members
@@ -18,6 +18,7 @@ export class EventBus<E, Value> {
     sendEvent(type: E, value: Value) {
         for (const listener of this.listeners.values()) {
             if (listener.type == type) {
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 listener.listener(value, type)
             }
         }

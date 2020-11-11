@@ -1,3 +1,4 @@
+import { Decoder } from '@simonbackx/simple-encoding'
 import { NetworkManager } from '@stamhoofd/networking'
 import { Organization, Webshop } from '@stamhoofd/structures'
 
@@ -21,6 +22,15 @@ export class WebshopManagerStatic {
         }
 
         return server
+    }
+
+    async reload() {
+        const response = await NetworkManager.server.request({
+            method: "GET",
+            path: "/webshop/"+this.webshop.id,
+            decoder: Webshop as Decoder<Webshop>
+        })
+        this.webshop = response.data
     }
 }
 

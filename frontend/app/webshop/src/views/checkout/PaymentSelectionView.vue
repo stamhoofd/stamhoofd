@@ -23,6 +23,7 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
@@ -32,6 +33,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import OrderView from '../orders/OrderView.vue';
+import CartView from './CartView.vue';
 import { CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -130,6 +132,24 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
+
+            let error = e
+
+            if (isSimpleError(e)) {
+                error = new SimpleErrors(e)
+            }
+
+            if (isSimpleErrors(error)) {
+                if (error.containsFieldThatStartsWith("cart")) {
+                    // A cart error: force a reload and go back to the cart.
+                    await WebshopManager.reload()
+                    
+                    this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
+                    this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                }
+            }
+
+            
         }
         this.loading = false
     }
