@@ -300,9 +300,19 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
 
         img {
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
             border-radius: $border-radius;
+
+            @media (min-width: 340px) {
+                width: 80px;
+                height: 80px;
+            }
+
+            @media (min-width: 801px) {
+                width: 100px;
+                height: 100px;
+            }
         }
     }
 }

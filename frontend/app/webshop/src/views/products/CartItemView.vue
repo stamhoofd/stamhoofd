@@ -19,7 +19,7 @@
 
             <div v-if="cartItem.product.prices.length > 1" class="container">
                 <STList>
-                    <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="right-description" :selectable="true" element-name="label">
+                    <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="no-border right-description" :selectable="true" element-name="label">
                         <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
                         {{ price.name }}
 

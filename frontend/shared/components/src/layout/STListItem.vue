@@ -177,7 +177,7 @@ export default class STListItem extends Vue {
         }
     }
 
-    &:last-child {
+    &:last-child, &.no-border {
         > .main > hr {
             display: none;
         }
