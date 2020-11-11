@@ -30,7 +30,7 @@
                         Betaalmethode
 
                         <template slot="right">
-                            {{ order.payment.method }}
+                            {{ getName(order.payment.method) }}
 
                             <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                             <span v-else class="icon help" />
@@ -199,6 +199,15 @@ export default class OrderView extends Mixins(NavigationMixin){
             text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
             url: WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order!.id,
         }).catch(e => console.error(e))
+    }
+
+    getName(paymentMethod: PaymentMethod): string {
+        switch (paymentMethod) {
+            case PaymentMethod.Payconiq: return "Payconiq"
+            case PaymentMethod.Transfer: return "Via overschrijving"
+            case PaymentMethod.Bancontact: return "Bancontact"
+            case PaymentMethod.iDEAL: return "iDEAL"
+        }
     }
 
     openTransferView() {

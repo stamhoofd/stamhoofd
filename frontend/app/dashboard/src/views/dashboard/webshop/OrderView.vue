@@ -39,7 +39,7 @@
                     Betaalmethode
 
                     <template slot="right">
-                        {{ order.payment.method }}
+                        {{ getName(order.payment.method) }}
 
                         <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon help" />
@@ -225,6 +225,15 @@ export default class OrderView extends Mixins(NavigationMixin){
             getPreviousOrder: this.getPreviousOrder,
         });
         this.navigationController?.push(component, true, 1, false);
+    }
+
+    getName(paymentMethod: PaymentMethod): string {
+        switch (paymentMethod) {
+            case PaymentMethod.Payconiq: return "Payconiq"
+            case PaymentMethod.Transfer: return "Via overschrijving"
+            case PaymentMethod.Bancontact: return "Bancontact"
+            case PaymentMethod.iDEAL: return "iDEAL"
+        }
     }
 
     activated() {
