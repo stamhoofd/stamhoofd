@@ -20,6 +20,9 @@ export class Order extends Model {
     })
     id!: string;
 
+    @column({ foreignKey: Order.organization, type: "string" })
+    organizationId: string;
+
     @column({ foreignKey: Order.webshop, type: "string" })
     webshopId: string;
 
@@ -57,7 +60,8 @@ export class Order extends Model {
     validAt: Date | null = null
 
     static webshop = new ManyToOneRelation(Webshop, "webshop");
-    static payment = new ManyToOneRelation(Payment, "payment")
+    static payment = new ManyToOneRelation(Payment, "payment");
+    static organization = new ManyToOneRelation(Organization, "organization");
 
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
         return "https://"+this.webshop.getHost()+"/order/"+this.id

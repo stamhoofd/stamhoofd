@@ -1,0 +1,2 @@
+ALTER TABLE `webshop_orders` ADD COLUMN `organizationId` varchar(36) CHARACTER SET ascii NOT NULL COMMENT '';
+ALTER TABLE `webshop_orders` ADD FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;

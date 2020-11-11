@@ -8,3 +8,4 @@ export class EncryptedPaymentDetailed extends Payment {
     @field({ decoder: new ArrayDecoder(RegistrationWithEncryptedMember) })
     registrations: RegistrationWithEncryptedMember[]
 }
+

@@ -99,6 +99,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         const order = new Order().setRelation(Order.webshop, webshop)
         order.data = request.body // todo: validate
+        order.organizationId = organization.id
         order.createdAt = new Date()
         order.createdAt.setMilliseconds(0)
 
