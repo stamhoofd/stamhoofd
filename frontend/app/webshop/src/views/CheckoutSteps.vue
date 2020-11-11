@@ -57,7 +57,7 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
     }
 
     get totalSteps() {
-        return CheckoutStepsManager.getActiveSteps().length
+        return CheckoutStepsManager.getActiveSteps().length + 1
     }
 
     get privacyUrl() {
