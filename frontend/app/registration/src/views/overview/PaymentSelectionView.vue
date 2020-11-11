@@ -146,7 +146,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     organization: OrganizationManager.organization, 
                     payment, 
                     paymentUrl: response.data.paymentUrl, 
-                    returnUrl: response.data.paymentUrl+"?returnUrl="+encodeURIComponent("https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)),
+                    returnUrl: "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
                     iban: OrganizationManager.organization.meta.iban,
                 }, (payment: Payment) => {
