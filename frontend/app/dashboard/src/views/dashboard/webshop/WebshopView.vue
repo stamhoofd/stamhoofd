@@ -160,6 +160,7 @@ import OrderView from './OrderView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditWebshopView from './EditWebshopView.vue';
 import MailView from '../mail/MailView.vue';
+import OrdersContextMenu from './OrdersContextMenu.vue';
 
 class SelectableOrder {
     order: Order;
@@ -278,6 +279,16 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         return val;
     }
 
+    getSelectedOrders(): Order[] {
+        return this.orders
+            .filter((order: SelectableOrder) => {
+                return order.selected;
+            })
+            .map((order: SelectableOrder) => {
+                return order.order;
+            });
+    }
+
     get filteredOrders() {
         this.selectionCountHidden = 0
 
@@ -387,9 +398,9 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     openMail(subject = "") {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
-                otherRecipients: this.sortedOrders.flatMap((o) => {
-                    if ( o.order.data.customer.email.length > 0) {
-                        return [o.order.data.customer]
+                otherRecipients: this.getSelectedOrders().flatMap((o) => {
+                    if ( o.data.customer.email.length > 0) {
+                        return [o.data.customer]
                     }
                     return []
                 }),
@@ -403,13 +414,12 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         if (this.selectionCount == 0) {
             return;
         }
-        /*const displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
+        const displayedComponent = new ComponentWithProperties(OrdersContextMenu, {
             x: event.clientX,
             y: event.clientY + 10,
-            //members: this.getSelectedMembers(),
-            //group: this.group
+            orders: this.getSelectedOrders()
         });
-        this.present(displayedComponent.setDisplayStyle("overlay"));*/
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
 }
