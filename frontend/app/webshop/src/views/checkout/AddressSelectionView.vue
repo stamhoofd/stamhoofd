@@ -24,7 +24,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
@@ -104,6 +104,17 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
+    }
+
+    mounted() {
+        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Address.toLowerCase())
+    }
+
+    activated() {
+        // For an unknown reason, we need to set a timer to properly update the URL...
+        window.setTimeout(() => {
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Address.toLowerCase())
+        }, 100);
     }
 }
 </script>

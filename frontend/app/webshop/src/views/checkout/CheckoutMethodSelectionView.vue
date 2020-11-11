@@ -10,10 +10,10 @@
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
                         <Radio slot="left" v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
                         <h2 class="style-title-list">
-                            {{ checkoutMethod.type }}: {{ checkoutMethod.name }}
+                            {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ checkoutMethod.description }}
+                            {{ checkoutMethod.description || checkoutMethod.address || "" }}
                         </p>
                     </STListItem>
                 </STList>
@@ -89,6 +89,13 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         CheckoutManager.checkout.checkoutMethod = method
         CheckoutManager.saveCheckout()
     }
+
+    getTypeName(type: CheckoutMethodType) {
+        switch (type) {
+            case CheckoutMethodType.Takeout: return "Afhalen";
+            case CheckoutMethodType.Delivery: return "Levering";
+        }
+    }
     
     async goNext() {
         if (this.loading || !this.selectedMethod) {
@@ -117,8 +124,15 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         this.loading = false
     }
 
-    activated() {
+    mounted() {
         HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
+    }
+
+    activated() {
+        // For an unknown reason, we need to set a timer to properly update the URL...
+        window.setTimeout(() => {
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
+        }, 100);
     }
 }
 </script>

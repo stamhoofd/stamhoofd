@@ -9,6 +9,8 @@
                     Kies je leveringstijdstip
                 </h1>
 
+                <p v-if="checkoutMethod.type == 'Takeout'">Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : ''}} {{ checkoutMethod.address }}</p>
+                
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList>
@@ -119,8 +121,15 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         this.loading = false
     }
 
-    activated() {
+    mounted() {
         HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Time.toLowerCase())
+    }
+
+    activated() {
+        // For an unknown reason, we need to set a timer to properly update the URL...
+        window.setTimeout(() => {
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Time.toLowerCase())
+        }, 100);
     }
 }
 </script>

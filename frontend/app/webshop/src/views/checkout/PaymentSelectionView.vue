@@ -132,8 +132,16 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         this.loading = false
     }
 
-    activated() {
+    mounted() {
+        console.log("set payment")
         HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+    }
+
+    activated() {
+        this.$nextTick(() => {
+            console.log("set payment")
+            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+        });
     }
 }
 </script>

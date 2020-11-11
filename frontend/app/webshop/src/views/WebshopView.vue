@@ -161,9 +161,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
         console.log("activated "+this.canSetUrl)
         if (this.canSetUrl) {
             console.log("set url!!!")
-            this.$nextTick(() => {
+
+            // For an unknown reason, we need to set a timer to properly update the URL...
+            window.setTimeout(() => {
                 HistoryManager.setUrl(this.webshop.getUrlSuffix())
-            })
+            }, 100);
         }
     }
 
