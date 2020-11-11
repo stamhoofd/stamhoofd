@@ -2,9 +2,10 @@ import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simpl
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMember,EncryptedPaymentDetailed, PaymentPatch,PaymentStatus,RegistrationWithEncryptedMember } from "@stamhoofd/structures";
+import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Order as OrderStruct, PaymentPatch, PaymentStatus } from "@stamhoofd/structures";
 
 import { Member } from '../models/Member';
+import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
@@ -15,6 +16,7 @@ type ResponseBody = EncryptedPaymentDetailed[]
 
 type RegistrationWithMember = Registration & { member: Member}
 type PaymentWithRegistrations = Payment & { registrations: RegistrationWithMember[] }
+type PaymentWithOrder = Payment & { order: Order }
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -49,11 +51,14 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
         }
 
         const payments = await this.getPaymentsWithRegistrations(user.organizationId)
+        const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
+
+
 
 
         // Modify payments
         for (const patch of request.body) {
-            const model = payments.find(p => p.id == patch.id)
+            const model = payments.find(p => p.id == patch.id) ?? orderPayments.find(p => p.id == patch.id)
             if (!model) {
                 throw new SimpleError({
                     code: "payment_not_found",
@@ -77,28 +82,61 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             await payment.save()
         }
 
-        return new Response(payments.map(p => {
-            return EncryptedPaymentDetailed.create({
-                id: p.id,
-                method: p.method,
-                status: p.status,
-                price: p.price,
-                transferDescription: p.transferDescription,
-                paidAt: p.paidAt,
-                createdAt: p.createdAt,
-                updatedAt: p.updatedAt,
-                registrations: p.registrations.map(r => RegistrationWithEncryptedMember.create({
-                    id: r.id,
-                    groupId: r.groupId,
-                    cycle: r.cycle,
-                    registeredAt: r.registeredAt,
-                    deactivatedAt: r.deactivatedAt,
-                    createdAt: r.createdAt,
-                    updatedAt: r.updatedAt,
-                    member: EncryptedMember.create(r.member)
-                }))
+        for (const payment of orderPayments) {
+            // Automatically checks if it is changed or not
+            await payment.save()
+        }
+
+         return new Response(
+            [...payments, ...orderPayments].map((p: any) => {
+                return EncryptedPaymentGeneral.create({
+                    id: p.id,
+                    method: p.method,
+                    status: p.status,
+                    price: p.price,
+                    transferDescription: p.transferDescription,
+                    paidAt: p.paidAt,
+                    createdAt: p.createdAt,
+                    updatedAt: p.updatedAt,
+                    registrations: p.registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
+                    order: p.order ? OrderStruct.create(Object.assign({...p.order}, { payment: null })) : null,
+                })
             })
-        }));
+        );
+    }
+
+    /**
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    async getPaymentsWithOrder(organizationId: string): Promise<PaymentWithOrder[]> {
+        let query = `SELECT ${Payment.getDefaultSelect()}, ${Order.getDefaultSelect()} from \`${Payment.table}\`\n`;
+        query += `JOIN \`${Order.table}\` ON \`${Order.table}\`.\`${Order.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\`\n`
+        query += `where \`${Order.table}\`.\`organizationId\` = ?`
+
+        const [results] = await Database.select(query, [organizationId])
+        const payments: PaymentWithOrder[] = []
+
+        // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
+        const paymentOrderRelation = new ManyToOneRelation(Order, "order")
+        paymentOrderRelation.foreignKey = Order.payment.foreignKey
+
+        for (const row of results) {
+            const foundPayment = Payment.fromRow(row[Payment.table])
+            if (!foundPayment) {
+                throw new Error("Expected payment in every row")
+            }
+
+            const order = Order.fromRow(row[Order.table])
+            if (!order) {
+                throw new Error("Every payment should have a valid order")
+            }
+
+            const payment = foundPayment.setRelation(paymentOrderRelation, order)
+            payments.push(payment)
+        }
+
+        return payments
+
     }
 
     /**
