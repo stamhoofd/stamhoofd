@@ -1,7 +1,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order as OrderStruct,PaginatedResponse, SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
@@ -88,7 +88,9 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
        
         return new Response(
             new PaginatedResponse({ 
-                results: orders.map(order => OrderStruct.create(order)),
+                results: (orders as (Order & { payment: Payment | null })[]).map(order => OrderStruct.create(Object.assign({
+                    ...order
+                }, { payment: order.payment ? PaymentStruct.create(order.payment) : null }))),
                 next: orders.length >= limit ? WebshopOrdersQuery.create({
                     afterNumber: orders[orders.length - 1].number ?? undefined,
                     sort: request.query.sort

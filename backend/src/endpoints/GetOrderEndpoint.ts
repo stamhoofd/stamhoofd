@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order as OrderStruct } from "@stamhoofd/structures";
+import { Order as OrderStruct, Payment as PaymentStruct } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
@@ -40,7 +40,7 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
                 throw new Error("Failed to load relation payment")
             }
             order.setRelation(Order.payment, payment)
-            return new Response(OrderStruct.create(order));
+            return new Response(OrderStruct.create(Object.assign({...order}, { payment: PaymentStruct.create(payment) })));
         }
         
         return new Response(OrderStruct.create(Object.assign({}, order, { payment: null })));

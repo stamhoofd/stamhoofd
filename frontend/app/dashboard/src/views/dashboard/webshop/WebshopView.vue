@@ -111,8 +111,8 @@
                         </td>
                         <td>
                             <span class="style-description-small">{{ order.order.data.cart.price | price }}</span>
-                            <span v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" class="icon success green" v-tooltip="order.order.payment ? 'Betaald op '+order.order.payment.paidAt : 'Zonder betaling'"></span>
-                            <span v-else class="icon clock gray" v-tooltip="'Nog niet betaald'"></span>
+                            <span key="success" v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" class="icon success green" v-tooltip="order.order.payment && order.order.payment.paidAt ? 'Betaald op '+formatDateTime(order.order.payment.paidAt) : 'Zonder betaling'"></span>
+                            <span key="no-success" v-else class="icon clock gray" v-tooltip="'Nog niet betaald'"></span>
                         </td>
                     </tr>
                 </tbody>
@@ -209,7 +209,12 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         this.loadNextOrders()
     }
 
-     toggleSort(field: string) {
+    formatDateTime(date: Date) {
+        console.log(date)
+        return Formatter.dateTime(date)
+    }
+
+    toggleSort(field: string) {
         if (this.sortBy == field) {
             if (this.sortDirection == "ASC") {
                 this.sortDirection = "DESC";
