@@ -208,6 +208,14 @@
     &.flag:after {
         font-icon: url(@stamhoofd/assets/images/icons/flag.svg);
     }
+
+    &.plus:after {
+        font-icon: url(@stamhoofd/assets/images/icons/plus.svg);
+    }
+
+    &.min:after {
+        font-icon: url(@stamhoofd/assets/images/icons/min.svg);
+    }
 }
 
 .android-icons {

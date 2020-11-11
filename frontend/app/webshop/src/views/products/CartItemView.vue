@@ -35,7 +35,7 @@
 
             <h2>Aantal</h2>
 
-            <NumberInput v-model="cartItem.amount" suffix="stuks" :max="maximumRemaining" :min="1"/>
+            <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true"/>
             <p class="st-list-description" v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining">Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje zitten</template></p>
         </main>
 
@@ -55,7 +55,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { NumberInput,Radio,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { NumberInput,Radio,STList, STListItem,STNavigationBar, STToolbar, Toast, StepperInput} from '@stamhoofd/components';
 import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
@@ -72,7 +72,8 @@ import OptionMenuBox from './OptionMenuBox.vue';
         STListItem,
         Radio,
         NumberInput,
-        OptionMenuBox
+        OptionMenuBox,
+        StepperInput
     },
     filters: {
         price: Formatter.price.bind(Formatter),

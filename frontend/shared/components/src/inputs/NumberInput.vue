@@ -1,35 +1,43 @@
 <template>
-    <label class="number-input" :class="{ error: !valid }">
-        <!-- 
-            We use type = text here because the specs of number inputs ensure that we can't get 
-            the raw string value, but we need this for our placeholder logic.
-            Also inputmode is more specific on mobile devices. 
-            Only downside is that we lose the stepper input on desktop.
-        -->
-        <input
-            ref="input"
-            v-model="valueString"
-            type="text"
-            inputmode="decimal"
-            step="any"
-            @blur="clean"
-            @keydown.up.prevent="step(1)"
-            @keydown.down.prevent="step(-1)"
-        >
-        <div v-if="!valid">
-            <span>{{ valueString }}</span>
-        </div>
-        <div v-else-if="valueString != ''">
-            <span>{{ valueString }}</span> {{ suffix }}
-        </div>
-        <div v-else>{{ placeholder }}</div>
-    </label>
+    <div class="number-container">
+        <label class="number-input" :class="{ error: !valid }">
+            <!-- 
+                We use type = text here because the specs of number inputs ensure that we can't get 
+                the raw string value, but we need this for our placeholder logic.
+                Also inputmode is more specific on mobile devices. 
+                Only downside is that we lose the stepper input on desktop.
+            -->
+            <input
+                ref="input"
+                v-model="valueString"
+                type="text"
+                inputmode="decimal"
+                step="any"
+                @blur="clean"
+                @keydown.up.prevent="step(1)"
+                @keydown.down.prevent="step(-1)"
+            >
+            <div v-if="!valid">
+                <span>{{ valueString }}</span>
+            </div>
+            <div v-else-if="valueString != ''">
+                <span>{{ valueString }}</span> {{ internalValue == 1 && suffixSingular !== null ? suffixSingular : suffix }}
+            </div>
+            <div v-else>{{ placeholder }}</div>
+        </label>
+        <StepperInput v-if="stepper" :min="min" :max="max" v-model="stepperValue"/>
+    </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+import StepperInput from "./StepperInput.vue"
 
-@Component
+@Component({
+    components: {
+        StepperInput
+    }
+})
 export default class NumberInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
@@ -37,7 +45,10 @@ export default class NumberInput extends Vue {
 
     /** Price in cents */
     @Prop({ default: null })
-    max!: number | null
+    max!: number | null;
+
+    @Prop({ default: false })
+    stepper!: boolean;
 
     valueString = "";
     valid = true;
@@ -48,6 +59,9 @@ export default class NumberInput extends Vue {
 
     @Prop({ default: "" })
     suffix: string;
+
+    @Prop({ default: null })
+    suffixSingular: string | null;
 
     @Prop({ default: "" })
     placeholder!: string
@@ -61,6 +75,17 @@ export default class NumberInput extends Vue {
 
     set internalValue(val: number) {
         this.$emit("input", val)
+    }
+
+    get stepperValue() {
+        return this.value
+    }
+
+    set stepperValue(val: number) {
+        this.$emit("input", val)
+        this.$nextTick(() => {
+            this.clean(val);
+        })
     }
 
     mounted() {
@@ -152,6 +177,19 @@ export default class NumberInput extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use "~@stamhoofd/scss/components/inputs.scss";
 
+.number-container {
+    display: flex;
+
+    .number-input {
+        min-width: 0;
+    }
+
+    .stepper-input {
+        margin-left: 5px;
+        min-width: 0;
+        flex-shrink: 0;
+    }
+}
 .number-input {
     @extend .input;
     position: relative;

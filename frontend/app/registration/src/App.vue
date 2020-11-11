@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, PromiseView, ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { Component, Vue } from "vue-property-decorator";
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import LoginView from './views/login/LoginView.vue';
@@ -46,8 +46,7 @@ export default class App extends Vue {
 
                 // Set color
                 if (response.data.meta.color) {
-                    console.log("Set color "+response.data.meta.color)
-                    document.documentElement.style.setProperty("--color-primary", response.data.meta.color)
+                    ColorHelper.setColor(response.data.meta.color)
                 }
 
                 await SessionManager.setCurrentSession(session)

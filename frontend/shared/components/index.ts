@@ -1,3 +1,5 @@
+import { ColorHelper } from './src/ColorHelper'
+
 // Errors
 export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
 export * from "./src/errors/ErrorBox"
@@ -28,6 +30,7 @@ export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as TimeInput } from "./src/inputs/TimeInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as NumberInput } from "./src/inputs/NumberInput.vue"
+export { default as StepperInput } from "./src/inputs/StepperInput.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
@@ -80,3 +83,5 @@ export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vu
 export * from "./src/views/PaymentHandler"
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
+
+export * from "./src/ColorHelper"

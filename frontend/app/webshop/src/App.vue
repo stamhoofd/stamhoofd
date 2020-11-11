@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
-import { PromiseView, ToastBox } from '@stamhoofd/components';
+import { ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
@@ -19,51 +19,6 @@ import CheckoutSteps from './views/CheckoutSteps.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
 import OrderView from './views/orders/OrderView.vue';
 import WebshopView from './views/WebshopView.vue';
-
-function hexToHSL(H) {
-	// Convert hex to RGB first
-	let r: any = 0, g: any = 0, b: any = 0;
-	if (H.length == 4) {
-		r = "0x" + H[1] + H[1];
-		g = "0x" + H[2] + H[2];
-		b = "0x" + H[3] + H[3];
-	} else if (H.length == 7) {
-		r = "0x" + H[1] + H[2];
-		g = "0x" + H[3] + H[4];
-		b = "0x" + H[5] + H[6];
-	}
-	// Then to HSL
-	r /= 255;
-	g /= 255;
-	b /= 255;
-	let cmin = Math.min(r,g,b),
-        cmax = Math.max(r,g,b),
-        delta = cmax - cmin,
-        h = 0,
-        s = 0,
-        l = 0;
-
-	if (delta == 0)
-		h = 0;
-	else if (cmax == r)
-		h = ((g - b) / delta) % 6;
-	else if (cmax == g)
-		h = (b - r) / delta + 2;
-	else
-		h = (r - g) / delta + 4;
-
-	h = Math.round(h * 60);
-
-	if (h < 0)
-		h += 360;
-
-	l = (cmax + cmin) / 2;
-	s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-	s = +(s * 100).toFixed(1);
-	l = +(l * 100).toFixed(1);
-
-	return { h, s, l}
-}
 
 @Component({
     components: {
@@ -94,16 +49,7 @@ export default class App extends Vue {
 
                 // Set color
                 if (WebshopManager.organization.meta.color) {
-                    document.documentElement.style.setProperty("--color-primary", WebshopManager.organization.meta.color)
-
-                    // Do color manipulation here
-                    let { h, s, l } = hexToHSL(WebshopManager.organization.meta.color.substring(1));
-                    // Modify s + l
-                    l = 97
-                    s = 100
-                    
-                    const primaryBackground = "hsl(" + h + "," + s + "%," + l + "%)";
-                    document.documentElement.style.setProperty("--color-primary-background", primaryBackground)
+                    ColorHelper.setColor(WebshopManager.organization.meta.color)
                 }
 
                 return new ComponentWithProperties(ModalStackComponent, {

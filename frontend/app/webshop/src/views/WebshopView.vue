@@ -182,7 +182,6 @@ export default class WebshopView extends Mixins(NavigationMixin){
     min-height: calc(var(--vh, 1vh) * 100);
 
     .webshop-banner {
-        width: 100%;
         height: 300px;
         background: $color-gray;
         border-radius: $border-radius;
@@ -193,6 +192,17 @@ export default class WebshopView extends Mixins(NavigationMixin){
             height: 100%;
             width: 100%;
             object-fit: cover;
+        }
+
+        @media (max-width: 800px) {
+            border-radius: 0;
+            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+            margin-bottom: 30px;
+            height: calc(100vw / 720 * 300);
+
+            img {
+                border-radius: 0;
+            }
         }
     }
 

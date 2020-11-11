@@ -22,8 +22,9 @@
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.unitPrice | price }}
                         </p>
-                        <div>
+                        <div @click.stop>
                             <button class="button icon trash gray" @click="deleteItem(cartItem)" />
+                            <StepperInput v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -49,7 +50,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { ErrorBox, LoadingButton,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast, StepperInput } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
@@ -68,7 +69,8 @@ import { CheckoutStepsManager } from './CheckoutStepsManager';
         STList,
         STListItem,
         STErrorsDefault,
-        LoadingButton
+        LoadingButton,
+        StepperInput
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -132,6 +134,23 @@ export default class CartView extends Mixins(NavigationMixin){
         }
         CheckoutManager.saveCart()
     }
+
+    countFor(cartItem: CartItem) {
+        return CheckoutManager.cart.items.reduce((prev, item) => {
+            if (item.product.id != cartItem.product.id) {
+                return prev
+            }
+            return prev + item.amount
+        }, 0)  - (cartItem.amount ?? 0)
+    }
+
+    maximumRemainingFor(cartItem: CartItem) {
+        if (cartItem.product.remainingStock === null) {
+            return null
+        }
+
+        return cartItem.product.remainingStock - this.countFor(cartItem)
+    }
 }
 </script>
 
@@ -159,20 +178,29 @@ export default class CartView extends Mixins(NavigationMixin){
             font-size: 14px;
             line-height: 1.4;
             font-weight: 600;
-            padding-top: 10px;
             color: $color-primary;
         }
 
         footer {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
         }
 
         img {
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
             border-radius: $border-radius;
+
+            @media (min-width: 340px) {
+                width: 80px;
+                height: 80px;
+            }
+
+            @media (min-width: 801px) {
+                width: 100px;
+                height: 100px;
+            }
         }
     }
 }
