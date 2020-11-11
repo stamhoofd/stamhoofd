@@ -63,7 +63,7 @@ export default class IBANInput extends Vue {
     }
 
     async validate() {
-        this.ibanRaw = this.ibanRaw.trim().toUpperCase()
+        this.ibanRaw = this.ibanRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
         if (!this.required && this.ibanRaw.length == 0) {
             this.errorBox = null
@@ -78,7 +78,7 @@ export default class IBANInput extends Vue {
         if (!ibantools.isValidIBAN(iban)) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig rekeningnummer",
+                "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
                 "field": "iban"
             }))
             this.$emit("input", null)

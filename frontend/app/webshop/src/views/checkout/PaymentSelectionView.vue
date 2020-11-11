@@ -79,7 +79,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get paymentMethods() {
-        return this.organization.meta.paymentMethods // todo: replace by webshop payment methods in the future
+        return this.webshop.meta.paymentMethods // todo: replace by webshop payment methods in the future
     }
 
     goToOrder(id: string) {
@@ -109,7 +109,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     payment, 
                     paymentUrl: response.data.paymentUrl, 
                     returnUrl: "https://"+this.webshop.getUrl(this.organization)+"/payment?id="+encodeURIComponent(payment.id),
-                    component: this
+                    component: this,
+                    iban: WebshopManager.webshop.meta.iban,
                 }, (payment: Payment) => {
                     console.log("Success")
                     // success

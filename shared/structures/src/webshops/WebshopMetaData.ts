@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../Address';
 import { Image } from '../files/Image';
+import { PaymentMethod } from '../PaymentMethod';
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -198,6 +199,12 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
     checkoutMethods: CheckoutMethod[] = []
+
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 41 })
+    paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+
+    @field({ decoder: StringDecoder, nullable: true, version: 42 })
+    iban: string | null = null
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {

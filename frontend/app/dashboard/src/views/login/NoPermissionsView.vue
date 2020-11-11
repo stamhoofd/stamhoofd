@@ -28,7 +28,6 @@ import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import FinancialProblemsView from './FinancialProblemsView.vue';
 import { Formatter } from '@stamhoofd/utility';
-import TransferPaymentView from './TransferPaymentView.vue';
 import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({

@@ -55,16 +55,18 @@ export class PaymentHandler {
         payment: Payment; 
         returnUrl: string | null;
         paymentUrl: string | null; 
+        iban: string | null;
         component: NavigationMixin; 
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         let finishedHandler: (() => void) | null = null
-        const {payment, organization, server, component, paymentUrl, returnUrl } = settings;
+        const {payment, organization, server, component, paymentUrl, returnUrl, iban } = settings;
 
         if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
                 organization,
                 payment,
+                iban,
                 finishedHandler: (payment: Payment) => {
                     if (finishedHandler) {
                         // hide payconiq button view if needed

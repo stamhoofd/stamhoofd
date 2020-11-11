@@ -80,6 +80,7 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
             this.webshop = this.editWebshop
         } else {
             this.webshop = PrivateWebshop.create({})
+            this.webshop.meta.paymentMethods = OrganizationManager.organization.meta.paymentMethods
         }
     }
 

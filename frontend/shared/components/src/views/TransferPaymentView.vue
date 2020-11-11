@@ -22,7 +22,7 @@
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Bankrekening</td>
-                                    <td>{{ organization.meta.iban }}</td>
+                                    <td>{{ iban || organization.meta.iban }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Gestructureerde mededeling</td>
@@ -83,6 +83,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     @Prop({ required: true }) 
     organization: Organization
 
+    @Prop({ default: null }) 
+    iban: string | null
+
     @Prop({ default: false })
     isPopup: boolean
 
@@ -105,7 +108,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
-            const iban = this.organization.meta.iban ?? "";
+            const iban = this.iban ?? this.organization.meta.iban ?? "";
             const creditor = this.organization.name
             const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nBetalen";
 

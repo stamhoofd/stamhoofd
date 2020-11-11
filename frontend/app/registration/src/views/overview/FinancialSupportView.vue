@@ -32,7 +32,6 @@ import { MemberWithRegistrations, Group, RegisterMembers, RegisterMember, Paymen
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
-import TransferPaymentView from './TransferPaymentView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';

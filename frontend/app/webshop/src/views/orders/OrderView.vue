@@ -207,6 +207,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 root: new ComponentWithProperties(TransferPaymentView, {
                     payment: this.order.payment,
                     organization: WebshopManager.organization,
+                    iban: WebshopManager.webshop.meta.iban ?? null,
                     isPopup: true
                 })
             }).setDisplayStyle("popup"))
