@@ -74,7 +74,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
                 this.pop();
             } else {
                 //navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
-                this.finishedHandler(this.payment)
+                this.finishedHandler.call(this, this.payment)
             }
         }
         
@@ -94,12 +94,12 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
                 this.pollCount++;
                 if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
-                    this.finishedHandler(this.payment);
+                    this.finishedHandler.call(this, this.payment);
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
             }).catch(e => {
-                this.finishedHandler(this.payment);
+                this.finishedHandler.call(this, this.payment);
             })
     }
 

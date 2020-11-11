@@ -79,7 +79,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get paymentMethods() {
-        return this.webshop.meta.paymentMethods // todo: replace by webshop payment methods in the future
+        return this.webshop.meta.paymentMethods
     }
 
     goToOrder(id: string) {

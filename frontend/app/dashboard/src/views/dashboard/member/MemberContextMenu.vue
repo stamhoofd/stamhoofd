@@ -2,12 +2,12 @@
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="editMember">
             Wijzig gegevens
-            <span class="icon edit" slot="right"/>
+            <span slot="right" class="icon edit" />
         </ContextMenuItem>
 
         <ContextMenuItem @click="changeGroup">
             Wijzig groep
-            <span class="icon sync" slot="right"/>
+            <span slot="right" class="icon sync" />
         </ContextMenuItem>
 
         <template v-if="member.details && member.details.parents.length > 0">
@@ -43,31 +43,30 @@
 
         <ContextMenuItem @click="deleteRegistration">
             Uitschrijven
-            <span class="icon unregister" slot="right"/>
+            <span slot="right" class="icon unregister" />
         </ContextMenuItem>
         <ContextMenuItem @click="deleteData">
-            <span class="icon trash" slot="right"/>
+            <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
-
     </ContextMenu>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, CenteredMessage, CenteredMessageButton, Toast } from "@stamhoofd/components";
+import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
+import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailView from "../mail/MailView.vue";
-import SMSView from "../sms/SMSView.vue";
-import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
-import EditMemberView from './edit/EditMemberView.vue';
-import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from '../../../classes/MemberManager';
+import MailView from "../mail/MailView.vue";
+import SMSView from "../sms/SMSView.vue";
+import EditMemberGroupView from './edit/EditMemberGroupView.vue';
+import EditMemberView from './edit/EditMemberView.vue';
 
 @Component({
     components: {
@@ -138,7 +137,18 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     }
 
     deleteRegistration() {
-        new CenteredMessage("Binnenkort beschikbaar!", "Deze functie is op dit moment nog niet beschikbaar, maar mag je vrij snel verwachten. Contacteer ons gerust als je hierover vragen hebt.", "clock").addCloseButton().show()
+        new CenteredMessage("Ben je zeker dat je de inschrijving van "+this.member.firstName+" wilt verwijderen?", "De gegevens van het lid blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
+            .addButton(new CenteredMessageButton("Uitschrijven", {
+                action: async () => {
+                    // todo
+                    await MemberManager.unregisterMember(this.member)
+                    new Toast(this.member.firstName+' is uitgeschreven', "success").show()
+                },
+                type: "destructive",
+                icon: "unregister"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
     }
 
     changeGroup() {
