@@ -126,7 +126,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-           const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Customer, true)
+           const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Customer)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

@@ -15,7 +15,7 @@
                         <p class="style-description-small">
                             {{ checkoutMethod.description || checkoutMethod.address || "" }}
                         </p>
-                        <p class="style-description-small" v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
+                        <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
                             {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ checkoutMethod.timeSlots.timeSlots[0].startTime | minutes }} - {{ checkoutMethod.timeSlots.timeSlots[0].endTime | minutes }}
                         </p>
                     </STListItem>
@@ -115,7 +115,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
 
         try {
             // Force a save if nothing changed (to fix timeSlot + updated data)
-            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Method, true)
+            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Method)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

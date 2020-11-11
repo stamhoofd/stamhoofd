@@ -1,4 +1,4 @@
-import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
+import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, Webshop } from '@stamhoofd/structures';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
@@ -34,6 +34,22 @@ export class CheckoutStep {
                 // If you get a compile error here, a type is missing in the switch and you should add it
                 const t: never = this.type
                 throw new Error("Missing component for "+t)
+            }
+        }
+    }
+
+    validate(checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) {
+        switch (this.type) {
+            case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
+            case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
+            case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
+            case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta); return;
+            case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta); return;
+
+            default: {
+                // If you get a compile error here, a type is missing in the switch and you should add it
+                const t: never = this.type
+                throw new Error("Missing validate for "+t)
             }
         }
     }
@@ -99,7 +115,7 @@ export class CheckoutStepsManager {
         return this.getSteps().filter(s => s.active)
     }
 
-    static getNextStep(step: CheckoutStepType | undefined, runSkip = false) {
+    static getNextStep(step: CheckoutStepType | undefined) {
         const steps = this.getSteps()
         let next = step === undefined
         for (const s of steps) {
@@ -107,11 +123,12 @@ export class CheckoutStepsManager {
                 if (s.active) {
                     return s
                 }
-                if (runSkip) {
-                    s.skipHandler()
-                }
+                s.skipHandler()
                 continue
             }
+
+            // Validate all steps along the way
+            s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
             if (s.type === step) {
                 next = true
             }

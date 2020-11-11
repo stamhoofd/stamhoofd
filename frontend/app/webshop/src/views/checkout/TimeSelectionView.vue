@@ -9,7 +9,9 @@
                     Kies je leveringstijdstip
                 </h1>
 
-                <p v-if="checkoutMethod.type == 'Takeout'">Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : ''}} {{ checkoutMethod.address }}</p>
+                <p v-if="checkoutMethod.type == 'Takeout'">
+                    Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+                </p>
                 
                 <STErrorsDefault :error-box="errorBox" />
 
@@ -103,7 +105,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Time, true)
+            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Time)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

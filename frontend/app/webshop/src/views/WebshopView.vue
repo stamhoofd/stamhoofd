@@ -28,8 +28,9 @@ import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STLi
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
-import { GlobalEventBus } from '../classes/EventBus';
 
+import { CheckoutManager } from '../classes/CheckoutManager';
+import { GlobalEventBus } from '../classes/EventBus';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
@@ -78,7 +79,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     mounted() {
         GlobalEventBus.addListener(this, "checkout", async () => {
             console.log("goto checkout")
-            const nextStep = CheckoutStepsManager.getNextStep(undefined, true)
+            const nextStep = CheckoutStepsManager.getNextStep(undefined)
 
             if (!nextStep) {
                 // Not possible
@@ -129,12 +130,17 @@ export default class WebshopView extends Mixins(NavigationMixin){
         let step: CheckoutStepType | undefined = undefined
         const components: Promise<any>[] = []
         while (step != destination) {
-            const nextStep = CheckoutStepsManager.getNextStep(step, true)
-            if (!nextStep) {
+            try {
+                const nextStep = CheckoutStepsManager.getNextStep(step)
+                if (!nextStep) {
+                    break;
+                }
+                components.push(nextStep.getComponent())
+                step = nextStep.type
+            } catch (e) {
+                // Possible invalid checkout -> stop here
                 break;
             }
-            components.push(nextStep.getComponent())
-            step = nextStep.type
         }
 
         Promise.all(components).then(comp => {
