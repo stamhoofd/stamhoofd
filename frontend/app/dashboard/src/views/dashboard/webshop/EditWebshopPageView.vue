@@ -34,7 +34,11 @@
             </div>
         </h2>
 
-        <img v-if="coverPhoto" :src="coverPhotoSrc" class="image">
+        <p>De foto wordt getoond met een grootte van 720 x 300, maar we raden aan om een foto van minstens 1440 x 600 te uploaden.</p>
+
+        <figure v-if="coverPhotoSrc" class="webshop-banner">
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
+        </figure>
 
         <hr>
         <h2>Link</h2>
@@ -248,12 +252,28 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
         ]
     }
 
+    get coverPhotoResolution() {
+        const image = this.coverPhoto
+        if (!image) {
+            return null
+        }
+        return image.getResolutionForSize(800, 200)
+    }
+
     get coverPhotoSrc() {
         const image = this.coverPhoto
         if (!image) {
             return null
         }
-        return image.getPathForSize(800, undefined)
+        return this.coverPhotoResolution?.file.getPublicPath()
+    }
+    
+    get coverImageWidth() {
+        return this.coverPhotoResolution?.width
+    }
+
+    get coverImageHeight() {
+        return this.coverPhotoResolution?.height
     }
 
     copyElement(event) {
@@ -291,7 +311,36 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
 .webshop-view-page {
     .image {
-        height: 200px;
+        display: block;
+        max-width: 100%;
+        max-height: 200px;
+        width: auto;
+        height: auto;
+    }
+
+     .webshop-banner {
+        height: 300px;
+        background: $color-gray;
+        border-radius: $border-radius;
+        margin-top: 20px;
+
+        img {
+            border-radius: $border-radius;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 800px) {
+            border-radius: 0;
+            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+            margin-top: 20px;
+            height: calc(100vw / 720 * 300);
+
+            img {
+                border-radius: 0;
+            }
+        }
     }
 }
 </style>
