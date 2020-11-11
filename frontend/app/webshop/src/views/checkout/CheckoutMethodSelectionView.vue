@@ -15,6 +15,9 @@
                         <p class="style-description-small">
                             {{ checkoutMethod.description || checkoutMethod.address || "" }}
                         </p>
+                        <p class="style-description-small" v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
+                            {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ checkoutMethod.timeSlots.timeSlots[0].startTime | minutes }} - {{ checkoutMethod.timeSlots.timeSlots[0].endTime | minutes }}
+                        </p>
                     </STListItem>
                 </STList>
             </main>
@@ -38,6 +41,7 @@ import { ComponentWithProperties,HistoryManager,NavigationController,NavigationM
 import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { CheckoutMethod, CheckoutMethodType, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
@@ -56,6 +60,11 @@ import TimeSelectionView from './TimeSelectionView.vue';
         Radio,
         LoadingButton,
         STErrorsDefault
+    },
+    filters: {
+        date: Formatter.dateWithDay.bind(Formatter),
+        minutes: Formatter.minutes.bind(Formatter),
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     }
 })
 export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin){
