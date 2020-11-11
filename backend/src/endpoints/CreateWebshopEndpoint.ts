@@ -54,7 +54,15 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.products = request.body.products
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
-        webshop.uri = Formatter.slug(webshop.meta.name)
+        webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
+
+        if (request.body.domain !== undefined) {
+            webshop.domain = request.body.domain
+        }
+
+        if (request.body.domainUri !== undefined) {
+            webshop.domainUri = request.body.domainUri
+        }
 
         await webshop.save()
         

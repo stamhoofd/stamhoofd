@@ -108,6 +108,8 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
             path: "/webshop/"+this.webshop.id,
         })
         new Toast("Webshop verwijderd", "success green").show()
+
+        OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshop.id)
         this.dismiss({ force: true })
     }
 
