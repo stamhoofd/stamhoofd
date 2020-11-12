@@ -4,10 +4,11 @@ import { Address } from '../Address';
 import { Payment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
+import { Checkout } from './Checkout';
 import { Customer } from './Customer';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, WebshopTimeSlot } from './WebshopMetaData';
 
-export class OrderData extends AutoEncoder {
+export class OrderData extends Checkout {
     @field({ decoder: WebshopTimeSlot, nullable: true })
     timeSlot: WebshopTimeSlot | null = null
     

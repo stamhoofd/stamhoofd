@@ -144,6 +144,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
 
         Promise.all(components).then(comp => {
+            if (comp.length == 0) {
+                this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"));
+                return;
+            }
             const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
             this.navigationController!.push(replaceWith[replaceWith.length - 1], animated, 0, false, replaceWith.slice(0, replaceWith.length - 1))
         }).catch(e => {

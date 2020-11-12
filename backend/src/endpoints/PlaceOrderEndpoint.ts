@@ -94,16 +94,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
         const webshopStruct = WebshopStruct.create(webshop)
 
+        request.body.validate(webshopStruct, organization.meta)
         const validatedCart = request.body.cart
-        try {
-            validatedCart.validate(webshopStruct)
-        } catch (e) {
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                e.addNamespace("cart")
-            }
-            throw e
-        }
-
         const totalPrice = validatedCart.price
 
         const order = new Order().setRelation(Order.webshop, webshop)

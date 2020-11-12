@@ -116,6 +116,8 @@ export class CheckoutStepsManager {
     }
 
     static getNextStep(step: CheckoutStepType | undefined) {
+        CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
+
         const steps = this.getSteps()
         let next = step === undefined
         for (const s of steps) {

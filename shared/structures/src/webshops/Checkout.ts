@@ -1,5 +1,5 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Address } from '../Address';
@@ -34,6 +34,26 @@ export class Checkout extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
+
+    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+        if (this.cart.items.length == 0) {
+            throw new SimpleError({
+                code: "cart_empty",
+                message: "Cart is empty",
+                human: "Jouw winkelmandje is leeg",
+                field: "cart"
+            })
+        }
+
+        try {
+            this.cart.validate(webshop)
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                e.addNamespace("cart")
+            }
+            throw e
+        }
+    }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {
         if (this.checkoutMethod == null) {
@@ -108,14 +128,66 @@ export class Checkout extends AutoEncoder {
     }
 
     validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+        if (this.customer.firstName.length < 2) {
+            throw new SimpleError({
+                code: "invalid_first_name",
+                message: "Invalid first name",
+                human: "Het voornaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                field: "customer.firstName"
+            })
+        }
 
+        if (this.customer.lastName.length < 2) {
+            throw new SimpleError({
+                code: "invalid_last_name",
+                message: "Invalid last name",
+                human: "Het achternaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                field: "customer.lastName"
+            })
+        }
+
+        if (this.customer.phone.length < 6) {
+            throw new SimpleError({
+                code: "invalid_phone",
+                message: "Invalid phone",
+                human: "Het GSM-nummer dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                field: "customer.phone"
+            })
+        }
+
+        const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+        
+        if (!regex.test(this.customer.email)) {
+            throw new SimpleError({
+                code: "invalid_email",
+                message: "Invalid email",
+                human: "Het e-mailadres dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                field: "customer.email"
+            })
+        }
     }
 
     validatePayment(webshop: Webshop, organizationMeta: OrganizationMetaData) {
-
+        if (!this.paymentMethod) {
+            throw new SimpleError({
+                code: "missing_payment_ethod",
+                message: "Missing payment method",
+                human: "Kies een betaalmethode",
+                field: "paymentMethod"
+            })
+        }
+        if (!webshop.meta.paymentMethods.includes(this.paymentMethod)) {
+            throw new SimpleError({
+                code: "missing_payment_ethod",
+                message: "Missing payment method",
+                human: "Deze betaalmethode is niet meer beschikbaar. Herlaad eventueel de pagina en probeer opnieuw.",
+                field: "paymentMethod"
+            })
+        }
     }
 
     validate(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+        this.validateCart(webshop, organizationMeta)
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
