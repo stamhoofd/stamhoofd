@@ -4,8 +4,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../Address';
+import { Country, CountryDecoder } from '../CountryDecoder';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
+import { Province } from '../Province';
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -81,6 +83,51 @@ export class WebshopTakeoutMethod extends CheckoutMethod {
     address: Address
 }
 
+/**
+ * If you want to have some sort of cost (e.g. delivery cost that is variable depending on the cart value)
+ */
+export class CheckoutMethodPrice extends AutoEncoder {
+    @field({ decoder: IntegerDecoder })
+    price = 0
+
+    /**
+     * At what price of the cart the discount price should be used instead.
+     * If it is null, the discount price will never get used
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    minimumPrice: number | null = null
+
+    @field({ decoder: IntegerDecoder })
+    discountPrice = 0
+}
+
+export class WebshopDeliveryLocation extends AutoEncoder {
+    /** Name of the city (only used for cache) */
+    @field({ decoder: StringDecoder })
+    city = ""
+
+    /**
+     * Only fill in if you want to match a city
+     */
+    @field({ decoder: StringDecoder })
+    postalCode = ""
+
+    @field({ decoder: BooleanDecoder })
+    submunicipality = false
+
+    /**
+     * Only fill in if you want to match the whole province
+     */
+    @field({ decoder: new EnumDecoder(Province), nullable: true })
+    province: Province | null = null
+
+    @field({ decoder: CountryDecoder })
+    country: Country;
+
+    @field({ decoder: CheckoutMethodPrice, nullable: true })
+    price: CheckoutMethodPrice | null = null
+}
+
 export class WebshopDeliveryMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery
@@ -145,44 +192,6 @@ export class AnyCheckoutMethodDecoder {
         return StringDecoder
     }
 }
-
-/*
-export class WebshopDeliveryCity extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name = ""
-
-    @field({ decoder: StringDecoder })
-    postalCode = ""
-
-    @field({ decoder: new ArrayDecoder(WebshopDeliveryCity) })
-    children: WebshopDeliveryCity[] = [] // If subcities are included (should be reachable immediately during validation!)
-}
-
-export class WebshopDeliveryOption extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name = ""
-
-    @field({ decoder: StringDecoder })
-    description = ""
-
-    @field({ decoder: new ArrayDecoder(WebshopTimeSlot) })
-    timeSlots: WebshopTimeSlot[] = []
-
-    @field({ decoder: IntegerDecoder })
-    deliveryPrice = 0
-
-    @field({ decoder: IntegerDecoder, nullable: true })
-    deliveryPriceDiscountMinimumPrice: number | null = null
-
-    /**
-     * Ignore if deliveryPriceDiscountMinimumPrice is null
-     */
-    /*@field({ decoder: IntegerDecoder })
-    deliveryPriceDiscount = 0
-
-
-}*/
-
 
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
