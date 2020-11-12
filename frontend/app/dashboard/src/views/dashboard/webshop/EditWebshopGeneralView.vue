@@ -48,7 +48,7 @@
 
         <STList>
             <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" @click="editCheckoutMethod(method)">
-                {{ method.type }}: {{ method.name }}
+                {{ method.type == 'Takeout' ? 'Afhalen' : 'Leveren' }}: {{ method.name }}
 
                 <template slot="right">
                     <button class="button icon arrow-up gray" @click.stop="moveCheckoutUp(method)" />
