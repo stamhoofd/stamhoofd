@@ -10,10 +10,10 @@
             </main>
 
             <STToolbar>
+                <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
+                        <span>Bestelling bevestigen</span>
                     </button>
                 </LoadingButton>
             </STToolbar>
@@ -48,6 +48,7 @@ import { CheckoutStepType } from './CheckoutStepsManager';
         PaymentSelectionList
     },
     filters: {
+        price: Formatter.price.bind(Formatter),
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
         minutes: Formatter.minutes.bind(Formatter)
     }
@@ -66,6 +67,10 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     set selectedPaymentMethod(paymentMethod: PaymentMethod | null) {
         CheckoutManager.checkout.paymentMethod = paymentMethod
         CheckoutManager.saveCheckout()
+    }
+
+    get checkout() {
+        return CheckoutManager.checkout
     }
 
     get checkoutMethod() {

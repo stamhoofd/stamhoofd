@@ -35,6 +35,10 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
 
+    get totalPrice() {
+        return this.cart.price
+    }
+
     validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData) {
         if (this.cart.items.length == 0) {
             throw new SimpleError({
