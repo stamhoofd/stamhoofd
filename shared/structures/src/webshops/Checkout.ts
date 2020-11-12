@@ -84,6 +84,14 @@ export class Checkout extends AutoEncoder {
             })
         }
 
+        if (webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
+            throw new SimpleError({
+                code: "closed",
+                message: "Orders are closed",
+                human: "Helaas! Je bent te laat. De bestellingen zijn gesloten.",
+            })
+        }
+
         this.checkoutMethod = checkoutMethod
     }
 
