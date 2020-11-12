@@ -27,7 +27,21 @@
             iDEAL (29 cent)
         </Checkbox>
 
-        <IBANInput v-if="enableTransfers" v-model="iban" title="Bankrekeningnummer" :placeholder="organization.meta.iban" :validator="validator" :required="false" />
+        <IBANInput v-if="enableTransfers" v-model="iban" title="Bankrekeningnummer (overschrijvingen)" :placeholder="organization.meta.iban" :validator="validator" :required="false" />
+
+        <hr>
+        <h2>Beschikbaarheid</h2>
+
+        <Checkbox v-model="useAvailableUntil">
+            Stop bestellingen op een bepaalde datum
+        </Checkbox>
+
+        <div v-if="useAvailableUntil" class="split-inputs">
+            <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
+                <DateSelection v-model="availableUntil" />
+            </STInputBox>
+            <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
+        </div>
 
         <hr>
         <h2>Afhaal- en leveringsopties</h2>
@@ -57,16 +71,15 @@
                 <span>Leveringsoptie toevoegen</span>
             </button>
         </p>
-        
     </main>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STList, STListItem,Toast,TooltipDirective as Tooltip, Validator, Checkbox, IBANInput } from "@stamhoofd/components";
+import { Checkbox, DateSelection, ErrorBox, IBANInput,STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { AnyCheckoutMethod, CheckoutMethod, EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, PaymentMethod, PrivateWebshop, Record, RecordTypeHelper, RecordTypePriority, Webshop, WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -80,7 +93,9 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        IBANInput
+        IBANInput,
+        DateSelection,
+        TimeInput
     },
     directives: { Tooltip },
 })
@@ -174,6 +189,37 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
 
     get organization() {
         return SessionManager.currentSession!.organization!
+    }
+
+    get useAvailableUntil() {
+        return this.webshop.meta.availableUntil !== null
+    }
+
+    set useAvailableUntil(use: boolean) {
+        if (use == this.useAvailableUntil) {
+            return;
+        }
+        const p = PrivateWebshop.patch({})
+        const meta = WebshopMetaData.patch({})
+        if (use) {
+            meta.availableUntil = new Date()
+        } else {
+            meta.availableUntil = null
+        }
+        p.meta = meta
+        this.$emit("patch", p)
+    }
+
+    get availableUntil() {
+        return this.webshop.meta.availableUntil ?? new Date()
+    }
+
+    set availableUntil(availableUntil: Date) {
+        const p = PrivateWebshop.patch({})
+        const meta = WebshopMetaData.patch({})
+        meta.availableUntil = availableUntil
+        p.meta = meta
+        this.$emit("patch", p)
     }
 
     get iban() {

@@ -13,8 +13,17 @@
                     Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
                 </p>
 
-                <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
-                <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
+                <p v-if="closed" class="error-box">
+                    Bestellingen zijn gesloten
+                </p>
+                <p v-else-if="almostClosed" class="warning-box">
+                    Bestellen kan tot {{ webshop.meta.availableUntil | time }}
+                </p>
+
+                <template v-if="!closed">
+                    <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
+                    <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
+                </template>
             </main>
         </div>
     </section>
@@ -50,7 +59,8 @@ import ProductGrid from "./products/ProductGrid.vue"
         ProductGrid
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price.bind(Formatter),
+        time: Formatter.time.bind(Formatter)
     }
 })
 export default class WebshopView extends Mixins(NavigationMixin){
@@ -72,6 +82,21 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get bannerImageSrc() {
         return this.bannerImage?.file.getPublicPath()
+    }
+
+    get closed() {
+        // 2 minutes in advance already
+        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 2*60*1000) {
+            return true
+        }
+        return false
+    }
+
+    get almostClosed() {
+        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 6*60*60*1000) {
+            return true
+        }
+        return false
     }
 
     canSetUrl = false

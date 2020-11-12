@@ -205,6 +205,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 42 })
     iban: string | null = null
+
+    @field({ decoder: DateDecoder, nullable: true, version: 43 })
+    availableUntil: Date | null = null
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {
