@@ -57,6 +57,14 @@ export class Checkout extends AutoEncoder {
             }
             throw e
         }
+
+        if (webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
+            throw new SimpleError({
+                code: "closed",
+                message: "Orders are closed",
+                human: "Helaas! Je bent te laat. De bestellingen zijn gesloten.",
+            })
+        }
     }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {
@@ -81,14 +89,6 @@ export class Checkout extends AutoEncoder {
                 message: "Checkout method is invalid",
                 human: "Er zijn enkele instellingen gewijzigd terwijl je aan het bestellen was. Herlaad de pagina en probeer opnieuw.",
                 field: "checkoutMethod"
-            })
-        }
-
-        if (webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
-            throw new SimpleError({
-                code: "closed",
-                message: "Orders are closed",
-                human: "Helaas! Je bent te laat. De bestellingen zijn gesloten.",
             })
         }
 

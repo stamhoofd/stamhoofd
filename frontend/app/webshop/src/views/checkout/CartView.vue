@@ -1,13 +1,15 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :title="title">
-            <span slot="left" class="style-tag" v-if="cart.items.length > 0">{{ cart.price | price }}</span>
+            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
 
-            <p class="info-box" v-if="cart.items.length == 0">Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.</p>
+            <p v-if="cart.items.length == 0" class="info-box">
+                Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
+            </p>
             <STErrorsDefault :error-box="errorBox" />
            
             <STList>
@@ -50,17 +52,16 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast, StepperInput } from '@stamhoofd/components';
+import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
-import { GlobalEventBus } from '../../classes/EventBus';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import { GlobalEventBus } from '../../classes/EventBus';
 import { WebshopManager } from '../../classes/WebshopManager';
 import CartItemView from '../products/CartItemView.vue';
-import { CheckoutStepsManager } from './CheckoutStepsManager';
 
 @Component({
     components: {
@@ -96,7 +97,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
          try {
-            GlobalEventBus.sendEvent("checkout", "cart")
+            await GlobalEventBus.sendEvent("checkout", "cart")
             this.dismiss({ force: true })
         } catch (e) {
             console.error(e)
