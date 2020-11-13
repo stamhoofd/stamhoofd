@@ -1,7 +1,7 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 
-import { ValidatedAddress } from '../Address';
+import { ValidatedAddress } from '../addresses/Address';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';

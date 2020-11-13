@@ -1,7 +1,7 @@
 import { AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Address } from "../Address";
+import { Address } from "../addresses/Address";
 import { ParentType } from "./ParentType";
 
 export class Parent extends AutoEncoder {
