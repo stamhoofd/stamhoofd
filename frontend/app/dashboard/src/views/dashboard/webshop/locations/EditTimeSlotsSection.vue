@@ -2,7 +2,9 @@
     <div class="container">
         <hr>
         <h2 class="style-with-button">
-            <div>Keuze uit afhaaltijdstippen</div>
+            <div>
+                {{ title }}
+            </div>
             <div>
                 <button class="button text" @click="addTimeSlot">
                     <span class="icon add" />
@@ -10,19 +12,23 @@
                 </button>
             </div>
         </h2>
-        <p>Bij het plaatsen van bestellingen kan er gekozen worden tussen verschillende afhaaltijdstippen (als je meerdere keuzes toevoegt), ligt het afhaaltijdstip vast (als je er één hebt) of is het afhaaltijdstip onbepaald (geen keuzes). Dat laatste is handig als je bijvoorbeeld voor of na activiteiten kan afhalen; zet dit dan wel in de beschrijving.</p>
+        <slot />
     
-        <p class="info-box" v-if="timeSlots.timeSlots.length == 0">Je hebt geen afhaaltijdstippen toegevoegd, dus er moet geen keuze gemaakt worden. Het afhaaltijdstip van een bestelling is 'onbepaald'. Voeg één of meer keuzes toe als je het afhalen op vaste tijdstippen wilt organiseren.</p>
-        <p class="info-box" v-if="timeSlots.timeSlots.length == 1">Er is maar één keuze, dus we communiceren dit tijdstip gewoon i.v.p. een keuze te geven.</p>
+        <p v-if="timeSlots.timeSlots.length == 0" class="info-box">
+            Je hebt geen intervallen toegevoegd, dus er moet geen keuze gemaakt worden.
+        </p>
+        <p v-if="timeSlots.timeSlots.length == 1" class="info-box">
+            Er is maar één keuze, dus we communiceren dit interval i.v.p. een keuze te geven.
+        </p>
 
         <STList>
-            <STListItem v-for="timeSlot in sortedSlots" :key="timeSlot.id" :selectable="true" @click="editTimeSlot(timeSlot)" class="right-description">
+            <STListItem v-for="timeSlot in sortedSlots" :key="timeSlot.id" :selectable="true" class="right-description" @click="editTimeSlot(timeSlot)">
                 {{ timeSlot.date | date }}
 
                 <template slot="right">
                     {{ timeSlot.startTime | minutes }}
                     - {{ timeSlot.endTime | minutes }}
-                    <span  class="icon arrow-right-small gray"/>
+                    <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>
         </STList>
@@ -32,10 +38,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STListItem, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditTimeSlotView from './EditTimeSlotView.vue';
 
 @Component({
@@ -51,7 +58,9 @@ import EditTimeSlotView from './EditTimeSlotView.vue';
     }
 })
 export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
-  
+    @Prop({ required: true })
+    title!: string
+
     @Prop({ required: true })
     timeSlots!: WebshopTimeSlots
 

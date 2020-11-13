@@ -48,7 +48,9 @@
                 </div>
             </div>
 
-            <EditTimeSlotsSection :time-slots="patchedTakeoutMethod.timeSlots" @patch="patchTimeSlots" />
+            <EditTimeSlotsSection :time-slots="patchedTakeoutMethod.timeSlots" title="Keuze uit afhaalintervallen" @patch="patchTimeSlots">
+                <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+            </EditTimeSlotsSection>
         </main>
 
         <STToolbar>

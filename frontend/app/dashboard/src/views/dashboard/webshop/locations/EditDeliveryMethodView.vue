@@ -42,7 +42,9 @@
             </STInputBox>
             <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />
 
-            <EditTimeSlotsSection :time-slots="patchedDeliveryMethod.timeSlots" @patch="patchTimeSlots" />
+            <EditTimeSlotsSection :time-slots="patchedDeliveryMethod.timeSlots" title="Keuze uit leveringstijdstip" @patch="patchTimeSlots">
+                <p>Je kan tijdsintervallen toevoegen waartussen je de bestelling aan huis kan leveren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. via post versturen). Als je leveren organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+            </EditTimeSlotsSection>
 
             <hr>
             <h2>Leveringskost</h2>

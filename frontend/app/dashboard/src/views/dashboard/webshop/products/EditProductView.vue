@@ -90,29 +90,29 @@
             <img v-if="image" :src="imageSrc" class="image">
             <img v-if="image" :src="imageSrc2" class="image">
             
-            <hr>
-            <h2>
-                Voorraad
-            </h2>
+            <template v-if="false">
+                <hr>
+                <h2>
+                    Voorraad
+                </h2>
 
-            <Checkbox v-model="disabled">
-                Tijdelijk niet beschikbaar
-            </Checkbox>
+                <Checkbox v-model="disabled">
+                    Tijdelijk niet beschikbaar
+                </Checkbox>
 
-            <Checkbox v-model="useStock">
-                Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
-            </Checkbox>
+                <Checkbox v-model="useStock">
+                    Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
+                </Checkbox>
 
-            <div class="split-inputs" v-if="useStock">
-                <STInputBox  title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
-                    <NumberInput v-model="stock"  />
-                </STInputBox>
-                <STInputBox title="Waarvan reeds besteld" error-fields="usedStock" :error-box="errorBox">
-                    <NumberInput v-model="usedStock"  />
-                </STInputBox>
-            </div>
-
-            
+                <div v-if="useStock" class="split-inputs">
+                    <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
+                        <NumberInput v-model="stock" />
+                    </STInputBox>
+                    <STInputBox title="Waarvan reeds besteld" error-fields="usedStock" :error-box="errorBox">
+                        <NumberInput v-model="usedStock" />
+                    </STInputBox>
+                </div>
+            </template>
         </main>
 
         <STToolbar>
@@ -131,7 +131,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, NumberInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
