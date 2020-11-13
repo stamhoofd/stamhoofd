@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 45
+export const Version = 46
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -16,6 +16,7 @@ export * from "./src/addresses/Address"
 export * from "./src/addresses/CountryDecoder"
 export * from "./src/addresses/City"
 export * from "./src/addresses/Province"
+export * from "./src/addresses/SearchRegions"
 
 export * from "./src/OrganizationEmail"
 

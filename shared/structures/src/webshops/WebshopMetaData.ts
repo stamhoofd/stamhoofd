@@ -102,24 +102,6 @@ export class CheckoutMethodPrice extends AutoEncoder {
     discountPrice = 0
 }
 
-export class WebshopDeliveryRegion extends AutoEncoder {
-    /** Name of the city (only used for cache) */
-    @field({ decoder: StringDecoder })
-    city: City | null = null
-
-    /**
-     * Only fill in if you want to match the whole province
-     */
-    @field({ decoder: Province, nullable: true })
-    province: Province | null = null
-
-    @field({ decoder: CountryDecoder })
-    country: Country;
-
-    @field({ decoder: CheckoutMethodPrice, nullable: true })
-    price: CheckoutMethodPrice | null = null
-}
-
 export class WebshopDeliveryMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery
@@ -127,8 +109,14 @@ export class WebshopDeliveryMethod extends CheckoutMethod {
     @field({ decoder: CheckoutMethodPrice, version: 45 })
     price: CheckoutMethodPrice = CheckoutMethodPrice.create({})
 
-    @field({ decoder: new ArrayDecoder(WebshopDeliveryRegion), nullable: true, version: 44 })
-    regions: WebshopDeliveryRegion[] = []
+    @field({ decoder: new ArrayDecoder(City), version: 46 })
+    cities: City[] = []
+
+    @field({ decoder: new ArrayDecoder(Province), version: 46 })
+    provinces: Province[] = []
+
+    @field({ decoder: new ArrayDecoder(CountryDecoder), version: 46 })
+    countries: Country[] = [];
 }
 
 export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod

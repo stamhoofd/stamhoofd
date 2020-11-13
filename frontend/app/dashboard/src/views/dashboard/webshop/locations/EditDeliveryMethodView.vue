@@ -46,6 +46,8 @@
             <hr>
             <h2>Leveringskost</h2>
             <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" @patch="patchPrice" :error-box="errorBox"/>
+
+            <EditDeliveryRegionsSection :delivery-method="deliveryMethod" @patch="addPatch" />
         </main>
 
         <STToolbar>
@@ -70,6 +72,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
 import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue"
+import EditDeliveryRegionsSection from "./EditDeliveryRegionsSection.vue"
 
 @Component({
     components: {
@@ -88,7 +91,8 @@ import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue"
         UploadButton,
         STList,
         EditTimeSlotsSection,
-        CheckoutMethodPriceBox
+        CheckoutMethodPriceBox,
+        EditDeliveryRegionsSection
     },
 })
 export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
