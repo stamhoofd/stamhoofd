@@ -42,6 +42,10 @@
             </STInputBox>
 
             <EditTimeSlotsSection :time-slots="patchedDeliveryMethod.timeSlots" @patch="patchTimeSlots" />
+
+            <hr>
+            <h2>Leveringskost</h2>
+            <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" @patch="patchPrice" :error-box="errorBox"/>
         </main>
 
         <STToolbar>
@@ -61,10 +65,11 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, AnyCheckoutMethodPatch, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopDeliveryMethod, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { Address, AnyCheckoutMethodPatch, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopDeliveryMethod, WebshopTimeSlot, WebshopTimeSlots, CheckoutMethodPrice } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
+import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue"
 
 @Component({
     components: {
@@ -82,7 +87,8 @@ import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
         Spinner,
         UploadButton,
         STList,
-        EditTimeSlotsSection
+        EditTimeSlotsSection,
+        CheckoutMethodPriceBox
     },
 })
 export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
@@ -133,6 +139,10 @@ export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
    
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
         this.addPatch(WebshopDeliveryMethod.patch({ timeSlots: patch }))
+    }
+
+    patchPrice(patch: AutoEncoderPatchType<CheckoutMethodPrice>) {
+        this.addPatch(WebshopDeliveryMethod.patch({ price: patch }))
     }
   
     async save() {

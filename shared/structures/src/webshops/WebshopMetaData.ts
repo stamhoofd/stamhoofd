@@ -124,8 +124,8 @@ export class WebshopDeliveryMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery
 
-    @field({ decoder: CheckoutMethodPrice, nullable: true, version: 44 })
-    price: CheckoutMethodPrice | null = null
+    @field({ decoder: CheckoutMethodPrice, version: 45 })
+    price: CheckoutMethodPrice = CheckoutMethodPrice.create({})
 
     @field({ decoder: new ArrayDecoder(WebshopDeliveryRegion), nullable: true, version: 44 })
     regions: WebshopDeliveryRegion[] = []
