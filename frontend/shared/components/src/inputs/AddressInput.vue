@@ -22,11 +22,12 @@
 </template>
 
 <script lang="ts">
+import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, ValidatedAddress} from "@stamhoofd/structures"
 import { Vue, Prop, Component, Watch } from "vue-property-decorator";
 
 @Component({
@@ -48,7 +49,13 @@ export default class AddressInput extends Vue {
     pendingErrorBox: ErrorBox | null = null
     
     @Prop({ default: null })
-    value: Address | null
+    value: Address | ValidatedAddress | null
+
+    /**
+     * Validate on the server or not? -> will return a ValidatedAddress if this is true
+     */
+    @Prop({ default: null })
+    validateServer: Server | null
 
     @Prop({ default: true })
     required: boolean
@@ -100,7 +107,7 @@ export default class AddressInput extends Vue {
         }
     }
 
-    isValid(): boolean {
+    async isValid(): Promise<boolean> {
         if (!this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
             this.errorBox = null
 
@@ -114,7 +121,20 @@ export default class AddressInput extends Vue {
 
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
-            this.$emit("input", address)
+
+            // Do we need to validate on the server?
+            if (this.validateServer) {
+                const response = await this.validateServer.request({
+                    method: "POST",
+                    path: "/address/validate",
+                    body: address,
+                    decoder: ValidatedAddress as Decoder<ValidatedAddress>
+                })
+                this.$emit("input", response.data)
+            } else {
+                this.$emit("input", address)
+            }
+            
             this.errorBox = null
             this.pendingErrorBox = null
             return true

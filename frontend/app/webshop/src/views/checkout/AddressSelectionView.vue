@@ -6,7 +6,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" />
+                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" :validateServer="server" />
             </main>
 
             <STToolbar>
@@ -72,19 +72,25 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
     }
 
     set address(address: Address | null) {
+        console.log(address)
         CheckoutManager.checkout.address = address
         CheckoutManager.saveCheckout()
     } 
+
+    get server() {
+        return WebshopManager.server
+    }
 
     async goNext() {
         if (this.loading) {
             return
         }
+        this.loading = true
 
         if (!await this.validator.validate()) {
+            this.loading = false
             return
         }
-        this.loading = true
         this.errorBox = null
 
         try {

@@ -96,3 +96,14 @@ export class Address extends AutoEncoder {
         }
     }
 }
+
+export class ValidatedAddress extends Address {
+    @field({ decoder: StringDecoder })
+    cityId: string;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    parentCityId: string | null;
+
+    @field({ decoder: StringDecoder })
+    provinceId: string;
+}

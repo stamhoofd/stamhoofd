@@ -92,6 +92,11 @@ describe("Model.PostalCode", () => {
         expect(test).toMatchObject(mariakerke)
     });
 
+     test("Entering the postal code of a child city works", async () => {
+        const test = await PostalCode.getCity("9030", "Gent", "BE");
+        expect(test).toMatchObject(mariakerke)
+    });
+
     test("Search normal", async () => {
         const test = await PostalCode.getCity("9230", "Wetteren", "BE");
         expect(test).toMatchObject(wetteren)
