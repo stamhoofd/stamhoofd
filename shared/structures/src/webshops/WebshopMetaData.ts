@@ -3,11 +3,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Address } from '../Address';
-import { Country, CountryDecoder } from '../CountryDecoder';
+import { Address } from '../addresses/Address';
+import { City } from '../addresses/City';
+import { Country, CountryDecoder } from '../addresses/CountryDecoder';
+import { Province } from '../addresses/Province';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
-import { Province } from '../Province';
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -101,24 +102,15 @@ export class CheckoutMethodPrice extends AutoEncoder {
     discountPrice = 0
 }
 
-export class WebshopDeliveryLocation extends AutoEncoder {
+export class WebshopDeliveryRegion extends AutoEncoder {
     /** Name of the city (only used for cache) */
     @field({ decoder: StringDecoder })
-    city = ""
-
-    /**
-     * Only fill in if you want to match a city
-     */
-    @field({ decoder: StringDecoder })
-    postalCode = ""
-
-    @field({ decoder: BooleanDecoder })
-    submunicipality = false
+    city: City | null = null
 
     /**
      * Only fill in if you want to match the whole province
      */
-    @field({ decoder: new EnumDecoder(Province), nullable: true })
+    @field({ decoder: Province, nullable: true })
     province: Province | null = null
 
     @field({ decoder: CountryDecoder })
@@ -132,8 +124,11 @@ export class WebshopDeliveryMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery
 
-    // todo: add supported region here
-    // todo: add delivery costs here (could also add it to checkout method and make it general)
+    @field({ decoder: CheckoutMethodPrice, nullable: true, version: 44 })
+    price: CheckoutMethodPrice | null = null
+
+    @field({ decoder: new ArrayDecoder(WebshopDeliveryRegion), nullable: true, version: 44 })
+    regions: WebshopDeliveryRegion[] = []
 }
 
 export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod

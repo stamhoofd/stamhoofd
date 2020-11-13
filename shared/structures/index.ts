@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 43
+export const Version = 44
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -12,8 +12,11 @@ export * from "./src/User"
 export * from "./src/Token"
 export * from "./src/KeychainItem"
 export * from "./src/KeyConstants"
-export * from "./src/Address"
-export * from "./src/CountryDecoder"
+export * from "./src/addresses/Address"
+export * from "./src/addresses/CountryDecoder"
+export * from "./src/addresses/City"
+export * from "./src/addresses/Province"
+
 export * from "./src/OrganizationEmail"
 
 export * from "./src/Group"

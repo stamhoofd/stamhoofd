@@ -1,8 +1,7 @@
 import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
 
-import { Address } from '../Address';
+import { ValidatedAddress } from '../Address';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
@@ -20,8 +19,8 @@ export class Checkout extends AutoEncoder {
     /**
      * Only needed for delivery
      */
-    @field({ decoder: Address, nullable: true })
-    address: Address | null = null
+    @field({ decoder: ValidatedAddress, nullable: true })
+    address: ValidatedAddress | null = null
 
     /**
      * Only needed for delivery
