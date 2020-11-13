@@ -1,25 +1,38 @@
 <template>
     <div class="container">
         <hr>
-        <h2 class="style-with-button">
-            <div>Leveringsgebied</div>
-            <div>
-                <button class="button text" @click="addRegion">
-                    <span class="icon add" />
-                    <span>Toevoegen</span>
-                </button>
-            </div>
-        </h2>
-        <p>Je kan meerdere gebieden toevoegen waarin je wilt leveren.</p>
-    
-        <p class="info-box" v-if="deliveryMethod.regions.length == 0">Je hebt geen leveringsgebieden toegevoegd, de levering is dus overal.</p>
+        <h2>Leveringsgebied</h2>
+        <p>Voeg de gemeenten, provincies en landen toe waarin je wilt leveren.</p>
 
+        <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
+            <input v-model="searchQuery" class="input search" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
+        </LoadingButton>
+    
         <STList>
-            <STListItem v-for="region in sortedRegions" :key="region.id" class="right-description">
-                {{ region.name }}
+            <STListItem v-for="city in cities" :key="city.id" class="right-description" :selectable="true" @click="toggleCity(city)">
+                {{ city.name }} ({{ city.province.name }})
 
                 <template slot="right">
-                    <span class="icon trash"/>
+                    <span v-if="hasCity(city)" class="icon trash" />
+                    <span v-else class="icon plus" />
+                </template>
+            </STListItem>
+
+            <STListItem v-for="province in provinces" :key="province.id" class="right-description" :selectable="true" @click="toggleProvince(province)">
+                {{ province.name }} (provincie)
+
+                <template slot="right">
+                    <span v-if="hasProvince(province)" class="icon trash" />
+                    <span v-else class="icon plus" />
+                </template>
+            </STListItem>
+
+            <STListItem v-for="country in countries" :key="country" class="right-description" :selectable="true" @click="toggleCountry(country)">
+                {{ country }}
+
+                <template slot="right">
+                    <span v-if="hasCountry(country)" class="icon trash" />
+                    <span v-else class="icon plus" />
                 </template>
             </STListItem>
         </STList>
@@ -27,14 +40,33 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STListItem, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { WebshopDeliveryMethod } from "@stamhoofd/structures"
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import EditRegionView from './EditRegionView.vue';
-import EditTimeSlotView from './EditTimeSlotView.vue';
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { LoadingButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { City, Country, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+
+const throttle = (func, limit) => {
+    let lastFunc;
+    let lastRan;
+    return function() {
+        const context = this;
+        // eslint-disable-next-line prefer-rest-params
+        const args = arguments;
+        if (lastRan) {
+            clearTimeout(lastFunc);
+        }
+        lastRan = Date.now();
+            
+        lastFunc = setTimeout(function() {
+            if (Date.now() - lastRan >= limit) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            }
+        }, limit - (Date.now() - lastRan));
+    };
+};
 
 @Component({
     components: {
@@ -42,6 +74,7 @@ import EditTimeSlotView from './EditTimeSlotView.vue';
         STToolbar,
         STListItem,
         STList,
+        LoadingButton
     }
 })
 export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) {
@@ -49,42 +82,133 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
     @Prop({ required: true })
     deliveryMethod!: WebshopDeliveryMethod
 
-    
+    searchQuery = ""
+    throttledSearch = throttle(this.doSearch.bind(this), 300);
+    loadingSearch = false
+    searchResults: SearchRegions | null = null
+    searchCount = 0
+
+    @Watch('searchQuery')
+    onSearch() {
+        // start query
+        this.loadingSearch = true
+        this.searchCount++;
+
+         if (this.searchQuery.length == 0) {
+            this.searchResults = null
+            this.loadingSearch = false
+            return
+        }
+        this.throttledSearch()
+    }
+
+    async doSearch() {
+        if (this.searchQuery.length == 0) {
+            this.searchResults = null
+            this.loadingSearch = false
+            return
+        }
+
+        const c = this.searchCount
+
+        // search
+        const response = await SessionManager.currentSession!.server.request({
+            method: "GET",
+            path: "/address/search",
+            query: {
+                query: this.searchQuery
+            },
+            decoder: SearchRegions as Decoder<SearchRegions>
+        })
+
+        if (c === this.searchCount) {
+            this.searchResults = response.data
+            this.loadingSearch = false
+        }
+    }
 
     addPatch(patch: AutoEncoderPatchType<WebshopDeliveryMethod>) {
         this.$emit("patch", patch)
     }
 
-    get sortedRegions() {
-        return this.deliveryMethod.regions
+    get cities() {
+        if (this.searchResults) {
+            return this.searchResults.cities
+        }
+        return this.deliveryMethod.cities
+    }
+
+    get provinces() {
+        if (this.searchResults) {
+            return this.searchResults.provinces
+        }
+        return this.deliveryMethod.provinces
+    }
+
+    get countries() {
+        if (this.searchResults) {
+            return this.searchResults.countries
+        }
+        return this.deliveryMethod.countries
     }
    
-    addRegion() {
-        const region = WebshopDeliveryRegion.create({
-            country: "BE"
-        })
-        const p = WebshopDeliveryMethod.patch({})
-        p.regions.addPut(region)
-        
-        this.present(new ComponentWithProperties(EditRegionView, { region, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopDeliveryRegion>) => {
-            // Merge both patches
-            p.regions.merge(patch)
-            this.addPatch(p)
-
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+    hasCity(city: City) {
+        return !!this.deliveryMethod.cities.find(c => c.id == city.id)
     }
 
-    editRegion(region: WebshopDeliveryRegion) {
-        this.present(new ComponentWithProperties(EditRegionView, { region, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopDeliveryRegion>) => {
-            // Merge both patches
-            const p = WebshopDeliveryMethod.patch({})
-            p.regions.merge(patch)
-            this.addPatch(p)
+    toggleCity(city: City) {
+        const p = WebshopDeliveryMethod.patch({})
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("popup"))
+        if (this.hasCity(city)) {
+            p.cities.addDelete(city.id)
+        } else {
+            p.cities.addPut(city)
+        }
+
+        this.$emit('patch', p)
+    }
+
+    hasProvince(province: Province) {
+        return !!this.deliveryMethod.provinces.find(c => c.id == province.id)
+    }
+
+    toggleProvince(province: Province) {
+        const p = WebshopDeliveryMethod.patch({})
+
+        if (this.hasProvince(province)) {
+            p.provinces.addDelete(province.id)
+        } else {
+            p.provinces.addPut(province)
+        }
+
+        this.$emit('patch', p)
+    }
+
+    hasCountry(country: Country) {
+        return !!this.deliveryMethod.countries.find(c => c == country)
+    }
+
+    toggleCountry(country: Country) {
+        const p = WebshopDeliveryMethod.patch({})
+
+        if (this.hasCountry(country)) {
+            p.countries.addDelete(country)
+        } else {
+            p.countries.addPut(country)
+        }
+
+        this.$emit('patch', p)
     }
     
 }
 </script>
+
+<style lang="scss">
+@use '~@stamhoofd/scss/base/variables' as *;
+@use '~@stamhoofd/scss/base/text-styles';
+
+.edit-regions-search-bar {
+    display: block;
+    margin-top: 15px;
+}
+</style>

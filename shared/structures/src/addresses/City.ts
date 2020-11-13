@@ -1,6 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Country, CountryDecoder } from './CountryDecoder';
+import { Province } from './Province';
 
 export class City extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -9,8 +10,8 @@ export class City extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name: string
 
-    @field({ decoder: StringDecoder })
-    provinceId: string;
+    @field({ decoder: Province })
+    province: Province;
 
     @field({ decoder: StringDecoder, nullable: true })
     parentCityId: string | null = null;

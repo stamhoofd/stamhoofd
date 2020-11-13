@@ -40,14 +40,13 @@
                     autocomplete=""
                 />
             </STInputBox>
+            <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />
 
             <EditTimeSlotsSection :time-slots="patchedDeliveryMethod.timeSlots" @patch="patchTimeSlots" />
 
             <hr>
             <h2>Leveringskost</h2>
-            <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" @patch="patchPrice" :error-box="errorBox"/>
-
-            <EditDeliveryRegionsSection :delivery-method="deliveryMethod" @patch="addPatch" />
+            <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errorBox" @patch="patchPrice" />
         </main>
 
         <STToolbar>
@@ -67,12 +66,12 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, AnyCheckoutMethodPatch, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopDeliveryMethod, WebshopTimeSlot, WebshopTimeSlots, CheckoutMethodPrice } from "@stamhoofd/structures"
+import { Address, AnyCheckoutMethodPatch, CheckoutMethodPrice,Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
 import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue"
 import EditDeliveryRegionsSection from "./EditDeliveryRegionsSection.vue"
+import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
 
 @Component({
     components: {

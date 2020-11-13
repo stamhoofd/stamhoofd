@@ -7,7 +7,7 @@ import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
 import { Webshop } from './Webshop';
-import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopTimeSlot } from './WebshopMetaData';
+import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
 
 export class Checkout extends AutoEncoder {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -99,6 +99,16 @@ export class Checkout extends AutoEncoder {
             this.address = null;
             return;
         }
+
+        if (!(this.checkoutMethod instanceof WebshopDeliveryMethod)) {
+            throw new SimpleError({
+                code: "invalid_data_type",
+                message: "Invalid data type",
+                human: "Er ontbreekt data. Probeer het opnieuw of neem contact op met hallo@stamhoofd.be om dit te melden.",
+                field: "address"
+            })
+        }
+
         if (!this.address) {
              throw new SimpleError({
                 code: "missing_address",
@@ -107,6 +117,30 @@ export class Checkout extends AutoEncoder {
                 field: "address"
             })
         }
+
+        // Check country
+        if (this.checkoutMethod.countries.includes(this.address.country)) {
+            return
+        }
+
+        if (this.checkoutMethod.provinces.map(p => p.id).includes(this.address.provinceId)) {
+            return
+        }
+
+        if (this.checkoutMethod.cities.map(c => c.id).includes(this.address.cityId)) {
+            return
+        }
+
+        if (this.address.parentCityId && this.checkoutMethod.cities.map(c => c.id).includes(this.address.parentCityId)) {
+            return
+        }
+
+        throw new SimpleError({
+            code: "region_not_supported",
+            message: "Region not supported",
+            human: "We leveren jammer genoeg niet op dit adres.",
+            field: "address"
+        })
     }
 
     validateTimeSlot(webshop: Webshop, organizationMeta: OrganizationMetaData) {

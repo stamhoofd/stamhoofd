@@ -50,7 +50,7 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
         const cities = await City.where({ name: match }, {
-            limit: 15,
+            limit: 5,
             sort: [
                 {
                     column: { name: match },
@@ -58,17 +58,25 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
             ]
         });
+        const loadedCities: (City & { province: Province })[] = []
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
-        const provinces = await Province.where({ name: match }, {
-            limit: 15,
-            sort: [
-                {
-                    column: { name: match },
-                    direction: "DESC"
-                }
-            ]
-        });
+        const allProvinces = await Province.all();
+
+        for (const city of cities) {
+            const province = allProvinces.find(p => p.id == city.provinceId);
+            if (!province) {
+                continue;
+            }
+            loadedCities.push(city.setRelation(City.province, province))
+        }
+
+        const provinces: Province[] = []
+        for (const province of allProvinces) {
+            if (StringCompare.typoCount(request.query.query, province.name) < 3) {
+                provinces.push(province)
+            }
+        }
 
         const countries: Country[] = []
         if (StringCompare.typoCount(request.query.query, "België") < 3) {
@@ -80,7 +88,7 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
         
         return new Response(SearchRegions.create({
-            cities: cities.map(c => CityStruct.create(c)),
+            cities: loadedCities.map(c => CityStruct.create(Object.assign({...c}, { province: ProvinceStruct.create(c.province) }))),
             provinces: provinces.map(c => ProvinceStruct.create(c)),
             countries: countries
         }));

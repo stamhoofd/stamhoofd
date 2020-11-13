@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { column,Model } from '@simonbackx/simple-database';
+import { StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { City } from '../models/addresses/City';
@@ -37,13 +38,13 @@ export class Gemeente extends Model {
 }
 
 async function getProvince(name: string, provinces: Province[]): Promise<Province> {
-    const p = provinces.find(p => p.name === name && p.country == "BE")
+    const p = provinces.find(p => StringCompare.typoCount(p.name, name) < 2 && p.country == "BE")
     if (p) {
         return p
     }
     const province = new Province()
     province.country = "BE"
-    province.name = name
+    province.name = name.trim()
     await province.save()
     provinces.push(province)
     return province
@@ -65,12 +66,12 @@ export default new Migration(async () => {
         const province = await getProvince(gemeente.provincie, provinces)
         
         // Some cities have the same name
-        const found = cities.find(c => c.name == gemeente.gemeente && c.provinceId == province.id)
+        const found = cities.find(c => c.name.trim() == gemeente.gemeente.trim() && c.provinceId == province.id)
 
         if (!found) {
             // Create the city
             const city = new City()
-            city.name = gemeente.gemeente
+            city.name = gemeente.gemeente.trim()
             city.country = "BE"
             city.provinceId = province.id
 
@@ -99,17 +100,17 @@ export default new Migration(async () => {
     }
 
     for (const gemeente of gemeenten) {
-        if (gemeente.gemeente == gemeente.hoofdgemeente) {
+        if (gemeente.gemeente.trim() == gemeente.hoofdgemeente.trim()) {
             continue;
         }
 
-        const hoofd = cities.find(c => c.name == gemeente.hoofdgemeente && c.provinceId == gemeente.city.provinceId)
+        const hoofd = cities.find(c => c.name.trim() == gemeente.hoofdgemeente.trim() && c.provinceId == gemeente.city.provinceId)
         if (!hoofd) {
             console.log("Creating "+gemeente.hoofdgemeente)
 
             // Create the city
             const city = new City()
-            city.name = gemeente.hoofdgemeente
+            city.name = gemeente.hoofdgemeente.trim()
             city.country = "BE"
 
             const province = await getProvince(gemeente.provincie, provinces)
