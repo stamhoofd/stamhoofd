@@ -57,8 +57,19 @@ export class PostalCode extends Model {
             }
         }
 
-        if (bestScore < 2) {
+        if (bestScore < 3) {
             return bestCity
+        }
+
+        if (cities.length == 1 && cities[0].parentCityId !== null) {
+            // Might have put a postal code of the parent city
+            const parent = await City.getByID(cities[0].parentCityId)
+            if (parent) {
+                const typo = StringCompare.typoCount(cityName, parent.name)
+                if (typo < 3) {
+                    return cities[0] // do not return parent here, because the postal code has priority
+                }
+            }
         }
 
         // Search parent in belgium only
