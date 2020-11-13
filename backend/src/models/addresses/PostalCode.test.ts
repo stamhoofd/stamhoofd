@@ -82,6 +82,11 @@ describe("Model.PostalCode", () => {
         await massemenZip.save()
     });
 
+    test("Normal flow", async () => {
+        const test = await PostalCode.getCity("9000", "Gent", "BE");
+        expect(test).toMatchObject(gent)
+    });
+
     test("Entering the postal code of the parent city works", async () => {
         const test = await PostalCode.getCity("9000", "Mariakerke", "BE");
         expect(test).toMatchObject(mariakerke)
@@ -92,6 +97,14 @@ describe("Model.PostalCode", () => {
         expect(test).toMatchObject(wetteren)
 
         const test2 = await PostalCode.getCity("9230", "Massemen", "BE");
+        expect(test2).toMatchObject(massemen)
+    });
+
+    test("Allow typo", async () => {
+        const test = await PostalCode.getCity("9230", "Wettern", "BE");
+        expect(test).toMatchObject(wetteren)
+
+        const test2 = await PostalCode.getCity("9230", "Masemen", "BE");
         expect(test2).toMatchObject(massemen)
     });
 });
