@@ -96,11 +96,18 @@
                             </template>
                         </STListItem>
                     </template>
+                    <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
+                        Leveringskost
+
+                        <template slot="right">
+                            {{ order.data.deliveryPrice | price }}
+                        </template>
+                    </STListItem>
                     <STListItem class="right-description">
                         Totaal
 
                         <template slot="right">
-                            {{ order.data.cart.price | price }}
+                            {{ order.data.totalPrice | price }}
                         </template>
                     </STListItem>
                 </STList>

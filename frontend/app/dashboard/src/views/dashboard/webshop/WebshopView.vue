@@ -43,7 +43,7 @@
                                 v-model="selectAll"
                             />
                         </th>
-                        <th class="hide-smartphone tiny" @click="toggleSort('number')" >
+                        <th class="hide-smartphone tiny" @click="toggleSort('number')">
                             Nummer
                             <span
                                 class="sort-arrow"
@@ -110,9 +110,9 @@
                             </p>
                         </td>
                         <td>
-                            <span class="style-description-small">{{ order.order.data.cart.price | price }}</span>
-                            <span key="success" v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" class="icon success green" v-tooltip="order.order.payment && order.order.payment.paidAt ? 'Betaald op '+formatDateTime(order.order.payment.paidAt) : 'Zonder betaling'"></span>
-                            <span key="no-success" v-else class="icon clock gray" v-tooltip="'Nog niet betaald'"></span>
+                            <span class="style-description-small">{{ order.order.data.totalPrice | price }}</span>
+                            <span v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" key="success" v-tooltip="order.order.payment && order.order.payment.paidAt ? 'Betaald op '+formatDateTime(order.order.payment.paidAt) : 'Zonder betaling'" class="icon success green" />
+                            <span v-else key="no-success" v-tooltip="'Nog niet betaald'" class="icon clock gray" />
                         </td>
                     </tr>
                 </tbody>
@@ -156,11 +156,11 @@ import { Order, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, Webshop
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import OrderView from './OrderView.vue';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import EditWebshopView from './EditWebshopView.vue';
 import MailView from '../mail/MailView.vue';
+import EditWebshopView from './EditWebshopView.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
+import OrderView from './OrderView.vue';
 
 class SelectableOrder {
     order: Order;

@@ -3,10 +3,26 @@
         <div class="st-view">
             <main>
                 <h1>Kies je leveringadres</h1>
+                <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
+                    Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
+                </div>
+
+                <p v-if="checkout.deliveryPrice == 0" class="success-box">
+                    Levering is gratis
+                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
+                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                    </template>
+                </p>
+                <p v-else class="info-box">
+                    De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
+                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
+                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                    </template>
+                </p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" :validateServer="server" />
+                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" :validate-server="server" />
             </main>
 
             <STToolbar>
@@ -48,7 +64,8 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
-        minutes: Formatter.minutes.bind(Formatter)
+        minutes: Formatter.minutes.bind(Formatter),
+        price: Formatter.price.bind(Formatter)
     }
 })
 export default class AddressSelectionView extends Mixins(NavigationMixin){
@@ -61,6 +78,14 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
 
     get checkoutMethod() {
         return CheckoutManager.checkout.checkoutMethod!
+    }
+
+    get deliveryMethod() {
+        return CheckoutManager.checkout.deliveryMethod
+    }
+
+    get checkout() {
+        return CheckoutManager.checkout
     }
 
     get webshop() {

@@ -95,8 +95,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const webshopStruct = WebshopStruct.create(webshop)
 
         request.body.validate(webshopStruct, organization.meta)
-        const validatedCart = request.body.cart
-        const totalPrice = validatedCart.price
+        const totalPrice = request.body.totalPrice
 
         const order = new Order().setRelation(Order.webshop, webshop)
         order.data = request.body // todo: validate

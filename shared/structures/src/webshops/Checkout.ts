@@ -34,8 +34,25 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
 
+    get deliveryPrice() {
+        if (!this.checkoutMethod || this.checkoutMethod.type != CheckoutMethodType.Delivery) {
+            return 0;
+        }
+
+        if (!(this.checkoutMethod instanceof WebshopDeliveryMethod)) {
+            // will throw in validation
+            return 0;
+        }
+
+        if (this.checkoutMethod.price.minimumPrice !== null && this.cart.price >= this.checkoutMethod.price.minimumPrice) {
+            return this.checkoutMethod.price.discountPrice
+        }
+
+        return this.checkoutMethod.price.price
+    }
+
     get totalPrice() {
-        return this.cart.price
+        return this.cart.price + this.deliveryPrice
     }
 
     validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData) {
@@ -238,5 +255,22 @@ export class Checkout extends AutoEncoder {
         this.validateTimeSlot(webshop, organizationMeta)
         this.validateCustomer(webshop, organizationMeta)
         this.validatePayment(webshop, organizationMeta)
+    }
+
+
+    /**
+     * Convenience mapper
+     */
+    get deliveryMethod() {
+        if (!this.checkoutMethod || this.checkoutMethod.type != CheckoutMethodType.Delivery) {
+            return null;
+        }
+
+        if (!(this.checkoutMethod instanceof WebshopDeliveryMethod)) {
+            // will throw in validation
+            return null;
+        }
+
+        return this.checkoutMethod
     }
 }
