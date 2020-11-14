@@ -73,7 +73,6 @@ export default new Migration(async () => {
                 console.error(`Failed to parse line: ${line}`);
                 continue;
             }
-            console.log(`${line}`);
             const postcode = splitted[0].trim();
             const gemeente = splitted[1].trim();
             const plaats = splitted[2].trim();

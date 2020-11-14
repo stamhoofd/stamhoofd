@@ -61,8 +61,6 @@ export default new Migration(async () => {
     const cities: City[] = []
 
     for (const gemeente of gemeenten) {
-        console.log("Creating "+gemeente.gemeente)
-
         const province = await getProvince(gemeente.provincie, provinces)
         
         // Some cities have the same name
@@ -106,8 +104,6 @@ export default new Migration(async () => {
 
         const hoofd = cities.find(c => c.name.trim() == gemeente.hoofdgemeente.trim() && c.provinceId == gemeente.city.provinceId)
         if (!hoofd) {
-            console.log("Creating "+gemeente.hoofdgemeente)
-
             // Create the city
             const city = new City()
             city.name = gemeente.hoofdgemeente.trim()
