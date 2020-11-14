@@ -106,26 +106,31 @@ export class Order extends Model {
             // Send confirmation e-mail
             let from = organization.uri+"@stamhoofd.email";
             const sender = organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
-            let replyTo: string | undefined = sender.email
+            let replyTo: string | undefined = undefined
 
-            // Can we send from this e-mail or reply-to?
-            if (replyTo && organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+organization.privateMeta.mailDomain)) {
-                from = sender.email
-                replyTo = undefined
+            if (sender) {
+                replyTo = sender.email
+
+                // Can we send from this e-mail or reply-to?
+                if (replyTo && organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+organization.privateMeta.mailDomain)) {
+                    from = sender.email
+                    replyTo = undefined
+                }
+
+                // Include name in form field
+                if (sender.name) {
+                    from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+                }
+
             }
-
-            // Include name in form field
-            if (sender.name) {
-                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
-            }
-
+           
             const customer = this.data.customer
 
             // Also send a copy
             Email.send({
                 from,
                 replyTo,
-                to: sender.email,
+                to: this.data.customer.email,
                 subject: "["+webshop.meta.name+"] Bestelling "+this.number,
                 text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. Je kan jouw bestelling nakijken via \n"+this.getUrl()+"\n\n"+organization.name,
             })
