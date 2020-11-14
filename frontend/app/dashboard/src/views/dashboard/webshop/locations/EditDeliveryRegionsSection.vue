@@ -10,7 +10,7 @@
     
         <STList>
             <STListItem v-for="city in cities" :key="city.id" class="right-description" :selectable="true" @click="toggleCity(city)">
-                {{ city.name }} ({{ city.province.name }})
+                {{ city.name }} ({{ city.province.name }}, {{ countryName(city.country) }})
 
                 <template slot="right">
                     <span v-if="hasCity(city)" class="icon trash" />
@@ -19,7 +19,7 @@
             </STListItem>
 
             <STListItem v-for="province in provinces" :key="province.id" class="right-description" :selectable="true" @click="toggleProvince(province)">
-                {{ province.name }} (provincie)
+                {{ province.name }} (provincie, {{ countryName(province.country) }})
 
                 <template slot="right">
                     <span v-if="hasProvince(province)" class="icon trash" />
@@ -28,7 +28,7 @@
             </STListItem>
 
             <STListItem v-for="country in countries" :key="country" class="right-description" :selectable="true" @click="toggleCountry(country)">
-                {{ country }}
+                {{ countryName(country) }}
 
                 <template slot="right">
                     <span v-if="hasCountry(country)" class="icon trash" />
@@ -44,7 +44,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { LoadingButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { City, Country, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
+import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 const throttle = (func, limit) => {
@@ -100,6 +100,10 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
             return
         }
         this.throttledSearch()
+    }
+
+    countryName(country: Country) {
+        return CountryHelper.getName(country)
     }
 
     async doSearch() {

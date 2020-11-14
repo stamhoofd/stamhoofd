@@ -27,8 +27,35 @@ export class ValidateAddressEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        let postalCode = request.body.postalCode
+        if (request.body.country == "NL") {
+            // Check if we have the right syntax
+            const stripped = postalCode.replace(/\s/g, '')
+            if (stripped.length != 6) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Invalid postal code format (NL)",
+                    human: "Ongelidg postcode formaat, voer in zoals '8011 PK'",
+                    field: "postalCode"
+                })
+            }
 
-        const city = await PostalCode.getCity(request.body.postalCode, request.body.city, request.body.country)
+            const numbers = stripped.slice(0, 4)
+            if (!/[0-9]{4}/.test(numbers)) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Invalid postal code format (NL)",
+                    human: "Ongelidg postcode formaat, voer in zoals '8011 PK'",
+                    field: "postalCode"
+                })
+            }
+
+            // Don't do validation on last letters
+            postalCode = numbers
+        }
+
+
+        const city = await PostalCode.getCity(postalCode, request.body.city, request.body.country)
 
         if (!city) {
             throw new SimpleError({
