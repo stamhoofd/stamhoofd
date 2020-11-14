@@ -1,0 +1,17 @@
+{
+    "name": "devops",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "@typescript-eslint/eslint-plugin": "^4.7.0",
+        "@typescript-eslint/parser": "^4.7.0",
+        "eslint": "^7.13.0",
+        "node-ssh": "^11.1.1",
+        "typescript": "^4.0.5"
+    },
+    "scripts": {
+        "build": "tsc -b && mkdir -p ./dist/src/configs && cp -r ./src/configs/* ./dist/src/configs",
+        "build:full": "rm -rf ./dist && yarn build",
+        "init-user": "yarn build && node ./dist/install/init-users.js"
+    }
+}
