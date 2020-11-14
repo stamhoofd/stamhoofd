@@ -10,8 +10,10 @@
         "typescript": "^4.0.5"
     },
     "scripts": {
-        "build": "tsc -b && mkdir -p ./dist/src/configs && cp -r ./src/configs/* ./dist/src/configs",
+        "build": "tsc -b && mkdir -p ./dist/configs && cp -r ./src/configs/* ./dist/configs",
         "build:full": "rm -rf ./dist && yarn build",
-        "init-user": "yarn build && node ./dist/install/init-users.js"
+        "install-server": "yarn build && node ./dist/scripts/install.js",
+        "deploy": "yarn build && node ./dist/scripts/deploy.js",
+        "build-code": "yarn build && node ./dist/scripts/build.js"
     }
 }

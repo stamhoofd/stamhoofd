@@ -44,11 +44,7 @@ export class Webshop extends AutoEncoder {
             return this.domain+this.getUrlSuffix()
         }
 
-        if (process.env.NODE_ENV == "production") {
-             return organization.uri+".stamhoofd.shop"+this.getUrlSuffix()
-        }
-
-        return organization.uri+".shop.stamhoofd.dev"+this.getUrlSuffix()
+        return organization.uri+"."+process.env.HOSTNAME_WEBSHOP+this.getUrlSuffix()
     }
 
     getUrlSuffix(): string {

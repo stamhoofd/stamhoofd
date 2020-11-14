@@ -181,19 +181,19 @@ export class Organization extends Model {
     }
 
     getDefaultHost(): string {
-        const defaultDomain = process.env.REGISTRATION_HOSTNAME;
+        const defaultDomain = process.env.HOSTNAME_REGISTRATION;
         if (!defaultDomain) {
-            throw new Error("Missing REGISTRATION_HOSTNAME in environment")
+            throw new Error("Missing HOSTNAME_REGISTRATION in environment")
         }
         return this.uri + "." + defaultDomain;
     }
 
     getApiHost(): string {
-        const defaultDomain = process.env.HOSTNAME;
+        const defaultDomain = process.env.HOSTNAME_API;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
         }
-        return this.id+".api." + defaultDomain;
+        return this.id+"." + defaultDomain;
     }
 
     async getStructure(): Promise<OrganizationStruct> {

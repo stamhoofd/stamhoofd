@@ -156,10 +156,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             return "https://"+this.organization.registerDomain
         } 
 
-        if (process.env.NODE_ENV == "production") {
-            return "https://"+this.organization.uri+'.stamhoofd.be'
-        }
-        return "https://"+this.organization.uri+'.stamhoofd.dev'
+        return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
 
     get isSGV() {

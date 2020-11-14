@@ -29,33 +29,23 @@ export async function createUser(server: Server, oldUserName) {
     await server.execCommand(`echo "${username} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99-${username} && chmod u=r,g=r,o= /etc/sudoers.d/99-${username}`)
 
     // Discard current connection
-    await server.disconnect()
+    server.disconnect()
 }
 
 export async function disableRootLogin(server: Server) {
     // Disable root access (todo)
     await server.execCommand("sudo sed -i 's/#\\?\\(PermitRootLogin\\s*\\).*$/\\1 no/' /etc/ssh/sshd_config")
     await server.execCommand("sudo service ssh restart")
-    await server.disconnect()
+    server.disconnect()
 }
 
 
 /**
  * Create the initial user on this server and disable root access
  */
-export async function initUsers() {
+export async function initUsers(server: Server) {
     // Create a user
-    const server = await getServer()
     await createUser(server, "root");
     await disableRootLogin(server);
-
-    await server.disconnect();
+    server.disconnect();
 }
-
-
-initUsers()
-    .then(() => {
-        console.log("Done.");
-        process.exit(0);
-    })
-    .catch(err => console.error(err));

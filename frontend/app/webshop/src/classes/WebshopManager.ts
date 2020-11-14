@@ -14,13 +14,7 @@ export class WebshopManagerStatic {
      */
     get server() {
         const server = NetworkManager.server
-
-        if (process.env.NODE_ENV == "production") {
-            server.host = "https://" + this.organization.id + ".api.stamhoofd.app"
-        } else {
-            server.host = "https://" + this.organization.id + ".api.stamhoofd.dev"
-        }
-
+        server.host = "https://" + this.organization.id + "." + process.env.HOSTNAME_API;
         return server
     }
 

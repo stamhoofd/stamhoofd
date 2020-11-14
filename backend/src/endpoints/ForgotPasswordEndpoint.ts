@@ -53,7 +53,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
         let host: string;
         if (user.permissions) {
-            host = "https://"+(process.env.DASHBOARD_HOST ?? "stamhoofd.app")
+            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
         } else {
             host = "https://"+organization.getHost()
         }

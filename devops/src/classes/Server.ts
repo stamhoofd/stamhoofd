@@ -1,18 +1,66 @@
-import { NodeSSH } from "node-ssh"
-const homedir = require('os').homedir();
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { promises as fs } from "fs"
+import { NodeSSH, SSHExecOptions } from "node-ssh"
+import os from "os";
+const homedir = os.homedir();
+
+export interface ServerConfig {
+    name: string,
+    description: string,
+    type: "web" | "api",
+    ssh: {
+        user: string,
+        ip: string,
+    },
+    caddyConfig?: string,
+    frontend?: {
+        apps: ("dashboard" | "registration" | "webshop")[]
+    },
+    environment: "staging" | "production" | "development",
+    backend?: {
+        env: {
+            SMTP_HOST: string,
+            SMTP_USERNAME: string,
+            SMTP_PASSWORD: string,
+            SMTP_PORT: number,
+
+            // AWS
+            AWS_ACCESS_KEY_ID: string,
+            AWS_SECRET_ACCESS_KEY: string,
+            AWS_REGION: "eu-west-1" | string, // todo: add others
+
+            // DO spaces
+            SPACES_ENDPOINT: string,
+            SPACES_BUCKET: string,
+            SPACES_KEY: string,
+            SPACES_SECRET: string,
+
+            // Mollie
+            MOLLIE_CLIENT_ID: string,
+            MOLLIE_SECRET: string
+        }
+    },
+    domains: {
+        dashboard: string,
+        registration: string,   // requires wildcard prefix DNS
+        webshop: string,       // requires wildcard prefix DNS
+        api: string, // requires wildcard prefix DNS
+    }
+}
 
 export class Server {
-    config: any;
+    config: ServerConfig;
     connection: NodeSSH | null = null
     verbose = true
 
-    constructor(config: any) {
+    constructor(config: ServerConfig) {
         this.config = config
     }
 
-    static async createFromName(name: string) {
-        const config = (await import(__dirname+"/../servers/"+name+".js")).default as any
+    static async createFromName(name: string): Promise<Server> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        const config = (await import(__dirname+"/../servers/"+name+".js")).default 
         return new Server(config)
     }
 
@@ -27,7 +75,7 @@ export class Server {
         return ssh
     }
 
-    async disconnect() {
+    disconnect() {
         if (this.connection) {
             this.connection.dispose()
             this.connection = null
@@ -51,32 +99,34 @@ export class Server {
     /**
      * Execute a command on this server, as the normal user
      */
-    async execCommand(cmd, options?: any) {
+    async execCommand(cmd: string, options?: any) {
         const ssh = await this.getConnection()
         const result = await ssh.execCommand(cmd, options);
         if (result.code !== 0 && result.code !== null) {
             console.error(result.stdout)
             console.error(result.stderr)
-            throw new Error("Cmd '"+cmd+"' failed: "+result.code)
+            throw new Error(`Cmd '${cmd}' failed: ${result.code}`)
         }
 
         if (this.verbose) {
             console.error(result.stdout)
             console.error(result.stderr)
         }
-        
     }
 
     /**
      * Execute a command on this server, with parameters, as the normal user
      */
-    async exec(ssh, cmd, params, options?: any) {
-        options.stream = "both" // prevent errors
-        const result = await ssh.exec(cmd, params, options);
+    async exec(cmd: string, params, options?: SSHExecOptions) {
+        const ssh = await this.getConnection()
+        const bothOptions = Object.assign({}, options, { stream: "both" as const })
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const result = await ssh.exec(cmd, params, bothOptions);
         if (result.code !== 0 && result.code !== null) {
             console.error(result.stdout)
             console.error(result.stderr)
-            throw new Error("Cmd '"+cmd+"' failed: "+result.code)
+            throw new Error(`Cmd '${cmd}' failed: ${result.code}`)
         }
         if (this.verbose) {
             console.error(result.stdout)
