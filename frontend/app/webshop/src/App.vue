@@ -38,7 +38,7 @@ export default class App extends Vue {
                     path: "/webshop-from-domain",
                     query: {
                         domain: window.location.hostname,
-                        uri: path[0] && !ignorePath.includes(path[0]) ? path[0] : null
+                        uri: path[0] && !ignorePath.includes(path[0]) ? path[0] : ''
                     },
                     decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
