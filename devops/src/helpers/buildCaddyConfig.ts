@@ -335,7 +335,7 @@ export function buildCaddyConfig(server: Server): string {
                     "interval": "1d",
                     "burst": 50
                 },
-                "ask": "https://"+server.config.domains.api+"/v15/organization-from-domain"
+                "ask": "https://"+server.config.domains.api+"/v15/check-domain-cert"
             }
         };
 
