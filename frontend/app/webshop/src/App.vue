@@ -31,13 +31,14 @@ export default class App extends Vue {
         promise: async () => {
             // get organization
             try {
+                const ignorePath = ["checkout", "order", "cart"];
                 const path = window.location.pathname.substring(1).split("/");
                 const response = await NetworkManager.server.request({
                     method: "GET",
                     path: "/webshop-from-domain",
                     query: {
                         domain: window.location.hostname,
-                        uri: path[0] ?? null
+                        uri: path[0] && !ignorePath.includes(path[0]) ? path[0] : null
                     },
                     decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
