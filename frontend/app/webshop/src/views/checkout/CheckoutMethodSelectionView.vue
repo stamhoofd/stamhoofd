@@ -110,6 +110,9 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         if (this.loading || !this.selectedMethod) {
             return
         }
+        // Force checkout save
+        this.selectedMethod = this.selectedMethod as any
+
         this.loading = true
         this.errorBox = null
 

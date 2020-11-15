@@ -101,6 +101,8 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         if (this.loading || !this.selectedSlot) {
             return
         }
+        // Force checkout save
+        this.selectedSlot = this.selectedSlot as any
         this.loading = true
         this.errorBox = null
 
