@@ -53,6 +53,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/arrow-up-big.svg);
     }
 
+    &.arrow-down:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-down-big.svg);
+    }
+
     &.clock:after {
         font-icon: url(@stamhoofd/assets/images/icons/gray/clock.svg);
     }
@@ -195,6 +199,22 @@
 
     &.gift:after {
         font-icon: url(@stamhoofd/assets/images/icons/gift.svg);
+    }
+
+    &.basket:after {
+        font-icon: url(@stamhoofd/assets/images/icons/basket.svg);
+    }
+
+    &.flag:after {
+        font-icon: url(@stamhoofd/assets/images/icons/flag.svg);
+    }
+
+    &.plus:after {
+        font-icon: url(@stamhoofd/assets/images/icons/plus.svg);
+    }
+
+    &.min:after {
+        font-icon: url(@stamhoofd/assets/images/icons/min.svg);
     }
 }
 

@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -12,6 +12,7 @@ import Email from '../email/Email';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
 import { User } from './User';
+import { Webshop } from './Webshop';
 
 export class Organization extends Model {
     static table = "organizations";
@@ -180,19 +181,19 @@ export class Organization extends Model {
     }
 
     getDefaultHost(): string {
-        const defaultDomain = process.env.REGISTRATION_HOSTNAME;
+        const defaultDomain = process.env.HOSTNAME_REGISTRATION;
         if (!defaultDomain) {
-            throw new Error("Missing REGISTRATION_HOSTNAME in environment")
+            throw new Error("Missing HOSTNAME_REGISTRATION in environment")
         }
         return this.uri + "." + defaultDomain;
     }
 
     getApiHost(): string {
-        const defaultDomain = process.env.HOSTNAME;
+        const defaultDomain = process.env.HOSTNAME_API;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
         }
-        return this.id+".api." + defaultDomain;
+        return this.id+"." + defaultDomain;
     }
 
     async getStructure(): Promise<OrganizationStruct> {
@@ -212,6 +213,7 @@ export class Organization extends Model {
 
     async getPrivateStructure(): Promise<OrganizationStruct> {
         const groups = await Group.where({ organizationId: this.id })
+        const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
         return OrganizationStruct.create({
             id: this.id,
             name: this.name,
@@ -222,7 +224,8 @@ export class Organization extends Model {
             uri: this.uri,
             website: this.website,
             groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort),
-            privateMeta: this.privateMeta
+            privateMeta: this.privateMeta,
+            webshops: webshops.map(w => WebshopPreview.create(w))
         })
     }
 

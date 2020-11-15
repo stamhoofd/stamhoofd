@@ -12,12 +12,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
      * Normal, non authenticated requests
      */
     get server() {
-        let server: Server;
-        if (process.env.NODE_ENV == "production") {
-            server = new Server("https://api.stamhoofd.app")
-        } else {
-            server = new Server("https://api.stamhoofd.dev")
-        }
+        const server = new Server("https://"+process.env.HOSTNAME_API)
         server.middlewares.push(this)
         return server
     }

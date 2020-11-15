@@ -1,88 +1,100 @@
 <template>
     <div class="boxed-view">
-        <div class="st-view" v-if="waitingMembers.length > 0">
+        <div v-if="waitingMembers.length > 0" class="st-view">
             <main>
                 <h1>Leden op wachtlijst</h1>
                 <p>Deze leden staan nog op een wachtlijst. We houden je op de hoogte, dan kan je verdere informatie aanvullen en het lidgeld betalen.</p>
 
                 <STList>
                     <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
-                        <span class="icon clock" slot="left" v-if="member.acceptedWaitingGroups.length == 0"/>
-                        <span class="icon green success" slot="left" v-else />
+                        <span v-if="member.acceptedWaitingGroups.length == 0" slot="left" class="icon clock" />
+                        <span v-else slot="left" class="icon green success" />
 
-                        <h2 class="payment-period">{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</h2>
-                        <p class="style-description-small" v-if="member.waitingGroups.length > 0">Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}</p>
-                        <p class="style-description-small" v-if="member.acceptedWaitingGroups.length > 0">Kan zich nu inschrijven voor {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}</p>
+                        <h2 class="payment-period">
+                            {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
+                        </h2>
+                        <p v-if="member.waitingGroups.length > 0" class="style-description-small">
+                            Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}
+                        </p>
+                        <p v-if="member.acceptedWaitingGroups.length > 0" class="style-description-small">
+                            Kan zich nu inschrijven voor {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}
+                        </p>
 
                         <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="member.acceptedWaitingGroups.length == 0">
+                            <button v-if="member.acceptedWaitingGroups.length == 0" class="button text limit-space" @click.stop="editMember(member)">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>
-                            <button class="button text limit-space" @click.stop="addNewMember" v-else>
+                            <button v-else class="button text limit-space" @click.stop="addNewMember">
                                 <span>Inschrijven</span>
-                                 <span class="icon arrow-right" />
+                                <span class="icon arrow-right" />
                             </button>
-                            
                         </template>
                     </STListItem>
                 </STList>
-
             </main>
             <STToolbar v-if="registeredMembers.length == 0">
-                <button class="primary button" slot="right" @click="addNewMember">
-                    <span class="icon white left add"/>
+                <button slot="right" class="primary button" @click="addNewMember">
+                    <span class="icon white left add" />
                     <span>Lid inschrijven</span>
                 </button>
             </STToolbar>
         </div>
 
-        <div class="st-view" v-if="registeredMembers.length > 0">
+        <div v-if="registeredMembers.length > 0" class="st-view">
             <main>
                 <h1>Ingeschreven leden</h1>
                 <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
 
                 <STList>
                     <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
-                        <span class="icon user" slot="left" />
+                        <span slot="left" class="icon user" />
 
-                        <h2 class="payment-period">{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</h2>
-                        <p class="style-description-small">Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}</p>
+                        <h2 class="payment-period">
+                            {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
+                        </h2>
+                        <p class="style-description-small">
+                            Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
+                        </p>
 
                         <template slot="right">
                             <button class="button text limit-space" @click.stop="editMember(member)">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>
-                            
                         </template>
                     </STListItem>
                 </STList>
-
             </main>
             <STToolbar>
-                <button class="primary button" slot="right" @click="addNewMember">
-                    <span class="icon white left add"/>
+                <button slot="right" class="primary button" @click="addNewMember">
+                    <span class="icon white left add" />
                     <span>Lid inschrijven</span>
                 </button>
             </STToolbar>
         </div>
 
-        <div class="st-view payments-overview-view" v-if="payments.length > 0">
+        <div v-if="payments.length > 0" class="st-view payments-overview-view">
             <main>
                 <h1>Afrekeningen</h1>
                 <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
                 <STList>
                     <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
-                        <span class="icon card" slot="left" />
+                        <span slot="left" class="icon card" />
 
-                        <h2 class="style-title-list">{{ getPaymentPeriod(payment) }}</h2>
-                        <p class="style-description-small">{{ payment.getMemberNames() }}</p>
-                        <p class="style-description-small" v-if="payment.status == 'Succeeded'">
+                        <h2 class="style-title-list">
+                            {{ getPaymentPeriod(payment) }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ payment.getMemberNames() }}
+                        </p>
+                        <p v-if="payment.status == 'Succeeded'" class="style-description-small">
                             {{ paymentMethodName(payment.method) }}
                         </p>
-                        <p class="style-description-small" v-else>Betaal via overschrijving {{ payment.transferDescription }}</p>
+                        <p v-else class="style-description-small">
+                            Betaal via overschrijving {{ payment.transferDescription }}
+                        </p>
 
                         <template slot="right">
                             {{ payment.price | price }}
@@ -91,25 +103,24 @@
                         </template>
                     </STListItem>
                 </STList>
-
             </main>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, PaymentMethod } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
-import FinancialProblemsView from './FinancialProblemsView.vue';
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, ErrorBox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { Group, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import TransferPaymentView from './TransferPaymentView.vue';
+import { Component, Mixins,Vue } from "vue-property-decorator";
+
+import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import MemberGroupView from '../registration/MemberGroupView.vue';
+import FinancialProblemsView from './FinancialProblemsView.vue';
 import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
@@ -231,6 +242,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(TransferPaymentView, {
+                organization: OrganizationManager.organization,
                 payment,
                 isPopup: true
             })

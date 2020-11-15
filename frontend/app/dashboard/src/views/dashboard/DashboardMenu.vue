@@ -39,14 +39,38 @@
             <button
                 v-for="group in groups"
                 :key="group.id"
-                class="menu-button"
+                class="menu-button button"
                 :class="{ selected: currentlySelected == 'group-'+group.id }"
                 @click="openGroup(group)"
             >
                 {{ group.settings.name }}
             </button>
         </div>
+        
         <hr v-if="groups.length > 0">
+
+        <div>
+            <button class="menu-button heading">
+                <span class="icon basket" />
+                <span>Verkopen</span>
+                <button v-if="fullAccess" class="button text" @click="addWebshop()">
+                    <span class="icon add" />
+                    <span>Nieuw</span>
+                </button>
+            </button>
+
+            <button
+                v-for="webshop in webshops"
+                :key="webshop.id"
+                class="menu-button button"
+                :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
+                @click="openWebshop(webshop)"
+            >
+                {{ webshop.meta.name }}
+            </button>
+        </div>
+
+        <hr>
         <div v-if="fullAccess">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-groups'}" @click="manageGroups">
                 <span class="icon group" />
@@ -92,13 +116,14 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Group, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
@@ -113,6 +138,8 @@ import AdminsView from './settings/AdminsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
 import WhatsNewView from './settings/WhatsNewView.vue';
+import EditWebshopView from './webshop/EditWebshopView.vue';
+import WebshopView from './webshop/WebshopView.vue';
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -129,10 +156,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             return "https://"+this.organization.registerDomain
         } 
 
-        if (process.env.NODE_ENV == "production") {
-            return "https://"+this.organization.uri+'.stamhoofd.be'
-        }
-        return "https://"+this.organization.uri+'.stamhoofd.dev'
+        return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
 
     get isSGV() {
@@ -236,7 +260,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             }
 
             const session = SessionManager.currentSession!
-            const keyPair = await session.decryptKeychainItem(keychainItem)
+            await session.decryptKeychainItem(keychainItem)
 
         } catch (e) {
             console.error(e)
@@ -249,9 +273,13 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     get groups() {
-        return this.organization.groups!.filter(g => {
+        return this.organization.groups.filter(g => {
             return this.hasAccessToGroup(g)
         })
+    }
+
+    get webshops() {
+        return this.organization.webshops
     }
 
     switchOrganization() {
@@ -271,6 +299,12 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }));
     }
 
+    openWebshop(webshop: WebshopPreview) {
+        this.currentlySelected = "webshop-"+webshop.id
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }));
+    }
+
+
     manageGroups() {
         this.currentlySelected = "manage-groups"
         this.showDetail(new ComponentWithProperties(EditGroupsView, {}));
@@ -283,7 +317,8 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
-        this.splitViewController!.showDetail(new ComponentWithProperties(SettingsView, {}), animated);
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.splitViewController?.showDetail(new ComponentWithProperties(SettingsView, {}), animated);
     }
 
     manageAdmins() {
@@ -302,8 +337,8 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.whatsNewBadge = ""
     }
 
-    logout() {
-        if (!confirm("Ben je zeker dat je wilt uitloggen?")) {
+    async logout() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             return;
         }
         SessionManager.logout()
@@ -319,11 +354,15 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     importMembers() {
-        this.present(new ComponentWithProperties(CenteredMessage, { title: "Binnenkort beschikbaar!", description: "Binnenkort kan je leden importeren via Excel of manueel.", closeButton: "Sluiten", type: "sync" }).setDisplayStyle("overlay"))
+        new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
     }
 
     hasAccessToGroup(group: Group) {
         return SessionManager.currentSession!.user!.permissions!.hasReadAccess(group.id)
+    }
+
+    addWebshop() {
+        this.present(new ComponentWithProperties(EditWebshopView, { }).setDisplayStyle("popup"))
     }
 
     get fullAccess() {
@@ -419,7 +458,6 @@ export default class Menu extends Mixins(NavigationMixin) {
     width: 100%;
     box-sizing: border-box;
     height: 45px;
-    cursor: pointer;
     transition: transform 0.2s, background-color 0.2s, color 0.2s;
 
     text-overflow: ellipsis;
@@ -427,11 +465,13 @@ export default class Menu extends Mixins(NavigationMixin) {
     overflow: hidden;
     white-space: nowrap;
 
+    
+
     &, &:active, &:visited, &:link {
         text-decoration: none;
     }
 
-    .icon {
+    > .icon {
         padding-right: 10px;
         flex-shrink: 0;
     }
@@ -458,11 +498,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         vertical-align: middle;
         color: $color-white;
     }
-
-    &:active {
-        background-color: $color-gray-lighter;
-    }
-
+    
     padding-left: var(--horizontal-padding, 30px);
     padding-right: var(--horizontal-padding, 30px);
 
@@ -477,9 +513,19 @@ export default class Menu extends Mixins(NavigationMixin) {
         font-weight: 600;
     }
 
+    &.button {
+        cursor: pointer;
+
+        &:active {
+            background-color: $color-gray-lighter;
+        }
+    }
+
     > button {
         margin-left: auto;
         color: $color-primary;
+
+       
     }
 }
 </style>

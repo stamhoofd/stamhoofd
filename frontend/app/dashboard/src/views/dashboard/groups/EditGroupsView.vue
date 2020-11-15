@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BackButton,CenteredMessage, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Logger } from '@stamhoofd/logger';
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
@@ -111,11 +111,11 @@ export default class EditGroupsView extends Mixins(NavigationMixin) {
                 patch.groups.addDelete(group.id)
                 OrganizationManager.patch(patch)
                 .then(() => {
-                    this.present(new ComponentWithProperties(CenteredMessage, { title: "De groep is verwijderd", closeButton: "Sluiten", type: "success" }).setDisplayStyle("overlay"))
+                    new Toast("De groep is verwijderd", "green success").show()
                 })
                 .catch(e => {
                     Logger.error(e)
-                    this.present(new ComponentWithProperties(CenteredMessage, { title: "Er ging iets mis", description: e.human ?? e.message, closeButton: "Sluiten", type: "error" }).setDisplayStyle("overlay"))
+                    new Toast("Er ging iets mis: "+(e.human ?? e.message), "error").show()
                 })
             }
         }

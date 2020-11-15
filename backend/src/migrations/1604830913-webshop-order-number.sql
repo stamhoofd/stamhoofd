@@ -1,0 +1,1 @@
+ALTER TABLE `webshop_orders` ADD COLUMN `number` bigint unsigned NULL COMMENT '';

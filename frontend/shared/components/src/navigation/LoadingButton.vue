@@ -30,6 +30,10 @@ export default class LoadingButton extends Vue {
     position: relative;
     display: inline-block;
 
+    &.block {
+        display: block;
+    }
+
     > div:first-child {
         padding-right: 0px;
         transition: padding-right 0.25s;

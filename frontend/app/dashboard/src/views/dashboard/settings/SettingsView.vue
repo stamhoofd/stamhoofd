@@ -94,7 +94,7 @@
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
                 <p class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+(organization.registerDomain || organization.uri+'.stamhoofd.be')" target="_blank">{{ organization.registerDomain || organization.uri+'.stamhoofd.be' }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 
                 <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
@@ -111,7 +111,7 @@
 
             <template v-else>
                 <p class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="'https://'+organization.uri+'.stamhoofd.be'" target="_blank">{{ organization.uri }}.stamhoofd.be</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
                 </p>
 
                 <p class="st-list-description">
@@ -303,6 +303,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get registerUrl() {
+        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
+            return "https://"+this.organization.registerDomain
+        } 
+
+        return "https://"+this.organization.uri + '.' + process.env.HOSTNAME_REGISTRATION
     }
    
     get name() {
@@ -640,7 +648,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     linkMollie() {
         // Start oauth flow
-        const client_id = process.env.NODE_ENV == "development" ? "app_8mK3BCPCqd8sSkQmuNC8xmgu" : "app_awGyMjwGgRue2zjJBrdkEWuK"
+        const client_id = process.env.NODE_ENV != "production" ? "app_8mK3BCPCqd8sSkQmuNC8xmgu" : "app_awGyMjwGgRue2zjJBrdkEWuK"
         const state = new Buffer(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
 
         const scope = "payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write subscriptions.read subscriptions.write"

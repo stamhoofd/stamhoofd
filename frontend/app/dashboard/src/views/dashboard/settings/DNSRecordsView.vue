@@ -13,27 +13,7 @@
             <p class="st-list-description">Stel volgende de DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.</p>
             
             <div v-for="record in records" :key="record.id">
-                <dl class="details-grid dns-records" :class="{ success: record.status == 'Valid' }">
-                    <dt>Type</dt>
-                    <dd>{{ record.type }}</dd>
-
-                    <dt>Naam</dt>
-                    <dd class="selectable" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ record.name }}</dd>
-
-                    <dt>Waarde</dt>
-                    <dd class="selectable" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ record.value }}</dd>
-
-                    <dt>TTL</dt>
-                    <dd class="selectable" @click="copyElement">3600</dd>
-
-                    <span class="icon green success" v-if="record.status == 'Valid'"/>
-                    <span class="icon error" v-if="record.status == 'Failed'"/>
-                </dl>
-                <template v-if="record.errors">
-                    <div v-for="error in record.errors.errors" :key="error.id" class="error-box" style="word-wrap: break-word">
-                        {{ error.human || error.message }}
-                    </div>
-                </template>
+                <DNSRecordBox :record="record" />
             </div>
 
             <p class="warning-box">Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.</p>
@@ -62,6 +42,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
+import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 
 @Component({
     components: {
@@ -71,7 +52,8 @@ import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
         STErrorsDefault,
         Checkbox,
         BackButton,
-        LoadingButton
+        LoadingButton,
+        DNSRecordBox
     },
     directives: {
         tooltip: TooltipDirective
@@ -125,30 +107,6 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
         //this.pop({ force: true })
     }
 
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
 
 
 }
@@ -158,44 +116,4 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-
-#dns-records-view {
-    .dns-records {
-        padding: 20px 20px;
-        margin: 15px 0;
-        border-radius: $border-radius;
-        background: $color-white-shade;
-
-        display: grid;
-        grid-template-columns: 20% 80%;
-        gap: 8px 0;
-        position: relative;
-
-        @media (max-width: 450px) {
-            margin: 15px calc(-1 * var(--st-horizontal-padding, 40px));
-            padding: 20px var(--st-horizontal-padding, 40px);
-        }
-
-        dt {
-            @extend .style-definition-term;
-        }
-
-        dd {
-            @extend .style-definition-description;
-            font-family: monospace;
-            word-wrap: break-word;
-            outline: 0;
-
-            &.selectable {
-                cursor: pointer;
-            }
-        }
-
-        > .icon {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-        }
-    }
-}
 </style>

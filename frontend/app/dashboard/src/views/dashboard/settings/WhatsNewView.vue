@@ -1,13 +1,18 @@
 <template>
-    <div class="st-view background" id="whatsnew-view">
+    <div id="whatsnew-view" class="st-view background">
         <STNavigationBar title="Wat is er nieuw?">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
             <h1>Wat is er nieuw?</h1>
 
             <p>Blijf op de hoogte van al onze wijzigingen en krijg als eerste toegang tot nieuwe functies door ons te volgen op <a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Instagram</a> of <a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Facebook</a>.</p>
+            
+            <hr>
+            <h2>Bouw je eigen webshop: spaghetti-festijn, tickets, wafelverkoop, ...</h2>
+            <p>Met deze nieuwe functie kan je nu een centje bijverdienen. We lanceren deze functie voorlopig volledig gratis!</p>
+            <p><a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Wat is er gewijzigd?</a></p>
 
             <hr>
             <h2>Meer velden in Excel export (27 oktober) 📋</h2>
@@ -55,20 +60,21 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User, OrganizationType, UmbrellaOrganization } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, patchContainsChanges,PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
-import ChangePasswordView from './ChangePasswordView.vue';
+import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, ErrorBox, LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Tooltip,TooltipDirective, Validator } from "@stamhoofd/components";
+import { LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { Address, Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationType, ResolutionFit, ResolutionRequest, UmbrellaOrganization,User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { WhatsNewCount } from "../../../classes/WhatsNewCount"
+import ChangePasswordView from './ChangePasswordView.vue';
+import DNSRecordsView from './DNSRecordsView.vue';
+import DomainSettingsView from './DomainSettingsView.vue';
+import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({
     components: {

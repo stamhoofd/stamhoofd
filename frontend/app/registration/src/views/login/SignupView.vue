@@ -149,12 +149,7 @@ export default class SignupView extends Mixins(NavigationMixin){
         this.loading = true
         // Request the key constants
         
-        const component = new ComponentWithProperties(CenteredMessage, { 
-            type: "loading",
-            title: "Account aanmaken...", 
-            description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
-        }).setDisplayStyle("overlay");
-        this.present(component)
+        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
 
         try {
             const session = new Session(OrganizationManager.organization.id)
@@ -163,26 +158,20 @@ export default class SignupView extends Mixins(NavigationMixin){
             await LoginHelper.signUp(session, this.email, this.password)
             
             this.loading = false;
-            (component.componentInstance() as any)?.pop()
+            component.hide()
             this.dismiss({ force: true })
             
         } catch (e) {
             console.log(e)
             this.loading = false;
-            (component.componentInstance() as any)?.pop()
+            component.hide()
 
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 this.errorBox = new ErrorBox(e)
                 return;
             }
 
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: "Er ging iets mis", 
-                description: "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
+            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
             return;
         }
         

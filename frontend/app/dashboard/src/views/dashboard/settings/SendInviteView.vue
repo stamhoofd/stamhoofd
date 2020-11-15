@@ -1,7 +1,7 @@
 <template>
-    <div class="st-view" id="send-invite-view" :class="{ 'android-icons': isAndroid }">
+    <div id="send-invite-view" class="st-view" :class="{ 'android-icons': isAndroid }">
         <STNavigationBar title="Gelukt!">
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -9,19 +9,24 @@
                 Verstuur de uitnodiging
             </h1>
         
-            <p class="st-list-description">Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). De link is één uur geldig.</p>
+            <p class="st-list-description">
+                Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). De link is één uur geldig.
+            </p>
 
             <STInputBox title="Link" class="max">
-                <p class="link-box input" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ url }}</p>
+                <p v-tooltip="'Klik om te kopiëren'" class="link-box input" @click="copyElement">
+                    {{ url }}
+                </p>
             </STInputBox>
 
 
-            <hr />
+            <hr>
             <h2>Of laat {{ name }} deze QR-code scannen</h2>
-            <p class="st-list-description">Zijn jullie fysiek bij elkaar? Laat {{ name }} dan de QR-code onderaan scannen.</p>
+            <p class="st-list-description">
+                Zijn jullie fysiek bij elkaar? Laat {{ name }} dan de QR-code onderaan scannen.
+            </p>
 
-            <img v-if="QRCodeUrl" :src="QRCodeUrl" class="qr-code" />
-            
+            <img v-if="QRCodeUrl" :src="QRCodeUrl" class="qr-code">
         </main>
 
         <STToolbar v-if="canShare">
@@ -37,13 +42,14 @@
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective, Tooltip } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, DNSRecord, Invite } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Tooltip,TooltipDirective } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Address, DNSRecord, Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Invite,Organization, OrganizationPatch } from "@stamhoofd/structures"
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 
 @Component({
     components: {
@@ -69,7 +75,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     QRCodeUrl: string | null = null
 
     get isAndroid() {
-        var userAgent = navigator.userAgent || navigator.vendor;
+        const userAgent = navigator.userAgent || navigator.vendor;
 
         if (/android/i.test(userAgent)) {
             return true;

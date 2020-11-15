@@ -4,7 +4,28 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const autoprefixer = require('autoprefixer');
-const path = require("path");
+const webpack = require("webpack")
+require('dotenv').config({path: __dirname+'/.env'})
+
+const use_env = {}
+if (process.env.LOAD_ENV) {
+    // Load this in the environment
+    const decode = JSON.parse(process.env.LOAD_ENV);
+    for (const key in decode) {
+        const val = decode[key];
+        use_env["process.env."+key] = JSON.stringify(val);
+    }
+} else {
+    // Use current environment
+    if (process.env.NODE_ENV !== 'development') {
+        throw new Error("Setting LOAD_ENV is required for non development environments")
+    }
+
+    for (const key in process.env) {
+        const val = process.env[key];
+        use_env["process.env."+key] = JSON.stringify(val);
+    }
+}
 
 module.exports = {
     mode: "development",
@@ -161,6 +182,7 @@ module.exports = {
         ...(process.env.NODE_ENV !== 'production') ? [] : [new MiniCssExtractPlugin({ // Make sure CSS is not put inline, but saved to a seperate file
             filename: '[name].[contenthash].css',
             //chunkFilename: '[id].[contenthash].css',
-        })]
+        })],
+        new webpack.DefinePlugin(use_env)
     ]
 };

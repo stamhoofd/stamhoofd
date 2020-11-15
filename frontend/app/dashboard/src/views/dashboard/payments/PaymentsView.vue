@@ -1,47 +1,60 @@
 <template>
     <div class="st-view background">
         <STNavigationBar title="Overschrijvingen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
 
             <template #right>
-                <input v-model="searchQuery" @input="searchQuery = $event.target.value" class="input search" placeholder="Zoeken">
+                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
             </template>
         </STNavigationBar>
 
         <main>
             <h1>Overschrijvingen</h1>
     
-            <Spinner v-if="loading"/>
+            <Spinner v-if="loading" />
             <STList v-else>
                 <STListItem v-for="payment in filteredPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
-                    <Checkbox slot="left" v-model="payment.selected"/>
+                    <Checkbox slot="left" v-model="payment.selected" />
 
-                    <h2 class="style-title-list">{{ payment.payment.registrations.map(r => r.member.details.name).join(", ") }}</h2>
-                    <p class="style-description-small">{{ payment.payment.createdAt | date }}</p>
-                    <p class="style-description-small">{{ payment.payment.transferDescription }}</p>
+                    <h2 class="style-title-list">
+                        {{ payment.payment.order !== null ? (payment.payment.order.data.customer.name + ' (bestelling #'+ payment.payment.order.number +')') : payment.payment.registrations.map(r => r.member.details.name).join(", ") }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ payment.payment.createdAt | date }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ payment.payment.transferDescription }}
+                    </p>
                     
                     <template slot="right">
                         <span>{{ payment.payment.price | price }}</span>
-                        <span v-if="getPaymentTiming(payment.payment) == 'Succeeded'" class="icon success green" v-tooltip="'Betaald op '+payment.payment.paidAt"></span>
-                        <span v-else-if="getPaymentTiming(payment.payment) == 'Pending'" class="icon clock gray" v-tooltip="'Wacht op betaling, zou intussen overgeschreven moeten zijn. Je kan deze al een herinnering sturen.'"></span>
-                        <span v-else-if="getPaymentTiming(payment.payment) == 'Late'" class="icon error red" v-tooltip="'Na meer dan een maand nog steeds niet betaald'"></span>
-                        <span v-else-if="getPaymentTiming(payment.payment) == 'New'" class="icon new gray" v-tooltip="'Recente inschrijving, betaling kan mogelijks nog niet aangekomen zijn (minder dan 3 werkdagen geleden)'"></span>
+                        <span v-if="getPaymentTiming(payment.payment) == 'Succeeded'" v-tooltip="'Betaald op '+payment.payment.paidAt" class="icon success green" />
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'Pending'" v-tooltip="'Wacht op betaling, zou intussen overgeschreven moeten zijn. Je kan deze al een herinnering sturen.'" class="icon clock gray" />
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'Late'" v-tooltip="'Na meer dan een maand nog steeds niet betaald'" class="icon error red" />
+                        <span v-else-if="getPaymentTiming(payment.payment) == 'New'" v-tooltip="'Recent aangemaakt, betaling kan mogelijks nog niet aangekomen zijn (minder dan 3 werkdagen geleden)'" class="icon new gray" />
                     </template>
                 </STListItem>
             </STList>
 
-            <p class="info-box" v-if="!loading && payments.length == 0 && filteredPayments.length == 0">Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt als een lid bij het inschrijven de betaalmethode 'overschrijven' kiest.</p>
-            <p class="info-box" v-else-if="!loading && filteredPayments.length == 0">Geen zoekresultaten</p>
-
+            <p v-if="!loading && payments.length == 0 && filteredPayments.length == 0" class="info-box">
+                Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt als een lid bij het inschrijven de betaalmethode 'overschrijven' kiest.
+            </p>
+            <p v-else-if="!loading && filteredPayments.length == 0" class="info-box">
+                Geen zoekresultaten
+            </p>
         </main>
 
         <STToolbar v-if="canMarkNotPaid || canMarkPaid">
             <template #right>
-                <LoadingButton :loading="loadingNotPaid" v-if="canMarkNotPaid" >
-                    <button class="button" :class="{ secundary: canMarkPaid, primary: !canMarkPaid}" @click="markNotPaid">Niet betaald</button>
+                <LoadingButton v-if="canMarkNotPaid" :loading="loadingNotPaid">
+                    <button class="button" :class="{ secundary: canMarkPaid, primary: !canMarkPaid}" @click="markNotPaid">
+                        Niet betaald
+                    </button>
                 </LoadingButton>
-                <LoadingButton :loading="loadingPaid" v-if="canMarkPaid" >
-                    <button class="button primary" @click="markPaid">Markeer als betaald</button>
+                <LoadingButton v-if="canMarkPaid" :loading="loadingPaid">
+                    <button class="button primary" @click="markPaid">
+                        Markeer als betaald
+                    </button>
                 </LoadingButton>
             </template>
         </STToolbar>
@@ -50,24 +63,22 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, CenteredMessage, BackButton, Spinner, TooltipDirective, LoadingButton } from "@stamhoofd/components";
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, LoadingButton,Spinner, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch, EncryptedPaymentDetailed, PaymentDetailed, RegistrationWithMember, PaymentStatus, PaymentPatch, PaymentMethod } from '@stamhoofd/structures';
-import { OrganizationGenderType } from '@stamhoofd/structures';
+import { EncryptedPaymentGeneral, PaymentDetailed, PaymentGeneral, PaymentMethod,PaymentPatch, PaymentStatus, RegistrationWithMember } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import EditGroupView from './EditGroupView.vue';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { MemberManager } from '../../../classes/MemberManager';
-import { Formatter } from '@stamhoofd/utility';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 class SelectablePayment {
-    payment: PaymentDetailed;
+    payment: PaymentGeneral;
     selected = false;
 
-    constructor(payment: PaymentDetailed) {
+    constructor(payment: PaymentGeneral) {
         this.payment = payment;
     }
 }
@@ -117,6 +128,10 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         return this.payments.filter((payment: SelectablePayment) => {
             if (payment.payment.matchQuery(this.searchQuery)) {
                 return true;
+            }
+
+            if (payment.payment.order && (payment.payment.order.number+"" == this.searchQuery || payment.payment.order.data.matchQuery(this.searchQuery))) {
+                return true
             }
             return false;
         });
@@ -192,15 +207,15 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async setPayments(encryptedPayments: EncryptedPaymentDetailed[]) {
+    async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
 
         // Decrypt data
-        const payments: PaymentDetailed[] = []
+        const payments: PaymentGeneral[] = []
         for (const encryptedPayment of encryptedPayments) {
             // Create a detailed payment without registrations
-            const payment = PaymentDetailed.create({...encryptedPayment, registrations: []})
+            const payment = PaymentGeneral.create({...encryptedPayment, registrations: []})
 
             // Decrypt the members and add them one by one
             for (const registration of encryptedPayment.registrations) {
@@ -242,8 +257,10 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/payments",
-            decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+            decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
         })
+
+        console.log(response.data)
 
         await this.setPayments(response.data)
     }
@@ -273,7 +290,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
                 this.setPayments(response.data)
             } finally {
@@ -308,9 +325,9 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                this.setPayments(response.data)
+                await this.setPayments(response.data)
             } finally {
                 this.loadingNotPaid = false
             }

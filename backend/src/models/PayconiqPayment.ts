@@ -78,7 +78,7 @@ export class PayconiqPayment extends Model {
     }
 
 
-    static async createPayment(payment: Payment, organization: Organization) {
+    static async createPayment(payment: Payment, organization: Organization, description: string) {
         const apiKey = organization.privateMeta.payconiqApiKey
         if (!apiKey) {
             throw new SimpleError({
@@ -92,7 +92,7 @@ export class PayconiqPayment extends Model {
             amount: payment.price,
             currency: "EUR",
             callbackUrl: 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-            description: "Inschrijving bij "+organization.name,
+            description
 
         }, apiKey)
 

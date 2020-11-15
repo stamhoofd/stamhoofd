@@ -33,7 +33,7 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 export default class PriceInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
-    min!: number
+    min!: number | null
 
     /** Price in cents */
     @Prop({ default: null })
@@ -69,7 +69,7 @@ export default class PriceInput extends Vue {
         // but for our placeholder system we need exactly the same string
         if (value == "") {
             this.valid = true;
-            this.internalValue = Math.max(0, this.min);
+            this.internalValue = Math.max(0, this.min ?? 0);
         } else {
             if (!value.includes(".")) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
@@ -78,7 +78,7 @@ export default class PriceInput extends Vue {
             const v = parseFloat(value);
             if (isNaN(v)) {
                 this.valid = false;
-                this.internalValue = this.min;
+                this.internalValue = this.min ?? 0;
             } else {
                 this.valid = true;
 
@@ -112,7 +112,7 @@ export default class PriceInput extends Vue {
                 (float < 0 ? "-" : "") +
                 Math.floor(abs) +
                 this.whatDecimalSeparator() +
-                Math.round(Math.abs(decimals) * 100);
+                (""+Math.round(Math.abs(decimals) * 100)).padStart(2, "0");
         } else {
             // Hide decimals
             this.valueString = float + "";
@@ -121,8 +121,9 @@ export default class PriceInput extends Vue {
 
     // Limit value to bounds
     constrain(value: number): number {
-        value = Math.max(this.min, value);
-        if (this.max !== null && value > this.max) {
+        if (this.min !== null && value < this.min) {
+             value = this.min;
+        } else if (this.max !== null && value > this.max) {
             value = this.max;
         }
         return value
@@ -132,10 +133,10 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        this.clean();
         this.internalValue = this.constrain(this.internalValue + add);
-
-        this.clean();
+        this.$nextTick(() => {
+            this.clean();
+        })
     }
 }
 </script>

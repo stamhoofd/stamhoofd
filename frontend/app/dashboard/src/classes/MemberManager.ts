@@ -1,9 +1,10 @@
 
 
-import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox, ConvertArrayToPatchableArray, PatchableArray, PatchType, AutoEncoderPatchType } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, MemberDetails, Version, Member, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, EncryptedMemberWithRegistrationsPatch, KeychainItem, KeychainedResponseDecoder } from '@stamhoofd/structures'
+import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+
 import { OrganizationManager } from './OrganizationManager';
 
 export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment" | "encryption"
@@ -293,6 +294,29 @@ export class MemberManagerStatic {
     async deleteMember(member: MemberWithRegistrations) {
         const patchArray = new PatchableArray()
         patchArray.addDelete(member.id)
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+
+        this.callListeners("deleted", member)
+    }
+
+    async unregisterMember(member: MemberWithRegistrations) {
+        const patchArray = new PatchableArray()
+        const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+        for (const registration of member.activeRegistrations) {
+            patchMember.registrations.addDelete(registration.id)
+        }
+
+        patchArray.addPatch(patchMember)
  
         const session = SessionManager.currentSession!
 

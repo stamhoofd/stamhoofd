@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "esnext",
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "lib": [
+            "esnext",
+            "dom",
+            "dom.iterable",
+            "scripthost"
+        ],
+        "types": [
+            "node",
+            "jest"
+        ]
+    },
+    "include": [
+        "frontend/app/**/*.ts",
+        "frontend/app/**/*.vue",
+        "frontend/shared/**/*.ts",
+        "frontend/shared/**/*.vue",
+        "frontend/*.d.ts", 
+        "shared/**/*.ts",
+        "backend/**/*.ts",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 37
+export const Version = 46
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -12,8 +12,12 @@ export * from "./src/User"
 export * from "./src/Token"
 export * from "./src/KeychainItem"
 export * from "./src/KeyConstants"
-export * from "./src/Address"
-export * from "./src/CountryDecoder"
+export * from "./src/addresses/Address"
+export * from "./src/addresses/CountryDecoder"
+export * from "./src/addresses/City"
+export * from "./src/addresses/Province"
+export * from "./src/addresses/SearchRegions"
+
 export * from "./src/OrganizationEmail"
 
 export * from "./src/Group"
@@ -82,3 +86,16 @@ export * from "./src/files/ResolutionRequest"
 
 export * from "./src/Invite"
 export * from "./src/InviteUserDetails"
+export * from "./src/members/PaymentGeneral"
+
+
+// Webshop
+export * from "./src/webshops/WebshopMetaData"
+export * from "./src/webshops/Product"
+export * from "./src/webshops/Category"
+export * from "./src/webshops/Webshop"
+export * from "./src/webshops/Cart"
+export * from "./src/webshops/Checkout"
+export * from "./src/webshops/Customer"
+export * from "./src/webshops/Order"
+export * from "./src/endpoints/WebshopOrdersQuery"

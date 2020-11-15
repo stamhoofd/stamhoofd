@@ -70,6 +70,7 @@ export default class STListItem extends Vue {
     &.right-description {
         .right {
             @extend .style-description;
+            text-align: right;
         }
     }
 
@@ -85,12 +86,24 @@ export default class STListItem extends Vue {
                     margin-right: 0;
                 }
             }
+
+            > .button {
+                margin: -5px 5px;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
         }
 
         &.no-margin {
             .right {
                 > * {
                     margin: 0;
+                }
+
+                > .button {
+                    margin: -5px 0;
                 }
             }
         }
@@ -164,7 +177,7 @@ export default class STListItem extends Vue {
         }
     }
 
-    &:last-child {
+    &:last-child, &.no-border {
         > .main > hr {
             display: none;
         }

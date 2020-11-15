@@ -177,12 +177,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                     return;
                 }
 
-                const component = new ComponentWithProperties(CenteredMessage, { 
-                    type: "loading",
-                    title: "Account aanmaken...", 
-                    description: "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even."
-                }).setDisplayStyle("overlay");
-                this.present(component);
+                const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
                 try {
                     if (!this.session) {
                         this.session = new Session(this.invite.organization.id)
@@ -190,11 +185,11 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
 
                     await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                 } catch (e) {
-                    (component.componentInstance() as any)?.pop()
+                    component.hide()
                     throw e;
                 }
                 
-                (component.componentInstance() as any)?.pop()
+                component.hide()
             }
 
             // Trade in the key for the keychain constants + permissions (happens in the background

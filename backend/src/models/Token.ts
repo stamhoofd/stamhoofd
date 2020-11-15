@@ -64,6 +64,14 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
+    static async optionalAuthenticate(request: DecodedRequest<any, any, any>): Promise<UserWithOrganizationAndUser | undefined> {
+        const header = request.headers.authorization
+        if (!header) {
+            return
+        }
+        return this.authenticate(request)
+    }
+
     /**
      * Throws instead of returning undefined
      */

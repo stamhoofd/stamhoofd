@@ -37,11 +37,11 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // check if the domain ends on .stamhoofd.be
-        if (!process.env.REGISTRATION_HOSTNAME) {
-            throw new Error("Expected environment variable REGISTRATION_HOSTNAME")
+        if (!process.env.HOSTNAME_REGISTRATION) {
+            throw new Error("Expected environment variable HOSTNAME_REGISTRATION")
         }
-        if (request.query.domain.endsWith("." + process.env.REGISTRATION_HOSTNAME)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.REGISTRATION_HOSTNAME).length )
+        if (request.query.domain.endsWith("." + process.env.HOSTNAME_REGISTRATION)) {
+            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_REGISTRATION).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",

@@ -3,10 +3,10 @@ var merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var common;
-if (process.env.NODE_ENV != "production") {
-    common = require("../../webpack.config.js");
-} else {
+if (process.env.NODE_ENV == "production") {
     common = require("../../webpack.production.config.js");
+} else {
+    common = require("../../webpack.config.js");
 }
 
 module.exports = merge(common, {

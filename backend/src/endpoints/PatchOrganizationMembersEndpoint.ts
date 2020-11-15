@@ -155,6 +155,19 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 await registration.save()
             }
 
+            for (const deleteId of patch.registrations.getDeletes()) {
+                const registration = member.registrations.find(r => r.id === deleteId)
+                if (!registration || registration.memberId != member.id) {
+                    throw new SimpleError({
+                        code: "permission_denied",
+                        message: "You don't have permissions to access this endpoint",
+                        human: "Je hebt geen toegang om deze registratie te wijzigen"
+                    })
+                }
+                await registration.delete()
+                member.registrations = member.registrations.filter(r => r.id !== deleteId)
+            }
+
             members.push(member)
         }
 

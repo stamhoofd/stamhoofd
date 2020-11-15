@@ -1,0 +1,566 @@
+1000	Amsterdam	Amsterdam
+1001	Amsterdam	Amsterdam
+1002	Amsterdam	Amsterdam
+1003	Amsterdam	Amsterdam
+1005	Amsterdam	Amsterdam
+1006	Amsterdam	Amsterdam
+1007	Amsterdam	Amsterdam
+1008	Amsterdam	Amsterdam
+1009	Amsterdam	Amsterdam
+1011	Amsterdam	Amsterdam
+1012	Amsterdam	Amsterdam
+1013	Amsterdam	Amsterdam
+1014	Amsterdam	Amsterdam
+1015	Amsterdam	Amsterdam
+1016	Amsterdam	Amsterdam
+1017	Amsterdam	Amsterdam
+1018	Amsterdam	Amsterdam
+1019	Amsterdam	Amsterdam
+1020	Amsterdam	Amsterdam
+1021	Amsterdam	Amsterdam
+1022	Amsterdam	Amsterdam
+1023	Amsterdam	Amsterdam
+1024	Amsterdam	Amsterdam
+1025	Amsterdam	Amsterdam
+1026	Amsterdam	Amsterdam
+1027	Amsterdam	Amsterdam
+1028	Amsterdam	Amsterdam
+1030	Amsterdam	Amsterdam
+1031	Amsterdam	Amsterdam
+1032	Amsterdam	Amsterdam
+1033	Amsterdam	Amsterdam
+1034	Amsterdam	Amsterdam
+1035	Amsterdam	Amsterdam
+1036	Amsterdam	Amsterdam
+1037	Amsterdam	Amsterdam
+1040	Amsterdam	Amsterdam
+1041	Amsterdam	Amsterdam
+1042	Amsterdam	Amsterdam
+1043	Amsterdam	Amsterdam
+1044	Amsterdam	Amsterdam
+1045	Amsterdam	Amsterdam
+1046	Amsterdam	Amsterdam
+1047	Amsterdam	Amsterdam
+1051	Amsterdam	Amsterdam
+1052	Amsterdam	Amsterdam
+1053	Amsterdam	Amsterdam
+1054	Amsterdam	Amsterdam
+1055	Amsterdam	Amsterdam
+1056	Amsterdam	Amsterdam
+1057	Amsterdam	Amsterdam
+1058	Amsterdam	Amsterdam
+1059	Amsterdam	Amsterdam
+1060	Amsterdam	Amsterdam
+1061	Amsterdam	Amsterdam
+1062	Amsterdam	Amsterdam
+1063	Amsterdam	Amsterdam
+1064	Amsterdam	Amsterdam
+1065	Amsterdam	Amsterdam
+1066	Amsterdam	Amsterdam
+1067	Amsterdam	Amsterdam
+1068	Amsterdam	Amsterdam
+1069	Amsterdam	Amsterdam
+1070	Amsterdam	Amsterdam
+1071	Amsterdam	Amsterdam
+1072	Amsterdam	Amsterdam
+1073	Amsterdam	Amsterdam
+1074	Amsterdam	Amsterdam
+1075	Amsterdam	Amsterdam
+1076	Amsterdam	Amsterdam
+1077	Amsterdam	Amsterdam
+1078	Amsterdam	Amsterdam
+1079	Amsterdam	Amsterdam
+1080	Amsterdam	Amsterdam
+1081	Amsterdam	Amsterdam
+1082	Amsterdam	Amsterdam
+1083	Amsterdam	Amsterdam
+1086	Amsterdam	Amsterdam
+1087	Amsterdam	Amsterdam
+1090	Amsterdam	Amsterdam
+1091	Amsterdam	Amsterdam
+1092	Amsterdam	Amsterdam
+1093	Amsterdam	Amsterdam
+1094	Amsterdam	Amsterdam
+1095	Amsterdam	Amsterdam
+1096	Amsterdam	Amsterdam
+1097	Amsterdam	Amsterdam
+1098	Amsterdam	Amsterdam
+1100	Amsterdam	Amsterdam
+1101	Amsterdam	Amsterdam
+1102	Amsterdam	Amsterdam
+1103	Amsterdam	Amsterdam
+1104	Amsterdam	Amsterdam
+1105	Amsterdam	Amsterdam
+1106	Amsterdam	Amsterdam
+1107	Amsterdam	Amsterdam
+1108	Amsterdam	Amsterdam
+1109	Amsterdam	Amsterdam
+1110	Diemen	Diemen
+1111	Diemen	Diemen
+1112	Diemen	Diemen
+1113	Diemen	Diemen
+1114	Ouder-Amstel	Amsterdam-Duivendrecht
+1115	Ouder-Amstel	Duivendrecht
+1117	Haarlemmermeer	Schiphol
+1118	Haarlemmermeer	Schiphol
+1119	Haarlemmermeer	Schiphol-Rijk
+1120	Landsmeer	Landsmeer
+1121	Landsmeer	Landsmeer
+1127	Landsmeer	Den Ilp
+1130	Edam-Volendam	Volendam
+1131	Edam-Volendam	Volendam
+1132	Edam-Volendam	Volendam
+1135	Edam-Volendam	Edam
+1140	Waterland	Monnickendam
+1141	Waterland	Monnickendam
+1145	Waterland	Katwoude
+1150	Waterland	Broek in Waterland
+1151	Waterland	Broek in Waterland
+1153	Waterland	Zuiderwoude
+1154	Waterland	Uitdam
+1156	Waterland	Marken
+1160	Haarlemmermeer	Zwanenburg
+1161	Haarlemmermeer	Zwanenburg
+1165	Haarlemmermeer	Halfweg
+1170	Haarlemmermeer	Badhoevedorp
+1171	Haarlemmermeer	Badhoevedorp
+1175	Haarlemmermeer	Lijnden
+1180	Amstelveen	Amstelveen
+1181	Amstelveen	Amstelveen
+1182	Amstelveen	Amstelveen
+1183	Amstelveen	Amstelveen
+1184	Amstelveen	Amstelveen
+1185	Amstelveen	Amstelveen
+1186	Amstelveen	Amstelveen
+1187	Amstelveen	Amstelveen
+1188	Amstelveen	Amstelveen
+1189	Amstelveen	Amstelveen
+1190	Ouder-Amstel	Ouderkerk aan de Amstel
+1191	Ouder-Amstel	Ouderkerk aan de Amstel
+1200	Hilversum	Hilversum
+1201	Hilversum	Hilversum
+1202	Hilversum	Hilversum
+1211	Hilversum	Hilversum
+1212	Hilversum	Hilversum
+1213	Hilversum	Hilversum
+1214	Hilversum	Hilversum
+1215	Hilversum	Hilversum
+1216	Hilversum	Hilversum
+1217	Hilversum	Hilversum
+1218	Hilversum	Hilversum
+1221	Hilversum	Hilversum
+1222	Hilversum	Hilversum
+1223	Hilversum	Hilversum
+1230	Wijdemeren	Loosdrecht
+1231	Wijdemeren	Loosdrecht
+1240	Wijdemeren	Kortenhoef
+1241	Wijdemeren	Kortenhoef
+1243	Wijdemeren	's-Graveland
+1244	Wijdemeren	Ankeveen
+1250	Laren	Laren
+1251	Laren	Laren
+1252	Laren	Laren
+1260	Blaricum	Blaricum
+1261	Blaricum	Blaricum
+1262	Blaricum	Blaricum
+1270	Huizen	Huizen
+1271	Huizen	Huizen
+1272	Huizen	Huizen
+1273	Huizen	Huizen
+1274	Huizen	Huizen
+1275	Huizen	Huizen
+1276	Huizen	Huizen
+1277	Huizen	Huizen
+1380	Weesp	Weesp
+1381	Weesp	Weesp
+1382	Weesp	Weesp
+1383	Weesp	Weesp
+1384	Weesp	Weesp
+1394	Wijdemeren	Nederhorst den Berg
+1398	Gooise Meren	Muiden
+1399	Gooise Meren	Muiderberg
+1400	Gooise Meren	Bussum
+1401	Gooise Meren	Bussum
+1402	Gooise Meren	Bussum
+1403	Gooise Meren	Bussum
+1404	Gooise Meren	Bussum
+1405	Gooise Meren	Bussum
+1406	Gooise Meren	Bussum
+1410	Gooise Meren	Naarden
+1411	Gooise Meren	Naarden
+1412	Gooise Meren	Naarden
+1420	Uithoorn	Uithoorn
+1421	Uithoorn	Uithoorn
+1422	Uithoorn	Uithoorn
+1423	Uithoorn	Uithoorn
+1424	Uithoorn	De Kwakel
+1430	Aalsmeer	Aalsmeer
+1431	Aalsmeer	Aalsmeer
+1432	Aalsmeer	Aalsmeer
+1433	Aalsmeer	Kudelstaart
+1435	Haarlemmermeer	Rijsenhout
+1436	Haarlemmermeer	Aalsmeerderbrug
+1437	Haarlemmermeer	Rozenburg
+1438	Haarlemmermeer	Oude Meer
+1440	Purmerend	Purmerend
+1441	Purmerend	Purmerend
+1442	Purmerend	Purmerend
+1443	Purmerend	Purmerend
+1444	Purmerend	Purmerend
+1445	Purmerend	Purmerend
+1446	Purmerend	Purmerend
+1447	Purmerend	Purmerend
+1448	Purmerend	Purmerend
+1451	Landsmeer	Purmerland
+1452	Waterland	Ilpendam
+1454	Waterland	Watergang
+1456	Wormerland	Wijdewormer
+1458	Wormerland	Spijkerboor
+1461	Beemster	Zuidoostbeemster
+1462	Beemster	Middenbeemster
+1463	Beemster	Noordbeemster
+1464	Beemster	Westbeemster
+1471	Edam-Volendam	Kwadijk
+1472	Edam-Volendam	Middelie
+1473	Edam-Volendam	Warder
+1474	Edam-Volendam	Oosthuizen
+1475	Edam-Volendam	Beets
+1476	Edam-Volendam	Schardam
+1477	Edam-Volendam	Hobrede
+1481	Edam-Volendam	Purmer
+1482	Waterland	Purmer
+1483	Alkmaar	De Rijp
+1484	Alkmaar	Graft
+1485	Alkmaar	Noordeinde
+1486	Alkmaar	West-Graftdijk
+1487	Alkmaar	Oost-Graftdijk
+1488	Alkmaar	Starnmeer
+1489	Castricum	de Woude
+1500	Zaanstad	Zaandam
+1501	Zaanstad	Zaandam
+1502	Zaanstad	Zaandam
+1503	Zaanstad	Zaandam
+1504	Zaanstad	Zaandam
+1505	Zaanstad	Zaandam
+1506	Zaanstad	Zaandam
+1507	Zaanstad	Zaandam
+1508	Zaanstad	Zaandam
+1509	Zaanstad	Zaandam
+1510	Oostzaan	Oostzaan
+1511	Oostzaan	Oostzaan
+1520	Zaanstad	Wormerveer
+1521	Zaanstad	Wormerveer
+1525	Zaanstad	Westknollendam
+1530	Wormerland	Wormer
+1531	Wormerland	Wormer
+1534	Wormerland	Oostknollendam
+1536	Alkmaar	Markenbinnen
+1540	Zaanstad	Koog aan de Zaan
+1541	Zaanstad	Koog aan de Zaan
+1544	Zaanstad	Zaandijk
+1546	Wormerland	Jisp
+1550	Zaanstad	Westzaan
+1551	Zaanstad	Westzaan
+1560	Zaanstad	Krommenie
+1561	Zaanstad	Krommenie
+1562	Zaanstad	Krommenie
+1566	Zaanstad	Assendelft
+1567	Zaanstad	Assendelft
+1600	Enkhuizen	Enkhuizen
+1601	Enkhuizen	Enkhuizen
+1602	Enkhuizen	Enkhuizen
+1606	Drechterland	Venhuizen
+1607	Drechterland	Hem
+1608	Drechterland	Wijdenes
+1609	Drechterland	Oosterleek
+1610	Stede Broec	Bovenkarspel
+1611	Stede Broec	Bovenkarspel
+1613	Stede Broec	Grootebroek
+1614	Stede Broec	Lutjebroek
+1616	Drechterland	Hoogkarspel
+1617	Drechterland	Westwoud
+1619	Medemblik	Andijk
+1620	Hoorn	Hoorn
+1621	Hoorn	Hoorn
+1622	Hoorn	Hoorn
+1623	Hoorn	Hoorn
+1624	Hoorn	Hoorn
+1625	Hoorn	Hoorn
+1627	Hoorn	Hoorn
+1628	Hoorn	Hoorn
+1631	Koggenland	Oudendijk
+1633	Koggenland	Avenhorn
+1634	Koggenland	Scharwoude
+1636	Alkmaar	Schermerhorn
+1641	Koggenland	Spierdijk
+1642	Koggenland	Spierdijk
+1643	Koggenland	Spierdijk
+1645	Koggenland	Ursem
+1646	Alkmaar	Ursem
+1647	Koggenland	Berkhout
+1648	Koggenland	De Goorn
+1652	Koggenland	Zuidermeer
+1654	Medemblik	Benningbroek
+1655	Medemblik	Sijbekarspel
+1657	Medemblik	Abbekerk
+1658	Medemblik	Lambertschaag
+1661	Opmeer	De Weere
+1662	Opmeer	De Weere
+1663	Opmeer	De Weere
+1670	Medemblik	Medemblik
+1671	Medemblik	Medemblik
+1674	Medemblik	Opperdoes
+1676	Medemblik	Twisk
+1678	Medemblik	Oostwoud
+1679	Medemblik	Midwoud
+1681	Medemblik	Zwaagdijk-Oost
+1682	Medemblik	Zwaagdijk-Oost
+1683	Medemblik	Zwaagdijk-Oost
+1684	Medemblik	Zwaagdijk-Oost
+1685	Medemblik	Zwaagdijk-West
+1686	Medemblik	Zwaagdijk-West
+1687	Medemblik	Wognum
+1688	Medemblik	Nibbixwoud
+1689	Hoorn	Zwaag
+1691	Medemblik	Hauwert
+1692	Medemblik	Hauwert
+1693	Medemblik	Wervershoof
+1695	Hoorn	Blokker
+1696	Drechterland	Oosterblokker
+1697	Drechterland	Schellinkhout
+1700	Heerhugowaard	Heerhugowaard
+1701	Heerhugowaard	Heerhugowaard
+1702	Heerhugowaard	Heerhugowaard
+1703	Heerhugowaard	Heerhugowaard
+1704	Heerhugowaard	Heerhugowaard
+1705	Heerhugowaard	Heerhugowaard
+1706	Heerhugowaard	Heerhugowaard
+1710	Koggenland	Hensbroek
+1711	Koggenland	Hensbroek
+1713	Koggenland	Obdam
+1715	Opmeer	Spanbroek
+1716	Opmeer	Opmeer
+1718	Opmeer	Hoogwoud
+1719	Opmeer	Aartswoud
+1720	Langedijk	Broek op Langedijk
+1721	Langedijk	Broek op Langedijk
+1722	Langedijk	Zuid-Scharwoude
+1723	Langedijk	Noord-Scharwoude
+1724	Langedijk	Oudkarspel
+1730	Hollands Kroon	Winkel
+1731	Hollands Kroon	Winkel
+1732	Hollands Kroon	Lutjewinkel
+1733	Hollands Kroon	Nieuwe Niedorp
+1734	Hollands Kroon	Oude Niedorp
+1735	Hollands Kroon	't Veld
+1736	Hollands Kroon	Zijdewind
+1738	Schagen	Waarland
+1740	Schagen	Schagen
+1741	Schagen	Schagen
+1742	Schagen	Schagen
+1744	Schagen	Sint Maarten
+1746	Schagen	Dirkshorn
+1747	Schagen	Tuitjenhorn
+1749	Schagen	Warmenhuizen
+1750	Schagen	Schagerbrug
+1751	Schagen	Schagerbrug
+1752	Schagen	Sint Maartensbrug
+1753	Schagen	Sint Maartensvlotbrug
+1754	Schagen	Burgerbrug
+1755	Schagen	Petten
+1756	Schagen	't Zand
+1757	Schagen	Oudesluis
+1759	Schagen	Callantsoog
+1760	Hollands Kroon	Anna Paulowna
+1761	Hollands Kroon	Anna Paulowna
+1764	Hollands Kroon	Breezand
+1766	Hollands Kroon	Wieringerwaard
+1767	Hollands Kroon	Kolhorn
+1768	Hollands Kroon	Barsingerhorn
+1769	Hollands Kroon	Haringhuizen
+1770	Hollands Kroon	Wieringerwerf
+1771	Hollands Kroon	Wieringerwerf
+1773	Hollands Kroon	Kreileroord
+1774	Hollands Kroon	Slootdorp
+1775	Hollands Kroon	Middenmeer
+1777	Hollands Kroon	Hippolytushoef
+1778	Hollands Kroon	Westerland
+1779	Hollands Kroon	Den Oever
+1780	Den Helder	Den Helder
+1781	Den Helder	Den Helder
+1782	Den Helder	Den Helder
+1783	Den Helder	Den Helder
+1784	Den Helder	Den Helder
+1785	Den Helder	Den Helder
+1786	Den Helder	Den Helder
+1787	Den Helder	Julianadorp
+1788	Den Helder	Julianadorp
+1789	Den Helder	Den Helder
+1790	Texel	Den Burg
+1791	Texel	Den Burg
+1792	Texel	Oudeschild
+1793	Texel	De Waal
+1794	Texel	Oosterend
+1795	Texel	De Cocksdorp
+1796	Texel	De Koog
+1797	Texel	Den Hoorn
+1800	Alkmaar	Alkmaar
+1801	Alkmaar	Alkmaar
+1802	Alkmaar	Alkmaar
+1810	Alkmaar	Alkmaar
+1811	Alkmaar	Alkmaar
+1812	Alkmaar	Alkmaar
+1813	Alkmaar	Alkmaar
+1814	Alkmaar	Alkmaar
+1815	Alkmaar	Alkmaar
+1816	Alkmaar	Alkmaar
+1817	Alkmaar	Alkmaar
+1821	Alkmaar	Alkmaar
+1822	Alkmaar	Alkmaar
+1823	Alkmaar	Alkmaar
+1824	Alkmaar	Alkmaar
+1825	Alkmaar	Alkmaar
+1826	Alkmaar	Alkmaar
+1827	Alkmaar	Alkmaar
+1829	Alkmaar	Oudorp
+1830	Langedijk	Koedijk
+1831	Alkmaar	Koedijk
+1832	Langedijk	Koedijk
+1834	Langedijk	Sint Pancras
+1840	Alkmaar	Stompetoren
+1841	Alkmaar	Stompetoren
+1842	Alkmaar	Oterleek
+1843	Alkmaar	Grootschermer
+1844	Alkmaar	Driehuizen
+1846	Alkmaar	Zuidschermer
+1847	Alkmaar	Zuidschermer
+1850	Heiloo	Heiloo
+1851	Heiloo	Heiloo
+1852	Heiloo	Heiloo
+1860	Bergen (NH.)	Bergen (NH)
+1861	Bergen (NH.)	Bergen (NH)
+1862	Bergen (NH.)	Bergen (NH)
+1865	Bergen (NH.)	Bergen aan Zee
+1870	Bergen (NH.)	Schoorl
+1871	Bergen (NH.)	Schoorl
+1873	Bergen (NH.)	Groet
+1900	Castricum	Castricum
+1901	Castricum	Castricum
+1902	Castricum	Castricum
+1906	Castricum	Limmen
+1910	Uitgeest	Uitgeest
+1911	Uitgeest	Uitgeest
+1920	Castricum	Akersloot
+1921	Castricum	Akersloot
+1930	Bergen (NH.)	Egmond aan Zee
+1931	Bergen (NH.)	Egmond aan Zee
+1934	Bergen (NH.)	Egmond aan den Hoef
+1935	Bergen (NH.)	Egmond-Binnen
+1940	Beverwijk	Beverwijk
+1941	Beverwijk	Beverwijk
+1942	Beverwijk	Beverwijk
+1943	Beverwijk	Beverwijk
+1944	Beverwijk	Beverwijk
+1945	Beverwijk	Beverwijk
+1946	Beverwijk	Beverwijk
+1947	Beverwijk	Beverwijk
+1948	Beverwijk	Beverwijk
+1949	Beverwijk	Wijk aan Zee
+1950	Velsen	Velsen-Noord
+1951	Velsen	Velsen-Noord
+1960	Heemskerk	Heemskerk
+1961	Heemskerk	Heemskerk
+1962	Heemskerk	Heemskerk
+1963	Heemskerk	Heemskerk
+1964	Heemskerk	Heemskerk
+1965	Heemskerk	Heemskerk
+1966	Heemskerk	Heemskerk
+1967	Heemskerk	Heemskerk
+1968	Heemskerk	Heemskerk
+1969	Heemskerk	Heemskerk
+1970	Velsen	IJmuiden
+1971	Velsen	IJmuiden
+1972	Velsen	IJmuiden
+1973	Velsen	IJmuiden
+1974	Velsen	IJmuiden
+1975	Velsen	IJmuiden
+1976	Velsen	IJmuiden
+1980	Velsen	Velsen-Zuid
+1981	Velsen	Velsen-Zuid
+1985	Velsen	Driehuis NH
+1990	Velsen	Velserbroek
+1991	Velsen	Velserbroek
+1992	Velsen	Velserbroek
+2000	Haarlem	Haarlem
+2001	Haarlem	Haarlem
+2002	Haarlem	Haarlem
+2003	Haarlem	Haarlem
+2011	Haarlem	Haarlem
+2012	Haarlem	Haarlem
+2013	Haarlem	Haarlem
+2014	Haarlem	Haarlem
+2015	Haarlem	Haarlem
+2021	Haarlem	Haarlem
+2022	Haarlem	Haarlem
+2023	Haarlem	Haarlem
+2024	Haarlem	Haarlem
+2025	Haarlem	Haarlem
+2026	Haarlem	Haarlem
+2031	Haarlem	Haarlem
+2032	Haarlem	Haarlem
+2033	Haarlem	Haarlem
+2034	Haarlem	Haarlem
+2035	Haarlem	Haarlem
+2036	Haarlem	Haarlem
+2037	Haarlem	Haarlem
+2040	Zandvoort	Zandvoort
+2041	Zandvoort	Zandvoort
+2042	Zandvoort	Zandvoort
+2050	Bloemendaal	Overveen
+2051	Bloemendaal	Overveen
+2060	Bloemendaal	Bloemendaal
+2061	Bloemendaal	Bloemendaal
+2063	Haarlem	Spaarndam gem. Haarlem
+2064	Haarlemmermeer	Spaarndam
+2065	Haarlemmermeer	Haarlemmerliede
+2070	Velsen	Santpoort-Noord
+2071	Velsen	Santpoort-Noord
+2080	Velsen	Santpoort-Zuid
+2082	Velsen	Santpoort-Zuid
+2100	Heemstede	Heemstede
+2101	Heemstede	Heemstede
+2102	Heemstede	Heemstede
+2103	Heemstede	Heemstede
+2104	Heemstede	Heemstede
+2105	Heemstede	Heemstede
+2106	Heemstede	Heemstede
+2110	Bloemendaal	Aerdenhout
+2111	Bloemendaal	Aerdenhout
+2114	Bloemendaal	Vogelenzang
+2116	Zandvoort	Bentveld
+2120	Bloemendaal	Bennebroek
+2121	Bloemendaal	Bennebroek
+2130	Haarlemmermeer	Hoofddorp
+2131	Haarlemmermeer	Hoofddorp
+2132	Haarlemmermeer	Hoofddorp
+2133	Haarlemmermeer	Hoofddorp
+2134	Haarlemmermeer	Hoofddorp
+2135	Haarlemmermeer	Hoofddorp
+2136	Haarlemmermeer	Zwaanshoek
+2140	Haarlemmermeer	Vijfhuizen
+2141	Haarlemmermeer	Vijfhuizen
+2142	Haarlemmermeer	Cruquius
+2143	Haarlemmermeer	Boesingheliede
+2144	Haarlemmermeer	Beinsdorp
+2150	Haarlemmermeer	Nieuw-Vennep
+2151	Haarlemmermeer	Nieuw-Vennep
+2152	Haarlemmermeer	Nieuw-Vennep
+2153	Haarlemmermeer	Nieuw-Vennep
+2154	Haarlemmermeer	Burgerveen
+2155	Haarlemmermeer	Leimuiderbrug
+2156	Haarlemmermeer	Weteringbrug
+2157	Haarlemmermeer	Abbenes
+2158	Haarlemmermeer	Buitenkaag
+2165	Haarlemmermeer	Lisserbroek
+3180	Haarlemmermeer	Rozenburg
+3625	Wijdemeren	Breukeleveen

@@ -11,7 +11,7 @@
 
         <main>
             <div class="error-box" v-if="!isSupported">SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.</div>
-            <STInputBox title="Naar wie?">
+            <STInputBox title="Naar wie?" v-if="customers.length == 0">
                 <select id="sms-who" v-model="smsFilter" class="input">
                     <option value="parents">
                         Enkel naar ouders
@@ -55,7 +55,7 @@ import { STToolbar, STInputBox } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { Customer, MemberWithRegistrations } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -67,8 +67,11 @@ import { MemberWithRegistrations } from '@stamhoofd/structures';
     },
 })
 export default class SMSView extends Mixins(NavigationMixin) {
-    @Prop()
+    @Prop({ default: () => []})
     members!: MemberWithRegistrations[];
+
+    @Prop({ default: () => []})
+    customers!: Customer[];
 
     @Prop({ default: "parents" })
     initialSmsFilter!: string;
@@ -126,25 +129,34 @@ export default class SMSView extends Mixins(NavigationMixin) {
     }
 
     get phones(): string[] {
-        return this.members.flatMap((member) => {
+        const recipients: Set<string> = new Set()
+
+        for (const customer of this.customers) {
+            if (customer.phone.length > 0) {
+                recipients.add(customer.phone)
+            }
+        }
+
+        for (const member of this.members) {
             if (!member.details) {
-                return []
+                continue;
             }
             let arr: string[] = [];
+
             if (this.smsFilter == "parents" || this.smsFilter == "all") {
-                arr = member.details.parents.flatMap((parent) => {
+                for (const parent of member.details.parents) {
                     if (parent.phone) {
-                        return [parent.phone];
+                        recipients.add(parent.phone)
                     }
-                    return [];
-                });
+                }
             }
 
             if (member.details.phone && (this.smsFilter == "members" || this.smsFilter == "all")) {
-                arr.push(member.details.phone);
+                recipients.add(member.details.phone)
             }
-            return arr;
-        });
+        }
+
+        return Array.from(recipients.values())
     }
 
     send() {

@@ -1,52 +1,75 @@
 <template>
     <div class="boxed-view">
-        <div class="st-view" v-if="members.length == 0">
+        <div v-if="members.length == 0" class="st-view">
             <main>
                 <h1>Voeg de leden toe die je wilt inschrijven</h1>
 
-                <p v-if="organizationGender == 'M'">Klik op de knop onderaan en voeg alle broers toe die je wilt inschrijven.</p>
-                <p v-else-if="organizationGender == 'F'">Klik op de knop onderaan en voeg alle zussen toe die je wilt inschrijven.</p>
-                <p v-else>Klik op de knop onderaan en voeg alle leden toe die je wilt inschrijven (bv. broers en zussen).</p>
+                <p v-if="organizationGender == 'M'">
+                    Klik op de knop onderaan en voeg alle broers toe die je wilt inschrijven.
+                </p>
+                <p v-else-if="organizationGender == 'F'">
+                    Klik op de knop onderaan en voeg alle zussen toe die je wilt inschrijven.
+                </p>
+                <p v-else>
+                    Klik op de knop onderaan en voeg alle leden toe die je wilt inschrijven (bv. broers en zussen).
+                </p>
 
                 <STErrorsDefault :error-box="errorBox" />
             </main>
             <STToolbar>
-                <button class="primary button" slot="right" @click="addNewMember">
-                    <span class="icon white left add"/>
+                <button slot="right" class="primary button" @click="addNewMember">
+                    <span class="icon white left add" />
                     <span>Lid inschrijven</span>
                 </button>
             </STToolbar>
         </div>
-        <div class="st-view" v-else>
+        <div v-else class="st-view">
             <main>
-                <h1 v-if="defaultSelection">Wil je nog iemand inschrijven?</h1>
-                <h1 v-else>Wie wil je inschrijven?</h1>
+                <h1 v-if="defaultSelection">
+                    Wil je nog iemand inschrijven?
+                </h1>
+                <h1 v-else>
+                    Wie wil je inschrijven?
+                </h1>
 
-                <p v-if="organizationGender == 'M'">Voeg eventueel broers toe zodat we ze in één keer kunnen afrekenen</p>
-                <p v-else-if="organizationGender == 'F'">Voeg eventueel zussen toe zodat we ze in één keer kunnen afrekenen</p>
-                <p v-else>Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen</p>
+                <p v-if="organizationGender == 'M'">
+                    Voeg eventueel broers toe zodat we ze in één keer kunnen afrekenen
+                </p>
+                <p v-else-if="organizationGender == 'F'">
+                    Voeg eventueel zussen toe zodat we ze in één keer kunnen afrekenen
+                </p>
+                <p v-else>
+                    Voeg eventueel broers en zussen toe zodat we ze in één keer kunnen afrekenen
+                </p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STList class="member-selection-table">
                     <STListItem v-for="member in members" :key="member.id" :selectable="member.groups.length == 0" class="right-stack left-center" @click="toggleMember(member)">
-                        <Checkbox v-model="memberSelection[member.id]" slot="left" :manual="true"/>
+                        <Checkbox slot="left" v-model="memberSelection[member.id]" :manual="true" />
                         <p>{{ member.firstName }} {{ member.details ? member.details.lastName : "" }}</p>                        
-                        <p class="member-group" v-if="getWaitingListGroups(member).length > 0">Op wachtlijst zetten voor {{ getWaitingListGroups(member).map(g => g.settings.name).join(", ") }}</p>
-                        <p class="member-group" v-else-if="getRegisterGroups(member).length > 0">Inschrijven bij {{ getRegisterGroups(member).map(g => g.settings.name).join(", ") }}</p>
-                        <p class="member-group" v-else-if="member.acceptedWaitingGroups.length > 0">Toegelaten tot {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}, schrijf nu in!</p>
-                        <p class="member-group" v-else>Kies een groep</p>
+                        <p v-if="getWaitingListGroups(member).length > 0" class="member-group">
+                            Op wachtlijst zetten voor {{ getWaitingListGroups(member).map(g => g.settings.name).join(", ") }}
+                        </p>
+                        <p v-else-if="getRegisterGroups(member).length > 0" class="member-group">
+                            Inschrijven bij {{ getRegisterGroups(member).map(g => g.settings.name).join(", ") }}
+                        </p>
+                        <p v-else-if="member.acceptedWaitingGroups.length > 0" class="member-group">
+                            Toegelaten tot {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}, schrijf nu in!
+                        </p>
+                        <p v-else class="member-group">
+                            Kies een groep
+                        </p>
 
                         <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)" v-if="isValid(member)">
+                            <button v-if="isValid(member)" class="button text limit-space" @click.stop="editMember(member)">
                                 <span class="icon edit" />
                                 <span>Bewerken</span>
                             </button>
-                            <div class="button text limit-space" v-else>
+                            <div v-else class="button text limit-space">
                                 <span>Invullen / nakijken</span>
                                 <span class="icon arrow-right" />
                             </div>
-                            
                         </template>
                     </STListItem>
                 </STList>
@@ -54,16 +77,16 @@
 
             <STToolbar>
                 <button slot="right" class="button secundary" @click="addNewMember">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Nog iemand toevoegen</span>
                 </button>
-                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0" v-if="!hasWaitingList">
+                <button v-if="!hasWaitingList" slot="right" class="button primary" :disabled="selectedMembers.length == 0" @click="registerSelectedMembers">
                     <span>Inschrijven</span>
-                    <span class="icon arrow-right"/>
+                    <span class="icon arrow-right" />
                 </button>
-                <button slot="right" class="button primary" @click="registerSelectedMembers" :disabled="selectedMembers.length == 0" v-else>
+                <button v-else slot="right" class="button primary" :disabled="selectedMembers.length == 0" @click="registerSelectedMembers">
                     <span>Inschrijven (of wachtlijst)</span>
-                    <span class="icon arrow-right"/>
+                    <span class="icon arrow-right" />
                 </button>
             </STToolbar>
         </div>
@@ -71,18 +94,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, CenteredMessage, STErrorsDefault } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, Payment, PaymentDetailed, RegistrationWithMember, SelectedGroup, GroupGenderType } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import FinancialSupportView from './FinancialSupportView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, ErrorBox, LoadingView, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { Group, GroupGenderType,MemberWithRegistrations, PaymentDetailed, SelectedGroup } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import TransferPaymentView from './TransferPaymentView.vue';
+import { Component, Mixins } from "vue-property-decorator";
+
+import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
+import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import FinancialSupportView from './FinancialSupportView.vue';
 import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
@@ -103,7 +125,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     OrganizationManager = OrganizationManager
 
-    memberSelection: { [key:string]:boolean; } = {}
+    memberSelection: { [key: string]: boolean } = {}
 
     step = 1
     defaultSelection = false
@@ -227,14 +249,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
                 return false
             }
             
-            // todo: improve message
-            const errorMessage = new ComponentWithProperties(CenteredMessage, { 
-                type: "error",
-                title: member.firstName+" is al ingeschreven", 
-                description: "Je kan dit lid niet nog eens inschrijven.",
-                closeButton: "Sluiten",
-            }).setDisplayStyle("overlay");
-            this.present(errorMessage)
+            new CenteredMessage(member.firstName+" is al ingeschreven", "Je kan dit lid niet nog eens inschrijven.", "error").addCloseButton().show()
             return
         }
 
@@ -306,7 +321,7 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
     }
 
 
-     get shouldAskFinancialSupport() {
+    get shouldAskFinancialSupport() {
          // do not ask for waiting list
         return !!this.selectedMembers.find(m => this.getRegisterGroups(m).length > 0);
         
@@ -322,15 +337,6 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
             }
         }
         return false*/
-    }
-
-    openPayment(payment: PaymentDetailed) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TransferPaymentView, {
-                payment,
-                isPopup: true
-            })
-        }).setDisplayStyle("popup"))
     }
 }
 </script>

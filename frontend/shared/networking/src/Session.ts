@@ -142,13 +142,7 @@ export class Session implements RequestMiddleware {
      */
     get server() {
         const server = NetworkManager.server
-
-        if (process.env.NODE_ENV == "production") {
-            server.host = "https://" + this.organizationId + ".api.stamhoofd.app"
-        } else {
-            server.host = "https://" + this.organizationId + ".api.stamhoofd.dev"
-        }
-
+        server.host = "https://" + this.organizationId + "." + process.env.HOSTNAME_API;
         return server
     }
 

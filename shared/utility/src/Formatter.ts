@@ -21,6 +21,11 @@ export class Formatter {
         return monthNames[index - 1]
     }
 
+    static weekDay(date: Date): string {
+        const monthNames = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"]
+        return monthNames[date.getDay()]
+    }
+
     /**
      * 1 januari (2020). Year only in different year
      */
@@ -29,6 +34,21 @@ export class Formatter {
         const year = date.getFullYear()
         return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
     }
+
+    /**
+     * maandag, 1 januari (2020). Year only in different year
+     */
+    static dateWithDay(date: Date): string {
+        return this.weekDay(date) +", "+this.date(date)
+    }
+
+    /**
+     * maandag, 1 januari (2020). Year only in different year
+     */
+    static dateTimeWithDay(date: Date): string {
+        return this.weekDay(date) +", "+this.dateTime(date)
+    }
+
 
      /**
      * 01/01/2020
@@ -69,6 +89,13 @@ export class Formatter {
         return formatted.replace(new RegExp("EUR", "ig"), '€');
     }
 
+    static priceChange(value: number): string {
+        if (value >= 0) {
+            return "+ "+this.price(value)
+        }
+        return "- "+this.price(-value)
+    }
+
     static capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
@@ -87,6 +114,12 @@ export class Formatter {
         }
 
         return Math.round(bytes / 1000 / 1000 / 10) / 100 + " GB"
+    }
+
+    static minutesPadded(minutes: number): string {
+        const h = Math.floor(minutes/60)
+        const m = minutes - h*60
+        return (h+"").padStart(2, "0")+":"+(m+"").padStart(2, "0")
     }
 
     static minutes(minutes: number): string {

@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
 import { NetworkManager, Session } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
@@ -49,6 +49,11 @@ export default class App extends Vue {
 
     mounted() {
         HistoryManager.activate();
+
+        CenteredMessage.addListener(this, (centeredMessage) => {
+            console.log(this.$refs.modalStack);
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+        })
 
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");

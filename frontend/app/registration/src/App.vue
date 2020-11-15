@@ -1,22 +1,30 @@
 <template>
     <div id="app">
         <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
-        <ComponentWithPropertiesInstance :component="root"/>
+        <ComponentWithPropertiesInstance :component="root" />
         <ToastBox />
     </div>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, SplitViewController, ComponentWithPropertiesInstance, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, PromiseView, ToastBox } from '@stamhoofd/components';
-import { Component, Vue } from "vue-property-decorator";
-import RegistrationSteps from './views/login/RegistrationSteps.vue';
-import LoginView from './views/login/LoginView.vue';
-import { NetworkManager, SessionManager, Session } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
 import { Decoder } from '@simonbackx/simple-encoding';
-import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent, NavigationController, NavigationMixin,SplitViewController } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
+import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
+import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
+import { Component, Vue } from "vue-property-decorator";
+
 import { MemberManager } from './classes/MemberManager';
+import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
+import LoginView from './views/login/LoginView.vue';
+import RegistrationSteps from './views/login/RegistrationSteps.vue';
+
+async function getDefaultView() {
+    if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
+        return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
+    }
+    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/RegistrationOverviewView.vue")).default;
+}
 
 @Component({
     components: {
@@ -46,11 +54,12 @@ export default class App extends Vue {
 
                 // Set color
                 if (response.data.meta.color) {
-                    console.log("Set color "+response.data.meta.color)
-                    document.documentElement.style.setProperty("--color-primary", response.data.meta.color)
+                    ColorHelper.setColor(response.data.meta.color)
                 }
 
                 await SessionManager.setCurrentSession(session)
+
+                
 
                 return new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(PromiseView, {
@@ -62,26 +71,37 @@ export default class App extends Vue {
 
                             if (parts.length == 1 && parts[0] == 'payment') {
                                 // tood: password reset view
-                                const PaymentPendingView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/PaymentPendingView.vue")).default
+                                const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
                                 return new ComponentWithProperties(ModalStackComponent, {
                                     root: new ComponentWithProperties(RegistrationSteps, { 
-                                        root: new ComponentWithProperties(PaymentPendingView, {}),
+                                        root: new ComponentWithProperties(PaymentPendingView, {
+                                            server: SessionManager.currentSession!.authenticatedServer,
+                                            paymentId: new URL(window.location.href).searchParams.get("id"),
+                                            finishedHandler: async function(this: any, payment: Payment | null) {
+                                                if (payment && payment.status == PaymentStatus.Succeeded) {
+                                                    const RegistrationSuccessView = (await import(/* webpackChunkName: "PaymentPendingView" */ "./views/overview/RegistrationSuccessView.vue")).default
+                                                    const response = await session.authenticatedServer.request({
+                                                        method: "GET",
+                                                        path: "/payments/"+payment.id+"/registrations",
+                                                        decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
+                                                    })
+                                                    const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
+                                                    this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                                                        registrations
+                                                    }))
+                                                } else {
+                                                    this.navigationController.push(new ComponentWithProperties(await getDefaultView(), {}), true, 1, true)
+                                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                                }
+                                            }
+                                        }),
                                     })
                                 })
                             }
 
-                            if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
-                                const OverviewView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
-                                return new ComponentWithProperties(ModalStackComponent, {
-                                    root: new ComponentWithProperties(RegistrationSteps, { 
-                                        root: new ComponentWithProperties(OverviewView, {}),
-                                    })
-                                })
-                            }
-                            const RegistrationOverviewView = (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/RegistrationOverviewView.vue")).default;
                             return new ComponentWithProperties(ModalStackComponent, {
                                 root: new ComponentWithProperties(RegistrationSteps, { 
-                                    root: new ComponentWithProperties(RegistrationOverviewView, {}),
+                                    root: new ComponentWithProperties(await getDefaultView(), {}),
                                 })
                             })
                         }
