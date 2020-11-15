@@ -6,14 +6,10 @@ import os from "os";
 const homedir = os.homedir();
 
 export interface ServerConfig {
-    name: string,
-    description: string,
-    type: "web" | "api",
     ssh: {
         user: string,
         ip: string,
     },
-    caddyConfig?: string,
     frontend?: {
         apps: ("dashboard" | "registration" | "webshop")[]
     },

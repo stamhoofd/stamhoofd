@@ -4,6 +4,7 @@ import { getApp } from '../helpers/getApp';
 import { getServer } from "../helpers/getServer";
 import { deployBackend } from '../install/deploy-backend';
 import { deployFrontend } from '../install/deploy-frontend';
+import { updateCaddyConfig } from '../install/update-caddy-config';
 
 dotenv.config()
 
@@ -30,6 +31,9 @@ async function main() {
             await deployFrontend(server, app)
         }
     }
+
+    // Update caddy configs (only do this after deployment!)
+    await updateCaddyConfig(server)
 }
 
 main()

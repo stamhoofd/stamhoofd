@@ -5,15 +5,10 @@ import mollieDevelopment from './secrets/mollie-development';
 import smtp from './secrets/smtp';
 
 const config: ServerConfig = {
-
-    name: "web-staging-001",
-    description: "Staging server",
-    type: "web",
     ssh: {
         user: "stamhoofd",
         ip: "178.62.239.97",
     },
-    caddyConfig: "web.json",
     environment: "staging",
     frontend: {
         apps: ["webshop", "registration", "dashboard"]

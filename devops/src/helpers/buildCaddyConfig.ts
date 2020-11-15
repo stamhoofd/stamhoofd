@@ -256,16 +256,6 @@ export function buildCaddyConfig(server: Server): string {
                     }
                 ],
                 "handle": registrationRoutes
-            },
-            {
-                "match": [
-                    {
-                        "host": [
-                            "inschrijven.*"
-                        ]
-                    }
-                ],
-                "handle": registrationRoutes
             }
         );
     }
@@ -300,7 +290,31 @@ export function buildCaddyConfig(server: Server): string {
                     }
                 ],
                 "handle": webshopRoutes
-            },
+            }
+        );
+    }
+
+    // Add defaults as last options
+
+    if (server.config.frontend?.apps.includes("registration")) {
+        routes.push(
+            {
+                "match": [
+                    {
+                        "vars_regexp": {
+                            "{http.request.host}": {
+                                "pattern": "^inschrijven\\."
+                            }
+                        }
+                    }
+                ],
+                "handle": registrationRoutes
+            }
+        );
+    }
+
+    if (server.config.frontend?.apps.includes("webshop")) {
+         routes.push(
             {
                 // default handler a.t.m.
                 "handle": webshopRoutes

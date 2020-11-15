@@ -105,9 +105,24 @@ export class Webshop extends Model {
     }
 
     // Methods
+    static async getByDomainOnly(host: string): Promise<Webshop | undefined> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 1`,
+            [host]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]);
+    }
+
+    // Methods
     static async getByDomain(host: string, uri: string | null): Promise<Webshop | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND \`uri\` = ? LIMIT 1`,
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND \`domainUri\` = ? LIMIT 1`,
             [host, uri]
         );
 
