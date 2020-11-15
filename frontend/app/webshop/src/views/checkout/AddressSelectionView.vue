@@ -2,7 +2,7 @@
     <div class="boxed-view">
         <div class="st-view">
             <main>
-                <h1>Kies je leveringadres</h1>
+                <h1>Kies je leveringsadres</h1>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
                     Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
                 </div>
@@ -22,7 +22,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringadres in" :validator="validator" :validate-server="server" />
+                <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
             </main>
 
             <STToolbar>
