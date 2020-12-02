@@ -1,0 +1,204 @@
+import { CheckoutMethodType, Order, PaymentMethod } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import XLSX from "xlsx";
+
+export class OrdersExcelExport {
+
+    /**
+     * List of all products for every order
+     */
+    static createOrderLines(orders: Order[]): XLSX.WorkSheet {
+        /// Should we repeat all the duplicate fields for multiple lines in an order?
+        const repeat = false
+        
+        // Columns
+        const wsData = [
+            [
+                "Bestelnummer",
+                "Naam",
+                "E-mail",
+                "GSM-nummer",
+                "Aantal",
+                "Product (terugloop aanzetten!)",
+            ],
+        ];
+
+        for (const order of orders) {
+            for (const [index, item] of order.data.cart.items.entries()) {
+                const showDetails = index == 0 || repeat
+                wsData.push([
+                    showDetails ? `${order.number}` : "",
+                    showDetails ? order.data.customer.name : "",
+                    showDetails ? order.data.customer.email : "",
+                    showDetails ? order.data.customer.phone : "",
+                    `${item.amount}`,
+                    `${item.product.name}${item.description ? "\r\n"+item.description : ""}`,
+                ]);
+            }
+        }
+
+        this.deleteEmptyColumns(wsData)
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        this.wrapColumn(wsData[0].length, ws);
+
+        // Set column width
+        ws['!cols'] = []
+        for (const column of wsData[0]) {
+            if (column.toLowerCase().startsWith("naam")) {
+                ws['!cols'].push({width: 20});
+            } else if (column.toLowerCase().includes("naam")) {
+                ws['!cols'].push({width: 15});
+            } else if (column.toLowerCase().includes("e-mail")) {
+                ws['!cols'].push({width: 25});
+            } else if (column.toLowerCase().includes("adres")) {
+                ws['!cols'].push({width: 30});
+            } else if (column.toLowerCase().includes("gsm")) {
+                ws['!cols'].push({width: 16});
+            } else if (column.toLowerCase().includes("product")) {
+                ws['!cols'].push({width: 40});
+            } else {
+                ws['!cols'].push({width: 13});
+            }
+        }
+
+        return ws
+    }
+
+    /**
+     * List all orders
+     */
+    static createOrders(orders: Order[]): XLSX.WorkSheet {
+        /// Should we repeat all the duplicate fields for multiple lines in an order?
+        const repeat = false
+        
+        // Columns
+        const wsData: (string | number)[][] = [
+            [
+                "Bestelnummer",
+                "Naam",
+                "E-mail",
+                "GSM-nummer",
+                "Afhaalmethode",
+                "Leveringsadres / afhaallocatie",
+                "Leveringskost",
+                "Totaal",
+                "Betaalmethode",
+                "Betaald"
+            ],
+        ];
+
+        for (const order of orders) {
+            let checkoutType = "/"
+            let address = "/"
+            if (order.data.checkoutMethod?.type == CheckoutMethodType.Takeout) {
+                checkoutType = "Afhalen"
+                address = order.data.checkoutMethod.name
+            } else if (order.data.checkoutMethod?.type == CheckoutMethodType.Delivery) {
+                checkoutType = "Levering"
+                address = order.data.address?.toString() ?? "??"
+            }
+
+            wsData.push([
+                `${order.number}`,
+                order.data.customer.name,
+                order.data.customer.email,
+                order.data.customer.phone,
+                checkoutType,
+                address,
+                order.data.deliveryPrice / 100,
+                order.data.totalPrice / 100,
+                order.data.paymentMethod == PaymentMethod.Transfer ? "Overschrijving" : order.data.paymentMethod,
+                order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald"
+            ]);
+        }
+
+        this.deleteEmptyColumns(wsData)
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        this.formatColumn(wsData[0].length - 2, "€0.00", ws)
+        this.formatColumn(wsData[0].length - 3, "€0.00", ws)
+
+        // Set column width
+        ws['!cols'] = []
+        for (const column of wsData[0]) {
+            if (typeof column != "string") {
+                continue
+            }
+            if (column.toLowerCase().startsWith("naam")) {
+                ws['!cols'].push({width: 20});
+            } else if (column.toLowerCase().includes("naam")) {
+                ws['!cols'].push({width: 15});
+            } else if (column.toLowerCase().includes("e-mail")) {
+                ws['!cols'].push({width: 25});
+            } else if (column.toLowerCase().includes("adres")) {
+                ws['!cols'].push({width: 30});
+            } else if (column.toLowerCase().includes("gsm")) {
+                ws['!cols'].push({width: 16});
+            } else if (column.toLowerCase().includes("product")) {
+                ws['!cols'].push({width: 40});
+            } else {
+                ws['!cols'].push({width: 13});
+            }
+        }
+
+        return ws
+    }
+
+    // Does not work
+    static wrapColumn(colNum: number, worksheet: any) {
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
+            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
+            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
+            /* if the particular row did not contain data for the column, the cell will not be generated */
+            if(!worksheet[ref]) continue;
+            /* assign the `.s` style */
+            worksheet[ref].s = {alignment:{ wrapText: true }}
+        }
+    }
+
+    static formatColumn(colNum: number, fmt: string, worksheet: any) {
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
+            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
+            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
+            /* if the particular row did not contain data for the column, the cell will not be generated */
+            if(!worksheet[ref]) continue;
+            /* `.t == "n"` for number cells */
+            if(worksheet[ref].t != 'n') continue;
+            /* assign the `.z` number format */
+            worksheet[ref].z = fmt;
+        }
+    }
+
+    static deleteEmptyColumns(wsData: (string | number)[][]) {
+        // Delete empty columns
+        for (let index = wsData[0].length - 1; index >= 0; index--) {
+            let empty = true
+            for (const row of wsData.slice(1)) {
+                if (row[index].length == 0 || row[index] == "/") {
+                    continue;
+                }
+                empty = false
+                break
+            }
+            if (empty) {
+               for (const row of wsData) {
+                    row.splice(index, 1)
+                } 
+            }
+        }
+    }
+
+    static export(orders: Order[]) {
+        const wb = XLSX.utils.book_new();
+        /* Add the worksheet to the workbook */
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Bestellingen + producten");
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders), "Bestellingen");
+
+        // todo: also add other sheets
+        XLSX.writeFile(wb, "bestellingen.xlsx");
+    }
+}

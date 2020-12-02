@@ -27,6 +27,7 @@
         
         > circle {
             stroke: $color-primary;
+            stroke: var(--color-primary, $color-primary);
             animation: spinner-circle 4s infinite;
         }
     }

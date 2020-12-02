@@ -6,15 +6,16 @@
         <ContextMenuItem @click="mail">
             Mailen
         </ContextMenuItem>
+        <ContextMenuItem @click="exportToExcel">
+            Exporteer naar Excel
+        </ContextMenuItem>
     </ContextMenu>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu } from "@stamhoofd/components";
-import { ContextMenuItem } from "@stamhoofd/components";
-import { ContextMenuLine } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
 import { Group, MemberWithRegistrations, Order } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -26,6 +27,7 @@ import SMSView from "../sms/SMSView.vue";
         ContextMenu,
         ContextMenuItem,
         ContextMenuLine,
+        Spinner
     },
 })
 export default class OrdersContextMenu extends Mixins(NavigationMixin) {
@@ -54,6 +56,12 @@ export default class OrdersContextMenu extends Mixins(NavigationMixin) {
             }),
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    async exportToExcel() {
+        const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../classes/OrdersExcelExport");
+        const OrdersExcelExport = d.OrdersExcelExport
+        OrdersExcelExport.export(this.orders);
     }
 }
 </script>

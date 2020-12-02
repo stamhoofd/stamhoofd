@@ -151,6 +151,9 @@ export default class ContextMenu extends Vue {
         &:hover {
             background: $color-primary;
             color: $color-white;
+            > * {
+                --color-primary: #{$color-white};
+            }
         }
 
         &.clicked {
