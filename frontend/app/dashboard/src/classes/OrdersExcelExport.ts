@@ -9,7 +9,7 @@ export class OrdersExcelExport {
      */
     static createOrderLines(orders: Order[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
-        const repeat = false
+        const repeat = true
         
         // Columns
         const wsData = [

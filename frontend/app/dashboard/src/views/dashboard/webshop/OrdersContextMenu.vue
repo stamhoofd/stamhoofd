@@ -6,6 +6,7 @@
         <ContextMenuItem @click="mail">
             Mailen
         </ContextMenuItem>
+        <ContextMenuLine />
         <ContextMenuItem @click="exportToExcel">
             Exporteer naar Excel
         </ContextMenuItem>
