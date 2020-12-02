@@ -41,8 +41,6 @@ export class OrdersExcelExport {
 
         const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-        this.wrapColumn(wsData[0].length, ws);
-
         // Set column width
         ws['!cols'] = []
         for (const column of wsData[0]) {
@@ -96,7 +94,7 @@ export class OrdersExcelExport {
                 checkoutType = "Afhalen"
                 address = order.data.checkoutMethod.name
             } else if (order.data.checkoutMethod?.type == CheckoutMethodType.Delivery) {
-                checkoutType = "Levering"
+                checkoutType = "Levering" + (order.data.checkoutMethod.name.length > 0 ? "("+order.data.checkoutMethod.name+")" : "")
                 address = order.data.address?.toString() ?? "??"
             }
 
@@ -117,8 +115,8 @@ export class OrdersExcelExport {
         this.deleteEmptyColumns(wsData)
 
         const ws = XLSX.utils.aoa_to_sheet(wsData);
-        this.formatColumn(wsData[0].length - 2, "€0.00", ws)
         this.formatColumn(wsData[0].length - 3, "€0.00", ws)
+        this.formatColumn(wsData[0].length - 4, "€0.00", ws)
 
         // Set column width
         ws['!cols'] = []
@@ -146,19 +144,6 @@ export class OrdersExcelExport {
         return ws
     }
 
-    // Does not work
-    static wrapColumn(colNum: number, worksheet: any) {
-        const range = XLSX.utils.decode_range(worksheet['!ref']);
-        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
-            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
-            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
-            /* if the particular row did not contain data for the column, the cell will not be generated */
-            if(!worksheet[ref]) continue;
-            /* assign the `.s` style */
-            worksheet[ref].s = {alignment:{ wrapText: true }}
-        }
-    }
-
     static formatColumn(colNum: number, fmt: string, worksheet: any) {
         const range = XLSX.utils.decode_range(worksheet['!ref']);
         for(let i = range.s.r + 1; i <= range.e.r; ++i) {
@@ -178,7 +163,16 @@ export class OrdersExcelExport {
         for (let index = wsData[0].length - 1; index >= 0; index--) {
             let empty = true
             for (const row of wsData.slice(1)) {
-                if (row[index].length == 0 || row[index] == "/") {
+                const value = row[index]
+                if (typeof value != "string") {
+                    if (value == 0) {
+                        // If all zero: empty
+                        continue;
+                    }
+                    empty = false
+                    break
+                }
+                if (value.length == 0 || value == "/") {
                     continue;
                 }
                 empty = false
