@@ -1,5 +1,5 @@
 import { CheckoutMethodType, Order, PaymentMethod } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
 export class OrdersExcelExport {
@@ -144,6 +144,77 @@ export class OrdersExcelExport {
         return ws
     }
 
+    /**
+     * List all amount per product variant
+     */
+    static createProducts(orders: Order[]): XLSX.WorkSheet {
+        
+        // Columns
+        const wsData: (string | number)[][] = [
+            [
+                "Product",
+                "Variant",
+                "Aantal"
+            ],
+        ];
+
+        const counter: Map<string, { amount: number; name: string; variant: string}> = new Map()
+
+        for (const order of orders) {
+            for (const item of order.data.cart.items) {
+                const id = item.id
+                let existing = counter.get(id)
+                if (!existing) {
+                    existing = { amount: 0, name: item.product.name,  variant: item.description}
+                    counter.set(id, existing)
+                }
+                existing.amount += item.amount
+            }
+        }
+
+        // Sort by amount
+        const arr = Array.from(counter.values())
+        arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, "name"), Sorter.byNumberProperty(a, b, "amount")))
+
+         for (const item of arr) {
+          
+            wsData.push([
+                item.name,
+                item.variant,
+                item.amount
+            ]);
+        }
+
+        this.deleteEmptyColumns(wsData)
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        // Set column width
+        ws['!cols'] = []
+        for (const column of wsData[0]) {
+            if (typeof column != "string") {
+                continue
+            }
+            if (column.toLowerCase().startsWith("naam")) {
+                ws['!cols'].push({width: 20});
+            } else if (column.toLowerCase().includes("naam")) {
+                ws['!cols'].push({width: 15});
+            } else if (column.toLowerCase().includes("e-mail")) {
+                ws['!cols'].push({width: 25});
+            } else if (column.toLowerCase().includes("adres")) {
+                ws['!cols'].push({width: 30});
+            } else if (column.toLowerCase().includes("gsm")) {
+                ws['!cols'].push({width: 16});
+            } else if (column.toLowerCase().includes("product")) {
+                ws['!cols'].push({width: 40});
+            } else {
+                ws['!cols'].push({width: 13});
+            }
+        }
+
+        return ws
+    }
+
     static formatColumn(colNum: number, fmt: string, worksheet: any) {
         const range = XLSX.utils.decode_range(worksheet['!ref']);
         for(let i = range.s.r + 1; i <= range.e.r; ++i) {
@@ -191,6 +262,7 @@ export class OrdersExcelExport {
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Bestellingen + producten");
         XLSX.utils.book_append_sheet(wb, this.createOrders(orders), "Bestellingen");
+        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Producten");
 
         // todo: also add other sheets
         XLSX.writeFile(wb, "bestellingen.xlsx");
