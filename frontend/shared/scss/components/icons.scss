@@ -216,6 +216,10 @@
     &.min:after {
         font-icon: url(@stamhoofd/assets/images/icons/min.svg);
     }
+
+    &.canceled:after {
+        font-icon: url(@stamhoofd/assets/images/icons/canceled.svg);
+    }
 }
 
 .android-icons {

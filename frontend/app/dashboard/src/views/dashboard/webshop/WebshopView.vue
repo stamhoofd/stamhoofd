@@ -74,13 +74,13 @@
                             />
                         </th>
                         <th @click="toggleSort('payment')">
-                            Betaling
-                            <span
-                                class="sort-arrow"
-                                :class="{
-                                    up: sortBy == 'payment' && sortDirection == 'ASC',
-                                    down: sortBy == 'payment' && sortDirection == 'DESC',
-                                }"
+                            Status
+                            <span v-if="sortBy == 'payment'"
+                                  class="sort-arrow"
+                                  :class="{
+                                      up: sortBy == 'payment' && sortDirection == 'ASC',
+                                      down: sortBy == 'payment' && sortDirection == 'DESC',
+                                  }"
                             />
                         </th>
                     </tr>
@@ -110,9 +110,10 @@
                             </p>
                         </td>
                         <td>
-                            <span class="style-description-small">{{ order.order.data.totalPrice | price }}</span>
-                            <span v-if="!order.order.payment || order.order.payment.status == 'Succeeded'" key="success" v-tooltip="order.order.payment && order.order.payment.paidAt ? 'Betaald op '+formatDateTime(order.order.payment.paidAt) : 'Zonder betaling'" class="icon success green" />
-                            <span v-else key="no-success" v-tooltip="'Nog niet betaald'" class="icon clock gray" />
+                            <span v-if="order.order.payment && order.order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
+                            <span v-if="order.order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                            <span v-if="order.order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
+                            <span v-if="order.order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
                         </td>
                     </tr>
                 </tbody>

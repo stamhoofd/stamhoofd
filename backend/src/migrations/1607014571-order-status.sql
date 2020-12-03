@@ -1,0 +1,1 @@
+ALTER TABLE `webshop_orders` ADD COLUMN `status` varchar(36) NOT NULL DEFAULT 'Created' COMMENT '';

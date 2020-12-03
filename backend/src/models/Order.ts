@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData } from '@stamhoofd/structures';
+import { OrderData, OrderStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import Email from '../email/Email';
@@ -58,6 +58,9 @@ export class Order extends Model {
 
     @column({ type: "datetime", nullable: true })
     validAt: Date | null = null
+
+    @column({ type: "string" })
+    status = OrderStatus.Created
 
     static webshop = new ManyToOneRelation(Webshop, "webshop");
     static payment = new ManyToOneRelation(Payment, "payment");

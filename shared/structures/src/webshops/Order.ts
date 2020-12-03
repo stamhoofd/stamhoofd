@@ -4,6 +4,13 @@ import { Payment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Checkout } from './Checkout';
 
+export enum OrderStatus {
+    Created = "Created",
+    Prepared = "Prepared",
+    Completed = "Completed",
+    Canceled = "Canceled",
+}
+
 export class OrderData extends Checkout {
     // Payment method is required
     @field({ decoder: new EnumDecoder(PaymentMethod) })
@@ -51,6 +58,8 @@ export class Order extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
 
+    @field({ decoder: new EnumDecoder(OrderStatus), version: 47 })
+    status: OrderStatus
 }
 
 export class OrderResponse extends AutoEncoder {

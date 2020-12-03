@@ -69,11 +69,12 @@
 }
 
 .style-tag {
-    font-size: 14px;
+    font-size: 11px;
+    text-transform: uppercase;
     font-weight: bold;
     color: $color-primary;
     background: $color-primary-background;
-    padding: 7px 10px;
+    padding: 5px 7px;
     border-radius: $border-radius;
 
     &.warn {
@@ -84,6 +85,11 @@
     &.error {
         color: $color-error-dark;
         background: $color-error-background;
+    }
+
+    &.success {
+        color: $color-success-dark;
+        background: $color-success-background;
     }
 }
 
