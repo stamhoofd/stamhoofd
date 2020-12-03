@@ -16,6 +16,11 @@
                 <div />
             </template>
             <template #right>
+                <select v-model="selectedFilter" class="input hide-small">
+                    <option v-for="(filter, index) in filters" :key="index" :value="index">
+                        {{ filter.getName() }}
+                    </option>
+                </select>
                 <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
             </template>
         </STNavigationBar>
@@ -73,13 +78,13 @@
                                 }"
                             />
                         </th>
-                        <th @click="toggleSort('payment')">
+                        <th @click="toggleSort('status')">
                             Status
-                            <span v-if="sortBy == 'payment'"
+                            <span v-if="sortBy == 'status'"
                                   class="sort-arrow"
                                   :class="{
-                                      up: sortBy == 'payment' && sortDirection == 'ASC',
-                                      down: sortBy == 'payment' && sortDirection == 'DESC',
+                                      up: sortBy == 'status' && sortDirection == 'ASC',
+                                      down: sortBy == 'status' && sortDirection == 'DESC',
                                   }"
                             />
                         </th>
@@ -131,6 +136,9 @@
                 </template>
             </template>
             <template #right>
+                <button class="button secundary" :disabled="selectionCount == 0" @click="markAs">
+                    <span class="dropdown-text">Markeren als...</span>
+                </button>
                 <LoadingButton :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
                         <span class="dropdown-text">Mailen</span>
@@ -153,21 +161,23 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Order, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import MailView from '../mail/MailView.vue';
 import EditWebshopView from './EditWebshopView.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
+import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
 
 class SelectableOrder {
     order: Order;
-    selected = true;
+    selected = false;
 
-    constructor(order: Order, selected = true) {
+    constructor(order: Order, selected = false) {
         this.order = order;
         this.selected = selected
     }
@@ -201,10 +211,13 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     orders: SelectableOrder[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
 
-    sortBy = "number";
+    sortBy = "status";
     sortDirection = "ASC";
     selectionCountHidden = 0;
     searchQuery = "";
+
+    filters = [new NoFilter(), ...StatusFilter.generateAll(), new NotPaidFilter()];
+    selectedFilter = 0;
 
     mounted() {
         this.reload();
@@ -293,7 +306,19 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     get filteredOrders() {
         this.selectionCountHidden = 0
 
-        return this.orders.filter((order: SelectableOrder) => {
+        const filtered = this.orders.filter((order: SelectableOrder) => {
+            if (this.filters[this.selectedFilter].doesMatch(order.order)) {
+                return true;
+            }
+            this.selectionCountHidden += order.selected ? 1 : 0;
+            return false;
+        });
+
+        if (this.searchQuery == "") {
+            return filtered;
+        }
+
+        return filtered.filter((order: SelectableOrder) => {
             if (order.order.number+"" == this.searchQuery) {
                 return true;
             }
@@ -325,11 +350,18 @@ export default class WebshopView extends Mixins(NavigationMixin) {
                 )
                 * (this.sortDirection == "ASC" ? -1 : 1));
         }
+        
 
-        if (this.sortBy == "payment") {
+        if (this.sortBy == "status") {
+            const statusMap: Map<OrderStatus, number> = new Map()
+            for (const status of Object.values(OrderStatus)) {
+                statusMap.set(status, statusMap.size)
+            }
+
             return this.filteredOrders.sort((a, b) => Sorter.stack(
+                Sorter.byNumberValue(statusMap.get(a.order.status) ?? 0, statusMap.get(b.order.status) ?? 0),
                 Sorter.byBooleanValue((a.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded, (b.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded), 
-                Sorter.byNumberValue(a.order.data.cart.price, b.order.data.cart.price)
+                Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0)
             ) * (this.sortDirection == "ASC" ? -1 : 1));
         }
 
@@ -417,8 +449,21 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         }
         const displayedComponent = new ComponentWithProperties(OrdersContextMenu, {
             x: event.clientX,
-            y: event.clientY + 10,
+            y: event.clientY,
             orders: this.getSelectedOrders()
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    markAs(event) {
+        if (this.selectionCount == 0) {
+            return;
+        }
+        const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
+            x: event.clientX,
+            y: event.clientY,
+            orders: this.getSelectedOrders(),
+            webshop: this.preview
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
