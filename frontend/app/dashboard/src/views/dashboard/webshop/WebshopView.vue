@@ -91,7 +91,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)">
+                    <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
                         <td @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
@@ -128,7 +128,7 @@
             <Spinner v-if="isLoadingOrders" class="center" />
         </main>
 
-        <STToolbar>
+        <STToolbar :class="{'hide-smartphone': selectionCount == 0}">
             <template #left>
                 {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "bestelling" : "bestellingen" }} geselecteerd
                 <template v-if="selectionCountHidden">
@@ -164,11 +164,13 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { EventBus } from '../../../classes/EventBus';
 import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import MailView from '../mail/MailView.vue';
 import EditWebshopView from './EditWebshopView.vue';
+import OrderContextMenu from './OrderContextMenu.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
@@ -182,6 +184,9 @@ class SelectableOrder {
         this.selected = selected
     }
 }
+
+
+export const WebshopOrdersEventBus = new EventBus<"deleted", any>()
 
 @Component({
     components: {
@@ -221,6 +226,20 @@ export default class WebshopView extends Mixins(NavigationMixin) {
 
     mounted() {
         this.reload();
+        this.loadNextOrders()
+    }
+
+    activated() {
+        WebshopOrdersEventBus.addListener(this, "deleted", this.onDeleteOrder)
+    }
+
+    deactivated() {
+        WebshopOrdersEventBus.removeListener(this)
+    }
+
+    onDeleteOrder() {
+        this.nextQuery = WebshopOrdersQuery.create({})
+        this.orders = []
         this.loadNextOrders()
     }
 
@@ -463,6 +482,16 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY,
             orders: this.getSelectedOrders(),
+            webshop: this.preview
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    showOrderContextMenu(event, order: Order) {
+        const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
+            x: event.clientX,
+            y: event.clientY,
+            orders: [order],
             webshop: this.preview
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
