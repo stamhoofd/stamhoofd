@@ -120,15 +120,23 @@ export class CartItem extends AutoEncoder {
         const remainingMenus = this.product.optionMenus.slice()
 
         for (const o of this.options) {
-            const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
+            let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
             if (index == -1) {
+                // Check if it has a multiple choice one
+                index = this.product.optionMenus.findIndex(m => m.id === o.optionMenu.id)
                 throw new SimpleError({
                     code: "option_menu_unavailable",
                     message: "Option menu unavailable",
                     human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
                 })
             }
-            const menu = remainingMenus.splice(index, 1)[0]
+
+            const menu = remainingMenus[index]
+            if (!menu.multipleChoice) {
+                // Already used: not possible to add another
+                remainingMenus.splice(index, 1)[0]
+            }
+            
             const option = menu.options.find(m => m.id === o.option.id)
 
             if (!option) {

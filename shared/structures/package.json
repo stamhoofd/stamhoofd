@@ -14,7 +14,7 @@
     "scripts": {
         "build": " tsc -b . esm",
         "build:full": "rm -r ./dist && rm -r ./esm/dist && tsc -b . esm",
-        "test": "jest",
+        "test": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
