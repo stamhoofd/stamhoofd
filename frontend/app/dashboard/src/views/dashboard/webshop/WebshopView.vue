@@ -6,10 +6,8 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
 
-                    <button class="button text" @click="editSettings">
-                        <span class="icon settings" />
-                        <span>Instellingen</span>
-                    </button>
+                    <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
+                    <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
                 </STNavigationTitle>
             </template>
             <template #middle>
@@ -29,10 +27,8 @@
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <button class="button text" @click="editSettings">
-                    <span class="icon settings" />
-                    <span>Instellingen</span>
-                </button>
+                <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
+                <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
             <Spinner v-if="loading" class="center" />
@@ -241,6 +237,10 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         this.nextQuery = WebshopOrdersQuery.create({})
         this.orders = []
         this.loadNextOrders()
+    }
+
+    get webshopUrl() {
+        return this.webshop?.getUrl(OrganizationManager.organization) ?? ""
     }
 
     formatDateTime(date: Date) {
