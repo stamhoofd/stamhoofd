@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, DateDecoder,EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { File } from './files/File';
 import { Image } from './files/Image';
@@ -8,9 +8,20 @@ import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 
+export class OrganizationModules extends AutoEncoder {
+    @field({ decoder: BooleanDecoder })
+    useMembers = false
+
+    @field({ decoder: BooleanDecoder })
+    useWebshops = false
+}
+
 export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type: OrganizationType;
+
+    @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }) })
+    modules = OrganizationModules.create({})
 
     @field({ decoder: new EnumDecoder(UmbrellaOrganization), nullable: true })
     umbrellaOrganization: UmbrellaOrganization | null = null;

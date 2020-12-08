@@ -25,9 +25,9 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
-        <hr v-if="groups.length > 0">
+        <hr v-if="groups.length > 0 && enableMemberModule">
 
-        <div v-if="groups.length > 0">
+        <div v-if="groups.length > 0 && enableMemberModule">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
                 <span class="icon user" />
                 <span>Leden</span>
@@ -47,9 +47,9 @@
             </button>
         </div>
         
-        <hr v-if="groups.length > 0">
+        <hr v-if="enableWebshopModule">
 
-        <div>
+        <div v-if="enableWebshopModule">
             <button class="menu-button heading">
                 <span class="icon basket" />
                 <span>Verkopen</span>
@@ -72,10 +72,6 @@
 
         <hr>
         <div v-if="fullAccess">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-groups'}" @click="manageGroups">
-                <span class="icon group" />
-                <span>Leeftijdsgroepen</span>
-            </button>
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments"> 
                 <span class="icon card" />
                 <span>Overschrijvingen</span>
@@ -186,7 +182,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             if (this.groups.length > 0) {
                 this.openGroup(this.groups[0])
             } else {
-                this.manageGroups()
+                this.manageSettings(false)
             }
         }
 
@@ -304,12 +300,6 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }));
     }
 
-
-    manageGroups() {
-        this.currentlySelected = "manage-groups"
-        this.showDetail(new ComponentWithProperties(EditGroupsView, {}));
-    }
-
     managePayments() {
         this.currentlySelected = "manage-payments"
         this.showDetail(new ComponentWithProperties(PaymentsView, {}));
@@ -318,7 +308,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.splitViewController?.showDetail(new ComponentWithProperties(SettingsView, {}), animated);
+        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }), animated);
     }
 
     manageAdmins() {
@@ -371,6 +361,14 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     get fullReadAccess() {
         return SessionManager.currentSession!.user!.permissions!.hasReadAccess()
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
+    }
+
+    get enableWebshopModule() {
+        return this.organization.meta.modules.useWebshops
     }
 }
 </script>

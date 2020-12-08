@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 47
+export const Version = 48
 
 // General
 export * from "./src/OrganizationMetaData"
