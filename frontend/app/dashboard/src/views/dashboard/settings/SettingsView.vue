@@ -138,12 +138,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -222,6 +222,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>) {
+        OrganizationManager.patch(OrganizationPatch.create({
+            id: this.organization.id,
+            meta: OrganizationMetaData.patch({
+                modules: OrganizationModules.patch(patch)
+            })
+        })).catch(e => {
+            CenteredMessage.fromError(e).show()
+        })
+    }
+
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
@@ -229,6 +240,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     set enableMemberModule(enable: boolean) {
         // todo: sync + start questions
         this.organization.meta.modules.useMembers = enable
+        this.patchModule({ useMembers: enable })
     }
 
     get enableWebshopModule() {
@@ -238,8 +250,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     set enableWebshopModule(enable: boolean) {
         // todo: sync
         this.organization.meta.modules.useWebshops = enable
+        this.patchModule({ useWebshops: enable })
     }
-    
 
     mounted() {
         const path = window.location.pathname;
@@ -252,6 +264,23 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPayment(false)
             return
         }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
+            // Open mollie settings
+            this.openGeneral()
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
+            // Open mollie settings
+            this.openPayment(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'personalize') {
+            // Open mollie settings
+            this.openPersonalize()
+        }
+
+
         HistoryManager.setUrl("/settings")
     }
 }

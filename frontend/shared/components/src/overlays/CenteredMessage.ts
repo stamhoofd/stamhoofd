@@ -1,3 +1,5 @@
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors'
+
 export type CenteredMessageListener = (centeredMessage: CenteredMessage) => void
 
 export class CenteredMessageButton {
@@ -36,6 +38,21 @@ export class CenteredMessage {
         this.title = title
         this.description = description
         this.type = type
+    }
+
+    static fromError(errors: Error) {
+        let simpleErrors: SimpleErrors
+        if (isSimpleError(errors)) {
+            simpleErrors = new SimpleErrors(errors)
+        } else if (isSimpleErrors(errors)) {
+            simpleErrors = errors
+        } else {
+            simpleErrors = new SimpleErrors(new SimpleError({
+                code: "unknown_error",
+                message: errors.message
+            }))
+        }
+        return new CenteredMessage(simpleErrors.getHuman(), "", "error")
     }
 
     static addListener(owner: any, listener: CenteredMessageListener) {

@@ -42,7 +42,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties,NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, CenteredMessage, BackButton } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch, User, OrganizationAdmins, Invite } from '@stamhoofd/structures';
@@ -75,6 +75,8 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         this.load().catch(e => {
             console.error(e)
         })
+
+        HistoryManager.setUrl("/admins")
     }
 
     async load() {

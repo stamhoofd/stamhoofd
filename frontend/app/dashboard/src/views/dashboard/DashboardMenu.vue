@@ -72,7 +72,7 @@
 
         <hr>
         <div v-if="fullAccess">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments"> 
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
                 <span class="icon card" />
                 <span>Overschrijvingen</span>
             </button>
@@ -81,12 +81,12 @@
                 <span>Instellingen</span>
             </button>
 
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-admins'}" @click="manageAdmins">
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-admins'}" @click="manageAdmins(false)">
                 <span class="icon lock" />
                 <span>Beheerders</span>
             </button>
 
-            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="syncScoutsEnGidsen">
+            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(false)">
                 <span class="icon sync" />
                 <span>Groepsadministratie</span>
             </button>
@@ -96,7 +96,7 @@
                 <span>Leden importeren</span>
             </button>
 
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount">
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
                 <span class="icon user" />
                 <span>Mijn account</span>
             </button>
@@ -169,8 +169,23 @@ export default class Menu extends Mixins(NavigationMixin) {
             didSet = true
         }
 
+        if (parts.length >= 1 && parts[0] == 'transfers') {
+            this.managePayments(false)
+            didSet = true
+        }
+
+        if (parts.length >= 1 && parts[0] == 'admins') {
+            this.manageAdmins(false)
+            didSet = true
+        }
+
+        if (parts.length >= 1 && parts[0] == 'account') {
+            this.manageAccount(false)
+            didSet = true
+        }
+
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
-            this.openSyncScoutsEnGidsen()
+            this.openSyncScoutsEnGidsen(false)
             didSet = true
         }
 
@@ -300,9 +315,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }));
     }
 
-    managePayments() {
+    managePayments(animated = true) {
         this.currentlySelected = "manage-payments"
-        this.showDetail(new ComponentWithProperties(PaymentsView, {}));
+        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(PaymentsView, {}) }), animated);
     }
 
     manageSettings(animated = true) {
@@ -311,14 +326,14 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }), animated);
     }
 
-    manageAdmins() {
+    manageAdmins(animated = true) {
         this.currentlySelected = "manage-admins"
-        this.showDetail(new ComponentWithProperties(AdminsView, {}));
+        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AdminsView, {}) }), animated);
     }
 
-    manageAccount() {
+    manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
-        this.showDetail(new ComponentWithProperties(AccountSettingsView, {}));
+        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AccountSettingsView, {}) }), animated);
     }
 
     manageWhatsNew() {
@@ -334,13 +349,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.logout()
     }
 
-    syncScoutsEnGidsen() {
-        this.openSyncScoutsEnGidsen()
-    }
-
-    openSyncScoutsEnGidsen() {
+    openSyncScoutsEnGidsen(animated = true) {
         this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.showDetail(new ComponentWithProperties(SGVGroepsadministratieView, {}));
+        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SGVGroepsadministratieView, {}) }), animated);
     }
 
     importMembers() {

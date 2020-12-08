@@ -64,7 +64,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton,Spinner, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentGeneral, PaymentDetailed, PaymentGeneral, PaymentMethod,PaymentPatch, PaymentStatus, RegistrationWithMember } from '@stamhoofd/structures';
@@ -118,6 +118,8 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
         })
+
+        HistoryManager.setUrl("/transfers")
     }
 
     get filteredPayments(): SelectablePayment[] {

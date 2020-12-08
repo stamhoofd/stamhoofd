@@ -67,7 +67,7 @@
             </template>
             <template v-else>
                 <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    Online betalingen via Bancontact of iDEAL zijn beschikbaar (je moet ze aanzetten waar je ze wil gebruiken).
+                    Online betalingen via Bancontact of iDEAL zijn mogelijk (je moet ze wel eerst aanzetten waar je ze wil gebruiken).
                 </p>
                 <p v-else class="warning-box">
                     Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.

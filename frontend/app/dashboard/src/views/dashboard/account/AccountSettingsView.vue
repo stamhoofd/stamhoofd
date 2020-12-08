@@ -44,7 +44,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
@@ -79,6 +79,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     userPatch = User.patch({ id: this.user.id })
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+
+    mounted() {
+        HistoryManager.setUrl("/account")
+    }
 
     get patchedUser() {
         return this.user.patch(this.userPatch)
