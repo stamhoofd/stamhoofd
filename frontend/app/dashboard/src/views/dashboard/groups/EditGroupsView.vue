@@ -6,8 +6,8 @@
                 <span class="icon add" />
                 <span>Nieuw</span>
             </button>
+            <button v-if="!canPop" class="button icon close gray" @click="pop" slot="right" />
         </STNavigationBar>
-
     
         <main>
             <h1 v-if="groups.length == 0">

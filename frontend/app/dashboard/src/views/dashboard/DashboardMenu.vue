@@ -130,7 +130,7 @@ import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
-import AdminsView from './settings/AdminsView.vue';
+import AdminsView from './admins/AdminsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
 import WhatsNewView from './settings/WhatsNewView.vue';

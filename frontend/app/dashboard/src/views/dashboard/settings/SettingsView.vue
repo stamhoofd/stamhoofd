@@ -10,14 +10,14 @@
             </h1>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true">
+                <STListItem :selectable="true" @click="openGeneral">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" />
                     <h2 class="style-title-list">Algemeen</h2>
                     <p class="style-description">Naam, adres en website</p>
                     <span class="icon arrow-right-small gray" slot="right"/>
                 </STListItem>
 
-                <STListItem :selectable="true">
+                <STListItem :selectable="true" @click="openPersonalize">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg" />
                     <h2 class="style-title-list">Personaliseren</h2>
                     <p class="style-description">Logo, kleur en domeinnaam</p>
@@ -31,14 +31,14 @@
                     <span class="icon arrow-right-small gray" slot="right"/>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="setupEmail">
+                <STListItem :selectable="true" @click="openPrivacy">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg" />
                     <h2 class="style-title-list">Privacy</h2>
                     <p class="style-description">Stel je privacyvoorwaarden in</p>
                     <span class="icon arrow-right-small gray" slot="right"/>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="setupEmail">
+                <STListItem :selectable="true" @click="openPayment(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg" />
                     <h2 class="style-title-list">Betaalmethodes</h2>
                     <p class="style-description">Bankrekeningnummer, Payconiq, Bancontact...</p>
@@ -104,7 +104,7 @@
                     <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg" /></div>
                     <div>
                         <h2 class="style-title-list">Bouw zelf je website</h2>
-                        <p class="style-description">Koppel alle tools op je website. Geen technische kennis vereist</p>
+                        <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
                     </div>
                     <div>
                         <span class="style-tag">2021</span>
@@ -133,8 +133,6 @@
                     </div>
                 </label>
             </div>
-
-           
         </main>
     </div>
 </template>
@@ -153,6 +151,10 @@ import EditGroupsView from '../groups/EditGroupsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
+import GeneralSettingsView from './GeneralSettingsView.vue';
+import PaymentSettingsView from './PaymentSettingsView.vue';
+import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
+import PrivacySettingsView from './PrivacySettingsView.vue';
 
 @Component({
     components: {
@@ -184,14 +186,40 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
+    openGeneral() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(GeneralSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    openPersonalize() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PersonalizeSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    openPrivacy() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PrivacySettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
     setupEmail() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EmailSettingsView, {})
         }).setDisplayStyle("popup"))
     }
 
+    openPayment(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PaymentSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
     manageGroups() {
-        this.show(new ComponentWithProperties(EditGroupsView, {}));
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditGroupsView, {})
+        }).setDisplayStyle("popup"))
     }
 
     get enableMemberModule() {
@@ -219,25 +247,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         console.log(path);
 
-        /*if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-
-            if (code && state) {
-                this.doLinkMollie(code);
-            } else {
-                const error = urlParams.get('error') ?? "";
-                if (error) {
-                    new Toast("Koppelen mislukt", "error red").show()
-                }
-            }
-            this.updateMollie();
-        } else {
-            if (this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) {
-                this.updateMollie();
-            }
-        }*/
+        if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
+            // Open mollie settings
+            this.openPayment(false)
+            return
+        }
         HistoryManager.setUrl("/settings")
     }
 }

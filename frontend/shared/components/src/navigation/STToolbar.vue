@@ -29,6 +29,7 @@ export default class STToolbar extends Vue {}
     position: sticky;
     bottom: 0;
     overflow: hidden;
+    pointer-events: none; // fix browser bug not able to click through
 
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);
@@ -37,6 +38,7 @@ export default class STToolbar extends Vue {}
         display: flex;
         align-items: center;
         justify-content: space-between;
+        pointer-events: all;
 
         > div:first-child {
             @extend .style-description;

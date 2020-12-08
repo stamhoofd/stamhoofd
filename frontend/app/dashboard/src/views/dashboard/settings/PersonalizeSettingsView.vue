@@ -1,0 +1,324 @@
+<template>
+    <div id="personalize-settings-view" class="st-view background">
+        <STNavigationBar title="Personaliseren">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-else class="button icon close gray" @click="pop" slot="right" />
+        </STNavigationBar>
+
+        <main>
+            <h1>
+                Personaliseren
+            </h1>
+            <p>Als je een logo hebt kan je deze hier toevoegen. Je kan kiezen om een vierkant logo, een horizontaal logo of beide te uploaden. We kiezen dan automatisch het beste logo afhankelijk van de schermgrootte.</p>
+
+            <STErrorsDefault :error-box="errorBox" />
+
+            <div class="split-inputs">
+                <div>
+                    <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
+
+                    <p class="st-list-description">
+                        Beter voor grotere schermen.
+                    </p>
+                </div>
+
+                <div>
+                    <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
+                    <p class="st-list-description">
+                        Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
+                    </p>
+                </div>
+            </div>
+
+            <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />
+            <p class="st-list-description">
+                Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om het blauwe kleur te behouden.
+            </p>
+
+            <hr>
+            <h2>Domeinnaam</h2>
+
+            <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
+                <p class="warning-box">
+                    Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.
+                </p>
+                <p class="st-list-description">
+                    <button class="button secundary" @click="openRecords">
+                        DNS-records instellen en verifiëren
+                    </button>
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Wijzigen</span>
+                    </button>
+                </p>
+            </template>
+
+            <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
+                <p class="st-list-description">
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                </p>
+                
+                <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
+                    Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.
+                </p>
+
+                <p class="st-list-description">
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam wijzigen</span>
+                    </button>
+                </p>
+            </template>
+
+            <template v-else>
+                <p class="st-list-description">
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
+                </p>
+
+                <p class="st-list-description">
+                    <button class="button text" @click="setupDomain">
+                        <span class="icon settings" />
+                        <span>Domeinnaam instellen</span>
+                    </button>
+                </p>
+            </template>
+        </main>
+
+        <STToolbar>
+            <template slot="right">
+                <LoadingButton :loading="saving">
+                    <button class="button primary" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
+    </div>
+</template>
+
+<script lang="ts">
+import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
+import DNSRecordsView from './DNSRecordsView.vue';
+import DomainSettingsView from './DomainSettingsView.vue';
+import EmailSettingsView from './EmailSettingsView.vue';
+
+@Component({
+    components: {
+        STNavigationBar,
+        STToolbar,
+        STInputBox,
+        STErrorsDefault,
+        Checkbox,
+        DateSelection,
+        RadioGroup,
+        Radio,
+        BackButton,
+        AddressInput,
+        LoadingButton,
+        IBANInput,
+        ImageInput,
+        ColorInput,
+        FileInput
+    },
+})
+export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
+    errorBox: ErrorBox | null = null
+    validator = new Validator()
+    saving = false
+    temp_organization = OrganizationManager.organization
+    showDomainSettings = true
+
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+
+    get organization() {
+        return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get registerUrl() {
+        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
+            return "https://"+this.organization.registerDomain
+        } 
+
+        return "https://"+this.organization.uri + '.' + process.env.HOSTNAME_REGISTRATION
+    }
+
+    get squareLogoResolutions() {
+        return [
+            ResolutionRequest.create({
+                height: 44,
+                width: 44,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 44*3,
+                width: 44*3,
+                fit: ResolutionFit.Inside
+            })
+        ]
+    }
+
+    get horizontalLogoResolutions() {
+        return [
+            ResolutionRequest.create({
+                height: 44,
+                width: 300,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 44*3,
+                width: 300*3,
+                fit: ResolutionFit.Inside
+            })
+        ]
+    }
+
+    get color() {
+        return this.organization.meta.color
+    }
+
+    set color(color: string | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.$set(this.organizationPatch.meta!, "color", color)
+    }
+
+    get squareLogo() {
+        return this.organization.meta.squareLogo
+    }
+
+    set squareLogo(image: Image | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.$set(this.organizationPatch.meta!, "squareLogo", image)
+    }
+
+    get horizontalLogo() {
+        return this.organization.meta.horizontalLogo
+    }
+
+    set horizontalLogo(image: Image | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.$set(this.organizationPatch.meta!, "horizontalLogo", image)
+    }
+
+    async save() {
+        if (this.saving) {
+            return;
+        }
+
+        const errors = new SimpleErrors()
+      
+        let valid = false
+
+        if (errors.errors.length > 0) {
+            this.errorBox = new ErrorBox(errors)
+        } else {
+            this.errorBox = null
+            valid = true
+        }
+        valid = valid && await this.validator.validate()
+
+        if (!valid) {
+            return;
+        }
+
+        this.saving = true
+
+        try {
+            await OrganizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.saving = false
+        this.dismiss({ force: true })
+    }
+
+    setupDomain() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DomainSettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+   
+    openRecords() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DNSRecordsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    async shouldNavigateAway() {
+        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+            return true;
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    }
+   
+    mounted() {
+        HistoryManager.setUrl("/settings/personalize");
+    }
+}
+</script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+#personalize-settings-view {
+    .logo-placeholder {
+        @extend .style-input;
+        @extend .style-input-shadow;
+        border: $border-width solid $color-gray-light;
+        color: $color-gray;
+        background: white;
+        border-radius: $border-radius;
+        padding: 5px 15px;
+        height: 60px;
+        margin: 0;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, color 0.2s;
+        outline: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+        touch-action: manipulation;
+
+
+        &:hover {
+            border-color: $color-primary-gray-light;
+            color: $color-primary;
+        }
+
+        &:active {
+            border-color: $color-primary;
+            color: $color-primary;
+        }
+
+        &.square {
+            width: 60px;
+        }
+
+        &.horizontal {
+            width: 300px;
+        }
+    }
+}
+</style>

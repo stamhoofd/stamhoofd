@@ -1,48 +1,44 @@
 <template>
-    <div id="general-settings-view" class="st-view background">
-        <STNavigationBar title="Instellingen">
+    <div class="st-view background">
+        <STNavigationBar title="Privacy">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else class="button icon close gray" @click="pop" slot="right" />
         </STNavigationBar>
 
         <main>
             <h1>
-                Algemene instellingen
+                Privacy
             </h1>
-        
+            <p>
+                Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam van je vereniging" error-fields="name" :error-box="errorBox">
-                        <input
-                            id="organization-name"
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="De naam van je vereniging"
-                            autocomplete="organization"
-                        >
-                    </STInputBox>
+            <STInputBox title="Waar staan jouw privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-model="selectedPrivacyType" value="none">
+                        Geen
+                    </Radio>
+                    <Radio v-model="selectedPrivacyType" value="website">
+                        Op jouw website
+                    </Radio>
+                    <Radio v-model="selectedPrivacyType" value="file">
+                        Zelf PDF-bestand aanleveren
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
-                </div>
+            <STInputBox v-if="selectedPrivacyType == 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
+                <input
+                    v-model="privacyPolicyUrl"
+                    class="input"
+                    type="url"
+                    placeholder="bv. https://www.vereniging.be/privacy"
+                >
+            </STInputBox>
 
-                <div>
-                    <STInputBox title="Website (optioneel)" error-fields="website" :error-box="errorBox">
-                        <input
-                            v-model="website"
-                            class="input"
-                            type="url"
-                            placeholder="bv. https://www.vereniging.be"
-                        >
-                    </STInputBox>
-                    <p class="st-list-description">
-                        De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.
-                    </p>
-                </div>
-            </div>
+            <FileInput v-if="selectedPrivacyType == 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
         </main>
 
         <STToolbar>
@@ -77,26 +73,18 @@ import EmailSettingsView from './EmailSettingsView.vue';
         STToolbar,
         STInputBox,
         STErrorsDefault,
-        Checkbox,
-        DateSelection,
         RadioGroup,
         Radio,
         BackButton,
-        AddressInput,
         LoadingButton,
-        IBANInput,
-        ImageInput,
-        ColorInput,
         FileInput
     },
 })
-export default class GeneralSettingsView extends Mixins(NavigationMixin) {
+export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
     temp_organization = OrganizationManager.organization
-    showDomainSettings = true
-    loadingMollie = false
     selectedPrivacyType = this.temp_organization.meta.privacyPolicyUrl ? "website" : (this.temp_organization.meta.privacyPolicyFile ? "file" : "none")
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
@@ -104,29 +92,28 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
     }
-   
-    get name() {
-        return this.organization.name
+  
+    get privacyPolicyUrl() {
+        return this.organization.meta.privacyPolicyUrl
     }
 
-    set name(name: string) {
-        this.$set(this.organizationPatch, "name", name)
+    set privacyPolicyUrl(url: string | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({ }))
+        }
+        this.$set(this.organizationPatch.meta!, 'privacyPolicyUrl', url)
     }
 
-    get website() {
-        return this.organization.website ?? ""
+    get privacyPolicyFile() {
+        console.log(this.organization.meta.privacyPolicyFile)
+        return this.organization.meta.privacyPolicyFile
     }
 
-    set website(website: string) {
-        this.$set(this.organizationPatch, "website", website.length == 0 ? null : website)
-    }
-
-    get address() {
-        return this.organization.address
-    }
-
-    set address(address: Address) {
-        this.$set(this.organizationPatch, "address", address)
+    set privacyPolicyFile(file: File | null) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+        this.$set(this.organizationPatch.meta!, "privacyPolicyFile", file)
     }
 
     async save() {
@@ -135,16 +122,17 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
         }
 
         const errors = new SimpleErrors()
-        if (this.name.length < 2) {
-            errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "Vul een geldige naam in voor je vereniging",
-                field: "name"
-            }))
+       
+        if (this.selectedPrivacyType == "none") {
+            this.privacyPolicyFile = null;
+            this.privacyPolicyUrl = null;
+        } else if (this.selectedPrivacyType == "file") {
+            this.privacyPolicyUrl = null;
+            // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file
         }
 
-        if (this.organization.website && this.organization.website.length > 0 && !this.organization.website.startsWith("http://") && !this.organization.website.startsWith("https://")) {
-            this.website = "http://"+this.organization.website
+        if (this.selectedPrivacyType == "website" && this.organization.meta.privacyPolicyUrl && this.organization.meta.privacyPolicyUrl.length > 0 && !this.organization.meta.privacyPolicyUrl.startsWith("http://") && !this.organization.meta.privacyPolicyUrl.startsWith("https://")) {
+            this.privacyPolicyUrl = "http://"+this.organization.meta.privacyPolicyUrl
         }
 
         let valid = false
@@ -174,7 +162,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
         this.dismiss({ force: true })
     }
-
+  
     async shouldNavigateAway() {
         if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
             return true;
@@ -183,7 +171,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/general")
+        HistoryManager.setUrl("/settings/privacy");
     }
 }
 </script>
@@ -191,5 +179,6 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
+
 
 </style>
