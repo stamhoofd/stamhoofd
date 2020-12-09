@@ -82,6 +82,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     mounted() {
         HistoryManager.setUrl("/account")
+        document.title = "Stamhoofd - Mijn account"
     }
 
     get patchedUser() {

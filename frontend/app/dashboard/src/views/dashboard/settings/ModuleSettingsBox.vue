@@ -1,70 +1,77 @@
 <template>
-    <div class="module-box">
-        <label :class="{ selected: enableMemberModule }">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
-                <p class="style-description">Gratis</p>
-            </div>
-            <div>
-                <Checkbox v-model="enableMemberModule" />
-            </div>
-        </label>
+    <div class="module-settings-box">
+        <div class="module-box">
+            <label :class="{ selected: enableMemberModule }">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
+                    <p class="style-description">Gratis</p>
+                </div>
+                <div>
+                    <Checkbox v-model="enableMemberModule" />
+                </div>
+            </label>
 
-        <label :class="{ selected: enableWebshopModule }">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Webshops</h2>
-                <p class="style-description">Tijdelijk gratis voor alle shops die je nu aanmaakt</p>
-            </div>
-            <div>
-                <Checkbox v-model="enableWebshopModule" />
-            </div>
-        </label>
+            <label :class="{ selected: enableWebshopModule }">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Webshops</h2>
+                    <p class="style-description">Tijdelijk gratis voor alle shops die je nu aanmaakt</p>
+                </div>
+                <div>
+                    <Checkbox v-model="enableWebshopModule" />
+                </div>
+            </label>
+        </div>
 
-        <label class="disabled">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Activiteiten</h2>
-                <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
-            </div>
-            <div>
-                <span class="style-tag">2021</span>
-            </div>
-        </label>
+        <h3>Verwacht in de toekomst</h3>
 
-        <label class="disabled">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Bouw zelf je website</h2>
-                <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
-            </div>
-            <div>
-                <span class="style-tag">2021</span>
-            </div>
-        </label>
+        <div class="module-box">
 
-        <label class="disabled">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Ticketverkoop</h2>
-                <p class="style-description">Verkoop en scan tickets met je smartphone</p>
-            </div>
-            <div>
-                <span class="style-tag">2021</span>
-            </div>
-        </label>
+            <label class="disabled">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Activiteiten</h2>
+                    <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
+                </div>
+                <div>
+                    <span class="style-tag">2021</span>
+                </div>
+            </label>
 
-        <label class="disabled">
-            <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg" /></div>
-            <div>
-                <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
-                <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
-            </div>
-            <div>
-                <span class="style-tag">2021</span>
-            </div>
-        </label>
+            <label class="disabled">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Bouw zelf je website</h2>
+                    <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
+                </div>
+                <div>
+                    <span class="style-tag">2021</span>
+                </div>
+            </label>
+
+            <label class="disabled">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Ticketverkoop</h2>
+                    <p class="style-description">Verkoop en scan tickets met je smartphone</p>
+                </div>
+                <div>
+                    <span class="style-tag">2021</span>
+                </div>
+            </label>
+
+            <label class="disabled">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg" /></div>
+                <div>
+                    <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
+                    <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
+                </div>
+                <div>
+                    <span class="style-tag">2021</span>
+                </div>
+            </label>
+        </div>
     </div>
 </template>
 
@@ -166,64 +173,73 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-.module-box {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: 50% 50%;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 
-    // auto-fill is causing a weird unfixable overflow bug, so hard fix it:
-    @media (max-width: 800px) {
-        grid-template-columns: 100%;
+.module-settings-box {
+    > h3 {
+        @extend .style-label;
+        padding-bottom: 10px;
     }
 
-    > label {
-        min-width: 0;
-        max-width: 100%;
-        box-sizing: border-box;
-        padding: 30px 20px;
-        border-radius: $border-radius;
-        background: $color-white-shade;
-        display: flex;
-        flex-direction: row;     
-        align-items: center;    
-        cursor: pointer;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        user-select: none;
+    .module-box {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 50% 50%;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 
-        @media (max-width: 400px) {
-            padding: 20px 15px;
+        // auto-fill is causing a weird unfixable overflow bug, so hard fix it:
+        @media (max-width: 800px) {
+            grid-template-columns: 100%;
         }
 
-        &.selected{
-            background: $color-primary-background;
-        }
-
-        &.disabled {
-            cursor: default;
-        }
-        
-        img {
-            @extend .style-illustration-img;
-        }
-
-        > div {
+        > label {
             min-width: 0;
-            overflow: hidden;
-        }
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 30px 20px;
+            border-radius: $border-radius;
+            background: $color-white-shade;
+            display: flex;
+            flex-direction: row;     
+            align-items: center;    
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            user-select: none;
 
-        > div:first-child {
-            flex-shrink: 0;
-            padding-right: 15px;
-        }
+            @media (max-width: 400px) {
+                padding: 20px 15px;
+            }
 
-        > div:last-child {
-            margin-left: auto;
-            flex-shrink: 0;
-            padding-left: 10px;
+            &.selected{
+                background: $color-primary-background;
+            }
+
+            &.disabled {
+                cursor: default;
+            }
+            
+            img {
+                @extend .style-illustration-img;
+            }
+
+            > div {
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            > div:first-child {
+                flex-shrink: 0;
+                padding-right: 15px;
+            }
+
+            > div:last-child {
+                margin-left: auto;
+                flex-shrink: 0;
+                padding-left: 10px;
+            }
         }
     }
 }
+
 
 </style>

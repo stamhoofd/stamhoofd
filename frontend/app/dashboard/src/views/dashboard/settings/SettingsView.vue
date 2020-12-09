@@ -200,7 +200,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
 
-        console.log(path);
+        document.title = "Stamhoofd - Instellingen"
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
             // Open mollie settings

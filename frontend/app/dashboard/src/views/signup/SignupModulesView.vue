@@ -7,7 +7,7 @@
 
         <main>
             <h1>
-                Vereniging aangemaakt! Kies de functies die je wilt gebruiken.
+                Kies de functies die je wilt gebruiken
             </h1>
             <p>
                 We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.

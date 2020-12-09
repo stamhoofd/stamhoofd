@@ -148,7 +148,7 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
@@ -223,6 +223,10 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     mounted() {
         this.reload();
         this.loadNextOrders()
+
+        // Set url
+        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
+        document.title = "Stamhoofd - " + this.preview.meta.name
     }
 
     activated() {

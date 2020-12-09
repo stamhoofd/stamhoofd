@@ -160,7 +160,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
@@ -230,6 +230,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     mounted() {
         this.reload();
+
+        // Set url
+        if (this.group) {
+            HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
+            document.title = "Stamhoofd - "+this.group.settings.name
+        } else {
+            HistoryManager.setUrl("/groups/all")    
+            document.title = "Stamhoofd - Alle leden"
+        }
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {

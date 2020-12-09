@@ -77,6 +77,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         })
 
         HistoryManager.setUrl("/admins")
+        document.title = "Stamhoofd - Beheerders"
     }
 
     async load() {

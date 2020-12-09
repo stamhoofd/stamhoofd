@@ -136,6 +136,7 @@ import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vu
 import WhatsNewView from './settings/WhatsNewView.vue';
 import EditWebshopView from './webshop/EditWebshopView.vue';
 import WebshopView from './webshop/WebshopView.vue';
+import { Formatter } from "@stamhoofd/utility";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -187,6 +188,31 @@ export default class Menu extends Mixins(NavigationMixin) {
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
             this.openSyncScoutsEnGidsen(false)
             didSet = true
+        }
+
+        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
+            if (parts[1] == "all") {
+                this.openAll()
+                didSet = true
+            } else {
+                for (const group of this.organization.groups) {
+                    if (parts[1] == Formatter.slug(group.settings.name)) {
+                        this.openGroup(group)
+                        didSet = true
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
+            for (const webshop of this.organization.webshops) {
+                if (parts[1] == Formatter.slug(webshop.meta.name)) {
+                    this.openWebshop(webshop)
+                    didSet = true
+                    break;
+                }
+            }
         }
 
         if (!didSet) {

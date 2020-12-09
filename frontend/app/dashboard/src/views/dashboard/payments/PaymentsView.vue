@@ -120,6 +120,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         })
 
         HistoryManager.setUrl("/transfers")
+        document.title = "Stamhoofd - Overschrijvingen"
     }
 
     get filteredPayments(): SelectablePayment[] {
