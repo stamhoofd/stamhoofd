@@ -54,8 +54,11 @@
             </template>
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
-                <p class="st-list-description">
+                <p class="st-list-description" v-if="enableMemberModule">
                     Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                </p>
+                <p class="st-list-description" v-else>
+                    Jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 
                 <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
@@ -71,8 +74,11 @@
             </template>
 
             <template v-else>
-                <p class="st-list-description">
+                <p class="st-list-description" v-if="enableMemberModule">
                     Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
+                </p>
+                <p class="st-list-description" v-else>
+                    Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel het domeinnaam al gekocht hebben, meestal zal dat al het geval zijn als je al een eigen website hebt.
                 </p>
 
                 <p class="st-list-description">
@@ -140,6 +146,10 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
     }
 
     get registerUrl() {

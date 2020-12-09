@@ -208,6 +208,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return
         }
 
+        // First set current url already, to fix back
+        HistoryManager.setUrl("/settings")
+
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings
             this.openGeneral()
@@ -218,13 +221,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPayment(false)
         }
 
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {
+            // Open mollie settings
+            this.openPrivacy()
+        }
+
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'personalize') {
             // Open mollie settings
             this.openPersonalize()
         }
 
 
-        HistoryManager.setUrl("/settings")
     }
 }
 </script>

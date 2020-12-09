@@ -232,11 +232,6 @@ export class Organization extends Model {
     async updateDNSRecords() {
         const organization = this;
 
-        if (process.env.NODE_ENV != "production") {
-            // Temporary ignore this
-            return;
-        }
-
         // Check initial status
         let isValidRecords = true
         for (const record of organization.privateMeta.dnsRecords) {
@@ -444,6 +439,11 @@ export class Organization extends Model {
             return;
         }
 
+         if (process.env.NODE_ENV != "production") {
+            // Temporary ignore this
+            return;
+        }
+
         const sesv2 = new SES();
 
         // Check if mail identitiy already exists..
@@ -493,7 +493,7 @@ export class Organization extends Model {
         }
 
         if (this.registerDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.registerDomain)))) {
-            // Also set a from domain, to increase deliverability even more
+            // Also set a from domain, to fix SPF
             console.log("Setting mail from domain...")
             const params = {
                 EmailIdentity: this.privateMeta.mailDomain,

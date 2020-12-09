@@ -137,7 +137,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
                 }),
                 decoder: Organization as Decoder<Organization>
             })
-            OrganizationManager.organization = response.data
+            OrganizationManager.organization.set(response.data)
             this.show(new ComponentWithProperties(DNSRecordsView, {}))
             this.saving = false
         } catch (e) {

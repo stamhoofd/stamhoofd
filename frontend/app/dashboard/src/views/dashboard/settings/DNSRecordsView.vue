@@ -92,10 +92,10 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
                 decoder: Organization as Decoder<Organization>
             })
 
-            OrganizationManager.organization = response.data
+            OrganizationManager.organization.set(response.data)
             this.saving = false
 
-            if ( response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null) {
+            if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null) {
                 this.show(new ComponentWithProperties(DNSRecordsDoneView, {}))
             }
         } catch (e) {

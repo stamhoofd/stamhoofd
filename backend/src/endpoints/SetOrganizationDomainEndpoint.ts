@@ -80,10 +80,22 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.pendingMailDomain = request.body.mailDomain
             organization.privateMeta.mailDomain = null
 
+            // Reset notification counters
+            organization.serverMeta.DNSRecordWarningCount = 0
+            organization.serverMeta.firstInvalidDNSRecords = undefined
+
             // Generate new DNS-records
             organization.privateMeta.dnsRecords = []
 
-            if (organization.registerDomain || request.body.mailDomain) {
+            if (organization.registerDomain === null && request.body.mailDomain !== null) {
+                // We set a custom domainname for webshops already
+                // This doesn't work atm
+                organization.privateMeta.dnsRecords.push(DNSRecord.create({
+                    type: DNSRecordType.CNAME,
+                    name: "stamhoofd." + organization.privateMeta.pendingMailDomain + ".",
+                    value: "domains." + process.env.HOSTNAME_REGISTRATION! + "."
+                }))
+            } else if (organization.registerDomain !== null && request.body.mailDomain !== null) {
                 // CNAME domain: for SPF + MX + A record
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.CNAME,
