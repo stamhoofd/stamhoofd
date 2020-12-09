@@ -7,8 +7,9 @@
 
         <main>
             <h1>
-                Samenstelling
+                Configureer leeftijdsgroepen
             </h1>
+            <p>Aan de hand van jouw antwoorden kunnen we de meeste instellingen automatisch configureren. Je kan dit hierna nog nauwkeuriger instellen.</p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -47,6 +48,9 @@
 
         <STToolbar>
             <template slot="right">
+                <button class="button secundary" @click="skip">
+                    Overslaan
+                </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="save">
                         Volgende
@@ -63,10 +67,11 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { TimeInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,OrganizationType,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, UmbrellaOrganization, UmbrellaOrganizationHelper, Version } from "@stamhoofd/structures"
+import { Address, File, Image, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,OrganizationType,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, UmbrellaOrganization, UmbrellaOrganizationHelper, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import EditGroupsView from '../../../groups/EditGroupsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
@@ -159,6 +164,26 @@ export default class MembersStructureSetupView extends Mixins(NavigationMixin) {
         }))
     }
 
+    async skip() {
+        if (this.saving) {
+            return;
+        }
+
+        this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+        this.addMetaPatch({ modules: OrganizationModules.patch({ useMembers: true })})
+        this.saving = true
+
+        try {
+            await OrganizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            this.navigationController!.push(new ComponentWithProperties(EditGroupsView, {}), true, this.navigationController!.components.length)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.saving = false
+    }
+
     async save() {
         if (this.saving) {
             return;
@@ -185,13 +210,12 @@ export default class MembersStructureSetupView extends Mixins(NavigationMixin) {
         try {
             await OrganizationManager.patch(this.organizationPatch)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
-            //new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+            this.show(new ComponentWithProperties(MembersYearSetupView, {}))
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-        this.show(new ComponentWithProperties(MembersYearSetupView, {}))
     }
 
     async shouldNavigateAway() {

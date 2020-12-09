@@ -113,14 +113,12 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
             await OrganizationManager.patch(this.organizationPatch)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('De ledenadministratie module is nu actief', "success green").show()
+            this.navigationController!.push(new ComponentWithProperties(EditGroupsView, {}), true, this.navigationController!.components.length)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-        
-        //this.dismiss({ force: true })
-        this.navigationController!.push(new ComponentWithProperties(EditGroupsView, {}), true, this.navigationController!.components.length)
     }
 
     async shouldNavigateAway() {

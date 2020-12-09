@@ -140,7 +140,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableMemberModule(enable: boolean) {
-        if (!enable) {
+        if (!enable || this.organization.groups.length > 0) {
             this.organization.meta.modules.useMembers = enable
             this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
         } else {

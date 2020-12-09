@@ -135,13 +135,12 @@ export default class MembersYearSetupView extends Mixins(NavigationMixin) {
         try {
             await OrganizationManager.patch(this.organizationPatch)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
-            //new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+            this.show(new ComponentWithProperties(MembersPriceSetupView, {}))
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-        this.show(new ComponentWithProperties(MembersPriceSetupView, {}))
     }
 
     async shouldNavigateAway() {
