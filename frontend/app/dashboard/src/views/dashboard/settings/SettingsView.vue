@@ -242,10 +242,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     set enableMemberModule(enable: boolean) {
         // todo: sync + start questions
-        this.organization.meta.modules.useMembers = enable
-        this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
 
-        if (enable) {
+        if (!enable) {
+            this.organization.meta.modules.useMembers = enable
+            this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
+        } else {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(MembersYearSetupView, {})
             }).setDisplayStyle("popup"))
