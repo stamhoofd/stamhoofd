@@ -14,7 +14,7 @@
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam van je vereniging" error-fields="name" :error-box="errorBox">
+                    <STInputBox title="Naam van jouw vereniging" error-fields="name" :error-box="errorBox">
                         <input
                             id="organization-name"
                             ref="firstInput"
@@ -27,8 +27,9 @@
                     </STInputBox>
 
                     <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
+                    <p class="style-description-small">Geen adres? Vul dan een adres in dat in de buurt ligt</p>
 
-                    <STInputBox title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox">
+                    <STInputBox title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox" v-if="false">
                         <input
                             v-model="registerCode"
                             class="input"
@@ -39,7 +40,7 @@
                     </STInputBox>
                 </div>
 
-                <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox">
+                <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox" v-if="false">
                     <Slider v-model="expectedMemberCount" :max="500" :min="0" />
                 </STInputBox>
             </div>
@@ -64,6 +65,7 @@ import { AddressInput, BackButton, ErrorBox, LoadingButton, Slider, STErrorsDefa
 import { NetworkManager } from '@stamhoofd/networking';
 import { Address, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import SignupAccountView from './SignupAccountView.vue';
 
 import SignupStructureView from './SignupStructureView.vue';
 
@@ -87,7 +89,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     address: Address | null = null
 
     @Prop({ default: "" })
-    initialRegisterCode: string;
+    initialRegisterCode!: string;
 
     registerCode = this.initialRegisterCode
     loading = false
@@ -178,7 +180,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
             this.loading = false;
             this.errorBox = null
-            this.show(new ComponentWithProperties(SignupStructureView, { organization, registerCode: this.registerCode }))
+            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }))
             plausible('signupGeneral');
         } catch (e) {
             this.loading = false;

@@ -152,6 +152,7 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -241,14 +242,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableMemberModule(enable: boolean) {
-        // todo: sync + start questions
-
         if (!enable) {
             this.organization.meta.modules.useMembers = enable
             this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
         } else {
             this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MembersYearSetupView, {})
+                root: new ComponentWithProperties(MembersStructureSetupView, {})
             }).setDisplayStyle("popup"))
         }
     }
@@ -258,7 +257,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableWebshopModule(enable: boolean) {
-        // todo: sync
         this.organization.meta.modules.useWebshops = enable
         this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld")
     }

@@ -9,7 +9,7 @@
                 Maak jouw account
             </h1>
             <p>
-                Alle gegevens van jouw leden worden in een versleutelde digitale kluis bijgehouden - ook Stamhoofd heeft hier geen toegang tot. Het is belangrijk dat je de toegang tot die kluis goed beschermd met sterke wachtwoorden. Doe dit om de gegevens van jouw leden te beschermen, het is jouw plicht om hun persoonsgegevens te beschermen.
+                Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres dat niet gedeeld wordt.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />

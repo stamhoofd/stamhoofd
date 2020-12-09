@@ -94,7 +94,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.meta) {
-                const old = organization.meta
+                const didUseMembers = organization.meta.modules.useMembers
                 organization.meta.patchOrPut(request.body.meta)
 
                 // check payconiq + mollie
@@ -121,7 +121,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                if (!old.modules.useMembers && organization.meta.modules.useMembers) {
+                if (!didUseMembers && organization.meta.modules.useMembers) {
                     const builder = new GroupBuilder(organization)
                     await builder.build()
                 }

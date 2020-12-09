@@ -41,6 +41,7 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
+import EditGroupsView from '../../../groups/EditGroupsView.vue';
 
 @Component({
     components: {
@@ -117,7 +118,9 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
         }
 
         this.saving = false
-        this.dismiss({ force: true })
+        
+        //this.dismiss({ force: true })
+        this.navigationController!.push(new ComponentWithProperties(EditGroupsView, {}), true, this.navigationController!.components.length)
     }
 
     async shouldNavigateAway() {
