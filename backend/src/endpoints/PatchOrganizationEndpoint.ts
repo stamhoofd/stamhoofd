@@ -5,6 +5,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
+import { GroupBuilder } from '../helpers/GroupBuilder';
 import { Group } from '../models/Group';
 import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
@@ -93,6 +94,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.meta) {
+                const old = organization.meta
                 organization.meta.patchOrPut(request.body.meta)
 
                 // check payconiq + mollie
@@ -117,6 +119,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             field: "paymentMethods"
                         })
                     }
+                }
+
+                if (!old.modules.useMembers && organization.meta.modules.useMembers) {
+                    const builder = new GroupBuilder(organization)
+                    await builder.build()
                 }
             }
 

@@ -76,50 +76,7 @@
                 </STInputBox>
             </template>
             <template v-if="tab == 'payments'">
-                <STInputBox title="Standaard tarief" error-fields="price" :error-box="errorBox">
-                    <PriceInput v-model="price" placeholder="Gratis" />
-                </STInputBox>
-
-                <Checkbox v-model="enableReducedPrice">
-                    Verlaagd tarief voor leden met financiële moeilijkheden
-                </Checkbox>
-                <STInputBox v-if="enableReducedPrice" title="Verlaagd tarief" error-fields="reducedPrice" :error-box="errorBox">
-                    <PriceInput v-model="reducedPrice" placeholder="Gratis" />
-                </STInputBox>
-               
-                <Checkbox v-model="enableLatePrice">
-                    Verlaagd tarief na een bepaalde datum
-                </Checkbox>
-
-                <div v-if="enableLatePrice" class="split-inputs">
-                    <STInputBox title="Verminder het lidgeld vanaf" error-fields="reducedPriceDate" :error-box="errorBox">
-                        <DateSelection v-model="latePriceDate" />
-                    </STInputBox>
-
-                    <STInputBox title="Standaard tarief na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
-                        <PriceInput v-model="latePrice" placeholder="Gratis" />
-                    </STInputBox>
-                </div>
-
-                <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verlaagd tarief na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
-                    <PriceInput v-model="reducedLatePrice" placeholder="Gratis" />
-                </STInputBox>
-
-                <Checkbox v-model="enableFamilyPrice">
-                    Verlaagd tarief voor broers/zussen
-                </Checkbox>
-                <div v-if="enableFamilyPrice" class="split-inputs">
-                    <STInputBox title="Voor tweede broer/zus" error-fields="reducedPrice" :error-box="errorBox">
-                        <PriceInput v-model="familyPrice" placeholder="Gratis" />
-                    </STInputBox>
-                    <STInputBox title="Daaropvolgende broers/zussen" error-fields="reducedPrice" :error-box="errorBox">
-                        <PriceInput v-model="extraFamilyPrice" placeholder="Gratis" />
-                    </STInputBox>
-                </div>
-                <p v-if="enableFamilyPrice" class="style-description">
-                    Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.
-                </p>
-
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
                 <STErrorsDefault :error-box="errorBox" />
             </template>
 
@@ -177,6 +134,7 @@ import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSe
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import EditGroupPriceBox from "./EditGroupPriceBox.vue"
 
 @Component({
     components: {
@@ -195,7 +153,8 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         AgeInput,
         Slider,
         Spinner,
-        TimeInput
+        TimeInput,
+        EditGroupPriceBox
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
@@ -239,8 +198,12 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         (this.organizationPatch as any).groups.addPatch(patch)
     }
 
-    getPricesPatch(): PatchableArrayAutoEncoder<GroupPrices> {
-        return new PatchableArray()
+    getPrices() {
+        return this.group.settings.prices
+    }
+
+    addPricesPatch(patch: PatchableArrayAutoEncoder<GroupPrices>) {
+        this.addSettingsPatch({ prices: patch })
     }
 
     addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>> ) {
@@ -322,184 +285,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
                 name: "Enkel jongens",
             },
         ]
-    }
-
-    get price() {
-        return this.group.settings.prices.find(p => p.startDate == null)?.price ?? 0
-    }
-
-    set price(price: number) {
-        const p = this.group.settings.prices.find(p => p.startDate == null)
-
-        if (!p) {
-            const patch = this.getPricesPatch()
-            patch.addPut(GroupPrices.create({ price }))
-            this.addSettingsPatch({ prices: patch })
-        } else {
-            const patch = this.getPricesPatch()
-            patch.addPatch(GroupPrices.patchType().create({ id: p.id, price }))
-            this.addSettingsPatch({ prices: patch })
-        }
-    }
-
-    get enableReducedPrice() {
-        return !!this.group.settings.prices.find(p => p.reducedPrice !== null)
-    }
-
-    set enableReducedPrice(enable: boolean) {
-        const patch = this.getPricesPatch()
-
-        for (const price of this.group.settings.prices) {
-            if (!enable) {
-                patch.addPatch(GroupPrices.patchType().create({ id: price.id, reducedPrice: null}))
-            } else {
-                patch.addPatch(GroupPrices.patchType().create({ id: price.id, reducedPrice: price.price}))
-            }
-        }
-
-        this.addSettingsPatch({ prices: patch })
-    }
-
-    get enableFamilyPrice() {
-        return !!this.group.settings.prices.find(p => p.familyPrice !== null)
-    }
-
-    set enableFamilyPrice(enable: boolean) {
-        const patch = this.getPricesPatch()
-
-        for (const price of this.group.settings.prices) {
-            if (!enable) {
-                patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice: null, extraFamilyPrice: null }))
-            } else {
-                patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice: price.price, extraFamilyPrice: price.price }))
-            }
-        }
-
-        this.addSettingsPatch({ prices: patch })
-    }
-
-    get familyPrice() {
-        return this.group.settings.prices.find(p => p.startDate == null)?.familyPrice ?? 0
-    }
-
-    set familyPrice(familyPrice: number) {
-        const patch = this.getPricesPatch()
-
-        for (const price of this.group.settings.prices) {
-            patch.addPatch(GroupPrices.patchType().create({ id: price.id, familyPrice }))
-        }
-
-        this.addSettingsPatch({ prices: patch })
-    }
-
-    get extraFamilyPrice() {
-        return this.group.settings.prices.find(p => p.startDate == null)?.extraFamilyPrice ?? 0
-    }
-
-    set extraFamilyPrice(extraFamilyPrice: number) {
-        const patch = this.getPricesPatch()
-
-        for (const price of this.group.settings.prices) {
-            patch.addPatch(GroupPrices.patchType().create({ id: price.id, extraFamilyPrice }))
-        }
-
-        this.addSettingsPatch({ prices: patch })
-    }
-
-    get reducedPrice() {
-        return this.group.settings.prices.find(p => p.startDate == null)?.reducedPrice ?? 0
-    }
-
-    set reducedPrice(reducedPrice: number) {
-        const p = this.group.settings.prices.find(p => p.startDate == null)
-
-        if (!p) {
-            const patch = this.getPricesPatch()
-            patch.addPut(GroupPrices.create({ reducedPrice }))
-            this.addSettingsPatch({ prices: patch })
-        } else {
-            const patch = this.getPricesPatch()
-            patch.addPatch(GroupPrices.patchType().create({ id: p.id, reducedPrice }))
-            this.addSettingsPatch({ prices: patch })
-        }
-    }
-
-    get enableLatePrice() {
-        return !!this.group.settings.prices.find(p => p.startDate !== null)
-    }
-
-    set enableLatePrice(enable: boolean) {
-        const p = this.group.settings.prices.find(p => p.startDate !== null)
-
-        if (!enable) {
-            if (p) {
-                const patch = this.getPricesPatch()
-                patch.addDelete(p.id)
-                this.addSettingsPatch({ prices: patch })
-            }
-            return
-        } else {
-            if (!p) {
-                const patch = this.getPricesPatch()
-                // todo: better default date
-                patch.addPut(GroupPrices.create({ 
-                    startDate: new Date(), 
-                    price: this.price, 
-                    reducedPrice: this.enableReducedPrice ? this.reducedPrice : null, 
-                    familyPrice: this.enableFamilyPrice ? this.familyPrice : null, 
-                    extraFamilyPrice: this.enableFamilyPrice ? this.extraFamilyPrice : null
-                }))
-                this.addSettingsPatch({ prices: patch })
-            }
-        }
-    }
-
-    get latePrice() {
-        return this.group.settings.prices.find(p => p.startDate !== null)?.price ?? 0
-    }
-
-    set latePrice(price: number) {
-        const p = this.group.settings.prices.find(p => p.startDate !== null)
-
-        if (!p) {
-            // shouldn't happen
-        } else {
-            const patch = this.getPricesPatch()
-            patch.addPatch(GroupPrices.patchType().create({ id: p.id, price }))
-            this.addSettingsPatch({ prices: patch })
-        }
-    }
-
-    get reducedLatePrice() {
-        return this.group.settings.prices.find(p => p.startDate !== null)?.reducedPrice ?? 0
-    }
-
-    set reducedLatePrice(reducedPrice: number) {
-        const p = this.group.settings.prices.find(p => p.startDate !== null)
-
-        if (!p) {
-            // shouldn't happen
-        } else {
-            const patch = this.getPricesPatch()
-            patch.addPatch(GroupPrices.patchType().create({ id: p.id, reducedPrice }))
-            this.addSettingsPatch({ prices: patch })
-        }
-    }
-
-    get latePriceDate() {
-        return this.group.settings.prices.find(p => p.startDate !== null)?.startDate ?? new Date()
-    }
-
-    set latePriceDate(startDate: Date) {
-        const p = this.group.settings.prices.find(p => p.startDate !== null)
-
-        if (!p) {
-            // shouldn't happen
-        } else {
-            const patch = this.getPricesPatch()
-            patch.addPatch(GroupPrices.patchType().create({ id: p.id, startDate }))
-            this.addSettingsPatch({ prices: patch })
-        }
     }
 
     // Waiting list

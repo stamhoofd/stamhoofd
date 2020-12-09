@@ -27,7 +27,7 @@ export class OrganizationManagerStatic {
             body: patch,
             decoder: Organization as Decoder<Organization>
         })
-        this.organization = response.data
+        this.organization.set(response.data)
     }
 }
 

@@ -63,8 +63,8 @@
             </template>
 
             <hr>
-            <h2>Modules</h2>
-            <p>Kies welke functies je wilt gebruiken. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+            <h2>Kies de functies die je wilt activeren</h2>
+            <p>We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
             <div class="module-box">
                 <label :class="{ selected: enableMemberModule }">
@@ -152,6 +152,7 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
@@ -222,13 +223,15 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>) {
+    patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>, message: string) {
         OrganizationManager.patch(OrganizationPatch.create({
             id: this.organization.id,
             meta: OrganizationMetaData.patch({
                 modules: OrganizationModules.patch(patch)
             })
-        })).catch(e => {
+        })).then(() => {
+            new Toast(message, "success green").show()
+        }).catch(e => {
             CenteredMessage.fromError(e).show()
         })
     }
@@ -240,7 +243,13 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     set enableMemberModule(enable: boolean) {
         // todo: sync + start questions
         this.organization.meta.modules.useMembers = enable
-        this.patchModule({ useMembers: enable })
+        this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
+
+        if (enable) {
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MembersYearSetupView, {})
+            }).setDisplayStyle("popup"))
+        }
     }
 
     get enableWebshopModule() {
@@ -250,7 +259,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     set enableWebshopModule(enable: boolean) {
         // todo: sync
         this.organization.meta.modules.useWebshops = enable
-        this.patchModule({ useWebshops: enable })
+        this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld")
     }
 
     mounted() {
