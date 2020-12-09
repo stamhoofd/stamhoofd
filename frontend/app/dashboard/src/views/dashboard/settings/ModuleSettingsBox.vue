@@ -192,6 +192,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         user-select: none;
 
+        @media (max-width: 400px) {
+            padding: 20px 15px;
+        }
+
         &.selected{
             background: $color-primary-background;
         }
@@ -201,8 +205,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }
         
         img {
-            width: 50px;
-            height: 50px;
+            @extend .style-illustration-img;
         }
 
         > div {

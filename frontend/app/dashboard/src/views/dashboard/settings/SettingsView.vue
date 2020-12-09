@@ -10,21 +10,21 @@
             </h1>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" @click="openGeneral">
+                <STListItem :selectable="true" @click="openGeneral" class="left-center">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" />
                     <h2 class="style-title-list">Algemeen</h2>
                     <p class="style-description">Naam, adres en website</p>
                     <span class="icon arrow-right-small gray" slot="right"/>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPersonalize">
+                <STListItem :selectable="true" @click="openPersonalize" class="left-center">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg" />
                     <h2 class="style-title-list">Personaliseren</h2>
                     <p class="style-description">Logo, kleur en domeinnaam</p>
                     <span class="icon arrow-right-small gray" slot="right"/>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="setupEmail">
+                <STListItem :selectable="true" @click="setupEmail" class="left-center">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg" />
                     <h2 class="style-title-list">E-mailadressen</h2>
                     <p class="style-description">Verstuur e-mails vanaf je zelf gekozen e-mailadres</p>
@@ -34,7 +34,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPrivacy">
+                <STListItem :selectable="true" @click="openPrivacy" class="left-center">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg" />
                     <h2 class="style-title-list">Privacy</h2>
                     <p class="style-description">Stel je privacyvoorwaarden in</p>
@@ -44,7 +44,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPayment(true)">
+                <STListItem :selectable="true" @click="openPayment(true)" class="left-center">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg" />
                     <h2 class="style-title-list">Betaalmethodes</h2>
                     <p class="style-description">Bankrekeningnummer, Payconiq, Bancontact...</p>
@@ -61,7 +61,7 @@
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" @click="manageGroups" class="right-stack">
+                    <STListItem :selectable="true" @click="manageGroups" class="left-center right-stack">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg" />
                         <h2 class="style-title-list">Leeftijdsgroepen</h2>
                         <p class="style-description">Prijzen, leeftijden, wachtlijsten</p>
@@ -235,8 +235,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
 #settings-view {
     .illustration-list img {
-        width: 50px;
-        height: 50px;
+        @extend .style-illustration-img;
     }
 }
 
