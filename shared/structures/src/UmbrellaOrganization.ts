@@ -5,6 +5,7 @@ export enum UmbrellaOrganization {
     KLJ = "KLJ",
     FOS = "FOSOpenScouting",
     JeugdRodeKruis = "JeugdRodeKruis",
+    JNM = "JNM",
     Other = "Other",
 }
 
@@ -18,6 +19,7 @@ export class UmbrellaOrganizationHelper {
         case UmbrellaOrganization.KLJ: return "KLJ"
         case UmbrellaOrganization.FOS: return "FOS Open Scouting"
         case UmbrellaOrganization.JeugdRodeKruis: return "Jeugd Rode Kruis"
+        case UmbrellaOrganization.JNM: return "JNM"
         case UmbrellaOrganization.Other: return "Andere"
         }
     }

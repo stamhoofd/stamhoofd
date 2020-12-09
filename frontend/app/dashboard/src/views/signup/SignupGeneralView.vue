@@ -9,7 +9,7 @@
             <h1>
                 Aan de slag met Stamhoofd
             </h1>
-            <p>Een account maken duurt niet lang en is gratis.</p>
+            <p>Een account maken duurt niet lang en is gratis. Je kiest zelf welke functies je gebruikt.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
@@ -40,6 +40,30 @@
                     </STInputBox>
                 </div>
 
+                <div>
+                    <STInputBox title="Soort vereniging" error-fields="type" :error-box="errorBox">
+                        <select v-model="type" class="input">
+                            <option :value="null" disabled>
+                                Maak een keuze
+                            </option>
+                            <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
+                                {{ _type.name }}
+                            </option>
+                        </select>
+                    </STInputBox>
+
+                    <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                        <select v-model="umbrellaOrganization" class="input">
+                            <option :value="null" disabled>
+                                Maak een keuze
+                            </option>
+                            <option :value="item.value" v-for="item in availableUmbrellaOrganizations" :key="item.value">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                    </STInputBox>
+                </div>
+
                 <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox" v-if="false">
                     <Slider v-model="expectedMemberCount" :max="500" :min="0" />
                 </STInputBox>
@@ -63,7 +87,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
-import { Address, Organization, OrganizationMetaData, OrganizationType} from "@stamhoofd/structures"
+import { Address, Organization, OrganizationMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import SignupAccountView from './SignupAccountView.vue';
 
@@ -94,6 +119,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     registerCode = this.initialRegisterCode
     loading = false
 
+    type: OrganizationType | null = null
+    umbrellaOrganization: UmbrellaOrganization | null = null
+
     mounted() {
         if (this.initialRegisterCode) {
             localStorage.setItem("savedRegisterCode", this.initialRegisterCode)
@@ -106,14 +134,11 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             }
         }
 
-
         if (this.registerCode.length > 0) {
             HistoryManager.setUrl("/aansluiten/"+encodeURIComponent(this.registerCode))
         } else {
             HistoryManager.setUrl("/aansluiten")   
         }
-
-        
     }
 
     async goNext() {
@@ -133,6 +158,22 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                     message: "",
                     human: "De naam van je vereniging is te kort",
                      field: "name"
+                })
+            }
+
+            if (this.type === null) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Maak een keuze",
+                    field: "type"
+                })
+            }
+
+            if (this.umbrellaOrganization === null && this.type == OrganizationType.Youth) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Maak een keuze",
+                    field: "umbrellaOrganization"
                 })
             }
 
@@ -169,7 +210,8 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 name: this.name,
                 uri: "", // ignored by backend for now
                 meta: OrganizationMetaData.create({
-                    type: OrganizationType.Other,
+                    type: this.type,
+                    umbrellaOrganization: this.umbrellaOrganization,
                     expectedMemberCount: this.expectedMemberCount,
                     defaultStartDate,
                     defaultEndDate
@@ -189,6 +231,30 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             plausible('signupGeneralError');
             return;
         }
+    }
+
+    get availableTypes() {
+        return OrganizationTypeHelper.getList().sort((a, b) => 
+            Sorter.stack(
+                Sorter.byBooleanValue(
+                    !a.name.toLowerCase().startsWith("andere"), 
+                    !b.name.toLowerCase().startsWith("andere")
+                ), 
+                Sorter.byStringProperty(a, b, "name")
+            )
+        );
+    }
+
+    get availableUmbrellaOrganizations() {
+        return UmbrellaOrganizationHelper.getList().sort((a, b) => 
+            Sorter.stack(
+                Sorter.byBooleanValue(
+                    !a.name.toLowerCase().startsWith("andere"), 
+                    !b.name.toLowerCase().startsWith("andere")
+                ), 
+                Sorter.byStringProperty(a, b, "name")
+            )
+        )
     }
 
     shouldNavigateAway() {

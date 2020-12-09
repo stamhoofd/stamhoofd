@@ -14,6 +14,12 @@ export enum OrganizationType {
     Judo = "Judo",
     Sport = "Sport",
     Student = "Student",
+    HorseRiding = "HorseRiding",
+    Neighborhood = "Neighborhood",
+    Nature = "Nature",
+    Music = "Music",
+    Professional = "Professional",
+    Art = "Art",
     Other = "Other",
 }
 
@@ -79,6 +85,30 @@ export class OrganizationTypeHelper {
             {
                 value: OrganizationType.Student,
                 name: "Studentenvereniging",
+            },
+            {
+                value: OrganizationType.HorseRiding,
+                name: "Paardensport",
+            },
+            {
+                value: OrganizationType.Neighborhood,
+                name: "Buurtvereniging",
+            },
+            {
+                value: OrganizationType.Nature,
+                name: "Natuurvereniging",
+            },
+            {
+                value: OrganizationType.Music,
+                name: "Muziekvereniging",
+            },
+            {
+                value: OrganizationType.Professional,
+                name: "Beroepsvereniging",
+            },
+            {
+                value: OrganizationType.Art,
+                name: "Kunstvereniging",
             },
             {
                 value: OrganizationType.Other,

@@ -68,6 +68,7 @@ import { ComponentWithProperties, HistoryManager,NavigationController, Navigatio
 import { TimeInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, Image, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,OrganizationType,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, UmbrellaOrganization, UmbrellaOrganizationHelper, Version } from "@stamhoofd/structures"
+import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -151,11 +152,27 @@ export default class MembersStructureSetupView extends Mixins(NavigationMixin) {
     }
 
     get availableTypes() {
-        return OrganizationTypeHelper.getList();
+        return OrganizationTypeHelper.getList().sort((a, b) => 
+            Sorter.stack(
+                Sorter.byBooleanValue(
+                    !a.name.toLowerCase().startsWith("andere"), 
+                    !b.name.toLowerCase().startsWith("andere")
+                ), 
+                Sorter.byStringProperty(a, b, "name")
+            )
+        );
     }
 
     get availableUmbrellaOrganizations() {
-        return UmbrellaOrganizationHelper.getList();
+        return UmbrellaOrganizationHelper.getList().sort((a, b) => 
+            Sorter.stack(
+                Sorter.byBooleanValue(
+                    !a.name.toLowerCase().startsWith("andere"), 
+                    !b.name.toLowerCase().startsWith("andere")
+                ), 
+                Sorter.byStringProperty(a, b, "name")
+            )
+        )
     }
 
     addMetaPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationMetaData>> ) {

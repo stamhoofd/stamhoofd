@@ -43,6 +43,16 @@ import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
         Steps,
         BackButton
     },
+    metaInfo () {
+        return {
+            title: this.WebshopManager.webshop.meta.title,
+             meta: [{
+                vmid: 'description',
+                name: 'description',
+                content: this.WebshopManager.webshop.meta.description
+            }],
+        }
+    }
 })
 export default class CheckoutSteps extends Mixins(NavigationMixin){
     @Prop({ required: true })

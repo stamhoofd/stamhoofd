@@ -81,7 +81,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage, TooltipDirective} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, UmbrellaOrganization, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -151,9 +151,19 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             this.organization.meta.modules.useMembers = enable
             this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
         } else {
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MembersStructureSetupView, {})
-            }).setDisplayStyle("popup"))
+            if (enable && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+                // We have an automated flow for these organizations
+                this.present(new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(MembersStructureSetupView, {})
+                }).setDisplayStyle("popup"))
+            } else {
+                // Activate + show groups
+                this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
+                this.present(new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditGroupsView, {})
+                }).setDisplayStyle("popup"))
+            }
+            
         }
     }
 
