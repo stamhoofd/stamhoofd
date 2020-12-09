@@ -167,12 +167,12 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
             await OrganizationManager.patch(this.organizationPatch)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+            this.dismiss({ force: true })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-        this.dismiss({ force: true })
     }
 
     async shouldNavigateAway() {

@@ -92,8 +92,5 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
         patch.privateMeta!.emails.addPut(email)
         this.show(new ComponentWithProperties(EditEmailView, { organizationPatch: patch, emailId: email.id }))
     }
-  
-
-
 }
 </script>

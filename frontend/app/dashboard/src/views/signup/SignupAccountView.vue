@@ -9,7 +9,7 @@
                 Maak jouw account
             </h1>
             <p>
-                Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres dat niet gedeeld wordt.
+                Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -27,9 +27,9 @@
                         </div>
                     </STInputBox>
 
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+                    <EmailInput title="Persoonlijk e-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
 
-                   <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
+                   <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
                         <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
 
@@ -83,6 +83,7 @@ import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { NetworkManager, Session, SessionManager, Keychain, LoginHelper } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import SignupModulesView from './SignupModulesView.vue';
 
 @Component({
     components: {
@@ -202,8 +203,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 
                 this.loading = false;
                 component.hide()
-                this.dismiss({ force: true });
                 plausible('signup');
+
+                this.navigationController!.push(new ComponentWithProperties(SignupModulesView, {}), true, this.navigationController!.components.length)
 
             } catch (e) {
                 this.loading = false;

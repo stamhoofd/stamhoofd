@@ -28,7 +28,10 @@
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg" />
                     <h2 class="style-title-list">E-mailadressen</h2>
                     <p class="style-description">Verstuur e-mails vanaf je zelf gekozen e-mailadres</p>
-                    <span class="icon arrow-right-small gray" slot="right"/>
+                    <template slot="right">
+                        <span class="icon warning yellow" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" v-if="!hasPolicy" />
+                        <span class="icon arrow-right-small gray"/>
+                    </template>
                 </STListItem>
 
                 <STListItem :selectable="true" @click="openPrivacy">
@@ -36,7 +39,7 @@
                     <h2 class="style-title-list">Privacy</h2>
                     <p class="style-description">Stel je privacyvoorwaarden in</p>
                     <template slot="right">
-                        <span class="icon warning yellow" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'"/>
+                        <span class="icon warning yellow" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'" v-if="!hasPolicy" />
                         <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
@@ -46,7 +49,7 @@
                     <h2 class="style-title-list">Betaalmethodes</h2>
                     <p class="style-description">Bankrekeningnummer, Payconiq, Bancontact...</p>
                     <template slot="right">
-                        <span class="icon warning yellow" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'"/>
+                        <span class="icon warning yellow" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" v-if="!hasPaymentMethod"/>
                         <span class="icon arrow-right-small gray"/>
                     </template>
                 </STListItem>
@@ -64,7 +67,7 @@
                         <p class="style-description">Prijzen, leeftijden, wachtlijsten</p>
 
                         <template slot="right">
-                            <span class="icon warning yellow" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'"/>
+                            <span v-if="!hasGroups" class="icon warning yellow" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'"/>
                             <span class="icon arrow-right-small gray"/>
                         </template>
                     </STListItem>
@@ -76,73 +79,7 @@
             <h2>Kies de functies die je wilt activeren</h2>
             <p>We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
-            <div class="module-box">
-                <label :class="{ selected: enableMemberModule }">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
-                        <p class="style-description">Gratis</p>
-                    </div>
-                    <div>
-                        <Checkbox v-model="enableMemberModule" />
-                    </div>
-                </label>
-
-                <label :class="{ selected: enableWebshopModule }">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Webshops</h2>
-                        <p class="style-description">Tijdelijk gratis voor alle shops die je nu aanmaakt</p>
-                    </div>
-                    <div>
-                        <Checkbox v-model="enableWebshopModule" />
-                    </div>
-                </label>
-
-                <label class="disabled">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Activiteiten</h2>
-                        <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
-                    </div>
-                    <div>
-                        <span class="style-tag">2021</span>
-                    </div>
-                </label>
-
-                <label class="disabled">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Bouw zelf je website</h2>
-                        <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
-                    </div>
-                    <div>
-                        <span class="style-tag">2021</span>
-                    </div>
-                </label>
-
-                <label class="disabled">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Ticketverkoop</h2>
-                        <p class="style-description">Verkoop en scan tickets met je smartphone</p>
-                    </div>
-                    <div>
-                        <span class="style-tag">2021</span>
-                    </div>
-                </label>
-
-                <label class="disabled">
-                    <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg" /></div>
-                    <div>
-                        <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
-                        <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
-                    </div>
-                    <div>
-                        <span class="style-tag">2021</span>
-                    </div>
-                </label>
-            </div>
+            <ModuleSettingsBox />
         </main>
     </div>
 </template>
@@ -167,6 +104,7 @@ import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
+import ModuleSettingsBox from './ModuleSettingsBox.vue';
 
 @Component({
     components: {
@@ -183,7 +121,8 @@ import PrivacySettingsView from './PrivacySettingsView.vue';
         IBANInput,
         FileInput,
         STList,
-        STListItem
+        STListItem,
+        ModuleSettingsBox
     },
     directives: {
         tooltip: TooltipDirective
@@ -237,41 +176,24 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>, message: string) {
-        OrganizationManager.patch(OrganizationPatch.create({
-            id: this.organization.id,
-            meta: OrganizationMetaData.patch({
-                modules: OrganizationModules.patch(patch)
-            })
-        })).then(() => {
-            new Toast(message, "success green").show()
-        }).catch(e => {
-            CenteredMessage.fromError(e).show()
-        })
+    get hasPolicy() {
+        return this.organization.meta.privacyPolicyUrl !== null || this.organization.meta.privacyPolicyFile !== null
     }
+
+    get hasPaymentMethod() {
+        return this.organization.meta.iban.length > 0 || !this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
+    } 
+
+    get hasGroups() {
+        return this.organization.groups.length > 0
+    } 
 
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
 
-    set enableMemberModule(enable: boolean) {
-        if (!enable) {
-            this.organization.meta.modules.useMembers = enable
-            this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
-        } else {
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MembersStructureSetupView, {})
-            }).setDisplayStyle("popup"))
-        }
-    }
-
     get enableWebshopModule() {
         return this.organization.meta.modules.useWebshops
-    }
-
-    set enableWebshopModule(enable: boolean) {
-        this.organization.meta.modules.useWebshops = enable
-        this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld")
     }
 
     mounted() {
@@ -315,49 +237,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     .illustration-list img {
         width: 50px;
         height: 50px;
-    }
-
-    .module-box {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: 50% 50%;
-
-        > label {
-            padding: 30px 20px;
-            border-radius: $border-radius;
-            background: $color-white-shade;
-            display: flex;
-            flex-direction: row;     
-            align-items: center;    
-            cursor: pointer;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-            user-select: none;
-
-            &.selected{
-                background: $color-primary-background;
-            }
-
-            &.disabled {
-                cursor: default;
-            }
-            
-            img {
-                width: 50px;
-                height: 50px;
-            }
-
-            > div:first-child {
-                flex-shrink: 0;
-                padding-right: 15px;
-            }
-
-            > div:last-child {
-                margin-left: auto;
-                flex-shrink: 0;
-                padding-left: 10px;
-            }
-        }
     }
 }
 

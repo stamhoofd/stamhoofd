@@ -10,7 +10,7 @@
                 Privacy
             </h1>
             <p>
-                Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen. Bij het maken van een account moeten jouw leden deze goedkeuren.
+                Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -155,12 +155,12 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
             await OrganizationManager.patch(this.organizationPatch)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+            this.dismiss({ force: true })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-        this.dismiss({ force: true })
     }
   
     async shouldNavigateAway() {

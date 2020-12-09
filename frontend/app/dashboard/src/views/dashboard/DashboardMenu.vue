@@ -9,12 +9,12 @@
             <input v-if="false" class="input search" placeholder="Zoeken">
         </div>
 
-        <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
+        <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank" v-if="false">
             <span class="icon info-filled" />
             <span>Documentatie</span>
         </a>
 
-        <a class="menu-button button heading" :href="registerUrl" target="_blank">
+        <a class="menu-button button heading" :href="registerUrl" target="_blank" v-if="enableMemberModule">
             <span class="icon external" />
             <span>Jouw inschrijvingspagina</span>
         </a>
