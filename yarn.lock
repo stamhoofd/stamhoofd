@@ -8990,24 +8990,10 @@ prosemirror-keymap@1.1.4, prosemirror-keymap@^1.0.0, prosemirror-keymap@^1.1.2:
     prosemirror-state "^1.0.0"
     w3c-keyname "^2.2.0"
 
-prosemirror-model@1.11.2:
-  version "1.11.2"
-  resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.11.2.tgz#3ce08172b465bc725c8808c18c2e9378fe69418d"
-  integrity sha512-+gM+x1VUfGAyKR/g0bK7FC46fVNq0xVVL859QAQ7my2p5HzKrPps/pSbYn7T50XTG2r2IhZJChsUFUBHtcoN0Q==
-  dependencies:
-    orderedmap "^1.1.0"
-
-prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.8.1:
+prosemirror-model@1.11.2, prosemirror-model@1.9.1, prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.11.2, prosemirror-model@^1.8.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.9.1.tgz#8c08cf556f593c5f015548d2c1a6825661df087f"
   integrity sha512-Qblh8pm1c7Ll64sYLauwwzjimo/tFg1zW3Q3IWhKRhvfOEgRKqa6dC5pRrAa+XHOIjBFEYrqbi52J5bqA2dV8Q==
-  dependencies:
-    orderedmap "^1.1.0"
-
-prosemirror-model@^1.11.2:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/prosemirror-model/-/prosemirror-model-1.12.0.tgz#deb6acbce5c62ea35ef3d59c7d4c54f65d6d9fba"
-  integrity sha512-B5syrXluQwEPfih8PqZcVg2VWRUf8Rj97K/VNSkQtjUPL1BCoTUgdLERIlxdWHkwqvujFsT3Pw5ubc4/ofF1jQ==
   dependencies:
     orderedmap "^1.1.0"
 
@@ -10803,7 +10789,7 @@ tiptap-commands@^1.15.0:
     prosemirror-utils "^0.9.6"
     tiptap-utils "^1.11.0"
 
-tiptap-extensions@^1.29.1:
+tiptap-extensions@^1.33.2:
   version "1.33.2"
   resolved "https://registry.yarnpkg.com/tiptap-extensions/-/tiptap-extensions-1.33.2.tgz#7ea8965c0cb6d22908ab3394a5b58efcbe3901e6"
   integrity sha512-8Xj3L3k2tvJzcTfTPCC5oj0wMLWK77+uAwA7dGrz9X5A0Q0de0Ug3ym+sUaojsjNQ22gsPq0dN8VM6+mVqrfrQ==
@@ -10831,7 +10817,7 @@ tiptap-utils@^1.11.0:
     prosemirror-tables "^1.1.1"
     prosemirror-utils "^0.9.6"
 
-tiptap@^1.27.1, tiptap@^1.30.0:
+tiptap@^1.30.0:
   version "1.30.0"
   resolved "https://registry.yarnpkg.com/tiptap/-/tiptap-1.30.0.tgz#5fa6649a26e79a34aba494282e37d11c8a7419be"
   integrity sha512-zvSwxvBjp2ZchtX1+ZwCI7bx8n5FZrKW5aPTsQWt7WaWOkYZ23lYoT2dvk2b8JJhWnLWAOeTTnGTPpA6AxhOsw==
