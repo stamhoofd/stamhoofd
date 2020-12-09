@@ -1,6 +1,7 @@
 const path = require("path");
 var merge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 var common;
 if (process.env.NODE_ENV == "production") {
@@ -19,6 +20,14 @@ module.exports = merge(common, {
         new HtmlWebpackPlugin({
             template: './src/index.html',
             base: "/"
+        }),
+        new FaviconsWebpackPlugin({
+            logo: './../../shared/assets/images/logo/favicon.svg',
+            mode: 'webapp', // optional can be 'webapp' or 'light' - 'webapp' by default
+            devMode: 'webapp', // optional can be 'webapp' or 'light' - 'light' by default 
+            favicons: {
+                theme_color: '#0053ff',
+            }
         })
     ],
 });

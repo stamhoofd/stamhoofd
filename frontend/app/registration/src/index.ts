@@ -4,6 +4,9 @@ import 'regenerator-runtime/runtime';
 import * as Sentry from '@sentry/browser';
 import { Vue as VueIntegration } from '@sentry/integrations';
 import Vue from "vue";
+import VueMeta from 'vue-meta'
+
+Vue.use(VueMeta)
 
 if (process.env.NODE_ENV == "production") {
     Sentry.init({

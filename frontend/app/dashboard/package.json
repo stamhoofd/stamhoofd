@@ -22,6 +22,7 @@
     },
     "devDependencies": {
         "@types/pdfkit": "^0.10.6",
-        "arraybuffer-loader": "^1.0.8"
+        "arraybuffer-loader": "^1.0.8",
+        "favicons-webpack-plugin": "^4.2.0"
     }
 }

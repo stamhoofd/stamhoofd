@@ -29,6 +29,7 @@
         "qrcode": "^1.4.4",
         "vue": "^2.6.11",
         "vue-class-component": "^7.0.2",
+        "vue-meta": "^2.4.0",
         "vue-property-decorator": "^8.4.1"
     },
     "devDependencies": {

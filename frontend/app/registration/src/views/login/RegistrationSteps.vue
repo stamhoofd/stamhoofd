@@ -42,6 +42,16 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         Steps,
         BackButton
     },
+    metaInfo () {
+        return {
+            title: "Inschrijven bij "+this.organization.name,
+             meta: [{
+                vmid: 'description',
+                name: 'description',
+                content: 'Schrijf je via deze pagina in bij '+this.organization.name
+            }],
+        }
+    }
 })
 export default class RegistrationSteps extends Mixins(NavigationMixin){
     @Prop({ required: true })

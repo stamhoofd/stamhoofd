@@ -52,9 +52,7 @@ export default class App extends Vue {
 
                 // Set organization and session
                 const session = new Session(response.data.id)
-                session.setOrganization(response.data)
-
-                document.title = response.data.name+" - Inschrijven"
+                session.setOrganization(response.data)                
 
                 // Set color
                 if (response.data.meta.color) {
@@ -62,8 +60,6 @@ export default class App extends Vue {
                 }
 
                 await SessionManager.setCurrentSession(session)
-
-                
 
                 return new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(PromiseView, {
