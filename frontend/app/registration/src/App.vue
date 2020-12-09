@@ -46,6 +46,10 @@ export default class App extends Vue {
                     decoder: Organization as Decoder<Organization>
                 })
 
+                if (!response.data.meta.modules.useMembers) {
+                    throw new Error("Member module disabled")
+                }
+
                 // Set organization and session
                 const session = new Session(response.data.id)
                 session.setOrganization(response.data)
