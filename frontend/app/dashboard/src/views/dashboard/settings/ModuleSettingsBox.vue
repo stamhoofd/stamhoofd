@@ -170,8 +170,17 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     display: grid;
     gap: 10px;
     grid-template-columns: 50% 50%;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+
+    // auto-fill is causing a weird unfixable overflow bug, so hard fix it:
+    @media (max-width: 800px) {
+        grid-template-columns: 100%;
+    }
 
     > label {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
         padding: 30px 20px;
         border-radius: $border-radius;
         background: $color-white-shade;
@@ -194,6 +203,11 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         img {
             width: 50px;
             height: 50px;
+        }
+
+        > div {
+            min-width: 0;
+            overflow: hidden;
         }
 
         > div:first-child {
