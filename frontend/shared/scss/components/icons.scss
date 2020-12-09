@@ -145,6 +145,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/info-filled.svg);
     }
 
+    &.warning:after {
+        font-icon: url(@stamhoofd/assets/images/icons/warning.svg);
+    }
+
     &.exclamation:after {
         font-icon: url(@stamhoofd/assets/images/icons/exclamation.svg);
     }

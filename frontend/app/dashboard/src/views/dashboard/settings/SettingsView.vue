@@ -35,14 +35,20 @@
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg" />
                     <h2 class="style-title-list">Privacy</h2>
                     <p class="style-description">Stel je privacyvoorwaarden in</p>
-                    <span class="icon arrow-right-small gray" slot="right"/>
+                    <template slot="right">
+                        <span class="icon warning yellow" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'"/>
+                        <span class="icon arrow-right-small gray"/>
+                    </template>
                 </STListItem>
 
                 <STListItem :selectable="true" @click="openPayment(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg" />
                     <h2 class="style-title-list">Betaalmethodes</h2>
                     <p class="style-description">Bankrekeningnummer, Payconiq, Bancontact...</p>
-                    <span class="icon arrow-right-small gray" slot="right"/>
+                    <template slot="right">
+                        <span class="icon warning yellow" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'"/>
+                        <span class="icon arrow-right-small gray"/>
+                    </template>
                 </STListItem>
             </STList>
 
@@ -52,11 +58,15 @@
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" @click="manageGroups">
+                    <STListItem :selectable="true" @click="manageGroups" class="right-stack">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg" />
                         <h2 class="style-title-list">Leeftijdsgroepen</h2>
                         <p class="style-description">Prijzen, leeftijden, wachtlijsten</p>
-                        <span class="icon arrow-right-small gray" slot="right"/>
+
+                        <template slot="right">
+                            <span class="icon warning yellow" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'"/>
+                            <span class="icon arrow-right-small gray"/>
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -141,7 +151,7 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage} from "@stamhoofd/components";
+import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage, TooltipDirective} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -175,6 +185,9 @@ import PrivacySettingsView from './PrivacySettingsView.vue';
         STList,
         STListItem
     },
+    directives: {
+        tooltip: TooltipDirective
+    }
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
