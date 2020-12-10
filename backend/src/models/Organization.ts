@@ -401,31 +401,33 @@ export class Organization extends Model {
                 const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
                 let found = false
 
-                for (const user of users) {
-                    if (user.permissions && user.permissions.hasFullAccess()) {
-                        found = true
+                if (process.env.NODE_ENV === "production") {
+                    for (const user of users) {
+                        if (user.permissions && user.permissions.hasFullAccess()) {
+                            found = true
 
+                            Email.sendInternal({
+                                to: user.email,
+                                subject: "Stamhoofd domeinnaam instellingen ongeldig",
+                                text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen?\n\nBedankt!\n\nHet Stamhoofd team"
+                            })
+                        }
+                    }
+
+                    if (!found) {
                         Email.sendInternal({
-                            to: user.email,
+                            to: "simon@stamhoofd.be",
                             subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                            text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen?\n\nBedankt!\n\nHet Stamhoofd team"
+                            text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Kon geen contactgegevens vinden."
+                        })
+
+                    } else {
+                        Email.sendInternal({
+                            to: "simon@stamhoofd.be",
+                            subject: "Stamhoofd domeinnaam instellingen ongeldig",
+                            text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd"
                         })
                     }
-                }
-
-                if (!found) {
-                    Email.sendInternal({
-                        to: "simon@stamhoofd.be",
-                        subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                        text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Kon geen contactgegevens vinden."
-                    })
-
-                } else {
-                    Email.sendInternal({
-                        to: "simon@stamhoofd.be",
-                        subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                        text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd"
-                    })
                 }
             }
         }
@@ -439,7 +441,7 @@ export class Organization extends Model {
             return;
         }
 
-         if (process.env.NODE_ENV != "production") {
+        if (process.env.NODE_ENV != "production") {
             // Temporary ignore this
             return;
         }

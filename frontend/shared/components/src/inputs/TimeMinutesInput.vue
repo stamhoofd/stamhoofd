@@ -44,11 +44,11 @@ export default class TimeMinutesInput extends Vue {
     errorBox: ErrorBox | null = null
 
     @Watch('value')
-    onValueChanged(val: string | null) {
+    onValueChanged(val: number | null) {
         if (val === null) {
             return
         }
-        this.timeRaw = val
+        this.timeRaw = Formatter.minutes(val)
     }
 
     mounted() {
@@ -109,7 +109,7 @@ export default class TimeMinutesInput extends Vue {
                 minutes = 0;
             }
 
-            const time = Math.max(0, Math.min(hours*60, 24*60 - 1))
+            const time = Math.max(0, Math.min(hours*60 + minutes, 24*60 - 1))
 
             if (time !== this.value) {
                 this.$emit("input", time)
