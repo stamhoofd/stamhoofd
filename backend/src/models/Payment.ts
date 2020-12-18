@@ -1,5 +1,5 @@
 import { column,Model } from '@simonbackx/simple-database';
-import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentStatus, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 export class Payment extends Model {
@@ -47,6 +47,18 @@ export class Payment extends Model {
 
     @column({ type: "datetime", nullable: true })
     paidAt: Date | null = null
+
+    static generateDescription(settings: TransferSettings, reference: string) {
+        if (settings.type == TransferDescriptionType.Structured) {
+            return this.generateOGM()
+        }
+
+        if (settings.type == TransferDescriptionType.Reference) {
+            return (settings.prefix ? (settings.prefix + " ") : "" ) + reference
+        }
+
+        return settings.prefix
+    }
 
     static generateOGM() {
         /**

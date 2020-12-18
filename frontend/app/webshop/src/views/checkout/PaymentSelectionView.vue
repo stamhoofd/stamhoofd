@@ -117,7 +117,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     paymentUrl: response.data.paymentUrl, 
                     returnUrl: "https://"+this.webshop.getUrl(this.organization)+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
-                    iban: WebshopManager.webshop.meta.iban,
+                    transferSettings: WebshopManager.webshop.meta.transferSettings,
                 }, (payment: Payment) => {
                     console.log("Success")
                     // success

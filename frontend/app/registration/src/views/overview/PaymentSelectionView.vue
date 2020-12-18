@@ -34,7 +34,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup } from '@stamhoofd/structures';
+import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, TransferSettings } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../classes/MemberManager';
@@ -108,36 +109,36 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
         try {
             const groups = OrganizationManager.organization.groups
+            const registerMembers = this.selectedMembers.flatMap(m => {
+                if (!m.details) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Data is niet leesbaar"
+                    })
+                }
+
+                const preferred = m.getSelectedGroups(groups)
+
+                if (preferred.length == 0) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Een gekozen leeftijdsgroep is niet meer geldig. Herlaad de pagina eens en probeer opnieuw."
+                    })
+                }
+
+                return preferred.map(g => RegisterMember.create({
+                    memberId: m.id,
+                    groupId: g.group.id,
+                    reduced: this.reduced,
+                    waitingList: g.waitingList
+                }))
+            })
 
             const response = await session.authenticatedServer.request({
                 method: "POST",
                 path: "/user/members/register",
                 body: RegisterMembers.create({
-                    members: this.selectedMembers.flatMap(m => {
-                        if (!m.details) {
-                            throw new SimpleError({
-                                code: "",
-                                message: "Data is niet leesbaar"
-                            })
-                        }
-
-                        const preferred = m.getSelectedGroups(groups)
-
-                        if (preferred.length == 0) {
-                            throw new SimpleError({
-                                code: "",
-                                message: "Een gekozen leeftijdsgroep is niet meer geldig. Herlaad de pagina eens en probeer opnieuw."
-                            })
-                        }
-
-                        return preferred.map(g => RegisterMember.create({
-                            memberId: m.id,
-                            groupId: g.group.id,
-                            reduced: this.reduced,
-                            waitingList: g.waitingList
-                        }))
-                        
-                    }),
+                    members: registerMembers,
                     paymentMethod: this.selectedPaymentMethod
                 }),
                 decoder: RegisterResponse as Decoder<RegisterResponse>
@@ -155,7 +156,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     paymentUrl: response.data.paymentUrl, 
                     returnUrl: "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
-                    iban: OrganizationManager.organization.meta.iban,
+                    transferSettings: OrganizationManager.organization.meta.transferSettings,
+                    additionalReference: Formatter.uniqueArray(this.selectedMembers.map(r => r.details?.lastName ?? "?")).join(", "),
                 }, (payment: Payment) => {
                     console.log("Success")
                     // success

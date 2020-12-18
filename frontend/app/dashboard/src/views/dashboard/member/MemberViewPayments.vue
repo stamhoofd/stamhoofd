@@ -9,7 +9,7 @@
 
                     <template v-if="payment.method == 'Transfer'">
                         <dt>Bankrekening</dt>
-                        <dd>{{ organization.meta.iban }}</dd>
+                        <dd>{{ organization.meta.transferSettings.iban }}</dd>
 
                         <dt>Mededeling</dt>
                         <dd>{{ payment.transferDescription }}</dd>

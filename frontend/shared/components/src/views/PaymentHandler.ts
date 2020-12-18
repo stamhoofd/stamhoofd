@@ -1,6 +1,6 @@
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Organization, Payment, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { Organization, Payment, PaymentMethod, PaymentStatus, TransferSettings } from "@stamhoofd/structures";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue"
 import PayconiqButtonView from "./PayconiqButtonView.vue"
@@ -55,18 +55,20 @@ export class PaymentHandler {
         payment: Payment; 
         returnUrl: string | null;
         paymentUrl: string | null; 
-        iban: string | null;
+        transferSettings: TransferSettings | null;
+        additionalReference?: string;
         component: NavigationMixin; 
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         let finishedHandler: (() => void) | null = null
-        const {payment, organization, server, component, paymentUrl, returnUrl, iban } = settings;
+        const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings, additionalReference } = settings;
 
         if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
                 organization,
                 payment,
-                iban,
+                settings: transferSettings,
+                additionalReference,
                 finishedHandler: (payment: Payment) => {
                     if (finishedHandler) {
                         // hide payconiq button view if needed

@@ -21,12 +21,21 @@
                                     <td>{{ payment.price | price }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
-                                    <td>Bankrekening</td>
-                                    <td>{{ iban || organization.meta.iban }}</td>
+                                    <td>Begunstigde</td>
+                                    <td>{{ creditor }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
-                                    <td>Gestructureerde mededeling</td>
-                                    <td>{{ payment.transferDescription }}</td>
+                                    <td>Bankrekeningnummer</td>
+                                    <td>{{ iban }}</td>
+                                </tr>
+                                <tr v-if="payment.price > 0">
+                                    <td v-if="isStructured">
+                                        Gestructureerde mededeling
+                                    </td>
+                                    <td v-else>
+                                        Mededeling
+                                    </td>
+                                    <td>{{ transferDescription }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -37,7 +46,7 @@
                     We hebben de betaling ontvangen.
                 </p>
                 <p v-else-if="payment.price > 0" class="warning-box">
-                    Voer de overschrijving meteen uit. Vermeld zeker “{{ payment.transferDescription }}” in je overschrijving.
+                    Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
                 </p>
             </main>
 
@@ -58,7 +67,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group, MemberWithRegistrations, Organization,Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, Organization,Payment, PaymentDetailed, RegistrationWithMember, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
@@ -84,7 +93,10 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     organization: Organization
 
     @Prop({ default: null }) 
-    iban: string | null
+    settings: TransferSettings | null
+
+    @Prop({ default: null }) 
+    additionalReference: string | null
 
     @Prop({ default: false })
     isPopup: boolean
@@ -104,13 +116,38 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         return this.organization.address.country == "BE"
     }
 
+    get isStructured() {
+        return this.settings?.type == TransferDescriptionType.Structured
+    }
+
+    get iban() {
+        return this.settings?.iban ?? this.organization.meta.transferSettings.iban ?? "";
+    }
+
+    get creditor() {
+        return this.settings?.creditor ?? this.organization.name
+    }
+
+    get transferDescription() {
+        if (this.additionalReference && this.settings?.type === TransferDescriptionType.Reference) {
+            return this.payment.transferDescription + " " + this.additionalReference
+        }
+        return this.payment.transferDescription
+    }
+
     async generateQRCode() {
         try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
-            const iban = this.iban ?? this.organization.meta.iban ?? "";
-            const creditor = this.organization.name
-            const message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.payment.transferDescription+"\n\nBetalen";
+            const iban = this.iban
+            const creditor = this.creditor
+
+            let message: string
+            if (this.isStructured) {
+                message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nBetalen";
+            } else {
+                message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nBetalen";
+            }
 
             this.QRCodeUrl = await QRCode.toDataURL(message)
         } catch (e) {

@@ -23,7 +23,7 @@
                         {{ payment.payment.createdAt | date }}
                     </p>
                     <p class="style-description-small">
-                        {{ payment.payment.transferDescription }}
+                        {{ getPaymentDescription(payment.payment ) }}
                     </p>
                     
                     <template slot="right">
@@ -67,7 +67,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton,Spinner, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EncryptedPaymentGeneral, PaymentDetailed, PaymentGeneral, PaymentMethod,PaymentPatch, PaymentStatus, RegistrationWithMember } from '@stamhoofd/structures';
+import { EncryptedPaymentGeneral, PaymentDetailed, PaymentGeneral, PaymentMethod,PaymentPatch, PaymentStatus, RegistrationWithMember, TransferDescriptionType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -138,6 +138,16 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             }
             return false;
         });
+    }
+
+    getPaymentDescription(payment: PaymentGeneral) {
+        if (payment.order) {
+            return payment.transferDescription 
+        }
+        if (OrganizationManager.organization.meta.transferSettings.type === TransferDescriptionType.Reference) {
+            return payment.transferDescription + " "+ payment.getMemberLastNames()
+        }
+        return payment.transferDescription 
     }
 
     get canMarkPaid() {

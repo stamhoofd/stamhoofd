@@ -2,7 +2,7 @@
     <div class="st-view background">
         <STNavigationBar title="Betaalmethodes">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -34,6 +34,45 @@
             <h2>Overschrijvingen</h2>
 
             <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="false" />
+
+            <template v-if="enableMemberModule">
+                <hr>
+                <h2>Overschrijvingen, specifiek voor inschrijvingen</h2>
+
+                <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
+                    <input
+                        v-model="creditor"
+                        class="input"
+                        type="text"
+                        :placeholder="organization.name"
+                        autocomplete=""
+                    >
+                </STInputBox>
+
+                <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
+                    <RadioGroup>
+                        <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
+                            {{ _type.name }}
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
+                <p class="style-description-small">
+                    {{ transferTypeDescription }}
+                </p>
+
+                <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
+                    <input
+                        v-model="prefix"
+                        class="input"
+                        type="text"
+                        placeholder="bv. Inschrijving"
+                        autocomplete=""
+                    >
+                </STInputBox>
+                <p class="style-description-small">
+                    Voorbeeld van een mededeling: “{{ transferExample }}”
+                </p>
+            </template>
 
             <hr>
             <h2>Payconiq activeren</h2>
@@ -112,7 +151,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -156,18 +195,88 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useMembers
     }
 
+    get transferTypes() {
+        return [
+            { 
+                value: TransferDescriptionType.Structured,
+                name: "Gestructureerde mededeling",
+                description: "Geen kans op typefouten vanwege validatie in bankapps. Er zijn doorgaans ook minder overschrijvingen zonder mededelingen omdat men in de andere gevallen soms niet begrijpt dat ze het exact moeten overnemen (mensen lezen niet, ongeacht alle uitroepingstekens). Hiermee willen we later automatisatie mogelijk maken."
+            },
+            { 
+                value: TransferDescriptionType.Reference,
+                name: "Naam van lid/leden",
+                description: "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)"
+            },
+            { 
+                value: TransferDescriptionType.Fixed,
+                name: "Vaste mededeling",
+                description: "Altijd dezelfde mededeling voor alle bestellingen"
+            }
+        ]
+    }
+
+    get transferTypeDescription() {
+        return this.transferTypes.find(t => t.value === this.transferType)?.description ?? ""
+    }
+
+    get creditor() {
+        return this.organization.meta.transferSettings.creditor
+    }
+
+    set creditor(creditor: string | null ) {
+        this.preparePatchTransferSettings()
+        this.$set(this.organizationPatch.meta!.transferSettings!, "creditor", creditor ? creditor : null)
+    }
+
+    preparePatchTransferSettings() {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+        if (!this.organizationPatch.meta!.transferSettings) {
+            this.$set(this.organizationPatch.meta!, "transferSettings", TransferSettings.patch({}))
+        }
+    }
+
     get iban() {
-        return this.organization.meta.iban
+        return this.organization.meta.transferSettings.iban ?? ""
     }
 
     set iban(iban: string) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patchType().create({}))
-        }
-        this.$set(this.organizationPatch.meta!, "iban", iban ?? "")
+        this.preparePatchTransferSettings()
+        this.$set(this.organizationPatch.meta!.transferSettings!, "iban", iban ? iban : null)
     }
 
-     get payconiqApiKey() {
+    get prefix() {
+        return this.organization.meta.transferSettings.prefix
+    }
+
+    set prefix(prefix: string | null ) {
+        this.preparePatchTransferSettings()
+        this.$set(this.organizationPatch.meta!.transferSettings!, "prefix", prefix ? prefix : null)
+    }
+
+    get transferType() {
+        return this.organization.meta.transferSettings.type
+    }
+
+    set transferType(type: TransferDescriptionType ) {
+        this.preparePatchTransferSettings()
+        this.$set(this.organizationPatch.meta!.transferSettings!, "type", type)
+    }
+
+    get transferExample() {
+        if (this.transferType == TransferDescriptionType.Structured) {
+            return "+++705/1929/77391+++"
+        }
+
+        if (this.transferType == TransferDescriptionType.Reference) {
+            return (this.prefix ? this.prefix+' ' : '') + "Simon en Andreas Backx"
+        }
+
+        return this.prefix
+    }
+
+    get payconiqApiKey() {
         return this.organization.privateMeta?.payconiqApiKey ?? ""
     }
 

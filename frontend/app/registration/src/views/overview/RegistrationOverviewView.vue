@@ -96,7 +96,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, LoadingView, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox, ErrorBox, LoadingView, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Group, GroupGenderType,MemberWithRegistrations, PaymentDetailed, SelectedGroup } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";

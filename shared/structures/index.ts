@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 48
+export const Version = 50
 
 // General
 export * from "./src/OrganizationMetaData"
@@ -99,3 +99,4 @@ export * from "./src/webshops/Checkout"
 export * from "./src/webshops/Customer"
 export * from "./src/webshops/Order"
 export * from "./src/endpoints/WebshopOrdersQuery"
+export * from "./src/webshops/TransferSettings"
