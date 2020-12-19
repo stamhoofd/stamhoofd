@@ -24,6 +24,10 @@
                     <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
                     <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
                 </template>
+
+                <p class="stamhoofd-footer">
+                    <a href="https://stamhoofd.be" target="_blank" class="button text">Gratis webshop van <strong>Stamhoofd</strong>, software voor verenigingen</a>
+                </p>
             </main>
         </div>
     </section>
@@ -252,6 +256,22 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
             + p {
                  white-space: pre-wrap;
+            }
+        }
+
+        .stamhoofd-footer {
+            padding-top: 30px;
+            @extend .style-description;
+
+            a {
+                white-space: normal;
+                text-overflow: initial;
+                height: auto;
+                line-height: 1.4;
+            }
+
+            strong {
+                color: $color-primary-original;
             }
         }
     }
