@@ -27,7 +27,46 @@
             iDEAL (29 cent)
         </Checkbox>
 
-        <IBANInput v-if="enableTransfers" v-model="iban" title="Bankrekeningnummer (overschrijvingen)" :placeholder="organization.meta.iban" :validator="validator" :required="false" />
+        <template v-if="enableTransfers">
+            <hr>
+            <h2>Overschrijvingen</h2>
+
+            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
+                <input
+                    v-model="creditor"
+                    class="input"
+                    type="text"
+                    :placeholder="organization.meta.transferSettings.creditor || organization.name"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <IBANInput v-model="iban" title="Bankrekeningnummer" :placeholder="organization.meta.transferSettings.iban || 'Op deze rekening schrijft men over'" :validator="validator" :required="false" />
+
+            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
+                        {{ _type.name }}
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
+            <p class="style-description-small">
+                {{ transferTypeDescription }}
+            </p>
+
+            <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
+                <input
+                    v-model="prefix"
+                    class="input"
+                    type="text"
+                    placeholder="bv. Bestelling"
+                    autocomplete=""
+                >
+            </STInputBox>
+            <p class="style-description-small">
+                Voorbeeld van een mededeling: “{{ transferExample }}”
+            </p>
+        </template>
 
         <hr>
         <h2>Beschikbaarheid</h2>
@@ -77,9 +116,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, DateSelection, ErrorBox, IBANInput,STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
+import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -95,7 +134,9 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
         Checkbox,
         IBANInput,
         DateSelection,
-        TimeInput
+        TimeInput,
+        RadioGroup,
+        Radio
     },
     directives: { Tooltip },
 })
@@ -222,16 +263,96 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         this.$emit("patch", p)
     }
 
+    get transferTypes() {
+        return [
+            { 
+                value: TransferDescriptionType.Structured,
+                name: "Gestructureerde mededeling",
+                description: "Geen kans op typefouten vanwege validatie in bankapps"
+            },
+            { 
+                value: TransferDescriptionType.Reference,
+                name: "Bestelnummer",
+                description: "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)"
+            },
+            { 
+                value: TransferDescriptionType.Fixed,
+                name: "Vaste mededeling",
+                description: "Altijd dezelfde mededeling voor alle bestellingen"
+            }
+        ]
+    }
+
+    get transferTypeDescription() {
+        return this.transferTypes.find(t => t.value === this.transferType)?.description ?? ""
+    }
+
+    get creditor() {
+        return this.webshop.meta.transferSettings.creditor
+    }
+
+    set creditor(creditor: string | null ) {
+        const p = PrivateWebshop.patch({})
+        p.meta = WebshopMetaData.patch({ 
+            transferSettings: TransferSettings.patch({
+                creditor: !creditor || creditor.length == 0 || creditor == (this.organization.meta.transferSettings.creditor ?? this.organization.name) ? null : creditor
+            })
+        })
+        this.$emit("patch", p)
+    }
+
     get iban() {
-        return this.webshop.meta.iban
+        return this.webshop.meta.transferSettings.iban
     }
 
     set iban(iban: string | null ) {
         const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        p.meta = meta
-        meta.iban = !iban || iban.length == 0 || iban == this.organization.meta.iban ? null : iban
+        p.meta = WebshopMetaData.patch({ 
+            transferSettings: TransferSettings.patch({
+                iban: !iban || iban.length == 0 || iban == this.organization.meta.transferSettings.iban ? null : iban
+            })
+        })
         this.$emit("patch", p)
+    }
+
+    get prefix() {
+        return this.webshop.meta.transferSettings.prefix
+    }
+
+    set prefix(prefix: string | null ) {
+        const p = PrivateWebshop.patch({})
+        p.meta = WebshopMetaData.patch({ 
+            transferSettings: TransferSettings.patch({
+                prefix
+            })
+        })
+        this.$emit("patch", p)
+    }
+
+    get transferType() {
+        return this.webshop.meta.transferSettings.type
+    }
+
+    set transferType(type: TransferDescriptionType ) {
+        const p = PrivateWebshop.patch({})
+        p.meta = WebshopMetaData.patch({ 
+            transferSettings: TransferSettings.patch({
+                type
+            })
+        })
+        this.$emit("patch", p)
+    }
+
+    get transferExample() {
+        if (this.transferType == TransferDescriptionType.Structured) {
+            return "+++705/1929/77391+++"
+        }
+
+        if (this.transferType == TransferDescriptionType.Reference) {
+            return (this.prefix ? this.prefix+' ' : '') + "152"
+        }
+
+        return this.prefix
     }
 
     get enableTransfers() {

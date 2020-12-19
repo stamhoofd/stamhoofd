@@ -3,7 +3,7 @@ import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
+import { GroupPrices, Organization, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Group } from '../models/Group';
@@ -47,7 +47,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         
         const registrations: RegistrationWithMember[] = []
         const payRegistrations: Registration[] = []
-        
+        const payNames: string[] = []
+
         const now = new Date()
         let totalPrice = 0
 
@@ -225,6 +226,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
                 totalPrice += price
                 payRegistrations.push(registration)
+                payNames.push(member.firstName)
                 alreadyRegisteredCount++;
             }
             registrations.push(registration)
@@ -237,7 +239,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice
-            payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
+
+            if (payment.method == PaymentMethod.Transfer) {
+                // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
+                payment.transferDescription = Payment.generateDescription(user.organization.meta.transferSettings, payNames.join(", "))
+            }
             payment.paidAt = null
 
             if (totalPrice == 0) {

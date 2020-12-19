@@ -111,7 +111,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice
-            payment.transferDescription = payment.method == PaymentMethod.Transfer ? Payment.generateOGM() : null
             payment.paidAt = null
 
             if (totalPrice == 0) {
@@ -125,6 +124,12 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.setRelation(Order.payment, payment)
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
                 await order.markValid()
+            }
+
+            if (payment.method == PaymentMethod.Transfer) {
+                // Only now we can update the transfer description, since we need the order number as a reference
+                payment.transferDescription = Payment.generateDescription(webshop.meta.transferSettings, (order.number ?? "")+"")
+                await payment.save()
             }
 
             await order.save()

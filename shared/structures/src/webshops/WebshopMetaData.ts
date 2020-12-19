@@ -9,6 +9,7 @@ import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
+import { TransferSettings } from './TransferSettings';
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -195,8 +196,18 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 41 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
-    @field({ decoder: StringDecoder, nullable: true, version: 42 })
-    iban: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 42, field: "iban" })
+    @field({ 
+        decoder: TransferSettings, 
+        version: 49, 
+        upgrade: (iban: string | null) => {
+            return TransferSettings.create({
+                iban
+            })
+        } 
+    })
+    transferSettings = TransferSettings.create({})
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null

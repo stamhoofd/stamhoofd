@@ -10,69 +10,91 @@
             </h1>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" @click="openGeneral" class="left-center">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" />
-                    <h2 class="style-title-list">Algemeen</h2>
-                    <p class="style-description">Naam, adres en website</p>
-                    <span class="icon arrow-right-small gray" slot="right"/>
+                <STListItem :selectable="true" class="left-center" @click="openGeneral">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
+                    <h2 class="style-title-list">
+                        Algemeen
+                    </h2>
+                    <p class="style-description">
+                        Naam, adres en website
+                    </p>
+                    <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPersonalize" class="left-center">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg" />
-                    <h2 class="style-title-list">Personaliseren</h2>
-                    <p class="style-description">Logo, kleur en domeinnaam</p>
-                    <span class="icon arrow-right-small gray" slot="right"/>
+                <STListItem :selectable="true" class="left-center" @click="openPersonalize">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg">
+                    <h2 class="style-title-list">
+                        Personaliseren
+                    </h2>
+                    <p class="style-description">
+                        Logo, kleur en domeinnaam
+                    </p>
+                    <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" @click="setupEmail" class="left-center">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg" />
-                    <h2 class="style-title-list">E-mailadressen</h2>
-                    <p class="style-description">Verstuur e-mails vanaf je zelf gekozen e-mailadres</p>
+                <STListItem :selectable="true" class="left-center" @click="setupEmail">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
+                    <h2 class="style-title-list">
+                        E-mailadressen
+                    </h2>
+                    <p class="style-description">
+                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
+                    </p>
                     <template slot="right">
-                        <span class="icon warning yellow" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" v-if="!hasPolicy" />
-                        <span class="icon arrow-right-small gray"/>
+                        <span v-if="!hasPolicy" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" class="icon warning yellow" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPrivacy" class="left-center">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg" />
-                    <h2 class="style-title-list">Privacy</h2>
-                    <p class="style-description">Stel je privacyvoorwaarden in</p>
+                <STListItem :selectable="true" class="left-center" @click="openPrivacy">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg">
+                    <h2 class="style-title-list">
+                        Privacy
+                    </h2>
+                    <p class="style-description">
+                        Stel je privacyvoorwaarden in
+                    </p>
                     <template slot="right">
-                        <span class="icon warning yellow" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'" v-if="!hasPolicy" />
-                        <span class="icon arrow-right-small gray"/>
+                        <span v-if="!hasPolicy" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'" class="icon warning yellow" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openPayment(true)" class="left-center">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg" />
-                    <h2 class="style-title-list">Betaalmethodes</h2>
-                    <p class="style-description">Bankrekeningnummer, Payconiq, Bancontact...</p>
+                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                    <h2 class="style-title-list">
+                        Betaalmethodes
+                    </h2>
+                    <p class="style-description">
+                        Bankrekeningnummer, Payconiq, Bancontact...
+                    </p>
                     <template slot="right">
-                        <span class="icon warning yellow" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" v-if="!hasPaymentMethod"/>
-                        <span class="icon arrow-right-small gray"/>
+                        <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="enableMemberModule">
-
                 <hr>
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" @click="manageGroups" class="left-center right-stack">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg" />
-                        <h2 class="style-title-list">Leeftijdsgroepen</h2>
-                        <p class="style-description">Prijzen, leeftijden, wachtlijsten</p>
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
+                        <h2 class="style-title-list">
+                            Leeftijdsgroepen
+                        </h2>
+                        <p class="style-description">
+                            Prijzen, leeftijden, wachtlijsten
+                        </p>
 
                         <template slot="right">
-                            <span v-if="!hasGroups" class="icon warning yellow" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'"/>
-                            <span class="icon arrow-right-small gray"/>
+                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'" class="icon warning yellow" />
+                            <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
-
             </template>
 
             <hr>
@@ -88,7 +110,7 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage, TooltipDirective} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -101,10 +123,10 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
+import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
-import ModuleSettingsBox from './ModuleSettingsBox.vue';
 
 @Component({
     components: {
@@ -181,7 +203,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasPaymentMethod() {
-        return this.organization.meta.iban.length > 0 || !this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
+        return (this.organization.meta.transferSettings.iban && this.organization.meta.transferSettings.iban.length > 0) || !this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
     } 
 
     get hasGroups() {

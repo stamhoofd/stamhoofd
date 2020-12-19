@@ -93,11 +93,11 @@
                             {{ paymentMethodName(payment.method) }}
                         </p>
                         <p v-else class="style-description-small">
-                            Betaal via overschrijving {{ payment.transferDescription }}
+                            Betaal via overschrijving
                         </p>
 
                         <template slot="right">
-                            {{ payment.price | price }}
+                            {{ payment.price | price }}
                             <span v-if="payment.status == 'Succeeded'" class="icon green success" />
                             <span v-else class="icon arrow-right" />
                         </template>
@@ -244,6 +244,8 @@ export default class OverviewView extends Mixins(NavigationMixin){
             root: new ComponentWithProperties(TransferPaymentView, {
                 organization: OrganizationManager.organization,
                 payment,
+                settings: OrganizationManager.organization.meta.transferSettings,
+                additionalReference: payment.getMemberLastNames(),
                 isPopup: true
             })
         }).setDisplayStyle("popup"))

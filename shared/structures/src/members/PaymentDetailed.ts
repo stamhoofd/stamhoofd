@@ -1,4 +1,5 @@
 import { ArrayDecoder,field } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Payment } from './Payment';
 import { RegistrationWithMember } from './RegistrationWithMember';
@@ -10,6 +11,10 @@ export class PaymentDetailed extends Payment {
 
     getMemberNames() {
         return this.registrations.map(r => r.member.details?.name ?? "Onbekend").join(", ")
+    }
+
+    getMemberLastNames() {
+        return Formatter.uniqueArray(this.registrations.map(r => r.member.details?.lastName ?? "Onbekend")).join(", ")
     }
 
     matchQuery(query: string): boolean {

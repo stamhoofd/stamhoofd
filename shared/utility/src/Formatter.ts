@@ -73,6 +73,14 @@ export class Formatter {
         return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
+    static uniqueArray<T extends any>(array: T[]): T[] {
+        function onlyUnique(value, index, self) {
+            return self.indexOf(value) === index;
+        }
+
+        return array.filter(onlyUnique);
+    }
+
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */

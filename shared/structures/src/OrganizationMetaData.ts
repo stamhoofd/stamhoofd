@@ -7,6 +7,7 @@ import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
+import { TransferSettings } from './webshops/TransferSettings';
 
 export class OrganizationModules extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
@@ -41,8 +42,17 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(GroupPrices) })
     defaultPrices: GroupPrices[] = []
 
-    @field({ decoder: StringDecoder, version: 6, upgrade: () => "" })
-    iban = ""
+    @field({ decoder: StringDecoder, version: 6, upgrade: () => "", field: "iban" })
+    @field({ 
+        decoder: TransferSettings, 
+        version: 50, 
+        upgrade: (iban: string) => {
+            return TransferSettings.create({
+                iban: iban ? iban : null
+            })
+        } 
+    })
+    transferSettings = TransferSettings.create({})
 
     /**
      * Logo used in a horizontal environment (e.g. menu bar)
