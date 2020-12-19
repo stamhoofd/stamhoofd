@@ -205,6 +205,9 @@ export class WebshopMetaData extends AutoEncoder {
             return TransferSettings.create({
                 iban
             })
+        },
+        downgrade: (transferSettings: TransferSettings) => {
+            return transferSettings.iban
         } 
     })
     transferSettings = TransferSettings.create({})

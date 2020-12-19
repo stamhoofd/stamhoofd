@@ -50,7 +50,10 @@ export class OrganizationMetaData extends AutoEncoder {
             return TransferSettings.create({
                 iban: iban ? iban : null
             })
-        } 
+        },
+        downgrade: (transferSettings: TransferSettings) => {
+            return transferSettings.iban ?? ""
+        }
     })
     transferSettings = TransferSettings.create({})
 
