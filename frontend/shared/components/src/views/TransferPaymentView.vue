@@ -7,7 +7,7 @@
 
             <main>
                 <h1>Bedrag overschrijven</h1>
-                <p>Voer de onderstaande overschrijving uit. <span v-if="isBelgium" class="hide-smartphone">Je kan de QR-code scannen met deze bank apps: KBC, ING, Belfius of Argenta. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
+                <p>Voer de onderstaande overschrijving uit. <span v-if="isBelgium" class="hide-smartphone">Scan rechtstreeks vanuit één van deze bankapps: KBC, ING, Belfius of Argenta, niet met je ingebouwde QR-scanner en ook niet met Payconiq. Lukt het niet? Typ dan gewoon de gegevens over.</span></p>
 
                 <div class="payment-split">
                     <div v-if="payment.price > 0" class="hide-smartphone">

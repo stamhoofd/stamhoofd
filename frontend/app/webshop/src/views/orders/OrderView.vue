@@ -15,7 +15,7 @@
                 </p>
 
                 <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
-                    Opgelet: deze bestelling werd (mogelijks) nog niet betaald. Zorg er zeker voor dat je deze meteen betaald zodat het bedrag op tijd op onze rekening komt.
+                    Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt.
                 </p>
 
                 <STList>
