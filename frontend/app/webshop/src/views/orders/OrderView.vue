@@ -150,7 +150,7 @@
                 <template slot="right">
                     <button class="button primary" @click="share">
                         <span class="icon share" />
-                        <span>Doorsturen</span>
+                        <span>Delen</span>
                     </button>
                 </template>
             </STToolbar>
