@@ -49,6 +49,18 @@
                             {{ order.number }}
                         </template>
                     </STListItem>
+
+                    <STListItem class="right-description">
+                        Status
+
+                        <template slot="right">
+                            <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                            <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
+                            <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
+                            <span v-else>Geplaatst</span>
+                        </template>
+                    </STListItem>
+                                                
                     <template v-if="order.data.checkoutMethod">
                         <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                             <template v-if="order.data.checkoutMethod.type == 'Takeout'">
