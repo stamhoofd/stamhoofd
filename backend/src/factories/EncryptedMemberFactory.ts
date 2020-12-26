@@ -61,34 +61,32 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
                 Math.floor(Math.random() * 10);
         }
 
-        let parentFactory = new ParentFactory({});
-
-        memberDetails.parents.push(await parentFactory.create());
-
-        // 80% chance to have 2 parents if not guardian
-        if (Math.random() >= 0.2 && memberDetails.parents[0].type != ParentType.Other) {
-            // 90% chance to have parents of different gender
-            parentFactory = new ParentFactory({
-                type:
-                    Math.random() >= 0.2
-                        ? memberDetails.parents[0].type == ParentType.Mother
-                            ? ParentType.Father
-                            : ParentType.Mother
-                        : undefined,
-            });
+        if (memberDetails.age < 22) {
+            let parentFactory = new ParentFactory({});
 
             memberDetails.parents.push(await parentFactory.create());
 
-            if (Math.random() >= 0.1) {
-                // 10% chance to have divorced parents
-                memberDetails.parents[1].address = memberDetails.parents[0].address;
-            }
+            // 80% chance to have 2 parents if not guardian
+            if (Math.random() >= 0.2 && memberDetails.parents[0].type != ParentType.Other) {
+                // 90% chance to have parents of different gender
+                parentFactory = new ParentFactory({
+                    type:
+                        Math.random() >= 0.2
+                            ? memberDetails.parents[0].type == ParentType.Mother
+                                ? ParentType.Father
+                                : ParentType.Mother
+                            : undefined,
+                });
 
-            if (Math.random() >= 0.5) {
-                // 50% chance no e-mail
-                memberDetails.parents[1].email = null;
+                memberDetails.parents.push(await parentFactory.create());
+
+                if (Math.random() >= 0.1) {
+                    // 10% chance to have divorced parents
+                    memberDetails.parents[1].address = memberDetails.parents[0].address;
+                }
             }
         }
+
         const recordFactory = new RecordFactory({});
         memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
 
@@ -105,46 +103,21 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
             return i.type != "NoData";
         });
 
-       /* memberDetails.records.sort((a, b) => {
-            const pA = RecordTypeHelper.getPriority(a.type);
-            const pB = RecordTypeHelper.getPriority(b.type);
-            if (pA == pB) {
-                if (a.getText() < b.getText()) {
-                    return -1;
-                }
-                if (a.getText() > b.getText()) {
-                    return 1;
-                }
-                return 0;
-            }
-            if (pA == RecordTypePriority.High && pB != RecordTypePriority.High) {
-                return -1;
-            }
-            if (pB == RecordTypePriority.High && pA != RecordTypePriority.High) {
-                return 1;
-            }
-            if (pA == RecordTypePriority.Medium && pB != RecordTypePriority.Medium) {
-                return -1;
-            }
-            if (pB == RecordTypePriority.Medium && pA != RecordTypePriority.Medium) {
-                return 1;
-            }
-
-            // Not possible
-            throw new Error("Method records sorting failure")
-        });*/
-
         // Sort
 
         if (memberDetails.parents.length == 2 && Math.random() >= 0.9) {
             memberDetails.lastName = memberDetails.parents[0].lastName + "-" + memberDetails.parents[1].lastName;
         } else {
-            if (memberDetails.parents[0].type == ParentType.Father) {
-                memberDetails.lastName = memberDetails.parents[0].lastName;
-            } else if (memberDetails.parents[1] && memberDetails.parents[1].type == ParentType.Father) {
-                memberDetails.lastName = memberDetails.parents[1].lastName;
+            if (memberDetails.parents.length == 1) {
+                if (memberDetails.parents[0].type == ParentType.Father) {
+                    memberDetails.lastName = memberDetails.parents[0].lastName;
+                } else if (memberDetails.parents[1] && memberDetails.parents[1].type == ParentType.Father) {
+                    memberDetails.lastName = memberDetails.parents[1].lastName;
+                } else {
+                    memberDetails.lastName = memberDetails.parents[0].lastName;
+                }
             } else {
-                memberDetails.lastName = memberDetails.parents[0].lastName;
+                memberDetails.lastName = this.randomLastName();
             }
         }
 

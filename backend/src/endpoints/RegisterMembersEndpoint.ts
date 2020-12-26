@@ -201,14 +201,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 registration.waitingList = false
                 registration.canRegister = false
-                let foundPrice: GroupPrices | undefined = undefined
-
-                // Determine price
-                for (const price of group.settings.prices) {
-                    if (!price.startDate || price.startDate <= now) {
-                        foundPrice = price
-                    }
-                }
+                const foundPrice = group.settings.getGroupPrices(now)
 
                 if (!foundPrice) {
                     throw new SimpleError({
@@ -217,13 +210,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     }) 
                 }
 
-                let price = register.reduced && foundPrice.reducedPrice !== null ? foundPrice.reducedPrice : foundPrice.price
-                if (foundPrice.familyPrice && alreadyRegisteredCount == 1 && foundPrice.familyPrice < price) {
-                    price = foundPrice.familyPrice
-                }
-                if (foundPrice.extraFamilyPrice && alreadyRegisteredCount >= 2 && foundPrice.extraFamilyPrice < price) {
-                    price = foundPrice.extraFamilyPrice
-                }
+                const price = foundPrice.getPriceFor(register.reduced, alreadyRegisteredCount)
                 totalPrice += price
                 payRegistrations.push(registration)
                 payNames.push(member.firstName)

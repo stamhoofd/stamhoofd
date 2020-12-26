@@ -228,7 +228,7 @@ $header-height: 70px;
 
         @media (min-width: 801px) {
             padding-top: $header-height + 10px;
-            padding-bottom: $header-height*2;
+            padding-bottom: $header-height;
         }
     }
 

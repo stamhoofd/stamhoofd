@@ -6,7 +6,7 @@
         <main>
             <h1>Account aanmaken</h1>
 
-            <p>Al jouw gegevens worden in een versleutelde digitale kluis bijgehouden - ook het computerssysteem heeft hier geen toegang tot. Het is belangrijk dat je de toegang tot die kluis goed beschermd met sterke wachtwoorden.</p>
+            <p>Met een account kan je leden inschrijven en die inschrijvingen verlengen of aanpassen.</p>
 
             <STErrorsDefault :error-box="errorBox" />
 

@@ -28,4 +28,15 @@ export class GroupPrices extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 22 })
     extraFamilyPrice: number | null = null
+
+    getPriceFor(reduced: boolean, alreadyRegisteredCount = 0) {
+        let price = reduced && this.reducedPrice !== null ? this.reducedPrice : this.price
+        if (this.familyPrice && alreadyRegisteredCount == 1 && this.familyPrice < price) {
+            price = this.familyPrice
+        }
+        if (this.extraFamilyPrice && alreadyRegisteredCount >= 2 && this.extraFamilyPrice < price) {
+            price = this.extraFamilyPrice
+        }
+        return price
+    }
 }

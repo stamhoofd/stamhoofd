@@ -80,6 +80,18 @@ export class GroupSettings extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 16 })
     priorityForFamily = true
+
+    getGroupPrices(date: Date) {
+        let foundPrice: GroupPrices | undefined = undefined
+
+        // Determine price
+        for (const price of this.prices) {
+            if (!price.startDate || price.startDate <= date) {
+                foundPrice = price
+            }
+        }
+        return foundPrice
+    }
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()
