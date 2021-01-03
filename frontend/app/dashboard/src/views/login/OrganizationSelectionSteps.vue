@@ -1,6 +1,11 @@
 <template>
     <Steps :root="root">
         <template slot="right">
+            <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
+                <span class="icon external" />
+                <span>Terug</span>
+                <span class="hide-smartphone">naar website</span>
+            </a>
             <button class="button primary" @click="gotoSignup">
                 Aansluiten
             </button>
