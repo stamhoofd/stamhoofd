@@ -1,5 +1,5 @@
 const path = require("path");
-var merge = require('webpack-merge');
+var { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var common;

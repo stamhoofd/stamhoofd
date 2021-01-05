@@ -1,7 +1,7 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Maak jouw account">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -27,9 +27,9 @@
                         </div>
                     </STInputBox>
 
-                    <EmailInput title="Persoonlijk e-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-                   <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
+                    <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
                         <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
 
@@ -63,7 +63,7 @@
                 Het aanmaken van de verenging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
             </template>
             <template #right>
-                <LoadingButton :loading="loading" >
+                <LoadingButton :loading="loading">
                     <button class="button primary">
                         Account aanmaken
                     </button>
@@ -78,11 +78,12 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { NetworkManager, Session, SessionManager, Keychain, LoginHelper } from "@stamhoofd/networking"
+import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import SignupModulesView from './SignupModulesView.vue';
 
 @Component({
@@ -197,6 +198,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
         
             const component = new CenteredMessage("Sleutels aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+            plausible('signupKeys');
             try {
 
                 await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)

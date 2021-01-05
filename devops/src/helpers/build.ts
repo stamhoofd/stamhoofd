@@ -31,7 +31,9 @@ export async function build() {
                 continue;
             }
             console.log(`Building ${app}...`)
-            await execPromise("yarn build:production", { env: { ...process.env, LOAD_ENV: frontendEnv }, cwd: `${__dirname}/../../../frontend/app/${app}`})
+            const { stdout, stderr } = await execPromise("yarn build:production", { env: { ...process.env, LOAD_ENV: frontendEnv }, cwd: `${__dirname}/../../../frontend/app/${app}`})
+            console.log(stdout)
+            console.warn(stderr)
         }
     }
 }
