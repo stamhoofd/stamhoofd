@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "serve": "NODE_ENV=development webpack-dev-server --hot",
+        "serve": "NODE_ENV=development webpack serve --hot",
         "build": "NODE_ENV=development webpack",
         "build:production": "NODE_ENV=production webpack --progress --performance-hints warning"
     },
