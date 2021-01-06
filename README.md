@@ -78,6 +78,6 @@ You can use the following commands in both `/frontend/app/registration` and `/fr
 
 All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build`. You can rebuild them all at once by running the same command in the project root.
 
-# Support en information
+# Support and information
 More info on our website:
 <a title="Stamhoofd" role="link" rel="author" href="https://www.stamhoofd.be/">Stamhoofd</a>
