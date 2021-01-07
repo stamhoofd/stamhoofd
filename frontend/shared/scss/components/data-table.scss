@@ -63,7 +63,7 @@
                 border-top: $border-width-thin solid $color-white-shade;
                 transition: border-top-color 0.15s;
 
-                &:first-child {
+                &.prefix:first-child {
                     border-top: 0;
                 }
 

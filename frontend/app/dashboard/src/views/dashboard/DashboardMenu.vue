@@ -9,12 +9,12 @@
             <input v-if="false" class="input search" placeholder="Zoeken">
         </div>
 
-        <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank" v-if="false">
+        <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
             <span class="icon info-filled" />
             <span>Documentatie</span>
         </a>
 
-        <a class="menu-button button heading" :href="registerUrl" target="_blank" v-if="enableMemberModule">
+        <a v-if="enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
             <span class="icon external" />
             <span>Jouw inschrijvingspagina</span>
         </a>
@@ -91,11 +91,6 @@
                 <span>Groepsadministratie</span>
             </button>
 
-            <button v-else class="menu-button button heading" :class="{ selected: currentlySelected == 'import-members'}" @click="importMembers">
-                <span class="icon sync" />
-                <span>Leden importeren</span>
-            </button>
-
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
                 <span class="icon user" />
                 <span>Mijn account</span>
@@ -120,23 +115,23 @@ import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import AccountSettingsView from './account/AccountSettingsView.vue';
+import AdminsView from './admins/AdminsView.vue';
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
-import AdminsView from './admins/AdminsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
 import WhatsNewView from './settings/WhatsNewView.vue';
 import EditWebshopView from './webshop/EditWebshopView.vue';
 import WebshopView from './webshop/WebshopView.vue';
-import { Formatter } from "@stamhoofd/utility";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {

@@ -82,7 +82,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
-                        <td @click.stop="">
+                        <td @click.stop="" class="prefix">
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
                         <td>

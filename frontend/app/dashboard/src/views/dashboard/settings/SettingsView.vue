@@ -94,6 +94,20 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/import-excel.svg">
+                        <h2 class="style-title-list">
+                            Leden importeren
+                        </h2>
+                        <p class="style-description">
+                            Importeer leden vanaf een Excel of CSV bestand
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -121,6 +135,7 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import ImportMembersView from './modules/members/ImportMembersView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
@@ -195,6 +210,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     manageGroups() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditGroupsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    importMembers() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ImportMembersView, {})
         }).setDisplayStyle("popup"))
     }
 

@@ -88,7 +88,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
-                        <td @click.stop="">
+                        <td @click.stop="" class="prefix">
                             <Checkbox v-model="order.selected" />
                         </td>
                         <td class="hide-smartphone tiny">
