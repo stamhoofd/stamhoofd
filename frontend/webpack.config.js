@@ -236,7 +236,10 @@ module.exports = {
             //chunkFilename: '[id].[contenthash].css',
             ignoreOrder: false, // Enable to remove warnings about conflicting order
         })],
-        new webpack.DefinePlugin(use_env)
+        new webpack.DefinePlugin(use_env),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        })
     ],
     experiments: {
         syncWebAssembly: true // temporary, until fixed
