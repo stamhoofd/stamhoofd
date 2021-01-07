@@ -5651,10 +5651,10 @@ ibantools@^3.1.0:
   resolved "https://registry.yarnpkg.com/ibantools/-/ibantools-3.2.1.tgz#b7881957c2eab617befe0d4a842f9ffc7bbcce6d"
   integrity sha512-X8Q47sTMbi7dFrKsZ/K6997tUCpoC5ol5V8nV6a+Su5CZhDlPUH8HRsTSeRWGDgyZH6mec2NURVASvxpaTlBAw==
 
-iconfont-webpack-plugin@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/iconfont-webpack-plugin/-/iconfont-webpack-plugin-4.2.2.tgz#de0dbf927fd510bc18299573f8935b469b19da2c"
-  integrity sha512-gr2ujb7/vTnsgOXFiv1rUrpdiMWarfvX2crYrD/XysYFrdEyieMNrzK14twlU0UVvUAiJ1LyR0Akc4iXcwd8dA==
+iconfont-webpack-plugin@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/iconfont-webpack-plugin/-/iconfont-webpack-plugin-5.0.0.tgz#306ea7cab35c84280c09a344c268f0d21932f748"
+  integrity sha512-cTaoMmDJe4p0Z0E67uCY2gRAQr46vYhXI8dVfvLjm+h7Xt9LSplDb5qe9+AeMW0s9PhNyXdllICYubOq5WZtWw==
   dependencies:
     loader-utils "1.4.0"
     postcss "7.0.27"

@@ -3,7 +3,9 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
-const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
+//const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
+const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
+
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
 require('dotenv').config({path: __dirname+'/.env'})
@@ -41,6 +43,7 @@ if (process.env.LOAD_ENV) {
 
 module.exports = {
     mode: "development",
+    target: 'web',
     //stats: 'none',
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension (so that you don't have to add it explicitly)
@@ -60,24 +63,19 @@ module.exports = {
     },
     output: {
         publicPath: "/",
-        filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[contenthash].js',
-        chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[contenthash].js',
+        filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[fullhash].js',
+        chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[fullhash].js',
         globalObject: 'this' // needed for webworkers
     },
     devServer: {
         contentBase: './dist',
-        allowedHosts: [
-            '.stamhoofd.be',
-            '.stamhoofd.local',
-        ],
-        // To test on external devices
-        host: '0.0.0.0',//your ip address
+        host: '0.0.0.0',
         port: 8080,
         sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
         disableHostCheck: true,
-        historyApiFallback: true
+        historyApiFallback: true,
     },
-    devtool: "source-map",
+    //devtool: "source-map",
     module: {
         rules: [
             {
@@ -129,7 +127,7 @@ module.exports = {
                             postcssOptions: {
                                 plugins: [
                                     // Don't need icons here
-                                    autoprefixer
+                                    "autoprefixer"
                                 ]
                             }
                         }
@@ -141,19 +139,29 @@ module.exports = {
             {
                 test: /\.url.scss$/,
                 use: [
-                    'css-loader',
-                    /*{
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 2,
+                            // 0 => no loaders (default);
+                            // 1 => postcss-loader;
+                            // 2 => postcss-loader, sass-loader
+                        },
+                    },
+                    {
                         loader: 'postcss-loader',
                         options: {
-                            postcssOptions: {
-                                plugins: (loader) => [
-                                    // Add the plugin
-                                    new IconfontWebpackPlugin(loader),
-                                    autoprefixer
-                                ]
+                            postcssOptions: (loader) => {
+                                return { 
+                                    plugins: [
+                                        // Add the plugin
+                                        new IconfontWebpackPlugin(loader),
+                                        autoprefixer
+                                    ]
+                                }
                             }
                         }
-                    },*/
+                    },
                     'sass-loader',
                 ]
             },
@@ -163,22 +171,32 @@ module.exports = {
                 test: /\.scss$/,
                 exclude:  /\.url.scss$/,
                 use: [
-                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'vue-style-loader', 
+                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',  // vue-style-loader is not supported/maintained any longer and doesn't work without other changes
                     // If you enable this, HMR won't work. Replace it with a style loader
                     // sets the style inline, instead of using MiniCssExtractPlugin.loader
-                    'css-loader',
-                    /*{
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 2,
+                            // 0 => no loaders (default);
+                            // 1 => postcss-loader;
+                            // 2 => postcss-loader, sass-loader
+                        },
+                    },
+                    {
                         loader: 'postcss-loader',
                         options: {
-                            postcssOptions: {
-                                plugins: (loader) => [
-                                    // Add the plugin
-                                    new IconfontWebpackPlugin(loader),
-                                    autoprefixer
-                                ]
+                            postcssOptions: (loader) => {
+                                return { 
+                                    plugins: [
+                                        // Add the plugin
+                                        new IconfontWebpackPlugin(loader),
+                                        autoprefixer
+                                    ]
+                                }
                             }
                         }
-                    },*/
+                    },
                     'sass-loader',
                 ]
             },
