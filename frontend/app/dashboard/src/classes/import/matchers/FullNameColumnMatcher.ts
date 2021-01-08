@@ -1,21 +1,21 @@
+import { SimpleError } from "@simonbackx/simple-errors";
+import { Parent, ParentType } from "@stamhoofd/structures";
+import XLSX from "xlsx";
+
 import { ColumnMatcher } from "../ColumnMatcher";
+import { ImportingMember } from "../ImportingMember";
+import { MatcherCategory } from "../MatcherCategory";
+import { SharedMatcher } from "../SharedMatcher";
 
-class FullNameColumnMatcherClass implements ColumnMatcher {
-    id = "FullNameColumnMatcher"
-
+export class FullNameColumnMatcher extends SharedMatcher implements ColumnMatcher {
     getName(): string {
         return "Volledige naam"
     }
 
-    getCategory(): string {
-        return "Van lid zelf"
-    }
-
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
-        const negativeMatch = ["ouder", "parent", "vader", "moeder", "mama", "papa", "voogd", "contact", "voornaam", "achternaam", "familienaam", "firstname", "lastname"]
 
-        for (const word of negativeMatch) {
+        for (const word of ["voornaam", "first", "achter", "last", ...this.negativeMatch]) {
             if (cleaned.includes(word)) {
                 return false
             }
@@ -49,6 +49,44 @@ class FullNameColumnMatcherClass implements ColumnMatcher {
         return true
     }
 
-}
+    apply(cell: XLSX.CellObject, member: ImportingMember) {
+        // Check if string value
+        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "Geen tekst in deze cell"
+            })
+        }
 
-export const FullNameColumnMatcher = new FullNameColumnMatcherClass()
+        const v = cell.v
+
+        // todo: improve splitting
+        let firstName = v.split(" ")[0]
+        let lastName = v.substr(firstName.length+1)
+
+        firstName = firstName.trim()
+        lastName = lastName.trim()
+
+        if (this.category == MatcherCategory.Member) {
+            member.details.firstName = firstName
+            member.details.lastName = lastName
+        } else if (this.category == MatcherCategory.Parent1) {
+            if (member.details.parents.length == 0) {
+                member.details.parents.push(Parent.create({
+                    type: ParentType.Parent1
+                }))
+            }
+            member.details.parents[0].firstName = firstName
+            member.details.parents[0].lastName = lastName
+        } else if (this.category == MatcherCategory.Parent2) {
+            while (member.details.parents.length < 2) {
+                member.details.parents.push(Parent.create({
+                    type: ParentType.Parent2
+                }))
+            }
+            member.details.parents[1].firstName = firstName
+            member.details.parents[1].lastName = lastName
+        }
+    }
+
+}

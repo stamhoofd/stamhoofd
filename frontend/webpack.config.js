@@ -177,7 +177,7 @@ module.exports = {
                     {
                         loader: "css-loader",
                         options: {
-                            importLoaders: 2,
+                            importLoaders: 2
                             // 0 => no loaders (default);
                             // 1 => postcss-loader;
                             // 2 => postcss-loader, sass-loader

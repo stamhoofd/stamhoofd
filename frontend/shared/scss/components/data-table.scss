@@ -106,10 +106,15 @@
 
             &:first-child {
                 padding: 0;
-                padding-left: 40px - 10px;
-                padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
+                padding-left: 40px;
+                padding-left: var(--st-horizontal-padding, 40px);
+            }
+
+            &.prefix:first-child {
                 white-space: nowrap;
                 width: 1px;
+                padding-left: 40px - 10px;
+                padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
 
                 .checkbox {
                     margin: 0;

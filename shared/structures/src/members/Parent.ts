@@ -25,7 +25,7 @@ export class Parent extends AutoEncoder {
     email: string | null = null;
 
     @field({ decoder: Address, nullable: true })
-    address: Address | null;
+    address: Address | null = null;
 
     get name() {
         return this.firstName + " " + this.lastName;

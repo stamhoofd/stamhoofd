@@ -1,7 +1,14 @@
+import XLSX from "xlsx";
+
+import { ImportingMember } from "./ImportingMember";
+import { MatcherCategory } from "./MatcherCategory";
+
 export interface ColumnMatcher {
     id: string;
-    
+    category: MatcherCategory;
+
     getName(): string;
-    getCategory(): string;
     doesMatch(columnName: string, examples: string[]): boolean;
+
+    apply(cell: XLSX.CellObject, member: ImportingMember);
 }

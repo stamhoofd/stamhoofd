@@ -1,21 +1,21 @@
+import { SimpleError } from "@simonbackx/simple-errors";
+import { Parent, ParentType } from "@stamhoofd/structures";
+import XLSX from "xlsx";
+
 import { ColumnMatcher } from "../ColumnMatcher";
+import { ImportingMember } from "../ImportingMember";
+import { MatcherCategory } from "../MatcherCategory";
+import { SharedMatcher } from "../SharedMatcher";
 
-class LastNameColumnMatcherClass implements ColumnMatcher {
-    id = "LastNameColumnMatcher"
-
+export class LastNameColumnMatcher extends SharedMatcher implements ColumnMatcher {
     getName(): string {
         return "Achternaam"
     }
 
-    getCategory(): string {
-        return "Van lid zelf"
-    }
-
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
-        const negativeMatch = ["ouder", "parent", "vader", "moeder", "mama", "papa", "voogd", "contact", "voornaam", "firstname"]
 
-        for (const word of negativeMatch) {
+        for (const word of ["voornaam", "firstname", ...this.negativeMatch]) {
             if (cleaned.includes(word)) {
                 return false
             }
@@ -31,6 +31,32 @@ class LastNameColumnMatcherClass implements ColumnMatcher {
         }
         return false
     }
-}
 
-export const LastNameColumnMatcher = new LastNameColumnMatcherClass()
+    apply(cell: XLSX.CellObject, member: ImportingMember) {
+        // Check if string value
+        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "Geen tekst in deze cell"
+            })
+        }
+
+        if (this.category == MatcherCategory.Member) {
+            member.details.lastName = cell.v
+        } else if (this.category == MatcherCategory.Parent1) {
+            if (member.details.parents.length == 0) {
+                member.details.parents.push(Parent.create({
+                    type: ParentType.Parent1
+                }))
+            }
+            member.details.parents[0].lastName = cell.v
+        } else if (this.category == MatcherCategory.Parent2) {
+            while (member.details.parents.length < 2) {
+                member.details.parents.push(Parent.create({
+                    type: ParentType.Parent2
+                }))
+            }
+            member.details.parents[1].lastName = cell.v
+        }
+    }
+}

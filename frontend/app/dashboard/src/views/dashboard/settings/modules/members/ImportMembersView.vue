@@ -10,7 +10,8 @@
             <p>Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft. In de volgende stappen kan je de kolommen koppelen.</p>
 
             <label class="upload-box">
-                <span class="icon upload"/>
+                <span v-if="!file"class="icon upload"/>
+                <span v-else class="icon file"/>
                 <div v-if="!file">
                     <h2 class="style-title-list">
                         Kies een bestand
@@ -28,14 +29,14 @@
                     </p>
                 </div>
                 <input type="file" multiple="multiple" style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-
+                <span v-if="file" class="icon sync gray"/>
             </label>
 
             <table v-if="file && columns.length > 0" class="data-table">
                 <thead>
                     <tr>
                         <th>
-                            Jouw bestand
+                            Kolom uit jouw bestand
                         </th>
                         <th>Koppelen aan</th>
                     </tr>
@@ -55,9 +56,9 @@
                         <td>
                             <select class="input" v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>Maak een keuze</option>
-                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
+                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="getCategoryName(cat.name)">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" v-bind:value="matcher.id">
-                                        {{ matcher.getName() }}
+                                        {{ matcher.getName() }} ({{ getCategoryName(cat.name) }})
                                     </option>
                                 </optgroup>
                             </select>
@@ -75,7 +76,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" :disabled="true" @click="goNext">
+                    <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" @click="goNext">
                         Volgende
                     </button>
                 </LoadingButton>
@@ -95,44 +96,12 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import XLSX from "xlsx";
-import { FirstNameColumnMatcher, FullNameColumnMatcher, LastNameColumnMatcher } from "../../../../../classes/import/matchers"
+import { allMathcers } from "../../../../../classes/import/matchers"
 import { ColumnMatcher } from "../../../../../classes/import/ColumnMatcher"
-
-class MatchedColumn {
-    selected = false
-    name: string
-    examples: string[] = []
-    matcher: ColumnMatcher | null = null
-
-    // For vue bug only...
-    matchersReference: ColumnMatcher[]
-
-    constructor(name: string, matchersReference: ColumnMatcher[]) {
-        this.name = name
-        this.matchersReference = matchersReference
-    }
-
-    /// Fallback for vue bug that is not able to detect the proper selected matcher -.-
-    get matcherCode() {
-        return this.matcher?.id ?? null
-    }
-
-    /// Fallback for vue bug that is not able to detect the proper selected matcher -.-
-    set matcherCode(name: string | null) {
-        if (name === null) {
-            this.matcher = null
-            return
-        }
-
-        for (const matcher of this.matchersReference) {
-            if (matcher.id === name) {
-                this.matcher = matcher
-                return
-            }
-        }
-        this.matcher = null
-    }
-}
+import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/import/MatcherCategory';
+import { ImportingMember } from "../../../../../classes/import/ImportingMember"
+import { MatchedColumn } from "../../../../../classes/import/MatchedColumn"
+import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 
 @Component({
     components: {
@@ -157,7 +126,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
     sheet: XLSX.WorkSheet | null = null
 
-    matchers = [FullNameColumnMatcher, LastNameColumnMatcher, FirstNameColumnMatcher]
+    matchers = allMathcers
     columns: MatchedColumn[] = []
 
     get organization() {
@@ -167,17 +136,21 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     get matcherCategories() {
         const arr = {}
         for (const matcher of this.matchers) {
-            const cat = matcher.getCategory().toLowerCase()
+            const cat = matcher.category.toLowerCase()
             if (arr[cat]) {
                 arr[cat].matchers.push(matcher)
             } else {
                 arr[cat] = {
-                    name: matcher.getCategory(),
+                    name: matcher.category,
                     matchers: [matcher]
                 }
             }
         }
         return Object.values(arr)
+    }
+
+    getCategoryName(category: MatcherCategory) {
+        return MatcherCategoryHelper.getName(category)
     }
 
     async shouldNavigateAway() {
@@ -255,12 +228,16 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         for(var colNum = range.s.c; colNum <= range.e.c; colNum++){
             const cell = this.sheet[XLSX.utils.encode_cell({r: range.s.r, c: colNum})] as XLSX.CellObject
             console.log(cell)
-            const columnName = cell.w ?? ""
-            const matched = new MatchedColumn(columnName, this.matchers)
+            const columnName = (cell.w ?? cell.v ?? "")+""
+            const matched = new MatchedColumn(colNum, columnName, this.matchers)
 
-            for(var row = range.s.r + 1; row <= range.e.r && colNum < 10; row++){
-                const valueCell = this.sheet[XLSX.utils.encode_cell({r: row, c: colNum})] as XLSX.CellObject
-                matched.examples.push(valueCell.w ?? "")
+            for(var row = range.s.r + 1; row <= range.e.r && row < 10; row++){
+                const valueCell = this.sheet[XLSX.utils.encode_cell({r: row, c: colNum})]
+
+                if (!valueCell) {
+                    continue
+                }
+                matched.examples.push((valueCell.w ?? valueCell.v ?? "")+"")
             }
 
             for (const [index, matcher] of availableMatchers.entries()) {
@@ -299,7 +276,15 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     }
 
     goNext() {
-        // todo
+        if (!this.sheet) {
+            return
+        }
+        const members = ImportingMember.importAll(this.sheet, this.columns, this.organization)
+        console.log(members)
+
+        this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+            members
+        }))
     }
 }
 </script>
@@ -333,8 +318,23 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
             background-color: $color-gray-lighter;
         }
 
-        > span.icon {
+        > .icon:first-child {
             padding-right: 20px;
+            flex-shrink: 0;
+        }
+
+        > .icon:last-child {
+            padding-left: 20px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+    }
+
+    .data-table {
+
+
+        select.input {
+            width: auto;
         }
     }
 }
