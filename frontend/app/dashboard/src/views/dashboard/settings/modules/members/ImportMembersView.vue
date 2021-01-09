@@ -276,24 +276,30 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         }
     }
 
-    goNext() {
-        if (!this.sheet) {
+    async goNext() {
+        if (!this.sheet || this.saving) {
             return
         }
-        const result = ImportingMember.importAll(this.sheet, this.columns, this.organization)
-        console.log(result)
 
-        if (result.errors.length > 0) {
-            this.show(new ComponentWithProperties(ImportMembersErrorsView, {
-                errors: result.errors
-            }))
-        } else {
-            this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
-                members: result.members
-            }))
+        this.saving = true
+
+        try {
+            const result = await ImportingMember.importAll(this.sheet, this.columns, this.organization)
+
+            if (result.errors.length > 0) {
+                this.show(new ComponentWithProperties(ImportMembersErrorsView, {
+                    errors: result.errors
+                }))
+            } else {
+                this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+                    members: result.members
+                }))
+            }
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
         }
 
-        
+        this.saving = false 
     }
 }
 </script>

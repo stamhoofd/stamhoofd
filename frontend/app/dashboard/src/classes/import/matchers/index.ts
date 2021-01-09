@@ -5,6 +5,7 @@ import { FullNameColumnMatcher } from "./FullNameColumnMatcher";
 import { GenderColumnMatcher } from "./GenderColumnMatcher";
 import { GroupColumnMatcher } from "./GroupColumnMatcher";
 import { LastNameColumnMatcher } from "./LastNameColumnMatcher";
+import { PhoneColumnMatcher } from "./PhoneColumnMatcher";
 
 // Always make sure fullname is before lastname!
 export const memberMatchers = [
@@ -14,12 +15,14 @@ export const memberMatchers = [
     new BirthDayColumnMatcher(),
     new GenderColumnMatcher(),
     new GroupColumnMatcher(),
+    new PhoneColumnMatcher(MatcherCategory.Member),
 ]
 
 export const parentMatchers1 = [
     new FullNameColumnMatcher(MatcherCategory.Parent1),
     new FirstNameColumnMatcher(MatcherCategory.Parent1),
     new LastNameColumnMatcher(MatcherCategory.Parent1),
+    new PhoneColumnMatcher(MatcherCategory.Parent1),
 ]
 
 
@@ -27,6 +30,7 @@ export const parentMatchers2 = [
     new FullNameColumnMatcher(MatcherCategory.Parent2),
     new FirstNameColumnMatcher(MatcherCategory.Parent2),
     new LastNameColumnMatcher(MatcherCategory.Parent2),
+    new PhoneColumnMatcher(MatcherCategory.Parent2),
 ]
 
 

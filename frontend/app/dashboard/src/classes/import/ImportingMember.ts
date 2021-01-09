@@ -46,7 +46,7 @@ export class ImportingMember {
         this.organization = organization
     }
 
-    static importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], organization: Organization): ImportResult {
+    static async importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], organization: Organization): Promise<ImportResult> {
         if (!sheet['!ref']) {
             throw new Error("Missing ref in sheet")
         }
@@ -75,7 +75,7 @@ export class ImportingMember {
                 // todo: add catch here
 
                 try {
-                    column.matcher.apply(valueCell, member)
+                    await column.matcher.apply(valueCell, member)
                 } catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         result.errors.push(new ImportError(row, column.index, e.getHuman()))
