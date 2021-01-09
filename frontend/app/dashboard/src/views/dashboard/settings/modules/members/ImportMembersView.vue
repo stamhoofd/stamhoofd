@@ -102,6 +102,7 @@ import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/i
 import { ImportingMember } from "../../../../../classes/import/ImportingMember"
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn"
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
+import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 
 @Component({
     components: {
@@ -279,12 +280,20 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         if (!this.sheet) {
             return
         }
-        const members = ImportingMember.importAll(this.sheet, this.columns, this.organization)
-        console.log(members)
+        const result = ImportingMember.importAll(this.sheet, this.columns, this.organization)
+        console.log(result)
 
-        this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
-            members
-        }))
+        if (result.errors.length > 0) {
+            this.show(new ComponentWithProperties(ImportMembersErrorsView, {
+                errors: result.errors
+            }))
+        } else {
+            this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+                members: result.members
+            }))
+        }
+
+        
     }
 }
 </script>

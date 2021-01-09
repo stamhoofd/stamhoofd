@@ -1,9 +1,10 @@
-import { MemberWithRegistrations, EncryptedMember, KeychainItem, Version, PatchMembers, EncryptedMemberWithRegistrations, Address, Parent, EmergencyContact, MemberDetails, Registration } from '@stamhoofd/structures';
-import { VersionBox, ArrayDecoder, PatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Keychain, SessionManager } from '@stamhoofd/networking';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder,VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { OrganizationManager } from './OrganizationManager';
+import { Keychain, SessionManager } from '@stamhoofd/networking';
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainItem, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Registration,Version } from '@stamhoofd/structures';
+
 import { MemberManager } from './MemberManager';
+import { OrganizationManager } from './OrganizationManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {
@@ -31,7 +32,7 @@ export class FamilyManager {
         this.setMembers(await MemberManager.decryptMembers(response.data))
     }
 
-     async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
+    async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
 
         // Create a keypair for this member (and discard it immediately)

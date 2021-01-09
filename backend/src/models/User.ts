@@ -50,6 +50,7 @@ export class User extends Model {
 
     /**
      * public key that is used to verify during login (using a challenge) and for getting a token
+     * SHOULD NEVER BE PUBLIC!
      */
     @column({ type: "string" })
     protected publicAuthSignKey?: string

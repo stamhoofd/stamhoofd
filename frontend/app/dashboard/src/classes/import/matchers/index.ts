@@ -1,6 +1,8 @@
 import { MatcherCategory } from "../MatcherCategory";
+import { BirthDayColumnMatcher } from "./BirthDayColumnMatcher";
 import { FirstNameColumnMatcher } from "./FirstNameColumnMatcher";
 import { FullNameColumnMatcher } from "./FullNameColumnMatcher";
+import { GenderColumnMatcher } from "./GenderColumnMatcher";
 import { GroupColumnMatcher } from "./GroupColumnMatcher";
 import { LastNameColumnMatcher } from "./LastNameColumnMatcher";
 
@@ -9,6 +11,8 @@ export const memberMatchers = [
     new FullNameColumnMatcher(MatcherCategory.Member),
     new FirstNameColumnMatcher(MatcherCategory.Member),
     new LastNameColumnMatcher(MatcherCategory.Member),
+    new BirthDayColumnMatcher(),
+    new GenderColumnMatcher(),
     new GroupColumnMatcher(),
 ]
 
