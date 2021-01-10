@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, PermissionLevel,Permissions } from '@stamhoofd/structures';
+import { PermissionLevel,Permissions } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { MemberFactory } from '../factories/MemberFactory';
@@ -7,7 +7,6 @@ import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { RegistrationFactory } from '../factories/RegistrationFactory';
 import { UserFactory } from '../factories/UserFactory';
 import { Token } from '../models/Token';
-import { User } from '../models/User';
 import { GetOrganizationPaymentsEndpoint } from './GetOrganizationPaymentsEndpoint';
 
 

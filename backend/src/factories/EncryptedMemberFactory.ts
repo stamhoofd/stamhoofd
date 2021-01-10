@@ -142,7 +142,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
         let keychainItem: KeychainItem | undefined;
 
-        if (this.options.user && this.options.userPrivateKey) {
+        if (this.options.user && this.options.userPrivateKey && this.options.user.publicKey) {
             // Add the private key to the keychain for this user (if possible)
             keychainItem = new KeychainItem()
             keychainItem.publicKey = member.publicKey

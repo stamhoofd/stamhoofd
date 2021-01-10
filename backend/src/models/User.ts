@@ -39,8 +39,8 @@ export class User extends Model {
     /**
      * Public key used for encryption
      */
-    @column({ type: "string" })
-    publicKey: string;
+    @column({ type: "string", nullable: true })
+    publicKey: string | null = null;
 
     /**
      * Public key used for encryption
@@ -179,6 +179,10 @@ export class User extends Model {
             firstName,
             lastName
         } = data;
+
+        if (publicKey === null) {
+            throw new Error("A publicKey is required for new users")
+        }
 
         const user = new User().setRelation(User.organization, organization);
         user.id = id ?? uuidv4()

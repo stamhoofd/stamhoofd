@@ -61,7 +61,7 @@ export class UserFactory extends Factory<Options, UserWithOrganization> {
         }
         await user.save();
 
-        if (this.options.organizationPrivateKey) {
+        if (this.options.organizationPrivateKey && user.publicKey) {
             if (this.options.permissions) {
                 // Add the private key to the keychain for this user (if possible)
                 const keychainItem = new KeychainItem()

@@ -62,7 +62,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
             editUser.permissions = editUser.permissions ? editUser.permissions.patch(request.body.permissions) : Permissions.create(request.body.permissions)
         }
 
-        if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {
+        if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.publicKey !== null && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {
             // password changes
             await editUser.changePassword(request.body.publicKey, request.body.publicAuthSignKey, request.body.encryptedPrivateKey, request.body.authSignKeyConstants, request.body.authEncryptionKeyConstants)
         }

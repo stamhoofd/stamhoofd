@@ -6,6 +6,7 @@ import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch,
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { Group } from '../models/Group';
+import { KeychainItem } from '../models/KeychainItem';
 import { Member, MemberWithRegistrations } from '../models/Member';
 import { Organization } from '../models/Organization';
 import { Payment } from '../models/Payment';
@@ -130,6 +131,38 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 member.registrations.push(registration)
             }
+
+            // Add users if they don't exist (only placeholders allowed)
+            for (const placeholder of struct.users) {
+                const existing = await User.where({ organizationId: user.organizationId, email: placeholder.email }, { limit: 1 })
+                let u: User
+                if (existing.length == 1) {
+                    u = existing[0]
+                    console.log("Giving an existing user access to a new member: "+u.id)
+
+                    // todo: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
+
+                } else {
+                    u = new User()
+                    u.organizationId = user.organizationId
+                    u.email = placeholder.email
+                    u.firstName = placeholder.firstName
+                    u.lastName = placeholder.lastName
+                    await u.save()
+
+                    console.log("Created new placeholder user: "+u.id)
+                }
+
+                // User already exists: give him acecss
+
+                if (u.publicKey) {
+                    // TODO Create keychains (since we have a public key)
+                    // need frontend for this!
+                }
+
+                await Member.users.reverse("members").link(u, [member])
+            }
+            
         }
 
         

@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMember, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { GroupFactory } from '../factories/GroupFactory';

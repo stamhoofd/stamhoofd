@@ -175,7 +175,7 @@ export class MemberFactory extends Factory<Options, Member> {
             await Member.users.link(member, [this.options.user])
         }
 
-        if (this.options.user && this.options.userPrivateKey) {
+        if (this.options.user && this.options.userPrivateKey && this.options.user.publicKey) {
             // Add the private key to the keychain for this user (if possible)
             const keychainItem = new KeychainItem()
             keychainItem.userId = this.options.user.id

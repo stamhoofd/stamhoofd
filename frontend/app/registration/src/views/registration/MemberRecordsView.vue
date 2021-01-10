@@ -219,14 +219,13 @@
                     </div>
 
                     <div>
-                        <PhoneInput title="Telefoonnummer huisarts" v-model="doctorPhone" :validator="validator" placeholder="Telefoonnummer" />
+                        <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" />
                     </div>
                 </div>
-
             </template>
         </main>
         <STToolbar>
-            <LoadingButton :loading="loading" slot="right">
+            <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goNext">
                     Doorgaan
                 </button>
@@ -236,24 +235,15 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput, LoadingButton } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { SessionManager } from '@stamhoofd/networking';
-import { MemberDetails, Record, RecordType, EmergencyContact } from "@stamhoofd/structures"
+import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
+import { EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
 import { MemberWithRegistrations } from '@stamhoofd/structures';
-import { EncryptedMember } from '@stamhoofd/structures';
-import { Version } from '@stamhoofd/structures';
-import { KeychainItem } from '@stamhoofd/structures';
-import { KeychainedResponseDecoder } from '@stamhoofd/structures';
-import { PatchMembers } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import { EncryptedMemberWithRegistrations } from '@stamhoofd/structures';
 import { MemberManager } from '../../classes/MemberManager';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {

@@ -1,12 +1,12 @@
 <template>
-    <div class="st-view" id="settings-view">
+    <div id="settings-view" class="st-view">
         <STNavigationBar title="Beheerder">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button class="button text only-icon-smartphone" slot="right" v-if="!isNew" @click="deleteMe(false)">
-                <span class="icon trash"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!isNew" slot="right" class="button text only-icon-smartphone" @click="deleteMe(false)">
+                <span class="icon trash" />
                 <span>Verwijderen</span>
             </button>
-            <button slot="right" class="button icon close gray" v-if="canDismiss && !canPop" @click="dismiss" />
+            <button v-if="canDismiss && !canPop" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -29,31 +29,34 @@
                 </div>
             </STInputBox>
 
-            <EmailInput :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" v-model="email" placeholder="E-mailadres" :required="!!user"/>
+            <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
         
             <hr>
             <h2>Geef toegang tot...</h2>
 
             <STList>
                 <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="fullAccess"/>
+                    <Checkbox slot="left" v-model="fullAccess" />
                     Maak administrator
 
-                    <template #right>Kan alle instellingen en beheerders bewerken</template>
+                    <template #right>
+                        Kan alle instellingen en beheerders bewerken
+                    </template>
                 </STListItem>
                 <STListItem v-if="!fullAccess" element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="writeAccess"/>
+                    <Checkbox slot="left" v-model="writeAccess" />
                     Toegang tot alle groepen
 
-                    <template #right>Kan alle leden bekijken en bewerken</template>
+                    <template #right>
+                        Kan alle leden bekijken en bewerken
+                    </template>
                 </STListItem>
                 <template v-if="!writeAccess && !fullAccess">
-                    <STListItem element-name="label" :selectable="true" v-for="group in groups" :key="group.group.id">
-                        <Checkbox slot="left" v-model="group.selected"/>
+                    <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
+                        <Checkbox slot="left" v-model="group.selected" />
                         {{ group.group.settings.name }}
                     </STListItem>
                 </template>
-                
             </STList>
 
             <template v-if="editUser !== null">
@@ -61,35 +64,47 @@
                 <h2>Encryptiesleutels</h2>
                 <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
 
-                <p class="warning-box" v-if="!hasKey">{{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.</p>
+                <p v-if="!hasKey" class="warning-box">
+                    {{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.
+                </p>
 
-                <Spinner v-if="loadingKeys"/>
+                <Spinner v-if="loadingKeys" />
 
                 <STList>
                     <STListItem v-for="key of availableKeys" :key="key.publicKey">
-                        <h2 class="style-title-list">Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}</h2>
-                        <p class="style-description-small" v-if="!key.end">Huidige sleutel voor iedereen</p>
-                        <p class="style-description-small" v-else>Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog</p>
-                        <button class="button text" v-if="!key.hasAccess && canShareKey(key.publicKey)" @click="shareKey(key.publicKey)"><span class="icon privacy"></span><span>Toegang geven</span></button>
+                        <h2 class="style-title-list">
+                            Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}
+                        </h2>
+                        <p v-if="!key.end" class="style-description-small">
+                            Huidige sleutel voor iedereen
+                        </p>
+                        <p v-else class="style-description-small">
+                            Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog
+                        </p>
+                        <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" @click="shareKey(key.publicKey)">
+                            <span class="icon privacy" />
+                            <span>Toegang geven</span>
+                        </button>
 
                         <template #right>
-                            <span class="icon error" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" v-if="!key.hasAccess" />
-                            <span class="icon success green" v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" v-else />
+                            <span v-if="!key.hasAccess" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" class="icon error" />
+                            <span v-else v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" class="icon success green" />
                         </template>
                     </STListItem>
                 </STList>
             </template>
-        
         </main>
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" v-if="!isNew && !user" @click="resendInvite">Opnieuw versturen</button>
+                <button v-if="!isNew && !user" class="button secundary" @click="resendInvite">
+                    Opnieuw versturen
+                </button>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save" v-if="isNew">
+                    <button v-if="isNew" class="button primary" @click="save">
                         Toevoegen
                     </button>
-                    <button class="button primary" @click="save" v-else>
+                    <button v-else class="button primary" @click="save">
                         Opslaan
                     </button>
                 </LoadingButton>
@@ -99,24 +114,24 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder, PatchableArray, VersionBox } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem, Toast, Spinner } from "@stamhoofd/components";
-import { SessionManager, Keychain } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch, NewInvite, InviteUserDetails, Permissions, PermissionLevel, GroupPermissions, Invite, InviteKeychainItem, User, OrganizationKeyUser, KeychainedResponseDecoder } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { ArrayDecoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DNSRecordsView from './DNSRecordsView.vue';
-import { Sodium } from '@stamhoofd/crypto';
-import SendInviteView from './SendInviteView.vue';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
+import { Sodium } from '@stamhoofd/crypto';
+import { Keychain,SessionManager } from '@stamhoofd/networking';
+import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, OrganizationKeyUser, PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
+import SendInviteView from './SendInviteView.vue';
 
 class SelectableGroup {
     group: Group;
-    selected: boolean = false;
-    constructor(group: Group, selected: boolean = false) {
+    selected = false
+    constructor(group: Group, selected = false) {
         this.selected = selected
         this.group = group
     }
@@ -180,7 +195,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     forceCreate = false
 
-    loadingKeys: boolean = false
+    loadingKeys = false
     availableKeys: OrganizationKeyUser[] = []
 
     get isNew() {
@@ -232,6 +247,14 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return
         }
 
+        if (!this.editUser || !this.editUser.publicKey) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: "",
+                message: "Deze gebruiker heeft nog nooit ingelogd en nog nooit een wachtwoord ingesteld. We kunnen op geen enkele manier de sleutel delen. Vraag aan deze gebruiker om zich te registereren met dit e-mailadres en probeer daarna opnieuw."
+            }))
+            return
+        }
+
         // Create an invite (automatic one)
         const items = new VersionBox([InviteKeychainItem.create({
             publicKey: keyPair.publicKey,
@@ -243,8 +266,8 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         const invite = NewInvite.create({ 
             userDetails: null,
             permissions: null,
-            receiverId: this.editUser!.id,
-            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), this.editUser!.publicKey)
+            receiverId: this.editUser.id,
+            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), this.editUser.publicKey)
         })
 
         try {
@@ -255,7 +278,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                 decoder: Invite as Decoder<Invite>
             })
 
-            new Toast("Als "+this.editUser!.firstName+" nu inlogt (voor "+Formatter.date(response.data.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
+            new Toast("Als "+this.editUser.firstName+" nu inlogt (voor "+Formatter.date(response.data.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
             this.saving = false
         } catch (e) {
             console.error(e)
