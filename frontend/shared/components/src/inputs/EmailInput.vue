@@ -8,6 +8,7 @@
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { DataValidator } from "@stamhoofd/utility";
 
 @Component({
     components: {
@@ -77,10 +78,8 @@ export default class EmailInput extends Vue {
             }
             return true
         }
-
-        const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
         
-        if (!regex.test(this.emailRaw)) {
+        if (!DataValidator.isEmailValid(this.emailRaw)) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
                 "message": "Ongeldig e-mailadres",

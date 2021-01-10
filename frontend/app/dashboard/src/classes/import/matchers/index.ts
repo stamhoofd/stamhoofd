@@ -1,5 +1,6 @@
 import { MatcherCategory } from "../MatcherCategory";
 import { BirthDayColumnMatcher } from "./BirthDayColumnMatcher";
+import { EmailColumnMatcher } from "./EmailColumnMatcher";
 import { FirstNameColumnMatcher } from "./FirstNameColumnMatcher";
 import { FullNameColumnMatcher } from "./FullNameColumnMatcher";
 import { GenderColumnMatcher } from "./GenderColumnMatcher";
@@ -16,6 +17,7 @@ export const memberMatchers = [
     new GenderColumnMatcher(),
     new GroupColumnMatcher(),
     new PhoneColumnMatcher(MatcherCategory.Member),
+    new EmailColumnMatcher(MatcherCategory.Member),
 ]
 
 export const parentMatchers1 = [
@@ -23,6 +25,7 @@ export const parentMatchers1 = [
     new FirstNameColumnMatcher(MatcherCategory.Parent1),
     new LastNameColumnMatcher(MatcherCategory.Parent1),
     new PhoneColumnMatcher(MatcherCategory.Parent1),
+    new EmailColumnMatcher(MatcherCategory.Parent1),
 ]
 
 
@@ -31,6 +34,7 @@ export const parentMatchers2 = [
     new FirstNameColumnMatcher(MatcherCategory.Parent2),
     new LastNameColumnMatcher(MatcherCategory.Parent2),
     new PhoneColumnMatcher(MatcherCategory.Parent2),
+    new EmailColumnMatcher(MatcherCategory.Parent2),
 ]
 
 
