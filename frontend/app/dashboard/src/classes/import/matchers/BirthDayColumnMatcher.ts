@@ -100,8 +100,18 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             })
         }
 
+        const currentYear = new Date().getFullYear()
+        const year = currentYear - 2000
+        const maxAge = 125
+
         const first = numbersClean[0]
-        if (first > 1900 && first < 2200) {
+        if (first > 999) {
+            if (first < currentYear - maxAge  || first > currentYear) {
+                throw new SimpleError({
+                    code: "invalid_type",
+                    message: "Ongeldig jaar. '"+ first +"' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995"
+                })
+            }
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: "invalid_type",
@@ -119,7 +129,13 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
 
         const last = numbersClean[2]
 
-        if (last > 1900 && last < 2200) {
+        if (last > 999) {
+            if (last < currentYear - maxAge  || last > currentYear) {
+                throw new SimpleError({
+                    code: "invalid_type",
+                    message: "Ongeldig jaar. '"+ last+"' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995"
+                })
+            }
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: "invalid_type",
@@ -133,6 +149,14 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
                 })
             }
             return new Date(numbersClean[2], numbersClean[1] - 1, numbersClean[0])
+        }
+
+        // default to last is year, in two chars, in 2000 if smaller than current year number
+        if (last > 99 || last < 0) {
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "Ongeldig jaar. Probeer in de vorm zoals 20/08/1995"
+            })
         }
 
         // default to last is year, in 2000 if smaller than current year number
@@ -149,7 +173,6 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             })
         }
         
-        const year = new Date().getFullYear() - 2000
         if (last <= year) {
             // 21th century
             return new Date(numbersClean[2] + 2000, numbersClean[1] - 1, numbersClean[0])
