@@ -1,7 +1,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder,VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain, SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainItem, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Registration,Version } from '@stamhoofd/structures';
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainItem, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Registration,User,Version } from '@stamhoofd/structures';
 
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
@@ -39,6 +39,24 @@ export class FamilyManager {
         // We might use the private key in the future to send an invitation or QR-code
         const keyPair = await Sodium.generateEncryptionKeyPair()
 
+        // Add all the needed users that need to have access
+        const users: User[] = []
+
+        if (member.email) {
+            users.push(User.create({
+                email: member.email,
+                firstName: member.firstName
+            }))
+        }
+
+        for (const parent of member.parents) {
+            if (parent.email) {
+                users.push(User.create({
+                    email: parent.email
+                }))
+            }
+        }
+
         // Create member
         const decryptedMember = MemberWithRegistrations.create({
             details: member,
@@ -46,7 +64,8 @@ export class FamilyManager {
             registrations: registrations,
             firstName: member.firstName,
             placeholder: true,
-            users: [],
+
+            users,
             organizationPublicKey: "" // doesn't matter since we only going to set this when we encrypt it
         })
 
@@ -62,7 +81,7 @@ export class FamilyManager {
         for (const m of addMembers) {
             patchArray.addPut(m)
         }
-
+        
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",

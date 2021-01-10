@@ -8,7 +8,7 @@ import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
-export type UserFull = User & { publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
+export type UserFull = User & { publicKey: string; publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
 
 export class User extends Model {
     static table = "users";
@@ -34,7 +34,7 @@ export class User extends Model {
     email: string;
 
     @column({ type: "boolean" })
-    verified: boolean;
+    verified = false
 
     /**
      * Public key used for encryption
@@ -52,26 +52,26 @@ export class User extends Model {
      * public key that is used to verify during login (using a challenge) and for getting a token
      * SHOULD NEVER BE PUBLIC!
      */
-    @column({ type: "string" })
-    protected publicAuthSignKey?: string
+    @column({ type: "string", nullable: true })
+    protected publicAuthSignKey?: string | null = null // if not selected will be undefined
 
     /**
      * Encrypted private key, used for authenticated encrytion and decryption
      */
     @column({ type: "string", nullable: true })
-    protected encryptedPrivateKey: string | null = null
+    protected encryptedPrivateKey: string | null = null // if not selected will be undefined
 
     /**
      * Constants that are used to get the authSignKeyPair from the user password. Using
      */
-    @column({ type: "json", decoder: KeyConstants })
-    protected authSignKeyConstants?: KeyConstants
+    @column({ type: "json", decoder: KeyConstants, nullable: true })
+    protected authSignKeyConstants?: KeyConstants | null = null // if not selected will be undefined
 
     /**
      * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
      */
     @column({ type: "json", decoder: KeyConstants, nullable: true })
-    protected authEncryptionKeyConstants: KeyConstants | null = null
+    protected authEncryptionKeyConstants: KeyConstants | null = null // if not selected will be undefined
 
 
     @column({
@@ -105,7 +105,7 @@ export class User extends Model {
 
     /**
      * @param namespace
-     * @override@override@override@override@override
+     * @override
      */
     static getDefaultSelect(namespace?: string): string {
         return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
@@ -119,7 +119,42 @@ export class User extends Model {
         }
 
         // Read member + address from first row
-        return this.fromRow(rows[0][this.table]) as UserFull;
+        const user = this.fromRow(rows[0][this.table]) 
+
+        if (!user) {
+            return undefined
+        }
+
+        if (user.publicKey === null) {
+            // This is a placeholder user
+            return undefined
+        }
+
+        if (user.authSignKeyConstants === null) {
+            console.error(user.id+": authSignKeyConstants is null")
+            // This is a placeholder user
+            return undefined
+        }
+        
+        if (user.publicAuthSignKey === null) {
+            console.error(user.id+": publicAuthSignKey is null")
+            // This is a placeholder user
+            return undefined
+        }
+
+        if (user.authEncryptionKeyConstants === null) {
+            console.error(user.id+": authEncryptionKeyConstants is null")
+            // This is a placeholder user
+            return undefined
+        }
+
+        if (user.encryptedPrivateKey === null) {
+            console.error(user.id+": encryptedPrivateKey is null")
+            // This is a placeholder user
+            return undefined
+        }
+        
+        return user as UserFull;
     }
 
     static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {

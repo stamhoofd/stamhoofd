@@ -223,7 +223,7 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false,
+                    placeholder: member.placeholder,
                     registrations: member.registrations,
                     users: member.users
                 })
@@ -249,7 +249,7 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false,
+                    placeholder: false
                 })
             )
         }
@@ -268,6 +268,9 @@ export class MemberManagerStatic {
                 organizationPublicKey: m.organizationPublicKey,
                 publicKey: m.publicKey,
             }))
+
+            // todo: add missing users as placeholder users
+            // todo: why is first name not updated here?
         }
 
         const session = SessionManager.currentSession!
