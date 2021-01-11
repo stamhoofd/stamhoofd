@@ -243,7 +243,8 @@ export class MemberManagerStatic {
 
             // Check if this user has missing users
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
-            for(const email of member.details.getManagerEmails()) {
+            const managers = member.details.getManagerEmails()
+            for(const email of managers) {
                 const user = member.users.find(u => u.email === email)
                 if (!user) {
                     console.log("link email "+email)
@@ -252,6 +253,19 @@ export class MemberManagerStatic {
                     }))
                 } else {
                     console.log("already linked "+email)
+                }
+            }
+
+            // Delete users that never created an account
+            for (const user of member.users) {
+                if (user.publicKey) {
+                    continue
+                }
+
+                const exists = managers.find(m => m === user.email)
+                if (!exists) {
+                    // This email has been removed from the managers
+                    missing.addDelete(user.id)
                 }
             }
 

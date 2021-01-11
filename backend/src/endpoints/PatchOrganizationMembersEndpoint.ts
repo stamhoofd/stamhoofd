@@ -224,6 +224,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 await this.linkUser(placeholder.put, member)
             }
 
+            // Unlink users
+            for (const userId of patch.users.getDeletes()) {
+                await this.unlinkUser(userId, member)
+            }
+
             members.push(member)
         }
 
@@ -315,7 +320,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             console.log("Created new (placeholder) user that has access to a member: "+u.id)
         }
-
+        
         // User already exists: give him acecss
 
         if (u.publicKey) {
@@ -324,6 +329,26 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         await Member.users.reverse("members").link(u, [member])
+
+        // Update model relation to correct response
+        member.users.push(u)
+
     }
 
+    async unlinkUser(userId: string, member: MemberWithRegistrations) {
+        console.log("Removing access for "+ userId +" to member "+member.id)
+        const existingIndex = member.users.findIndex(u => u.id === userId)
+        if (existingIndex === -1) {
+            throw new SimpleError({
+                code: "user_not_found",
+                message: "Unlinking a user that doesn't exists anymore",
+                human: "Je probeert de toegang van een account tot een lid te verwijderen, maar dat account bestaat niet (meer)"
+            })
+        }
+        const existing = member.users[existingIndex]
+        await Member.users.reverse("members").unlink(existing, member)
+
+        // Update model relation to correct response
+        member.users.splice(existingIndex, 1)
+    }
 }

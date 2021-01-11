@@ -188,13 +188,14 @@
                 <h2>
                     <span class="icon-spacer">Accounts</span><span
                         v-tooltip="
-                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid.'
+                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
                         "
                         class="icon gray help"
                     />
                 </h2>
-                <p v-for="user in activeAccounts" :key="user.id" class="account">
-                    {{ user.email }}
+                <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
+                    <span>{{ user.email }}</span>
+                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" />
                 </p>
             </template>
 
@@ -202,7 +203,7 @@
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
                         v-tooltip="
-                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op inschrijvingspagina)'
+                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
                         "
                         class="icon gray help"
                     />
@@ -266,6 +267,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get placeholderAccounts() {
         return this.member.users.filter(u => u.publicKey === null)
+    }
+
+    isOldEmail(email: string) {
+        return !(this.member.details?.getManagerEmails().includes(email) ?? false)
     }
 
     gotoMember(member: MemberWithRegistrations) {

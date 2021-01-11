@@ -44,19 +44,10 @@ export class FamilyManager {
         // Add all the needed users that need to have access
         const users: User[] = []
 
-        if (member.email) {
+        for (const email of member.getManagerEmails()) {
             users.push(User.create({
-                email: member.email,
-                firstName: member.firstName
+                email
             }))
-        }
-
-        for (const parent of member.parents) {
-            if (parent.email) {
-                users.push(User.create({
-                    email: parent.email
-                }))
-            }
         }
 
         // Create member

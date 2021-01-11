@@ -382,6 +382,7 @@ export class MemberWithRegistrations extends Member {
         if (member.groups !== this.groups) {
             this.groups.splice(0, this.groups.length, ...member.groups)
         }
+
         this.registrations = member.registrations
 
         if (member.users !== this.users) {
