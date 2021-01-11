@@ -6,9 +6,13 @@
 }
 
 export class Formatter {
-    static slug(name: string): string {
+    static removeAccents(name: string): string {
         name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
+        return name
+    }
+
+    static slug(name: string): string {
+        return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
     }
 
     /**
@@ -106,6 +110,10 @@ export class Formatter {
 
     static capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    static capitalizeWords(string: string) {
+        return string.split(" ").map(s => this.capitalizeFirstLetter(s)).join(" ")
     }
 
     static fileSize(bytes: number) {

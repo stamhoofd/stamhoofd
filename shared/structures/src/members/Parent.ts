@@ -1,4 +1,5 @@
 import { AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter,StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
@@ -29,5 +30,26 @@ export class Parent extends AutoEncoder {
 
     get name() {
         return this.firstName + " " + this.lastName;
+    }
+
+    /**
+     * Call this to clean up capitals in all the available data
+     */
+    cleanData() {
+        if (StringCompare.isFullCaps(this.firstName)) {
+            this.firstName = Formatter.capitalizeWords(this.firstName.toLowerCase())
+        }
+        if (StringCompare.isFullCaps(this.lastName)) {
+            this.lastName = Formatter.capitalizeWords(this.lastName.toLowerCase())
+        }
+
+        if (this.email) {
+            this.email = this.email.toLowerCase()
+        }
+
+        this.firstName = Formatter.capitalizeFirstLetter(this.firstName.trim())
+        this.lastName = this.lastName.trim()
+
+        this.address?.cleanData()
     }
 }

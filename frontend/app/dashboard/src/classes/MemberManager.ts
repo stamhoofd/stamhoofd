@@ -1,9 +1,9 @@
 
 
-import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -241,6 +241,20 @@ export class MemberManagerStatic {
             }
             const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
 
+            // Check if this user has missing users
+            const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
+            for(const email of member.details.getManagerEmails()) {
+                const user = member.users.find(u => u.email === email)
+                if (!user) {
+                    console.log("link email "+email)
+                    missing.addPut(User.create({
+                        email
+                    }))
+                } else {
+                    console.log("already linked "+email)
+                }
+            }
+
             encryptedMembers.push(
                 EncryptedMemberWithRegistrations.patch({
                     id: member.id,
@@ -249,7 +263,8 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false
+                    placeholder: false,
+                    users: missing
                 })
             )
         }

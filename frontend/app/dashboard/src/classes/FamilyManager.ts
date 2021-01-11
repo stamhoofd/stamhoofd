@@ -33,6 +33,8 @@ export class FamilyManager {
     }
 
     async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
+        member.cleanData()
+
         const session = SessionManager.currentSession!
 
         // Create a keypair for this member (and discard it immediately)
@@ -97,8 +99,7 @@ export class FamilyManager {
         return m;
     }
 
-    async patchMemberRegistrations(member: MemberWithRegistrations, registrations: PatchableArrayAutoEncoder<Registration>) {
-       
+    async patchMemberRegistrations(member: MemberWithRegistrations, registrations: PatchableArrayAutoEncoder<Registration>) {        
         const patchArray = new PatchableArray()
         patchArray.addPatch(MemberWithRegistrations.patch({
             id: member.id,
@@ -131,12 +132,16 @@ export class FamilyManager {
         const members = (this.members ?? []).filter(m => !!m.details)
         const ex = members.findIndex(m => m.id == member.id)
 
-
         if (ex !== -1) {
             members.splice(ex, 1, member)
         } else {
             members.push(member)
         }
+
+        for (const m of members) {
+            m.details?.cleanData()
+        }
+
         const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;

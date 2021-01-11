@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct } from "@stamhoofd/structures";
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { Group } from '../models/Group';
@@ -134,38 +134,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add users if they don't exist (only placeholders allowed)
             for (const placeholder of struct.users) {
-                const existing = await User.where({ organizationId: user.organizationId, email: placeholder.email }, { limit: 1 })
-                let u: User
-                if (existing.length == 1) {
-                    u = existing[0]
-                    console.log("Giving an existing user access to a new member: "+u.id)
-
-                    // todo: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
-
-                } else {
-                    u = new User()
-                    u.organizationId = user.organizationId
-                    u.email = placeholder.email
-                    u.firstName = placeholder.firstName
-                    u.lastName = placeholder.lastName
-                    await u.save()
-
-                    console.log("Created new placeholder user: "+u.id)
-                }
-
-                // User already exists: give him acecss
-
-                if (u.publicKey) {
-                    // TODO Create keychains (since we have a public key)
-                    // need frontend for this!
-                }
-
-                await Member.users.reverse("members").link(u, [member])
+                await this.linkUser(placeholder, member)
             }
-            
         }
-
-        
 
         // Loop all members one by one
         for (const patch of request.body.getPatches()) {
@@ -248,6 +219,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
             }
 
+            // Link users
+            for (const placeholder of patch.users.getPuts()) {
+                await this.linkUser(placeholder.put, member)
+            }
+
             members.push(member)
         }
 
@@ -317,6 +293,37 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Create fake users
         }
+    }
+
+    async linkUser(user: UserStruct, member: MemberWithRegistrations) {
+        const email = user.email
+        const existing = await User.where({ organizationId: member.organizationId, email }, { limit: 1 })
+        let u: User
+        if (existing.length == 1) {
+            u = existing[0]
+            console.log("Giving an existing user access to a member: "+u.id)
+
+            // todo: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
+
+        } else {
+            u = new User()
+            u.organizationId = member.organizationId
+            u.email = email
+            u.firstName = user.firstName
+            u.lastName = user.lastName
+            await u.save()
+
+            console.log("Created new (placeholder) user that has access to a member: "+u.id)
+        }
+
+        // User already exists: give him acecss
+
+        if (u.publicKey) {
+            // TODO Create keychains (since we have a public key)
+            // need frontend for this!
+        }
+
+        await Member.users.reverse("members").link(u, [member])
     }
 
 }

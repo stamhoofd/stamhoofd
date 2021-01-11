@@ -1,4 +1,5 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Group } from '../Group';
@@ -134,6 +135,31 @@ export class MemberDetails extends AutoEncoder {
         this._isPlaceholder = true
     }
 
+    /**
+     * Call this to clean up capitals in all the available data
+     */
+    cleanData() {
+        if (StringCompare.isFullCaps(this.firstName)) {
+            this.firstName = Formatter.capitalizeWords(this.firstName.toLowerCase())
+        }
+        if (StringCompare.isFullCaps(this.lastName)) {
+            this.lastName = Formatter.capitalizeWords(this.lastName.toLowerCase())
+        }
+
+        this.firstName = Formatter.capitalizeFirstLetter(this.firstName.trim())
+        this.lastName = this.lastName.trim()
+
+        for (const parent of this.parents) {
+            parent.cleanData()
+        }
+
+        this.address?.cleanData()
+
+        for (const contact of this.emergencyContacts) {
+            contact.cleanData()
+        }
+    }
+
     get name() {
         return this.firstName + " " + this.lastName;
     }
@@ -222,5 +248,24 @@ export class MemberDetails extends AutoEncoder {
                 this.parents[index] = parent
             }
         }
+    }
+
+    /**
+     * Return all the e-mail addresses that should have access to this user
+     */
+    getManagerEmails(): string[] {
+        const emails: string[] = []
+        if (this.email) {
+            emails.push(this.email)
+        }
+
+        if (this.age < 18 || (this.age < 24 && !this.address)) {
+            for (const parent of this.parents) {
+                if (parent.email) {
+                    emails.push(parent.email)
+                }
+            }
+        }
+        return emails
     }
 }

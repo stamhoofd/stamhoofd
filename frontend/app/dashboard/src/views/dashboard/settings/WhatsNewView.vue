@@ -10,9 +10,14 @@
             <p>Blijf op de hoogte van al onze wijzigingen en krijg als eerste toegang tot nieuwe functies door ons te volgen op <a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Instagram</a> of <a class="inline-link" href="https://facebook.com/stamhoofd" target="_blank">Facebook</a>.</p>
             
             <hr>
+            <h2>Importeer leden vanaf Excel</h2>
+            <p>Vanaf nu kan je leden importeren in Stamhoofd via Instellingen &gt; Leden importeren.</p>
+            <p><a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Meer info</a></p>
+
+            <hr>
             <h2>Bouw je eigen webshop: spaghetti-festijn, tickets, wafelverkoop, ...</h2>
             <p>Met deze nieuwe functie kan je nu een centje bijverdienen. We lanceren deze functie voorlopig volledig gratis!</p>
-            <p><a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Wat is er gewijzigd?</a></p>
+            <p><a class="inline-link" href="https://instagram.com/stamhoofd" target="_blank">Meer info</a></p>
 
             <hr>
             <h2>Meer velden in Excel export (27 oktober) 📋</h2>

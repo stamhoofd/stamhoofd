@@ -2,7 +2,7 @@
     <div id="import-members-questions-view" class="st-view background">
         <STNavigationBar title="Leden importeren">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -12,37 +12,55 @@
             <hr>
             <h2>Inschrijvingstatus</h2>
 
-            <STInputBox title="Hebben deze leden het lidgeld al betaald?" error-fields="paid" :error-box="errorBox" class="max" v-if="needsPaidStatus">
+            <STInputBox v-if="needsPaidStatus" title="Hebben deze leden het lidgeld al betaald?" error-fields="paid" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio v-model="paid" :value="true">Al betaald</Radio>
-                    <Radio v-model="paid" :value="false">Niet betaald</Radio>
-                    <Radio v-model="paid" :value="null">Sommigen wel, anderen niet</Radio>
+                    <Radio v-model="paid" :value="true">
+                        Al betaald
+                    </Radio>
+                    <Radio v-model="paid" :value="false">
+                        Niet betaald
+                    </Radio>
+                    <Radio v-model="paid" :value="null">
+                        Sommigen wel, anderen niet
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
-            <p class="warning-box" v-if="paid === null">
+            <p v-if="paid === null" class="warning-box">
                 We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
             </p>
 
 
             <STInputBox title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio v-model="waitingList" :value="false">Nee</Radio>
-                    <Radio v-model="waitingList" :value="true">Ja, zet op wachtlijst</Radio>
+                    <Radio v-model="waitingList" :value="false">
+                        Nee
+                    </Radio>
+                    <Radio v-model="waitingList" :value="true">
+                        Ja, zet op wachtlijst
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
             <STInputBox title="Moeten deze leden hun inschrijving voor de huidige periode nog bevestigen?" error-fields="needRegistration" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio v-model="needRegistration" :value="false">Nee, ze zijn al ingeschreven</Radio>
-                    <Radio v-model="needRegistration" :value="true">Ja, ze moeten hun inschrijving nog verlengen</Radio>
+                    <Radio v-model="needRegistration" :value="false">
+                        Nee, ze zijn al ingeschreven
+                    </Radio>
+                    <Radio v-model="needRegistration" :value="true">
+                        Ja, ze moeten hun inschrijving nog verlengen
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
             <STInputBox title="Vorm gezinnen op basis van gegevens van de ouders" error-fields="waitingList" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio v-model="waitingList" :value="true">Ja (aangeraden)</Radio>
-                    <Radio v-model="waitingList" :value="false">Nee</Radio>
+                    <Radio v-model="waitingList" :value="true">
+                        Ja (aangeraden)
+                    </Radio>
+                    <Radio v-model="waitingList" :value="false">
+                        Nee
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
@@ -56,12 +74,16 @@
 
                 <STInputBox title="Leeftijdsgroep toewijzen" error-fields="group" :error-box="errorBox" class="max">
                     <RadioGroup>
-                        <Radio v-model="autoAssign" :value="true">Automatisch groep bepalen</Radio>
-                        <Radio v-model="autoAssign" :value="false">Allemaal in één groep inschrijven</Radio>
+                        <Radio v-model="autoAssign" :value="true">
+                            Automatisch groep bepalen
+                        </Radio>
+                        <Radio v-model="autoAssign" :value="false">
+                            Allemaal in één groep inschrijven
+                        </Radio>
                     </RadioGroup>
 
                     <button slot="right" class="button text" @click.stop="openAssignment">
-                        <span class="icon help"/>
+                        <span class="icon help" />
                         <span>Toon resultaat</span>
                     </button>
                 </STInputBox>
@@ -78,17 +100,17 @@
 
                                 <template slot="right">
                                     <button class="button text" @click="openPriorityAssignedToGroup(group)">
-                                        <span class="icon external"/>
+                                        <span class="icon external" />
                                         <span>{{ getGroupAutoAssignCountForPriority(group) }} leden</span>
                                     </button>
-                                    <button class="button icon arrow-up gray" @click.stop="moveUp(index)"/>
-                                    <button class="button icon arrow-down gray" @click.stop="moveDown(index)"/>
+                                    <button class="button icon arrow-up gray" @click.stop="moveUp(index)" />
+                                    <button class="button icon arrow-down gray" @click.stop="moveDown(index)" />
                                 </template>
                             </STListItem>
                         </STList>
 
-                        <button class="button text" slot="right" @click.stop="openMultipleGroups">
-                            <span class="icon help"/>
+                        <button slot="right" class="button text" @click.stop="openMultipleGroups">
+                            <span class="icon help" />
                             <span>Toon leden</span>
                         </button>
                     </STInputBox>
@@ -105,8 +127,8 @@
                             </option>
                         </select>
 
-                        <button class="button text" slot="right" @click.stop="openWithoutMatchingGroups">
-                            <span class="icon help"/>
+                        <button slot="right" class="button text" @click.stop="openWithoutMatchingGroups">
+                            <span class="icon help" />
                             <span>Toon leden</span>
                         </button>
                     </STInputBox>
@@ -142,14 +164,14 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, TimeInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, Registration, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { FamilyManager } from '../../../../../classes/FamilyManager';
 import { ImportingMember } from '../../../../../classes/import/ImportingMember';
-
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import ImportAutoAssignedViewView from './ImportAutoAssignedView.vue';
 
@@ -179,8 +201,8 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
 
     paid: boolean | null = true
-    waitingList: boolean = false
-    needRegistration: boolean = false
+    waitingList = false
+    needRegistration = false
 
     autoAssign = true
     multipleGroups: Group[] = []
@@ -415,8 +437,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         const toast = new Toast("Bezig met importeren...", "spinner").setWithOffset().setHide(null).show()
 
         try {
-            // todo: Load all members and compare
-
             // Add all members that do not yet exist
             this.autoAssignMembers(this.members)
 

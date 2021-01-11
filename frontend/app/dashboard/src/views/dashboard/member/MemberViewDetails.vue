@@ -184,14 +184,31 @@
                 </template>
             </template>
 
-            <template v-if="member.users.length > 0">
-                <h2>Accounts</h2>
-                <p v-for="user in member.users" :key="user.id">
+            <template v-if="activeAccounts.length > 0">
+                <h2>
+                    <span class="icon-spacer">Accounts</span><span
+                        v-tooltip="
+                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid.'
+                        "
+                        class="icon gray help"
+                    />
+                </h2>
+                <p v-for="user in activeAccounts" :key="user.id" class="account">
                     {{ user.email }}
                 </p>
+            </template>
 
-                <p class="accounts-description">
-                    Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.
+            <template v-if="placeholderAccounts.length > 0">
+                <h2>
+                    <span class="icon-spacer">Kunnen registereren</span><span
+                        v-tooltip="
+                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op inschrijvingspagina)'
+                        "
+                        class="icon gray help"
+                    />
+                </h2>
+                <p v-for="user in placeholderAccounts" :key="user.id" class="account">
+                    {{ user.email }}
                 </p>
             </template>
 
@@ -241,6 +258,14 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    get activeAccounts() {
+        return this.member.users.filter(u => u.publicKey !== null)
+    }
+
+    get placeholderAccounts() {
+        return this.member.users.filter(u => u.publicKey === null)
     }
 
     gotoMember(member: MemberWithRegistrations) {
@@ -431,6 +456,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     .accounts-description {
         @extend .style-definition-description;
         margin-top: 15px;
+    }
+
+    .account {
+        @extend .style-definition-description;
+        margin-bottom: 5px;
     }
 }
 
