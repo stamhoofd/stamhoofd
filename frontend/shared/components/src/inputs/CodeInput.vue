@@ -1,18 +1,22 @@
 <template>
-    <div class="code-container">
-        <input 
-            v-for="index in codeLength" 
-            :key="index"
-            ref="numberInput" 
-            type="text"
-            inputmode="decimal" 
-            class="input" 
-            @input="onInput(index - 1)" 
-            @click="selectNext(index - 1)" 
-            @keyup.delete="clearInput(index - 1)" 
-            @keyup.left="selectNext(index - 2)" 
-            @keyup.right="selectNext(index)"
-        >
+    <div class="code-input">
+        <div>
+            <input 
+                v-for="index in codeLength" 
+                :key="index"
+                ref="numberInput" 
+                type="text"
+                inputmode="decimal" 
+                class="input" 
+                autocomplete="no"
+                @input="onInput(index - 1)" 
+                @click="selectNext(index - 1)" 
+                @keyup.delete="clearInput(index - 1)" 
+                @keyup.left="selectNext(index - 2)" 
+                @keyup.right="selectNext(index)"
+                @change="updateValue"
+            >
+        </div>
     </div>
 </template>
 
@@ -27,12 +31,30 @@ import StepperInput from "./StepperInput.vue"
     }
 })
 export default class CodeInput extends Vue {
-    valueString = "";
     valid = true;
 
-    /** Price in cents */
     @Prop({ default: "" })
     value!: string
+
+    @Watch("value")
+    onValueChanged(value: string, _oldValue: string) {
+        if (value == _oldValue) {
+            return
+        }
+        if (value == this.getInternalValue()) {
+            return
+        }
+        for (let index = 0; index < this.codeLength; index++) {
+            const element = this.$refs.numberInput[index];
+            
+            if (index < value.length) {
+                const letter = value[index]
+                element.value = letter
+            } else {
+                element.value = ""
+            }
+        }
+    }
 
     get codeLength() {
         return 6
@@ -83,6 +105,23 @@ export default class CodeInput extends Vue {
         this.$refs.numberInput[index].select()
     }
 
+    getInternalValue() {
+        let val = ""
+        for (let index = 0; index < this.codeLength; index++) {
+            const element = this.$refs.numberInput[index];
+            const letter = element.value.substr(0, 1).toUpperCase()
+            val += letter
+            if (letter.length == 0) {
+                break
+            }
+        }
+        return val
+    }
+
+    updateValue() {
+        this.$emit("input", this.getInternalValue())
+    }
+
 }
 </script>
 
@@ -91,28 +130,32 @@ export default class CodeInput extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use "~@stamhoofd/scss/components/inputs.scss";
 
-.code-container {
-    display: inline-flex;
-    flex-direction: row;
+.code-input {
+    > div {
+        display: inline-flex;
+        flex-direction: row;
 
-    .input {
-        margin: 0 3px;
-        max-width: 38px;
-        padding-left: 0;
-        padding-right: 0;
-        text-align: center;
-        font-size: 20px;
-        caret-color: transparent;
-        text-transform: uppercase;
+        .input {
+            margin: 0 3px;
+            max-width: 38px;
+            padding-left: 0;
+            padding-right: 0;
+            text-align: center;
+            font-size: 20px;
+            caret-color: transparent;
+            text-transform: uppercase;
+            user-select: none;
 
-        &::selection {
-            background: transparent
+            &::selection {
+                background: transparent
+            }
+
+            &:nth-child(3) {
+                margin-right: 15px;
+            }
         }
 
-        &:nth-child(3) {
-            margin-right: 15px;
-        }
     }
-
 }
+
 </style>

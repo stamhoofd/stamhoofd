@@ -1,8 +1,7 @@
 <template>
     <div class="boxed-view">
         <form class="confirm-email-view st-view small" @submit.prevent="submit">
-
-                <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration"/>
+            <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
             <main>
                 <h1>Vul de code in die we jou hebben gestuurd via e-mail</h1>
@@ -11,11 +10,12 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <CodeInput />
+                <CodeInput v-model="code" />
+                {{ code }}
             </main>
 
             <STToolbar>
-                <LoadingButton :loading="loading" slot="right">
+                <LoadingButton slot="right" :loading="loading">
                     <button class="button primary full">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
@@ -28,13 +28,13 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox, Toast, Spinner, STToolbar, CodeInput } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, CodeInput,EmailInput, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components"
+import { Sodium } from '@stamhoofd/crypto';
+import { LoginHelper,NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
+import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -54,9 +54,11 @@ import { SimpleError } from '@simonbackx/simple-errors';
 export default class ConfirmEmailView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     loading = false
+    code = ""
 
     submit() {
         // todo
+        this.code = "123456"
     }
 
     async shouldNavigateAway() {
