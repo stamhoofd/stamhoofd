@@ -1,14 +1,14 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input class="input" type="email" :class="{ error: !valid }" v-model="emailRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete" :disabled="disabled"/>
+        <input ref="input" v-model="emailRaw" class="input" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { DataValidator } from "@stamhoofd/utility";
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -67,7 +67,7 @@ export default class EmailInput extends Vue {
         }
     }
 
-    async validate() {
+    validate() {
         this.emailRaw = this.emailRaw.trim().toLowerCase()
 
         if (!this.required && this.emailRaw.length == 0) {
@@ -97,6 +97,10 @@ export default class EmailInput extends Vue {
             this.errorBox = null
             return true
         }
+    }
+
+    focus() {
+        (this.$refs.input as any)?.focus()
     }
 }
 </script>

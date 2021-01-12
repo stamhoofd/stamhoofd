@@ -31,6 +31,7 @@ export { default as TimeInput } from "./src/inputs/TimeInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as NumberInput } from "./src/inputs/NumberInput.vue"
 export { default as StepperInput } from "./src/inputs/StepperInput.vue"
+export { default as CodeInput } from "./src/inputs/CodeInput.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
@@ -77,6 +78,8 @@ export { default as MaleIcon } from "./src/icons/MaleIcon.vue"
 export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"
 export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vue"
 
+
+export { default as ConfirmEmailView } from "./src/views/ConfirmEmailView.vue"
 
 // Payment
 export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vue"

@@ -262,6 +262,10 @@ $header-height: 70px;
                 border-radius: $border-radius;
                 margin: 0 auto;
                 min-height: auto;
+
+                &.small {
+                    max-width: 500px;
+                }
             }
         }
     }

@@ -6,7 +6,7 @@
                 
                 <main>
                     <STInputBox title="E-mailadres" class="max">
-                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
+                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email" autofocus>
                     </STInputBox>
 
                     <STInputBox title="Wachtwoord" class="max">
@@ -116,11 +116,18 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     createAccount() {
-        this.present(new ComponentWithProperties(SignupView, {}).setDisplayStyle("popup")) 
+        this.show(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(SignupView, {})
+        }).setDisplayStyle("sheet")) 
     }
 
     async submit() {
         if (this.loading) {
+            return
+        }
+
+        if (this.email.length < 3 || this.password.length < 5) {
+            new CenteredMessage("Vul eerst iets in", "Je hebt geen correcte gegevens ingevuld", "error").addCloseButton().show()   
             return
         }
 
