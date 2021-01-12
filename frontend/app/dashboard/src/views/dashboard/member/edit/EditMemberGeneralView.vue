@@ -36,7 +36,7 @@
             </div>
 
             <div>
-                <AddressInput v-if="age >= 18 && !livesAtParents" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
+                <AddressInput v-if="(age >= 18 && !livesAtParents) || hasOldAddress" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
                 <EmailInput v-if="age >= 11" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="false" :validator="validator" />
                 <PhoneInput v-if="age >= 11" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
             </div>
@@ -87,7 +87,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     gender = Gender.Male
     livesAtParents = false
     validator = new Validator()
-
+    hasOldAddress = false
 
     mounted() {
         if (this.memberDetails) {
@@ -99,6 +99,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
             this.gender = this.memberDetails.gender
             this.livesAtParents = !this.memberDetails.address && this.age >= 18
             this.email = this.memberDetails.email
+            this.hasOldAddress = this.address !== null
         }
     }
 
