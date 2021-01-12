@@ -52,4 +52,25 @@ export class Parent extends AutoEncoder {
 
         this.address?.cleanData()
     }
+
+    merge(other: Parent) {
+        if (this.firstName.length == 0) {
+            this.firstName = other.firstName
+        }
+        if (this.lastName.length == 0) {
+            this.lastName = other.lastName
+        }
+
+        if (other.email && (!this.email || this.email.length == 0)) {
+            this.email = other.email
+        }
+
+        if (other.address && !this.address) {
+            this.address = other.address
+        }
+
+        if (other.phone && (!this.phone || this.phone.length == 0)) {
+            this.phone = other.phone
+        }
+    }
 }

@@ -133,6 +133,9 @@ export class FamilyManager {
             m.details?.cleanData()
         }
 
+        // Search for duplicate addresses and duplicate parents
+        this.removeDuplicates()
+
         const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;
@@ -171,6 +174,9 @@ export class FamilyManager {
         }
 
         this.members = s
+
+        // Search for duplicate addresses and duplicate parents
+        this.removeDuplicates()
     }
 
     updateAddress(oldValue: Address, newValue: Address) {
@@ -199,6 +205,27 @@ export class FamilyManager {
             }
 
             member.details.updateParent(parent)
+        }
+    }
+
+    /**
+     * Check for duplicate parents
+     */
+    removeDuplicates() {
+        const parents = new Map<string, Parent>()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            for (const [index, parent] of member.details.parents.entries()) {
+                const other = parents.get(parent.name.toLowerCase())
+                if (other) {
+                    other.merge(parent)
+                    member.details.parents[index] = other
+                } else {
+                    parents.set(parent.name.toLowerCase(), parent)
+                }
+            }
         }
     }
     
