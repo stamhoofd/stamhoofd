@@ -442,17 +442,24 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
             // todo: group family
             for (const member of this.members) {
-                const family =  new FamilyManager([])
-                const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
-                await family.addMember(member.details, [
-                    Registration.create({
-                        groupId: group.id,
-                        cycle: group.cycle + (this.needRegistration ? -1 : 0),
-                        waitingList: this.waitingList,
-                        payment: null, // todo
-                        registeredAt: new Date()
-                    })
-                ])
+                if (member.equal) {
+                    // Merge data (this is an edge case)
+                    const family =  new FamilyManager([])
+                    member.equal.details!.copyFrom(member.details)
+                    await family.patchAllMembersWith(member.equal)
+                } else {
+                    const family =  new FamilyManager([])
+                    const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
+                    await family.addMember(member.details, [
+                        Registration.create({
+                            groupId: group.id,
+                            cycle: group.cycle + (this.needRegistration ? -1 : 0),
+                            waitingList: this.waitingList,
+                            payment: null, // todo
+                            registeredAt: new Date()
+                        })
+                    ])
+                }
             }
 
             toast.hide()

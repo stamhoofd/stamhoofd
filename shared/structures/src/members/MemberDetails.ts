@@ -268,4 +268,48 @@ export class MemberDetails extends AutoEncoder {
         }
         return emails
     }
+
+    copyFrom(other: MemberDetails) {
+        if (other.firstName.length > 0) {
+            this.firstName = other.firstName
+        }
+        if (other.lastName.length > 0) {
+            this.lastName = other.lastName
+        }
+
+        if (other.email) {
+            this.email = other.email
+        }
+
+        this.birthDay = other.birthDay
+        this.gender = other.gender
+
+        if (other.address) {
+            if (this.address) {
+                this.updateAddress(this.address, other.address)
+            } else {
+                this.address = other.address
+            }
+        }
+
+        if (other.phone) {
+            this.phone = other.phone
+        }
+
+        if (other.memberNumber) {
+            this.memberNumber = other.memberNumber
+        }
+
+        if (other.parents.length > 0) {
+            this.parents = other.parents
+        }
+
+        if (other.emergencyContacts.length > 0) {
+            this.emergencyContacts = other.emergencyContacts
+        }
+
+        if (other.lastReviewed) {
+            this.lastReviewed = other.lastReviewed
+        }
+    }
 }

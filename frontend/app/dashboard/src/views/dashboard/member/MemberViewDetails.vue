@@ -111,11 +111,15 @@
                 </h2>
 
                 <dl class="details-grid">
-                    <dt>Naam</dt>
-                    <dd>{{ member.details.doctor.name }}</dd>
+                    <template v-if="member.details.doctor.name">
+                        <dt>Naam</dt>
+                        <dd>{{ member.details.doctor.name }}</dd>
+                    </template>
 
-                    <dt>Telefoonnummer</dt>
-                    <dd>{{ member.details.doctor.phone }}</dd>
+                    <template v-if="member.details.doctor.phone">
+                        <dt>Telefoonnummer</dt>
+                        <dd>{{ member.details.doctor.phone }}</dd>
+                    </template>
                 </dl>
             </div>
 

@@ -2,7 +2,7 @@
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Noodcontact">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop"></button>
+            <button v-else slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -36,13 +36,13 @@
                 </div>
 
                 <div>
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer" />
+                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer" :required="false" />
                 </div>
             </div>
         </main>
 
         <STToolbar>
-            <button  slot="right" class="button primary" @click="goNext">
+            <button slot="right" class="button primary" @click="goNext">
                 {{ !contact ? 'Toevoegen' : 'Opslaan' }}
             </button>
         </STToolbar>
@@ -53,11 +53,12 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, ParentType, ParentTypeHelper, EmergencyContact } from "@stamhoofd/structures"
+import { AddressInput, BackButton,Checkbox, EmailInput, ErrorBox, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { Address, Country, EmergencyContact,Gender, MemberDetails, Organization, OrganizationMetaData, OrganizationType, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
+
 import { FamilyManager } from '../../../../classes/FamilyManager';
+import MemberParentsView from './MemberParentsView.vue';
 
 @Component({
     components: {
@@ -140,7 +141,7 @@ export default class EditMemberEmergencyContactView extends Mixins(NavigationMix
         if (this.contact) {
             this.contact.name = this.name
             this.contact.title = this.title
-            this.contact.phone = this.phone
+            this.contact.phone = this.phone && this.phone.length > 0 ? this.phone : null
             this.handler(this.contact, this)
         } else {
             const contact = EmergencyContact.create({
