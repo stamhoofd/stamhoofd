@@ -1,55 +1,62 @@
 <template>
-    <div class="split-login-view padded-view">
-        <form class="login-view st-view auto" @submit.prevent="submit">
-            <h1>Inloggen</h1>
-            
-            <main>
-                <STInputBox title="E-mailadres">
-                    <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-                </STInputBox>
+    <div id="login-view" class="padded-view">
+        <div class="split-login-view">
+            <form class="login-view st-view auto" @submit.prevent="submit">
+                <h1>Inloggen</h1>
+                
+                <main>
+                    <STInputBox title="E-mailadres" class="max">
+                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
+                    </STInputBox>
 
-                <STInputBox title="Wachtwoord">
-                    <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
-                        <span>Vergeten</span>
-                        <span class="icon help"/>
+                    <STInputBox title="Wachtwoord" class="max">
+                        <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                            <span>Vergeten</span>
+                            <span class="icon help" />
+                        </button>
+                        <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                    </STInputBox>
+                </main>
+
+                <STFloatingFooter>
+                    <LoadingButton :loading="loading">
+                        <button class="button primary full">
+                            <span class="lock" />
+                            Inloggen
+                        </button>
+                    </LoadingButton>
+                    <button class="button secundary full" type="button" @click="createAccount">
+                        Account aanmaken
                     </button>
-                    <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
-                </STInputBox>
-            </main>
+                </STFloatingFooter>
+            </form>
 
-            <STFloatingFooter>
-                <LoadingButton :loading="loading">
-                    <button class="button primary full">
-                        <span class="lock" />
-                        Inloggen
-                    </button>
-                </LoadingButton>
-                <button class="button secundary full" @click="createAccount" type="button">
-                    Account aanmaken
-                </button>
-            </STFloatingFooter>
-        </form>
-
-        <aside>
-            <h1>Hoe schrijf je iemand in?</h1>
-            <ol>
-                <li>Log in, of maak een account aan.</li>
-                <li>Vul alle gegevens van de leden in of kijk ze na.</li>
-                <li>Betaal het lidgeld.</li>
-                <li>Klaar! Je hoeft vanaf nu enkel nog de gegevens jaarlijks na te kijken.</li>
-            </ol>
-        </aside>
+            <aside>
+                <h1>Hoe schrijf je iemand in?</h1>
+                <ol>
+                    <li>Log in, of maak een account aan.</li>
+                    <li>Vul alle gegevens van de leden in of kijk ze na.</li>
+                    <li>Betaal het lidgeld.</li>
+                    <li>Klaar! Je hoeft vanaf nu enkel nog de gegevens jaarlijks na te kijken.</li>
+                </ol>
+            </aside>
+        </div>
+        <p class="stamhoofd-footer">
+            <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie software door <strong>Stamhoofd</strong> voor {{ organization.name }}</a>
+        </p>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ForgotPasswordResetView, ForgotPasswordView } from "@stamhoofd/components"
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
+import { LoginHelper,NetworkManager, SessionManager } from '@stamhoofd/networking';
+import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import SignupView from './SignupView.vue';
 
 const throttle = (func, limit) => {
@@ -100,6 +107,10 @@ export default class LoginView extends Mixins(NavigationMixin){
         }
     }
 
+     get organization() {
+        return OrganizationManager.organization
+    }
+
     gotoPasswordForgot() {
         this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet"))
     }
@@ -135,6 +146,27 @@ export default class LoginView extends Mixins(NavigationMixin){
 <style lang="scss">
     @use "~@stamhoofd/scss/base/variables.scss" as *;
     @use "~@stamhoofd/scss/base/text-styles.scss" as *;
+
+    #login-view {
+        .stamhoofd-footer {
+            max-width: 850px;
+            margin: 0 auto;
+            @extend .style-description;
+            padding: 15px;
+            padding-top: 30px;
+
+            a {
+                white-space: normal;
+                text-overflow: initial;
+                height: auto;
+                line-height: 1.4;
+            }
+
+            strong {
+                color: $color-primary-original;
+            }
+        }
+    }
 
     .split-login-view {
         padding-top: 100px;
