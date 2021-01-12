@@ -131,7 +131,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
     phone: string | null = null
     errorBox: ErrorBox | null = null
 
-    // todo: replace with Addres and new input component
+    // todo: replace withcomponent
     address: Address | null = null
     email: string | null = null
     birthDay: Date | null = null
@@ -204,6 +204,15 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 field: "lastName"
             }))
         }
+        
+        if (valid && !this.birthDay) {
+            // Security check in case event based validation fails
+            // no translations needed here, since this is an edge case
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Birthday check failed",
+            }))
+        }
 
         if (errors.errors.length > 0) {
             this.errorBox = new ErrorBox(errors)
@@ -243,7 +252,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
             this.memberDetails.records.push(Record.create({
                 type: RecordType.NoPictures
             }))
-            if (this.memberDetails.age < 18) {
+            if (this.memberDetails.age ?? 99 < 18) {
                 this.memberDetails.records.push(Record.create({
                     type: RecordType.NoPermissionForMedicines
                 }))
@@ -366,7 +375,7 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
 
         const memberDetails = this.member.details!
         // todo: check age before asking parents
-        if (memberDetails.age < 18 || this.livesAtParents) {
+        if ((memberDetails.age ?? 99) < 18 || this.livesAtParents) {
             component.show(new ComponentWithProperties(MemberParentsView, { 
                 member: this.member
             }))

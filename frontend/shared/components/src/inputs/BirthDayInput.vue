@@ -1,32 +1,42 @@
 <template>
     <STInputBox :title="title" error-fields="birthDay" :error-box="errorBox">
         <div class="input birth-day-selection">
-            <select v-model="day" @change="updateDate" autocomplete="bday-day" name="bday-day"> <!-- name is needed for autocomplete in safari -->
-                <option disabled :value="null">Dag</option>
-                <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">{{ day }}</option>
+            <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
+                <!-- name is needed for autocomplete in safari -->
+                <option :disabled="required" :value="null">
+                    Dag
+                </option>
+                <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
+                    {{ day }}
+                </option>
             </select>
 
-            <select v-model="month" @change="updateDate" autocomplete="bday-month" name="bday-month">
-                <option disabled :value="null">Maand</option>
-                <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">{{ monthText(month) }}</option>
+            <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
+                <option :disabled="required" :value="null">
+                    Maand
+                </option>
+                <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
+                    {{ monthText(month) }}
+                </option>
             </select>
 
-            <select v-model="year" @change="updateDate" autocomplete="bday-year" name="bday-year">
-                <option disabled :value="null">Jaar</option>
-                <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">{{ currentYear - year + 1 }}</option>
+            <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
+                <option :disabled="required" :value="null">
+                    Jaar
+                </option>
+                <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
+                    {{ currentYear - year + 1 }}
+                </option>
             </select>
         </div>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Formatter } from "@stamhoofd/utility"
-import { Vue, Component, Mixins,Prop, Watch } from "vue-property-decorator";
-
-import DateSelectionView from '../overlays/DateSelectionView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Formatter } from "@stamhoofd/utility"
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -36,6 +46,9 @@ import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 export default class BirthDayInput extends Vue {
     @Prop({ default: "" }) 
     title: string;
+
+    @Prop({ default: true })
+    required!: boolean
 
     @Prop({ default: null})
     value: Date | null
@@ -99,7 +112,19 @@ export default class BirthDayInput extends Vue {
             this.errorBox = null
             return true
         }
-        this.$emit("input", null)
+
+        if (!this.required) {
+            this.errorBox = null
+
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
+            return true
+        }
+
+        if (this.value !== null) {
+            this.$emit("input", null)
+        }
         this.errorBox = new ErrorBox(new SimpleError({
             code: "empty_field",
             message: "Vul de geboortedatum in",

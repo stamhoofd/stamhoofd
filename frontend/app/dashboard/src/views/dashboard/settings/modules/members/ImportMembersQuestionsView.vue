@@ -95,7 +95,7 @@
                         </p>
 
                         <STList>
-                            <STListItem v-for="(group, index) of multipleGroups" class="right-description">
+                            <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
                                 {{ index + 1 }}. {{ group.settings.name }}
 
                                 <template slot="right">

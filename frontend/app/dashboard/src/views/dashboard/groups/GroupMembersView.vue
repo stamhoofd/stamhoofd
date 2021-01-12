@@ -82,7 +82,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
-                        <td @click.stop="" class="prefix">
+                        <td class="prefix" @click.stop="">
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
                         <td>
@@ -375,9 +375,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     return -1
                 }
                 if (this.sortDirection == "ASC") {
-                    return a.member.details.age - b.member.details.age;
+                    return (a.member.details.age ?? 99) - (b.member.details.age ?? 99);
                 }
-                return b.member.details.age - a.member.details.age;
+                return (b.member.details.age ?? 99) - (a.member.details.age ?? 99);
             });
         }
 

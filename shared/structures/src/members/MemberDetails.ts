@@ -71,7 +71,8 @@ export class MemberDetails extends AutoEncoder {
     email: string | null = null;
 
     @field({ decoder: DateDecoder })
-    birthDay: Date = new Date("1970-01-01");
+    @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old) => old ?? new Date("1970-01-01") })
+    birthDay: Date | null = null
 
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
@@ -165,11 +166,18 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /// The age this member will become, this year
-    ageForYear(year: number) {
+    ageForYear(year: number): number | null {
+        if (!this.birthDay) {
+            return null
+        }
         return year - this.birthDay.getFullYear();
     }
 
-    get age() {
+    get age(): number | null {
+        if (!this.birthDay) {
+            return null
+        }
+
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
         const m = today.getMonth() - this.birthDay.getMonth();
@@ -179,7 +187,11 @@ export class MemberDetails extends AutoEncoder {
         return age;
     }
 
-    get birthDayFormatted() {
+    get birthDayFormatted(): string | null {
+        if (!this.birthDay) {
+            return null
+        }
+
         const date = new Date(this.birthDay);
         const options = { year: "numeric", month: "long", day: "numeric" };
         return date.toLocaleDateString("nl-BE", options);
@@ -202,14 +214,16 @@ export class MemberDetails extends AutoEncoder {
      */
     doesMatchGroup(group: Group) {
         if (group.settings.minAge || group.settings.maxAge) {
-            
             const age = this.ageForYear(group.settings.startDate.getFullYear())
-            if (group.settings.minAge && age < group.settings.minAge) {
-                return false
-            }
 
-            if (group.settings.maxAge && age > group.settings.maxAge) {
-                return false
+            if (age) {
+                if (group.settings.minAge && age < group.settings.minAge) {
+                    return false
+                }
+
+                if (group.settings.maxAge && age > group.settings.maxAge) {
+                    return false
+                }
             }
         }
 
@@ -259,7 +273,7 @@ export class MemberDetails extends AutoEncoder {
             emails.push(this.email)
         }
 
-        if (this.age < 18 || (this.age < 24 && !this.address)) {
+        if (this.age && (this.age < 18 || (this.age < 24 && !this.address))) {
             for (const parent of this.parents) {
                 if (parent.email) {
                     emails.push(parent.email)
@@ -281,7 +295,10 @@ export class MemberDetails extends AutoEncoder {
             this.email = other.email
         }
 
-        this.birthDay = other.birthDay
+        if (other.birthDay) {
+            this.birthDay = other.birthDay
+        }
+
         this.gender = other.gender
 
         if (other.address) {

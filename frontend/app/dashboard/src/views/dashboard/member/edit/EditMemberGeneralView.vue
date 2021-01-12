@@ -14,7 +14,7 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" />
+                <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" :required="false" />
 
                 <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
                     <RadioGroup>
@@ -105,7 +105,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
 
     get age() {
         if (!this.birthDay) {
-            return 0
+            return 99
         }
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
@@ -152,7 +152,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 memberDetails.lastName = this.lastName
                 memberDetails.gender = this.gender
                 memberDetails.phone = this.phone
-                memberDetails.birthDay = this.birthDay!
+                memberDetails.birthDay = this.birthDay
                 memberDetails.email = this.age >= 18 ? this.email : null
                 memberDetails.address = this.livesAtParents ? null : this.address
 
@@ -164,7 +164,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     gender: this.gender,
                     phone: this.phone,
                     email: this.age >= 18 ? this.email : null,
-                    birthDay: this.birthDay!,
+                    birthDay: this.birthDay,
                     address: this.livesAtParents ? null : this.address
                 })
 
@@ -175,7 +175,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 memberDetails.records.push(Record.create({
                     type: RecordType.NoPictures
                 }))
-                if (memberDetails.age < 18) {
+                if (memberDetails.age ?? 99 < 18) {
                     memberDetails.records.push(Record.create({
                         type: RecordType.NoPermissionForMedicines
                     }))

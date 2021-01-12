@@ -52,14 +52,26 @@ export class ImportingMember {
 
 
     isEqual(member: MemberWithRegistrations) {
-        return StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.details.firstName+" "+this.details.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.details.birthDay)) == 0 
+        if (!member.details?.birthDay) {
+            return false
+        }
+        if (!this.details?.birthDay) {
+            return false
+        }
+        return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.details.birthDay)) == 0 
     }
 
     isProbablyEqual(member: MemberWithRegistrations) {
-        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.details.firstName+" "+this.details.lastName)
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.details.birthDay))
+        if (!member.details?.birthDay) {
+            return false
+        }
+        if (!this.details?.birthDay) {
+            return false
+        }
+        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.details.birthDay))
 
-        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.details.firstName.length + this.details.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.details.firstName.length + this.details.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
             return true;
         }
         return false;

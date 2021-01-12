@@ -14,8 +14,10 @@
                         <dd>{{ member.details.memberNumber }}</dd>
                     </template>
 
-                    <dt>Verjaardag</dt>
-                    <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                    <template v-if="member.details.birthDay">
+                        <dt>Verjaardag</dt>
+                        <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                    </template>
 
                     <template v-if="member.groups.length > 0">
                         <dt>Groep</dt>

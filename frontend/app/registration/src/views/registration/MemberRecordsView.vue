@@ -1,7 +1,7 @@
 <template>
     <div id="member-records-view" class="st-view">
         <STNavigationBar title="Steekkaart">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -19,7 +19,7 @@
                 Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
             </Checkbox>
 
-            <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
+            <Checkbox v-if="allowData && memberDetails.age < 18" v-model="isParent" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
             <Checkbox v-model="allowPictures" class="long-text">
@@ -27,202 +27,206 @@
             </Checkbox>
             <Checkbox v-if="!allowPictures" v-model="allowOnlyGroupPictures" class="long-text">
                 Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
-            </Checkbox>
+                </Che             <p v-if="!allowData" class="warning-box"
+                
+               Je be vri om geen gevoelige gegevens in te vullen, maar dan anaa juiraar ok derisico's die ontstaan doordat {{ organization.name }}gee wetheetanblngijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
+                </p>
 
-            <p v-if="!allowData" class="warning-box">
-                Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
-            </p>
-
-            <template v-if="allowData">
-                <hr>
-                <h2>Allergieën</h2>
-
-                <Checkbox v-model="foodAllergies">
-                    Allergisch of overgevoelig voor bepaalde voeding
-                </Checkbox>
-                <div v-if="foodAllergies" class="textarea-container">
-                    <textarea v-model="foodAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
-                </div>
-
-                <Checkbox v-model="medicineAllergies">
-                    Allergisch voor geneesmiddelen
-                </Checkbox>
-                <div v-if="medicineAllergies" class="textarea-container">
-                    <textarea v-model="medicineAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
-                </div>
-
-                <Checkbox v-model="hayFever">
-                    Hooikoorts
-                </Checkbox>
-                <div v-if="false && hayFever" class="textarea-container">
-                    <textarea v-model="hayFeverDescription" class="input" placeholder="Eventuele opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="otherAllergies">
-                    Allergisch voor andere zaken (verf, insecten...)
-                </Checkbox>
-                <div v-if="otherAllergies" class="textarea-container">
-                    <textarea v-model="otherAllergiesDescription" class="input" placeholder="Som hier op welke zaken." />
-                </div>
-
-                <hr>
-                <h2>Dieet</h2>
-
-                <Checkbox v-model="vegetarian">
-                    Vegetarisch dieet
-                </Checkbox>
-                <Checkbox v-model="vegan">
-                    Veganistisch dieet (geen dierlijke producten)
-                </Checkbox>
-                <Checkbox v-model="halal">
-                    Halal dieet
-                </Checkbox>
-                <Checkbox v-model="kosher">
-                    Koosjer dieet
-                </Checkbox>
-
-                <Checkbox v-model="diet">
-                    Ander dieet (geen allergieën)
-                </Checkbox>
-                <div v-if="diet" class="textarea-container">
-                    <textarea v-model="dietDescription" class="input" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
-                </div>
-
-                <hr>
-                <h2>Gezondheid, hygiëne &amp; slapen</h2>
-
-                <Checkbox v-model="asthma">
-                    Astma
-                </Checkbox>
-                <div v-if="asthma" class="textarea-container">
-                    <textarea v-model="asthmaDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="bedWaters">
-                    Bedwateren
-                </Checkbox>
-                <div v-if="bedWaters" class="textarea-container">
-                    <textarea v-model="bedWatersDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="epilepsy">
-                    Epilepsie
-                </Checkbox>
-                <div v-if="epilepsy" class="textarea-container">
-                    <textarea v-model="epilepsyDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="heartDisease">
-                    Hartkwaal
-                </Checkbox>
-                <div v-if="heartDisease" class="textarea-container">
-                    <textarea v-model="heartDiseaseDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="skinCondition">
-                    Huidaandoening
-                </Checkbox>
-                <div v-if="skinCondition" class="textarea-container">
-                    <textarea v-model="skinConditionDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="rheumatism">
-                    Reuma
-                </Checkbox>
-                <div v-if="rheumatism" class="textarea-container">
-                    <textarea v-model="rheumatismDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="sleepWalking">
-                    Slaapwandelen
-                </Checkbox>
-                <div v-if="sleepWalking" class="textarea-container">
-                    <textarea v-model="sleepWalkingDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="diabetes">
-                    Suikerziekte
-                </Checkbox>
-                <div v-if="diabetes" class="textarea-container">
-                    <textarea v-model="diabetesDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="medicines">
-                    Moet geneesmiddelen nemen (dagelijks, wekelijks...)
-                </Checkbox>
-                <div v-if="medicines" class="textarea-container">
-                    <textarea v-model="medicinesDescription" class="input" placeholder="Welke, wanneer en hoe vaak?" />
-                    <p>Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.</p>
-                </div>
-
-                <Checkbox v-model="specialHealthCare">
-                    Er is bijzondere aandacht nodig om risico's te voorkomen
-                </Checkbox>
-                <div v-if="specialHealthCare" class="textarea-container">
-                    <textarea v-model="specialHealthCareDescription" class="input" placeholder="Welke?" />
-                </div>
-
-                <hr>
-                <h2>Sport, spel en sociale omgang</h2>
-
-                <Checkbox v-model="canNotSwim">
-                    Kan niet (of onvoldoende) zwemmen
-                </Checkbox>
-
-                <Checkbox v-model="tiredQuickly">
-                    Vlug moe
-                </Checkbox>
-                <div v-if="tiredQuickly" class="textarea-container">
-                    <textarea v-model="tiredQuicklyDescription" class="input" placeholder="Eventuele opmerkingen" />
-                </div>
-
-                <Checkbox v-model="canNotParticipateInSport">
-                    Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
-                </Checkbox>
-                <div v-if="canNotParticipateInSport" class="textarea-container">
-                    <textarea v-model="canNotParticipateInSportDescription" class="input" placeholder="Meer informatie" />
-                </div>
-
-                <Checkbox v-model="specialSocialCare">
-                    Er is bijzondere aandacht nodig bij sociale omgang
-                </Checkbox>
-                <div v-if="specialSocialCare" class="textarea-container">
-                    <textarea v-model="specialSocialCareDescription" class="input" placeholder="Meer informatie" />
-                </div>
-
-                <hr>
-                <h2>Andere inlichtingen</h2>
-
-                <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
-
-                <template v-if="memberDetails.age < 18">
+                <template v-if="allowData">
                     <hr>
-                    <h2>Toedienen van medicatie</h2>
+                    <h2>Allergieën</h2>
 
-                    <p class="style-description">Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.</p>
+                    <Checkbox v-model="foodAllergies">
+                        Allergisch of overgevoelig voor bepaalde voeding
+                    </Checkbox>
+                    <div v-if="foodAllergies" class="textarea-container">
+                        <textarea v-model="foodAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
+                    </div>
 
-                    <Checkbox v-model="allowMedicines">
-                        Wij geven toestemming aan de leiding om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                    <Checkbox v-model="medicineAllergies">
+                        Allergisch voor geneesmiddelen
+                    </Checkbox>
+                    <div v-if="medicineAllergies" class="textarea-container">
+                        <textarea v-model="medicineAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
+                    </div>
+
+                    <Checkbox v-model="hayFever">
+                        Hooikoorts
+                    </Checkbox>
+                    <div v-if="false && hayFever" class="textarea-container">
+                        <textarea v-model="hayFeverDescription" class="input" placeholder="Eventuele opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="otherAllergies">
+                        Allergisch voor andere zaken (verf, insecten...)
+                    </Checkbox>
+                    <div v-if="otherAllergies" class="textarea-container">
+                        <textarea v-model="otherAllergiesDescription" class="input" placeholder="Som hier op welke zaken." />
+                    </div>
+
+                    <hr>
+                    <h2>Dieet</h2>
+
+                    <Checkbox v-model="vegetarian">
+                        Vegetarisch dieet
+                    </Checkbox>
+                    <Checkbox v-model="vegan">
+                        Veganistisch dieet (geen dierlijke producten)
+                    </Checkbox>
+                    <Checkbox v-model="halal">
+                        Halal dieet
+                    </Checkbox>
+                    <Checkbox v-model="kosher">
+                        Koosjer dieet
                     </Checkbox>
 
-                    <p class="style-description-small">* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang</p>
+                    <Checkbox v-model="diet">
+                        Ander dieet (geen allergieën)
+                    </Checkbox>
+                    <div v-if="diet" class="textarea-container">
+                        <textarea v-model="dietDescription" class="input" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
+                    </div>
+
+                    <hr>
+                    <h2>Gezondheid, hygiëne &amp; slapen</h2>
+
+                    <Checkbox v-model="asthma">
+                        Astma
+                    </Checkbox>
+                    <div v-if="asthma" class="textarea-container">
+                        <textarea v-model="asthmaDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="bedWaters">
+                        Bedwateren
+                    </Checkbox>
+                    <div v-if="bedWaters" class="textarea-container">
+                        <textarea v-model="bedWatersDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="epilepsy">
+                        Epilepsie
+                    </Checkbox>
+                    <div v-if="epilepsy" class="textarea-container">
+                        <textarea v-model="epilepsyDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="heartDisease">
+                        Hartkwaal
+                    </Checkbox>
+                    <div v-if="heartDisease" class="textarea-container">
+                        <textarea v-model="heartDiseaseDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="skinCondition">
+                        Huidaandoening
+                    </Checkbox>
+                    <div v-if="skinCondition" class="textarea-container">
+                        <textarea v-model="skinConditionDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="rheumatism">
+                        Reuma
+                    </Checkbox>
+                    <div v-if="rheumatism" class="textarea-container">
+                        <textarea v-model="rheumatismDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="sleepWalking">
+                        Slaapwandelen
+                    </Checkbox>
+                    <div v-if="sleepWalking" class="textarea-container">
+                        <textarea v-model="sleepWalkingDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="diabetes">
+                        Suikerziekte
+                    </Checkbox>
+                    <div v-if="diabetes" class="textarea-container">
+                        <textarea v-model="diabetesDescription" class="input" placeholder="Opmerkingen (optioneel)" />
+                    </div>
+
+                    <Checkbox v-model="medicines">
+                        Moet geneesmiddelen nemen (dagelijks, wekelijks...)
+                    </Checkbox>
+                    <div v-if="medicines" class="textarea-container">
+                        <textarea v-model="medicinesDescription" class="input" placeholder="Welke, wanneer en hoe vaak?" />
+                        <p>Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.</p>
+                    </div>
+
+                    <Checkbox v-model="specialHealthCare">
+                        Er is bijzondere aandacht nodig om risico's te voorkomen
+                    </Checkbox>
+                    <div v-if="specialHealthCare" class="textarea-container">
+                        <textarea v-model="specialHealthCareDescription" class="input" placeholder="Welke?" />
+                    </div>
+
+                    <hr>
+                    <h2>Sport, spel en sociale omgang</h2>
+
+                    <Checkbox v-model="canNotSwim">
+                        Kan niet (of onvoldoende) zwemmen
+                    </Checkbox>
+
+                    <Checkbox v-model="tiredQuickly">
+                        Vlug moe
+                    </Checkbox>
+                    <div v-if="tiredQuickly" class="textarea-container">
+                        <textarea v-model="tiredQuicklyDescription" class="input" placeholder="Eventuele opmerkingen" />
+                    </div>
+
+                    <Checkbox v-model="canNotParticipateInSport">
+                        Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
+                    </Checkbox>
+                    <div v-if="canNotParticipateInSport" class="textarea-container">
+                        <textarea v-model="canNotParticipateInSportDescription" class="input" placeholder="Meer informatie" />
+                    </div>
+
+                    <Checkbox v-model="specialSocialCare">
+                        Er is bijzondere aandacht nodig bij sociale omgang
+                    </Checkbox>
+                    <div v-if="specialSocialCare" class="textarea-container">
+                        <textarea v-model="specialSocialCareDescription" class="input" placeholder="Meer informatie" />
+                    </div>
+
+                    <hr>
+                    <h2>Andere inlichtingen</h2>
+
+                    <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
+
+                    <template v-if="memberDetails.age < 18">
+                        <hr>
+                        <h2>Toedienen van medicatie</h2>
+
+                        <p class="style-description">
+                            Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
+                        </p>
+
+                        <Checkbox v-model="allowMedicines">
+                            Wij geven toestemming aan de leiding om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                        </Checkbox>
+
+                        <p class="style-description-small">
+                            * gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang
+                        </p>
+                    </template>
+
+                    <hr>
+                    <h2>Contactgegevens huisarts</h2>
+
+                    <div class="split-inputs">
+                        <div>
+                            <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
+                                <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
+                            </STInputBox>
+                        </div>
+
+                        <div>
+                            <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" />
+                        </div>
+                    </div>
                 </template>
-
-                <hr>
-                <h2>Contactgegevens huisarts</h2>
-
-                <div class="split-inputs">
-                    <div>
-                        <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
-                            <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
-                        </STInputBox>
-                    </div>
-
-                    <div>
-                        <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" />
-                    </div>
-                </div>
-            </template>
+            </checkbox>
         </main>
         <STToolbar>
             <LoadingButton slot="right" :loading="loading">
@@ -280,7 +284,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        if (this.member && this.memberDetails.age < 18 && this.memberDetails.lastReviewed !== null) {
+        if (this.member && (this.memberDetails.age ?? 99) < 18 && this.memberDetails.lastReviewed !== null) {
             // already accepted previous time
             this.isParent = true
         }

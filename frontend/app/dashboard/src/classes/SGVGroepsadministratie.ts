@@ -1,18 +1,19 @@
+import { LinkedErrors } from '@sentry/browser/dist/integrations';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data,DateDecoder, Decoder, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleErrors,SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Request, RequestMiddleware, RequestResult,Server } from '@simonbackx/simple-networking';
+import { ComponentWithProperties,NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { Server, Request, RequestMiddleware, RequestResult } from '@simonbackx/simple-networking';
-import { ObjectData, DateDecoder, AutoEncoder, field, IntegerDecoder, ArrayDecoder, Decoder, StringDecoder, BooleanDecoder, Data } from '@simonbackx/simple-encoding';
-import { Gender, Country, CountryDecoder, Organization, MemberWithRegistrations, RecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/networking';
+import { Country, CountryDecoder, Gender, MemberWithRegistrations, Organization, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { OrganizationManager } from './OrganizationManager';
-import { SimpleError, SimpleErrors, isSimpleErrors } from '@simonbackx/simple-errors';
-import { MemberManager } from './MemberManager';
-import { NavigationMixin, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
+
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
-import { getPatch, SGVSyncReport, buildGroupMapping, schrappen } from './SGVGroepsadministratieSync';
-import { LinkedErrors } from '@sentry/browser/dist/integrations';
+import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
+import { MemberManager } from './MemberManager';
+import { OrganizationManager } from './OrganizationManager';
+import { buildGroupMapping, getPatch, schrappen,SGVSyncReport } from './SGVGroepsadministratieSync';
 
 export class SGVFoutDecoder implements Decoder<SimpleError> {
 
@@ -70,14 +71,14 @@ export class SGVMemberError extends Error {
 }
 
 export interface SGVLidMatch {
-    stamhoofd: MemberWithRegistrations
-    sgvId: string
+    stamhoofd: MemberWithRegistrations;
+    sgvId: string;
 }
 
 export interface SGVLidMatchVerify {
-    stamhoofd: MemberWithRegistrations
-    sgv: SGVLid
-    verify: boolean
+    stamhoofd: MemberWithRegistrations;
+    sgv: SGVLid;
+    verify: boolean;
 }
 
 export class SGVLid {
@@ -136,14 +137,22 @@ export class SGVLid {
     }
 
     isEqual(member: MemberWithRegistrations) {
-        return StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.birthDay)) == 0 
+        if (!member.details?.birthDay) {
+            return false
+        }
+
+        return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay)) == 0 
     }
 
     isProbablyEqual(member: MemberWithRegistrations) {
-        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details!.birthDay), Formatter.dateNumber(this.birthDay))
+        if (!member.details?.birthDay) {
+            return false
+        }
+        
+        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay))
 
-        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
             return true;
         }
         return false;
@@ -353,7 +362,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 path: "/auth/realms/scouts/protocol/openid-connect/token",
                 body: {
                     client_id: this.clientId,
-                    refresh_token: this.token!.refreshToken,
+                    refresh_token: this.token.refreshToken,
                     grant_type: "refresh_token",
                     redirect_uri: this.redirectUri
                 },
@@ -536,7 +545,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return leden;
     }
 
-    async matchAndSync(component: NavigationMixin, onPopup: () => void): Promise<{ matchedMembers, newMembers }> {
+    async matchAndSync(component: NavigationMixin, onPopup: () => void): Promise<{ matchedMembers; newMembers }> {
         // Members that are missing in groepsadmin
         let newMembers: MemberWithRegistrations[] = []
 
@@ -642,7 +651,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return { matchedMembers, newMembers }
     }
 
-    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[]): Promise<{ oldMembers, action }> {
+    async prepareSync(component: NavigationMixin, matched: SGVLidMatch[], newMembers: MemberWithRegistrations[]): Promise<{ oldMembers; action }> {
         // Determine the missing members by checking the matches
         const oldMembers: SGVLid[] = []
 

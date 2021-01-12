@@ -47,7 +47,7 @@ export class MemberFactory extends Factory<Options, Member> {
         // For now only generate -18
         memberDetails.address = null;
 
-        if (memberDetails.age >= 14) {
+        if (memberDetails.age! >= 14) {
             memberDetails.phone =
                 "+32 47" +
                 Math.floor(Math.random() * 10) +

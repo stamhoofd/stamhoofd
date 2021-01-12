@@ -1,6 +1,6 @@
-import XLSX from "xlsx";
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import XLSX from "xlsx";
 
 export class MemberExcelExport {
     static export(members: MemberWithRegistrations[]) {
@@ -35,7 +35,7 @@ export class MemberExcelExport {
                 member.firstName,
                 member.lastName,
                 member.gender,
-                Formatter.dateNumber(member.birthDay),
+                member.birthDay ? Formatter.dateNumber(member.birthDay) : "/",
                 member.phone ? member.phone : "",
                 member.email ? member.email : "",
                 member.address ? member.address.toString() : "",
