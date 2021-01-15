@@ -102,7 +102,11 @@ export default class CodeInput extends Vue {
             if (val.length > 1) {
                 prev.value = val.substr(0, 1)
             }
-            prev.blur();
+            for (let index = 0; index < this.codeLength; index++) {
+                const element = this.$refs.numberInput[index];
+                element.blur()
+            }
+            this.updateValue()
             return
         }
         if (index >= 1) {
@@ -117,6 +121,7 @@ export default class CodeInput extends Vue {
         }
         this.$refs.numberInput[index].focus()
         this.$refs.numberInput[index].select()
+        this.updateValue()
     }
 
     getInternalValue() {
@@ -158,10 +163,10 @@ export default class CodeInput extends Vue {
             font-size: 20px;
             caret-color: transparent;
             text-transform: uppercase;
-            user-select: none;
+            //user-select: none;
 
             &::selection {
-                background: transparent
+                //background: transparent
             }
 
             &:nth-child(3) {

@@ -64,6 +64,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError(errBody);
             }
 
+            // Clear challenge (can delete, since we need to reset the tries)
+            await challenge.delete()
+
             // Yay! Valid password
             // Now check if e-mail is already validated
             // if not: throw a validation error (e-mail validation is required)
@@ -83,10 +86,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             const token = await Token.createToken(user);
-
-            // Clear challenge (can delete, since we need to reset the tries)
-            await challenge.delete()
-
+            
             if (!token) {
                 throw new SimpleError({
                     code: "error",

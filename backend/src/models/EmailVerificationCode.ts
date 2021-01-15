@@ -131,7 +131,7 @@ export class EmailVerificationCode extends Model {
      * Error => token okay, but too many attempts checking the code
      * 
      */
-    static async verify(organizationId: string, token: string, code: string): Promise<string | undefined> {
+    static async verify(organizationId: string, token: string, code: string): Promise<EmailVerificationCode | undefined> {
         if (code.length != EmailVerificationCode.CODE_LENGTH) {
             return
         }
@@ -172,8 +172,7 @@ export class EmailVerificationCode extends Model {
             // To avoid leaving information about the existince of this user (tries)
             await verificationCode.delete()
 
-            // todo: change e-mail address if this was a change e-mail request
-            return verificationCode.userId
+            return verificationCode
         }
 
         verificationCode.tries++

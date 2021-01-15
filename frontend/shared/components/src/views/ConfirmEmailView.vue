@@ -15,7 +15,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <CodeInput v-model="code" />
+                <div><CodeInput v-model="code" /></div>
             </main>
 
             <STToolbar>
@@ -76,12 +76,14 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
 
         try {
             await LoginHelper.verifyEmail(SessionManager.currentSession!, this.code, this.token)
+            new Toast("Jouw e-mailadres is geverifieerd!", "success green").setHide(3000).show()
 
             // Yay!
             // we could be sign in, or couldn't.
             // if signed in: we'll automitically get deallocated
             // so always return
             await this.navigationController?.popToRoot({ force: true })
+
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
