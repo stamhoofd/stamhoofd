@@ -127,13 +127,12 @@ export default class SignupView extends Mixins(NavigationMixin){
             const session = new Session(OrganizationManager.organization.id)
             session.organization = OrganizationManager.organization
 
-            await LoginHelper.signUp(session, this.email, this.password)
+            const token = await LoginHelper.signUp(session, this.email, this.password)
             
             this.loading = false;
             component.hide()
-            //this.dismiss({ force: true })
 
-            this.show(new ComponentWithProperties(ConfirmEmailView, {}))
+            this.show(new ComponentWithProperties(ConfirmEmailView, { token }))
             return
             
         } catch (e) {

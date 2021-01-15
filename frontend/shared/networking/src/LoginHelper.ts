@@ -419,7 +419,7 @@ export class LoginHelper {
         await session.updateData()
     }
 
-    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null) {
+    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {
         const keys = await this.createKeys(password)
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
@@ -450,6 +450,8 @@ export class LoginHelper {
 
         // Save password until verified
         this.AWAITING_PASSWORDS.set(response.data.token, password)
+
+        return response.data.token
     }
 
     static async addToKeychain(session: Session, decryptedKeychainItems: string) {
