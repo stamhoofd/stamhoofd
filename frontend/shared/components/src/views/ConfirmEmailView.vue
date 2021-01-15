@@ -13,9 +13,9 @@
 
                 <p>Als je jouw e-mail op deze computer opent, kan je ook de link in de e-mail gebruiken.</p>
 
-                <STErrorsDefault :error-box="errorBox" />
-
                 <div><CodeInput v-model="code" /></div>
+
+                <STErrorsDefault :error-box="errorBox" />
             </main>
 
             <STToolbar>
