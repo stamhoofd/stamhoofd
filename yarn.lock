@@ -1508,12 +1508,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.3.5.tgz#1689ce4ccfbd33451a64e48c0f3a75fac9b4b58f"
   integrity sha512-vfHr7eDzAIgGS03gpU2dmTAZeq0Fj6qaBNNl1oeeL3+Fwa5gGQ4rEUOdKXNTcPGs3FY8CxfyNl/m3XY7Lj/voA==
 
-"@simonbackx/simple-errors@^1.0", "@simonbackx/simple-errors@~1.0":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.0.8.tgz#19f130fdb2b98eca6ff026e1f7bb4179719315db"
-  integrity sha512-OAM/3qi0+AnFYAabY3coUXZARPMkVJ7U8lbtofYCIs7HjO8mpP6qiMzhw+ATMd7qQD4qR1W0KYEWz16H8ya8Og==
-  dependencies:
-    uuid "^8.2.0"
+"@simonbackx/simple-errors@^1.0", "@simonbackx/simple-errors@^1.1":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.1.0.tgz#cc498a6e01bc21603650041491ec1f7dd1fb8b48"
+  integrity sha512-RWHTSAWZZwjVQtNnXnoW9828llJkKExMpYIHX1I+LM8/AY3Yr9EIEHvWm/XIrZ3t6G+BYdMqWQIqvWqf7N9FhQ==
 
 "@simonbackx/simple-networking@~1.3.0":
   version "1.3.10"
@@ -1734,7 +1732,7 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/uuid@^8.0.0":
+"@types/uuid@^8.3.0":
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.0.tgz#215c231dff736d5ba92410e6d602050cce7e273f"
   integrity sha512-eQ9qFW/fhfGJF8WKHGEHZEyVWfZxrT+6CLIJGBcZPfxUh/+BnEj+UCGYMlr9qZuX/2AltsvwrGqp0LhEW8D0zQ==
@@ -11003,7 +11001,7 @@ uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.2.0:
+uuid@^8.2.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==

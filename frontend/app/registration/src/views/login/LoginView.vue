@@ -49,8 +49,9 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { LoginHelper,NetworkManager, SessionManager } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
@@ -136,14 +137,16 @@ export default class LoginView extends Mixins(NavigationMixin){
         // Request the key constants
         const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
         try {
-            await LoginHelper.login(this.session, this.email, this.password)
+            const result = await LoginHelper.login(this.session, this.email, this.password)
+
+            if (result.verificationToken) {
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken }))
+            }
         } catch (e) {
             console.error(e)
-            this.loading = false;
-
             new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
-            return;
         } finally {
+            this.loading = false;
             component.hide()
         }
     }

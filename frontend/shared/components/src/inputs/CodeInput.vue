@@ -73,10 +73,24 @@ export default class CodeInput extends Vue {
         }
     }
 
-    clearInput(index: number) {
+    clearInput(index: number, select = true) {
         console.log("clear")
-        if (index > 0) {
-            this.selectNext(index - 1)
+        // Move everything one to the left
+        const input = this.$refs.numberInput[index];
+        if (input.value.length == 0 && index < this.codeLength - 1) {
+            input.value = this.$refs.numberInput[index + 1].value;
+            this.$refs.numberInput[index + 1].value = ""
+            this.clearInput(index + 1, false)
+        }
+
+        if (select) {
+            if (index > 0) {
+                this.selectNext(index - 1)
+            } else {
+                // reselect
+                this.selectNext(index)
+            }
+            this.updateValue()
         }
     }
 

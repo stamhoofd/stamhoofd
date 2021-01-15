@@ -541,4 +541,30 @@ export class Organization extends Model {
         // Read member + address from first row
         return keys
     }
+
+    getDefaultEmail(): { from: string; replyTo: string | undefined } {
+        // Send confirmation e-mail
+        let from = this.uri+"@stamhoofd.email";
+        const sender = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
+        let replyTo: string | undefined = undefined
+
+        if (sender) {
+            replyTo = sender.email
+
+            // Can we send from this e-mail or reply-to?
+            if (replyTo && this.privateMeta.mailDomain && this.privateMeta.mailDomainActive && sender.email.endsWith("@"+this.privateMeta.mailDomain)) {
+                from = sender.email
+                replyTo = undefined
+            }
+
+            // Include name in form field
+            if (sender.name) {
+                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            }
+        }
+
+        return {
+            from, replyTo
+        }
+    }
 }

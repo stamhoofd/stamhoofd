@@ -1,15 +1,23 @@
-import { KeyConstants, Version, ChallengeResponseStruct, Token, NewUser, Organization, KeychainItem, CreateOrganization, User, Permissions, PermissionLevel, ChangeOrganizationKeyRequest, MyUser, InviteKeychainItem } from '@stamhoofd/structures';
-import { Decoder, ObjectData, AutoEncoderPatchType, ArrayDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { Sodium } from '@stamhoofd/crypto';
-import { SessionManager } from './SessionManager';
-import { Session } from './Session';
-import { SimpleError } from '@simonbackx/simple-errors';
-import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
-import { NetworkManager } from './NetworkManager';
-import { Keychain } from './Keychain';
 import * as Sentry from '@sentry/browser';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { RequestResult } from '@simonbackx/simple-networking';
+import { Sodium } from '@stamhoofd/crypto';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, InviteKeychainItem,KeychainItem, KeyConstants, MyUser, NewUser, Organization, PermissionLevel, Permissions, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
+
+import { Keychain } from './Keychain';
+import { NetworkManager } from './NetworkManager';
+import { Session } from './Session';
+import { SessionManager } from './SessionManager';
 
 export class LoginHelper {
+    /**
+     * When email verification is needed (signup, login), we temporary need to
+     * store the password in memory for every token we have to allow a smooth login after validation
+     * We use the password to set the encryption key after successful validation
+     */
+    private static AWAITING_PASSWORDS = new Map<string, string>()
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
         return new Promise((resolve, reject) => {
@@ -68,7 +76,7 @@ export class LoginHelper {
         })
     }
 
-    static async createKeys(password: string): Promise<{ authSignKeyPair, authEncryptionSecretKey, authSignKeyConstants, authEncryptionKeyConstants }> {
+    static async createKeys(password: string): Promise<{ authSignKeyPair; authEncryptionSecretKey; authSignKeyConstants; authEncryptionKeyConstants }> {
         return new Promise((resolve, reject) => {
             const myWorker = new KeyWorker();
 
@@ -112,10 +120,43 @@ export class LoginHelper {
         })
     }
 
+    static async verifyEmail(session: Session, code: string, token: string) {
+        const response = await session.server.request({
+            method: "POST",
+            path: "/verify-email",
+            body: VerifyEmailRequest.create({
+                code,
+                token
+            }),
+            decoder: Token as Decoder<Token>
+        })
 
-    static async login(session: Session, email: string, password: string) {
-        let challengeResponse: ChallengeResponseStruct
+        // Yay, we have a token!
+        // But only use this token if we still have the password stored in our cache
+        // else, just return  and let the view return to home and sign in again
+        const password = this.AWAITING_PASSWORDS.get(token)
+        this.AWAITING_PASSWORDS.delete(token)
 
+        if (!password) {
+            // just return. We are verified, but can't use the token without password.
+            // user needs to sign in again
+            return;
+        }
+
+        console.log("Set token")
+        session.setToken(response.data)
+
+        // Request additional data
+        console.log("Fetching user")
+        const user = await session.fetchUser()
+        console.log("ok")
+        const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
+        await session.setEncryptionKey(encryptionKey)
+        await SessionManager.setCurrentSession(session)
+    }
+
+
+    static async login(session: Session, email: string, password: string): Promise<{ verificationToken?: string }> {
         const response = await session.server.request({
             method: "POST",
             path: "/oauth/token",
@@ -123,7 +164,7 @@ export class LoginHelper {
             body: { grant_type: "request_challenge", email: email },
             decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>
         })
-        challengeResponse = response.data
+        const challengeResponse = response.data
 
         let authSignKeys: { publicKey: string; privateKey: string }
         try {
@@ -143,13 +184,33 @@ export class LoginHelper {
         const signature = await Sodium.signMessage(challengeResponse.challenge, authSignKeys.privateKey)
         console.log("Sending signature...")
 
-        let tokenResponse = await session.server.request({
-            method: "POST",
-            path: "/oauth/token",
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
-            decoder: Token as Decoder<Token>
-        })
+        let tokenResponse: RequestResult<Token>
+
+        try {
+            tokenResponse = await session.server.request({
+                method: "POST",
+                path: "/oauth/token",
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
+                decoder: Token as Decoder<Token>
+            })
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e))) {
+                const error = e.getCode("verify_email")
+                if (error) {
+                    const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
+
+                    // Save this token + all the keys in temporary storage
+                    this.AWAITING_PASSWORDS.set(meta.token, password)
+
+                    return {
+                        verificationToken: meta.token
+                    }
+                }
+                
+            }
+            throw e
+        }
 
         console.log("Set token")
         session.setToken(tokenResponse.data)
@@ -161,6 +222,8 @@ export class LoginHelper {
         const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
         await session.setEncryptionKey(encryptionKey)
         await SessionManager.setCurrentSession(session)
+
+        return {}
     }
 
     static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null) {
@@ -260,7 +323,7 @@ export class LoginHelper {
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey!, keys.authEncryptionSecretKey)
+            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, keys.authEncryptionSecretKey)
         })
 
         // Do netwowrk request to create organization
@@ -292,7 +355,7 @@ export class LoginHelper {
             publicAuthSignKey: session.user!.publicAuthSignKey,
             authSignKeyConstants: session.user!.authSignKeyConstants,
             authEncryptionKeyConstants: session.user!.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey!, authEncryptionKey)
+            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, authEncryptionKey)
         })
 
         // Gather all keychain items, and check which ones are still valid
@@ -377,7 +440,7 @@ export class LoginHelper {
             method: "POST",
             path: "/sign-up",
             body: user,
-            decoder: Token
+            decoder: SignupResponse as Decoder<SignupResponse>
         })
 
         if (session.user) {
@@ -385,9 +448,8 @@ export class LoginHelper {
             session.user = null;
         }
 
-        session.setToken(response.data)
-        await session.setEncryptionKey(keys.authEncryptionSecretKey, { user: MyUser.create(user), userPrivateKey: userKeyPair.privateKey })
-        await SessionManager.setCurrentSession(session)
+        // Save password until verified
+        this.AWAITING_PASSWORDS.set(response.data.token, password)
     }
 
     static async addToKeychain(session: Session, decryptedKeychainItems: string) {

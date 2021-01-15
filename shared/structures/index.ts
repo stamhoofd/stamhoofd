@@ -38,6 +38,8 @@ export * from "./src/endpoints/EmailRequest"
 export * from "./src/endpoints/RegisterResponse"
 export * from "./src/endpoints/ForgotPasswordRequest"
 export * from "./src/endpoints/ChangeOrganizationKeyRequest"
+export * from "./src/endpoints/SignupResponse"
+export * from "./src/endpoints/VerifyEmailRequest"
 
 export * from "./src/DNSRecord"
 export * from "./src/endpoints/OrganizationDomains"

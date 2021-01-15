@@ -85,12 +85,7 @@ export default class SignupView extends Mixins(NavigationMixin){
     async submit() {
         if (this.loading) {
             return
-        }
-
-                // temp
-        this.show(new ComponentWithProperties(ConfirmEmailView, {}))
-
-        return
+        }       
 
         const valid = await this.validator.validate()
 
@@ -136,7 +131,10 @@ export default class SignupView extends Mixins(NavigationMixin){
             
             this.loading = false;
             component.hide()
-            this.dismiss({ force: true })
+            //this.dismiss({ force: true })
+
+            this.show(new ComponentWithProperties(ConfirmEmailView, {}))
+            return
             
         } catch (e) {
             console.log(e)

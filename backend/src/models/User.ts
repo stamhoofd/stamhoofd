@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { KeychainItem } from './KeychainItem';
 import { Organization } from "./Organization";
+import { PasswordToken } from "./PasswordToken";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
@@ -121,40 +122,67 @@ export class User extends Model {
         // Read member + address from first row
         const user = this.fromRow(rows[0][this.table]) 
 
-        if (!user) {
-            return undefined
-        }
-
-        if (user.publicKey === null) {
-            // This is a placeholder user
-            return undefined
-        }
-
-        if (user.authSignKeyConstants === null) {
-            console.error(user.id+": authSignKeyConstants is null")
-            // This is a placeholder user
-            return undefined
-        }
-        
-        if (user.publicAuthSignKey === null) {
-            console.error(user.id+": publicAuthSignKey is null")
-            // This is a placeholder user
-            return undefined
-        }
-
-        if (user.authEncryptionKeyConstants === null) {
-            console.error(user.id+": authEncryptionKeyConstants is null")
-            // This is a placeholder user
-            return undefined
-        }
-
-        if (user.encryptedPrivateKey === null) {
-            console.error(user.id+": encryptedPrivateKey is null")
-            // This is a placeholder user
+        if (!user || !user.hasKeys()) {
             return undefined
         }
         
         return user as UserFull;
+    }
+
+    hasAccount() {
+        if (this.publicKey === null) {
+            // This is a placeholder user
+            return false
+        }
+        return true
+    }
+
+    protected hasKeys() {
+        if (this.publicKey === null) {
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.authSignKeyConstants === null) {
+            console.error(this.id+": authSignKeyConstants is null")
+            // This is a placeholder user
+            return false
+        }
+        
+        if (this.publicAuthSignKey === null) {
+            console.error(this.id+": publicAuthSignKey is null")
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.authEncryptionKeyConstants === null) {
+            console.error(this.id+": authEncryptionKeyConstants is null")
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.encryptedPrivateKey === null) {
+            console.error(this.id+": encryptedPrivateKey is null")
+            // This is a placeholder user
+            return false
+        }
+        return true
+    }
+
+    static async getForRegister(organization: Organization, email: string): Promise<UserWithOrganization | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organization.id]);
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+        const user = this.fromRow(rows[0][this.table])
+
+        if (!user) {
+            return undefined
+        }
+
+        // Read member + address from first row
+        return user.setRelation(User.organization, organization);
     }
 
     static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
@@ -163,9 +191,14 @@ export class User extends Model {
         if (rows.length == 0) {
             return undefined;
         }
+        const user = this.fromRow(rows[0][this.table])
+
+        if (!user || !user.hasKeys()) {
+            return undefined
+        }
 
         // Read member + address from first row
-        return this.fromRow(rows[0][this.table]) as UserForAuthentication;
+        return user as UserForAuthentication;
     }
 
     // Methods
@@ -249,7 +282,15 @@ export class User extends Model {
         return user;
     }
 
-    async changePassword(publicKey: string | undefined, publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+    async changePassword(data: { publicKey?: string; publicAuthSignKey: string; encryptedPrivateKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants }) {
+        const {
+            publicKey,
+            publicAuthSignKey,
+            encryptedPrivateKey,
+            authSignKeyConstants,
+            authEncryptionKeyConstants
+        } = data;
+
         if (publicKey && this.publicKey != publicKey) {
             // Delete keychain!
             // First print it to console.error as a temporary backup
@@ -284,5 +325,19 @@ export class User extends Model {
             throw new Error("Unexpected permission failure")
         }
         return this.permissions && this.permissions.hasReadAccessForAtLeastOneGroup() ? await organization.getPrivateStructure() : await organization.getStructure()
+    }
+
+    async getPasswordRecoveryUrl(this: UserWithOrganization) {
+        // Send an e-mail to say you already have an account + follow password forgot flow
+        const token = await PasswordToken.createToken(this)
+
+        let host: string;
+        if (this.permissions) {
+            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+        } else {
+            host = "https://"+this.organization.getHost()
+        }
+
+        return host+"/reset-password"+(this.permissions ? "/"+encodeURIComponent(this.organization.id) : "")+"?token="+encodeURIComponent(token.token);
     }
 }

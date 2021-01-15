@@ -46,7 +46,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
         // For now only generate -18
         memberDetails.address = null;
 
-        if (memberDetails.age >= 14) {
+        if ((memberDetails.age ?? 99) >= 14) {
             memberDetails.phone =
                 "+32 47" +
                 Math.floor(Math.random() * 10) +
@@ -61,7 +61,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
                 Math.floor(Math.random() * 10);
         }
 
-        if (memberDetails.age < 22) {
+        if ((memberDetails.age ?? 99) < 22) {
             let parentFactory = new ParentFactory({});
 
             memberDetails.parents.push(await parentFactory.create());

@@ -36,8 +36,6 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // for now we care more about UX, so we show a mesage if the user doesn't exist
-        await sleep(1000);
-
         const organization = await Organization.fromApiHost(request.host);
         const users = await User.where({ email: request.body.email, organizationId: organization.id }, { limit: 1 })
         if (users.length == 0) {
@@ -47,20 +45,8 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
                 human: "Er bestaat geen gebruiker met dit e-mailadres",
             })
         }
-        const user = users[0];
-
-        const token = await PasswordToken.createToken(user)
-
-        let host: string;
-        if (user.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
-        } else {
-            host = "https://"+organization.getHost()
-        }
-
-        const recoveryUrl = host+"/reset-password"+(user.permissions ? "/"+encodeURIComponent(organization.id) : "")+"?token="+encodeURIComponent(token.token);
-
-        // todo: use e-mail of organization
+        const user = users[0].setRelation(User.organization, organization);
+        const recoveryUrl = await user.getPasswordRecoveryUrl()
         
         // Send email
         Email.sendInternal({
