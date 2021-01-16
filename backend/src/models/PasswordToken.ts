@@ -3,7 +3,7 @@ import { column,Database,ManyToOneRelation,Model } from "@simonbackx/simple-data
 import basex from "base-x";
 import crypto from "crypto";
 
-import { User } from "./User";
+import { User, UserWithOrganization } from "./User";
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)
 
@@ -102,5 +102,19 @@ export class PasswordToken extends Model {
         token.token = bs58.encode(await randomBytes(100)).toLowerCase();
         await token.save();
         return token;
+    }
+
+    static async getPasswordRecoveryUrl(user: UserWithOrganization) {
+        // Send an e-mail to say you already have an account + follow password forgot flow
+        const token = await PasswordToken.createToken(user)
+
+        let host: string;
+        if (user.permissions) {
+            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+        } else {
+            host = "https://"+user.organization.getHost()
+        }
+
+        return host+"/reset-password"+(user.permissions ? "/"+encodeURIComponent(user.organization.id) : "")+"?token="+encodeURIComponent(token.token);
     }
 }

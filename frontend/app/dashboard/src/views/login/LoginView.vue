@@ -13,7 +13,7 @@
             <STInputBox title="Wachtwoord">
                 <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
                     <span>Vergeten</span>
-                    <span class="icon help"/>
+                    <span class="icon help" />
                 </button>
                 <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
             </STInputBox>
@@ -33,9 +33,9 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ForgotPasswordView } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
-import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
+import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -82,8 +82,13 @@ export default class LoginView extends Mixins(NavigationMixin){
         const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
 
         try {
-            await LoginHelper.login(this.session, this.email, this.password)
-            this.dismiss({ force: true });
+            const result = await LoginHelper.login(this.session, this.email, this.password)
+
+            if (result.verificationToken) {
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
+            } else {
+                this.dismiss({ force: true });
+            }
         } catch (e) {
             console.error(e)
             this.loading = false;

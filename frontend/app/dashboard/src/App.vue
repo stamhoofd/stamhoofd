@@ -10,7 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
-import { NetworkManager, Session } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -62,6 +62,27 @@ export default class App extends Vue {
             // tood: password reset view
             const session = new Session(parts[1]);
             (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup"));
+        }
+
+        if (parts.length == 2 && parts[0] == 'verify-email') {
+            const queryString = new URL(window.location.href).searchParams;
+            const token = queryString.get('token')
+            const code = queryString.get('code')
+                
+            if (token && code) {
+                // tood: password reset view
+                const session = new Session(parts[1]);
+
+                // tood: password reset view
+                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
+                LoginHelper.verifyEmail(session, code, token).then(() => {
+                    toast.hide()
+                    new Toast("E-mailadres is gevalideerd", "success green").show()
+                }).catch(e => {
+                    toast.hide()
+                    CenteredMessage.fromError(e).addCloseButton().show()
+                })
+            }
         }
 
         if (parts.length == 3 && parts[0] == 'invite') {

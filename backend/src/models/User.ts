@@ -1,11 +1,10 @@
-import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from "@simonbackx/simple-database";
+import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 
 import { KeychainItem } from './KeychainItem';
 import { Organization } from "./Organization";
-import { PasswordToken } from "./PasswordToken";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
@@ -201,37 +200,6 @@ export class User extends Model {
         return user as UserForAuthentication;
     }
 
-    // Methods
-    /*static async login(
-        organization: Organization,
-        email: string,
-        password: string
-    ): Promise<UserWithOrganization | undefined> {
-        const [
-            rows,
-        ] = await Database.select(`SELECT * FROM ${this.table} WHERE organizationId = ? AND email = ? LIMIT 1`, [
-            organization.id,
-            email,
-        ]);
-
-        if (rows.length == 0) {
-            // todo: check timing attack?
-            return;
-        }
-
-        // Read member + address from first row
-        const user = this.fromRow(rows[0][this.table]);
-
-        if (!user?.password) {
-            return;
-        }
-
-        if (await argon2.verify(user.password, password)) {
-            user.eraseProperty("password");
-            return user.setRelation(User.organization, organization);
-        }
-    }*/
-
     static async register(
         organization: Organization,
         data: NewUser
@@ -325,19 +293,5 @@ export class User extends Model {
             throw new Error("Unexpected permission failure")
         }
         return this.permissions && this.permissions.hasReadAccessForAtLeastOneGroup() ? await organization.getPrivateStructure() : await organization.getStructure()
-    }
-
-    async getPasswordRecoveryUrl(this: UserWithOrganization) {
-        // Send an e-mail to say you already have an account + follow password forgot flow
-        const token = await PasswordToken.createToken(this)
-
-        let host: string;
-        if (this.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
-        } else {
-            host = "https://"+this.organization.getHost()
-        }
-
-        return host+"/reset-password"+(this.permissions ? "/"+encodeURIComponent(this.organization.id) : "")+"?token="+encodeURIComponent(token.token);
     }
 }

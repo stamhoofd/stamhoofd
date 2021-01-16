@@ -68,6 +68,9 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     @Prop({ default: false })
     login!: boolean
 
+    @Prop({ required: true })
+    session!: Session
+
     mounted() {
         setTimeout(this.poll.bind(this), 10000)
     }
@@ -79,9 +82,9 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.polling = true
 
         try {
-            const stop = await LoginHelper.pollEmail(SessionManager.currentSession!, this.token)
+            const stop = await LoginHelper.pollEmail(this.session, this.token)
             if (stop) {
-                await this.navigationController?.popToRoot({ force: true })
+                this.dismiss({ force: true })
                 return
             }
         } catch (e) {
@@ -89,7 +92,12 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         }
         this.pollCount++
         this.polling = false
-        setTimeout(this.poll.bind(this), Math.max(this.pollCount*1000, 10*1000))
+
+        if (this.pollCount > 150) {
+            // Stop after 12 minutes
+            return
+        }
+        setTimeout(this.poll.bind(this), Math.max(this.pollCount*1000, 5*1000))
     }
 
     async submit() {
@@ -101,14 +109,14 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-            await LoginHelper.verifyEmail(SessionManager.currentSession!, this.code, this.token)
+            await LoginHelper.verifyEmail(this.session, this.code, this.token)
             new Toast("Jouw e-mailadres is geverifieerd!", "success green").setHide(3000).show()
 
             // Yay!
             // we could be sign in, or couldn't.
             // if signed in: we'll automitically get deallocated
             // so always return
-            await this.navigationController?.popToRoot({ force: true })
+            this.dismiss({ force: true })
 
         } catch (e) {
             this.errorBox = new ErrorBox(e)

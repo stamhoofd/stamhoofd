@@ -6,6 +6,7 @@ import { NewUser, SignupResponse } from "@stamhoofd/structures";
 import Email from '../email/Email';
 import { EmailVerificationCode } from '../models/EmailVerificationCode';
 import { Organization } from "../models/Organization";
+import { PasswordToken } from '../models/PasswordToken';
 import { User } from "../models/User";
 
 type Params = {};
@@ -74,7 +75,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
             if (u.hasAccount()) {
                 // Send an e-mail to say you already have an account + follow password forgot flow
-                const recoveryUrl = await user.getPasswordRecoveryUrl()
+                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user)
                 
                 // Send email
                 Email.sendInternal({
