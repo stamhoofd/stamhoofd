@@ -143,6 +143,8 @@ export class LoginHelper {
             return;
         }
 
+        session.clearKeys()
+
         console.log("Set token")
         session.setToken(response.data)
 
@@ -211,6 +213,11 @@ export class LoginHelper {
             }
             throw e
         }
+
+        // Clear session first
+        // needed to make sure we don't use old keys now
+        // we are sure we'll have good, new keys
+        session.clearKeys()
 
         console.log("Set token")
         session.setToken(tokenResponse.data)
@@ -340,6 +347,10 @@ export class LoginHelper {
             // Clear user
             session.user = null;
         }
+
+        // Clear all known keys
+        // -> initiate loading screen
+        session.clearKeys()
 
         await session.setEncryptionKey(keys.authEncryptionSecretKey)
     }

@@ -261,6 +261,7 @@ export class Session implements RequestMiddleware {
     // Logout without clearing this token
     temporaryLogout() {
         // We do not call ontoken changed -> prevent saving!!!!
+        // Might still be able to login after a reload (because the error was caused by data errors)
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
@@ -270,14 +271,19 @@ export class Session implements RequestMiddleware {
         }
     }
 
+    clearKeys() {
+        this.authEncryptionKey = null;
+        this.userPrivateKey = null
+        this.callListeners()
+    }
+
     logout() {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
             }
             this.token = null;
-            this.authEncryptionKey = null;
-            this.userPrivateKey = null
+            this.clearKeys()
             this.user = null; // force refetch in the future
             this.onTokenChanged();
         }

@@ -107,6 +107,10 @@ export default class CodeInput extends Vue {
                 element.blur()
             }
             this.updateValue()
+
+            if (this.getInternalValue().length === this.codeLength) {
+                this.$emit("complete")
+            }
             return
         }
         if (index >= 1) {
