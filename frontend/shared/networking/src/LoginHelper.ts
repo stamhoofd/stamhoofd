@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, InviteKeychainItem,KeychainItem, KeyConstants, MyUser, NewUser, Organization, PermissionLevel, Permissions, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
 
 import { Keychain } from './Keychain';
@@ -11,32 +11,60 @@ import { NetworkManager } from './NetworkManager';
 import { Session } from './Session';
 import { SessionManager } from './SessionManager';
 
+class StoredKeys extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    authEncryptionKey: string
+
+    /**
+     * In case we don't have a token after validation (validatoin happened on other browser or device)
+     */
+    @field({ decoder: StringDecoder })
+    authSignPrivateKey: string
+
+    @field({ decoder: StringDecoder })
+    email: string
+}
+
 export class LoginHelper {
     /**
      * When email verification is needed (signup, login), we temporary need to
      * store the password in memory + session storage for every token we have to allow a smooth login after validation
      * We use the password to set the encryption key after successful validation
      */
-    private static AWAITING_ENCRYPTION_KEYS = new Map<string, string>()
+    private static AWAITING_KEYS = new Map<string, StoredKeys>()
 
-    static addTemporaryEncryptionKey(token: string, authEncryptionKey: string) {
-        this.AWAITING_ENCRYPTION_KEYS.set(token, authEncryptionKey)
-        // We cannot use sessionStorage, because links in e-mails will start a new session
-        localStorage.setItem("AWAITING_ENCRYPTION_KEYS", JSON.stringify(Object.fromEntries(this.AWAITING_ENCRYPTION_KEYS)))
+    static addTemporaryKey(token: string, keys: StoredKeys) {
+        this.AWAITING_KEYS.set(token, keys)
+        this.saveAwaitingKeys()
     }
 
-    static deleteTemporaryEncryptionKey(token: string) {
-        this.AWAITING_ENCRYPTION_KEYS.delete(token)
-        // We cannot use sessionStorage, because links in e-mails will start a new session
-        localStorage.setItem("AWAITING_ENCRYPTION_KEYS", JSON.stringify(Object.fromEntries(this.AWAITING_ENCRYPTION_KEYS)))
+    static clearAwaitingKeys() {
+        this.AWAITING_KEYS = new Map<string, StoredKeys>()
+        localStorage.removeItem("AWAITING_KEYS")
     }
 
-    static getTemporaryEncryptionKey(token: string): string | null {
-        const exists = this.AWAITING_ENCRYPTION_KEYS.get(token)
+    private static saveAwaitingKeys() {
+        // We cannot use sessionStorage, because links in e-mails will start a new session
+        localStorage.setItem("AWAITING_KEYS", JSON.stringify(
+            Object.fromEntries(
+                Array.from(this.AWAITING_KEYS).map(
+                    ([str, keys]) => [str, keys.encode({ version: Version })]
+                )
+            )
+        ))
+    }
+
+    static deleteTemporaryKey(token: string) {
+        this.AWAITING_KEYS.delete(token)
+        this.saveAwaitingKeys()
+    }
+
+    static getTemporaryKey(token: string): StoredKeys | null {
+        const exists = this.AWAITING_KEYS.get(token)
         if (exists) {
             return exists
         }
-        const stored = localStorage.getItem("AWAITING_ENCRYPTION_KEYS")
+        const stored = localStorage.getItem("AWAITING_KEYS")
         if (!stored) {
             return null
         }
@@ -44,8 +72,8 @@ export class LoginHelper {
         try {
             const decoded = JSON.parse(stored)
             const ob = new ObjectData(decoded, { version: Version })
-            this.AWAITING_ENCRYPTION_KEYS = ob.decode(new MapDecoder(StringDecoder, StringDecoder))
-            return this.AWAITING_ENCRYPTION_KEYS.get(token) ?? null
+            this.AWAITING_KEYS = ob.decode(new MapDecoder(StringDecoder, StoredKeys as Decoder<StoredKeys>))
+            return this.AWAITING_KEYS.get(token) ?? null
         } catch(e) {
             console.error(e)
         }
@@ -153,6 +181,39 @@ export class LoginHelper {
         })
     }
 
+    /**
+     * Return true when the polling should end + confirmation should stop
+     */
+    static async pollEmail(session: Session, token: string): Promise<boolean> {
+        const savedKeys = this.getTemporaryKey(token)
+        if (!savedKeys) {
+            return false
+        }
+        const response = await session.server.request({
+            method: "POST",
+            path: "/verify-email/poll",
+            body: PollEmailVerificationRequest.create({
+                token
+            }),
+            decoder: PollEmailVerificationResponse as Decoder<PollEmailVerificationResponse>
+        })
+
+        if (!response.data.valid) {
+            // the code has been used or is expired
+            session.loadFromStorage()
+            if (session.canGetCompleted()) {
+                // yay! We are signed in
+                await session.updateData()
+                return true
+            }
+
+            // Try to login with stored key
+            await this.login(session, savedKeys.email, savedKeys)
+            return true
+        }
+        return false
+    }
+
     static async verifyEmail(session: Session, code: string, token: string) {
         const response = await session.server.request({
             method: "POST",
@@ -167,15 +228,15 @@ export class LoginHelper {
         // Yay, we have a token!
         // But only use this token if we still have the encryptionKey stored in our cache
         // else, just return  and let the view return to home and sign in again
-        const encryptionKey = this.getTemporaryEncryptionKey(token)
+        const storedKeys = this.getTemporaryKey(token)
 
-        if (!encryptionKey) {
+        if (!storedKeys) {
             // just return. We are verified, but can't use the token without password.
             // user needs to sign in again
             console.warn("Email verified, but no encryptionKey found")
             return;
         }
-        this.deleteTemporaryEncryptionKey(token)
+        this.deleteTemporaryKey(token)
         session.clearKeys()
 
         console.log("Set token")
@@ -184,12 +245,16 @@ export class LoginHelper {
         // Request additional data
         console.log("Fetching user")
         await session.fetchUser()
-        await session.setEncryptionKey(encryptionKey)
+        await session.setEncryptionKey(storedKeys.authEncryptionKey)
         await SessionManager.setCurrentSession(session)
     }
 
 
-    static async login(session: Session, email: string, password: string): Promise<{ verificationToken?: string }> {
+    static async login(
+        session: Session, 
+        email: string, 
+        password: string | ({ authSignPrivateKey: string; authEncryptionKey: string })
+    ): Promise<{ verificationToken?: string }> {
         const response = await session.server.request({
             method: "POST",
             path: "/oauth/token",
@@ -199,17 +264,22 @@ export class LoginHelper {
         })
         const challengeResponse = response.data
 
-        let authSignKeys: { publicKey: string; privateKey: string }
-        try {
-            authSignKeys = await this.createSignKeys(password, challengeResponse.keyConstants)
-        } catch (e) {
-            console.error(e)
-            throw new SimpleError({
-                code: "sign_key_creation_failed",
-                message: "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op."
-            })
-        }
+        let authSignKeys: { privateKey: string }
 
+        if (typeof password === "string") {
+             try {
+                authSignKeys = await this.createSignKeys(password, challengeResponse.keyConstants)
+            } catch (e) {
+                console.error(e)
+                throw new SimpleError({
+                    code: "sign_key_creation_failed",
+                    message: "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op."
+                })
+            }
+        } else {
+            authSignKeys = { privateKey: password.authSignPrivateKey }
+        }
+       
         if (challengeResponse.challenge.length < 30) {
             throw new Error("Malicious challenge received")
         }
@@ -231,10 +301,18 @@ export class LoginHelper {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
                 const error = e.getCode("verify_email")
                 if (error) {
+                    if (typeof password !== "string") {
+                        console.warn("Inifite loop in sign in: sign in after validaton caused a new verification request")
+                        throw e
+                    }
                     const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
 
                     const encryptionKey = await this.createEncryptionKey(password, meta.authEncryptionKeyConstants)
-                    this.addTemporaryEncryptionKey(meta.token, encryptionKey)
+                    this.addTemporaryKey(meta.token, StoredKeys.create({
+                        email,
+                        authEncryptionKey: encryptionKey,
+                        authSignPrivateKey: authSignKeys.privateKey   
+                    }))
 
                     return {
                         verificationToken: meta.token
@@ -244,6 +322,9 @@ export class LoginHelper {
             }
             throw e
         }
+
+        // No need to keep awaiting keys now
+        this.clearAwaitingKeys()
 
         // Clear session first
         // needed to make sure we don't use old keys now
@@ -259,7 +340,12 @@ export class LoginHelper {
         console.log("ok")
 
         // Problem: page already loaded :(
-        const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
+        let encryptionKey!: string
+        if (typeof password === "string") {
+            encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
+        } else {
+            encryptionKey = password.authEncryptionKey
+        }
         await session.setEncryptionKey(encryptionKey)
         await SessionManager.setCurrentSession(session)
 
@@ -493,7 +579,11 @@ export class LoginHelper {
         }
 
         // Save encryption key until verified
-        this.addTemporaryEncryptionKey(response.data.token, keys.authEncryptionSecretKey)
+        this.addTemporaryKey(response.data.token, StoredKeys.create({
+            email,
+            authEncryptionKey: keys.authEncryptionSecretKey,
+            authSignPrivateKey: keys.authSignKeyPair.privateKey
+        }))
         return response.data.token
     }
 

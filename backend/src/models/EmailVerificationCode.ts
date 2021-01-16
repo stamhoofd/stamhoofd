@@ -136,6 +136,38 @@ export class EmailVerificationCode extends Model {
     }
 
     /**
+     * Return true if this token is still valid (used for automatic polling in code view)
+     */
+    static async poll(organizationId: string, token: string): Promise<boolean> {
+        const verificationCodes = await this.where({ token, organizationId }, { limit: 1 })
+
+        if (verificationCodes.length == 0) {
+            return false // = expired or invalid
+        }
+
+        const verificationCode = verificationCodes[0]
+
+        if (verificationCode.token !== token) {
+            // Safety check, is not possible
+            console.error("Security check failed for verify: check MySQL optimization")
+            return false;
+        }
+
+        if (verificationCode.expiresAt < new Date()) {
+            // Expired. 
+            // Can't expose this because that would expose a user enumeration attack
+            // -> we'll include this expiry date in e-mails
+            return false
+        }
+
+        if (verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
      * We don't throw errors here, because we don't want to expose any information about the existance of the code.
      * We just expose if it is valid or not, nothing else
      * False = expired or invalid

@@ -58,6 +58,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class ConfirmEmailView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     loading = false
+    polling = false
+    pollCount = 0
     code = ""
 
     @Prop({ required: true })
@@ -65,6 +67,30 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
 
     @Prop({ default: false })
     login!: boolean
+
+    mounted() {
+        setTimeout(this.poll.bind(this), 10000)
+    }
+
+    async poll() {
+        if (this.polling) {
+            return
+        }
+        this.polling = true
+
+        try {
+            const stop = await LoginHelper.pollEmail(SessionManager.currentSession!, this.token)
+            if (stop) {
+                await this.navigationController?.popToRoot({ force: true })
+                return
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        this.pollCount++
+        this.polling = false
+        setTimeout(this.poll.bind(this), Math.max(this.pollCount*1000, 10*1000))
+    }
 
     async submit() {
         if (this.loading) {

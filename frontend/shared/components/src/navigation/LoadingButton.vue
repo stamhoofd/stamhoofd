@@ -48,7 +48,8 @@ export default class LoadingButton extends Vue {
         top: 50%;
         right: 0;
         transform: translate(100%, -50%);
-        transition: transform 0.25s, opacity 0.25s;
+        transition: transform 0.25s, opacity 0.25s, visibility 0.25s step-end;
+        visibility: hidden;
     }
 
     &.loading {
@@ -58,6 +59,7 @@ export default class LoadingButton extends Vue {
         > div:last-child {
             opacity: 1;
             transform: translate(0, -50%);
+            visibility: visible;
         }
     }
 }

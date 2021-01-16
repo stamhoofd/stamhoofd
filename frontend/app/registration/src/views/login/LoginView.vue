@@ -116,12 +116,13 @@ export default class LoginView extends Mixins(NavigationMixin){
                 
             if (token && code) {
                 // tood: password reset view
-                const toast = new Toast("E-mailadres valideren...", "spinner").setWithOffset().setHide(null).show()
+                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                 LoginHelper.verifyEmail(this.session, code, token).then(() => {
                     toast.hide()
                     new Toast("E-mailadres is gevalideerd", "success green").show()
                 }).catch(e => {
-                    Toast.fromError(e).show()
+                    toast.hide()
+                    CenteredMessage.fromError(e).addCloseButton().show()
                 })
             }
         }

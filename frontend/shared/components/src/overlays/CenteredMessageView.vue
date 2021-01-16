@@ -3,17 +3,17 @@
         <div class="centered-message-container">
             <div class="centered-message">
                 <Spinner v-if="centeredMessage.type == 'loading'" class="center" />
-                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg" />
-                <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg" />
-                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg" />
+                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
+                <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
+                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
                 <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
                 <h1>{{ centeredMessage.title }}</h1>
                 <p>{{ centeredMessage.description }}</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <LoadingButton v-for="(button, index) in centeredMessage.buttons" :loading="button.loading" :key="index">
-                    <button  class="button full" :class="button.type" @click="onClickButton(button)">
+                <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
+                    <button class="button full" :class="button.type" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
@@ -24,15 +24,14 @@
 </template>
 
 <script lang="ts">
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop, Vue } from "vue-property-decorator";
 
-import Spinner from "../Spinner.vue"
+import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from "../errors/STErrorsDefault.vue"
 import LoadingButton from "../navigation/LoadingButton.vue"
-
-import { ErrorBox } from '../errors/ErrorBox';
+import Spinner from "../Spinner.vue"
 import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 
 @Component({
     components: {
@@ -145,6 +144,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     box-sizing: border-box;
     max-height: 100vh;
     overflow: auto;
+    overflow-x: hidden;
 
     > *:first-child {
         margin-top: 10px;

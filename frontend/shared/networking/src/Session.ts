@@ -6,6 +6,7 @@ import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, U
 import { Vue } from "vue-property-decorator";
 
 import { Keychain } from './Keychain'
+import { LoginHelper } from './LoginHelper'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 
@@ -286,6 +287,7 @@ export class Session implements RequestMiddleware {
             this.clearKeys()
             this.user = null; // force refetch in the future
             this.onTokenChanged();
+            LoginHelper.clearAwaitingKeys()
         }
     }
 
