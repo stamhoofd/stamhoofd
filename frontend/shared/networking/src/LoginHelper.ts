@@ -219,6 +219,8 @@ export class LoginHelper {
         console.log("Fetching user")
         const user = await session.fetchUser()
         console.log("ok")
+
+        // Problem: page already loaded :(
         const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
         await session.setEncryptionKey(encryptionKey)
         await SessionManager.setCurrentSession(session)

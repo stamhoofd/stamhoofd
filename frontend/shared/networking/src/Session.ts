@@ -276,6 +276,8 @@ export class Session implements RequestMiddleware {
                 // emtpy
             }
             this.token = null;
+            this.authEncryptionKey = null;
+            this.userPrivateKey = null
             this.user = null; // force refetch in the future
             this.onTokenChanged();
         }
