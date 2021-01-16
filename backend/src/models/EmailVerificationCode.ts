@@ -124,6 +124,17 @@ export class EmailVerificationCode extends Model {
         this.token = bs58.encode(await randomBytes(100)).toLowerCase();
     }
 
+    getEmailVerificationUrl(user: UserWithOrganization) {
+        let host: string;
+        if (user.permissions) {
+            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+        } else {
+            host = "https://"+user.organization.getHost()
+        }
+
+        return host+"/verify-email"+(user.permissions ? "/"+encodeURIComponent(user.organization.id) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
+    }
+
     /**
      * We don't throw errors here, because we don't want to expose any information about the existance of the code.
      * We just expose if it is valid or not, nothing else
@@ -199,7 +210,7 @@ export class EmailVerificationCode extends Model {
             replyTo,
             to: this.email,
             subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-            text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of (als je op dit apparaat geregistreerd hebt) klik op de onderstaande link om jouw e-mailadres te bevestigen.\ntodo?token=${encodeURIComponent(this.token)}&code=${encodeURIComponent(this.code)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+            text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of (als je op dit apparaat geregistreerd hebt) klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
         })
     
     }

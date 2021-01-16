@@ -105,7 +105,10 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         }
 
         return new Response(SignupResponse.create({
-            token: code.token
+            token: code.token,
+
+            // To avoid user enumeration attack, always return the same encryption constants
+            authEncryptionKeyConstants: request.body.authEncryptionKeyConstants
         }));
     }
 }

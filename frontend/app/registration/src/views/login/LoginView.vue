@@ -51,7 +51,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { LoginHelper,NetworkManager, SessionManager } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
@@ -101,10 +101,33 @@ export default class LoginView extends Mixins(NavigationMixin){
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        let clearPath = true
 
         if (parts.length == 1 && parts[0] == 'reset-password') {
             // tood: password reset view
             this.present(new ComponentWithProperties(ForgotPasswordResetView, {}).setDisplayStyle("popup"));
+            clearPath = false
+        }
+
+        if (parts.length == 1 && parts[0] == 'verify-email') {
+            const queryString = new URL(window.location.href).searchParams;
+            const token = queryString.get('token')
+            const code = queryString.get('code')
+                
+            if (token && code) {
+                // tood: password reset view
+                const toast = new Toast("E-mailadres valideren...", "spinner").setWithOffset().setHide(null).show()
+                LoginHelper.verifyEmail(this.session, code, token).then(() => {
+                    toast.hide()
+                    new Toast("E-mailadres is gevalideerd", "success green").show()
+                }).catch(e => {
+                    Toast.fromError(e).show()
+                })
+            }
+        }
+
+        if (clearPath) {
+            HistoryManager.setUrl("/")   
         }
     }
 

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
@@ -14,10 +14,43 @@ import { SessionManager } from './SessionManager';
 export class LoginHelper {
     /**
      * When email verification is needed (signup, login), we temporary need to
-     * store the password in memory for every token we have to allow a smooth login after validation
+     * store the password in memory + session storage for every token we have to allow a smooth login after validation
      * We use the password to set the encryption key after successful validation
      */
-    private static AWAITING_PASSWORDS = new Map<string, string>()
+    private static AWAITING_ENCRYPTION_KEYS = new Map<string, string>()
+
+    static addTemporaryEncryptionKey(token: string, authEncryptionKey: string) {
+        this.AWAITING_ENCRYPTION_KEYS.set(token, authEncryptionKey)
+        // We cannot use sessionStorage, because links in e-mails will start a new session
+        localStorage.setItem("AWAITING_ENCRYPTION_KEYS", JSON.stringify(Object.fromEntries(this.AWAITING_ENCRYPTION_KEYS)))
+    }
+
+    static deleteTemporaryEncryptionKey(token: string) {
+        this.AWAITING_ENCRYPTION_KEYS.delete(token)
+        // We cannot use sessionStorage, because links in e-mails will start a new session
+        localStorage.setItem("AWAITING_ENCRYPTION_KEYS", JSON.stringify(Object.fromEntries(this.AWAITING_ENCRYPTION_KEYS)))
+    }
+
+    static getTemporaryEncryptionKey(token: string): string | null {
+        const exists = this.AWAITING_ENCRYPTION_KEYS.get(token)
+        if (exists) {
+            return exists
+        }
+        const stored = localStorage.getItem("AWAITING_ENCRYPTION_KEYS")
+        if (!stored) {
+            return null
+        }
+
+        try {
+            const decoded = JSON.parse(stored)
+            const ob = new ObjectData(decoded, { version: Version })
+            this.AWAITING_ENCRYPTION_KEYS = ob.decode(new MapDecoder(StringDecoder, StringDecoder))
+            return this.AWAITING_ENCRYPTION_KEYS.get(token) ?? null
+        } catch(e) {
+            console.error(e)
+        }
+        return null
+    }
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
         return new Promise((resolve, reject) => {
@@ -132,17 +165,17 @@ export class LoginHelper {
         })
 
         // Yay, we have a token!
-        // But only use this token if we still have the password stored in our cache
+        // But only use this token if we still have the encryptionKey stored in our cache
         // else, just return  and let the view return to home and sign in again
-        const password = this.AWAITING_PASSWORDS.get(token)
-        this.AWAITING_PASSWORDS.delete(token)
+        const encryptionKey = this.getTemporaryEncryptionKey(token)
 
-        if (!password) {
+        if (!encryptionKey) {
             // just return. We are verified, but can't use the token without password.
             // user needs to sign in again
+            console.warn("Email verified, but no encryptionKey found")
             return;
         }
-
+        this.deleteTemporaryEncryptionKey(token)
         session.clearKeys()
 
         console.log("Set token")
@@ -150,9 +183,7 @@ export class LoginHelper {
 
         // Request additional data
         console.log("Fetching user")
-        const user = await session.fetchUser()
-        console.log("ok")
-        const encryptionKey = await this.createEncryptionKey(password, user.authEncryptionKeyConstants)
+        await session.fetchUser()
         await session.setEncryptionKey(encryptionKey)
         await SessionManager.setCurrentSession(session)
     }
@@ -202,8 +233,8 @@ export class LoginHelper {
                 if (error) {
                     const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
 
-                    // Save this token + all the keys in temporary storage
-                    this.AWAITING_PASSWORDS.set(meta.token, password)
+                    const encryptionKey = await this.createEncryptionKey(password, meta.authEncryptionKeyConstants)
+                    this.addTemporaryEncryptionKey(meta.token, encryptionKey)
 
                     return {
                         verificationToken: meta.token
@@ -461,9 +492,8 @@ export class LoginHelper {
             session.user = null;
         }
 
-        // Save password until verified
-        this.AWAITING_PASSWORDS.set(response.data.token, password)
-
+        // Save encryption key until verified
+        this.addTemporaryEncryptionKey(response.data.token, keys.authEncryptionSecretKey)
         return response.data.token
     }
 

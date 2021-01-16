@@ -8,7 +8,7 @@ import { Organization } from "./Organization";
 import { PasswordToken } from "./PasswordToken";
 
 export type UserWithOrganization = User & { organization: Organization };
-export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
+export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
 export type UserFull = User & { publicKey: string; publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
 
 export class User extends Model {

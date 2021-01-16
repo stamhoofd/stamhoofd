@@ -79,7 +79,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: "Your email address needs verification",
                     human: "Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.",
                     meta: SignupResponse.create({
-                        token: code.token
+                        token: code.token,
+                        authEncryptionKeyConstants: user.authEncryptionKeyConstants
                     }).encode({ version: request.request.getVersion() }),
                     statusCode: 403
                 });

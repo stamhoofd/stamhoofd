@@ -1498,7 +1498,12 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^1.12.2", "@simonbackx/simple-encoding@~1.12":
+"@simonbackx/simple-encoding@^1.12.2":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.13.0.tgz#0e0d152c035879cc98d32e9a777868ba62f51647"
+  integrity sha512-vxe5dC1s8pxDo4vdN9ODjNv1iPrXCO5z+Q5uG7IDAEC8z8d/fDtPZ3nqHGUDOWahNDXQgSntVIpyHwaURiFTPQ==
+
+"@simonbackx/simple-encoding@~1.12":
   version "1.12.6"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-1.12.6.tgz#d970f52f1eec67721b3ec29a6685cfd0b9053b8b"
   integrity sha512-fQvF+NQCBg5ev3lTXH8AOB7tPdepXW9yjvcjIiVMARxwyYQUlsVbKn5hH9+lzrpKMajHjYlOGRVGYnstZ9Gl9Q==
