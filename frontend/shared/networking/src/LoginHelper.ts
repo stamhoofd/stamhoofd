@@ -332,13 +332,19 @@ export class LoginHelper {
         const storedKeys = this.getTemporaryKey(token)
 
         if (!storedKeys) {
-            // just return. We are verified, but can't use the token without password.
+            // Warning: it is possible that this code + token is from a different user
+            // than the current user in session.
+            // So never set the token here, since we cannot swap the encryption key too
+
+            // We are verified, but can't use the token without password.
             // Could be that we are already signed in (but doesn't matter)
 
             // Update the user for sure (could have changed)
-            session.setToken(response.data)
-            await session.fetchUser()
-
+            // e.g. when changing password
+            if (session.canGetCompleted()) {
+                await session.fetchUser()
+            }
+            
             console.warn("Email verified, but no encryptionKey found")
             return;
         }

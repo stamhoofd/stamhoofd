@@ -95,6 +95,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // a hacker could send an e-mail to the user, right after the user registered (without verifying yet), when he had set a different password
                 // user clicks on it -> this sets his own password instead 
                 await user.changePassword(request.body)
+                await user.save()
             }
         }
 
