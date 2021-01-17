@@ -81,11 +81,6 @@
                 <span>Instellingen</span>
             </button>
 
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-admins'}" @click="manageAdmins(false)">
-                <span class="icon lock" />
-                <span>Beheerders</span>
-            </button>
-
             <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(false)">
                 <span class="icon sync" />
                 <span>Groepsadministratie</span>
@@ -122,7 +117,6 @@ import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import AccountSettingsView from './account/AccountSettingsView.vue';
-import AdminsView from './admins/AdminsView.vue';
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
@@ -167,11 +161,6 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
             this.managePayments(false)
-            didSet = true
-        }
-
-        if (parts.length >= 1 && parts[0] == 'admins') {
-            this.manageAdmins(false)
             didSet = true
         }
 
@@ -345,11 +334,6 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }), animated);
-    }
-
-    manageAdmins(animated = true) {
-        this.currentlySelected = "manage-admins"
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AdminsView, {}) }), animated);
     }
 
     manageAccount(animated = true) {

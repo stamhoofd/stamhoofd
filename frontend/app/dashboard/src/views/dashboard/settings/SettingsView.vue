@@ -46,6 +46,20 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center" @click="openAdmins">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                    <h2 class="style-title-list">
+                        Beheerders
+                    </h2>
+                    <p class="style-description">
+                        Geef anderen ook toegang tot deze vereniging
+                    </p>
+                    <template slot="right">
+                        <span v-if="!hasOtherAdmins && enableMemberModule" v-tooltip="'Voeg zeker één andere beheerder toe, om de toegang tot jouw gegevens nooit te verliezen'" class="icon error red" />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="openPrivacy">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg">
                     <h2 class="style-title-list">
@@ -126,10 +140,11 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Image, Invite, Organization, OrganizationAdmins, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import AdminsView from '../admins/AdminsView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
@@ -173,8 +188,22 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     loadingMollie = false
 
+    admins: User[] = []
+    invites: Invite[] = []
+
     get organization() {
         return OrganizationManager.organization
+    }
+
+    async loadAdmins() {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+        this.admins = response.data.users
+        this.invites = response.data.invites
     }
 
     openGeneral() {
@@ -192,6 +221,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     openPrivacy() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PrivacySettingsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    openAdmins() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(AdminsView, {})
         }).setDisplayStyle("popup"))
     }
 
@@ -221,6 +256,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get hasPolicy() {
         return this.organization.meta.privacyPolicyUrl !== null || this.organization.meta.privacyPolicyFile !== null
+    }
+
+    get hasOtherAdmins() {
+        return this.admins.length == 0 || this.admins.length > 1
     }
 
     get hasPaymentMethod() {
@@ -274,7 +313,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPersonalize()
         }
 
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'admins') {
+            // Open mollie settings
+            this.openAdmins()
+        }
 
+        this.loadAdmins()
     }
 }
 </script>
