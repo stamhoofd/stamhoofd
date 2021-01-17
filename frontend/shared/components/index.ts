@@ -32,6 +32,7 @@ export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as NumberInput } from "./src/inputs/NumberInput.vue"
 export { default as StepperInput } from "./src/inputs/StepperInput.vue"
 export { default as CodeInput } from "./src/inputs/CodeInput.vue"
+export { default as PasswordStrength } from "./src/inputs/PasswordStrength.vue"
 
 // Navigation
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"

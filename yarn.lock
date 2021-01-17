@@ -2001,6 +2001,16 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
+"@zxcvbn-ts/core@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@zxcvbn-ts/core/-/core-0.1.0.tgz#013047ffbe07622bd5126cc7899aba98ab53039a"
+  integrity sha512-OamEYWKXv/v1P9Tq1exVcUhaoRbQcwHg2JiWkUH5+Kp7JEsnXgFrYblNdrZ1Tf0zA3BuvXLJ4vW0egSwPJx3tQ==
+
+"@zxcvbn-ts/language-common@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@zxcvbn-ts/language-common/-/language-common-0.1.0.tgz#1927e856feb869ae3d8676bd588666558152722f"
+  integrity sha512-afbIKwEa918gTGOxG3cmyKGFhKWFkzy8R8onAdBOalIr3BxzJBhQPSLqtgYWaJMqQ64Gesafyy+9ram2QXdRVw==
+
 abab@^2.0.0:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.5.tgz#c0b678fb32d60fc1219c784d6a826fe385aeb79a"

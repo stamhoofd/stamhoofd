@@ -14,34 +14,45 @@
 
             <template v-if="!loggedIn">
                 <p v-if="invite.sender.firstName">
-                    {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.
+                    {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of log in) om toegang te krijgen tot alle inschrijvingen.
                 </p>
                 <p v-if="invite.userDetails && invite.userDetails.email" class="info-box">
                     Je kan jouw e-mailadres wijzigen nadat je een account hebt aangemaakt. Je moet eerst bewijzen dat dit jouw e-mailadres is.
                 </p>
                 <STErrorsDefault :error-box="errorBox" />
 
-                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                    <div class="input-group">
-                        <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                        </div>
-                        <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                        </div>
+                <div class="split-inputs">
+                    <div>
+                        <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="invite.userDetails && invite.userDetails.email" />
                     </div>
-                </STInputBox>
+                    <div>
+                        <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                            <div class="input-group">
+                                <div>
+                                    <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                                </div>
+                                <div>
+                                    <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                                </div>
+                            </div>
+                        </STInputBox>
+                    </div>
+                </div>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="invite.userDetails && invite.userDetails.email" />
+                <div class="split-inputs">
+                    <div>
+                        <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
+                            <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
 
-
-                <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
-                    <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
-                </STInputBox>
-
-                <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                    <input v-model="passwordRepeat" class="input" placeholder="Herhaal wachtwoord" autocomplete="new-password" type="password">
-                </STInputBox>
+                        <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
+                            <input v-model="passwordRepeat" class="input" placeholder="Herhaal wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
+                    </div>
+                    <div>
+                        <PasswordStrength v-model="password" />
+                    </div>
+                </div>
             </template>
 
             <template v-else>
@@ -52,21 +63,23 @@
             </template>
         </main>
 
-        <STFloatingFooter>
-            <button v-if="!loggedIn" class="button secundary" type="button" @click="tryLogin">
-                Ik heb al een account
-            </button>
-            <LoadingButton :loading="loading">
-                <button v-if="!loggedIn" class="button primary">
-                    <span class="icon lock" />
-                    <span>Account aanmaken</span>
+        <STToolbar>
+            <template slot="right">
+                <button v-if="!loggedIn" class="button secundary" type="button" @click="tryLogin">
+                    Ik heb al een account
                 </button>
-                <button v-else class="button primary">
-                    <span class="icon success" />
-                    <span>Uitnodiging accepteren</span>
-                </button>
-            </LoadingButton>
-        </STFloatingFooter>
+                <LoadingButton :loading="loading">
+                    <button v-if="!loggedIn" class="button primary">
+                        <span class="icon lock" />
+                        <span>Account aanmaken</span>
+                    </button>
+                    <button v-else class="button primary">
+                        <span class="icon success" />
+                        <span>Uitnodiging accepteren</span>
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
     </form>
 </template>
 
@@ -74,7 +87,7 @@
 import { ArrayDecoder,Decoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, STErrorsDefault, STToolbar, STInputBox, STNavigationBar, Validator, PasswordStrength } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
 import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
 import { ChallengeResponseStruct,Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, KeyConstants,NewUser, OrganizationSimple, Token, TradedInvite,User, Version } from '@stamhoofd/structures';
@@ -85,11 +98,12 @@ import LoginView from '../login/LoginView.vue';
 @Component({
     components: {
         STNavigationBar,
-        STFloatingFooter,
+        STToolbar,
         STInputBox,
         LoadingButton,
         EmailInput,
-        STErrorsDefault
+        STErrorsDefault,
+        PasswordStrength
     }
 })
 export default class AcceptInviteView extends Mixins(NavigationMixin){
@@ -176,10 +190,10 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                     })
                 }
 
-                if (this.password.length < 14) {
+                if (this.password.length < 8) {
                     throw new SimpleError({
                         code: "",
-                        message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
+                        message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
                         field: "password"
                     })
                 }

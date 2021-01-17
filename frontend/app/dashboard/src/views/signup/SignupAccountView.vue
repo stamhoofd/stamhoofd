@@ -16,7 +16,11 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                </div>
+
+                <div>
+                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -26,36 +30,40 @@
                             </div>
                         </div>
                     </STInputBox>
+                </div>
+            </div>
 
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
-
+            <div class="split-inputs">
+                <div>
                     <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
                         <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
-
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
                         <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
-
-                    <Checkbox v-model="acceptPrivacy" class="long-text">
-                        Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptTerms" class="long-text">
-                        Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptDataAgreement" class="long-text">
-                        Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
-                    </Checkbox>
                 </div>
 
                 <div>
-                    <div class="warning-box">
-                        Kies een wachtwoord van minstens 14 karakters. We raden je heel sterk aan om een wachtwoordbeheerder te gebruiken en een wachtwoord te kiezen dat nog veel langer is (en automatisch gegenereerd).
-                    </div>
+                    <PasswordStrength v-model="password" />
                 </div>
             </div>
+
+
+            <div class="checkbox-box">
+                <Checkbox v-model="acceptPrivacy" class="long-text">
+                    Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
+                </Checkbox>
+
+                <Checkbox v-model="acceptTerms" class="long-text">
+                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                </Checkbox>
+
+                <Checkbox v-model="acceptDataAgreement" class="long-text">
+                    Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                </Checkbox>
+            </div>
+
+            
         </main>
 
         <STToolbar>
@@ -78,7 +86,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -95,7 +103,8 @@ import SignupModulesView from './SignupModulesView.vue';
         LoadingButton,
         BackButton,
         EmailInput,
-        Checkbox
+        Checkbox,
+        PasswordStrength
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
@@ -158,11 +167,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 })
             }
 
-            if (this.password.length < 14) {
+            if (this.password.length < 8) {
                 plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "password_too_short",
-                    message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
+                    message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
                     field: "password"
                 })
             }
@@ -238,5 +247,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 #signup-account-view {
+    .checkbox-box {
+        margin-top: 15px;
+    }
 }
 </style>
