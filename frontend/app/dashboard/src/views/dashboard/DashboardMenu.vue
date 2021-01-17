@@ -93,6 +93,10 @@
         </div>
         <hr v-if="fullAccess">
         <div class="">
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
+                <span class="icon user" />
+                <span>Mijn account</span>
+            </button>
             <button class="menu-button button heading" @click="logout">
                 <span class="icon logout" />
                 <span>Uitloggen</span>
@@ -155,13 +159,17 @@ export default class Menu extends Mixins(NavigationMixin) {
         let didSet = false
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
-            this.manageSettings(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.manageSettings(false)
+                didSet = true
+            }
         }
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
-            this.managePayments(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.managePayments(false)
+                didSet = true
+            }
         }
 
         if (parts.length >= 1 && parts[0] == 'account') {
@@ -170,8 +178,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
-            this.openSyncScoutsEnGidsen(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.openSyncScoutsEnGidsen(false)
+                didSet = true
+            }
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
@@ -207,7 +217,11 @@ export default class Menu extends Mixins(NavigationMixin) {
             if (this.groups.length > 0) {
                 this.openGroup(this.groups[0])
             } else {
-                this.manageSettings(false)
+                if (this.fullAccess) {
+                    this.manageSettings(false)
+                } else {
+                    this.manageAccount(false)
+                }
             }
         }
 

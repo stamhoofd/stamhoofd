@@ -14,7 +14,7 @@
         <main>
             <h1>Beheerders</h1>
 
-            <p class="warning-box" v-if="admins.length == 1 && enableMemberModule">
+            <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
                 Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe!
             </p>
 
