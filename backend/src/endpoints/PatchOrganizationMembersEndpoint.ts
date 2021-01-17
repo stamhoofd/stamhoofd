@@ -69,6 +69,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Created by organization = placeholder
             member.placeholder = struct.placeholder
 
+            for (const registrationStruct of struct.registrations) {
+                if (!user.permissions.hasWriteAccess(registrationStruct.groupId)) {
+                    throw new SimpleError({
+                        code: "permission_denied",
+                        message: "No permissions to create member in this group",
+                        human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
+                        statusCode: 403
+                    })
+                }   
+            }
+
 
             /**
              * In development mode, we allow some secret usernames to create fake data
@@ -149,6 +160,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
+            let hasAccess = user.permissions.hasWriteAccess()
+
+            if (!hasAccess) {
+                for (const registration of member.registrations) {
+                    if (user.permissions.hasWriteAccess(registration.groupId)) {
+                        hasAccess = true
+                    }   
+                }
+            }
+
+            if (!hasAccess) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions to edit members in this group",
+                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
+                    statusCode: 403
+                })
+            }            
+
             // Check permissions (todo)
 
             member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
@@ -158,6 +188,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.publicKey = patch.publicKey ?? member.publicKey
             member.placeholder = patch.placeholder ?? member.placeholder
             await member.save();
+
+           
 
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
@@ -234,7 +266,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Loop all members one by one
         for (const id of request.body.getDeletes()) {
-            const member = await Member.getByID(id)
+            const member = await Member.getWithRegistrations(id)
             if (!member || member.organizationId != user.organizationId) {
                  throw new SimpleError({
                     code: "permission_denied",
@@ -242,6 +274,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     human: "Je hebt geen toegang om dit lid te verwijderen"
                 })
             }
+
+            let hasAccess = user.permissions.hasWriteAccess()
+
+            if (!hasAccess) {
+                for (const registration of member.registrations) {
+                    if (user.permissions.hasWriteAccess(registration.groupId)) {
+                        hasAccess = true
+                    }   
+                }
+            }
+
+            if (!hasAccess) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions to edit members in this group",
+                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
+                    statusCode: 403
+                })
+            }        
 
             await User.deleteForDeletedMember(member.id)
             await member.delete()
