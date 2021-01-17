@@ -333,7 +333,12 @@ export class LoginHelper {
 
         if (!storedKeys) {
             // just return. We are verified, but can't use the token without password.
-            // user needs to sign in again
+            // Could be that we are already signed in (but doesn't matter)
+
+            // Update the user for sure (could have changed)
+            session.setToken(response.data)
+            await session.fetchUser()
+
             console.warn("Email verified, but no encryptionKey found")
             return;
         }
@@ -672,16 +677,31 @@ export class LoginHelper {
         }
     }
 
-    static async patchUser(session: Session, patch: AutoEncoderPatchType<User>) {
+    static async patchUser(session: Session, patch: AutoEncoderPatchType<User>): Promise<{ verificationToken?: string }> {
         // Do netwowrk request to create organization
-        const response = await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/user/"+session.user!.id,
-            body: patch,
-            decoder: User
-        })
+        try {
+            await session.authenticatedServer.request({
+                method: "PATCH",
+                path: "/user/"+session.user!.id,
+                body: patch,
+                decoder: User
+            })
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e))) {
+                const error = e.getCode("verify_email")
+                if (error) {
+                    const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
+                    return {
+                        verificationToken: meta.token
+                    }
+                }
+                
+            }
+            throw e
+        }
 
         await session.updateData()
+        return {}
     }
 
     static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {

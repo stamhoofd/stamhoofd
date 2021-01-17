@@ -85,11 +85,6 @@
                 <span class="icon sync" />
                 <span>Groepsadministratie</span>
             </button>
-
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
-                <span class="icon user" />
-                <span>Mijn account</span>
-            </button>
         </div>
         <hr v-if="fullAccess">
         <div class="">

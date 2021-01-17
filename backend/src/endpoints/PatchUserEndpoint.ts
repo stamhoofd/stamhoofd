@@ -1,8 +1,9 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, KeyConstants,NewUser, Permissions, User as UserStruct } from "@stamhoofd/structures";
+import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
 
+import { EmailVerificationCode } from '../models/EmailVerificationCode';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 type Params = { id: string };
@@ -13,7 +14,7 @@ type ResponseBody = UserStruct
 /**
  * Return a list of users and invites for the given organization with admin permissions
  */
-export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = NewUser.patchType() as Decoder<AutoEncoderPatchType<NewUser>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -50,7 +51,6 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
 
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
-        editUser.email = request.body.email ?? editUser.email
 
         if (request.body.permissions) {
             if (!user.permissions || !user.permissions.hasFullAccess()) {
@@ -74,6 +74,33 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
         }
 
         await editUser.save();
+
+        if (request.body.email && request.body.email !== editUser.email) {
+            const fullUser = await User.getFull(user.id)
+            if (!fullUser) {
+                console.error("Unexpected user not found while fetching full user")
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "Je hebt geen toegang om deze gebruiker te wijzigen"
+                })
+            }
+
+            // Create an validation code
+            // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
+            const code = await EmailVerificationCode.createFor(user, request.body.email)
+            code.send(user)
+
+            throw new SimpleError({
+                code: "verify_email",
+                message: "Your email address needs verification",
+                human: "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.",
+                meta: SignupResponse.create({
+                    token: code.token,
+                    authEncryptionKeyConstants: fullUser.authEncryptionKeyConstants
+                }).encode({ version: request.request.getVersion() }),
+                statusCode: 403
+            });
+        }
 
         return new Response(UserStruct.create(editUser));      
     }

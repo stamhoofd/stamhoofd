@@ -45,7 +45,7 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
+import { BackButton, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -138,10 +138,18 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
-            const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
-            toast.withOffset = true
-            toast.show()
+            const result = await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
+
+            if (result.verificationToken) {
+                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken }).setDisplayStyle("popup"))
+            } else {
+                const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
+                toast.withOffset = true
+                toast.show()
+            }
+
+            // Create a new patch
+            this.userPatch = User.patch({ id: this.user.id })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
