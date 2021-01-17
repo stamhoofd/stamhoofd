@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDec
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
 
 import { Keychain } from './Keychain';
@@ -25,6 +25,14 @@ class StoredKeys extends AutoEncoder {
     email: string
 }
 
+class StoredInvite extends AutoEncoder {
+    @field({ decoder: Invite })
+    invite: Invite
+
+    @field({ decoder: StringDecoder })
+    secret: string
+}
+
 export class LoginHelper {
     /**
      * When email verification is needed (signup, login), we temporary need to
@@ -32,6 +40,7 @@ export class LoginHelper {
      * We use the password to set the encryption key after successful validation
      */
     private static AWAITING_KEYS = new Map<string, StoredKeys>()
+    private static STORED_INVITES: StoredInvite[] = []
 
     static addTemporaryKey(token: string, keys: StoredKeys) {
         this.AWAITING_KEYS.set(token, keys)
@@ -78,6 +87,40 @@ export class LoginHelper {
             console.error(e)
         }
         return null
+    }
+
+
+    static addStoredInvite(invite: StoredInvite) {
+        this.getStoredInvites()
+        this.STORED_INVITES.push(invite)
+        this.saveStoredInvites()
+    }
+
+    static clearStoredInvites() {
+        this.STORED_INVITES = []
+        localStorage.removeItem("STORED_INVITES")
+    }
+
+    private static saveStoredInvites() {
+        // We cannot use sessionStorage, because links in e-mails will start a new session
+        localStorage.setItem("STORED_INVITES", JSON.stringify(this.STORED_INVITES.map(v => v.encode({ version: Version }))))
+    }
+
+    static getStoredInvites(): StoredInvite[] {
+        const stored = localStorage.getItem("STORED_INVITES")
+        if (!stored) {
+            return this.STORED_INVITES
+        }
+
+        try {
+            const decoded = JSON.parse(stored)
+            const ob = new ObjectData(decoded, { version: Version })
+            this.STORED_INVITES = ob.decode(new ArrayDecoder(StoredInvite as Decoder<StoredInvite>))
+            return this.STORED_INVITES
+        } catch(e) {
+            console.error(e)
+        }
+        return []
     }
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
@@ -182,6 +225,64 @@ export class LoginHelper {
     }
 
     /**
+     * Save an invite until the e-mail address we have is valid
+     */
+    static saveInvite(invite: Invite, secret: string) {
+        this.addStoredInvite(StoredInvite.create({
+            invite,
+            secret
+        }))
+    }
+
+    static async tradeInvitesIfNeeded(session: Session) {
+        const invites = this.getStoredInvites()
+        let traded = false
+
+        for (const invite of invites) {
+            if (invite.invite.isValid() && invite.invite.organization.id === session.organizationId) {
+                try {
+                    await this.tradeInvite(session, invite.invite.key, invite.secret, true)
+                    traded = true
+                } catch(e) {
+                    console.error(e)
+                }
+            }
+        }
+
+        if (traded) {
+            // We need the user for decrypting the next invite
+            session.user = null
+        }
+
+        this.clearStoredInvites()
+    }
+
+    static async tradeInvite(session: Session, key: string, secret: string, multiple = false) {
+        const response = await session.authenticatedServer.request({
+            method: "POST",
+            path: "/invite/"+encodeURIComponent(key)+"/trade",
+            decoder: TradedInvite as Decoder<TradedInvite>
+        })
+
+        // todo: store this result until completed the trade in!
+
+        const encryptedKeychainItems = response.data.keychainItems
+        
+        if (encryptedKeychainItems) {
+            const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, secret)
+            await LoginHelper.addToKeychain(session, decrypted)
+        }
+
+        // Clear user since permissions have changed
+        if (!multiple) {
+            // We need the user for decrypting the next invite
+            session.user = null
+        }
+        //SessionManager.clearCurrentSession()
+        //await SessionManager.setCurrentSession(session)
+    }
+
+    /**
      * Return true when the polling should end + confirmation should stop
      */
     static async pollEmail(session: Session, token: string): Promise<boolean> {
@@ -238,14 +339,31 @@ export class LoginHelper {
         }
         this.deleteTemporaryKey(token)
         session.clearKeys()
+        
+        
+        try {
+            session.preventComplete = true
 
-        console.log("Set token")
-        session.setToken(response.data)
 
-        // Request additional data
-        console.log("Fetching user")
-        await session.fetchUser()
-        await session.setEncryptionKey(storedKeys.authEncryptionKey)
+            console.log("Set token")
+            session.setToken(response.data)
+
+            // Request additional data
+            console.log("Fetching user")
+            await session.fetchUser()
+
+            await session.setEncryptionKey(storedKeys.authEncryptionKey)
+            await this.tradeInvitesIfNeeded(session)
+
+            // if user got cleared due to an invite
+            if (!session.user) {
+                await session.fetchUser()
+                // need to wait on this because it changes the permissions
+            }
+        } finally {
+            session.preventComplete = false
+        }
+       
         await SessionManager.setCurrentSession(session)
     }
 
@@ -347,6 +465,14 @@ export class LoginHelper {
             encryptionKey = password.authEncryptionKey
         }
         await session.setEncryptionKey(encryptionKey)
+
+        await this.tradeInvitesIfNeeded(session)
+
+        // if user got cleared due to an invite
+        if (!session.user) {
+            await session.fetchUser()
+        }
+
         await SessionManager.setCurrentSession(session)
 
         return {}

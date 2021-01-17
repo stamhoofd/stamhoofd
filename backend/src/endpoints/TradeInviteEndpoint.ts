@@ -44,7 +44,7 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const [invite] = invites
 
-        if (invite.validUntil < new Date()) {
+        if (invite.validUntil < new Date() || invite.organizationId != user.organizationId) {
             throw new SimpleError({
                 code: "expired",
                 message: "This invite is expired",

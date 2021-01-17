@@ -86,42 +86,49 @@ export default class App extends Vue {
         }
 
         if (parts.length == 3 && parts[0] == 'invite') {
+            // out of date
+            new CenteredMessage("Deze link is niet meer geldig", "De uitnodiging die je hebt gekregen is niet langer geldig. Vraag om een nieuwe uitnodiging te versturen.", "error").addCloseButton().show()
+        }
 
-            const key = parts[2];
-            const secret = decodeURIComponent(parts[1]);
+        if (parts.length == 1 && parts[0] == 'invite') {
+            const queryString = new URL(window.location.href).searchParams;
+            const key = queryString.get('key');
+            const secret = queryString.get('secret');
 
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(PromiseView, {
-                    promise: async () => {
-                        try {
-                            const response = await NetworkManager.server.request({
-                                method: "GET",
-                                path: "/invite/"+key,
-                                decoder: Invite as Decoder<Invite>
-                            })
-
-                            if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
-                                // Invalid or almost invalid
-                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                return new ComponentWithProperties(InvalidInviteView, {
-                                    invite: response.data
+            if (key && secret) {
+                (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(PromiseView, {
+                        promise: async () => {
+                            try {
+                                const response = await NetworkManager.server.request({
+                                    method: "GET",
+                                    path: "/invite/"+key,
+                                    decoder: Invite as Decoder<Invite>
                                 })
+
+                                if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
+                                    // Invalid or almost invalid
+                                    const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                    return new ComponentWithProperties(InvalidInviteView, {
+                                        invite: response.data
+                                    })
+                                }
+                                const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
+                                return new ComponentWithProperties(AcceptInviteView, {
+                                    invite: response.data,
+                                    secret
+                                })
+                            } catch (e) {
+                                Logger.error(e)
+                                // Probably invalid invite
+                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                return new ComponentWithProperties(InvalidInviteView, {})
                             }
-                            const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
-                            return new ComponentWithProperties(AcceptInviteView, {
-                                invite: response.data,
-                                secret
-                            })
-                        } catch (e) {
-                            Logger.error(e)
-                            // Probably invalid invite
-                            const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                            return new ComponentWithProperties(InvalidInviteView, {})
+                            
                         }
-                        
-                    }
-                })
-            }).setDisplayStyle("popup"));
+                    })
+                }).setDisplayStyle("popup"));
+            }
         }
     }
 }

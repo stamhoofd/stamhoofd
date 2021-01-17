@@ -17,6 +17,8 @@ export class Session implements RequestMiddleware {
     organization: Organization | null = null
     user: MyUser | null = null
 
+    preventComplete = false
+
     protected token: ManagedToken | null = null
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
@@ -135,7 +137,7 @@ export class Session implements RequestMiddleware {
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !!this.organization && !!this.userPrivateKey
+        return !!this.token && !!this.user && !!this.organization && !!this.userPrivateKey && !this.preventComplete
     }
 
     /**
@@ -186,6 +188,7 @@ export class Session implements RequestMiddleware {
             this.user = preload.user
             this.userPrivateKey = preload.userPrivateKey
         }
+
         this.onTokenChanged();
 
         // Start loading the user and encryption keys

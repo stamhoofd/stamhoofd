@@ -4,14 +4,19 @@
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
         <main>
-            <h1 v-if="invite.sender.firstName">Uitnodiging van {{ invite.sender.firstName }}</h1>
-            <h1 v-else>Uitnodiging</h1>
+            <h1 v-if="invite.sender.firstName">
+                Uitnodiging van {{ invite.sender.firstName }}
+            </h1>
+            <h1 v-else>
+                Uitnodiging
+            </h1>
             
-            <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="!loggedIn">
-                <p class="st-list-description" v-if="invite.sender.firstName">{{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.</p>
-
+                <p v-if="invite.sender.firstName">
+                    {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.
+                </p>
+                <STErrorsDefault :error-box="errorBox" />
 
                 <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                     <div class="input-group">
@@ -24,7 +29,7 @@
                     </div>
                 </STInputBox>
 
-                <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
                 <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
                     <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
@@ -36,19 +41,23 @@
             </template>
 
             <template v-else>
-                <p class="st-list-description" v-if="invite.sender.firstName">{{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}.</p>
-
+                <p v-if="invite.sender.firstName">
+                    {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}.
+                </p>
+                <STErrorsDefault :error-box="errorBox" />
             </template>
         </main>
 
         <STFloatingFooter>
-            <button class="button secundary" v-if="!loggedIn" @click="tryLogin" type="button">Ik heb al een account</button>
+            <button v-if="!loggedIn" class="button secundary" type="button" @click="tryLogin">
+                Ik heb al een account
+            </button>
             <LoadingButton :loading="loading">
-                <button class="button primary" v-if="!loggedIn">
+                <button v-if="!loggedIn" class="button primary">
                     <span class="icon lock" />
                     <span>Account aanmaken</span>
                 </button>
-                <button class="button primary" v-else>
+                <button v-else class="button primary">
                     <span class="icon success" />
                     <span>Uitnodiging accepteren</span>
                 </button>
@@ -58,16 +67,16 @@
 </template>
 
 <script lang="ts">
-import { Decoder, StringDecoder, ObjectData, VersionBoxDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ErrorBox, STErrorsDefault, Validator, EmailInput } from "@stamhoofd/components"
+import { ArrayDecoder,Decoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
-import { NetworkManager,Session, SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version, Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, TradedInvite } from '@stamhoofd/structures';
+import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
+import { ChallengeResponseStruct,Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, KeyConstants,NewUser, OrganizationSimple, Token, TradedInvite,User, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import LoginView from '../login/LoginView.vue';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -183,17 +192,22 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                         this.session = new Session(this.invite.organization.id)
                     }
 
-                    await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
+                    const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
+                    LoginHelper.saveInvite(this.invite, this.secret)
+                    this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session }))
                 } catch (e) {
                     component.hide()
                     throw e;
                 }
                 
                 component.hide()
+            } else {
+                await LoginHelper.tradeInvite(this.session!, this.invite.key, this.secret)
+                SessionManager.clearCurrentSession()
+                await SessionManager.setCurrentSession(this.session!)
+                this.dismiss({ force: true })
             }
 
-            // Trade in the key for the keychain constants + permissions (happens in the background
-            await this.trade()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             console.error(e)
@@ -201,32 +215,5 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
        
         this.loading = false 
     }
-
-    async trade() {
-        const response = await this.session!.authenticatedServer.request({
-            method: "POST",
-            path: "/invite/"+encodeURIComponent(this.invite.key)+"/trade",
-            decoder: TradedInvite as Decoder<TradedInvite>
-        })
-
-        // todo: store this result until completed the trade in!
-
-        const encryptedKeychainItems = response.data.keychainItems
-        
-        if (encryptedKeychainItems) {
-            const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, this.secret)
-            await LoginHelper.addToKeychain(this.session!, decrypted)
-        }
-
-        // Clear user since permissions have changed
-        this.session!.user = null;
-        SessionManager.clearCurrentSession()
-        await SessionManager.setCurrentSession(this.session!)
-        this.dismiss({ force: true })
-    }
 }
 </script>
-
-<style lang="scss">
-
-</style>
