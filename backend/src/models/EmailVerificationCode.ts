@@ -232,19 +232,29 @@ export class EmailVerificationCode extends Model {
         }
     }
 
-    send(user: UserWithOrganization) {
+    send(user: UserWithOrganization, withCode = true) {
         const { from, replyTo } = user.organization.getDefaultEmail()
 
         // todo: add link (also include expire at in link, in case if not signed in we can report that immediately)
         // Send mail without waiting
-        Email.send({
-            from,
-            replyTo,
-            to: this.email,
-            subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-            text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of (als je op dit apparaat geregistreerd hebt) klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
-        })
-    
+
+        if (withCode) {
+            Email.send({
+                from,
+                replyTo,
+                to: this.email,
+                subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
+                text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of (als je op dit apparaat geregistreerd hebt) klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+            })
+        } else {
+            Email.send({
+                from,
+                replyTo,
+                to: this.email,
+                subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
+                text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+            })
+        }
     }
 
     static async resend(organization: Organization, token: string): Promise<undefined | string> {

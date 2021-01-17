@@ -87,13 +87,13 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
             // Create an validation code
             // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
-            const code = await EmailVerificationCode.createFor(user, request.body.email)
-            code.send(user)
+            const code = await EmailVerificationCode.createFor(editUser, request.body.email)
+            code.send(editUser.setRelation(User.organization, user.organization), editUser.id === user.id)
 
             throw new SimpleError({
                 code: "verify_email",
                 message: "Your email address needs verification",
-                human: "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.",
+                human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd wordt het e-mailadres gewijzigd.",
                 meta: SignupResponse.create({
                     token: code.token,
                     authEncryptionKeyConstants: fullUser.authEncryptionKeyConstants
