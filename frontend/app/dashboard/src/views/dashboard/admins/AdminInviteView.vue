@@ -17,6 +17,10 @@
                 Beheerder bewerken
             </h1>
 
+            <p v-if="isNew" class="info-box">
+                Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
             <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                 <div class="input-group">
@@ -495,7 +499,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
        
     }
 
-    async deleteMe(force: boolean = false) {
+    async deleteMe(force = false) {
         if (this.deleting || this.saving) {
             return false;
         }

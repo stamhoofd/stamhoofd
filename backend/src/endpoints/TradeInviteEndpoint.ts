@@ -53,6 +53,15 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
             })
         }
 
+        if (invite.userDetails?.email && (user.email !== invite.userDetails.email || !user.verified)) {
+            throw new SimpleError({
+                code: "invalid_email",
+                message: "This invite is only intended for an account with email "+invite.userDetails.email,
+                human: "Je kan deze uitnodiging enkel accepteren op het account met e-mailadres "+invite.userDetails.email+". Vraag een nieuwe uitnodiging.",
+                statusCode: 400
+            })
+        }
+
         if (invite.receiverId) {
 
             if (invite.receiverId != token.user.id) {

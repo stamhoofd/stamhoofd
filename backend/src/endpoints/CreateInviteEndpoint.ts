@@ -100,6 +100,13 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
                 })
             }
         }
+
+        if (!request.body.receiverId && request.body.userDetails?.email) {
+            // 7 days valid, because validation is required
+            const date = new Date(new Date().getTime() + 1000*60*60*24*7)
+            date.setMilliseconds(0)
+            invite.validUntil = date
+        }
         
         await invite.save()
 

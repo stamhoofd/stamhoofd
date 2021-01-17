@@ -16,6 +16,9 @@
                 <p v-if="invite.sender.firstName">
                     {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Maak een account aan (of login) om toegang te krijgen tot alle inschrijvingen.
                 </p>
+                <p v-if="invite.userDetails && invite.userDetails.email" class="info-box">
+                    Je kan jouw e-mailadres wijzigen nadat je een account hebt aangemaakt. Je moet eerst bewijzen dat dit jouw e-mailadres is.
+                </p>
                 <STErrorsDefault :error-box="errorBox" />
 
                 <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -29,7 +32,8 @@
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="invite.userDetails && invite.userDetails.email" />
+
 
                 <STInputBox title="Kies een wachtwoord" error-fields="password" :error-box="errorBox">
                     <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">

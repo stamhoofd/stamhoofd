@@ -10,7 +10,13 @@
             </h1>
         
             <p class="st-list-description">
-                Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). De link is één uur geldig.
+                Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). 
+                <template v-if="invite.userDetails && invite.userDetails.email">
+                    De link is 7 dagen geldig.
+                </template>
+                <template v-else>
+                    De link is 4 uur geldig.
+                </template>
             </p>
 
             <STInputBox title="Link" class="max">

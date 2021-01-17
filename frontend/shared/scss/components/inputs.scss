@@ -30,6 +30,11 @@ $input-height: 44px;
         border-color: $color-primary-gray-light;
     }
 
+    &:disabled {
+        color: $color-gray;
+        cursor: not-allowed;
+    }
+
     &:focus,
     &:focus-within {
         border-color: $color-primary;
