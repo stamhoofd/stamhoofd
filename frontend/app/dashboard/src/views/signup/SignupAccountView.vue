@@ -86,7 +86,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength, ConfirmEmailView } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
@@ -210,14 +210,15 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             plausible('signupKeys');
             try {
 
-                await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
-                
-                this.loading = false;
-                component.hide()
+                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
                 plausible('signup');
 
-                this.navigationController!.push(new ComponentWithProperties(SignupModulesView, {}), true, this.navigationController!.components.length)
+                this.loading = false;
+                component.hide()
 
+                const session = new Session(this.organization.id)
+                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session }))
+                
             } catch (e) {
                 this.loading = false;
                 component.hide()

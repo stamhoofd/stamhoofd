@@ -478,7 +478,7 @@ export class LoginHelper {
         return {}
     }
 
-    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null) {
+    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
         const keys = await this.createKeys(password)
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
@@ -514,11 +514,19 @@ export class LoginHelper {
                 ],
                 registerCode
             }),
-            decoder: Token
+            decoder: SignupResponse as Decoder<SignupResponse>
         })
 
+        // Save encryption key until verified
+        this.addTemporaryKey(response.data.token, StoredKeys.create({
+            email,
+            authEncryptionKey: keys.authEncryptionSecretKey,
+            authSignPrivateKey: keys.authSignKeyPair.privateKey
+        }))
+        return response.data.token
+
         // Auomatically assign all prmissions (frontend side)
-        user.permissions = Permissions.create({
+        /*user.permissions = Permissions.create({
             level: PermissionLevel.Full
         })
 
@@ -529,6 +537,7 @@ export class LoginHelper {
         // We don't preload anything because the server will make some additional changes to all the data, and we need to refetch everything
         await session.setEncryptionKey(keys.authEncryptionSecretKey)
         await SessionManager.setCurrentSession(session)
+        */
     }
 
     static async changeOrganizationKey(session: Session) {

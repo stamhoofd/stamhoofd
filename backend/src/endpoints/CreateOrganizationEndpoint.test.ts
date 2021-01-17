@@ -4,6 +4,7 @@ import { KeychainItem, OrganizationGenderType, Token as TokenStruct } from '@sta
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
+import { EmailVerificationCode } from "../models/EmailVerificationCode";
 import { Organization } from "../models/Organization";
 import { Token } from '../models/Token';
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
@@ -22,11 +23,12 @@ describe("Endpoint.CreateOrganization", () => {
         const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, "My user password")
 
         const userId = uuidv4()
+        const organizationId = uuidv4()
 
         const r = Request.buildJson("POST", "/v1/organizations", "todo-host.be", {
             // eslint-disable-next-line @typescript-eslint/camelcase
             organization: {
-                id: uuidv4(),
+                id: organizationId,
                 name: "My endpoint test organization",
                 publicKey: organizationKeyPair.publicKey,
                 meta: {
@@ -82,8 +84,8 @@ describe("Endpoint.CreateOrganization", () => {
         expect(organization).toBeDefined();
         if (!organization) throw new Error("impossible");
 
-        const token = await Token.getByAccessToken(response.body.accessToken, true);
-        expect(token).toBeDefined();
+        const token = await EmailVerificationCode.poll(organizationId, response.body.token);
+        expect(token).toEqual(true)
         if (!token) throw new Error("impossible");
         //expect(token.accessTokenValidUntil).toBeBefore(new Date());
 

@@ -120,6 +120,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
+import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
@@ -243,10 +244,16 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (this.whatsNewBadge.length > 0) {
             // show popup
-            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(20*1000).setAction( () => {
+            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(5*1000).setAction( () => {
                 window.open("https://www.instagram.com/stamhoofd/", "_blank")
                 localStorage.setItem("what-is-new", WhatsNewCount.toString());
             }).show()
+        }
+
+        if (!didSet) {
+            if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
+                this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup"))
+            }
         }
     }
 
