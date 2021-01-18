@@ -1,12 +1,13 @@
 import zxcvbn from '@zxcvbn-ts/core'
 import zxcvbnCommonPackage from '@zxcvbn-ts/language-common'
+import zxcvbnNlBePackage from '@zxcvbn-ts/language-nl-be'
 
 const options = {
+  translations: zxcvbnNlBePackage.translations,
   dictionary: {
     ...zxcvbnCommonPackage.dictionary,
-    //...zxcvbnEnPackage.dictionary,
+    ...zxcvbnNlBePackage.dictionary,
   },
-  //translations: zxcvbnEnPackage.translations,
 }
 
 export function checkPassword(password: string) {

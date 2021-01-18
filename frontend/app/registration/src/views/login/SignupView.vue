@@ -8,14 +8,20 @@
 
                 <EmailInput ref="emailInput" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-                <STInputBox title="Kies een wachtwoord">
-                    <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-                </STInputBox>
+                <div class="split-inputs">
+                    <div>
+                        <STInputBox title="Kies een wachtwoord">
+                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
 
-                <STInputBox title="Herhaal wachtwoord">
-                    <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-                </STInputBox>
-
+                        <STInputBox title="Herhaal wachtwoord">
+                            <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
+                    </div>
+                    <div>
+                        <PasswordStrength v-model="password" />
+                    </div>
+                </div>
 
                 <Checkbox v-if="privacyUrl" v-model="acceptPrivacy" class="long-text">
                     Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
@@ -39,7 +45,7 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength } from "@stamhoofd/components"
 import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins, Ref } from "vue-property-decorator";
 
@@ -54,7 +60,8 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         LoadingButton,
         STErrorsDefault,
         EmailInput,
-        Checkbox
+        Checkbox,
+        PasswordStrength
     }
 })
 export default class SignupView extends Mixins(NavigationMixin){
