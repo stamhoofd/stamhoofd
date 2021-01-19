@@ -15,6 +15,8 @@
             <STInputBox title="Herhaal wachtwoord">
                 <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
             </STInputBox>
+
+            <PasswordStrength v-model="password" />
         </main>
 
         <STFloatingFooter>
@@ -31,7 +33,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast,Validator } from "@stamhoofd/components"
+import { CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast,Validator, PasswordStrength } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -41,7 +43,8 @@ import { Component, Mixins } from "vue-property-decorator";
         STFloatingFooter,
         STInputBox,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        PasswordStrength
     }
 })
 export default class ChangePasswordView extends Mixins(NavigationMixin){
@@ -68,10 +71,10 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
             return;
         }
 
-        if (this.password.length < 14) {
+        if (this.password.length < 8) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
-                message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan."
+                message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan."
             }))
             return;
         }

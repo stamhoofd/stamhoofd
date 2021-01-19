@@ -8,10 +8,10 @@
                     Vul de code in uit de e-mail die we hebben gestuurd
                 </h1>
                 <h1 v-else>
-                    Verifieer eerst jouw e-mailadres. Vul de code in uit de e-mail die we hebben gestuurd
+                    Verifieer jouw e-mailadres. Vul de code in uit de e-mail die we hebben gestuurd
                 </h1>
 
-                <p>Als je jouw e-mail op deze computer opent, kan je ook de link in de e-mail gebruiken.</p>
+                <p>Of klik op de link in de e-mail en wacht enkele seconden.</p>
 
                 <div><CodeInput v-model="code" @complete="submit" /></div>
 
