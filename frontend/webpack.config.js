@@ -96,15 +96,26 @@ module.exports = {
                             presets: [
                                 [
                                    "@babel/preset-env",
-                                    {
+                                   // Use this for modern build in the future
+                                    /*{
                                         modules: false,
                                         useBuiltIns: 'usage',
                                         targets: {
                                             "esmodules": true
                                         },
                                         corejs: "3.6"
+                                    }*/
+                                    {		
+                                        "useBuiltIns": "usage",		
+                                        "corejs": "3.6"		
                                     }
                                 ]
+                            ],
+
+                            // Remove for modern build:
+                            "plugins": [		
+                                "@babel/plugin-transform-runtime",		
+                                "@babel/plugin-transform-regenerator"		
                             ]
                         }
                     },
