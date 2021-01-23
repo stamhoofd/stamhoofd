@@ -125,9 +125,10 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         new CenteredMessage("Wil je alle data van "+this.member.firstName+" verwijderen?", "Dit verwijdert alle data van "+this.member.firstName+", inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
             .addButton(new CenteredMessageButton("Verwijderen", {
                 action: async () => {
-                    // todo
-                    await MemberManager.deleteMember(this.member)
-                    new Toast(this.member.firstName+' is verwijderd', "success").show()
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
+                        await MemberManager.deleteMember(this.member)
+                        new Toast(this.member.firstName+' is verwijderd', "success").show()
+                    }
                 },
                 type: "destructive",
                 icon: "trash"
@@ -140,9 +141,10 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         new CenteredMessage("Ben je zeker dat je de inschrijving van "+this.member.firstName+" wilt verwijderen?", "De gegevens van het lid blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
             .addButton(new CenteredMessageButton("Uitschrijven", {
                 action: async () => {
-                    // todo
-                    await MemberManager.unregisterMember(this.member)
-                    new Toast(this.member.firstName+' is uitgeschreven', "success").show()
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
+                        await MemberManager.unregisterMember(this.member)
+                        new Toast(this.member.firstName+' is uitgeschreven', "success").show()
+                    }
                 },
                 type: "destructive",
                 icon: "unregister"

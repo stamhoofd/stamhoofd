@@ -174,7 +174,7 @@ export class MemberManagerStatic {
         return members;
     }
 
-    async loadMembers(groupId: string | null = null, waitingList = false): Promise<MemberWithRegistrations[]> {
+    async loadMembers(groupId: string | null = null, waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrations[]> {
         const session = SessionManager.currentSession!
 
         if (groupId === null) {
@@ -191,7 +191,7 @@ export class MemberManagerStatic {
             method: "GET",
             path: "/organization/group/" + groupId + "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)),
-            query: waitingList ? { waitingList: true } : {}
+            query: { waitingList, cycleOffset }
         })
 
         Keychain.addItems(response.data.keychainItems)

@@ -89,7 +89,12 @@
                             </template>
                         </STListItem>
                         <STListItem v-if="order.data.timeSlot" class="right-description">
-                            Wanneer afhalen?
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Wanneer afhalen?
+                            </template>
+                            <template v-else>
+                                Wanneer leveren?
+                            </template>
 
                             <template slot="right">
                                 {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
