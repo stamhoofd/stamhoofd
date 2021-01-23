@@ -235,16 +235,14 @@ export class EmailVerificationCode extends Model {
     send(user: UserWithOrganization, withCode = true) {
         const { from, replyTo } = user.organization.getDefaultEmail()
 
-        // todo: add link (also include expire at in link, in case if not signed in we can report that immediately)
-        // Send mail without waiting
-
         if (withCode) {
             Email.send({
                 from,
                 replyTo,
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of (als je op dit apparaat geregistreerd hebt) klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${this.code}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${this.code}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${this.getEmailVerificationUrl(user)}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`
             })
         } else {
             Email.send({
@@ -252,7 +250,7 @@ export class EmailVerificationCode extends Model {
                 replyTo,
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
             })
         }
     }
