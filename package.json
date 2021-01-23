@@ -8,6 +8,9 @@
         ".yalc/@*/*",
         ".yalc/*"
     ],
+    "engines": {
+        "yarn": "1.18.0"
+    },
     "scripts": {
         "build": "cd shared/crypto && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",

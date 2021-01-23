@@ -41,6 +41,7 @@ module.exports = merge(common, {
             }),
         ]
     },
+    devtool: "source-map",
     performance: {
         hints: 'warning',
         maxEntrypointSize: 250000,
