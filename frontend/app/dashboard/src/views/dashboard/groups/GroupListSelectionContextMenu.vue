@@ -103,9 +103,11 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         new CenteredMessage("Wil je alle data van "+this.members.length+" leden verwijderen?", "Dit verwijdert alle data van de geselecteerde leden, inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
             .addButton(new CenteredMessageButton("Verwijderen", {
                 action: async () => {
-                    for (const member of this.members) {
-                        await MemberManager.deleteMember(member)
-                        new Toast(member.firstName+' is verwijderd', "success").show()
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
+                        for (const member of this.members) {
+                            await MemberManager.deleteMember(member)
+                        }
+                        new Toast(this.members.length+" leden zijn verwijderd", "success green").show()
                     }
                 },
                 type: "destructive",
@@ -119,10 +121,11 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         new CenteredMessage("Ben je zeker dat je de inschrijving van "+this.members.length+" leden wilt verwijderen?", "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
             .addButton(new CenteredMessageButton("Uitschrijven", {
                 action: async () => {
-                    // todo
-                    for (const member of this.members) {
-                        await MemberManager.unregisterMember(member)
-                        new Toast(member.firstName+' is uitgeschreven', "success").show()
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
+                        for (const member of this.members) {
+                            await MemberManager.unregisterMember(member)
+                        }
+                        new Toast(this.members.length+" leden zijn uitgeschreven", "success green").show()
                     }
                 },
                 type: "destructive",
