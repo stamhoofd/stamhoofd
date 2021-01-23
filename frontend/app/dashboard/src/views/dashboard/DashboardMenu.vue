@@ -19,7 +19,7 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-whats-new'}" @click="manageWhatsNew()">
+        <button class="menu-button button heading" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
@@ -239,10 +239,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (this.whatsNewBadge.length > 0) {
             // show popup
-            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(5*1000).setAction( () => {
-                window.open("https://www.instagram.com/stamhoofd/", "_blank")
-                localStorage.setItem("what-is-new", WhatsNewCount.toString());
-            }).show()
+            new Toast("Er zijn nieuwe functies!", "gift green").setHide(5*1000).show()
         }
 
         if (!didSet) {
@@ -358,9 +355,10 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     manageWhatsNew() {
-        this.currentlySelected = "manage-whats-new"
-        this.showDetail(new ComponentWithProperties(WhatsNewView, {}));
         this.whatsNewBadge = ""
+
+        window.open('https://www.stamhoofd.be/release-notes', '_blank');
+        localStorage.setItem("what-is-new", WhatsNewCount.toString());
     }
 
     async logout() {
