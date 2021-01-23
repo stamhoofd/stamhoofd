@@ -39,12 +39,16 @@ export class StreetWithNumberColumnMatcher extends SharedMatcher implements Colu
         return true
     }
 
-    apply(cell: XLSX.CellObject, member: ImportingMember) {
+    apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
+        if (!cell) {
+            return
+        }
+
         // Check if string value
         if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Geen tekst in deze cell"
+                message: "Geen tekst in deze cel"
             })
         }
 

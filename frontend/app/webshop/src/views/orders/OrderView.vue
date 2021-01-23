@@ -226,6 +226,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
             case PaymentMethod.iDEAL: return "iDEAL"
+            case PaymentMethod.Unknown: return "?"
         }
     }
 

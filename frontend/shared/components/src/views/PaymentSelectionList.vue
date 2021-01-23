@@ -106,6 +106,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
             case PaymentMethod.iDEAL: return "iDEAL"
+            case PaymentMethod.Unknown: return "?"
         }
     }
 
@@ -115,6 +116,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Transfer: return ""
             case PaymentMethod.Bancontact: return ""
             case PaymentMethod.iDEAL: return ""
+            case PaymentMethod.Unknown: return ""
         }
     }
 
@@ -124,6 +126,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Transfer: return null
             case PaymentMethod.Bancontact: return bancontactLogo
             case PaymentMethod.iDEAL: return idealLogo
+            case PaymentMethod.Unknown: return null
         }
     }
 }

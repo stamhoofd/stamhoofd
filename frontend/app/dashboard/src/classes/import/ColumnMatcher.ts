@@ -10,5 +10,5 @@ export interface ColumnMatcher {
     getName(): string;
     doesMatch(columnName: string, examples: string[]): boolean;
 
-    apply(cell: XLSX.CellObject, member: ImportingMember): Promise<void> | void;
+    apply(cell: XLSX.CellObject | undefined, member: ImportingMember): Promise<void> | void;
 }

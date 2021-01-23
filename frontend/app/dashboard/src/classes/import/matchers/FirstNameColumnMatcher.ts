@@ -32,12 +32,23 @@ export class FirstNameColumnMatcher extends SharedMatcher implements ColumnMatch
         return false
     }
 
-    apply(cell: XLSX.CellObject, member: ImportingMember) {
+    apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
+        if (!cell && this.category === MatcherCategory.Member) {
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "Deze cel is leeg"
+            })
+        }
+
+        if (!cell) {
+            return
+        }
+
         // Check if string value
         if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Geen tekst in deze cell"
+                message: "Geen tekst in deze cel"
             })
         }
 

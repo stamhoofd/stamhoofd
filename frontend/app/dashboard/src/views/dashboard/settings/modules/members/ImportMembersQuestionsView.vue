@@ -9,6 +9,10 @@
             <h1>Importeer instellingen</h1>
             <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
 
+            <p v-if="existingCount > 0" class="warning-box">
+                Opgelet, {{ existingCount }} leden uit jouw bestand zitten al in het systeem. Let op, want zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van deze {{ existingCount }} leden worden niet gewijzigd via deze import.
+            </p>
+
             <hr>
             <h2>Inschrijvingstatus</h2>
 
@@ -26,7 +30,11 @@
                 </RadioGroup>
             </STInputBox>
 
-            <p v-if="paid === null" class="warning-box">
+            <p v-if="needsPaidStatus && somePaid" class="warning-box">
+                Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
+            </p>
+
+            <p v-if="needsPaidStatus && paid === null" class="warning-box">
                 We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
             </p>
 
@@ -166,7 +174,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, Registration, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,Payment,PaymentMethod, PaymentStatus, Registration, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -210,6 +218,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
     mounted() {
         this.multipleGroups = this.calculateMultipleGroups()
+        console.log(this.members)
     }
 
     get organization() {
@@ -220,8 +229,16 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         return !!this.members.find(m => m.registration.paid === null)
     }
 
+    get somePaid() {
+        return !!this.members.find(m => m.registration.paid !== null)
+    }
+
     get needsGroup() {
         return !!this.members.find(m => m.registration.group === null)
+    }
+
+    get existingCount() {
+        return this.members.filter(m => m.equal !== null).length
     }
     
     get automaticallyAssigned() {
@@ -447,15 +464,42 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     const family =  new FamilyManager([])
                     member.equal.details!.copyFrom(member.details)
                     await family.patchAllMembersWith(member.equal)
+
+                    // Payment and registration ignored
                 } else {
                     const family =  new FamilyManager([])
                     const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
+                    const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
+                    let paid = member.registration.paid
+
+                    if (!paid && member.registration.paidPrice && price !== 0) {
+                        if (member.registration.paidPrice !== 0 && price !== member.registration.paidPrice) {
+                            throw new SimpleError({
+                                code: "price_not_supported",
+                                message: "Het is momenteel niet mogelijk om lidgeld dat maar voor een deel betaald is, te importeren (voor lid "+member.details.name+")"
+                            })
+                        }
+
+                        paid = (member.registration.paidPrice !== 0)
+                    }
+
+                    const payment = Payment.create({
+                        method: member.registration.paymentMethod ?? PaymentMethod.Unknown,
+                        status: paid ? PaymentStatus.Succeeded : PaymentStatus.Created,
+                        price: price,
+                        paidAt: paid ? new Date() : null,
+
+                        // Placeholders:
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    })
+
                     await family.addMember(member.details, [
                         Registration.create({
                             groupId: group.id,
                             cycle: group.cycle + (this.needRegistration ? -1 : 0),
                             waitingList: this.waitingList,
-                            payment: null, // todo
+                            payment: payment, // todo
                             registeredAt: new Date()
                         })
                     ])

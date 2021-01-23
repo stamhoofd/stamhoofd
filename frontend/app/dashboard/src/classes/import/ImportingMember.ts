@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
-import { Group, MemberDetails, MemberWithRegistrations, Organization } from "@stamhoofd/structures";
+import { Group, MemberDetails, MemberWithRegistrations, Organization, PaymentMethod } from "@stamhoofd/structures";
 import { Formatter,StringCompare } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
@@ -10,6 +10,9 @@ export class ImportingRegistration {
     group: Group | null = null
     autoAssignedGroup: Group | null = null
     paid: boolean | null = null
+    paidPrice: number | null = null
+    price: number | null = null
+    paymentMethod: PaymentMethod | null = null
 }
 
 export class ImportResult {
@@ -97,14 +100,10 @@ export class ImportingMember {
                 }
 
                 if (!column.matcher) {
-                    throw new Error("Column doesnt have a matcher")
+                    throw new Error("Koppel de kolom '"+column.name+"' eerst aan een bijhorende waarde")
                 }
 
                 const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject
-
-                if (!valueCell) {
-                    continue
-                }
 
                 try {
                     await column.matcher.apply(valueCell, member)

@@ -2,7 +2,7 @@
     <div id="import-members-settings-view" class="st-view background">
         <STNavigationBar title="Leden importeren">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -10,8 +10,8 @@
             <p>Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft. In de volgende stappen kan je de kolommen koppelen.</p>
 
             <label class="upload-box">
-                <span v-if="!file"class="icon upload"/>
-                <span v-else class="icon file"/>
+                <span v-if="!file" class="icon upload" />
+                <span v-else class="icon file" />
                 <div v-if="!file">
                     <h2 class="style-title-list">
                         Kies een bestand
@@ -29,7 +29,7 @@
                     </p>
                 </div>
                 <input type="file" multiple="multiple" style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-                <span v-if="file" class="icon sync gray"/>
+                <span v-if="file" class="icon sync gray" />
             </label>
 
             <table v-if="file && columns.length > 0" class="data-table">
@@ -48,16 +48,18 @@
                                 <h2 class="style-title-list">
                                     {{ column.name }}
                                 </h2>
-                                <p class="style-description-small" v-if="column.examples.length > 0">
+                                <p v-if="column.examples.length > 0" class="style-description-small">
                                     {{ column.examples.slice(0, 2).join(', ') }}...
                                 </p>
                             </Checkbox>
                         </td>
                         <td>
-                            <select class="input" v-model="column.matcherCode" @change="didChangeColumn(column)">
-                                <option :value="null" disabled>Maak een keuze</option>
+                            <select v-model="column.matcherCode" class="input" @change="didChangeColumn(column)">
+                                <option :value="null" disabled>
+                                    Maak een keuze
+                                </option>
                                 <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="getCategoryName(cat.name)">
-                                    <option v-for="(matcher, index) in cat.matchers" :key="index" v-bind:value="matcher.id">
+                                    <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
                                         {{ matcher.getName() }} ({{ getCategoryName(cat.name) }})
                                     </option>
                                 </optgroup>
@@ -65,10 +67,11 @@
                         </td>
                     </tr>
                 </tbody>
-
             </table>
             
-            <p v-if="file && columns.length > 0" class="warning-box">Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.</p>
+            <p v-if="file && columns.length > 0" class="warning-box">
+                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
         </main>
@@ -89,20 +92,20 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { TimeInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
-
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import XLSX from "xlsx";
-import { allMathcers } from "../../../../../classes/import/matchers"
+
 import { ColumnMatcher } from "../../../../../classes/import/ColumnMatcher"
-import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/import/MatcherCategory';
 import { ImportingMember } from "../../../../../classes/import/ImportingMember"
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn"
-import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
+import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/import/MatcherCategory';
+import { allMathcers } from "../../../../../classes/import/matchers"
+import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
+import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 
 @Component({
     components: {
@@ -226,13 +229,13 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         const availableMatchers = this.matchers.slice()
 
         // Read all the names + some examples and try to match them to columns
-        for(var colNum = range.s.c; colNum <= range.e.c; colNum++){
+        for(let colNum = range.s.c; colNum <= range.e.c; colNum++){
             const cell = this.sheet[XLSX.utils.encode_cell({r: range.s.r, c: colNum})] as XLSX.CellObject
             console.log(cell)
             const columnName = (cell.w ?? cell.v ?? "")+""
             const matched = new MatchedColumn(colNum, columnName, this.matchers)
 
-            for(var row = range.s.r + 1; row <= range.e.r && row < 10; row++){
+            for(let row = range.s.r + 1; row <= range.e.r && row < 10; row++){
                 const valueCell = this.sheet[XLSX.utils.encode_cell({r: row, c: colNum})]
 
                 if (!valueCell) {

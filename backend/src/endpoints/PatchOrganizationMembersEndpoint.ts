@@ -85,7 +85,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
              * In development mode, we allow some secret usernames to create fake data
              */
             if (process.env.NODE_ENV == "development") {
-                if (member.firstName == "create") {
+                if (member.firstName == "create" || member.firstName == "Create") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -101,7 +101,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     continue;
                 }
 
-                if (member.firstName == "clear") {
+                if (member.firstName == "clear" || member.firstName == "Clear") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -138,8 +138,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 registration.waitingList = registrationStruct.waitingList
                 registration.canRegister = registrationStruct.canRegister
                 registration.deactivatedAt = registrationStruct.deactivatedAt
-                await registration.save()
+               
+                // Check payment
+                if (registrationStruct.payment) {
+                    const payment = new Payment()
+                    payment.method = registrationStruct.payment.method
+                    payment.paidAt = registrationStruct.payment.paidAt
+                    payment.price = registrationStruct.payment.price
+                    payment.status = registrationStruct.payment.status
+                    payment.transferDescription = registrationStruct.payment.transferDescription
+                    await payment.save()
 
+                    registration.setOptionalRelation(Registration.payment, payment)
+                }
+
+                await registration.save()
                 member.registrations.push(registration)
             }
 

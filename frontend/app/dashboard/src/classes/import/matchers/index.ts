@@ -9,6 +9,9 @@ import { GenderColumnMatcher } from "./GenderColumnMatcher";
 import { GroupColumnMatcher } from "./GroupColumnMatcher";
 import { LastNameColumnMatcher } from "./LastNameColumnMatcher";
 import { MemberNumberColumnMatcher } from "./MemberNumberColumnMatcher";
+import { PaidColumnMatcher } from "./PaidColumnMatcher";
+import { PaidPriceColumnMatcher } from "./PaidPriceColumnMatcher";
+import { PaymentPriceColumnMatcher } from "./PaymentPriceColumnMatcher";
 import { PhoneColumnMatcher } from "./PhoneColumnMatcher";
 import { StreetColumnMatcher } from "./StreetColumnMatcher";
 import { StreetNumberColumnMatcher } from "./StreetNumberColumnMatcher";
@@ -63,9 +66,15 @@ export const parentMatchers2 = [
     new CityWithZipColumnMatcher(MatcherCategory.Parent2)
 ]
 
+export const paymentMatchers = [
+    new PaidColumnMatcher(),
+    new PaidPriceColumnMatcher(),
+    new PaymentPriceColumnMatcher()
+]
 
 export const allMathcers = [
     ...memberMatchers,
+    ...paymentMatchers,
     ...parentMatchers1,
     ...parentMatchers2
 ]
