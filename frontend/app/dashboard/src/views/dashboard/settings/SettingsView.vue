@@ -138,7 +138,7 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, File, Image, Invite, Organization, OrganizationAdmins, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -150,7 +150,6 @@ import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
-import ImportMembersView from './modules/members/ImportMembersView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
@@ -249,8 +248,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     importMembers() {
+
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ImportMembersView, {})
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    const comp = (await import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue")).default
+                    return new ComponentWithProperties(comp, {})
+                }
+            })
         }).setDisplayStyle("popup"))
     }
 
