@@ -249,7 +249,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     importMembers() {
         if (this.organization.groups.length == 0) {
-            new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").show()
+            new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
             return
         }
 
