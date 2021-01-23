@@ -38,8 +38,7 @@
                 We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
             </p>
 
-
-            <STInputBox title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
+            <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-model="waitingList" :value="false">
                         Nee
@@ -57,17 +56,6 @@
                     </Radio>
                     <Radio v-model="needRegistration" :value="true">
                         Ja, ze moeten hun inschrijving nog verlengen
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
-
-            <STInputBox title="Vorm gezinnen op basis van gegevens van de ouders" error-fields="waitingList" :error-box="errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-model="waitingList" :value="true">
-                        Ja (aangeraden)
-                    </Radio>
-                    <Radio v-model="waitingList" :value="false">
-                        Nee
                     </Radio>
                 </RadioGroup>
             </STInputBox>
@@ -174,7 +162,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,Payment,PaymentMethod, PaymentStatus, Registration, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,Payment,PaymentMethod, PaymentStatus, Registration, ResolutionFit, ResolutionRequest, Version, WaitingListType } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -234,16 +222,23 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get needsGroup() {
-        return !!this.members.find(m => m.registration.group === null)
+        return !!this.members.find(m => m.registration.group === null && (m.equal?.registrations?.length ?? 0) == 0)
     }
 
     get existingCount() {
         return this.members.filter(m => m.equal !== null).length
     }
+
+    get hasWaitingLists() {
+        return !!this.organization.groups.find(g => g.settings.waitingListType !== WaitingListType.None)
+    }
     
     get automaticallyAssigned() {
         return this.members.filter(m => {
             if (m.registration.group !== null) {
+                return false
+            }
+            if ((m.equal?.registrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -257,6 +252,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
+            if ((m.equal?.registrations?.length ?? 0) > 0) {
+                return false
+            }
 
             return true
         })
@@ -265,6 +263,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     get notAutomaticallyAssigned() {
         return this.members.filter(m => {
             if (m.registration.group !== null) {
+                return false
+            }
+            if ((m.equal?.registrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -278,6 +279,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
+            if ((m.equal?.registrations?.length ?? 0) > 0) {
+                return false
+            }
 
             const groups = m.details.getMatchingGroups(this.organization.groups)
             return (groups.length > 1)
@@ -287,6 +291,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     get membersWithoutMatchingGroups() {
         return this.members.filter(m => {
             if (m.registration.group !== null) {
+                return false
+            }
+            if ((m.equal?.registrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -302,6 +309,9 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         const groups = new Map<string, Group>()
         for (const member of this.members) {
             if (member.registration.group !== null) {
+                continue
+            }
+            if ((member.equal?.registrations?.length ?? 0) > 0) {
                 continue
             }
 
@@ -321,6 +331,11 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     autoAssignMembers(members: ImportingMember[]) {
         for (const member of members) {
             if (member.registration.group) {
+                member.registration.autoAssignedGroup = null
+                continue
+            }
+
+            if ((member.equal?.registrations?.length ?? 0) > 0) {
                 member.registration.autoAssignedGroup = null
                 continue
             }
@@ -470,7 +485,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     const family =  new FamilyManager([])
                     const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
                     const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
-                    let paid = member.registration.paid
+                    let paid = member.registration.paid ?? this.paid ?? false
 
                     if (!paid && member.registration.paidPrice && price !== 0) {
                         if (member.registration.paidPrice !== 0 && price !== member.registration.paidPrice) {
@@ -499,7 +514,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                             groupId: group.id,
                             cycle: group.cycle + (this.needRegistration ? -1 : 0),
                             waitingList: this.waitingList,
-                            payment: payment, // todo
+                            payment: payment,
                             registeredAt: new Date()
                         })
                     ])
