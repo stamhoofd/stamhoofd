@@ -19,9 +19,11 @@ module.exports = merge(common, {
             cacheGroups: {
                 styles: {
                     name: 'styles',
-                    test: /\.css$/,
+                    test: /\.s?css$/,
                     chunks: 'all',
                     enforce: true,
+                    minChunks: 2,
+                    reuseExistingChunk: true
                 },
             },
         },
@@ -36,8 +38,8 @@ module.exports = merge(common, {
                     sourceMap: true,
                     output: {
                         comments: false,
-                    },
-                },
+                    }
+                }
             }),
         ]
     },
