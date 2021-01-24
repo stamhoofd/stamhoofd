@@ -62,6 +62,7 @@ export default class CodeInput extends Vue {
 
     onInput(index: number) {
         const input = this.$refs.numberInput[index];
+        input.value = (input.value as string).replace(/\s/g, '')
         if (input.value.length >= 1) {
             this.selectNext(index + 1)
         }
