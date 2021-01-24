@@ -1,27 +1,26 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="file-input-box" @click="onClick" :class="{ center: !value }">
+        <label class="file-input-box" :class="{ center: !value }" @click="onClick">
             <Spinner v-if="uploading" />
-            <span class="icon center upload" v-else-if="value == null"/>
+            <span v-else-if="value == null" class="icon center upload" />
 
-            <span class="icon file" v-if="value" />
+            <span v-if="value" class="icon file" />
             <span v-if="value">{{ value.name }}</span>
 
-            <span class="icon trash" v-if="!required && value" @click="deleteMe"/>
+            <span v-if="!required && value" class="icon trash" @click="deleteMe" />
             <input type="file" class="file-upload" accept="application/pdf" @change="changedFile">
         </label>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Formatter } from "@stamhoofd/utility"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { File, ResolutionRequest, Version } from "@stamhoofd/structures";
-import Spinner from "../Spinner.vue";
-import DateSelectionView from '../overlays/DateSelectionView.vue';
-import { SessionManager } from '@stamhoofd/networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
+import { File } from "@stamhoofd/structures";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import Spinner from "../Spinner.vue";
 
 @Component({
     components: {

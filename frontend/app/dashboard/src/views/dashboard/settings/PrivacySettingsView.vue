@@ -54,18 +54,14 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
+import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, ErrorBox, FileInput,LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({
     components: {

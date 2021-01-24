@@ -31,13 +31,9 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, CodeInput,EmailInput, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { LoginHelper,NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, CodeInput,EmailInput, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { LoginHelper, Session } from '@stamhoofd/networking';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation

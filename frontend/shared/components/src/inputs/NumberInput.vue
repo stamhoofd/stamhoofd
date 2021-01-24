@@ -25,12 +25,13 @@
             </div>
             <div v-else>{{ placeholder }}</div>
         </label>
-        <StepperInput v-if="stepper" :min="min" :max="max" v-model="stepperValue"/>
+        <StepperInput v-if="stepper" v-model="stepperValue" :min="min" :max="max" />
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
 import StepperInput from "./StepperInput.vue"
 
 @Component({

@@ -1,6 +1,6 @@
 <template>
-  <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-      <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+    <STInputBox :title="title" error-fields="address" :error-box="errorBox">
+        <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
         <div class="input-group">
             <div>
                 <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">
@@ -10,7 +10,7 @@
             </div>
         </div>
 
-        <select v-model="country" class="input" @change="updateAddress" @focus="onFocus" @blur="onBlur" autocomplete="country" name="country">
+        <select v-model="country" class="input" autocomplete="country" name="country" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             <option value="BE">
                 België
             </option>
@@ -18,17 +18,16 @@
                 Nederland
             </option>
         </select>
-  </STInputBox>
+    </STInputBox>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, ValidatedAddress} from "@stamhoofd/structures"
-import { Vue, Prop, Component, Watch } from "vue-property-decorator";
+import { Address, Country, ValidatedAddress} from "@stamhoofd/structures"
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {

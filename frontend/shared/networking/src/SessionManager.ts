@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ChallengeResponseStruct, KeyConstants, Organization, Token,Version } from '@stamhoofd/structures';
+import { Organization, Version } from '@stamhoofd/structures';
 
 import { Session } from './Session';
 

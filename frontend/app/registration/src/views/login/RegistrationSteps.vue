@@ -1,6 +1,6 @@
 <template>
     <Steps ref="steps" :root="root" :total-steps="3">
-        <template v-slot:left="slotProps">
+        <template #left="slotProps">
             <template v-if="!slotProps.canPop">
                 <img v-if="logoHorizontalSrc" :src="logoHorizontalSrc" :srcset="logoHorizontalSrcSet" class="organization-logo horizontal" :class="{ 'hide-smartphone': !!logoSrc }" @click="returnToSite">
                 <img v-if="logoSrc" :src="logoSrc" :srcset="logoSrcSet" class="organization-logo" :class="{ 'only-smartphone': !!logoHorizontalSrc }" @click="returnToSite">
@@ -106,7 +106,7 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
 
     logout() {
         if (SessionManager.currentSession && SessionManager.currentSession.isComplete()) {
-            SessionManager.currentSession.logout()
+            SessionManager.logout()
             return;
         }
     }

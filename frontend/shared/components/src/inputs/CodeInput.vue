@@ -21,15 +21,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
-import StepperInput from "./StepperInput.vue"
-
-@Component({
-    components: {
-        StepperInput
-    }
-})
+@Component
 export default class CodeInput extends Vue {
     valid = true;
 

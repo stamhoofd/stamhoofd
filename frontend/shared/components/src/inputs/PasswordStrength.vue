@@ -3,26 +3,32 @@
         <div class="password-strength">
             <div :style="{ width: strength+'%' }" :class="type" />
         </div>
-        <p class="style-description-small" v-if="!value">Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser</p>
-        <p class="style-description-small" v-else-if="duration <= 60*60">Kan in enkele minuten worden geraden door een computer</p>
-        <p class="style-description-small" v-else-if="duration <= 60*60*24">Kan in enkele uren worden geraden door een computer</p>
-        <p class="style-description-small" v-else-if="duration <= 60*60*24*30">Kan in enkele dagen worden geraden door een computer</p>
-        <p class="style-description-small" v-else-if="duration <= 60*60*24*30*12">Kan binnen het jaar worden geraden door een computer</p>
-        <p class="style-description-small" v-else>Jouw wachtwoord ziet er goed uit</p>
+        <p v-if="!value" class="style-description-small">
+            Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser
+        </p>
+        <p v-else-if="duration <= 60*60" class="style-description-small">
+            Kan in enkele minuten worden geraden door een computer
+        </p>
+        <p v-else-if="duration <= 60*60*24" class="style-description-small">
+            Kan in enkele uren worden geraden door een computer
+        </p>
+        <p v-else-if="duration <= 60*60*24*30" class="style-description-small">
+            Kan in enkele dagen worden geraden door een computer
+        </p>
+        <p v-else-if="duration <= 60*60*24*30*12" class="style-description-small">
+            Kan binnen het jaar worden geraden door een computer
+        </p>
+        <p v-else class="style-description-small">
+            Jouw wachtwoord ziet er goed uit
+        </p>
 
-        <span slot="right" :class="type" class="password-strength-description" v-if="value">{{ description }}</span>
+        <span v-if="value" slot="right" :class="type" class="password-strength-description">{{ description }}</span>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
-import { DataValidator } from "@stamhoofd/utility";
+import { STInputBox } from "@stamhoofd/components"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
-
-function getBaseLog(x, y) {
-  return Math.log(y) / Math.log(x);
-}
 
 @Component({
     components: {
@@ -48,7 +54,9 @@ export default class PasswordStrength extends Vue {
             this.loading = false
             return
         }
-        this.calculateStrength(val)
+        this.calculateStrength(val).catch(e => {
+            console.error(e)
+        })
     }
 
     async calculateStrength(password: string) {
@@ -72,6 +80,7 @@ export default class PasswordStrength extends Vue {
             this.duration = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond
 
         } catch (e) {
+            // ignore
         }
 
         if (saved === this.calculateCounter) {

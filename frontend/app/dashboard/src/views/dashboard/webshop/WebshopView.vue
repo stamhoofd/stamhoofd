@@ -160,7 +160,6 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { EventBus } from '../../../classes/EventBus';
 import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -170,6 +169,7 @@ import OrderContextMenu from './OrderContextMenu.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
+import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
 
 class SelectableOrder {
     order: Order;
@@ -181,8 +181,6 @@ class SelectableOrder {
     }
 }
 
-
-export const WebshopOrdersEventBus = new EventBus<"deleted", any>()
 
 @Component({
     components: {

@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance,FramedComponent } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
+import { Component, Vue } from "vue-property-decorator";
 
 import { Toast } from "./Toast"
 import ToastView from './ToastView.vue';

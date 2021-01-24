@@ -135,23 +135,18 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Invite, Organization, OrganizationAdmins, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, User, Version } from "@stamhoofd/structures"
+import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import AdminsView from '../admins/AdminsView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
-import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
-import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -235,7 +230,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    openPayment(animated = true) {
+    openPayment() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentSettingsView, {})
         }).setDisplayStyle("popup"))
@@ -295,7 +290,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
             // Open mollie settings
-            this.openPayment(false)
+            this.openPayment()
             return
         }
 
@@ -309,7 +304,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
             // Open mollie settings
-            this.openPayment(false)
+            this.openPayment()
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {

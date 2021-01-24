@@ -4,25 +4,22 @@
             Markeer als...
         </ContextMenuItem>
         <ContextMenuItem @click="deleteOrder">
-             <span slot="right" class="icon trash" />
+            <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
     </ContextMenu>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, MemberWithRegistrations, Order, OrderStatus, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailView from "../mail/MailView.vue";
-import SMSView from "../sms/SMSView.vue";
 import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
-import { WebshopOrdersEventBus } from "./WebshopView.vue";
+import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
 @Component({
     components: {

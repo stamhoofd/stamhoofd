@@ -5,6 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
 //const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
@@ -250,7 +251,12 @@ module.exports = {
         new webpack.DefinePlugin(use_env),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
-        })
+        }),
+        /*new CircularDependencyPlugin({
+            exclude: /\/shared\/components\//,
+            // add errors to webpack instead of warnings
+            failOnError: true,
+        })*/
     ],
     experiments: {
         syncWebAssembly: true // temporary, until fixed

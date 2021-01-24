@@ -1,25 +1,24 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
         <label class="image-input-box" :class="{square: isSquare}" @click="onClick">
-            <span class="icon trash" v-if="!required && value" />
+            <span v-if="!required && value" class="icon trash" />
 
             <Spinner v-if="uploading" />
-            <span class="icon upload" v-else-if="value == null"/>
-            <img :src="src" v-else/>
+            <span v-else-if="value == null" class="icon upload" />
+            <img v-else :src="src">
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Formatter } from "@stamhoofd/utility"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
-import Spinner from "../Spinner.vue";
-import DateSelectionView from '../overlays/DateSelectionView.vue';
-import { SessionManager } from '@stamhoofd/networking';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
+import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import Spinner from "../Spinner.vue";
 
 @Component({
     components: {

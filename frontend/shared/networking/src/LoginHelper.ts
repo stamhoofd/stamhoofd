@@ -4,7 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
 import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
-import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts';
+import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
 import { NetworkManager } from './NetworkManager';
@@ -125,6 +125,7 @@ export class LoginHelper {
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
         return new Promise((resolve, reject) => {
+            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
             const myWorker = new KeyWorker();
 
             myWorker.onmessage = (e) => {
@@ -155,6 +156,7 @@ export class LoginHelper {
         return new Promise((resolve, reject) => {
             console.log("starting encryption key worker")
             const myWorker = new KeyWorker();
+            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
 
             myWorker.onmessage = (e) => {
                 const key = e.data
@@ -182,6 +184,7 @@ export class LoginHelper {
 
     static async createKeys(password: string): Promise<{ authSignKeyPair; authEncryptionSecretKey; authSignKeyConstants; authEncryptionKeyConstants }> {
         return new Promise((resolve, reject) => {
+            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
             const myWorker = new KeyWorker();
 
             myWorker.onmessage = (e) => {
@@ -434,7 +437,7 @@ export class LoginHelper {
                         console.warn("Inifite loop in sign in: sign in after validaton caused a new verification request")
                         throw e
                     }
-                    const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
+                    const meta = SignupResponse.decode(new ObjectData(error.meta, { version: Version }))
 
                     const encryptionKey = await this.createEncryptionKey(password, meta.authEncryptionKeyConstants)
                     this.addTemporaryKey(meta.token, StoredKeys.create({
@@ -696,7 +699,7 @@ export class LoginHelper {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
                 const error = e.getCode("verify_email")
                 if (error) {
-                    const meta = error.decodeMeta(SignupResponse as Decoder<SignupResponse>, { version: Version })
+                    const meta = SignupResponse.decode(new ObjectData(error.meta, { version: Version }))
                     return {
                         verificationToken: meta.token
                     }

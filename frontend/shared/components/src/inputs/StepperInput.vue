@@ -1,13 +1,13 @@
 <template>
     <div class="stepper-input">
-        <button class="icon min" @click="step(-1)"/>
+        <button class="icon min" @click="step(-1)" />
         <hr>
-        <button class="icon plus" @click="step(1)"/> 
+        <button class="icon plus" @click="step(1)" /> 
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
 export default class StepperInput extends Vue {

@@ -54,18 +54,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup, Toast } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
-import ChangePasswordView from './ChangePasswordView.vue';
+import { NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
+import { BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Toast } from "@stamhoofd/components";
+import { Component, Mixins } from "vue-property-decorator";
 import { Formatter } from '@stamhoofd/utility';
 import { WhatsNewCount } from "../../../classes/WhatsNewCount"
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie"
