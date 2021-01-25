@@ -1,7 +1,6 @@
 <template>
     <div id="app">
-        <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
-        <ComponentWithPropertiesInstance :component="root" />
+        <PromiseView :promise="promise"/>
         <ToastBox />
     </div>
 </template>
@@ -28,95 +27,97 @@ async function getDefaultView() {
 
 @Component({
     components: {
-        ComponentWithPropertiesInstance,
-        ToastBox
+        ToastBox,
+        PromiseView
     },
 })
 export default class App extends Vue {
-    root = new ComponentWithProperties(PromiseView, {
-        promise: async () => {
-            // get organization
-            try {
-                const response = await NetworkManager.server.request({
-                    method: "GET",
-                    path: "/organization-from-domain",
-                    query: {
-                        domain: window.location.hostname
-                    },
-                    decoder: Organization as Decoder<Organization>
-                })
+    promise = async () => {
+        console.log("Fetching organization from domain...")
 
-                if (!response.data.meta.modules.useMembers) {
-                    throw new Error("Member module disabled")
-                }
+        // get organization
+        try {
+            const response = await NetworkManager.server.request({
+                method: "GET",
+                path: "/organization-from-domain",
+                query: {
+                    domain: window.location.hostname
+                },
+                decoder: Organization as Decoder<Organization>
+            })
+            console.log("Organization fetched!")
 
-                // Set organization and session
-                const session = new Session(response.data.id)
-                session.setOrganization(response.data)                
+            if (!response.data.meta.modules.useMembers) {
+                throw new Error("Member module disabled")
+            }
 
-                // Set color
-                if (response.data.meta.color) {
-                    ColorHelper.setColor(response.data.meta.color)
-                }
+            // Set organization and session
+            const session = new Session(response.data.id)
+            session.setOrganization(response.data)                
 
-                await SessionManager.setCurrentSession(session)
+            // Set color
+            if (response.data.meta.color) {
+                ColorHelper.setColor(response.data.meta.color)
+            }
 
-                return new ComponentWithProperties(AuthenticatedView, {
-                    root: new ComponentWithProperties(PromiseView, {
-                        promise: async () => {
-                            await MemberManager.loadMembers();
+            await SessionManager.setCurrentSession(session)
 
-                            const path = window.location.pathname;
-                            const parts = path.substring(1).split("/");
+            return new ComponentWithProperties(AuthenticatedView, {
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        await MemberManager.loadMembers();
 
-                            if (parts.length == 1 && parts[0] == 'payment') {
-                                // tood: password reset view
-                                const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
-                                return new ComponentWithProperties(ModalStackComponent, {
-                                    root: new ComponentWithProperties(RegistrationSteps, { 
-                                        root: new ComponentWithProperties(PaymentPendingView, {
-                                            server: SessionManager.currentSession!.authenticatedServer,
-                                            paymentId: new URL(window.location.href).searchParams.get("id"),
-                                            finishedHandler: async function(this: any, payment: Payment | null) {
-                                                if (payment && payment.status == PaymentStatus.Succeeded) {
-                                                    const RegistrationSuccessView = (await import(/* webpackChunkName: "PaymentPendingView" */ "./views/overview/RegistrationSuccessView.vue")).default
-                                                    const response = await session.authenticatedServer.request({
-                                                        method: "GET",
-                                                        path: "/payments/"+payment.id+"/registrations",
-                                                        decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
-                                                    })
-                                                    const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
-                                                    this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                                                        registrations
-                                                    }))
-                                                } else {
-                                                    this.navigationController.push(new ComponentWithProperties(await getDefaultView(), {}), true, 1, true)
-                                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                                                }
-                                            }
-                                        }),
-                                    })
-                                })
-                            }
+                        const path = window.location.pathname;
+                        const parts = path.substring(1).split("/");
 
+                        if (parts.length == 1 && parts[0] == 'payment') {
+                            // tood: password reset view
+                            const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
                             return new ComponentWithProperties(ModalStackComponent, {
                                 root: new ComponentWithProperties(RegistrationSteps, { 
-                                    root: new ComponentWithProperties(await getDefaultView(), {}),
+                                    root: new ComponentWithProperties(PaymentPendingView, {
+                                        server: SessionManager.currentSession!.authenticatedServer,
+                                        paymentId: new URL(window.location.href).searchParams.get("id"),
+                                        finishedHandler: async function(this: any, payment: Payment | null) {
+                                            if (payment && payment.status == PaymentStatus.Succeeded) {
+                                                const RegistrationSuccessView = (await import(/* webpackChunkName: "PaymentPendingView" */ "./views/overview/RegistrationSuccessView.vue")).default
+                                                const response = await session.authenticatedServer.request({
+                                                    method: "GET",
+                                                    path: "/payments/"+payment.id+"/registrations",
+                                                    decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
+                                                })
+                                                const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
+                                                this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                                                    registrations
+                                                }))
+                                            } else {
+                                                this.navigationController.push(new ComponentWithProperties(await getDefaultView(), {}), true, 1, true)
+                                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                            }
+                                        }
+                                    }),
                                 })
                             })
                         }
-                    }),
-                    loginRoot: new ComponentWithProperties(ModalStackComponent, {
-                        root: new ComponentWithProperties(RegistrationSteps, { 
-                            root: new ComponentWithProperties(LoginView, {}) 
+
+                        return new ComponentWithProperties(ModalStackComponent, {
+                            root: new ComponentWithProperties(RegistrationSteps, { 
+                                root: new ComponentWithProperties(await getDefaultView(), {}),
+                            })
                         })
+                    }
+                }),
+                loginRoot: new ComponentWithProperties(ModalStackComponent, {
+                    root: new ComponentWithProperties(RegistrationSteps, { 
+                        root: new ComponentWithProperties(LoginView, {}) 
                     })
-                });
-            } catch (e) {
-                return new ComponentWithProperties(InvalidOrganizationView, {})
-            }
+                })
+            });
+        } catch (e) {
+            console.error(e)
+            return new ComponentWithProperties(InvalidOrganizationView, {})
         }
-    })
+    }
 
     mounted() {
         HistoryManager.activate();

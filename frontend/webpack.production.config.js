@@ -17,6 +17,7 @@ module.exports = merge(common, {
             chunks: 'all',
             minChunks: 2,
             cacheGroups: {
+                default: false,
                 styles: {
                     name: 'styles',
                     test: /\.s?css$/,

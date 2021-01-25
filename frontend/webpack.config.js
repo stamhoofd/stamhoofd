@@ -108,16 +108,16 @@ module.exports = {
                                     }*/
                                     {		
                                         "useBuiltIns": "usage",		
-                                        "corejs": "3.6"		
+                                        "corejs": "3.8",
+                                        "bugfixes": true // Makes bundle size a bit smaller
                                     }
                                 ]
                             ],
 
                             // Remove for modern build:
-                            "plugins": [		
-                                "@babel/plugin-transform-runtime",		
-                                "@babel/plugin-transform-regenerator"		
-                            ]
+                            //"plugins": [		
+                            //    "@babel/plugin-transform-regenerator"		
+                            //]
                         }
                     },
                     {
