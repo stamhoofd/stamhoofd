@@ -177,17 +177,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await builder.build()
         }
 
-        // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
-        //const token = await Token.createToken(user)
-
-        // Send mail without waiting
-        /*Email.send(user.email, "Verifieer jouw e-mailadres voor Stamhoofd", "Hey fa!\n\nWelkom bij Stamhoofd. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n\nStamhoofd").catch(e => {
-            console.error(e)
-        })*/
-
-        // An email has been send to confirm your email address
-        //return new Response(new TokenStruct(token));
-
         const code = await EmailVerificationCode.createFor(user, user.email)
         code.send(user)
 
