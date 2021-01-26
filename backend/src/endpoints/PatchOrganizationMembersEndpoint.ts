@@ -2,11 +2,10 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct } from "@stamhoofd/structures";
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { Group } from '../models/Group';
-import { KeychainItem } from '../models/KeychainItem';
 import { Member, MemberWithRegistrations } from '../models/Member';
 import { Organization } from '../models/Organization';
 import { Payment } from '../models/Payment';
@@ -130,38 +129,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                const registration = new Registration().setOptionalRelation(Registration.payment, null)
-                registration.groupId = registrationStruct.groupId
-                registration.cycle = registrationStruct.cycle
-                registration.memberId = member.id
-                registration.registeredAt = registrationStruct.registeredAt
-                registration.waitingList = registrationStruct.waitingList
-
-                if (registration.waitingList) {
-                    registration.registeredAt = null
-                }
-                registration.canRegister = registrationStruct.canRegister
-
-                if (!registration.waitingList) {
-                    registration.canRegister = false
-                }
-                registration.deactivatedAt = registrationStruct.deactivatedAt
-               
-                // Check payment
-                if (registrationStruct.payment) {
-                    const payment = new Payment()
-                    payment.method = registrationStruct.payment.method
-                    payment.paidAt = registrationStruct.payment.paidAt
-                    payment.price = registrationStruct.payment.price
-                    payment.status = registrationStruct.payment.status
-                    payment.transferDescription = registrationStruct.payment.transferDescription
-                    await payment.save()
-
-                    registration.setOptionalRelation(Registration.payment, payment)
-                }
-
-                await registration.save()
-                member.registrations.push(registration)
+                await this.addRegistration(member, registrationStruct)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -279,6 +247,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
             }
 
+            // Add registrations
+            for (const registrationStruct of patch.registrations.getPuts()) {
+                await this.addRegistration(member, registrationStruct.put)
+            }
+
             // Link users
             for (const placeholder of patch.users.getPuts()) {
                 await this.linkUser(placeholder.put, member)
@@ -327,6 +300,41 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));
+    }
+
+    async addRegistration(member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+        const registration = new Registration().setOptionalRelation(Registration.payment, null)
+        registration.groupId = registrationStruct.groupId
+        registration.cycle = registrationStruct.cycle
+        registration.memberId = member.id
+        registration.registeredAt = registrationStruct.registeredAt
+        registration.waitingList = registrationStruct.waitingList
+
+        if (registration.waitingList) {
+            registration.registeredAt = null
+        }
+        registration.canRegister = registrationStruct.canRegister
+
+        if (!registration.waitingList) {
+            registration.canRegister = false
+        }
+        registration.deactivatedAt = registrationStruct.deactivatedAt
+        
+        // Check payment
+        if (registrationStruct.payment) {
+            const payment = new Payment()
+            payment.method = registrationStruct.payment.method
+            payment.paidAt = registrationStruct.payment.paidAt
+            payment.price = registrationStruct.payment.price
+            payment.status = registrationStruct.payment.status
+            payment.transferDescription = registrationStruct.payment.transferDescription
+            await payment.save()
+
+            registration.setOptionalRelation(Registration.payment, payment)
+        }
+
+        await registration.save()
+        member.registrations.push(registration)
     }
 
     async createDummyMembers(organization: Organization, group: Group) {

@@ -188,6 +188,7 @@ export class MemberManagerStatic {
             const members: MemberWithRegistrations[] = []
             members.push(...(await this.loadMembers(groupId, waitingList, 1)))
             members.push(...(await this.loadMembers(groupId, waitingList, 0)))
+
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
@@ -197,7 +198,7 @@ export class MemberManagerStatic {
             const members: MemberWithRegistrations[] = []
             for (const group of session.organization!.groups) {
                 if (session.user!.permissions!.hasReadAccess(group.id)) {
-                    members.push(...(await this.loadMembers(group.id, waitingList)))
+                    members.push(...(await this.loadMembers(group.id, waitingList, cycleOffset)))
                 }
             }
             // remove duplicates

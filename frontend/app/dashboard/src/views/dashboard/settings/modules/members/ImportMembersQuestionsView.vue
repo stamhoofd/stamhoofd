@@ -10,7 +10,7 @@
             <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
 
             <p v-if="existingCount > 0" class="warning-box">
-                Opgelet, {{ existingCount }} leden uit jouw bestand zitten al in het systeem. Let op, want zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van deze {{ existingCount }} leden worden niet gewijzigd via deze import.
+                Opgelet, {{ existingCount }} leden uit jouw bestand zitten al in het systeem. Let op, want zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van {{ existingCountRegistrations }} leden wordt niet gewijzigd via deze import.
             </p>
 
             <hr>
@@ -157,12 +157,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Group, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,Payment,PaymentMethod, PaymentStatus, Registration, ResolutionFit, ResolutionRequest, Version, WaitingListType } from "@stamhoofd/structures"
+import { AutoEncoder, AutoEncoderPatchType, PatchableArray,PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { Group, Organization, OrganizationPatch, Payment,PaymentMethod, PaymentStatus, Registration, WaitingListType } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -222,11 +221,15 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get needsGroup() {
-        return !!this.members.find(m => m.registration.group === null && (m.equal?.registrations?.length ?? 0) == 0)
+        return !!this.members.find(m => m.registration.group === null && (m.equal?.activeRegistrations?.length ?? 0) == 0)
     }
 
     get existingCount() {
         return this.members.filter(m => m.equal !== null).length
+    }
+
+    get existingCountRegistrations() {
+        return this.members.filter(m => (m.equal?.activeRegistrations?.length ?? 0) > 0).length
     }
 
     get hasWaitingLists() {
@@ -238,7 +241,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.registrations?.length ?? 0) > 0) {
+            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -252,7 +255,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.registrations?.length ?? 0) > 0) {
+            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -265,7 +268,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.registrations?.length ?? 0) > 0) {
+            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -279,7 +282,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.registrations?.length ?? 0) > 0) {
+            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -293,7 +296,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.registrations?.length ?? 0) > 0) {
+            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -311,7 +314,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (member.registration.group !== null) {
                 continue
             }
-            if ((member.equal?.registrations?.length ?? 0) > 0) {
+            if ((member.equal?.activeRegistrations?.length ?? 0) > 0) {
                 continue
             }
 
@@ -335,7 +338,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                 continue
             }
 
-            if ((member.equal?.registrations?.length ?? 0) > 0) {
+            if ((member.equal?.activeRegistrations?.length ?? 0) > 0) {
                 member.registration.autoAssignedGroup = null
                 continue
             }
@@ -458,6 +461,42 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         }).setDisplayStyle("popup"))
     }
 
+    buildRegistration(member: ImportingMember) {
+        const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
+        const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
+        let paid = member.registration.paid ?? this.paid ?? false
+
+        if (!paid && member.registration.paidPrice && price !== 0) {
+            if (member.registration.paidPrice !== 0 && price !== member.registration.paidPrice) {
+                throw new SimpleError({
+                    code: "price_not_supported",
+                    message: "Het is momenteel niet mogelijk om lidgeld dat maar voor een deel betaald is, te importeren (voor lid "+member.details.name+")"
+                })
+            }
+
+            paid = (member.registration.paidPrice !== 0)
+        }
+
+        const payment = Payment.create({
+            method: member.registration.paymentMethod ?? PaymentMethod.Unknown,
+            status: paid ? PaymentStatus.Succeeded : PaymentStatus.Created,
+            price: price,
+            paidAt: paid ? new Date() : null,
+
+            // Placeholders:
+            createdAt: new Date(),
+            updatedAt: new Date()
+        })
+
+        return Registration.create({
+            groupId: group.id,
+            cycle: group.cycle + (this.needRegistration ? -1 : 0),
+            waitingList: this.waitingList,
+            payment: payment,
+            registeredAt: new Date()
+        })
+    }
+
     async goNext() {
         if (this.saving) {
             return
@@ -474,49 +513,23 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
             // todo: group family
             for (const member of this.members) {
+                const family =  new FamilyManager([])
+
                 if (member.equal) {
                     // Merge data (this is an edge case)
-                    const family =  new FamilyManager([])
                     member.equal.details!.copyFrom(member.details)
                     await family.patchAllMembersWith(member.equal)
 
-                    // Payment and registration ignored
-                } else {
-                    const family =  new FamilyManager([])
-                    const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
-                    const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
-                    let paid = member.registration.paid ?? this.paid ?? false
-
-                    if (!paid && member.registration.paidPrice && price !== 0) {
-                        if (member.registration.paidPrice !== 0 && price !== member.registration.paidPrice) {
-                            throw new SimpleError({
-                                code: "price_not_supported",
-                                message: "Het is momenteel niet mogelijk om lidgeld dat maar voor een deel betaald is, te importeren (voor lid "+member.details.name+")"
-                            })
-                        }
-
-                        paid = (member.registration.paidPrice !== 0)
+                    if (member.equal.activeRegistrations.length === 0) {
+                        // Register
+                        const patchRegistrations: PatchableArrayAutoEncoder<Registration> = new PatchableArray()
+                        const registration = this.buildRegistration(member)
+                        patchRegistrations.addPut(registration)
+                        await family.patchMemberRegistrations(member.equal, patchRegistrations)
                     }
-
-                    const payment = Payment.create({
-                        method: member.registration.paymentMethod ?? PaymentMethod.Unknown,
-                        status: paid ? PaymentStatus.Succeeded : PaymentStatus.Created,
-                        price: price,
-                        paidAt: paid ? new Date() : null,
-
-                        // Placeholders:
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    })
-
+                } else {
                     await family.addMember(member.details, [
-                        Registration.create({
-                            groupId: group.id,
-                            cycle: group.cycle + (this.needRegistration ? -1 : 0),
-                            waitingList: this.waitingList,
-                            payment: payment,
-                            registeredAt: new Date()
-                        })
+                        this.buildRegistration(member)
                     ])
                 }
             }
