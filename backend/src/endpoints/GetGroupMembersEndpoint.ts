@@ -57,7 +57,6 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        console.log(request.query)
         const [group] = groups
         const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)
 

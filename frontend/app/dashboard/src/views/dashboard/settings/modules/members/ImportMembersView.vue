@@ -7,7 +7,13 @@
 
         <main>
             <h1>Leden importeren</h1>
-            <p>Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft. In de volgende stappen kan je de kolommen koppelen.</p>
+            <p>
+                Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
+            </p>
+
+            <p class="info-box">
+                Problemen, suggesties of vragen? Stuur een mailtje naar hallo@stamhoofd.be en we helpen je graag verder.
+            </p>
 
             <label class="upload-box">
                 <span v-if="!file" class="icon upload" />
