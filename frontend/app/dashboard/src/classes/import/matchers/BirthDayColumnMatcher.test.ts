@@ -29,12 +29,13 @@ describe("BirthDayColumnMatcher", () => {
         expect(matcher.parseDate("2 dec 95", false)).toEqual(date2)
         expect(matcher.parseDate("2 decmber 1995", false)).toEqual(date2) // typo matching should also work
 
-
         // Invalid dates
         expect(() => matcher.parseDate("02-12-1005", false)).toThrow(/jaar/i)
         expect(() => matcher.parseDate("02-13-1995", false)).toThrow(/maand/i)
         expect(() => matcher.parseDate("02 sdgsdgsdg 1995", false)).toThrow(/maand/i)
         expect(() => matcher.parseDate("32 02 1995", false)).toThrow(/dag/i)
-
+        expect(() => matcher.parseDate("december december december", false)).toThrow(/datum/i)
+        expect(() => matcher.parseDate("december", false)).toThrow(/datum/i)
+        expect(() => matcher.parseDate("sdgsdgsg", false)).toThrow(/datum/i)
     });
 });
