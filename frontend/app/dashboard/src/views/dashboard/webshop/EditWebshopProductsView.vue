@@ -37,17 +37,10 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip, STInputBox, STErrorsDefault, Validator } from "@stamhoofd/components";
-import { Category, EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, PrivateWebshop, Product, Record, RecordTypeHelper, RecordTypePriority, Webshop, WebshopMetaData } from '@stamhoofd/structures';
+import { Category, PrivateWebshop, Product } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { FamilyManager } from '../../../classes/FamilyManager';
-import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
-import EditMemberGroupView from './edit/EditMemberGroupView.vue';
-import EditMemberParentView from './edit/EditMemberParentView.vue';
-import EditMemberView from './edit/EditMemberView.vue';
 import EditProductView from './products/EditProductView.vue';
-import MemberView from './MemberView.vue';
-import RecordDescriptionView from './records/RecordDescriptionView.vue';
 import ProductRow from './products/ProductRow.vue';
 import EditCategoryView from './categories/EditCategoryView.vue';
 import CategoryRow from './categories/CategoryRow.vue';

@@ -56,6 +56,8 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 message: "De groep die je opvraagt bestaat niet (meer)"
             })
         }
+
+        console.log(request.query)
         const [group] = groups
         const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)
 

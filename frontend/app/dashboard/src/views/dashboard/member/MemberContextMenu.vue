@@ -58,7 +58,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
-import { MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
@@ -84,6 +84,15 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
 
     @Prop()
     member!: MemberWithRegistrations;
+
+    @Prop({ default: null })
+    group: Group | null;
+
+    @Prop({ default: 0 })
+    cycleOffset!: number
+
+    @Prop({ default: false })
+    waitingList!: boolean
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
@@ -138,11 +147,11 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
     }
 
     deleteRegistration() {
-        new CenteredMessage("Ben je zeker dat je de inschrijving van "+this.member.firstName+" wilt verwijderen?", "De gegevens van het lid blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
+        new CenteredMessage("Ben je zeker dat je "+this.member.firstName+" wilt uitschrijven?", "De gegevens van het lid blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
             .addButton(new CenteredMessageButton("Uitschrijven", {
                 action: async () => {
                     if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                        await MemberManager.unregisterMember(this.member)
+                        await MemberManager.unregisterMember(this.member, this.group, this.cycleOffset, this.waitingList)
                         new Toast(this.member.firstName+' is uitgeschreven', "success").show()
                     }
                 },

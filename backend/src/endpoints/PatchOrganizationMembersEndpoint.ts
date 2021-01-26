@@ -136,7 +136,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 registration.memberId = member.id
                 registration.registeredAt = registrationStruct.registeredAt
                 registration.waitingList = registrationStruct.waitingList
+
+                if (registration.waitingList) {
+                    registration.registeredAt = null
+                }
                 registration.canRegister = registrationStruct.canRegister
+
+                if (!registration.waitingList) {
+                    registration.canRegister = false
+                }
                 registration.deactivatedAt = registrationStruct.deactivatedAt
                
                 // Check payment
@@ -243,7 +251,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 // todo: allow group changes
                 registration.waitingList = patchRegistration.waitingList ?? registration.waitingList
+
+                if (!registration.waitingList && registration.registeredAt === null) {
+                    registration.registeredAt = new Date()
+                }
                 registration.canRegister = patchRegistration.canRegister ?? registration.canRegister
+                if (!registration.waitingList) {
+                    registration.canRegister = false
+                }
                 registration.cycle = patchRegistration.cycle ?? registration.cycle
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
 

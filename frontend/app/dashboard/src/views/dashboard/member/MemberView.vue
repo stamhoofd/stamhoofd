@@ -37,7 +37,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
-import { Gender,MemberWithRegistrations } from '@stamhoofd/structures';
+import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
@@ -62,6 +62,15 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     @Prop()
     member!: MemberWithRegistrations;
+
+    @Prop({ default: null })
+    group: Group | null;
+
+    @Prop({ default: 0 })
+    cycleOffset!: number
+
+    @Prop({ default: false })
+    waitingList!: boolean
 
     familyManager = new FamilyManager([this.member]);
 
@@ -102,6 +111,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
+
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.navigationController?.push(component, true, 1, true);
     }
@@ -115,6 +128,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
+
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.navigationController?.push(component, true, 1, false);
     }
@@ -150,6 +167,9 @@ export default class MemberView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY,
             member: this.member,
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

@@ -3,7 +3,7 @@
 import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
+import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, Group, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -174,7 +174,23 @@ export class MemberManagerStatic {
         return members;
     }
 
-    async loadMembers(groupId: string | null = null, waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrations[]> {
+    async loadMembers(groupId: string | null = null, waitingList: boolean | null = false, cycleOffset: number | null = 0): Promise<MemberWithRegistrations[]> {
+        if (waitingList === null) {
+            // Load both waiting list and without waiting list
+            const members: MemberWithRegistrations[] = []
+            members.push(...(await this.loadMembers(groupId, true, cycleOffset)))
+            members.push(...(await this.loadMembers(groupId, false, cycleOffset)))
+            return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
+        }
+
+        if (cycleOffset === null) {
+            // Load both waiting list and without waiting list
+            const members: MemberWithRegistrations[] = []
+            members.push(...(await this.loadMembers(groupId, waitingList, 1)))
+            members.push(...(await this.loadMembers(groupId, waitingList, 0)))
+            return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
+        }
+
         const session = SessionManager.currentSession!
 
         if (groupId === null) {
@@ -323,6 +339,25 @@ export class MemberManagerStatic {
         return await this.decryptMembers(response.data)
     }
 
+    async deleteMembers(members: MemberWithRegistrations[]) {
+        const patchArray = new PatchableArray()
+        for (const member of members) (
+            patchArray.addDelete(member.id)
+        )
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+
+        this.callListeners("deleted", null)
+    }
+
     async deleteMember(member: MemberWithRegistrations) {
         const patchArray = new PatchableArray()
         patchArray.addDelete(member.id)
@@ -340,12 +375,145 @@ export class MemberManagerStatic {
         this.callListeners("deleted", member)
     }
 
-    async unregisterMember(member: MemberWithRegistrations) {
+    async unregisterMembers(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0, waitingList = false) {
+        const patchArray = new PatchableArray()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            if (group === null) {
+                for (const registration of member.activeRegistrations) {
+                    if (registration.waitingList === waitingList) {
+                        patchMember.registrations.addDelete(registration.id)
+                    }
+                }
+            } else {
+                for (const registration of member.registrations) {
+                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === waitingList) {
+                        patchMember.registrations.addDelete(registration.id)
+                    }
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+   
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+
+        this.callListeners("deleted", null)
+    }
+
+    async acceptFromWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
+        const patchArray = new PatchableArray()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            if (group === null) {
+                for (const registration of member.activeRegistrations) {
+                    if (registration.waitingList === true) {
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            waitingList: false
+                        }))
+                    }
+                }
+            } else {
+                for (const registration of member.registrations) {
+                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === true) {
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            waitingList: false
+                        }))
+                    }
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+   
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+
+        this.callListeners("deleted", null)
+    }
+
+    async moveToWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
+        const patchArray = new PatchableArray()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            if (group === null) {
+                for (const registration of member.activeRegistrations) {
+                    if (registration.waitingList === false) {
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            waitingList: true
+                        }))
+                    }
+                }
+            } else {
+                for (const registration of member.registrations) {
+                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === false) {
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            waitingList: true
+                        }))
+                    }
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+   
+ 
+        const session = SessionManager.currentSession!
+
+        // Send the request
+        await session.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/members",
+            body: patchArray,
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+        })
+
+        this.callListeners("deleted", null)
+    }
+
+    async unregisterMember(member: MemberWithRegistrations, group: Group | null = null, cycleOffset = 0, waitingList = false) {
         const patchArray = new PatchableArray()
         const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
 
-        for (const registration of member.activeRegistrations) {
-            patchMember.registrations.addDelete(registration.id)
+        if (group === null) {
+            for (const registration of member.activeRegistrations) {
+                if (registration.waitingList === waitingList) {
+                    patchMember.registrations.addDelete(registration.id)
+                }
+            }
+        } else {
+            for (const registration of member.registrations) {
+                if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === waitingList) {
+                    patchMember.registrations.addDelete(registration.id)
+                }
+            }
         }
 
         patchArray.addPatch(patchMember)

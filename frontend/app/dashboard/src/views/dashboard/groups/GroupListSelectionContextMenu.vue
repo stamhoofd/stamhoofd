@@ -5,7 +5,7 @@
         </ContextMenuItem>
 
         <ContextMenuLine />-->
-        <ContextMenuItem @click="samenvatting">
+        <ContextMenuItem @click="samenvatting" v-if="!waitingList">
             Samenvatting
         </ContextMenuItem>
         <ContextMenuItem @click="excel">
@@ -23,6 +23,14 @@
         </ContextMenuItem>
 
         <ContextMenuLine />
+
+        <ContextMenuItem @click="acceptWaitingList" v-if="waitingList">
+            Schrijf in
+        </ContextMenuItem>
+        <ContextMenuItem @click="moveToWaitingList" v-else-if="hasWaitingList">
+            Verplaatst naar wachtlijst
+            <span slot="right" class="icon clock-small" />
+        </ContextMenuItem>
 
         <ContextMenuItem @click="deleteRegistration">
             Uitschrijven
@@ -67,8 +75,14 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     @Prop()
     members!: MemberWithRegistrations[];
 
-    @Prop()
-    group: Group;
+    @Prop({ default: null })
+    group: Group | null;
+
+    @Prop({ default: 0 })
+    cycleOffset!: number
+
+    @Prop({ default: false })
+    waitingList!: boolean
 
     sms() {
         const displayedComponent = new ComponentWithProperties(SMSView, {
@@ -93,10 +107,42 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
+    get hasWaitingList() {
+        return this.group?.hasWaitingList ?? false
+    }
+
     async excel() {
         const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
         const MemberExcelExport = d.MemberExcelExport
         MemberExcelExport.export(this.members);
+    }
+
+    acceptWaitingList() {
+        new CenteredMessage("Wil je "+this.members.length+" leden inschrijven?", "We raden sterk aan om leden enkel toe te voegen via de 'toelaten' knop. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
+            .addButton(new CenteredMessageButton("Meteen inschrijven", {
+                action: async () => {
+                    await MemberManager.acceptFromWaitingList(this.members, this.group, this.cycleOffset)
+                    new Toast(this.members.length+" leden zijn ingeschreven", "success green").show()
+                },
+                type: "destructive",
+                icon: "download"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    moveToWaitingList() {
+        new CenteredMessage("Wil je "+this.members.length+" leden naar de wachtlijst verplaatsen?")
+            .addButton(new CenteredMessageButton("Naar wachtlijst", {
+                action: async () => {
+                    await MemberManager.moveToWaitingList(this.members, this.group, this.cycleOffset)
+                    new Toast(this.members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
+                },
+                type: "destructive",
+                icon: "clock"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
     }
 
     deleteData() {
@@ -104,9 +150,7 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
             .addButton(new CenteredMessageButton("Verwijderen", {
                 action: async () => {
                     if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
-                        for (const member of this.members) {
-                            await MemberManager.deleteMember(member)
-                        }
+                        await MemberManager.deleteMembers(this.members)
                         new Toast(this.members.length+" leden zijn verwijderd", "success green").show()
                     }
                 },
@@ -118,13 +162,11 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     }
 
     deleteRegistration() {
-        new CenteredMessage("Ben je zeker dat je de inschrijving van "+this.members.length+" leden wilt verwijderen?", "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
+        new CenteredMessage("Ben je zeker dat je "+this.members.length+" leden wilt uitschrijven?", "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
             .addButton(new CenteredMessageButton("Uitschrijven", {
                 action: async () => {
                     if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                        for (const member of this.members) {
-                            await MemberManager.unregisterMember(member)
-                        }
+                        await MemberManager.unregisterMembers(this.members, this.group, this.cycleOffset, this.waitingList)
                         new Toast(this.members.length+" leden zijn uitgeschreven", "success green").show()
                     }
                 },

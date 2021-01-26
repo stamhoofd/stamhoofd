@@ -61,6 +61,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/gray/clock.svg);
     }
 
+    &.clock-small:after {
+        font-icon: url(@stamhoofd/assets/images/icons/gray/clock-small.svg);
+    }
+
     &.trash:after {
         font-icon: url(@stamhoofd/assets/images/icons/trash.svg);
     }

@@ -161,7 +161,10 @@
                 </button>
                 <LoadingButton v-if="waitingList" :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0" @click="allowMembers(true)">
-                        Toelaten
+                        <span class="dropdown-text">
+                            Toelaten
+                        </span>
+                        <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
                 </LoadingButton>
                 <template v-else>
@@ -586,6 +589,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 getNextMember: this.getNextMember,
                 // eslint-disable-next-line @typescript-eslint/unbound-method
                 getPreviousMember: this.getPreviousMember,
+
+                group: this.group,
+                cycleOffset: this.cycleOffset,
+                waitingList: this.waitingList
             }),
         });
         component.modalDisplayStyle = "popup";
@@ -607,6 +614,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY + 10,
             member: member,
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -690,7 +700,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY + 10,
             members: this.getSelectedMembers(),
-            group: this.group
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

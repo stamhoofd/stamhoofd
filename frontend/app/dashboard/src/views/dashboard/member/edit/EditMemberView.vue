@@ -37,14 +37,9 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, SegmentedControl, STToolbar, LoadingButton } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MemberContextMenu from "./MemberContextMenu.vue";
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
-import { MemberWithRegistrations, Gender, MemberDetails } from '@stamhoofd/structures';
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 import EditMemberGeneralView from './EditMemberGeneralView.vue';
 import EditMemberContactsView from './EditMemberContactsView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { FamilyManager } from "../../../../classes/FamilyManager";
 import EditMemberRecordsView from './EditMemberRecordsView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
