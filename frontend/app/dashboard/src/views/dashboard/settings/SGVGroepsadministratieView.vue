@@ -1,13 +1,15 @@
 <template>
-    <div class="st-view background" id="sgv-groepsadministratie-view">
+    <div id="sgv-groepsadministratie-view" class="st-view background">
         <STNavigationBar title="Groepsadministratie synchroniseren">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
-            <p class="info-box">Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be</p>
+            <p class="info-box">
+                Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be
+            </p>
 
             <hr>
             <h2>Hoe werkt het?</h2>
@@ -32,7 +34,6 @@
                 <li>Gestopte leiding/vrijwilligers schrappen</li>
                 <li>We kunnen het e-mailadres niet wijzigen van leden die een login hebben in de groepsadministratie</li>
             </ul>
-
         </main>
 
         <STToolbar>
@@ -40,11 +41,11 @@
                 <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank" class="button secundary">
                     Naar groepsadministratie
                 </a>
-                <LoadingButton :loading="loading" >
-                    <button class="button primary" v-if="isLoggedIn" @click="sync">
+                <LoadingButton :loading="loading">
+                    <button v-if="isLoggedIn" class="button primary" @click="sync">
                         Synchroniseren
                     </button>
-                     <button class="button primary" v-else @click="login">
+                    <button v-else class="button primary" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
@@ -54,12 +55,13 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Toast } from "@stamhoofd/components";
-import { Component, Mixins } from "vue-property-decorator";
+import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast,TooltipDirective } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
-import { WhatsNewCount } from "../../../classes/WhatsNewCount"
+import { Component, Mixins } from "vue-property-decorator";
+
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie"
+import { WhatsNewCount } from "../../../classes/WhatsNewCount"
 
 @Component({
     components: {
