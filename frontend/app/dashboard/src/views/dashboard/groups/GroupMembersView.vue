@@ -254,7 +254,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     cachedWaitingList: boolean | null = null
 
     mounted() {
-        this.reload();
+        //this.reload();
 
         // Set url
         if (this.group) {
@@ -294,6 +294,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     activated() {
+        this.reload();
         MemberManager.addListener(this, this.onUpdateMember)
     }
 
