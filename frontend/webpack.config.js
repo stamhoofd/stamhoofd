@@ -1,13 +1,27 @@
+/* eslint-disable no-constant-condition */
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
-const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
+//var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
+//const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
+const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin')
+
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
 require('dotenv').config({path: __dirname+'/.env'})
 
-const use_env = {}
+const use_env = {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || "development"),
+}
+
+// This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
+// process.env.BUILD_FOR_PRODUCTION
+
+if (process.env.NODE_ENV === "production") {
+    console.log("Building for production...")
+}
+
 if (process.env.LOAD_ENV) {
     // Load this in the environment
     const decode = JSON.parse(process.env.LOAD_ENV);
@@ -17,8 +31,9 @@ if (process.env.LOAD_ENV) {
     }
 } else {
     // Use current environment
-    if (process.env.NODE_ENV !== 'development') {
-        throw new Error("Setting LOAD_ENV is required for non development environments")
+    if (process.env.NODE_ENV === "production") {
+        //throw new Error("Setting LOAD_ENV is required for non development environments")
+        console.log("Setting LOAD_ENV is required for non development environments")
     }
 
     for (const key in process.env) {
@@ -29,34 +44,39 @@ if (process.env.LOAD_ENV) {
 
 module.exports = {
     mode: "development",
-    stats: 'none',
+    target: 'web',
+    //stats: 'none',
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension (so that you don't have to add it explicitly)
         extensions: [".ts", ".tsx", ".js"],
         alias: {
             vue$: "vue/dist/vue.runtime.esm.js", // we only need vue runtime, no compilation
             // ...
+        },
+
+        // Needed for libsodium
+        // It automatically detects if node is used or not, so stop webpack from complaining about this:
+        fallback: { 
+            "path": false,
+            "crypto": false,
+            "stream": false,
         }
     },
     output: {
-        filename: process.env.NODE_ENV === 'production' ? '[name].[contenthash].js' : '[name].[hash].js',
-        chunkFilename: process.env.NODE_ENV === 'production' ? '[name].[contenthash].js' : '[name].[hash].js',
+        publicPath: "/",
+        filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[fullhash].js',
+        chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[fullhash].js',
         globalObject: 'this' // needed for webworkers
     },
     devServer: {
         contentBase: './dist',
-        allowedHosts: [
-            '.stamhoofd.be',
-            '.stamhoofd.local',
-        ],
-        // To test on external devices
-        host: '0.0.0.0',//your ip address
+        host: '0.0.0.0',
         port: 8080,
         sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
         disableHostCheck: true,
-        historyApiFallback: true
+        historyApiFallback: true,
     },
-    devtool: "sourcemap",
+    //devtool: "source-map",
     module: {
         rules: [
             {
@@ -72,6 +92,38 @@ module.exports = {
                 use: [
                     {
                         loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                [
+                                   "@babel/preset-env",
+                                   // Use this for modern build in the future
+                                    /*{
+                                        modules: false,
+                                        useBuiltIns: 'usage',
+                                        targets: {
+                                            "esmodules": true
+                                        },
+                                        corejs: "3.6"
+                                    }*/
+                                    {		
+                                        "useBuiltIns": "usage",		
+                                        "corejs": "3.8",
+                                        "bugfixes": true // Makes bundle size a bit smaller
+                                    }
+                                ]
+                            ],
+
+                            plugins: [
+                                // for iOS 10 + iOS 11
+                                "@babel/plugin-proposal-object-rest-spread"
+                            ]
+
+                            // Remove for modern build:
+                            //"plugins": [		
+                            //    "@babel/plugin-transform-regenerator"		
+                            //]
+                        }
                     },
                     {
                         loader: 'ts-loader',
@@ -79,23 +131,54 @@ module.exports = {
                     }
                 ]
             },
+            /*{ 
+                // commented out, since this causes memory issues in webpack
+                test: /\.jsx?$/, 
+                exclude: /node_modules\/@zxcvbn-ts/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                [
+                                   "@babel/preset-env",
+                                    {		
+                                        "useBuiltIns": "usage",		
+                                        "corejs": "3.8",
+                                        "bugfixes": true // Makes bundle size a bit smaller
+                                    }
+                                ]
+                            ],
+                            plugins: [
+                                // for iOS 10 + iOS 11
+                                "@babel/plugin-proposal-object-rest-spread"
+                            ]
+
+                            // Remove for modern build:
+                            //"plugins": [		
+                            //    "@babel/plugin-transform-regenerator"		
+                            //]
+                        }
+                    }
+                ]
+            },*/
             {
                 test: /\.css$/,
                 use: [
-                    process.env.NODE_ENV === 'production' ? 
-                        { 
-                            loader: MiniCssExtractPlugin.loader,
-                            options: {
-                                esModule: true,
-                            },
-                        
-                        } : // If you enable this, HMR won't work. Replace it with a style loader
-                        'style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
+                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader', 
+                    // If you enable this, HMR won't work. Replace it with a style loader
+                    // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
                     { 
                         loader: 'postcss-loader', 
                         options: {
-                            "plugins": [autoprefixer]
+                            postcssOptions: {
+                                plugins: [
+                                    // Don't need icons here
+                                    "autoprefixer"
+                                ]
+                            }
                         }
                     }
                 ],
@@ -105,15 +188,27 @@ module.exports = {
             {
                 test: /\.url.scss$/,
                 use: [
-                    'css-loader',
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 2,
+                            // 0 => no loaders (default);
+                            // 1 => postcss-loader;
+                            // 2 => postcss-loader, sass-loader
+                        },
+                    },
                     {
                         loader: 'postcss-loader',
                         options: {
-                            plugins: (loader) => [
-                                // Add the plugin
-                                new IconfontWebpackPlugin(loader),
-                                autoprefixer
-                            ]
+                            postcssOptions: (loader) => {
+                                return { 
+                                    plugins: [
+                                        // Add the plugin
+                                        new IconfontWebpackPlugin(loader),
+                                        autoprefixer
+                                    ]
+                                }
+                            }
                         }
                     },
                     'sass-loader',
@@ -125,24 +220,30 @@ module.exports = {
                 test: /\.scss$/,
                 exclude:  /\.url.scss$/,
                 use: [
-                    process.env.NODE_ENV === 'production' ? 
-                        { 
-                            loader: MiniCssExtractPlugin.loader,
-                            options: {
-                                esModule: true,
-                            },
-                        
-                        } : // If you enable this, HMR won't work. Replace it with a style loader
-                        'vue-style-loader', // sets the style inline, instead of using MiniCssExtractPlugin.loader
-                    'css-loader',
+                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',  // vue-style-loader is not supported/maintained any longer and doesn't work without other changes
+                    // If you enable this, HMR won't work. Replace it with a style loader
+                    // sets the style inline, instead of using MiniCssExtractPlugin.loader
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 2
+                            // 0 => no loaders (default);
+                            // 1 => postcss-loader;
+                            // 2 => postcss-loader, sass-loader
+                        },
+                    },
                     {
                         loader: 'postcss-loader',
                         options: {
-                            plugins: (loader) => [
-                                // Add the plugin
-                                new IconfontWebpackPlugin(loader),
-                                autoprefixer
-                            ]
+                            postcssOptions: (loader) => {
+                                return { 
+                                    plugins: [
+                                        // Add the plugin
+                                        new IconfontWebpackPlugin(loader),
+                                        autoprefixer
+                                    ]
+                                }
+                            }
                         }
                     },
                     'sass-loader',
@@ -154,7 +255,7 @@ module.exports = {
                     {
                         loader: 'file-loader',
                         options: {
-                            name: 'images/[name].[hash].[ext]',
+                            name: 'images/[name].[contenthash].[ext]',
                             esModule: false // Important to work with vue
                         },
                     },
@@ -166,7 +267,7 @@ module.exports = {
                     {
                         loader: 'file-loader',
                         options: {
-                            name: 'fonts/[name].[hash].[ext]',
+                            name: 'fonts/[name].[contenthash].[ext]',
                             esModule: false // Important to work with vue
                         },
                     },
@@ -176,13 +277,25 @@ module.exports = {
     },
     plugins: [
         // make sure to include the plugin!
-        new FriendlyErrorsWebpackPlugin(),
+        //new FriendlyErrorsWebpackPlugin(),
         new CleanWebpackPlugin(), // Clear the dist folder before building
         new VueLoaderPlugin(), // Allow .vue files
-        ...(process.env.NODE_ENV !== 'production') ? [] : [new MiniCssExtractPlugin({ // Make sure CSS is not put inline, but saved to a seperate file
+        ...(process.env.NODE_ENV !== "production") ? [] : [new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css',
             //chunkFilename: '[id].[contenthash].css',
+            ignoreOrder: false, // Enable to remove warnings about conflicting order
         })],
-        new webpack.DefinePlugin(use_env)
-    ]
+        new webpack.DefinePlugin(use_env),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+        /*new CircularDependencyPlugin({
+            exclude: /\/shared\/components\//,
+            // add errors to webpack instead of warnings
+            failOnError: true,
+        })*/
+    ],
+    experiments: {
+        syncWebAssembly: true // temporary, until fixed
+    },
 };

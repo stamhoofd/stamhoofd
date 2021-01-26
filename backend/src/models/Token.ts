@@ -119,6 +119,15 @@ export class Token extends Model {
             throw new Error("Unexpected error when setting a relationship")
         }
 
+        if (!token.user.publicKey) {
+            throw new SimpleError({
+                code: "not_activated",
+                message: "This user is not yet activated",
+                human: "Maak een account aan op dit e-mailadres om een wachtwoord in te stellen voor je inlogt.",
+                statusCode: 401
+            })
+        }
+
         return token as UserWithOrganizationAndUser
     }
 

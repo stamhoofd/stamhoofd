@@ -1,16 +1,19 @@
 <template>
     <form class="st-view forgot-password-view" @submit.prevent="submit">
         <STNavigationBar title="Wachtwoord vergeten">
-            <button slot="right" class="button icon gray close" type="button" @click="pop"></button>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button slot="right" class="button icon gray close" type="button" @click="dismiss" />
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>
-            <div class="warning-box">Als je jouw wachtwoord vergeten bent kan je niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.</div>
+            <div class="warning-box">
+                Als je jouw wachtwoord vergeten bent kan je niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.
+            </div>
 
             <STErrorsDefault :error-box="errorBox" />
 
 
-            <EmailInput title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" v-model="email" :validator="validator"/>
+            <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" />
         </main>
 
         <STFloatingFooter>
@@ -25,10 +28,10 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { SessionManager, Session } from '@stamhoofd/networking';
+import { BackButton,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar, Toast, Validator } from "@stamhoofd/components"
+import { Session,SessionManager } from '@stamhoofd/networking';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -36,7 +39,8 @@ import { ForgotPasswordRequest } from '@stamhoofd/structures';
         STFloatingFooter,
         EmailInput,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        BackButton
     }
 })
 export default class ForgotPasswordView extends Mixins(NavigationMixin){
@@ -77,8 +81,3 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-    .forgot-password-view {
-    }
-</style>

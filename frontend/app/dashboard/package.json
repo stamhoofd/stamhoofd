@@ -3,9 +3,9 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "serve": "NODE_ENV=development webpack-dev-server --hot",
-        "build": "NODE_ENV=development webpack",
-        "build:production": "NODE_ENV=production webpack",
+        "serve": "NODE_ENV=development webpack serve --hot",
+        "build": "NODE_ENV=development webpack --progress ",
+        "build:production": "NODE_ENV=production webpack --performance-hints warning",
         "test": "jest",
         "lint": "eslint ../.. --ext .js,.jsx,.ts,.tsx,.vue"
     },
@@ -22,7 +22,6 @@
     },
     "devDependencies": {
         "@types/pdfkit": "^0.10.6",
-        "arraybuffer-loader": "^1.0.8",
-        "favicons-webpack-plugin": "^4.2.0"
+        "arraybuffer-loader": "^1.0.8"
     }
 }

@@ -16,6 +16,8 @@ export class Session implements RequestMiddleware {
     organization: Organization | null = null
     user: MyUser | null = null
 
+    preventComplete = false
+
     protected token: ManagedToken | null = null
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
@@ -134,7 +136,7 @@ export class Session implements RequestMiddleware {
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !!this.organization && !!this.userPrivateKey
+        return !!this.token && !!this.user && !!this.organization && !!this.userPrivateKey && !this.preventComplete
     }
 
     /**
@@ -185,6 +187,7 @@ export class Session implements RequestMiddleware {
             this.user = preload.user
             this.userPrivateKey = preload.userPrivateKey
         }
+
         this.onTokenChanged();
 
         // Start loading the user and encryption keys
@@ -261,6 +264,7 @@ export class Session implements RequestMiddleware {
     // Logout without clearing this token
     temporaryLogout() {
         // We do not call ontoken changed -> prevent saving!!!!
+        // Might still be able to login after a reload (because the error was caused by data errors)
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
@@ -270,14 +274,22 @@ export class Session implements RequestMiddleware {
         }
     }
 
+    clearKeys() {
+        this.authEncryptionKey = null;
+        this.userPrivateKey = null
+        this.callListeners()
+    }
+
     logout() {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
             }
             this.token = null;
+            this.clearKeys()
             this.user = null; // force refetch in the future
             this.onTokenChanged();
+            //LoginHelper.clearAwaitingKeys()
         }
     }
 
@@ -298,7 +310,7 @@ export class Session implements RequestMiddleware {
         request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
     }
 
-    async shouldRetryError(request: Request<any>, response: Response, error: SimpleErrors): Promise<boolean> {
+    async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
         if (!this.token) {
             // Euhm? The user is not signed in!
             return false;
@@ -308,7 +320,7 @@ export class Session implements RequestMiddleware {
             return false;
         }
 
-        if (error.containsCode("expired_access_token")) {
+        if (error.hasCode("expired_access_token")) {
             if (request.headers.Authorization != "Bearer " + this.token.token.accessToken) {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh")
                 return true

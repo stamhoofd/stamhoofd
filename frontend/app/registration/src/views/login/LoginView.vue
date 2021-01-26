@@ -1,55 +1,63 @@
 <template>
-    <div class="split-login-view padded-view">
-        <form class="login-view st-view auto" @submit.prevent="submit">
-            <h1>Inloggen</h1>
-            
-            <main>
-                <STInputBox title="E-mailadres">
-                    <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-                </STInputBox>
+    <div id="login-view" class="padded-view">
+        <div class="split-login-view">
+            <form class="login-view st-view auto" @submit.prevent="submit">
+                <h1>Inloggen</h1>
+                
+                <main>
+                    <STInputBox title="E-mailadres" class="max">
+                        <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email" autofocus>
+                    </STInputBox>
 
-                <STInputBox title="Wachtwoord">
-                    <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
-                        <span>Vergeten</span>
-                        <span class="icon help"/>
+                    <STInputBox title="Wachtwoord" class="max">
+                        <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                            <span>Vergeten</span>
+                            <span class="icon help" />
+                        </button>
+                        <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                    </STInputBox>
+                </main>
+
+                <STFloatingFooter>
+                    <LoadingButton :loading="loading">
+                        <button class="button primary full">
+                            <span class="lock" />
+                            Inloggen
+                        </button>
+                    </LoadingButton>
+                    <button class="button secundary full" type="button" @click="createAccount">
+                        Account aanmaken
                     </button>
-                    <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
-                </STInputBox>
-            </main>
+                </STFloatingFooter>
+            </form>
 
-            <STFloatingFooter>
-                <LoadingButton :loading="loading">
-                    <button class="button primary full">
-                        <span class="lock" />
-                        Inloggen
-                    </button>
-                </LoadingButton>
-                <button class="button secundary full" @click="createAccount" type="button">
-                    Account aanmaken
-                </button>
-            </STFloatingFooter>
-        </form>
-
-        <aside>
-            <h1>Hoe schrijf je iemand in?</h1>
-            <ol>
-                <li>Log in, of maak een account aan.</li>
-                <li>Vul alle gegevens van de leden in of kijk ze na.</li>
-                <li>Betaal het lidgeld.</li>
-                <li>Klaar! Je hoeft vanaf nu enkel nog de gegevens jaarlijks na te kijken.</li>
-            </ol>
-        </aside>
+            <aside>
+                <h1>Hoe schrijf je iemand in?</h1>
+                <ol>
+                    <li>Log in, of maak een account aan.</li>
+                    <li>Vul alle gegevens van de leden in of kijk ze na.</li>
+                    <li>Betaal het lidgeld.</li>
+                    <li>Klaar! Je hoeft vanaf nu enkel nog de gegevens jaarlijks na te kijken.</li>
+                </ol>
+            </aside>
+        </div>
+        <p class="stamhoofd-footer">
+            <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie software door <strong>Stamhoofd</strong> voor {{ organization.name }}</a>
+        </p>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, ForgotPasswordResetView, ForgotPasswordView } from "@stamhoofd/components"
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
 import { Sodium } from '@stamhoofd/crypto';
+import { LoginHelper,NetworkManager, SessionManager } from '@stamhoofd/networking';
+import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import SignupView from './SignupView.vue';
 
 const throttle = (func, limit) => {
@@ -93,11 +101,39 @@ export default class LoginView extends Mixins(NavigationMixin){
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        let clearPath = true
 
         if (parts.length == 1 && parts[0] == 'reset-password') {
             // tood: password reset view
             this.present(new ComponentWithProperties(ForgotPasswordResetView, {}).setDisplayStyle("popup"));
+            clearPath = false
         }
+
+        if (parts.length == 1 && parts[0] == 'verify-email') {
+            const queryString = new URL(window.location.href).searchParams;
+            const token = queryString.get('token')
+            const code = queryString.get('code')
+                
+            if (token && code) {
+                // tood: password reset view
+                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
+                LoginHelper.verifyEmail(this.session, code, token).then(() => {
+                    toast.hide()
+                    new Toast("E-mailadres is gevalideerd", "success green").show()
+                }).catch(e => {
+                    toast.hide()
+                    CenteredMessage.fromError(e).addCloseButton().show()
+                })
+            }
+        }
+
+        if (clearPath) {
+            HistoryManager.setUrl("/")   
+        }
+    }
+
+     get organization() {
+        return OrganizationManager.organization
     }
 
     gotoPasswordForgot() {
@@ -105,11 +141,18 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     createAccount() {
-        this.present(new ComponentWithProperties(SignupView, {}).setDisplayStyle("popup")) 
+        this.show(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(SignupView, {})
+        }).setDisplayStyle("sheet")) 
     }
 
     async submit() {
         if (this.loading) {
+            return
+        }
+
+        if (this.email.length < 3 || this.password.length < 5) {
+            new CenteredMessage("Vul eerst iets in", "Je hebt geen correcte gegevens ingevuld", "error").addCloseButton().show()   
             return
         }
 
@@ -118,14 +161,19 @@ export default class LoginView extends Mixins(NavigationMixin){
         // Request the key constants
         const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
         try {
-            await LoginHelper.login(this.session, this.email, this.password)
-        } catch (e) {
-            console.error(e)
-            this.loading = false;
+            const result = await LoginHelper.login(this.session, this.email, this.password)
 
-            new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
-            return;
+            if (result.verificationToken) {
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
+            }
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven. Gebruik het e-mailadres waar je al e-mails van ons op ontvangt.", "error").addCloseButton().show()           
+            } else {
+                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+            }
         } finally {
+            this.loading = false;
             component.hide()
         }
     }
@@ -135,6 +183,27 @@ export default class LoginView extends Mixins(NavigationMixin){
 <style lang="scss">
     @use "~@stamhoofd/scss/base/variables.scss" as *;
     @use "~@stamhoofd/scss/base/text-styles.scss" as *;
+
+    #login-view {
+        .stamhoofd-footer {
+            max-width: 850px;
+            margin: 0 auto;
+            @extend .style-description;
+            padding: 15px;
+            padding-top: 30px;
+
+            a {
+                white-space: normal;
+                text-overflow: initial;
+                height: auto;
+                line-height: 1.4;
+            }
+
+            strong {
+                color: $color-primary-original;
+            }
+        }
+    }
 
     .split-login-view {
         padding-top: 100px;

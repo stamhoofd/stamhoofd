@@ -47,7 +47,7 @@ export class MemberFactory extends Factory<Options, Member> {
         // For now only generate -18
         memberDetails.address = null;
 
-        if (memberDetails.age >= 14) {
+        if (memberDetails.age! >= 14) {
             memberDetails.phone =
                 "+32 47" +
                 Math.floor(Math.random() * 10) +
@@ -175,7 +175,7 @@ export class MemberFactory extends Factory<Options, Member> {
             await Member.users.link(member, [this.options.user])
         }
 
-        if (this.options.user && this.options.userPrivateKey) {
+        if (this.options.user && this.options.userPrivateKey && this.options.user.publicKey) {
             // Add the private key to the keychain for this user (if possible)
             const keychainItem = new KeychainItem()
             keychainItem.userId = this.options.user.id

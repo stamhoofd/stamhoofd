@@ -1,17 +1,17 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
         <label for="color-input" class="input color-input-box" :class="{ hasColor: !!hasColor }">
-            <input class="text-input" type="text" pattern="#[0-9A-Fa-f]{6}" v-model="colorRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete"/>
-            <input id="color-input" class="color-input" type="color" pattern="#[0-9A-Fa-f]{6}" v-model="colorRaw"  @change="validate" />
-            <span class="color" :style="{ backgroundColor: myColor }"/>
+            <input v-model="colorRaw" class="text-input" type="text" pattern="#[0-9A-Fa-f]{6}" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
+            <input id="color-input" v-model="colorRaw" class="color-input" type="color" pattern="#[0-9A-Fa-f]{6}" @change="validate">
+            <span class="color" :style="{ backgroundColor: myColor }" />
         </label>
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {

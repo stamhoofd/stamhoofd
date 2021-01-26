@@ -1,13 +1,13 @@
 <template>
     <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input class="input" :class="{ error: !valid }" v-model="phoneRaw" :placeholder="placeholder" @change="validate" autocomplete="mobile tel"/>
+        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {

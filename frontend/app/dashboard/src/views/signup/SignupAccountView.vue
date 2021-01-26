@@ -1,7 +1,7 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Maak jouw account">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -16,7 +16,11 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                </div>
+
+                <div>
+                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -26,36 +30,40 @@
                             </div>
                         </div>
                     </STInputBox>
+                </div>
+            </div>
 
-                    <EmailInput title="Persoonlijk e-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
-
-                   <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
+            <div class="split-inputs">
+                <div>
+                    <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
                         <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
-
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
                         <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
-
-                    <Checkbox v-model="acceptPrivacy" class="long-text">
-                        Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptTerms" class="long-text">
-                        Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
-                    </Checkbox>
-
-                    <Checkbox v-model="acceptDataAgreement" class="long-text">
-                        Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
-                    </Checkbox>
                 </div>
 
                 <div>
-                    <div class="warning-box">
-                        Kies een wachtwoord van minstens 14 karakters. We raden je heel sterk aan om een wachtwoordbeheerder te gebruiken en een wachtwoord te kiezen dat nog veel langer is (en automatisch gegenereerd).
-                    </div>
+                    <PasswordStrength v-model="password" />
                 </div>
             </div>
+
+
+            <div class="checkbox-box">
+                <Checkbox v-model="acceptPrivacy" class="long-text">
+                    Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
+                </Checkbox>
+
+                <Checkbox v-model="acceptTerms" class="long-text">
+                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                </Checkbox>
+
+                <Checkbox v-model="acceptDataAgreement" class="long-text">
+                    Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                </Checkbox>
+            </div>
+
+            
         </main>
 
         <STToolbar>
@@ -63,7 +71,7 @@
                 Het aanmaken van de verenging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
             </template>
             <template #right>
-                <LoadingButton :loading="loading" >
+                <LoadingButton :loading="loading">
                     <button class="button primary">
                         Account aanmaken
                     </button>
@@ -78,11 +86,12 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BackButton, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength, ConfirmEmailView } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { NetworkManager, Session, SessionManager, Keychain, LoginHelper } from "@stamhoofd/networking"
+import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import SignupModulesView from './SignupModulesView.vue';
 
 @Component({
@@ -94,7 +103,8 @@ import SignupModulesView from './SignupModulesView.vue';
         LoadingButton,
         BackButton,
         EmailInput,
-        Checkbox
+        Checkbox,
+        PasswordStrength
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
@@ -157,11 +167,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 })
             }
 
-            if (this.password.length < 14) {
+            if (this.password.length < 8) {
                 plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "password_too_short",
-                    message: "Jouw wachtwoord moet uit minstens 14 karakters bestaan.",
+                    message: "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
                     field: "password"
                 })
             }
@@ -197,16 +207,18 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
         
             const component = new CenteredMessage("Sleutels aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+            plausible('signupKeys');
             try {
 
-                await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
-                
-                this.loading = false;
-                component.hide()
+                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
                 plausible('signup');
 
-                this.navigationController!.push(new ComponentWithProperties(SignupModulesView, {}), true, this.navigationController!.components.length)
+                this.loading = false;
+                component.hide()
 
+                const session = new Session(this.organization.id)
+                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session }))
+                
             } catch (e) {
                 this.loading = false;
                 component.hide()
@@ -236,5 +248,8 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 #signup-account-view {
+    .checkbox-box {
+        margin-top: 15px;
+    }
 }
 </style>

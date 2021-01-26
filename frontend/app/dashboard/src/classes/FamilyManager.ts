@@ -1,9 +1,10 @@
-import { MemberWithRegistrations, EncryptedMember, KeychainItem, Version, PatchMembers, EncryptedMemberWithRegistrations, Address, Parent, EmergencyContact, MemberDetails, Registration } from '@stamhoofd/structures';
-import { VersionBox, ArrayDecoder, PatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Keychain, SessionManager } from '@stamhoofd/networking';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder,VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { OrganizationManager } from './OrganizationManager';
+import { Keychain, SessionManager } from '@stamhoofd/networking';
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainItem, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Registration,User,Version } from '@stamhoofd/structures';
+
 import { MemberManager } from './MemberManager';
+import { OrganizationManager } from './OrganizationManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {
@@ -31,12 +32,23 @@ export class FamilyManager {
         this.setMembers(await MemberManager.decryptMembers(response.data))
     }
 
-     async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
+    async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
+        member.cleanData()
+
         const session = SessionManager.currentSession!
 
         // Create a keypair for this member (and discard it immediately)
         // We might use the private key in the future to send an invitation or QR-code
         const keyPair = await Sodium.generateEncryptionKeyPair()
+
+        // Add all the needed users that need to have access
+        const users: User[] = []
+
+        for (const email of member.getManagerEmails()) {
+            users.push(User.create({
+                email
+            }))
+        }
 
         // Create member
         const decryptedMember = MemberWithRegistrations.create({
@@ -45,7 +57,8 @@ export class FamilyManager {
             registrations: registrations,
             firstName: member.firstName,
             placeholder: true,
-            users: [],
+
+            users,
             organizationPublicKey: "" // doesn't matter since we only going to set this when we encrypt it
         })
 
@@ -61,7 +74,7 @@ export class FamilyManager {
         for (const m of addMembers) {
             patchArray.addPut(m)
         }
-
+        
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",
@@ -77,8 +90,7 @@ export class FamilyManager {
         return m;
     }
 
-    async patchMemberRegistrations(member: MemberWithRegistrations, registrations: PatchableArrayAutoEncoder<Registration>) {
-       
+    async patchMemberRegistrations(member: MemberWithRegistrations, registrations: PatchableArrayAutoEncoder<Registration>) {        
         const patchArray = new PatchableArray()
         patchArray.addPatch(MemberWithRegistrations.patch({
             id: member.id,
@@ -111,12 +123,19 @@ export class FamilyManager {
         const members = (this.members ?? []).filter(m => !!m.details)
         const ex = members.findIndex(m => m.id == member.id)
 
-
         if (ex !== -1) {
             members.splice(ex, 1, member)
         } else {
             members.push(member)
         }
+
+        for (const m of members) {
+            m.details?.cleanData()
+        }
+
+        // Search for duplicate addresses and duplicate parents
+        this.removeDuplicates()
+
         const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;
@@ -155,6 +174,9 @@ export class FamilyManager {
         }
 
         this.members = s
+
+        // Search for duplicate addresses and duplicate parents
+        this.removeDuplicates()
     }
 
     updateAddress(oldValue: Address, newValue: Address) {
@@ -183,6 +205,27 @@ export class FamilyManager {
             }
 
             member.details.updateParent(parent)
+        }
+    }
+
+    /**
+     * Check for duplicate parents
+     */
+    removeDuplicates() {
+        const parents = new Map<string, Parent>()
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            for (const [index, parent] of member.details.parents.entries()) {
+                const other = parents.get(parent.name.toLowerCase())
+                if (other) {
+                    other.merge(parent)
+                    member.details.parents[index] = other
+                } else {
+                    parents.set(parent.name.toLowerCase(), parent)
+                }
+            }
         }
     }
     

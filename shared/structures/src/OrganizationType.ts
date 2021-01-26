@@ -20,6 +20,7 @@ export enum OrganizationType {
     Music = "Music",
     Professional = "Professional",
     Art = "Art",
+    Culture = "Culture",
     Other = "Other",
 }
 
@@ -109,6 +110,10 @@ export class OrganizationTypeHelper {
             {
                 value: OrganizationType.Art,
                 name: "Kunstvereniging",
+            },
+            {
+                value: OrganizationType.Culture,
+                name: "Cultuur",
             },
             {
                 value: OrganizationType.Other,

@@ -1,3 +1,5 @@
+import { Formatter } from "./Formatter";
+
 export class StringCompare {
     
     /**
@@ -33,5 +35,16 @@ export class StringCompare {
         original = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
         compareWith = compareWith.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
         return Math.max(original.length, compareWith.length) - this.compare(original, compareWith)
+    }
+
+    /**
+     * Return true if the user typed in full caps (sigh)
+     */
+    static isFullCaps(str: string) {
+        const fn = Formatter.removeAccents(str)
+        if (fn.toUpperCase() == fn) {
+            return true
+        }
+        return false
     }
 }

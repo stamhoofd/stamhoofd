@@ -1,8 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, Token as TokenStruct } from '@stamhoofd/structures';
+import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
 import { Challenge } from '../models/Challenge';
+import { EmailVerificationCode } from '../models/EmailVerificationCode';
 import { Organization } from '../models/Organization';
 import { PasswordToken } from '../models/PasswordToken';
 import { Token } from '../models/Token';
@@ -63,11 +64,30 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError(errBody);
             }
 
-            const token = await Token.createToken(user);
-
             // Clear challenge (can delete, since we need to reset the tries)
             await challenge.delete()
 
+            // Yay! Valid password
+            // Now check if e-mail is already validated
+            // if not: throw a validation error (e-mail validation is required)
+            if (!user.verified) {
+                const code = await EmailVerificationCode.createFor(user, user.email)
+                code.send(user.setRelation(User.organization, organization))
+                
+                throw new SimpleError({
+                    code: "verify_email",
+                    message: "Your email address needs verification",
+                    human: "Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.",
+                    meta: SignupResponse.create({
+                        token: code.token,
+                        authEncryptionKeyConstants: user.authEncryptionKeyConstants
+                    }).encode({ version: request.request.getVersion() }),
+                    statusCode: 403
+                });
+            }
+
+            const token = await Token.createToken(user);
+            
             if (!token) {
                 throw new SimpleError({
                     code: "error",
@@ -153,6 +173,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             // For now we keep the password token because the user might want to reload the page or load it on a different device/browser
             //await passwordToken.delete();
+
+            // TODO: verify user current e-mail, since the password token is always send via e-mail
+            // BUT first check if the e-mail wasn't changed since creating the password token -> need to assign an e-mail to the password token to fix this!
 
             const st = new TokenStruct(token);
             return new Response(st);           

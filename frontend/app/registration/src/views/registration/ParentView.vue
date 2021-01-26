@@ -130,7 +130,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
     }
 
     get parentTypes() {
-        return Object.values(ParentType)
+        return ParentTypeHelper.getPublicTypes()
     }
 
     parentTypeName(type: ParentType) {

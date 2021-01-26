@@ -2,7 +2,8 @@
     <div class="toast-box" :class="{ withOffset: withOffset }">
         <transition-group name="move" tag="div">
             <div v-for="(component, index) in components"
-                :key="component.key">
+                 :key="component.key"
+            >
                 <ComponentWithPropertiesInstance
                     ref="children"
                     :component="component"
@@ -14,8 +15,9 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, FramedComponent, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
+import { Component, Vue } from "vue-property-decorator";
+
 import { Toast } from "./Toast"
 import ToastView from './ToastView.vue';
 /**

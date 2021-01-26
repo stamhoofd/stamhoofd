@@ -14,9 +14,9 @@
 import { Component, Prop,Vue } from "vue-property-decorator";
 
 @Component({
-    model: {
-        prop: 'modelValue',
-        event: 'change'
+    "model": {
+        "prop": "modelValue",
+        "event": "change"
     },
 })
 export default class Radio extends Vue {

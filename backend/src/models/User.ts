@@ -1,4 +1,4 @@
-import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from "@simonbackx/simple-database";
+import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
@@ -7,8 +7,8 @@ import { KeychainItem } from './KeychainItem';
 import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
-export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants };
-export type UserFull = User & { publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
+export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
+export type UserFull = User & { publicKey: string; publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
 
 export class User extends Model {
     static table = "users";
@@ -34,13 +34,13 @@ export class User extends Model {
     email: string;
 
     @column({ type: "boolean" })
-    verified: boolean;
+    verified = false
 
     /**
      * Public key used for encryption
      */
-    @column({ type: "string" })
-    publicKey: string;
+    @column({ type: "string", nullable: true })
+    publicKey: string | null = null;
 
     /**
      * Public key used for encryption
@@ -50,27 +50,28 @@ export class User extends Model {
 
     /**
      * public key that is used to verify during login (using a challenge) and for getting a token
+     * SHOULD NEVER BE PUBLIC!
      */
-    @column({ type: "string" })
-    protected publicAuthSignKey?: string
+    @column({ type: "string", nullable: true })
+    protected publicAuthSignKey?: string | null = null // if not selected will be undefined
 
     /**
      * Encrypted private key, used for authenticated encrytion and decryption
      */
     @column({ type: "string", nullable: true })
-    protected encryptedPrivateKey: string | null = null
+    protected encryptedPrivateKey: string | null = null // if not selected will be undefined
 
     /**
      * Constants that are used to get the authSignKeyPair from the user password. Using
      */
-    @column({ type: "json", decoder: KeyConstants })
-    protected authSignKeyConstants?: KeyConstants
+    @column({ type: "json", decoder: KeyConstants, nullable: true })
+    protected authSignKeyConstants?: KeyConstants | null = null // if not selected will be undefined
 
     /**
      * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
      */
     @column({ type: "json", decoder: KeyConstants, nullable: true })
-    protected authEncryptionKeyConstants: KeyConstants | null = null
+    protected authEncryptionKeyConstants: KeyConstants | null = null // if not selected will be undefined
 
 
     @column({
@@ -104,7 +105,7 @@ export class User extends Model {
 
     /**
      * @param namespace
-     * @override@override@override@override@override
+     * @override
      */
     static getDefaultSelect(namespace?: string): string {
         return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
@@ -118,7 +119,69 @@ export class User extends Model {
         }
 
         // Read member + address from first row
-        return this.fromRow(rows[0][this.table]) as UserFull;
+        const user = this.fromRow(rows[0][this.table]) 
+
+        if (!user || !user.hasKeys()) {
+            return undefined
+        }
+        
+        return user as UserFull;
+    }
+
+    hasAccount() {
+        if (this.publicKey === null) {
+            // This is a placeholder user
+            return false
+        }
+        return true
+    }
+
+    protected hasKeys() {
+        if (this.publicKey === null) {
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.authSignKeyConstants === null) {
+            console.error(this.id+": authSignKeyConstants is null")
+            // This is a placeholder user
+            return false
+        }
+        
+        if (this.publicAuthSignKey === null) {
+            console.error(this.id+": publicAuthSignKey is null")
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.authEncryptionKeyConstants === null) {
+            console.error(this.id+": authEncryptionKeyConstants is null")
+            // This is a placeholder user
+            return false
+        }
+
+        if (this.encryptedPrivateKey === null) {
+            console.error(this.id+": encryptedPrivateKey is null")
+            // This is a placeholder user
+            return false
+        }
+        return true
+    }
+
+    static async getForRegister(organization: Organization, email: string): Promise<UserWithOrganization | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organization.id]);
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+        const user = this.fromRow(rows[0][this.table])
+
+        if (!user) {
+            return undefined
+        }
+
+        // Read member + address from first row
+        return user.setRelation(User.organization, organization);
     }
 
     static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
@@ -127,41 +190,15 @@ export class User extends Model {
         if (rows.length == 0) {
             return undefined;
         }
+        const user = this.fromRow(rows[0][this.table])
+
+        if (!user || !user.hasKeys()) {
+            return undefined
+        }
 
         // Read member + address from first row
-        return this.fromRow(rows[0][this.table]) as UserForAuthentication;
+        return user as UserForAuthentication;
     }
-
-    // Methods
-    /*static async login(
-        organization: Organization,
-        email: string,
-        password: string
-    ): Promise<UserWithOrganization | undefined> {
-        const [
-            rows,
-        ] = await Database.select(`SELECT * FROM ${this.table} WHERE organizationId = ? AND email = ? LIMIT 1`, [
-            organization.id,
-            email,
-        ]);
-
-        if (rows.length == 0) {
-            // todo: check timing attack?
-            return;
-        }
-
-        // Read member + address from first row
-        const user = this.fromRow(rows[0][this.table]);
-
-        if (!user?.password) {
-            return;
-        }
-
-        if (await argon2.verify(user.password, password)) {
-            user.eraseProperty("password");
-            return user.setRelation(User.organization, organization);
-        }
-    }*/
 
     static async register(
         organization: Organization,
@@ -178,6 +215,10 @@ export class User extends Model {
             firstName,
             lastName
         } = data;
+
+        if (publicKey === null) {
+            throw new Error("A publicKey is required for new users")
+        }
 
         const user = new User().setRelation(User.organization, organization);
         user.id = id ?? uuidv4()
@@ -209,7 +250,15 @@ export class User extends Model {
         return user;
     }
 
-    async changePassword(publicKey: string | undefined, publicAuthSignKey: string, encryptedPrivateKey: string, authSignKeyConstants: KeyConstants, authEncryptionKeyConstants: KeyConstants) {
+    async changePassword(data: { publicKey?: string; publicAuthSignKey: string; encryptedPrivateKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants }) {
+        const {
+            publicKey,
+            publicAuthSignKey,
+            encryptedPrivateKey,
+            authSignKeyConstants,
+            authEncryptionKeyConstants
+        } = data;
+
         if (publicKey && this.publicKey != publicKey) {
             // Delete keychain!
             // First print it to console.error as a temporary backup

@@ -10,12 +10,18 @@
             </h1>
         
             <p class="st-list-description">
-                Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). De link is één uur geldig.
+                Stuur de onderstaande link persoonlijk naar {{ name }} via een veilig kanaal (bv. WhatsApp, iMessage...). 
+                <template v-if="invite.userDetails && invite.userDetails.email">
+                    De link is 7 dagen geldig.
+                </template>
+                <template v-else>
+                    De link is 4 uur geldig.
+                </template>
             </p>
 
             <STInputBox title="Link" class="max">
                 <p v-tooltip="'Klik om te kopiëren'" class="link-box input" @click="copyElement">
-                    {{ url }}
+                    {{ url }}
                 </p>
             </STInputBox>
 
@@ -89,9 +95,9 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 
     get url() {
         if (process.env.NODE_ENV == "production") {
-            return "https://stamhoofd.app/invite/"+encodeURIComponent(this.secret)+"/"+encodeURIComponent(this.invite.key)
+            return "https://stamhoofd.app/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
         }
-        return "https://dashboard.stamhoofd.dev/invite/"+encodeURIComponent(this.secret)+"/"+encodeURIComponent(this.invite.key)
+        return "https://dashboard.stamhoofd.dev/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
     }
 
     get canShare() {

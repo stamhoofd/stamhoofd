@@ -178,7 +178,7 @@
                     </div>
 
                     <div>
-                        <PhoneInput title="Telefoonnummer huisarts" v-model="doctorPhone" :validator="validator" placeholder="Telefoonnummer" />
+                        <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" :required="false" />
                     </div>
                 </div>
             </template>
@@ -187,20 +187,21 @@
 </template>
 
 <script lang="ts">
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, EmailInput, LoadingButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup, MemberExistingStatus } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { MemberDetails } from '@stamhoofd/structures';
-import MemberParentsView from './MemberParentsView.vue';
-import MemberGroupView from './MemberGroupView.vue';
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import EmergencyContactView from './EmergencyContactView.vue';
-import MemberRecordsView from './MemberRecordsView.vue';
+import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
+import { Address, Country, EmergencyContact, Gender, Group, MemberExistingStatus,MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationType, PreferredGroup, Record, RecordType, Version, WaitingListType } from "@stamhoofd/structures"
+import { MemberDetails } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import EmergencyContactView from './EmergencyContactView.vue';
 import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
+import MemberGroupView from './MemberGroupView.vue';
+import MemberParentsView from './MemberParentsView.vue';
+import MemberRecordsView from './MemberRecordsView.vue';
 
 @Component({
     components: {
@@ -234,7 +235,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
     mounted() {
         if (this.memberDetails) {
             this.doctorName = this.memberDetails.doctor?.name ?? ""
-            this.doctorPhone = this.memberDetails.doctor?.phone ?? ""
+            this.doctorPhone = this.memberDetails.doctor?.phone ?? null
         }
     }
    
@@ -248,15 +249,16 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         }
 
         const errors = new SimpleErrors()
-         if (this.doctorName.length < 2) {
+        
+        // Don't need to validate doctor
+        /*if (this.doctorName.length < 2) {
             errors.addError(new SimpleError({
                 code: "invalid_field",
                 message: "Vul de naam van de dokter in",
                 field: "doctorName"
             }))
-        }
+        }*/
         
-      
         let valid = false
 
         if (errors.errors.length > 0) {
@@ -269,11 +271,16 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
 
         if (valid) {
             const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
-            memberDetails.doctor = EmergencyContact.create({
-                name: this.doctorName,
-                phone: this.doctorPhone,
-                title: "Huisdokter"
-            })
+
+            if (this.doctorName.length > 0 || this.doctorPhone) {
+                memberDetails.doctor = EmergencyContact.create({
+                    name: this.doctorName,
+                    phone: this.doctorPhone && this.doctorPhone.length > 0 ? this.doctorPhone : null,
+                    title: "Huisdokter"
+                })
+            } else {
+                memberDetails.doctor = null
+            }
 
             this.$emit("change", memberDetails)
             

@@ -46,6 +46,20 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center" @click="openAdmins">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                    <h2 class="style-title-list">
+                        Beheerders
+                    </h2>
+                    <p class="style-description">
+                        Geef anderen ook toegang tot deze vereniging
+                    </p>
+                    <template slot="right">
+                        <span v-if="!hasOtherAdmins && enableMemberModule" v-tooltip="'Voeg zeker één andere beheerder toe, om de toegang tot jouw gegevens nooit te verliezen'" class="icon error red" />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="openPrivacy">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg">
                     <h2 class="style-title-list">
@@ -94,6 +108,20 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/import-excel.svg">
+                        <h2 class="style-title-list">
+                            Leden importeren
+                        </h2>
+                        <p class="style-description">
+                            Importeer leden vanaf een Excel of CSV bestand
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -107,22 +135,18 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import AdminsView from '../admins/AdminsView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
-import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
-import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -158,8 +182,22 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     loadingMollie = false
 
+    admins: User[] = []
+    invites: Invite[] = []
+
     get organization() {
         return OrganizationManager.organization
+    }
+
+    async loadAdmins() {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+        this.admins = response.data.users
+        this.invites = response.data.invites
     }
 
     openGeneral() {
@@ -180,13 +218,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    openAdmins() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(AdminsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
     setupEmail() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EmailSettingsView, {})
         }).setDisplayStyle("popup"))
     }
 
-    openPayment(animated = true) {
+    openPayment() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentSettingsView, {})
         }).setDisplayStyle("popup"))
@@ -198,8 +242,28 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    importMembers() {
+        if (this.organization.groups.length == 0) {
+            new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
+            return
+        }
+
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    const comp = (await import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue")).default
+                    return new ComponentWithProperties(comp, {})
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
     get hasPolicy() {
         return this.organization.meta.privacyPolicyUrl !== null || this.organization.meta.privacyPolicyFile !== null
+    }
+
+    get hasOtherAdmins() {
+        return this.admins.length == 0 || this.admins.length > 1
     }
 
     get hasPaymentMethod() {
@@ -226,7 +290,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
             // Open mollie settings
-            this.openPayment(false)
+            this.openPayment()
             return
         }
 
@@ -240,7 +304,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
             // Open mollie settings
-            this.openPayment(false)
+            this.openPayment()
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {
@@ -253,7 +317,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPersonalize()
         }
 
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'admins') {
+            // Open mollie settings
+            this.openAdmins()
+        }
 
+        this.loadAdmins()
     }
 }
 </script>

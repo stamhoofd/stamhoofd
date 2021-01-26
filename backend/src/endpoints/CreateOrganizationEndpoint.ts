@@ -2,12 +2,11 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, CreditItem,GroupGenderType,GroupSettings,OrganizationGenderType,OrganizationType, PermissionLevel,Permissions, Token as TokenStruct, UmbrellaOrganization } from "@stamhoofd/structures";
+import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse, Token as TokenStruct } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { group } from 'console';
 
 import { GroupBuilder } from '../helpers/GroupBuilder';
-import { Group } from '../models/Group';
+import { EmailVerificationCode } from '../models/EmailVerificationCode';
 import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
 import { RegisterCode } from '../models/RegisterCode';
@@ -17,7 +16,7 @@ import { User } from "../models/User";
 type Params = {};
 type Query = undefined;
 type Body = CreateOrganization;
-type ResponseBody = TokenStruct;
+type ResponseBody = SignupResponse;
 
 export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = CreateOrganization as Decoder<CreateOrganization>;
@@ -178,16 +177,15 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await builder.build()
         }
 
-        // Create an expired access token, that you can only renew when the user has been verified, but this can keep the users signed in
-        const token = await Token.createToken(user)
+        const code = await EmailVerificationCode.createFor(user, user.email)
+        code.send(user)
 
-        // Send mail without waiting
-        /*Email.send(user.email, "Verifieer jouw e-mailadres voor Stamhoofd", "Hey fa!\n\nWelkom bij Stamhoofd. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n\nStamhoofd").catch(e => {
-            console.error(e)
-        })*/
+        return new Response(SignupResponse.create({
+            token: code.token,
 
-        // An email has been send to confirm your email address
-        return new Response(new TokenStruct(token));
+            // always return the same encryption constants
+            authEncryptionKeyConstants: request.body.user.authEncryptionKeyConstants
+        }));
     }
 
     

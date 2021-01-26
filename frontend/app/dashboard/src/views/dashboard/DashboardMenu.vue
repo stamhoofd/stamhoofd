@@ -9,17 +9,17 @@
             <input v-if="false" class="input search" placeholder="Zoeken">
         </div>
 
-        <a class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank" v-if="false">
+        <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
             <span class="icon info-filled" />
             <span>Documentatie</span>
         </a>
 
-        <a class="menu-button button heading" :href="registerUrl" target="_blank" v-if="enableMemberModule">
+        <a v-if="enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
             <span class="icon external" />
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-whats-new'}" @click="manageWhatsNew()">
+        <button class="menu-button button heading" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
@@ -81,28 +81,17 @@
                 <span>Instellingen</span>
             </button>
 
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-admins'}" @click="manageAdmins(false)">
-                <span class="icon lock" />
-                <span>Beheerders</span>
-            </button>
-
             <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(false)">
                 <span class="icon sync" />
                 <span>Groepsadministratie</span>
             </button>
-
-            <button v-else class="menu-button button heading" :class="{ selected: currentlySelected == 'import-members'}" @click="importMembers">
-                <span class="icon sync" />
-                <span>Leden importeren</span>
-            </button>
-
+        </div>
+        <hr v-if="fullAccess">
+        <div class="">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
                 <span class="icon user" />
                 <span>Mijn account</span>
             </button>
-        </div>
-        <hr v-if="fullAccess">
-        <div class="">
             <button class="menu-button button heading" @click="logout">
                 <span class="icon logout" />
                 <span>Uitloggen</span>
@@ -120,23 +109,23 @@ import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
+import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import EditGroupsView from './groups/EditGroupsView.vue';
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
-import AdminsView from './admins/AdminsView.vue';
 import SettingsView from './settings/SettingsView.vue';
 import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
 import WhatsNewView from './settings/WhatsNewView.vue';
 import EditWebshopView from './webshop/EditWebshopView.vue';
 import WebshopView from './webshop/WebshopView.vue';
-import { Formatter } from "@stamhoofd/utility";
 
 @Component({})
 export default class Menu extends Mixins(NavigationMixin) {
@@ -166,18 +155,17 @@ export default class Menu extends Mixins(NavigationMixin) {
         let didSet = false
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
-            this.manageSettings(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.manageSettings(false)
+                didSet = true
+            }
         }
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
-            this.managePayments(false)
-            didSet = true
-        }
-
-        if (parts.length >= 1 && parts[0] == 'admins') {
-            this.manageAdmins(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.managePayments(false)
+                didSet = true
+            }
         }
 
         if (parts.length >= 1 && parts[0] == 'account') {
@@ -186,8 +174,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
-            this.openSyncScoutsEnGidsen(false)
-            didSet = true
+            if (this.fullAccess) {
+                this.openSyncScoutsEnGidsen(false)
+                didSet = true
+            }
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
@@ -223,7 +213,11 @@ export default class Menu extends Mixins(NavigationMixin) {
             if (this.groups.length > 0) {
                 this.openGroup(this.groups[0])
             } else {
-                this.manageSettings(false)
+                if (this.fullAccess) {
+                    this.manageSettings(false)
+                } else {
+                    this.manageAccount(false)
+                }
             }
         }
 
@@ -245,10 +239,13 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (this.whatsNewBadge.length > 0) {
             // show popup
-            new Toast("Er zijn nieuwe functies! Volg ons op Instagram of Facebook om op de hoogte te blijven van nieuwe updates", "gift green").setHide(20*1000).setAction( () => {
-                window.open("https://www.instagram.com/stamhoofd/", "_blank")
-                localStorage.setItem("what-is-new", WhatsNewCount.toString());
-            }).show()
+            new Toast("Er zijn nieuwe functies!", "gift green").setHide(5*1000).show()
+        }
+
+        if (!didSet) {
+            if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
+                this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup"))
+            }
         }
     }
 
@@ -352,20 +349,16 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }), animated);
     }
 
-    manageAdmins(animated = true) {
-        this.currentlySelected = "manage-admins"
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AdminsView, {}) }), animated);
-    }
-
     manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
         this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AccountSettingsView, {}) }), animated);
     }
 
     manageWhatsNew() {
-        this.currentlySelected = "manage-whats-new"
-        this.showDetail(new ComponentWithProperties(WhatsNewView, {}));
         this.whatsNewBadge = ""
+
+        window.open('https://www.stamhoofd.be/release-notes', '_blank');
+        localStorage.setItem("what-is-new", WhatsNewCount.toString());
     }
 
     async logout() {

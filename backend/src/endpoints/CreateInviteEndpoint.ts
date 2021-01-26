@@ -2,6 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
+import basex from "base-x";
 import crypto from "crypto";
 
 import { Invite } from '../models/Invite';
@@ -11,6 +12,8 @@ type Params = {};
 type Query = undefined;
 type Body = NewInvite
 type ResponseBody = InviteStruct
+const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const bs58 = basex(ALPHABET)
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -62,7 +65,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
         invite.userDetails = request.body.userDetails
         invite.organizationId = user.organizationId
         invite.keychainItems = request.body.keychainItems
-        invite.key = (await randomBytes(32)).toString("base64")
+        invite.key = bs58.encode(await randomBytes(32)).toLowerCase();
 
         // todo: validate member access ids
         // invite.memberIds = request.body.memberIds
@@ -96,6 +99,13 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
                     message: "You don't have permissions to set permissions and/or receiver"
                 })
             }
+        }
+
+        if (!request.body.receiverId && request.body.userDetails?.email) {
+            // 7 days valid, because validation is required
+            const date = new Date(new Date().getTime() + 1000*60*60*24*7)
+            date.setMilliseconds(0)
+            invite.validUntil = date
         }
         
         await invite.save()

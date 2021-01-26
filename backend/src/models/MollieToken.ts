@@ -30,7 +30,7 @@ export class MollieToken extends Model {
 
     static knownTokens: Map<string, MollieToken> = new Map()
 
-       static async getTokenFor(organizationId: string) {
+    static async getTokenFor(organizationId: string) {
         const existing = this.knownTokens.get(organizationId)
         if (existing) {
             return existing

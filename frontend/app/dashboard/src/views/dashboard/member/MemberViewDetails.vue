@@ -14,8 +14,10 @@
                         <dd>{{ member.details.memberNumber }}</dd>
                     </template>
 
-                    <dt>Verjaardag</dt>
-                    <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                    <template v-if="member.details.birthDay">
+                        <dt>Verjaardag</dt>
+                        <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                    </template>
 
                     <template v-if="member.groups.length > 0">
                         <dt>Groep</dt>
@@ -111,11 +113,15 @@
                 </h2>
 
                 <dl class="details-grid">
-                    <dt>Naam</dt>
-                    <dd>{{ member.details.doctor.name }}</dd>
+                    <template v-if="member.details.doctor.name">
+                        <dt>Naam</dt>
+                        <dd>{{ member.details.doctor.name }}</dd>
+                    </template>
 
-                    <dt>Telefoonnummer</dt>
-                    <dd>{{ member.details.doctor.phone }}</dd>
+                    <template v-if="member.details.doctor.phone">
+                        <dt>Telefoonnummer</dt>
+                        <dd>{{ member.details.doctor.phone }}</dd>
+                    </template>
                 </dl>
             </div>
 
@@ -184,14 +190,32 @@
                 </template>
             </template>
 
-            <template v-if="member.users.length > 0">
-                <h2>Accounts</h2>
-                <p v-for="user in member.users" :key="user.id">
-                    {{ user.email }}
+            <template v-if="activeAccounts.length > 0">
+                <h2>
+                    <span class="icon-spacer">Accounts</span><span
+                        v-tooltip="
+                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
+                        "
+                        class="icon gray help"
+                    />
+                </h2>
+                <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
+                    <span>{{ user.email }}</span>
+                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" />
                 </p>
+            </template>
 
-                <p class="accounts-description">
-                    Bovenstaande accounts kunnen inloggen en hebben toegang tot dit lid.
+            <template v-if="placeholderAccounts.length > 0">
+                <h2>
+                    <span class="icon-spacer">Kunnen registereren</span><span
+                        v-tooltip="
+                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
+                        "
+                        class="icon gray help"
+                    />
+                </h2>
+                <p v-for="user in placeholderAccounts" :key="user.id" class="account">
+                    {{ user.email }}
                 </p>
             </template>
 
@@ -241,6 +265,18 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    get activeAccounts() {
+        return this.member.users.filter(u => u.publicKey !== null)
+    }
+
+    get placeholderAccounts() {
+        return this.member.users.filter(u => u.publicKey === null)
+    }
+
+    isOldEmail(email: string) {
+        return !(this.member.details?.getManagerEmails().includes(email) ?? false)
     }
 
     gotoMember(member: MemberWithRegistrations) {
@@ -431,6 +467,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     .accounts-description {
         @extend .style-definition-description;
         margin-top: 15px;
+    }
+
+    .account {
+        @extend .style-definition-description;
+        margin-bottom: 5px;
     }
 }
 

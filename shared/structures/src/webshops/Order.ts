@@ -11,6 +11,17 @@ export enum OrderStatus {
     Canceled = "Canceled",
 }
 
+export class OrderStatusHelper {
+    static getName(status: OrderStatus): string {
+        switch (status) {
+            case OrderStatus.Created: return "Te verwerken"
+            case OrderStatus.Prepared: return "Verwerkt"
+            case OrderStatus.Completed: return "Voltooid"
+            case OrderStatus.Canceled: return "Geannuleerd"
+        }
+    }
+}
+
 export class OrderData extends Checkout {
     // Payment method is required
     @field({ decoder: new EnumDecoder(PaymentMethod) })

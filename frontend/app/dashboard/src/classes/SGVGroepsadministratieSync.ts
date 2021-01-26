@@ -225,6 +225,10 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         report?.addWarning(details.firstName+" "+details.lastName+" moet nog een functie toegekend krijgen in de groepsadministratie, we konden niet automatisch bepalen welke functies we moeten toekennen.")
     }
 
+    if (!details.birthDay) {
+        throw new Error("Een geboortedatum is noodzakelijk voor de groepsadministratie")
+    }
+
     // Construct the patch: compare and check the fields that need changes
     const patch: any = {
         persoonsgegevens: {

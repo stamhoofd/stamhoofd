@@ -1,4 +1,4 @@
-import { CheckoutMethodType, Order, PaymentMethod } from '@stamhoofd/structures';
+import { CheckoutMethodType, Order, OrderStatusHelper, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -85,7 +85,8 @@ export class OrdersExcelExport {
                 "Leveringskost",
                 "Totaal",
                 "Betaalmethode",
-                "Betaald"
+                "Betaald",
+                "Status",
             ],
         ];
 
@@ -112,15 +113,16 @@ export class OrdersExcelExport {
                 order.data.deliveryPrice / 100,
                 order.data.totalPrice / 100,
                 order.data.paymentMethod == PaymentMethod.Transfer ? "Overschrijving" : order.data.paymentMethod,
-                order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald"
+                order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
+                OrderStatusHelper.getName(order.status)
             ]);
         }
 
         this.deleteEmptyColumns(wsData)
 
         const ws = XLSX.utils.aoa_to_sheet(wsData);
-        this.formatColumn(wsData[0].length - 3, "€0.00", ws)
         this.formatColumn(wsData[0].length - 4, "€0.00", ws)
+        this.formatColumn(wsData[0].length - 5, "€0.00", ws)
 
         // Set column width
         ws['!cols'] = []

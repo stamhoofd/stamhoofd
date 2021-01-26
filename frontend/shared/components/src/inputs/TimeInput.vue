@@ -1,14 +1,14 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errorBox">
-        <input class="input" type="time" :class="{ error: !valid }" v-model="timeRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete" :disabled="disabled"/>
+        <input v-model="timeRaw" class="input" type="time" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {

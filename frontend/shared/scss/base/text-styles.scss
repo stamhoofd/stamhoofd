@@ -32,6 +32,7 @@
 .style-title-1 {
     font-size: 30px;
     font-weight: 600;
+    line-height: 1.3;
 
     @media (max-width: 400px) {
         font-size: 25px;
@@ -90,6 +91,11 @@
     &.success {
         color: $color-success-dark;
         background: $color-success-background;
+    }
+
+    &.inline {
+        // need to evaluate the usage of this class
+        display: inline-block;
     }
 }
 

@@ -1,7 +1,7 @@
 <template>
     <div id="member-records-view" class="st-view">
         <STNavigationBar title="Steekkaart">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -19,7 +19,7 @@
                 Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
             </Checkbox>
 
-            <Checkbox v-model="isParent" v-if="allowData && memberDetails.age < 18" class="long-text">
+            <Checkbox v-if="allowData && memberDetails.age < 18" v-model="isParent" class="long-text">
                 Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
             </Checkbox>
             <Checkbox v-model="allowPictures" class="long-text">
@@ -199,13 +199,17 @@
                     <hr>
                     <h2>Toedienen van medicatie</h2>
 
-                    <p class="style-description">Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.</p>
+                    <p class="style-description">
+                        Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
+                    </p>
 
                     <Checkbox v-model="allowMedicines">
                         Wij geven toestemming aan de leiding om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
                     </Checkbox>
 
-                    <p class="style-description-small">* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang</p>
+                    <p class="style-description-small">
+                        * gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang
+                    </p>
                 </template>
 
                 <hr>
@@ -219,14 +223,13 @@
                     </div>
 
                     <div>
-                        <PhoneInput title="Telefoonnummer huisarts" v-model="doctorPhone" :validator="validator" placeholder="Telefoonnummer" />
+                        <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" />
                     </div>
                 </div>
-
             </template>
         </main>
         <STToolbar>
-            <LoadingButton :loading="loading" slot="right">
+            <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goNext">
                     Doorgaan
                 </button>
@@ -236,27 +239,18 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder,VersionBox } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, BackButton, ErrorBox, PhoneInput, LoadingButton } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { SessionManager } from '@stamhoofd/networking';
-import { MemberDetails, Record, RecordType, EmergencyContact } from "@stamhoofd/structures"
+import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
+import { EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
 import { MemberWithRegistrations } from '@stamhoofd/structures';
-import { EncryptedMember } from '@stamhoofd/structures';
-import { Version } from '@stamhoofd/structures';
-import { KeychainItem } from '@stamhoofd/structures';
-import { KeychainedResponseDecoder } from '@stamhoofd/structures';
-import { PatchMembers } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import { EncryptedMemberWithRegistrations } from '@stamhoofd/structures';
 import { MemberManager } from '../../classes/MemberManager';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
-    components: {
+    "components": {
         STToolbar,
         STNavigationBar,
         STErrorsDefault,
@@ -268,7 +262,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
         PhoneInput,
         LoadingButton
     },
-    directives: { Tooltip },
+    "directives": { Tooltip }
 })
 export default class MemberRecordsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
@@ -290,7 +284,7 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        if (this.member && this.memberDetails.age < 18 && this.memberDetails.lastReviewed !== null) {
+        if (this.member && (this.memberDetails.age ?? 99) < 18 && this.memberDetails.lastReviewed !== null) {
             // already accepted previous time
             this.isParent = true
         }
@@ -309,12 +303,12 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         }
     }
 
-    get privacyUrl() {
-        if (OrganizationManager.organization!.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization!.meta.privacyPolicyUrl
+    get privacyUrl(): string | null {
+        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization!.meta.privacyPolicyFile) {
-            return OrganizationManager.organization!.meta.privacyPolicyFile.getPublicPath()
+        if (OrganizationManager.organization.meta.privacyPolicyFile) {
+            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }

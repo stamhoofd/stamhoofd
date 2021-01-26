@@ -1,3 +1,5 @@
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
+
 export type ToastListener = (toast: Toast) => void
 
 export class ToastButton {
@@ -28,6 +30,21 @@ export class Toast {
     constructor(message: string, icon: string | null = null) {
         this.message = message
         this.icon = icon
+    }
+
+    static fromError(errors: Error): Toast {
+        let simpleErrors!: SimpleErrors
+        if (isSimpleError(errors)) {
+            simpleErrors = new SimpleErrors(errors)
+        } else if (isSimpleErrors(errors)) {
+            simpleErrors = errors
+        } else {
+            simpleErrors = new SimpleErrors(new SimpleError({
+                code: "unknown_error",
+                message: errors.message
+            }))
+        }
+        return new Toast(simpleErrors.getHuman(), "error red")
     }
 
     setProgress(progress: number | null) {

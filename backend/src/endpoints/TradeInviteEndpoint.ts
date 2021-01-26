@@ -44,11 +44,20 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const [invite] = invites
 
-        if (invite.validUntil < new Date()) {
+        if (invite.validUntil < new Date() || invite.organizationId != user.organizationId) {
             throw new SimpleError({
                 code: "expired",
                 message: "This invite is expired",
                 human: "Deze link is niet langer geldig, vraag om deze opnieuw te versturen",
+                statusCode: 400
+            })
+        }
+
+        if (invite.userDetails?.email && (user.email !== invite.userDetails.email || !user.verified)) {
+            throw new SimpleError({
+                code: "invalid_email",
+                message: "This invite is only intended for an account with email "+invite.userDetails.email,
+                human: "Je kan deze uitnodiging enkel accepteren op het account met e-mailadres "+invite.userDetails.email+". Vraag een nieuwe uitnodiging.",
                 statusCode: 400
             })
         }

@@ -32,7 +32,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
         // Get user unrestriced
         const user = await User.getFull(token.user.id)
 
-        if (!user) {
+        if (!user || !user.publicKey) {
             throw new Error("Unexpected error")
         }
 

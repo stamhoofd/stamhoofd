@@ -1,13 +1,15 @@
 <template>
-    <div class="st-view background" id="sgv-groepsadministratie-view">
+    <div id="sgv-groepsadministratie-view" class="st-view background">
         <STNavigationBar title="Groepsadministratie synchroniseren">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
-            <p class="info-box">Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be</p>
+            <p class="info-box">
+                Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be
+            </p>
 
             <hr>
             <h2>Hoe werkt het?</h2>
@@ -20,7 +22,7 @@
                 <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober). Opgelet: we schrappen enkel de functies waarvoor Stamhoofd verantwoordelijk is (de leeftijdsgroepen die in Stamhoofd staan).</li>
                 <li>Lidnummers ophalen</li>
                 <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Heb je tussentakken, dan raden we je aan om per tussentak een groepseigen functie te maken met een naam die overeenkomt met de naam die je in Stamhoofd gebruikt. Omdat je in de groepsadministratie altijd een 'hoofdfunctie' moet kiezen om facturen en dergelijke te krijgen voor die leden, gaan we tussentakken ook op basis van de ingestelde leeftijd of naam in Stamhoofd matchen op een hoofdtak. Alle woudlopers, wolven, kawellen... komen dus ook terecht bij de wouters.</li>
-                <li>(binnenkort) Leden importeren. Deze functie is vooral bedoeld als je tijdens het jaar start met Stamhoofd en leden niet opnieuw wil laten inschrijven.</li>
+                <li>(binnenkort) Leden importeren. Exporteer voorlopig je leden uit de groepsadministratie naar Excel en gebruik de importeerfunctie.</li>
             </ul>
 
             <hr>
@@ -32,7 +34,6 @@
                 <li>Gestopte leiding/vrijwilligers schrappen</li>
                 <li>We kunnen het e-mailadres niet wijzigen van leden die een login hebben in de groepsadministratie</li>
             </ul>
-
         </main>
 
         <STToolbar>
@@ -40,11 +41,11 @@
                 <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank" class="button secundary">
                     Naar groepsadministratie
                 </a>
-                <LoadingButton :loading="loading" >
-                    <button class="button primary" v-if="isLoggedIn" @click="sync">
+                <LoadingButton :loading="loading">
+                    <button v-if="isLoggedIn" class="button primary" @click="sync">
                         Synchroniseren
                     </button>
-                     <button class="button primary" v-else @click="login">
+                    <button v-else class="button primary" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
@@ -54,21 +55,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, STListItem, STList, Spinner, TooltipDirective, Tooltip, Radio, RadioGroup, Toast } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
-import ChangePasswordView from './ChangePasswordView.vue';
+import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast,TooltipDirective } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
-import { WhatsNewCount } from "../../../classes/WhatsNewCount"
+import { Component, Mixins } from "vue-property-decorator";
+
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie"
+import { WhatsNewCount } from "../../../classes/WhatsNewCount"
 
 @Component({
     components: {

@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct } from "@stamhoofd/structures";
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { Group } from '../models/Group';
@@ -68,12 +68,23 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Created by organization = placeholder
             member.placeholder = struct.placeholder
 
+            for (const registrationStruct of struct.registrations) {
+                if (!user.permissions.hasWriteAccess(registrationStruct.groupId)) {
+                    throw new SimpleError({
+                        code: "permission_denied",
+                        message: "No permissions to create member in this group",
+                        human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
+                        statusCode: 403
+                    })
+                }   
+            }
+
 
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
             if (process.env.NODE_ENV == "development") {
-                if (member.firstName == "create") {
+                if (member.firstName == "create" || member.firstName == "Create") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -89,7 +100,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     continue;
                 }
 
-                if (member.firstName == "clear") {
+                if (member.firstName == "clear" || member.firstName == "Clear") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -118,21 +129,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                const registration = new Registration().setOptionalRelation(Registration.payment, null)
-                registration.groupId = registrationStruct.groupId
-                registration.cycle = registrationStruct.cycle
-                registration.memberId = member.id
-                registration.registeredAt = registrationStruct.registeredAt
-                registration.waitingList = registrationStruct.waitingList
-                registration.canRegister = registrationStruct.canRegister
-                registration.deactivatedAt = registrationStruct.deactivatedAt
-                await registration.save()
+                await this.addRegistration(member, registrationStruct)
+            }
 
-                member.registrations.push(registration)
+            // Add users if they don't exist (only placeholders allowed)
+            for (const placeholder of struct.users) {
+                await this.linkUser(placeholder, member)
             }
         }
-
-        
 
         // Loop all members one by one
         for (const patch of request.body.getPatches()) {
@@ -145,6 +149,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
+            let hasAccess = user.permissions.hasWriteAccess()
+
+            if (!hasAccess) {
+                for (const registration of member.registrations) {
+                    if (user.permissions.hasWriteAccess(registration.groupId)) {
+                        hasAccess = true
+                    }   
+                }
+            }
+
+            if (!hasAccess) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions to edit members in this group",
+                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
+                    statusCode: 403
+                })
+            }            
+
             // Check permissions (todo)
 
             member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
@@ -154,6 +177,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.publicKey = patch.publicKey ?? member.publicKey
             member.placeholder = patch.placeholder ?? member.placeholder
             await member.save();
+
+           
 
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
@@ -194,7 +219,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 // todo: allow group changes
                 registration.waitingList = patchRegistration.waitingList ?? registration.waitingList
+
+                if (!registration.waitingList && registration.registeredAt === null) {
+                    registration.registeredAt = new Date()
+                }
                 registration.canRegister = patchRegistration.canRegister ?? registration.canRegister
+                if (!registration.waitingList) {
+                    registration.canRegister = false
+                }
                 registration.cycle = patchRegistration.cycle ?? registration.cycle
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
 
@@ -215,12 +247,27 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
             }
 
+            // Add registrations
+            for (const registrationStruct of patch.registrations.getPuts()) {
+                await this.addRegistration(member, registrationStruct.put)
+            }
+
+            // Link users
+            for (const placeholder of patch.users.getPuts()) {
+                await this.linkUser(placeholder.put, member)
+            }
+
+            // Unlink users
+            for (const userId of patch.users.getDeletes()) {
+                await this.unlinkUser(userId, member)
+            }
+
             members.push(member)
         }
 
         // Loop all members one by one
         for (const id of request.body.getDeletes()) {
-            const member = await Member.getByID(id)
+            const member = await Member.getWithRegistrations(id)
             if (!member || member.organizationId != user.organizationId) {
                  throw new SimpleError({
                     code: "permission_denied",
@@ -229,11 +276,65 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
+            let hasAccess = user.permissions.hasWriteAccess()
+
+            if (!hasAccess) {
+                for (const registration of member.registrations) {
+                    if (user.permissions.hasWriteAccess(registration.groupId)) {
+                        hasAccess = true
+                    }   
+                }
+            }
+
+            if (!hasAccess) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions to edit members in this group",
+                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
+                    statusCode: 403
+                })
+            }        
+
             await User.deleteForDeletedMember(member.id)
             await member.delete()
         }
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));
+    }
+
+    async addRegistration(member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+        const registration = new Registration().setOptionalRelation(Registration.payment, null)
+        registration.groupId = registrationStruct.groupId
+        registration.cycle = registrationStruct.cycle
+        registration.memberId = member.id
+        registration.registeredAt = registrationStruct.registeredAt
+        registration.waitingList = registrationStruct.waitingList
+
+        if (registration.waitingList) {
+            registration.registeredAt = null
+        }
+        registration.canRegister = registrationStruct.canRegister
+
+        if (!registration.waitingList) {
+            registration.canRegister = false
+        }
+        registration.deactivatedAt = registrationStruct.deactivatedAt
+        
+        // Check payment
+        if (registrationStruct.payment) {
+            const payment = new Payment()
+            payment.method = registrationStruct.payment.method
+            payment.paidAt = registrationStruct.payment.paidAt
+            payment.price = registrationStruct.payment.price
+            payment.status = registrationStruct.payment.status
+            payment.transferDescription = registrationStruct.payment.transferDescription
+            await payment.save()
+
+            registration.setOptionalRelation(Registration.payment, payment)
+        }
+
+        await registration.save()
+        member.registrations.push(registration)
     }
 
     async createDummyMembers(organization: Organization, group: Group) {
@@ -286,4 +387,55 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
+    async linkUser(user: UserStruct, member: MemberWithRegistrations) {
+        const email = user.email
+        const existing = await User.where({ organizationId: member.organizationId, email }, { limit: 1 })
+        let u: User
+        if (existing.length == 1) {
+            u = existing[0]
+            console.log("Giving an existing user access to a member: "+u.id)
+
+            // todo: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
+
+        } else {
+            u = new User()
+            u.organizationId = member.organizationId
+            u.email = email
+            u.firstName = user.firstName
+            u.lastName = user.lastName
+            await u.save()
+
+            console.log("Created new (placeholder) user that has access to a member: "+u.id)
+        }
+        
+        // User already exists: give him acecss
+
+        if (u.publicKey) {
+            // TODO Create keychains (since we have a public key)
+            // need frontend for this!
+        }
+
+        await Member.users.reverse("members").link(u, [member])
+
+        // Update model relation to correct response
+        member.users.push(u)
+
+    }
+
+    async unlinkUser(userId: string, member: MemberWithRegistrations) {
+        console.log("Removing access for "+ userId +" to member "+member.id)
+        const existingIndex = member.users.findIndex(u => u.id === userId)
+        if (existingIndex === -1) {
+            throw new SimpleError({
+                code: "user_not_found",
+                message: "Unlinking a user that doesn't exists anymore",
+                human: "Je probeert de toegang van een account tot een lid te verwijderen, maar dat account bestaat niet (meer)"
+            })
+        }
+        const existing = member.users[existingIndex]
+        await Member.users.reverse("members").unlink(existing, member)
+
+        // Update model relation to correct response
+        member.users.splice(existingIndex, 1)
+    }
 }

@@ -2,14 +2,14 @@
     <div class="loading-button" :class="{loading}">
         <div><slot /></div>
         <div>
-            <Spinner />
+            <Spinner v-if="loading || delayLoading"/>
         </div>
     </div>
 </template>
 
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import Spinner from "../Spinner.vue";
 
@@ -19,6 +19,19 @@ import Spinner from "../Spinner.vue";
 export default class LoadingButton extends Vue {
     @Prop({ default: false, type: Boolean })
     loading!: boolean;
+
+    // Remove the spinner animation from the dom to save some resources of the browser
+    delayLoading = false
+
+    @Watch('loading')
+    onValueChanged(val: boolean, old: boolean) {
+        if (!val && old) {
+            this.delayLoading = true
+            setTimeout(() => {
+                this.delayLoading = false
+            }, 300)
+        }
+    }
 }
 </script>
 

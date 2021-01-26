@@ -14,7 +14,7 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" />
+                <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" :required="false" />
 
                 <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
                     <RadioGroup>
@@ -36,7 +36,7 @@
             </div>
 
             <div>
-                <AddressInput v-if="age >= 18 && !livesAtParents" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
+                <AddressInput v-if="(age >= 18 && !livesAtParents) || hasOldAddress" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
                 <EmailInput v-if="age >= 11" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="false" :validator="validator" />
                 <PhoneInput v-if="age >= 11" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
             </div>
@@ -87,7 +87,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     gender = Gender.Male
     livesAtParents = false
     validator = new Validator()
-
+    hasOldAddress = false
 
     mounted() {
         if (this.memberDetails) {
@@ -99,12 +99,13 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
             this.gender = this.memberDetails.gender
             this.livesAtParents = !this.memberDetails.address && this.age >= 18
             this.email = this.memberDetails.email
+            this.hasOldAddress = this.address !== null
         }
     }
 
     get age() {
         if (!this.birthDay) {
-            return 0
+            return 99
         }
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
@@ -151,7 +152,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 memberDetails.lastName = this.lastName
                 memberDetails.gender = this.gender
                 memberDetails.phone = this.phone
-                memberDetails.birthDay = this.birthDay!
+                memberDetails.birthDay = this.birthDay
                 memberDetails.email = this.age >= 18 ? this.email : null
                 memberDetails.address = this.livesAtParents ? null : this.address
 
@@ -163,7 +164,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     gender: this.gender,
                     phone: this.phone,
                     email: this.age >= 18 ? this.email : null,
-                    birthDay: this.birthDay!,
+                    birthDay: this.birthDay,
                     address: this.livesAtParents ? null : this.address
                 })
 
@@ -174,7 +175,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 memberDetails.records.push(Record.create({
                     type: RecordType.NoPictures
                 }))
-                if (memberDetails.age < 18) {
+                if (memberDetails.age ?? 99 < 18) {
                     memberDetails.records.push(Record.create({
                         type: RecordType.NoPermissionForMedicines
                     }))

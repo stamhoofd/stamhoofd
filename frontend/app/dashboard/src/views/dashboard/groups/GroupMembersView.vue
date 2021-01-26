@@ -8,7 +8,7 @@
                     <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
                     <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
 
-                    <button class="button text" @click="addMember">
+                    <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                         <span class="icon add" />
                         <span>Nieuw</span>
                     </button>
@@ -32,17 +32,18 @@
                 <span class="icon-spacer">{{ title }}</span>
                 <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
 
-                <button class="button text" @click="addMember">
+                <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
             </h1>
+            <span v-if="titleDescription" class="style-description title-description">{{ titleDescription }}</span>
 
             <Spinner v-if="loading" class="center" />
             <table v-else class="data-table">
                 <thead>
                     <tr>
-                        <th>
+                        <th class="prefix">
                             <Checkbox
                                 v-model="selectAll"
                             />
@@ -82,7 +83,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
-                        <td @click.stop="">
+                        <td class="prefix" @click.stop="">
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
                         <td>
@@ -119,9 +120,29 @@
                 </tbody>
             </table>
 
-            <p v-if="!loading && members.length == 0" class="info-box">
-                Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.
-            </p>
+            <template v-if="!loading && members.length == 0">
+                <p v-if="cycleOffset === 0" class="info-box">
+                    Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.
+                </p>
+
+                <p v-else class="info-box">
+                    Er zijn nog geen leden ingeschreven in deze inschrijvingsperiode.
+                </p>
+            </template>
+
+            
+
+            <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
+                <button class="button text gray" v-if="canGoBack" @click="goBack">
+                    <span class="icon arrow-left" />
+                    <span>Vorige inschrijvingsperiode</span>
+                </button>
+
+                <button class="button text gray" v-if="canGoNext" @click="goNext">
+                    <span>Volgende inschrijvingsperiode</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </div>
         </main>
 
         <STToolbar>
@@ -140,7 +161,10 @@
                 </button>
                 <LoadingButton v-if="waitingList" :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0" @click="allowMembers(true)">
-                        Toelaten
+                        <span class="dropdown-text">
+                            Toelaten
+                        </span>
+                        <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
                 </LoadingButton>
                 <template v-else>
@@ -222,6 +246,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     selectionCountHidden = 0;
     sortBy = "info";
     sortDirection = "ASC";
+    cycleOffset = 0
 
     loading = false;
 
@@ -229,7 +254,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     cachedWaitingList: boolean | null = null
 
     mounted() {
-        this.reload();
+        //this.reload();
 
         // Set url
         if (this.group) {
@@ -241,6 +266,27 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
     }
 
+    get canGoBack() {
+        if (!this.group) {
+            return false
+        }
+        return this.group.cycle >= this.cycleOffset // always allow to go to -1
+    }
+
+    get canGoNext() {
+        return this.cycleOffset > 0
+    }
+
+    goNext() {
+        this.cycleOffset--
+        this.reload()
+    }
+
+    goBack() {
+        this.cycleOffset++
+        this.reload()
+    }
+
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
         if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment" || type == "encryption") {
             this.reload()
@@ -248,6 +294,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     activated() {
+        this.reload();
         MemberManager.addListener(this, this.onUpdateMember)
     }
 
@@ -279,7 +326,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     reload() {
         this.loading = true;
-        MemberManager.loadMembers(this.group?.id ?? null, this.waitingList).then((members) => {
+        MemberManager.loadMembers(this.group?.id ?? null, this.waitingList, this.cycleOffset).then((members) => {
             this.members = members.map((member) => {
                 return new SelectableMember(member, !this.waitingList);
             }) ?? [];
@@ -316,6 +363,16 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : "Alle leden")
+    }
+
+    get titleDescription() {
+        if (this.cycleOffset === 1) {
+            return "Dit is de vorige inschrijvingsperiode"
+        }
+        if (this.cycleOffset > 1) {
+            return "Dit is "+this.cycleOffset+" inschrijvingsperiodes geleden"
+        }
+        return ""
     }
 
     formatDate(date: Date) {
@@ -375,9 +432,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     return -1
                 }
                 if (this.sortDirection == "ASC") {
-                    return a.member.details.age - b.member.details.age;
+                    return (a.member.details.age ?? 99) - (b.member.details.age ?? 99);
                 }
-                return b.member.details.age - a.member.details.age;
+                return (b.member.details.age ?? 99) - (a.member.details.age ?? 99);
             });
         }
 
@@ -533,6 +590,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 getNextMember: this.getNextMember,
                 // eslint-disable-next-line @typescript-eslint/unbound-method
                 getPreviousMember: this.getPreviousMember,
+
+                group: this.group,
+                cycleOffset: this.cycleOffset,
+                waitingList: this.waitingList
             }),
         });
         component.modalDisplayStyle = "popup";
@@ -554,6 +615,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY + 10,
             member: member,
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -637,7 +701,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY + 10,
             members: this.getSelectedMembers(),
-            group: this.group
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -677,6 +743,18 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         -webkit-line-clamp: 3;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .history-navigation-bar {
+        display: flex;
+        padding-top: 20px;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: row;
+    }
+
+    .title-description {
+        margin-bottom: 20px;
     }
 }
 </style>

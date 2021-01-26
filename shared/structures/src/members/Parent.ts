@@ -1,4 +1,5 @@
 import { AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter,StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
@@ -25,9 +26,51 @@ export class Parent extends AutoEncoder {
     email: string | null = null;
 
     @field({ decoder: Address, nullable: true })
-    address: Address | null;
+    address: Address | null = null;
 
     get name() {
         return this.firstName + " " + this.lastName;
+    }
+
+    /**
+     * Call this to clean up capitals in all the available data
+     */
+    cleanData() {
+        if (StringCompare.isFullCaps(this.firstName)) {
+            this.firstName = Formatter.capitalizeWords(this.firstName.toLowerCase())
+        }
+        if (StringCompare.isFullCaps(this.lastName)) {
+            this.lastName = Formatter.capitalizeWords(this.lastName.toLowerCase())
+        }
+
+        if (this.email) {
+            this.email = this.email.toLowerCase()
+        }
+
+        this.firstName = Formatter.capitalizeFirstLetter(this.firstName.trim())
+        this.lastName = this.lastName.trim()
+
+        this.address?.cleanData()
+    }
+
+    merge(other: Parent) {
+        if (this.firstName.length == 0) {
+            this.firstName = other.firstName
+        }
+        if (this.lastName.length == 0) {
+            this.lastName = other.lastName
+        }
+
+        if (other.email && (!this.email || this.email.length == 0)) {
+            this.email = other.email
+        }
+
+        if (other.address && !this.address) {
+            this.address = other.address
+        }
+
+        if (other.phone && (!this.phone || this.phone.length == 0)) {
+            this.phone = other.phone
+        }
     }
 }

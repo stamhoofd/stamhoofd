@@ -209,3 +209,8 @@ dist
 
 .yalc
 yalc.lock
+
+.yarn
+
+# Yarnrc should be removed from git, because it breaks yarn if the version is not installed yet
+.yarnrc

@@ -1,8 +1,8 @@
 <template>
-    <div class="st-view" id="sgv-report-view">
+    <div id="sgv-report-view" class="st-view">
         <STNavigationBar title="Synchronisatie-rapport">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -14,14 +14,16 @@
                 Kijk zelf ook nog snel eens alles na in de groepsadministratie als het de eerste keer is dat je synchroniseert.
             </div>
 
-            <div class="error-box-parent" v-for="error in report.errors">
-                <div class="error-box" @click="handleError(error)" :class="{ selectable: canClickError(error)}">
-                    <h2 class="style-title-list" v-if="error.member">{{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span class="icon arrow-right-small" v-if="canClickError(error)"/></h2>
+            <div v-for="(error, index) in report.errors" :key="index" class="error-box-parent">
+                <div class="error-box" :class="{ selectable: canClickError(error)}" @click="handleError(error)">
+                    <h2 v-if="error.member" class="style-title-list">
+                        {{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span v-if="canClickError(error)" class="icon arrow-right-small" />
+                    </h2>
                     {{ error.human || error.message }}
                 </div>
             </div>
 
-            <div class="warning-box" v-for="warning in report.warnings">
+            <div v-for="(warning, index) in report.warnings" :key="index" class="warning-box">
                 {{ warning }}
             </div>
 
@@ -31,8 +33,12 @@
                 <STList>
                     <STListItem v-for="member in report.deleted" :key="member.id">
                         <div>
-                            <h2 class="style-title-list">{{ member.firstName }} {{ member.lastName }}</h2>
-                            <p class="style-description-small">{{ member.birthDay | date }}</p>
+                            <h2 class="style-title-list">
+                                {{ member.firstName }} {{ member.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ member.birthDay | date }}
+                            </p>
                         </div>
                     </STListItem>
                 </STList>
@@ -44,8 +50,12 @@
                 <STList>
                     <STListItem v-for="member in report.created" :key="member.id">
                         <div>
-                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                            <h2 class="style-title-list">
+                                {{ member.details.firstName }} {{ member.details.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ member.details.birthDay | date }}
+                            </p>
                         </div>
                     </STListItem>
                 </STList>
@@ -57,8 +67,12 @@
                 <STList>
                     <STListItem v-for="member in report.synced" :key="member.id">
                         <div>
-                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                            <h2 class="style-title-list">
+                                {{ member.details.firstName }} {{ member.details.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ member.details.birthDay | date }}
+                            </p>
                         </div>
                     </STListItem>
                 </STList>
@@ -70,8 +84,12 @@
                 <STList>
                     <STListItem v-for="member in report.imported" :key="member.id">
                         <div>
-                            <h2 class="style-title-list">{{ member.details.firstName }} {{ member.details.lastName }}</h2>
-                            <p class="style-description-small">{{ member.details.birthDay | date }}</p>
+                            <h2 class="style-title-list">
+                                {{ member.details.firstName }} {{ member.details.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ member.details.birthDay | date }}
+                            </p>
                         </div>
                     </STListItem>
                 </STList>
@@ -91,17 +109,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, STList, STListItem} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, MemberWithRegistrations } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DNSRecordsView from './DNSRecordsView.vue';
-import { SGVLid, SGVLidMatch, SGVLidMatchVerify } from '../../../classes/SGVGroepsadministratie';
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import { SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
 import MemberView from '../member/MemberView.vue';
 
@@ -127,7 +139,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     report: SGVSyncReport
 
-    async goNext() {
+    goNext() {
         if (this.loading) {
             return;
         }
@@ -145,12 +157,4 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         }
     } 
 }
-
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

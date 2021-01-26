@@ -17,12 +17,12 @@
 
         <SegmentedControl v-model="tab" :items="tabLabels" :labels="tabLabels" />
 
-        <STErrorsDefault :error-box="errorBox"/>
+        <STErrorsDefault :error-box="errorBox" />
 
         <main v-if="tab == 'Steekkaart'">
             <template v-for="group of createSamenvattingSteekkaart()">
                 <hr>
-                <h2>{{ group.title }}</h2>
+                <h2>{{ group.title }}</h2>
 
                 <dl class="details-grid small">
                     <template v-for="(text, key) of Object.fromEntries(group.items)">
@@ -30,9 +30,7 @@
                         <dd v-text="text" />
                     </template>
                 </dl>
-
             </template>
-
         </main>
         <main v-else class="split-main">
             <div v-for="group of createContacts()">
@@ -44,22 +42,21 @@
                     </template>
                 </dl>
             </div>
-
         </main>
 
-         <STToolbar>
+        <STToolbar>
             <template #right>
                 <button class="button secundary" @click="createPDF(false, true)">
-                    <span class="icon download"/><span>Steekkaart</span>
+                    <span class="icon download" /><span>Steekkaart</span>
                 </button>
 
                 <button class="button secundary" @click="createPDF(true, false)">
-                    <span class="icon download"/><span>Noodcontacten</span>
+                    <span class="icon download" /><span>Noodcontacten</span>
                 </button>
 
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="createPDF(true, true)">
-                        <span class="icon download"/><span>Alles</span>
+                        <span class="icon download" /><span>Alles</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -68,21 +65,15 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STNavigationTitle, TooltipDirective, STErrorsDefault } from "@stamhoofd/components";
+import { ErrorBox, STErrorsDefault,STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { SegmentedControl, BackButton, STToolbar, LoadingButton } from "@stamhoofd/components";
-import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import MemberContextMenu from "./MemberContextMenu.vue";
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewHistory from "./MemberViewHistory.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
-import { MemberWithRegistrations, Gender, RecordType, RecordTypeHelper, Member, Group, ParentTypeHelper } from '@stamhoofd/structures';
-import { FamilyManager } from '../../../classes/FamilyManager';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
+import { Group, Member, MemberWithRegistrations, ParentTypeHelper,RecordType, RecordTypeHelper } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+// PDFKit is used! Wrong warning below!
 import PDFKit from "pdfkit"
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 const mm = 2.834666666666667 // = 1 mm
 
@@ -122,6 +113,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
     tab = this.tabLabels[0];
     loading = false
     errorBox: ErrorBox | null = null
+
     @Prop({ default: null })
     group: Group | null;
 

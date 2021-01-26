@@ -1,91 +1,67 @@
 <template>
-    <form class="signup-view st-view" @submit.prevent="submit">
-        <STNavigationBar title="Account aanmaken">
-            <button slot="right" class="button icon gray close" @click="pop" type="button"></button>
-        </STNavigationBar>
-        <main>
-            <h1>Account aanmaken</h1>
+    <div class="boxed-view">
+        <form class="signup-view st-view" @submit.prevent="submit">
+            <main>
+                <h1>Account aanmaken</h1>
 
-            <p>Met een account kan je leden inschrijven en die inschrijvingen verlengen of aanpassen.</p>
+                <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-            <div class="split-inputs">
-                <div>
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username"/>
+                <div class="split-inputs">
+                    <div>
+                        <STInputBox title="Kies een wachtwoord">
+                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
 
-                    <STInputBox title="Kies een wachtwoord">
-                        <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-                    </STInputBox>
-
-                    <STInputBox title="Herhaal wachtwoord">
-                        <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-                    </STInputBox>
-
-                    <Checkbox v-model="acceptPrivacy" class="long-text" v-if="privacyUrl">
-                        Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
-                    </Checkbox>
+                        <STInputBox title="Herhaal wachtwoord">
+                            <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        </STInputBox>
+                    </div>
+                    <div>
+                        <PasswordStrength v-model="password" />
+                    </div>
                 </div>
-                <div>
-                    <div class="warning-box">Gebruik bij voorkeur een wachtwoordbeheerder of kies een sterk wachtwoord dat je kan onthouden.</div>
-                </div>
-            </div>
-        </main>
 
-        <STFloatingFooter>
-            <LoadingButton :loading="loading">
-                <button class="button primary full">
-                    <span class="icon lock" />
-                    <span>Account aanmaken</span>
-                </button>
-            </LoadingButton>
-        </STFloatingFooter>
-    </form>
+                <Checkbox v-if="privacyUrl" v-model="acceptPrivacy" class="long-text">
+                    Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+                </Checkbox>
+            </main>
+
+            <STToolbar>
+                <template #right>
+                    <LoadingButton :loading="loading">
+                        <button class="button primary full">
+                            <span class="icon lock" />
+                            <span>Account aanmaken</span>
+                        </button>
+                    </LoadingButton>
+                </template>
+            </STToolbar>
+        </form>
+    </div>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { OrganizationManager } from '../../classes/OrganizationManager';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength } from "@stamhoofd/components"
+import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
+import { Component, Mixins, Ref } from "vue-property-decorator";
 
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function() {
-        const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
-            clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if (Date.now() - lastRan >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
-        }
-    };
-};
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
     components: {
         STNavigationBar,
-        STFloatingFooter,
+        STToolbar,
         STInputBox,
         LoadingButton,
         STErrorsDefault,
         EmailInput,
-        Checkbox
+        Checkbox,
+        PasswordStrength
     }
 })
 export default class SignupView extends Mixins(NavigationMixin){
@@ -100,12 +76,15 @@ export default class SignupView extends Mixins(NavigationMixin){
 
     session = SessionManager.currentSession!
 
+    @Ref("emailInput")
+    emailInput: EmailInput
+
     get privacyUrl() {
-        if (OrganizationManager.organization!.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization!.meta.privacyPolicyUrl
+        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization!.meta.privacyPolicyFile) {
-            return OrganizationManager.organization!.meta.privacyPolicyFile.getPublicPath()
+        if (OrganizationManager.organization.meta.privacyPolicyFile) {
+            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
@@ -113,7 +92,7 @@ export default class SignupView extends Mixins(NavigationMixin){
     async submit() {
         if (this.loading) {
             return
-        }
+        }       
 
         const valid = await this.validator.validate()
 
@@ -147,19 +126,22 @@ export default class SignupView extends Mixins(NavigationMixin){
         }
 
         this.loading = true
+        this.errorBox = null
         // Request the key constants
         
-        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end versleuteling. Dit kan even duren.", "loading").show()
 
         try {
             const session = new Session(OrganizationManager.organization.id)
             session.organization = OrganizationManager.organization
 
-            await LoginHelper.signUp(session, this.email, this.password)
+            const token = await LoginHelper.signUp(session, this.email, this.password)
             
             this.loading = false;
             component.hide()
-            this.dismiss({ force: true })
+
+            this.show(new ComponentWithProperties(ConfirmEmailView, { token, session }))
+            return
             
         } catch (e) {
             console.log(e)
@@ -175,6 +157,12 @@ export default class SignupView extends Mixins(NavigationMixin){
             return;
         }
         
+    }
+
+    mounted() {
+        setTimeout(() => {
+            this.emailInput.focus()
+        }, 300);
     }
 }
 </script>

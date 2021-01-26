@@ -75,7 +75,6 @@ export default class MailEditor extends Vue {
     hasFirstName: boolean;
     
     editor = (() => {
-        console.log(this.hasFirstName)
         return new Editor({
             extensions: [
                 new BulletList(),

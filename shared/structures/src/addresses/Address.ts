@@ -1,5 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter,StringCompare } from '@stamhoofd/utility';
 
 import { Country, CountryDecoder } from './CountryDecoder';
 
@@ -31,6 +32,22 @@ export class Address extends AutoEncoder {
             city: "",
             country: "BE"
         })
+    }
+
+    /**
+     * Call this to clean up capitals in all the available data
+     */
+    cleanData() {
+        if (StringCompare.isFullCaps(this.street)) {
+            this.street = Formatter.capitalizeWords(this.street.toLowerCase())
+        }
+
+        if (StringCompare.isFullCaps(this.city)) {
+            this.city = Formatter.capitalizeWords(this.city.toLowerCase())
+        }
+
+        this.number = this.number.trim()
+        this.street = this.street.trim()
     }
 
     static createFromFields(addressLine1: string, postalCode: string, city: string, country: string) {

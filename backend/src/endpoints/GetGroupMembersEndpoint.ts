@@ -1,22 +1,19 @@
-import { OneToManyRelation } from '@simonbackx/simple-database';
-import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder,Decoder,field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
-import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
-import { MemberFactory } from '../factories/MemberFactory';
 import { Group } from "../models/Group";
 import { KeychainItem } from '../models/KeychainItem';
-import { Member } from '../models/Member';
-import { Payment } from '../models/Payment';
-import { Registration, RegistrationWithPayment } from '../models/Registration';
 import { Token } from '../models/Token';
 
 type Params = { id: string };
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     waitingList = false
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    cycleOffset = 0
 }
 type Body = undefined
 type ResponseBody = EncryptedMemberWithRegistrations[] | KeychainedResponse<EncryptedMemberWithRegistrations[]>;
@@ -59,8 +56,9 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 message: "De groep die je opvraagt bestaat niet (meer)"
             })
         }
+
         const [group] = groups
-        const members = await group.getMembersWithRegistration(request.query.waitingList)
+        const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)
 
         if (request.request.getVersion() <= 35) {
             // Old

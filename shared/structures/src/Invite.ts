@@ -90,6 +90,10 @@ export class Invite extends AutoEncoder {
      */
     @field({ decoder: DateDecoder })
     validUntil: Date
+
+    isValid() {
+        return this.validUntil > new Date()
+    }
 }
 
 export class TradedInvite extends Invite {

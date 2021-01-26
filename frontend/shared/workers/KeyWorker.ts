@@ -8,7 +8,7 @@ const ctx: Worker = self as any;
 /**
  * Generate keys for challenge signing
  */
-async function generateSignKeys(password: string, authSignKeyConstants: KeyConstants) {
+export async function generateSignKeys(password: string, authSignKeyConstants: KeyConstants) {
     console.log("Generating sign keys...");
 
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
@@ -20,7 +20,7 @@ async function generateSignKeys(password: string, authSignKeyConstants: KeyConst
 /**
  * Generate encryption key on successful sign in
  */
-async function generateEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants) {
+export async function generateEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants) {
     console.log("Generating encryption key...");
 
     const authEncryptionKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
@@ -32,7 +32,7 @@ async function generateEncryptionKey(password: string, authEncryptionKeyConstant
 /**
  * Generate keys for a user sign-up
  */
-async function generateKeys(password: string) {
+export async function generateKeys(password: string) {
     console.log("Generating keys and constants...");
 
     const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
@@ -51,8 +51,11 @@ async function generateKeys(password: string) {
 }
 
 
-ctx.addEventListener('message', (e) => {
+ctx.onmessage = (e) => {
+    console.log("KeyWorker received a message")
+
     if (!e.data.type) {
+        console.error("Expected type for key worker")
         throw new Error("Expected type for key worker")
     }
 
@@ -90,5 +93,4 @@ ctx.addEventListener('message', (e) => {
             throw new Error("Unknown type "+e.data.type)
         }
     }
-
-});
+}

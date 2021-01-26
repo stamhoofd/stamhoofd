@@ -1,34 +1,33 @@
 <template>
     <div class="payconiq-banner-view">
-        <button class="payconiq-close button icon close white" @click="close"/>
+        <button class="payconiq-close button icon close white" @click="close" />
         <h1>Scan en betaal met Payconiq by Bancontact</h1>
 
         <div class="payconiq-logo" />
 
         <div class="qr-code" :class="{ scanned: payment.status == 'Pending'}">
-            <img :src="qrCodeSrc" v-if="payment.status == 'Pending' || payment.status == 'Created'"/>
+            <img v-if="payment.status == 'Pending' || payment.status == 'Created'" :src="qrCodeSrc">
         </div>
 
         <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
             <p class="price">
-                {{ price | price }}
+                {{ price | price }}
             </p>
         </LoadingButton>
 
         <p>Of scan met de app van</p>
-        <p><a class="button simple" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help"/></a> <a class="button simple" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help"/></a></p>
+        <p><a class="button simple" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help" /></a> <a class="button simple" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help" /></a></p>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin, ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { STFloatingFooter, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { SessionManager, Session } from '@stamhoofd/networking';
-import { ForgotPasswordRequest, EncryptedPaymentDetailed, PaymentStatus, Payment } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { EmailInput, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar } from "@stamhoofd/components"
+import { Payment,PaymentStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {

@@ -1,13 +1,13 @@
 <template>
     <STInputBox :title="title" error-fields="iban" :error-box="errorBox">
-        <input class="input" type="text" :class="{ error: !valid }" v-model="ibanRaw" :placeholder="placeholder" @change="validate" :autocomplete="autocomplete"/>
+        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {

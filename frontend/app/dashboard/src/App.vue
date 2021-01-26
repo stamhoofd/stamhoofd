@@ -10,7 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
-import { NetworkManager, Session } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -64,43 +64,71 @@ export default class App extends Vue {
             (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup"));
         }
 
-        if (parts.length == 3 && parts[0] == 'invite') {
+        if (parts.length == 2 && parts[0] == 'verify-email') {
+            const queryString = new URL(window.location.href).searchParams;
+            const token = queryString.get('token')
+            const code = queryString.get('code')
+                
+            if (token && code) {
+                // tood: password reset view
+                const session = new Session(parts[1]);
 
-            const key = parts[2];
-            const secret = decodeURIComponent(parts[1]);
-
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(PromiseView, {
-                    promise: async () => {
-                        try {
-                            const response = await NetworkManager.server.request({
-                                method: "GET",
-                                path: "/invite/"+key,
-                                decoder: Invite as Decoder<Invite>
-                            })
-
-                            if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
-                                // Invalid or almost invalid
-                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                return new ComponentWithProperties(InvalidInviteView, {
-                                    invite: response.data
-                                })
-                            }
-                            const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
-                            return new ComponentWithProperties(AcceptInviteView, {
-                                invite: response.data,
-                                secret
-                            })
-                        } catch (e) {
-                            Logger.error(e)
-                            // Probably invalid invite
-                            const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                            return new ComponentWithProperties(InvalidInviteView, {})
-                        }
-                        
-                    }
+                // tood: password reset view
+                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
+                LoginHelper.verifyEmail(session, code, token).then(() => {
+                    toast.hide()
+                    new Toast("E-mailadres is gevalideerd", "success green").show()
+                }).catch(e => {
+                    toast.hide()
+                    CenteredMessage.fromError(e).addCloseButton().show()
                 })
-            }).setDisplayStyle("popup"));
+            }
+        }
+
+        if (parts.length == 3 && parts[0] == 'invite') {
+            // out of date
+            new CenteredMessage("Deze link is niet meer geldig", "De uitnodiging die je hebt gekregen is niet langer geldig. Vraag om een nieuwe uitnodiging te versturen.", "error").addCloseButton().show()
+        }
+
+        if (parts.length == 1 && parts[0] == 'invite') {
+            const queryString = new URL(window.location.href).searchParams;
+            const key = queryString.get('key');
+            const secret = queryString.get('secret');
+
+            if (key && secret) {
+                (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(PromiseView, {
+                        promise: async () => {
+                            try {
+                                const response = await NetworkManager.server.request({
+                                    method: "GET",
+                                    path: "/invite/"+key,
+                                    decoder: Invite as Decoder<Invite>
+                                })
+
+                                if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
+                                    // Invalid or almost invalid
+                                    const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                    return new ComponentWithProperties(InvalidInviteView, {
+                                        invite: response.data
+                                    })
+                                }
+                                const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
+                                return new ComponentWithProperties(AcceptInviteView, {
+                                    invite: response.data,
+                                    secret
+                                })
+                            } catch (e) {
+                                Logger.error(e)
+                                // Probably invalid invite
+                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                return new ComponentWithProperties(InvalidInviteView, {})
+                            }
+                            
+                        }
+                    })
+                }).setDisplayStyle("popup"));
+            }
         }
     }
 }

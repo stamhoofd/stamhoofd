@@ -1,16 +1,22 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
             <button slot="right" class="button text" @click="createAdmin">
                 <span class="icon add"/>
                 <span>Nieuw</span>
             </button>
+
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
     
         <main>
             <h1>Beheerders</h1>
+
+            <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
+                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe!
+            </p>
 
             <Spinner v-if="loading" />
             <STList v-else>
@@ -76,7 +82,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        HistoryManager.setUrl("/admins")
+        HistoryManager.setUrl("/settings/admins")
         document.title = "Stamhoofd - Beheerders"
     }
 
@@ -94,6 +100,10 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
     }
 
     permissionList(user: User | Invite) {

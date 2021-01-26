@@ -13,14 +13,13 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Formatter } from "@stamhoofd/utility"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
-import LoadingButton from "../navigation/LoadingButton.vue";
-import DateSelectionView from '../overlays/DateSelectionView.vue';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { STInputBox, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import LoadingButton from "../navigation/LoadingButton.vue";
 
 @Component({
     components: {

@@ -1,4 +1,5 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Group } from '../Group';
@@ -70,7 +71,8 @@ export class MemberDetails extends AutoEncoder {
     email: string | null = null;
 
     @field({ decoder: DateDecoder })
-    birthDay: Date = new Date("1970-01-01");
+    @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old) => old ?? new Date("1970-01-01") })
+    birthDay: Date | null = null
 
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
@@ -134,16 +136,48 @@ export class MemberDetails extends AutoEncoder {
         this._isPlaceholder = true
     }
 
+    /**
+     * Call this to clean up capitals in all the available data
+     */
+    cleanData() {
+        if (StringCompare.isFullCaps(this.firstName)) {
+            this.firstName = Formatter.capitalizeWords(this.firstName.toLowerCase())
+        }
+        if (StringCompare.isFullCaps(this.lastName)) {
+            this.lastName = Formatter.capitalizeWords(this.lastName.toLowerCase())
+        }
+
+        this.firstName = Formatter.capitalizeFirstLetter(this.firstName.trim())
+        this.lastName = this.lastName.trim()
+
+        for (const parent of this.parents) {
+            parent.cleanData()
+        }
+
+        this.address?.cleanData()
+
+        for (const contact of this.emergencyContacts) {
+            contact.cleanData()
+        }
+    }
+
     get name() {
         return this.firstName + " " + this.lastName;
     }
 
     /// The age this member will become, this year
-    ageForYear(year: number) {
+    ageForYear(year: number): number | null {
+        if (!this.birthDay) {
+            return null
+        }
         return year - this.birthDay.getFullYear();
     }
 
-    get age() {
+    get age(): number | null {
+        if (!this.birthDay) {
+            return null
+        }
+
         const today = new Date();
         let age = today.getFullYear() - this.birthDay.getFullYear();
         const m = today.getMonth() - this.birthDay.getMonth();
@@ -153,7 +187,11 @@ export class MemberDetails extends AutoEncoder {
         return age;
     }
 
-    get birthDayFormatted() {
+    get birthDayFormatted(): string | null {
+        if (!this.birthDay) {
+            return null
+        }
+
         const date = new Date(this.birthDay);
         const options = { year: "numeric", month: "long", day: "numeric" };
         return date.toLocaleDateString("nl-BE", options);
@@ -176,14 +214,16 @@ export class MemberDetails extends AutoEncoder {
      */
     doesMatchGroup(group: Group) {
         if (group.settings.minAge || group.settings.maxAge) {
-            
             const age = this.ageForYear(group.settings.startDate.getFullYear())
-            if (group.settings.minAge && age < group.settings.minAge) {
-                return false
-            }
 
-            if (group.settings.maxAge && age > group.settings.maxAge) {
-                return false
+            if (age) {
+                if (group.settings.minAge && age < group.settings.minAge) {
+                    return false
+                }
+
+                if (group.settings.maxAge && age > group.settings.maxAge) {
+                    return false
+                }
             }
         }
 
@@ -221,6 +261,72 @@ export class MemberDetails extends AutoEncoder {
             if (_parent.id == parent.id) {
                 this.parents[index] = parent
             }
+        }
+    }
+
+    /**
+     * Return all the e-mail addresses that should have access to this user
+     */
+    getManagerEmails(): string[] {
+        const emails: string[] = []
+        if (this.email) {
+            emails.push(this.email)
+        }
+
+        if (this.age && (this.age < 18 || (this.age < 24 && !this.address))) {
+            for (const parent of this.parents) {
+                if (parent.email) {
+                    emails.push(parent.email)
+                }
+            }
+        }
+        return emails
+    }
+
+    copyFrom(other: MemberDetails) {
+        if (other.firstName.length > 0) {
+            this.firstName = other.firstName
+        }
+        if (other.lastName.length > 0) {
+            this.lastName = other.lastName
+        }
+
+        if (other.email) {
+            this.email = other.email
+        }
+
+        if (other.birthDay) {
+            this.birthDay = other.birthDay
+        }
+
+        this.gender = other.gender
+
+        if (other.address) {
+            if (this.address) {
+                this.updateAddress(this.address, other.address)
+            } else {
+                this.address = other.address
+            }
+        }
+
+        if (other.phone) {
+            this.phone = other.phone
+        }
+
+        if (other.memberNumber) {
+            this.memberNumber = other.memberNumber
+        }
+
+        if (other.parents.length > 0) {
+            this.parents = other.parents
+        }
+
+        if (other.emergencyContacts.length > 0) {
+            this.emergencyContacts = other.emergencyContacts
+        }
+
+        if (other.lastReviewed) {
+            this.lastReviewed = other.lastReviewed
         }
     }
 }
