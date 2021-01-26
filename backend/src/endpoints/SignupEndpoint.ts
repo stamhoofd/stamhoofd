@@ -81,7 +81,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 Email.sendInternal({
                     to: user.email,
                     subject: `[${organization.name}] Je hebt al een account`,
-                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopieëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : organization.name)
+                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : organization.name)
                 });
 
                 // Don't send the code

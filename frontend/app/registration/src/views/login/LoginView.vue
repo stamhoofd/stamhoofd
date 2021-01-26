@@ -167,8 +167,11 @@ export default class LoginView extends Mixins(NavigationMixin){
                 this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
             }
         } catch (e) {
-            console.error(e)
-            new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven. Gebruik het e-mailadres waar je al e-mails van ons op ontvangt.", "error").addCloseButton().show()           
+            } else {
+                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+            }
         } finally {
             this.loading = false;
             component.hide()

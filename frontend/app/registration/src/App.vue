@@ -1,14 +1,14 @@
 <template>
     <div id="app">
-        <PromiseView :promise="promise"/>
+        <PromiseView :promise="promise" />
         <ToastBox />
     </div>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent, NavigationController, NavigationMixin,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
