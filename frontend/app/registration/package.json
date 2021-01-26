@@ -5,7 +5,7 @@
     "scripts": {
         "serve": "NODE_ENV=development webpack serve --hot",
         "build": "NODE_ENV=development webpack --progress ",
-        "build:production": "NODE_ENV=production webpack --performance-hints warning"
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
     },
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",

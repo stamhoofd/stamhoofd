@@ -1523,10 +1523,10 @@
     svgicons2svgfont "9.1.1"
     ttf2woff "2.0.2"
 
-"@simonbackx/simple-database@1.11.14":
-  version "1.11.14"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.11.14.tgz#110799d4b131f13beb935fb31e40ba2cd9d83dff"
-  integrity sha512-Th19/eNy9W8NuXm2Z1t2EDpE0KWoAnm+ktwTEwGQV6IsIgnCO5A0l7xaYbxGoWlm7nz9jpijr7mY9v1Ct1ZhSA==
+"@simonbackx/simple-database@1.11.16":
+  version "1.11.16"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.11.16.tgz#66791e4a561eebc9a782172c2b0c9a80adf268ec"
+  integrity sha512-xNZ/p1m155QcRiKTbt3NE+bsxQ0Yi3YURPNgNqVkpREuwbk0wIRpJK3s/FjHSiTWEJUJZDsSgB76wIGTRWLcxw==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -1545,11 +1545,6 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.2.0.tgz#3788b376bb4fd347fb0b0499cdc2ec607c40d0d5"
   integrity sha512-Tq+rbGIfUycN4rDlwluOp29bAKW+F/YwjBC497RYKkFKKQqf0TbSV8v2h7yFR4gZbaLw4j0q8DJSEDg2R8xThg==
-
-"@simonbackx/simple-networking@~1.3.0":
-  version "1.3.10"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.3.10.tgz#15c3118e9a8399173821af38017f697832efe40d"
-  integrity sha512-gs6Oyy0Ip02oTnbPWa08PId2iVfo0fphEym0O9n+qctDptHO0MQHRwHuEu2uUaIHILaGxSri7mGBDmew4tpI8A==
 
 "@simonbackx/vue-app-navigation@^1.7.0":
   version "1.7.0"

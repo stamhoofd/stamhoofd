@@ -89,16 +89,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
+import { Organization, OrganizationPatch } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 import XLSX from "xlsx";
 
-import { ColumnMatcher } from "../../../../../classes/import/ColumnMatcher"
 import { ImportingMember } from "../../../../../classes/import/ImportingMember"
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn"
 import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/import/MatcherCategory';

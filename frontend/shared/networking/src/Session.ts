@@ -310,7 +310,7 @@ export class Session implements RequestMiddleware {
         request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
     }
 
-    async shouldRetryError(request: Request<any>, response: Response, error: SimpleErrors): Promise<boolean> {
+    async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
         if (!this.token) {
             // Euhm? The user is not signed in!
             return false;
@@ -320,7 +320,7 @@ export class Session implements RequestMiddleware {
             return false;
         }
 
-        if (error.containsCode("expired_access_token")) {
+        if (error.hasCode("expired_access_token")) {
             if (request.headers.Authorization != "Bearer " + this.token.token.accessToken) {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh")
                 return true

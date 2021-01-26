@@ -7,7 +7,7 @@ import { MatcherCategory } from "../MatcherCategory";
 
 export class PaymentPriceColumnMatcher implements ColumnMatcher {
     id = this.constructor.name
-    category: MatcherCategory = MatcherCategory.Member
+    category: MatcherCategory = MatcherCategory.Payment
 
     getName(): string {
         return "Lidgeld (los van betaling)"

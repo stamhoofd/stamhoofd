@@ -24,7 +24,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
     }
 
     async shouldRetryNetworkError(request: Request<any>, error: Error): Promise<boolean> {
-        console.error(error)
+        console.error("network error", error)
         await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 7000));
 
         if ((request as any).retryCount > 1 && !this.displayedErrorMessage) {
@@ -34,7 +34,14 @@ export class NetworkManagerStatic implements RequestMiddleware {
         return Promise.resolve(true);
     }
 
-    onNetworkResponse(request: Request<any>, response: Response) {
+    async shouldRetryServerError(request: Request<any>, response: XMLHttpRequest, error: Error): Promise<boolean> {
+        console.error("server error", error)
+        console.error(error)
+        console.error(response)
+        return Promise.resolve(false);
+    }
+
+    onNetworkResponse(request: Request<any>, response: XMLHttpRequest) {
         // todo: hide network error message
         this.displayedErrorMessage = false;
     }

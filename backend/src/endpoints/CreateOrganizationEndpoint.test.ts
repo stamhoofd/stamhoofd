@@ -1,12 +1,11 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto";
-import { KeychainItem, OrganizationGenderType, Token as TokenStruct } from '@stamhoofd/structures';
+import { KeychainItem, OrganizationGenderType, SignupResponse } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { EmailVerificationCode } from "../models/EmailVerificationCode";
 import { Organization } from "../models/Organization";
-import { Token } from '../models/Token';
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 describe("Endpoint.CreateOrganization", () => {
@@ -76,7 +75,7 @@ describe("Endpoint.CreateOrganization", () => {
 
         // Access token should be expired (todo for email validation)
         // expect(response.body.accessTokenValidUntil).toBeBefore(new Date());
-        expect(response.body).toBeInstanceOf(TokenStruct);
+        expect(response.body).toBeInstanceOf(SignupResponse);
 
         expect(response.status).toEqual(200);
 

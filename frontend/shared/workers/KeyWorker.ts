@@ -51,8 +51,11 @@ export async function generateKeys(password: string) {
 }
 
 
-ctx.addEventListener('message', (e) => {
+ctx.onmessage = (e) => {
+    console.log("KeyWorker received a message")
+
     if (!e.data.type) {
+        console.error("Expected type for key worker")
         throw new Error("Expected type for key worker")
     }
 
@@ -90,5 +93,4 @@ ctx.addEventListener('message', (e) => {
             throw new Error("Unknown type "+e.data.type)
         }
     }
-
-});
+}

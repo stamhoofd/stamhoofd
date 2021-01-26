@@ -6,6 +6,9 @@
         <p v-if="!value" class="style-description-small">
             Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser
         </p>
+        <p v-else-if="warning.length > 0" class="style-description-small">
+            {{ warning }}
+        </p>
         <p v-else-if="duration <= 60*60" class="style-description-small">
             Kan in enkele minuten worden geraden door een computer
         </p>
@@ -41,6 +44,7 @@ export default class PasswordStrength extends Vue {
 
     strength = 0
     duration = 0
+    warning = ""
 
     calculateCounter = 0
     loading = false
@@ -75,7 +79,7 @@ export default class PasswordStrength extends Vue {
                 // skip
                 return
             }
-            console.log(result)
+            this.warning = result.feedback.warning ?? ""
             this.strength = result.score*25
             this.duration = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond
 
@@ -98,7 +102,7 @@ export default class PasswordStrength extends Vue {
             return "error"
         }
 
-        if (strength < 75) {
+        if (strength < 100) {
             return "warning"
         }
 
@@ -108,18 +112,24 @@ export default class PasswordStrength extends Vue {
     get description() {
         const strength = this.strength
         if (strength < 50) {
-            return "Zwak"
+            return "Heel zwak"
         }
 
         if (strength < 75) {
-            return "Matig"
+            return "Zwak"
         }
 
         if (strength < 100) {
-            return "Redelijk sterk"
+            return "Matig"
         }
 
         return "Sterk"
+    }
+
+    get detailDescription() {
+        if (this.warning.length > 0) {
+            return this.warning
+        }
     }
 
 }

@@ -114,6 +114,11 @@ module.exports = {
                                 ]
                             ],
 
+                            plugins: [
+                                // for iOS 10 + iOS 11
+                                "@babel/plugin-proposal-object-rest-spread"
+                            ]
+
                             // Remove for modern build:
                             //"plugins": [		
                             //    "@babel/plugin-transform-regenerator"		
@@ -126,6 +131,38 @@ module.exports = {
                     }
                 ]
             },
+            /*{ 
+                // commented out, since this causes memory issues in webpack
+                test: /\.jsx?$/, 
+                exclude: /node_modules\/@zxcvbn-ts/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            presets: [
+                                [
+                                   "@babel/preset-env",
+                                    {		
+                                        "useBuiltIns": "usage",		
+                                        "corejs": "3.8",
+                                        "bugfixes": true // Makes bundle size a bit smaller
+                                    }
+                                ]
+                            ],
+                            plugins: [
+                                // for iOS 10 + iOS 11
+                                "@babel/plugin-proposal-object-rest-spread"
+                            ]
+
+                            // Remove for modern build:
+                            //"plugins": [		
+                            //    "@babel/plugin-transform-regenerator"		
+                            //]
+                        }
+                    }
+                ]
+            },*/
             {
                 test: /\.css$/,
                 use: [

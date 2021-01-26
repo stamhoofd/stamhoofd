@@ -94,7 +94,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
                     })
                 }
                 hadMonth = true
-                numbersClean.push(this.stringToMonth(str))
+                numbersClean.push(this.stringToMonth(part))
             }
         }
 
@@ -225,7 +225,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             let bestScore = 0
             for (const [index, month] of rows.entries()) {
                 const typo = StringCompare.typoCount(month, str)
-                if (typo <= 2 && (bestMatch === null || bestScore > typo)) {
+                if (((typo <= 2 && month.length > 3) || typo == 0 ) && (bestMatch === null || bestScore > typo)) {
                     bestScore = typo
                     bestMatch = index
                 }
