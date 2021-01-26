@@ -76,7 +76,7 @@ export class SessionManagerStatic {
     }
 
     logout() {
-         if (this.currentSession) {
+        if (this.currentSession) {
             this.currentSession.logout()
         }
         this.clearCurrentSession()

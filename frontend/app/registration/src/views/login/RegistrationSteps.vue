@@ -106,7 +106,7 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
 
     logout() {
         if (SessionManager.currentSession && SessionManager.currentSession.isComplete()) {
-            SessionManager.logout()
+            SessionManager.currentSession.logout()
             return;
         }
     }
