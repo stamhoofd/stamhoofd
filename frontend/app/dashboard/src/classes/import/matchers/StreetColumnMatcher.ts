@@ -13,6 +13,10 @@ export class StreetColumnMatcher extends SharedMatcher implements ColumnMatcher 
         return "Straat zonder huisnummer"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

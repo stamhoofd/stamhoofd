@@ -6,7 +6,7 @@ import { ImportingMember } from "../ImportingMember";
 import { MatcherCategory } from "../MatcherCategory";
 
 export class PaidPriceColumnMatcher implements ColumnMatcher {
-    id = this.constructor.name
+    id = "PaidPriceColumnMatcher"
     category: MatcherCategory = MatcherCategory.Payment
 
     getName(): string {

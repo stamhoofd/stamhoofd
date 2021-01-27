@@ -13,6 +13,10 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
         return "Huisnummer"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

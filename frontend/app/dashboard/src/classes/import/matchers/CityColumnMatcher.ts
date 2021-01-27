@@ -16,6 +16,10 @@ export class CityColumnMatcher extends SharedMatcher implements ColumnMatcher {
         return "Gemeente"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

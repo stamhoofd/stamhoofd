@@ -12,6 +12,10 @@ export class FirstNameColumnMatcher extends SharedMatcher implements ColumnMatch
         return "Voornaam"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
 

@@ -7,7 +7,7 @@ import { ImportingMember } from "../ImportingMember";
 import { MatcherCategory } from "../MatcherCategory";
 
 export class GenderColumnMatcher implements ColumnMatcher {
-    id = this.constructor.name
+    id = "GenderColumnMatcher"
     category: MatcherCategory = MatcherCategory.Member
 
     getName(): string {

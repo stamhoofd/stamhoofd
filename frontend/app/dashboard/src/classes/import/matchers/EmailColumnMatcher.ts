@@ -13,6 +13,10 @@ export class EmailColumnMatcher extends SharedMatcher implements ColumnMatcher {
         return "E-mailadres"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

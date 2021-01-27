@@ -13,6 +13,10 @@ export class StreetWithNumberColumnMatcher extends SharedMatcher implements Colu
         return "Straat met huisnummer"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

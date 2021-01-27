@@ -16,6 +16,10 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
         return "Gemeente met postcode"
     }
 
+    get id() {
+        return this.getName()+"-"+this.category
+    }
+
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         

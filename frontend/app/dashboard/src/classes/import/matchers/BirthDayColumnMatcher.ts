@@ -8,11 +8,14 @@ import { ImportingMember } from "../ImportingMember";
 import { MatcherCategory } from "../MatcherCategory";
 
 export class BirthDayColumnMatcher implements ColumnMatcher {
-    id = this.constructor.name
     category: MatcherCategory = MatcherCategory.Member
 
     getName(): string {
         return "Geboortedatum"
+    }
+
+    get id() {
+        return this.getName()+"-"+this.category
     }
 
     doesMatch(columnName: string, examples: string[]): boolean {

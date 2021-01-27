@@ -9,7 +9,7 @@ import { MatcherCategory } from "../MatcherCategory";
 import { SharedMatcher } from "../SharedMatcher";
 
 export class GroupColumnMatcher implements ColumnMatcher {
-    id = this.constructor.name
+    id = "GroupColumnMatcher"
     category: MatcherCategory = MatcherCategory.Member
 
     getName(): string {

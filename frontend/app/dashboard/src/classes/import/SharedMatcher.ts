@@ -5,10 +5,6 @@ export class SharedMatcher {
     category: MatcherCategory
     protected negativeMatch: string[] = []
 
-    get id() {
-        return this.constructor.name + this.category
-    }
-
     constructor(category: MatcherCategory) {
         this.category = category
 
