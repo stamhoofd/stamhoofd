@@ -3,6 +3,7 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, fiel
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupPrices } from './GroupPrices';
+import { RecordType } from './members/RecordType';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
@@ -16,6 +17,34 @@ export class OrganizationModules extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     useWebshops = false
 }
+
+export enum AskRequirement {
+    NotAsked = "NotAsked",
+    Optional = "Optional",
+    Required = "Required"
+}
+
+export class OrganizationRecordsConfiguration extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)) })
+    enabledRecords: RecordType[] = []
+
+    /**
+     * true: required
+     * false: don't ask
+     * null: optional
+     */
+    @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
+    doctor = AskRequirement.NotAsked
+
+    /**
+     * true: required
+     * false: don't ask
+     * null: optional
+     */
+    @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
+    emergencyContact = AskRequirement.Optional
+}
+
 
 export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrganizationType) })
@@ -81,10 +110,9 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 21 })
     color: string | null = null
 
-    // Deprecated
-    @field({ decoder: StringDecoder, version: 6, optional: true, upgrade: () => "" })
-    bic = ""
-
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+
+    @field({ decoder: OrganizationRecordsConfiguration, version: 53, defaultValue: () => OrganizationRecordsConfiguration.create({}) })
+    recordsConfiguration: OrganizationRecordsConfiguration
 }

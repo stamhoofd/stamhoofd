@@ -122,6 +122,20 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
+                        <h2 class="style-title-list">
+                            Persoonlijke steekkaart
+                        </h2>
+                        <p class="style-description">
+                            Kies welke <strong>gevoelige</strong> gegevens je wilt opvragen (allergieën, medische gegevens) en vraag toestemming voor foto's. 
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -147,6 +161,7 @@ import AdminsView from '../admins/AdminsView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -239,6 +254,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     manageGroups() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditGroupsView, {})
+        }).setDisplayStyle("popup"))
+    }
+
+    manageRecords() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(RecordsSettingsView, {})
         }).setDisplayStyle("popup"))
     }
 
