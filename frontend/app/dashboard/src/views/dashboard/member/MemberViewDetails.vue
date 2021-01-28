@@ -152,7 +152,7 @@
         </div>
 
         <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && !member.details.isPlaceholder)">
+            <template v-if="(member.details && !member.details.isPlaceholder && !shouldSkipRecords)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -274,6 +274,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get placeholderAccounts() {
         return this.member.users.filter(u => u.publicKey === null)
+    }
+
+    get shouldSkipRecords() {
+        return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
     }
 
     isOldEmail(email: string) {

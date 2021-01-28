@@ -29,6 +29,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 export default class SegmentedControl extends Vue {
     @Prop({ type: Array })
     public items!: any[];
+    
     @Prop({ default: null })
     public labels!: string[] | null;
 
