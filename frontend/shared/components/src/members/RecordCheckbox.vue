@@ -14,6 +14,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox } from "@stamhoofd/components"
+import { SessionManager } from "@stamhoofd/networking";
 import { Record, RecordType, RecordTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -81,6 +82,7 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
         if (enabled) {
             this.records.push(Record.create({
                 type: this.type,
+                author: SessionManager.currentSession?.user?.id
             }))
         } else {
             this.records.splice(index, 1)
@@ -102,6 +104,7 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
             return
         }
         record.description = description
+        record.author = SessionManager.currentSession?.user?.id
     }
 }
 </script>

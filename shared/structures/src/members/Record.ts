@@ -49,7 +49,15 @@ export class Record extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = "";
 
-    getText() {
+    /**
+     * Sometimes it is necessary to know who created a record.
+     * So we keep track of this information in the background only when
+     * someone inside the organization modified records
+     */
+    @field({ decoder: StringDecoder, optional: true })
+    author?: string
+
+    getText(): string {
         return RecordTypeHelper.getName(this.type);
     }
 

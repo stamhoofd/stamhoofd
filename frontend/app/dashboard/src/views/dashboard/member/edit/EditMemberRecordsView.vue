@@ -2,9 +2,31 @@
     <form id="member-records-view" class="view" @submit.prevent="goNext">
         <main>
             <STErrorsDefault :error-box="errorBox" />
-            <p v-if="!allowData" class="warning-box">
-                Er werd geen toestemming gegeven voor het verzamelen van gevoelige gegevens. Je kan daarom de steekkaart niet invullen. De toestemming kan gewijzigd worden door het lid door in te loggen en de steekkaart te wijzigen.
-            </p>
+
+            <template v-if="shouldAsk(RecordType.DataPermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions)">
+                <hr>
+                <h2>Privacy</h2>
+
+                <p class="info-box">Maak hier niet zomaar wijzigingen.</p>
+
+                <template v-if="shouldAsk(RecordType.DataPermissions)">
+                    <Checkbox v-model="allowData" class="long-text">
+                        Toestemming om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart) zoals staat vermeld in het privacybeleid.
+                    </Checkbox>
+                </template>
+
+                <Checkbox v-if="shouldAsk(RecordType.PicturePermissions)" v-model="allowPictures" class="long-text">
+                    {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
+                </Checkbox>
+                <Checkbox v-if="(!allowPictures || !shouldAsk(RecordType.PicturePermissions)) && shouldAsk(RecordType.GroupPicturePermissions)" v-model="allowGroupPictures" class="long-text">
+                    Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
+                </Checkbox>
+
+                <hr v-if="!allowData && dataRequired">
+                <p v-if="!allowData && dataRequired" class="warning-box">
+                    Er werd geen toestemming gegeven voor het verzamelen van gevoelige gegevens. Je kan daarom de steekkaart niet invullen.
+                </p>
+            </template>
 
             <template v-if="allowData">
                 <template v-if="shouldAsk(RecordType.FoodAllergies, RecordType.MedicineAllergies, RecordType.HayFever, RecordType.OtherAllergies)">
@@ -70,6 +92,23 @@
                     </div>
                 </template>
             </template>
+
+             <template v-if="(memberDetails.age !== null && memberDetails.age < 18) && shouldAsk(RecordType.MedicinePermissions)">
+                <hr>
+                <h2>Toedienen van medicatie</h2>
+
+                <p class="style-description">
+                    Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
+                </p>
+
+                <Checkbox v-model="allowMedicines">
+                    Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                </Checkbox>
+
+                <p class="style-description-small">
+                    * gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang
+                </p>
+            </template>
         </main>
     </form>
 </template>
@@ -78,7 +117,8 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, RecordCheckbox, Validator } from "@stamhoofd/components"
+import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, RecordCheckbox, Validator, Toast } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
 import { AskRequirement, EmergencyContact, Record, RecordType, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -191,8 +231,33 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return RecordType
     }
 
+    showPrivacyWarning() {
+        new Toast("Maak niet zomaar wijzigingen aan toestemmingen. Zorg dat je altijd schriftelijk bewijs hebt. Aan deze wijziging werd jouw gebruikers-ID gekoppeld.", "error red").setHide(15*1000).show()
+    }
+
     get allowData() { return this.getBooleanType(RecordType.DataPermissions) }
-    set allowData(enabled: boolean) { this.setBooleanType(RecordType.DataPermissions, enabled) }
+    set allowData(enabled: boolean) { 
+        this.setBooleanType(RecordType.DataPermissions, enabled) 
+        if (enabled) ( this.showPrivacyWarning() )
+    }
+    
+    get allowPictures() { return this.getBooleanType(RecordType.PicturePermissions) }
+    set allowPictures(enabled: boolean) { 
+        this.setBooleanType(RecordType.PicturePermissions, enabled) 
+        if (enabled) ( this.showPrivacyWarning() )
+    }
+
+    get allowGroupPictures() { return this.getBooleanType(RecordType.GroupPicturePermissions) }
+    set allowGroupPictures(enabled: boolean) { 
+        this.setBooleanType(RecordType.GroupPicturePermissions, enabled)
+        if (enabled) ( this.showPrivacyWarning() )
+    }
+
+    get allowMedicines() { return this.getBooleanType(RecordType.MedicinePermissions) }
+    set allowMedicines(enabled: boolean) { 
+        this.setBooleanType(RecordType.MedicinePermissions, enabled)
+        if (enabled) ( this.showPrivacyWarning() )
+    }
 
     get otherDescription() { return this.getTypeDescription(RecordType.Other) }
     set otherDescription(description: string) { 
@@ -234,7 +299,8 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         if (enabled) {
             memberDetails.records.push(Record.create({
                 type,
-                description
+                description,
+                author: SessionManager.currentSession?.user?.id ?? ""
             }))
         } else {
             memberDetails.records.splice(index, 1)
@@ -260,6 +326,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         }
 
         record.description = description
+        record.author = SessionManager.currentSession?.user?.id ?? ""
         this.$emit("change", memberDetails)
     }
 }
