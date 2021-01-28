@@ -159,22 +159,23 @@
             
 
             <hr>
-            <h2>Contactgegevens huisarts</h2>
+            <h2>Contactgegevens vragen van...</h2>
 
-            <RadioGroup>
-                <Radio v-model="doctor" :value="AskRequirement.NotAsked">Niet vragen</Radio>
-                <Radio v-model="doctor" :value="AskRequirement.Optional">Optioneel</Radio>
-                <Radio v-model="doctor" :value="AskRequirement.Required">Verplicht</Radio>
-            </RadioGroup>
+            <STInputBox title="Huisdokter" class="max">
+                <RadioGroup>
+                    <Radio v-model="doctor" :value="AskRequirement.NotAsked">Niet vragen</Radio>
+                    <Radio v-model="doctor" :value="AskRequirement.Optional">Optioneel</Radio>
+                    <Radio v-model="doctor" :value="AskRequirement.Required">Verplicht</Radio>
+                </RadioGroup>
+            </STInputBox>
 
-            <hr>
-            <h2>Contactgegevens noodcontact</h2>
-
-            <RadioGroup>
-                <Radio v-model="emergencyContact" :value="AskRequirement.NotAsked">Niet vragen</Radio>
-                <Radio v-model="emergencyContact" :value="AskRequirement.Optional">Optioneel</Radio>
-                <Radio v-model="emergencyContact" :value="AskRequirement.Required">Verplicht</Radio>
-            </RadioGroup>
+            <STInputBox title="Noodcontactpersoon" class="max">
+                <RadioGroup>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.NotAsked">Niet vragen</Radio>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.Optional">Optioneel</Radio>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.Required">Verplicht</Radio>
+                </RadioGroup>
+            </STInputBox>
         </main>
 
         <STToolbar>
