@@ -17,7 +17,6 @@ import { Checkbox } from "@stamhoofd/components"
 import { Record, RecordType, RecordTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-
 @Component({
     "components": {
         Checkbox,
