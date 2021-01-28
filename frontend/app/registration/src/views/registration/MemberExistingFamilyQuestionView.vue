@@ -37,14 +37,11 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, Spinner, BackButton, Checkbox } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberExistingStatus } from "@stamhoofd/structures"
+import { MemberDetails, MemberExistingStatus } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
-import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {

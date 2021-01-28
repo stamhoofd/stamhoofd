@@ -57,20 +57,12 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, STList, STListItem, Checkbox, LoadingButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, Group, Record, RecordType, MemberWithRegistrations, Version, EmergencyContact, WaitingListType, PreferredGroup, MemberExistingStatus, Parent } from "@stamhoofd/structures"
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STToolbar, STList, STListItem, Checkbox, LoadingButton } from "@stamhoofd/components"
+import { MemberWithRegistrations, Version, EmergencyContact, Parent } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberDetails } from '@stamhoofd/structures';
-import MemberParentsView from './MemberParentsView.vue';
-import MemberGroupView from './MemberGroupView.vue';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import EmergencyContactView from './EmergencyContactView.vue';
-import MemberRecordsView from './MemberRecordsView.vue';
-import { SessionManager } from '@stamhoofd/networking';
-import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
 import EditMemberParentView from './EditMemberParentView.vue';
 import { FamilyManager } from '../../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';

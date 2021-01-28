@@ -46,21 +46,21 @@
             <button slot="right" class="button secundary" v-if="isOptional" @click="skipStep">
                 Overslaan
             </button>
-            <button slot="right" class="button primary" @click="goNext">
-                Volgende
-            </button>
+            <LoadingButton :loading="loading">
+                <button slot="right" class="button primary" @click="goNext">
+                    Volgende
+                </button>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact, AskRequirement } from "@stamhoofd/structures"
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton, LoadingButton } from "@stamhoofd/components"
+import { EmergencyContact, AskRequirement } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 
@@ -77,7 +77,8 @@ import { OrganizationManager } from '../../../../dashboard/src/classes/Organizat
         Radio,
         PhoneInput,
         Checkbox,
-        BackButton
+        BackButton,
+        LoadingButton
     }
 })
 export default class EmergencyContactView extends Mixins(NavigationMixin) {
@@ -85,12 +86,13 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     contact: EmergencyContact | null // tood
 
     @Prop({ required: true })
-    handler: (contact: EmergencyContact | null, component: EmergencyContactView) => void;
+    handler: (contact: EmergencyContact | null, component: EmergencyContactView) => Promise<void>;
 
     name = ""
     title = ""
     phone: string | null = null
     errorBox: ErrorBox | null = null
+    loading = false
 
     validator = new Validator()
 
@@ -118,6 +120,10 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     }
 
     async goNext() {
+        if (this.loading) {
+            return;
+        }
+
         const errors = new SimpleErrors()
         if (this.name.length < 2) {
             errors.addError(new SimpleError({
@@ -143,6 +149,8 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
             this.errorBox = null
             valid = true
         }
+
+        this.loading = true
         valid = valid && await this.validator.validate()
 
         if (valid) {
@@ -158,7 +166,15 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
                 })
             }
 
-           this.handler(this.contact, this)
+            try {
+                await this.handler(this.contact, this)
+            } catch (e) {
+                this.errorBox = new ErrorBox(e)
+            }
+            this.loading = false
+
+        } else {
+            this.loading = false
         }
     }
 }

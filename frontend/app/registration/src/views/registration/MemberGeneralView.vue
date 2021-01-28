@@ -337,6 +337,48 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         }
     }
 
+    async goToEmergencyContact(component: NavigationMixin & { loading: boolean; errorBox: ErrorBox | null }) {
+        const memberDetails = this.member!.details!
+
+        if (OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked) {
+            // go to the steekkaart view
+            await this.goToRecords(component)
+            return
+        }
+        // Noodcontacten
+        component.show(new ComponentWithProperties(EmergencyContactView, { 
+            contact: memberDetails.emergencyContacts.length > 0 ? memberDetails.emergencyContacts[0] : null,
+            handler: async (contact: EmergencyContact | null, component: EmergencyContactView) => {
+                if (contact) {
+                    memberDetails.emergencyContacts = [contact]
+                } else {
+                    memberDetails.emergencyContacts = []
+                }
+                
+                // go to the steekkaart view
+                await this.goToRecords(component)
+            }
+        }))
+    }
+
+    async goToRecords(component: NavigationMixin & { loading: boolean; errorBox: ErrorBox | null }) {
+        if (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member?.details?.age ?? null)) {
+            // Skip records
+            this.member!.details!.records = []
+            this.member!.details!.lastReviewed = new Date()
+
+            await MemberManager.patchAllMembersWith(this.member!)
+            component.dismiss({ force: true })
+
+            return
+        }
+
+        // go to the steekkaart view
+        component.show(new ComponentWithProperties(MemberRecordsView, { 
+            member: this.member
+        }))
+    }
+
     async goToParents(component: NavigationMixin & { loading: boolean; errorBox: ErrorBox | null }) {
         if (!this.memberDetails) {
             return;
@@ -364,35 +406,14 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
         // todo: check age before asking parents
         if ((memberDetails.age ?? 99) < 18 || this.livesAtParents) {
             component.show(new ComponentWithProperties(MemberParentsView, { 
-                member: this.member
-            }))
-        } else {
-            if (OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked) {
-                // go to the steekkaart view
-                component.show(new ComponentWithProperties(MemberRecordsView, { 
-                    member: this.member
-                }))
-                return
-            }
-            // Noodcontacten
-            component.show(new ComponentWithProperties(EmergencyContactView, { 
-                contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
-                handler: (contact: EmergencyContact | null, component: EmergencyContactView) => {
-                    if (contact) {
-                        memberDetails.emergencyContacts = [contact]
-                    } else {
-                        memberDetails.emergencyContacts = []
-                    }
-                    
-                    // go to the steekkaart view
-                    component.show(new ComponentWithProperties(MemberRecordsView, { 
-                        member: this.member
-                    }))
+                member: this.member,
+                handler: async (component: MemberParentsView) => {
+                    await this.goToEmergencyContact(component)
                 }
             }))
+        } else {
+            await this.goToEmergencyContact(component)
         }
-
-        
     }
 
     shouldNavigateAway() {

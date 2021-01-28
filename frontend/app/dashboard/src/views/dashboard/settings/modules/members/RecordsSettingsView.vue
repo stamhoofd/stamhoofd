@@ -19,7 +19,7 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.DataPermissions)" @change="setBooleanType(RecordType.DataPermissions, $event)" class="long-text">
+            <Checkbox :checked="getBooleanType(RecordType.DataPermissions) || dataRequired" :disabled="dataRequired" @change="setBooleanType(RecordType.DataPermissions, $event)" class="long-text">
                 Vraag toestemming voor verzamelen gevoelige informatie
             </Checkbox>
 
@@ -312,6 +312,10 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     get AskRequirement() {
         return AskRequirement
+    }
+
+    get dataRequired() {
+        return this.organization.meta.recordsConfiguration.needsData()
     }
 
     // Helpers ---

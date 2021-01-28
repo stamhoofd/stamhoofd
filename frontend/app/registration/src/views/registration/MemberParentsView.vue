@@ -94,6 +94,11 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
 
     parents: SelectableParent[] = []
 
+    loading = false
+
+    @Prop({ required: true })
+    handler: (component: MemberParentsView) => Promise<void>;
+
     editParent(parent: Parent) {
         this.present(new ComponentWithProperties(ParentView, {
             memberDetails: this.memberDetails,
@@ -171,31 +176,14 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
         }
 
         this.errorBox = null;
+        this.loading = true
 
-        if (OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked) {
-            // go to the steekkaart view
-            this.show(new ComponentWithProperties(MemberRecordsView, { 
-                member: this.member
-            }))
-            return
+        try {
+            await this.handler(this)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
         }
-
-        // Emergency contact
-        this.show(new ComponentWithProperties(EmergencyContactView, { 
-            contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
-            handler: (contact: EmergencyContact | null, component: EmergencyContactView) => {
-                if (contact) {
-                    this.memberDetails.emergencyContacts = [contact]
-                } else {
-                    this.memberDetails.emergencyContacts = []
-                }
-                
-                // go to the steekkaart view
-                component.show(new ComponentWithProperties(MemberRecordsView, { 
-                    member: this.member
-                }))
-            }
-        }))
+        this.loading = false
     }
 }
 </script>

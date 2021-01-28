@@ -50,15 +50,13 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton,Checkbox, EmailInput, ErrorBox, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { Address, Country, EmergencyContact,Gender, MemberDetails, Organization, OrganizationMetaData, OrganizationType, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
+import { EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
-import MemberParentsView from './MemberParentsView.vue';
 
 @Component({
     components: {

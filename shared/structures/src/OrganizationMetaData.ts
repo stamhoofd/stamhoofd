@@ -4,7 +4,7 @@ import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupPrices } from './GroupPrices';
 import { Record } from './members/Record';
-import { RecordType } from './members/RecordType';
+import { RecordType, RecordTypeHelper } from './members/RecordType';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
@@ -27,7 +27,7 @@ export enum AskRequirement {
 
 export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)), upgrade: () => [] })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)), upgrade: () => [], version: 55 })
     enabledRecords: RecordType[] = []
 
     /**
@@ -46,13 +46,23 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
     emergencyContact = AskRequirement.Optional
 
+    /**
+     * Return true if at least one from the records should get asked
+     */
     shouldAsk(...types: RecordType[]): boolean {
         for (const type of types) {
-            if (!this.enabledRecords.find(r => r === type)) {
-                return false
+            if (this.enabledRecords.find(r => r === type)) {
+                return true
+            }
+
+            if (type == RecordType.DataPermissions) {
+                // Required if at least non oprivacy related record automatically
+                if (this.needsData()) {
+                    return true
+                }
             }
         }
-        return true
+        return false
     }
 
     filterRecords(records: Record[], ...allow: RecordType[]): Record[] {
@@ -62,6 +72,44 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             }
             return this.shouldAsk(r.type)
         })
+    }
+
+    /**
+     * Return true if we need to ask permissions for data, even when RecordType.DataPermissions is missing from enabledRecords
+     */
+    needsData(): boolean {
+        if (this.doctor !== AskRequirement.NotAsked) {
+            return true
+        }
+        if (this.enabledRecords.length == 0) {
+            return false
+        }
+
+        if (this.enabledRecords.find(type => {
+            if (![RecordType.DataPermissions, RecordType.MedicinePermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions].includes(type)) {
+                return true
+            }
+            return false
+        })) {
+            return true
+        }
+        return false
+    }
+
+    shouldSkipRecords(age: number | null): boolean {
+        if (this.doctor !== AskRequirement.NotAsked) {
+            return false
+        }
+        if (this.enabledRecords.length == 0) {
+            return true
+        }
+
+        if (this.enabledRecords.length == 1 && (age === null || age >= 18)) {
+            // Skip if the only record that should get asked is permission for medication
+            return this.enabledRecords[0] === RecordType.MedicinePermissions
+        }
+
+        return false
     }
 }
 

@@ -232,62 +232,70 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             return
         }
         this.errorBox =  null;
-
-        if (this.allowData) {
-            const errors = new SimpleErrors()
-            if (this.doctorRequired && this.doctorName.length < 2) {
-                errors.addError(new SimpleError({
-                    code: "invalid_field",
-                    message: "Vul de naam van de dokter in",
-                    field: "doctorName"
-                }))
-            }
-
-            const valid = await this.validator.validate()
-
-            if (!valid || errors.errors.length > 0) {
-                if (errors.errors.length > 0) {
-                    this.errorBox = new ErrorBox(errors)
-                }
-                return;
-            }
-
-            if (this.doctorRequired || (this.doctorOptional && (this.doctorName.length > 0 || (this.doctorPhone?.length ?? 0) > 0))) {
-                this.memberDetails.doctor = EmergencyContact.create({
-                    name: this.doctorName,
-                    phone: this.doctorPhone,
-                    title: "Huisdokter"
-                })
-            } else {
-                this.memberDetails.doctor = null
-            }
-
-            
-        } else {
-            // Remove all records except...
-            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.PicturePermissions || r.type == RecordType.GroupPicturePermissions || r.type == RecordType.MedicinePermissions )
-            this.memberDetails.doctor = null
-        }
-
-        // Filter records (remove records that were disabled and might be already saved somehow)
-        this.memberDetails.records = OrganizationManager.organization.meta.recordsConfiguration.filterRecords(this.memberDetails.records)
-
-        if (!this.memberDetails.age || this.memberDetails.age >= 18) {
-            // remove medicine permission (not needed any longer)
-            this.memberDetails.records = this.memberDetails.records.filter(r => r.type !== RecordType.MedicinePermissions)
-        }
-        
-        this.memberDetails.lastReviewed = new Date()
-
         this.loading = true
 
         try {
-            await MemberManager.patchAllMembersWith(this.member)
+            if (this.allowData) {
+                const errors = new SimpleErrors()
+                if (this.doctorRequired && this.doctorName.length < 2) {
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Vul de naam van de dokter in",
+                        field: "doctorName"
+                    }))
+                }
 
-            this.dismiss({ force: true })
+                const valid = await this.validator.validate()
+
+                if (!valid || errors.errors.length > 0) {
+                    if (errors.errors.length > 0) {
+                        this.errorBox = new ErrorBox(errors)
+                    }
+                    this.loading = false
+                    return;
+                }
+
+                if (this.doctorRequired || (this.doctorOptional && (this.doctorName.length > 0 || (this.doctorPhone?.length ?? 0) > 0))) {
+                    this.memberDetails.doctor = EmergencyContact.create({
+                        name: this.doctorName,
+                        phone: this.doctorPhone,
+                        title: "Huisdokter"
+                    })
+                } else {
+                    this.memberDetails.doctor = null
+                }
+
+                
+            } else {
+                // Remove all records except...
+                this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.PicturePermissions || r.type == RecordType.GroupPicturePermissions || r.type == RecordType.MedicinePermissions )
+                this.memberDetails.doctor = null
+            }
+
+            // Filter records (remove records that were disabled and might be already saved somehow)
+            this.memberDetails.records = OrganizationManager.organization.meta.recordsConfiguration.filterRecords(this.memberDetails.records)
+
+            if (!this.memberDetails.age || this.memberDetails.age >= 18) {
+                // remove medicine permission (not needed any longer)
+                this.memberDetails.records = this.memberDetails.records.filter(r => r.type !== RecordType.MedicinePermissions)
+            }
+            
+            this.memberDetails.lastReviewed = new Date()
         } catch (e) {
             console.error(e);
-            alert("Er ging iets mis...")
+            this.loading = false
+            this.errorBox = new ErrorBox(e)
+            return
+        }
+
+        try {
+            await MemberManager.patchAllMembersWith(this.member)
+            this.dismiss({ force: true })
+        } catch (e) {
+            this.loading = false
+            console.error(e);
+            this.errorBox = new ErrorBox(e)
+            return
         }
     }
 

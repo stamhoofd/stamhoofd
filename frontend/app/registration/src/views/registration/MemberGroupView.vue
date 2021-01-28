@@ -87,15 +87,12 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STNavigationBar, STToolbar, Radio, STList, STListItem, LoadingButton, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, Group, MemberWithRegistrations, WaitingListType, PreferredGroup, MemberExistingStatus, SelectableGroup, SelectedGroup, GroupSizeResponse, WaitingListSkipReason, GroupGenderType } from "@stamhoofd/structures"
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
+import { Gender, MemberDetails, MemberWithRegistrations, PreferredGroup, SelectableGroup, SelectedGroup, GroupSizeResponse, WaitingListSkipReason, GroupGenderType } from "@stamhoofd/structures"
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import { Formatter } from '@stamhoofd/utility';
 import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
 import { SessionManager } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
