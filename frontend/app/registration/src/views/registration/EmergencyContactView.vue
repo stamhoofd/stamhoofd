@@ -43,7 +43,7 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" v-if="false">
+            <button slot="right" class="button secundary" v-if="isOptional" @click="skipStep">
                 Overslaan
             </button>
             <button slot="right" class="button primary" @click="goNext">
@@ -58,10 +58,11 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact, AskRequirement } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import MemberParentsView from './MemberParentsView.vue';
 import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 
 @Component({
     components: {
@@ -84,7 +85,7 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     contact: EmergencyContact | null // tood
 
     @Prop({ required: true })
-    handler: (contact: EmergencyContact, component: EmergencyContactView) => void;
+    handler: (contact: EmergencyContact | null, component: EmergencyContactView) => void;
 
     name = ""
     title = ""
@@ -106,6 +107,14 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
                 this.phone = contact.phone
             }
         }
+    }
+
+    get isOptional() {
+        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
+    }
+
+    skipStep() {
+        this.handler(null, this)
     }
 
     async goNext() {

@@ -81,7 +81,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, Gender, MemberExistingStatus,MemberWithRegistrations, Record, RecordType, Version } from "@stamhoofd/structures"
+import { Address, AskRequirement, EmergencyContact, Gender, MemberExistingStatus,MemberWithRegistrations, Record, RecordType, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -380,11 +380,22 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 member: this.member
             }))
         } else {
+            if (OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked) {
+                // go to the steekkaart view
+                component.show(new ComponentWithProperties(MemberRecordsView, { 
+                    member: this.member
+                }))
+                return
+            }
             // Noodcontacten
             component.show(new ComponentWithProperties(EmergencyContactView, { 
                 contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
-                handler: (contact: EmergencyContact, component: EmergencyContactView) => {
-                    memberDetails.emergencyContacts = [contact]
+                handler: (contact: EmergencyContact | null, component: EmergencyContactView) => {
+                    if (contact) {
+                        memberDetails.emergencyContacts = [contact]
+                    } else {
+                        memberDetails.emergencyContacts = []
+                    }
                     
                     // go to the steekkaart view
                     component.show(new ComponentWithProperties(MemberRecordsView, { 
