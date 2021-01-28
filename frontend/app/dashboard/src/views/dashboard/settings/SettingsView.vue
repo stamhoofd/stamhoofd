@@ -126,10 +126,10 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                         <h2 class="style-title-list">
-                            Persoonlijke steekkaart
+                            Wijzig vragen
                         </h2>
                         <p class="style-description">
-                            Kies welke <strong>gevoelige</strong> gegevens je wilt opvragen (allergieën, medische gegevens) en vraag toestemming voor foto's. 
+                            Kies welke <strong>gevoelige</strong> gegevens (allergieën, medische gegevens) en toestemmingen je wilt vragen tijdens het inschrijven
                         </p>
 
                         <template slot="right">

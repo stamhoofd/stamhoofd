@@ -306,128 +306,15 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
     get allowData() { return this.getBooleanType(RecordType.DataPermissions) }
     set allowData(enabled: boolean) { this.setBooleanType(RecordType.DataPermissions, enabled) }
     
-    
     get allowPictures() { return this.getBooleanType(RecordType.PicturePermissions) }
-    set allowPictures(enabled: boolean) { 
-        this.setBooleanType(RecordType.PicturePermissions, enabled) 
-    }
+    set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.PicturePermissions, enabled) }
 
-    get allowGroupPictures() { 
-        return this.getBooleanType(RecordType.GroupPicturePermissions)
-    }
-
-    set allowGroupPictures(enabled: boolean) { 
-        this.setBooleanType(RecordType.GroupPicturePermissions, enabled) 
-    }
+    get allowGroupPictures() { return this.getBooleanType(RecordType.GroupPicturePermissions) }
+    set allowGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.GroupPicturePermissions, enabled) }
 
     get allowMedicines() { return this.getBooleanType(RecordType.MedicinePermissions) }
     set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.MedicinePermissions, enabled) }
-
-    get foodAllergies() { return this.getBooleanType(RecordType.FoodAllergies) }
-    set foodAllergies(enabled: boolean) { this.setBooleanType(RecordType.FoodAllergies, enabled) }
-    get foodAllergiesDescription() { return this.getTypeDescription(RecordType.FoodAllergies) }
-    set foodAllergiesDescription(description: string) { this.setTypeDescription(RecordType.FoodAllergies, description) }
-
-    get medicineAllergies() { return this.getBooleanType(RecordType.MedicineAllergies) }
-    set medicineAllergies(enabled: boolean) { this.setBooleanType(RecordType.MedicineAllergies, enabled) }
-    get medicineAllergiesDescription() { return this.getTypeDescription(RecordType.MedicineAllergies) }
-    set medicineAllergiesDescription(description: string) { this.setTypeDescription(RecordType.MedicineAllergies, description) }
-
-    get hayFever() { return this.getBooleanType(RecordType.HayFever) }
-    set hayFever(enabled: boolean) { this.setBooleanType(RecordType.HayFever, enabled) }
-    get hayFeverDescription() { return this.getTypeDescription(RecordType.HayFever) }
-    set hayFeverDescription(description: string) { this.setTypeDescription(RecordType.HayFever, description) }
-
-    get otherAllergies() { return this.getBooleanType(RecordType.OtherAllergies) }
-    set otherAllergies(enabled: boolean) { this.setBooleanType(RecordType.OtherAllergies, enabled) }
-    get otherAllergiesDescription() { return this.getTypeDescription(RecordType.OtherAllergies) }
-    set otherAllergiesDescription(description: string) { this.setTypeDescription(RecordType.OtherAllergies, description) }
-
-    get vegetarian() { return this.getBooleanType(RecordType.Vegetarian) }
-    set vegetarian(enabled: boolean) { this.setBooleanType(RecordType.Vegetarian, enabled) }
-
-    get vegan() { return this.getBooleanType(RecordType.Vegan) }
-    set vegan(enabled: boolean) { this.setBooleanType(RecordType.Vegan, enabled) }
-
-    get halal() { return this.getBooleanType(RecordType.Halal) }
-    set halal(enabled: boolean) { this.setBooleanType(RecordType.Halal, enabled) }
-
-    get kosher() { return this.getBooleanType(RecordType.Kosher) }
-    set kosher(enabled: boolean) { this.setBooleanType(RecordType.Kosher, enabled) }
-
-    get diet() { return this.getBooleanType(RecordType.Diet) }
-    set diet(enabled: boolean) { this.setBooleanType(RecordType.Diet, enabled) }
-    get dietDescription() { return this.getTypeDescription(RecordType.Diet) }
-    set dietDescription(description: string) { this.setTypeDescription(RecordType.Diet, description) }
-
-    get asthma() { return this.getBooleanType(RecordType.Asthma) }
-    set asthma(enabled: boolean) { this.setBooleanType(RecordType.Asthma, enabled) }
-    get asthmaDescription() { return this.getTypeDescription(RecordType.Asthma) }
-    set asthmaDescription(description: string) { this.setTypeDescription(RecordType.Asthma, description) }
-
-    get bedWaters() { return this.getBooleanType(RecordType.BedWaters) }
-    set bedWaters(enabled: boolean) { this.setBooleanType(RecordType.BedWaters, enabled) }
-    get bedWatersDescription() { return this.getTypeDescription(RecordType.BedWaters) }
-    set bedWatersDescription(description: string) { this.setTypeDescription(RecordType.BedWaters, description) }
-
-    get epilepsy() { return this.getBooleanType(RecordType.Epilepsy) }
-    set epilepsy(enabled: boolean) { this.setBooleanType(RecordType.Epilepsy, enabled) }
-    get epilepsyDescription() { return this.getTypeDescription(RecordType.Epilepsy) }
-    set epilepsyDescription(description: string) { this.setTypeDescription(RecordType.Epilepsy, description) }
-
-    get heartDisease() { return this.getBooleanType(RecordType.HeartDisease) }
-    set heartDisease(enabled: boolean) { this.setBooleanType(RecordType.HeartDisease, enabled) }
-    get heartDiseaseDescription() { return this.getTypeDescription(RecordType.HeartDisease) }
-    set heartDiseaseDescription(description: string) { this.setTypeDescription(RecordType.HeartDisease, description) }
-
-    get skinCondition() { return this.getBooleanType(RecordType.SkinCondition) }
-    set skinCondition(enabled: boolean) { this.setBooleanType(RecordType.SkinCondition, enabled) }
-    get skinConditionDescription() { return this.getTypeDescription(RecordType.SkinCondition) }
-    set skinConditionDescription(description: string) { this.setTypeDescription(RecordType.SkinCondition, description) }
-
-    get rheumatism() { return this.getBooleanType(RecordType.Rheumatism) }
-    set rheumatism(enabled: boolean) { this.setBooleanType(RecordType.Rheumatism, enabled) }
-    get rheumatismDescription() { return this.getTypeDescription(RecordType.Rheumatism) }
-    set rheumatismDescription(description: string) { this.setTypeDescription(RecordType.Rheumatism, description) }
-
-    get sleepWalking() { return this.getBooleanType(RecordType.SleepWalking) }
-    set sleepWalking(enabled: boolean) { this.setBooleanType(RecordType.SleepWalking, enabled) }
-    get sleepWalkingDescription() { return this.getTypeDescription(RecordType.SleepWalking) }
-    set sleepWalkingDescription(description: string) { this.setTypeDescription(RecordType.SleepWalking, description) }
- 
-    get diabetes() { return this.getBooleanType(RecordType.Diabetes) }
-    set diabetes(enabled: boolean) { this.setBooleanType(RecordType.Diabetes, enabled) }
-    get diabetesDescription() { return this.getTypeDescription(RecordType.Diabetes) }
-    set diabetesDescription(description: string) { this.setTypeDescription(RecordType.Diabetes, description) }
-
-    get medicines() { return this.getBooleanType(RecordType.Medicines) }
-    set medicines(enabled: boolean) { this.setBooleanType(RecordType.Medicines, enabled) }
-    get medicinesDescription() { return this.getTypeDescription(RecordType.Medicines) }
-    set medicinesDescription(description: string) { this.setTypeDescription(RecordType.Medicines, description) }
-
-    get specialHealthCare() { return this.getBooleanType(RecordType.SpecialHealthCare) }
-    set specialHealthCare(enabled: boolean) { this.setBooleanType(RecordType.SpecialHealthCare, enabled) }
-    get specialHealthCareDescription() { return this.getTypeDescription(RecordType.SpecialHealthCare) }
-    set specialHealthCareDescription(description: string) { this.setTypeDescription(RecordType.SpecialHealthCare, description) }
-
-    get canNotSwim() { return this.getBooleanType(RecordType.CanNotSwim) }
-    set canNotSwim(enabled: boolean) { this.setBooleanType(RecordType.CanNotSwim, enabled) }
-
-    get tiredQuickly() { return this.getBooleanType(RecordType.TiredQuickly) }
-    set tiredQuickly(enabled: boolean) { this.setBooleanType(RecordType.TiredQuickly, enabled) }
-    get tiredQuicklyDescription() { return this.getTypeDescription(RecordType.TiredQuickly) }
-    set tiredQuicklyDescription(description: string) { this.setTypeDescription(RecordType.TiredQuickly, description) }
-
-    get canNotParticipateInSport() { return this.getBooleanType(RecordType.CanNotParticipateInSport) }
-    set canNotParticipateInSport(enabled: boolean) { this.setBooleanType(RecordType.CanNotParticipateInSport, enabled) }
-    get canNotParticipateInSportDescription() { return this.getTypeDescription(RecordType.CanNotParticipateInSport) }
-    set canNotParticipateInSportDescription(description: string) { this.setTypeDescription(RecordType.CanNotParticipateInSport, description) }
-
-    get specialSocialCare() { return this.getBooleanType(RecordType.SpecialSocialCare) }
-    set specialSocialCare(enabled: boolean) { this.setBooleanType(RecordType.SpecialSocialCare, enabled) }
-    get specialSocialCareDescription() { return this.getTypeDescription(RecordType.SpecialSocialCare) }
-    set specialSocialCareDescription(description: string) { this.setTypeDescription(RecordType.SpecialSocialCare, description) }
-
+   
     get otherDescription() { return this.getTypeDescription(RecordType.Other) }
     set otherDescription(description: string) { 
         if (description.length > 0) { 
