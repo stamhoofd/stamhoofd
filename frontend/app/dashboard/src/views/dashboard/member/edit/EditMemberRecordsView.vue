@@ -197,12 +197,6 @@ import { Address, Country, EmergencyContact, Gender, Group, MemberExistingStatus
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import EmergencyContactView from './EmergencyContactView.vue';
-import MemberExistingQuestionView from './MemberExistingQuestionView.vue';
-import MemberGroupView from './MemberGroupView.vue';
-import MemberParentsView from './MemberParentsView.vue';
-import MemberRecordsView from './MemberRecordsView.vue';
-
 @Component({
     components: {
         Slider,
@@ -289,17 +283,17 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return false
     }
 
-    get allowData() { return !this.getBooleanType(RecordType.NoData) }
-    set allowData(enabled: boolean) { this.setBooleanType(RecordType.NoData, !enabled) }
+    get allowData() { return this.getBooleanType(RecordType.DataPermissions) }
+    set allowData(enabled: boolean) { this.setBooleanType(RecordType.DataPermissions, enabled) }
 
-    get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
-    set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.NoPictures, !enabled)} 
+    get allowPictures() { return this.getBooleanType(RecordType.PicturePermissions) }
+    set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.PicturePermissions, enabled)} 
     
-    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.OnlyGroupPictures) }
-    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled)}
+    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.GroupPicturePermissions) }
+    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.GroupPicturePermissions, enabled)}
 
-    get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
-    set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.NoPermissionForMedicines, !enabled) }
+    get allowMedicines() { return this.getBooleanType(RecordType.MedicinePermissions) }
+    set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.MedicinePermissions, enabled) }
 
     get foodAllergies() { return this.getBooleanType(RecordType.FoodAllergies) }
     set foodAllergies(enabled: boolean) { this.setBooleanType(RecordType.FoodAllergies, enabled) }

@@ -3,6 +3,7 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, fiel
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupPrices } from './GroupPrices';
+import { Record } from './members/Record';
 import { RecordType } from './members/RecordType';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
@@ -25,7 +26,8 @@ export enum AskRequirement {
 }
 
 export class OrganizationRecordsConfiguration extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)) })
+    @field({ decoder: new ArrayDecoder(StringDecoder) })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)), upgrade: () => [] })
     enabledRecords: RecordType[] = []
 
     /**
@@ -43,6 +45,24 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
     emergencyContact = AskRequirement.Optional
+
+    shouldAsk(...types: RecordType[]): boolean {
+        for (const type of types) {
+            if (!this.enabledRecords.find(r => r === type)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    filterRecords(records: Record[], ...allow: RecordType[]): Record[] {
+        return records.filter((r) => {
+            if (allow.includes(r.type)) {
+                return true
+            }
+            return this.shouldAsk(r.type)
+        })
+    }
 }
 
 

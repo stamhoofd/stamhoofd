@@ -181,7 +181,7 @@
                     </li>
                 </ul>
 
-                <p v-if="member.details.records.length == 0" class="info-box">
+                <p v-if="sortedRecords.length == 0" class="info-box">
                     {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
                 </p>
 
@@ -237,10 +237,11 @@
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
@@ -400,8 +401,48 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         return this.familyManager.members.filter(m => m.id != this.member.id)
     }
 
+    get filteredRecords() {
+        return this.member.details?.records ? 
+        OrganizationManager.organization.meta.recordsConfiguration.filterRecords(
+            Record.invertRecords(this.member.details.records), 
+            ...(OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.GroupPicturePermissions) ? [RecordType.PicturePermissions] : [])
+        ).filter((record) => {
+            // Some edge cases
+            // Note: inverted types are already reverted here! -> GroupPicturePermissions means no permissions here
+            
+            if (record.type === RecordType.GroupPicturePermissions) {
+                // When both group and normal pictures are allowed, hide the group pictures message
+                if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.PicturePermissions) && this.member.details?.records.find(r => r.type === RecordType.PicturePermissions)) {
+                    // Permissions for pictures -> this is okay
+                    return false
+                }
+
+                if (!OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.PicturePermissions)) {
+                    // This is not a special case
+                    return false
+                }
+            }
+
+            // If no permissions for pictures but permissions for group pictures, only show the group message
+            if (record.type === RecordType.PicturePermissions) {
+                if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.GroupPicturePermissions) && this.member.details?.records.find(r => r.type === RecordType.GroupPicturePermissions)) {
+                    // Only show the 'only permissions for group pictures' banner
+                    return false
+                }
+            }
+
+
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.type === RecordType.MedicinePermissions && (this.member.details?.age ?? 18) >= 18) {
+                return false
+            }
+
+            return true
+        }) : undefined
+    }
+
     get sortedRecords() {
-        return this.member.details?.records.sort((record1, record2) => {
+        return this.filteredRecords?.sort((record1, record2) => {
             const priority1: string = RecordTypeHelper.getPriority(record1.type);
             const priority2: string = RecordTypeHelper.getPriority(record2.type)
 

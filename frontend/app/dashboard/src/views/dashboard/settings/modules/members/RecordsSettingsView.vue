@@ -19,11 +19,15 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.NoPictures)" @change="setBooleanType(RecordType.NoPictures, $event)" class="long-text">
+            <Checkbox :checked="getBooleanType(RecordType.DataPermissions)" @change="setBooleanType(RecordType.DataPermissions, $event)" class="long-text">
+                Vraag toestemming voor verzamelen gevoelige informatie
+            </Checkbox>
+
+            <Checkbox :checked="getBooleanType(RecordType.PicturePermissions)" @change="setBooleanType(RecordType.PicturePermissions, $event)" class="long-text">
                 Vraag toestemming voor publicatie van foto's op de website en sociale media
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.OnlyGroupPictures)" @change="setBooleanType(RecordType.OnlyGroupPictures, $event)" class="long-text">
+            <Checkbox :checked="getBooleanType(RecordType.GroupPicturePermissions)" @change="setBooleanType(RecordType.GroupPicturePermissions, $event)" class="long-text">
                 Vraag toestemming voor publicatie van <strong>groeps</strong>foto's op de website en sociale media<template v-if="getBooleanType(RecordType.NoPictures)">, als er geen toestemming werd gegeven voor het verzamelen van foto's in het algemeen.</template>
             </Checkbox>
 
@@ -138,7 +142,7 @@
                 Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
             </p>
 
-            <Checkbox :checked="getBooleanType(RecordType.NoPermissionForMedicines)" @change="setBooleanType(RecordType.NoPermissionForMedicines, $event)">
+            <Checkbox :checked="getBooleanType(RecordType.MedicinePermissions)" @change="setBooleanType(RecordType.MedicinePermissions, $event)">
                 Vraag toestemming voor het toedienen van medicatie (wordt enkel gevraagd voor minderjarigen)*
             </Checkbox>
 

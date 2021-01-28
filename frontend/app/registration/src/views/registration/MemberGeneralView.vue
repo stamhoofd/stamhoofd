@@ -112,7 +112,7 @@ import MemberRecordsView from './MemberRecordsView.vue';
 })
 export default class MemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    initialMember: MemberWithRegistrations | null
+    initialMember!: MemberWithRegistrations | null
 
     member: MemberWithRegistrations | null = this.initialMember
 
@@ -244,19 +244,6 @@ export default class MemberGeneralView extends Mixins(NavigationMixin) {
                 birthDay: this.birthDay!,
                 address: this.livesAtParents ? null : this.address
             })
-
-            // Add default values for records
-            this.memberDetails.records.push(Record.create({
-                type: RecordType.NoData
-            }))
-            this.memberDetails.records.push(Record.create({
-                type: RecordType.NoPictures
-            }))
-            if (this.memberDetails.age ?? 99 < 18) {
-                this.memberDetails.records.push(Record.create({
-                    type: RecordType.NoPermissionForMedicines
-                }))
-            }
         }
 
         if (this.member) {

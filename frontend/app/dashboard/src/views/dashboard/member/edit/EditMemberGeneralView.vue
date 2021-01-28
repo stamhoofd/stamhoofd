@@ -168,19 +168,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     address: this.livesAtParents ? null : this.address
                 })
 
-                // Add default values for records
-                memberDetails.records.push(Record.create({
-                    type: RecordType.NoData
-                }))
-                memberDetails.records.push(Record.create({
-                    type: RecordType.NoPictures
-                }))
-                if (memberDetails.age ?? 99 < 18) {
-                    memberDetails.records.push(Record.create({
-                        type: RecordType.NoPermissionForMedicines
-                    }))
-                }
-
                 this.$emit("change", memberDetails)
             }
             return true;

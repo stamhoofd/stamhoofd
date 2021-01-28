@@ -51,13 +51,14 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, STList, STListItem, Checkbox, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, MemberWithRegistrations } from "@stamhoofd/structures"
+import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, MemberWithRegistrations, AskRequirement } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ParentView from './ParentView.vue';
 import EmergencyContactView from './EmergencyContactView.vue';
 import { EmergencyContact } from '@stamhoofd/structures';
 import MemberRecordsView from './MemberRecordsView.vue';
 import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 class SelectableParent {
     selected = false
@@ -105,6 +106,7 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
     }
 
     addParent() {
+        this.errorBox = null;
         this.present(new ComponentWithProperties(ParentView, {
             memberDetails: this.memberDetails,
             handler: (parent: Parent, component: ParentView) => {
@@ -168,15 +170,28 @@ export default class MemberParentsView extends Mixins(NavigationMixin) {
             return;
         }
 
+        this.errorBox = null;
+
+        if (OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked) {
+            // go to the steekkaart view
+            this.show(new ComponentWithProperties(MemberRecordsView, { 
+                member: this.member
+            }))
+            return
+        }
+
         // Emergency contact
         this.show(new ComponentWithProperties(EmergencyContactView, { 
             contact: this.memberDetails.emergencyContacts.length > 0 ? this.memberDetails.emergencyContacts[0] : null,
-            handler: (contact: EmergencyContact, component: EmergencyContactView) => {
-                this.memberDetails.emergencyContacts = [contact]
+            handler: (contact: EmergencyContact | null, component: EmergencyContactView) => {
+                if (contact) {
+                    this.memberDetails.emergencyContacts = [contact]
+                } else {
+                    this.memberDetails.emergencyContacts = []
+                }
                 
                 // go to the steekkaart view
                 component.show(new ComponentWithProperties(MemberRecordsView, { 
-                    memberDetails: this.memberDetails,
                     member: this.member
                 }))
             }

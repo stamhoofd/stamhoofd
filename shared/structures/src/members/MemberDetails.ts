@@ -7,7 +7,8 @@ import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
-import { Record } from './Record';
+import { OldRecord, Record } from './Record';
+import { OldRecordType, RecordType } from './RecordType';
 
 // Everything in this file is stored encrypted
 
@@ -71,7 +72,7 @@ export class MemberDetails extends AutoEncoder {
     email: string | null = null;
 
     @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old) => old ?? new Date("1970-01-01") })
+    @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
     birthDay: Date | null = null
 
     @field({ decoder: Address, nullable: true })
@@ -83,7 +84,52 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EmergencyContact) })
     emergencyContacts: EmergencyContact[] = [];
 
-    @field({ decoder: new ArrayDecoder(Record) })
+    @field({ decoder: new ArrayDecoder(OldRecord) })
+    @field({ 
+        decoder: new ArrayDecoder(Record), version: 54, upgrade: (old: OldRecord[]): Record[] => {
+            const addIfNotFound = new Map<RecordType, boolean>()
+            addIfNotFound.set(RecordType.DataPermissions, true)
+            addIfNotFound.set(RecordType.PicturePermissions, true)
+            addIfNotFound.set(RecordType.GroupPicturePermissions, false)
+            addIfNotFound.set(RecordType.MedicinePermissions, true)
+            
+            const result = old.flatMap((o) => {
+                // Does this type exist in RecordType?
+                if (Object.values(RecordType).includes(o.type as any)) {
+                    return [Record.create(o as any)] // compatible
+                }
+
+                if (o.type === OldRecordType.NoPictures) {
+                    // Do not add picture permissions
+                    addIfNotFound.set(RecordType.PicturePermissions, false)
+                }
+                if (o.type === OldRecordType.OnlyGroupPictures) {
+                    // Yay
+                    addIfNotFound.set(RecordType.PicturePermissions, false)
+                    addIfNotFound.set(RecordType.GroupPicturePermissions, true)
+                }
+                if (o.type === OldRecordType.NoData) {
+                    // Yay
+                    addIfNotFound.set(RecordType.DataPermissions, false)
+                }
+                if (o.type === OldRecordType.NoPermissionForMedicines) {
+                    // Yay
+                    addIfNotFound.set(RecordType.MedicinePermissions, false)
+                }
+                return []
+            })
+
+            for (const [key, add] of addIfNotFound.entries()) {
+                if (add) {
+                    result.push(Record.create({
+                        type: key
+                    }))
+                }
+            }
+
+            return result
+        } 
+    })
     records: Record[] = [];
 
     @field({ decoder: EmergencyContact, nullable: true })
