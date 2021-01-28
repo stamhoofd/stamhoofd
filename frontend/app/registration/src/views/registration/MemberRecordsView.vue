@@ -17,10 +17,10 @@
 
                 <template v-if="shouldAsk(RecordType.DataPermissions)">
                     <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
-                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
                     </Checkbox>
                     <Checkbox v-else v-model="allowData" class="long-text">
-                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
+                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart).
                     </Checkbox>
                     <Checkbox v-if="allowData && memberDetails.age < 18" v-model="isParent" class="long-text">
                         Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
@@ -34,7 +34,7 @@
                     Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
                 </Checkbox>
 
-                <p v-if="!allowData" class="warning-box">
+                <p v-if="!allowData && dataRequired" class="warning-box">
                     Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
                 </p>
             </template>
@@ -210,6 +210,10 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
 
     shouldAsk(...types: RecordType[]) {
         return OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(...types)
+    }
+
+    get dataRequired() {
+        return OrganizationManager.organization.meta.recordsConfiguration.needsData()
     }
 
     get RecordType() {
