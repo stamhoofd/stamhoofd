@@ -5,8 +5,12 @@
                 <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
-                    <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
                     <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
+
+                    <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                        <span class="icon clock-small" />
+                        <span>Wachtlijst</span>
+                    </button>
 
                     <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                         <span class="icon add" />
@@ -30,7 +34,11 @@
         <main>
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
-                <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
+
+                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                    <span class="icon clock-small" />
+                    <span>Wachtlijst</span>
+                </button>
 
                 <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                     <span class="icon add" />
@@ -336,7 +344,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
 
-            if (!this.waitingList && this.group && this.group.settings.maxMembers !== null) {
+            if (!this.waitingList && this.group && this.group.hasWaitingList) {
                 this.checkWaitingList()
             }
         })
