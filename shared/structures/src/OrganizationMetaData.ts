@@ -188,6 +188,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
                     RecordType.Diabetes,
                     RecordType.SpecialHealthCare,
                     RecordType.Medicines,
+                    RecordType.Rheumatism,
                     ...(type === OrganizationType.Swimming ? [RecordType.SkinCondition] : [RecordType.HayFever]),
 
                     RecordType.MedicinePermissions,
