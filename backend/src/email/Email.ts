@@ -120,6 +120,16 @@ class Email {
             const info = await this.transporter.sendMail(mail);
             console.log("Message sent: %s", info.messageId);
         } catch (e) {
+            if (e.responseCode && e.responseCode == 554) {
+                // Email address is not verified.
+                if (!data.from.includes("@stamhoofd.be")) {
+                    this.sendInternal({
+                        to: "hallo@stamhoofd.be",
+                        subject: "Ongeldige e-mail setup",
+                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd: \n\n"+e
+                    })
+                }
+            }
             console.error("Failed to send e-mail:")
             console.error(e);
         }
