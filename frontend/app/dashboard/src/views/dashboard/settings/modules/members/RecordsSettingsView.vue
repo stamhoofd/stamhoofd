@@ -11,7 +11,9 @@
             </h1>
             <p>Je kan hieronder kiezen welke vragen of keuzes jouw leden te zien krijgen bij het inschrijven. Voorlopig is het nog niet mogelijk om zelf vragen toe te voegen, contacteer ons gerust op hallo@stamhoofd.be als je ideeën hebt voor vragen.</p>
 
-            <p class="info-box">Om in orde te zijn met de GDPR-wetgeving moet je kunnen verantwoorden waarom je elk van deze gegevens vraagt. Selecteer dus enkel wat voor jullie van toepassing is.</p>
+            <p class="info-box">
+                Om in orde te zijn met de GDPR-wetgeving moet je kunnen verantwoorden waarom je elk van deze gegevens vraagt. Selecteer dus enkel wat voor jullie van toepassing is.
+            </p>
             
             <STErrorsDefault :error-box="errorBox" />
 
@@ -19,20 +21,32 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.DataPermissions) || dataRequired" :disabled="dataRequired" @change="setBooleanType(RecordType.DataPermissions, $event)" class="long-text">
-                Vraag toestemming voor verzamelen gevoelige informatie
+            <Checkbox :checked="getBooleanType(RecordType.DataPermissions) || dataRequired" :disabled="dataRequired" class="long-text" @change="setBooleanType(RecordType.DataPermissions, $event)">
+                Vraag toestemming voor het verzamelen van <a class="inline-link" target="_blank" rel="noopener noreferrer" href="https://www.gegevensbeschermingsautoriteit.be/professioneel/thema-s/gevoelige-gegevens">gevoelige gegevens</a>
+                <p v-if="dataRequired" class="style-description-small">
+                    Dit kan je enkel uitschakelen als je verder geen gevoelige gegevens in Stamhoofd zelf vraagt.
+                </p>
+                <p v-else class="style-description-small">
+                    Vink dit aan als je buiten Stamhoofd gevoelige gegevens verzamelt of als het lidmaatschap zelf als gevoelig kan worden beschouwd. Bij twijfel altijd aangevinkt houden.
+                </p>
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.PicturePermissions)" @change="setBooleanType(RecordType.PicturePermissions, $event)" class="long-text">
+            <Checkbox :checked="getBooleanType(RecordType.PicturePermissions)" class="long-text" @change="setBooleanType(RecordType.PicturePermissions, $event)">
                 Vraag toestemming voor publicatie van foto's op de website en sociale media
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.GroupPicturePermissions)" @change="setBooleanType(RecordType.GroupPicturePermissions, $event)" class="long-text">
-                Vraag toestemming voor publicatie van <strong>groeps</strong>foto's op de website en sociale media<template v-if="getBooleanType(RecordType.NoPictures)">, als er geen toestemming werd gegeven voor het verzamelen van foto's in het algemeen.</template>
+            <Checkbox :checked="getBooleanType(RecordType.GroupPicturePermissions)" class="long-text" @change="setBooleanType(RecordType.GroupPicturePermissions, $event)">
+                Vraag toestemming voor publicatie van <strong>groeps</strong>foto's op de website en sociale media
+                <p v-if="getBooleanType(RecordType.PicturePermissions)" class="style-description-small">
+                    Als er geen toestemming werd gegeven voor de publicatie van foto's (hierboven)
+                </p>
             </Checkbox>
 
-             <Checkbox class="long-text">
-                Vraag of het gezin financiële moeilijkheden heeft (kansarm gezin). We vragen dit sowieso als je verminderd lidgeld geeft (ook als je dit uitschakelt). Vink dit aan als je deze informatie nodig hebt voor andere zaken (bv. voor het uitdelen van tweedehands materiaal).
+            <Checkbox :checked="getBooleanType(RecordType.FinancialProblems)" class="long-text" @change="setBooleanType(RecordType.FinancialProblems, $event)">
+                Vraag of het gezin financiële moeilijkheden heeft (kansarm gezin)
+                <p class="style-description-small">
+                    Je moet dit zeker vragen als je verminderd lidgeld hebt ingesteld. Of vink dit aan als je deze informatie nodig hebt voor andere zaken (bv. voor het uitdelen van tweedehands materiaal).
+                </p>
             </Checkbox>
 
             <hr>
@@ -108,7 +122,7 @@
                 Suikerziekte
             </Checkbox>
 
-             <Checkbox :checked="getBooleanType(RecordType.Medicines)" @change="setBooleanType(RecordType.Medicines, $event)">
+            <Checkbox :checked="getBooleanType(RecordType.Medicines)" @change="setBooleanType(RecordType.Medicines, $event)">
                 Moet geneesmiddelen nemen (dagelijks, wekelijks...)
             </Checkbox>
 
@@ -163,17 +177,29 @@
 
             <STInputBox title="Huisdokter" class="max">
                 <RadioGroup>
-                    <Radio v-model="doctor" :value="AskRequirement.NotAsked">Niet vragen</Radio>
-                    <Radio v-model="doctor" :value="AskRequirement.Optional">Optioneel</Radio>
-                    <Radio v-model="doctor" :value="AskRequirement.Required">Verplicht</Radio>
+                    <Radio v-model="doctor" :value="AskRequirement.NotAsked">
+                        Niet vragen
+                    </Radio>
+                    <Radio v-model="doctor" :value="AskRequirement.Optional">
+                        Optioneel
+                    </Radio>
+                    <Radio v-model="doctor" :value="AskRequirement.Required">
+                        Verplicht
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
 
             <STInputBox title="Noodcontactpersoon" class="max">
                 <RadioGroup>
-                    <Radio v-model="emergencyContact" :value="AskRequirement.NotAsked">Niet vragen</Radio>
-                    <Radio v-model="emergencyContact" :value="AskRequirement.Optional">Optioneel</Radio>
-                    <Radio v-model="emergencyContact" :value="AskRequirement.Required">Verplicht</Radio>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.NotAsked">
+                        Niet vragen
+                    </Radio>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.Optional">
+                        Optioneel
+                    </Radio>
+                    <Radio v-model="emergencyContact" :value="AskRequirement.Required">
+                        Verplicht
+                    </Radio>
                 </RadioGroup>
             </STInputBox>
         </main>
