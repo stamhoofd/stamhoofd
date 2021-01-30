@@ -168,7 +168,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             })
         }
 
-        if ([OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
+        if ([OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
             // Enable sport related records + pictures
 
             return OrganizationRecordsConfiguration.create({
@@ -287,7 +287,7 @@ export class OrganizationMetaData extends AutoEncoder {
         decoder: OrganizationRecordsConfiguration, 
         version: 53, 
         upgrade: function(this: OrganizationMetaData) {
-            return OrganizationRecordsConfiguration.getDefaultFor(this.type)
+            return OrganizationRecordsConfiguration.getDefaultFor(OrganizationType.Youth)
         },
         defaultValue: () => OrganizationRecordsConfiguration.create({})
     })
