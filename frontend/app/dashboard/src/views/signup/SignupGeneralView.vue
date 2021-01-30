@@ -107,7 +107,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -236,6 +236,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 meta: OrganizationMetaData.create({
                     type: this.type,
                     umbrellaOrganization: this.umbrellaOrganization,
+                    recordsConfiguration: OrganizationRecordsConfiguration.getDefaultFor(this.type),
                     defaultStartDate,
                     defaultEndDate
                 }),

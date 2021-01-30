@@ -188,7 +188,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
                     RecordType.Diabetes,
                     RecordType.SpecialHealthCare,
                     RecordType.Medicines,
-                    ...(OrganizationType.Swimming ? [RecordType.SkinCondition] : [RecordType.HayFever]),
+                    ...(type === OrganizationType.Swimming ? [RecordType.SkinCondition] : [RecordType.HayFever]),
 
                     RecordType.MedicinePermissions,
 
@@ -285,8 +285,11 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ 
         decoder: OrganizationRecordsConfiguration, 
         version: 53, 
-        defaultValue: function(this: OrganizationMetaData) {
+        upgrade: function(this: OrganizationMetaData) {
             return OrganizationRecordsConfiguration.getDefaultFor(this.type)
+        },
+        defaultValue: () => {
+            OrganizationRecordsConfiguration.create({})
         }
     })
     recordsConfiguration: OrganizationRecordsConfiguration
