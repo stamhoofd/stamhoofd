@@ -1,13 +1,13 @@
 <template>
     <div id="records-settings-view" class="st-view background">
-        <STNavigationBar title="Persoonlijke steekkaart">
+        <STNavigationBar title="Wijzig gevraagde gegevens">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
             <h1>
-                Persoonlijke steekkaart aanpassen
+                Wijzig gevraagde gegevens
             </h1>
             <p>Je kan hieronder kiezen welke vragen of keuzes jouw leden te zien krijgen bij het inschrijven. Voorlopig is het nog niet mogelijk om zelf vragen toe te voegen, contacteer ons gerust op hallo@stamhoofd.be als je ideeën hebt voor vragen.</p>
 
