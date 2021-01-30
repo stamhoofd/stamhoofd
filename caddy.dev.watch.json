@@ -125,7 +125,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "*.shop.stamhoofd.dev"
+                                        "*.shop.stamhoofd.dev",
+                                        "webshop.stamhoofd.dev"
                                     ]
                                 }
                             ],

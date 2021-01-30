@@ -1,7 +1,7 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 import { MolliePayment } from '../models/MolliePayment';
@@ -15,51 +15,6 @@ type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
 type ResponseBody = OrderResponse
-
-const Base64 = (function () {
-
-    const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-    const Base64 = function () {
-        //
-    };
-
-    const _encode = function (value) {
-
-        if (typeof(value) !== 'number') {
-            throw 'Value is not number!';
-        }
-
-        let result = '', mod;
-        do {
-            mod = value % 64;
-            result = ALPHA.charAt(mod) + result;
-            value = Math.floor(value / 64);
-        } while(value > 0);
-
-        return result;
-    };
-
-    const _decode = function (value) {
-
-        let result = 0;
-        for (let i = 0, len = value.length; i < len; i++) {
-            result *= 64;
-            result += ALPHA.indexOf(value[i]);
-        }
-
-        return result;
-    };
-
-    Base64.prototype = {
-        constructor: Base64,
-        encode: _encode,
-        decode: _decode
-    };
-
-    return Base64;
-
-})();
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)

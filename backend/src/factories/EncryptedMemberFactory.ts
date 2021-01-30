@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMember, Gender, KeychainItem, MemberDetails, ParentType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
+import { EncryptedMember, Gender, KeychainItem, MemberDetails, ParentType, Record, RecordType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
 
 import { Member } from "../models/Member";
 import { Organization } from "../models/Organization";
@@ -89,6 +89,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
         const recordFactory = new RecordFactory({});
         memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
+        memberDetails.records.push(Record.create({ type: RecordType.DataPermissions }))
 
         // Remove duplicates
         const unique = {};
@@ -98,10 +99,6 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
             }
         });
         memberDetails.records = Object.values(unique);
-
-        memberDetails.records = memberDetails.records.filter((i) => {
-            return i.type != "NoData";
-        });
 
         // Sort
 

@@ -156,7 +156,11 @@ export class Webshop extends Model {
             return this.domain
         }
 
-        return this.organization.uri+"."+process.env.HOSTNAME_WEBSHOP+"/"+this.uri
+        if (this.uri.length > 0) {
+            return this.organization.uri+"."+process.env.HOSTNAME_WEBSHOP+"/"+this.uri
+        }
+
+        return this.organization.uri+"."+process.env.HOSTNAME_WEBSHOP
     }
 
  

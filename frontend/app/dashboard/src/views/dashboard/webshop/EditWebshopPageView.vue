@@ -70,7 +70,7 @@
         </template>
 
         <template v-else>
-            <STInputBox title="Eigen achtervoegsel" error-fields="uri" :error-box="errorBox">
+            <STInputBox title="Eigen achtervoegsel (optioneel)" error-fields="uri" :error-box="errorBox">
                 <input
                     v-model="uri"
                     class="input"
