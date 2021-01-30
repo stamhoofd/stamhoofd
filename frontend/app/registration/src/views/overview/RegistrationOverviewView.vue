@@ -97,7 +97,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, LoadingView, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group, GroupGenderType,MemberWithRegistrations, PaymentDetailed, SelectedGroup } from '@stamhoofd/structures';
+import { Group, GroupGenderType,MemberWithRegistrations, PaymentDetailed, RecordType, SelectedGroup } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -322,6 +322,9 @@ export default class RegistrationOverviewView extends Mixins(NavigationMixin){
 
 
     get shouldAskFinancialSupport() {
+        if (!this.OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+            return false
+        }
          // do not ask for waiting list
         return !!this.selectedMembers.find(m => this.getRegisterGroups(m).length > 0);
         
