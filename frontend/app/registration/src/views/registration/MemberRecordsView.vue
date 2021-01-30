@@ -22,7 +22,7 @@
                     <Checkbox v-else v-model="allowData" class="long-text">
                         Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart).
                     </Checkbox>
-                    <Checkbox v-if="allowData && memberDetails.age < 18" v-model="isParent" class="long-text">
+                    <Checkbox v-if="allowData && memberDetails.age && memberDetails.age < 18" v-model="isParent" class="long-text">
                         Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
                     </Checkbox>
                 </template>
@@ -58,15 +58,15 @@
                     <RecordCheckbox v-if="shouldAsk(RecordType.Vegan)" v-model="records" :type="RecordType.Vegan" />
                     <RecordCheckbox v-if="shouldAsk(RecordType.Halal)" v-model="records" :type="RecordType.Halal" />
                     <RecordCheckbox v-if="shouldAsk(RecordType.Kosher)" v-model="records" :type="RecordType.Kosher" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Diet)" v-model="records" name="Ander dieet" :type="RecordType.Diet" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden."/>
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Diet)" v-model="records" name="Ander dieet" :type="RecordType.Diet" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
                 </template>
 
                 <template v-if="shouldAsk(RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes, RecordType.Medicines, RecordType.SpecialHealthCare)">
                     <hr>
                     <h2>Gezondheid, hygiëne &amp; slapen</h2>
 
-                    <RecordCheckbox :key="type" v-for="type in [RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes ]" v-if="shouldAsk(type)" v-model="records" :type="type" :comments="true"/>
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Medicines)" v-model="records" :type="RecordType.Medicines" placeholder="Welke, wanneer en hoe vaak?" comment="Gelieve ons ook de noodzakelijke doktersattesten te bezorgen."/>
+                    <RecordCheckbox v-for="type in [RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes ]" v-if="shouldAsk(type)" :key="type" v-model="records" :type="type" :comments="true" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Medicines)" v-model="records" :type="RecordType.Medicines" placeholder="Welke, wanneer en hoe vaak?" comment="Gelieve ons ook de noodzakelijke doktersattesten te bezorgen." />
                     <RecordCheckbox v-if="shouldAsk(RecordType.SpecialHealthCare)" v-model="records" :type="RecordType.SpecialHealthCare" placeholder="Welke?" />
                 </template>
 
@@ -74,10 +74,10 @@
                     <hr>
                     <h2>Sport, spel &amp; sociale omgang</h2>
 
-                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotSwim)" v-model="records" :type="RecordType.CanNotSwim"/>
-                    <RecordCheckbox v-if="shouldAsk(RecordType.TiredQuickly)" v-model="records" :type="RecordType.TiredQuickly"/>
+                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotSwim)" v-model="records" :type="RecordType.CanNotSwim" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.TiredQuickly)" v-model="records" :type="RecordType.TiredQuickly" />
                     <RecordCheckbox v-if="shouldAsk(RecordType.CanNotParticipateInSport)" v-model="records" :type="RecordType.CanNotParticipateInSport" placeholder="Meer informatie" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialSocialCare)" v-model="records" :type="RecordType.SpecialSocialCare" placeholder="Meer informatie"/>
+                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialSocialCare)" v-model="records" :type="RecordType.SpecialSocialCare" placeholder="Meer informatie" />
                 </template>
 
                 <template v-if="shouldAsk(RecordType.Other)">
@@ -136,7 +136,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator, RecordCheckbox } from "@stamhoofd/components"
+import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
 import { AskRequirement, EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -245,6 +245,15 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
                         code: "invalid_field",
                         message: "Vul de naam van de dokter in",
                         field: "doctorName"
+                    }))
+                }
+
+                if ((this.memberDetails.age ?? 99) < 18 && !this.isParent) {
+                    // already accepted previous time
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Enkel een voogd of ouder kan toestemming geven voor het verwerken van gevoelige gegevens.",
+                        field: "allowData"
                     }))
                 }
 

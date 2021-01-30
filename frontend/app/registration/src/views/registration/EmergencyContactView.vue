@@ -1,7 +1,7 @@
 <template>
     <div id="emergency-contact-view" class="st-view">
         <STNavigationBar title="Noodcontact">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -33,21 +33,23 @@
                             <option value="Grootmoeder" />
                         </datalist>
                     </STInputBox>
-                    <p class="style-description-small">*Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.</p>
+                    <p class="style-description-small">
+                        *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
+                    </p>
                 </div>
 
                 <div>
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer" />
+                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer" />
                 </div>
             </div>
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" v-if="isOptional" @click="skipStep">
+            <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
                 Overslaan
             </button>
-            <LoadingButton :loading="loading">
-                <button slot="right" class="button primary" @click="goNext">
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" @click="goNext">
                     Volgende
                 </button>
             </LoadingButton>
@@ -58,11 +60,12 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton, LoadingButton } from "@stamhoofd/components"
-import { EmergencyContact, AskRequirement } from "@stamhoofd/structures"
+import { AddressInput, BackButton, BirthDayInput, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AskRequirement,EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import { MemberManager } from '../../classes/MemberManager';
+
 import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
+import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
