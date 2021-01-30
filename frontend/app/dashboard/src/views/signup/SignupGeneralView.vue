@@ -7,7 +7,7 @@
 
         <main>
             <h1>
-                Aan de slag met Stamhoofd
+                Nieuwe vereniging aansluiten bij Stamhoofd
             </h1>
             <p>Een account maken duurt niet lang en is gratis. Je kiest zelf welke functies je gebruikt.</p>
 
@@ -48,9 +48,12 @@
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
-                            <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
-                                {{ _type.name }}
-                            </option>
+
+                            <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
+                                <option v-for="_type in group.types" :key="_type.value" :value="_type.value">
+                                    {{ _type.name }}
+                                </option>
+                            </optgroup>
                         </select>
                     </STInputBox>
 
@@ -66,13 +69,32 @@
                     </STInputBox>
                 </div>
             </div>
+
+            <hr>
+            <h2>Hoe ken je Stamhoofd?</h2>
+
+            <Checkbox :checked="getBooleanType(AcquisitionType.Recommended)" @change="setBooleanType(AcquisitionType.Recommended, $event)">
+                Op aanraden van andere vereniging / persoon
+            </Checkbox>
+            <Checkbox :checked="getBooleanType(AcquisitionType.Seen)" @change="setBooleanType(AcquisitionType.Seen, $event)">
+                Gezien bij andere vereniging
+            </Checkbox>
+            <Checkbox :checked="getBooleanType(AcquisitionType.SocialMedia)" @change="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                Via sociale media
+            </Checkbox>
+            <Checkbox :checked="getBooleanType(AcquisitionType.Search)" @change="setBooleanType(AcquisitionType.Search, $event)">
+                Via opzoekwerk (bv. Google)
+            </Checkbox>
+            <Checkbox :checked="getBooleanType(AcquisitionType.Other)" @change="setBooleanType(AcquisitionType.Other, $event)">
+                Andere
+            </Checkbox>
         </main>
 
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="goNext">
-                        Aan de slag
+                        Vereniging registreren
                     </button>
                 </LoadingButton>
             </template>
@@ -83,14 +105,13 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
-import { Address, Organization, OrganizationMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupAccountView from './SignupAccountView.vue';
-import SignupStructureView from './SignupStructureView.vue';
 
 @Component({
     components: {
@@ -101,15 +122,16 @@ import SignupStructureView from './SignupStructureView.vue';
         STInputBox,
         BackButton,
         AddressInput,
-        LoadingButton
+        LoadingButton,
+        Checkbox
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {
     name = ""
     validator = new Validator()
     errorBox: ErrorBox | null = null
-    expectedMemberCount = 150
     address: Address | null = null
+    acquisitionTypes: AcquisitionType[] = []
 
     @Prop({ default: "" })
     initialRegisterCode!: string;
@@ -137,6 +159,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         } else {
             HistoryManager.setUrl("/aansluiten")   
         }
+    }
+
+    get AcquisitionType() {
+        return AcquisitionType
     }
 
     async goNext() {
@@ -210,9 +236,11 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 meta: OrganizationMetaData.create({
                     type: this.type,
                     umbrellaOrganization: this.umbrellaOrganization,
-                    expectedMemberCount: this.expectedMemberCount,
                     defaultStartDate,
                     defaultEndDate
+                }),
+                privateMeta: OrganizationPrivateMetaData.create({
+                    acquisitionTypes: this.acquisitionTypes
                 }),
                 address: this.address,
                 publicKey: "" // placeholder
@@ -232,7 +260,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 
     get availableTypes() {
-        return OrganizationTypeHelper.getList().sort((a, b) => 
+        const types = OrganizationTypeHelper.getList().sort((a, b) => 
             Sorter.stack(
                 Sorter.byBooleanValue(
                     !a.name.toLowerCase().startsWith("andere"), 
@@ -241,6 +269,31 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 Sorter.byStringProperty(a, b, "name")
             )
         );
+
+        // Group by category
+        const map = new Map<string, {
+                value: OrganizationType;
+                name: string;
+            }[]>()
+
+        for (const type of types) {
+            const cat = OrganizationTypeHelper.getCategory(type.value)
+            if (!map.has(cat)) {
+                map.set(cat, [type])
+            } else {
+                map.get(cat)!.push(type)
+            }
+        }
+
+        const keys = Array.from(map.keys()).sort(Sorter.byStringValue)
+
+        return keys.map((key) => {
+            const types = map.get(key)!
+            return {
+                name: key,
+                types
+            }
+        })
     }
 
     get availableUmbrellaOrganizations() {
@@ -262,6 +315,25 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         }
         plausible('cancelCloseSignup');
         return false;
+    }
+
+     // Helpers ---
+
+    getBooleanType(type: AcquisitionType) {
+        return !!this.acquisitionTypes.find(r => r == type)
+    }
+
+    setBooleanType(type: AcquisitionType, enabled: boolean) {
+        const index = this.acquisitionTypes.findIndex(r => r == type)
+        if ((index != -1) === enabled) {
+            return
+        }
+        
+        if (enabled) {
+            this.acquisitionTypes.push(type)
+        } else {
+            this.acquisitionTypes.splice(index, 1)
+        }
     }
 }
 </script>
