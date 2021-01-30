@@ -289,9 +289,7 @@ export class OrganizationMetaData extends AutoEncoder {
         upgrade: function(this: OrganizationMetaData) {
             return OrganizationRecordsConfiguration.getDefaultFor(this.type)
         },
-        defaultValue: () => {
-            OrganizationRecordsConfiguration.create({})
-        }
+        defaultValue: () => OrganizationRecordsConfiguration.create({})
     })
     recordsConfiguration: OrganizationRecordsConfiguration
 }
