@@ -155,6 +155,63 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             return true
         })
     }
+
+    static getDefaultFor(type: OrganizationType): OrganizationRecordsConfiguration {
+        if (type === OrganizationType.Youth) {
+            // Enable all
+            const records = Object.values(RecordType)
+
+            return OrganizationRecordsConfiguration.create({
+                enabledRecords: records,
+                doctor: AskRequirement.Required,
+                emergencyContact: AskRequirement.Optional
+            })
+        }
+
+        if ([OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
+            // Enable sport related records + pictures
+
+            return OrganizationRecordsConfiguration.create({
+                enabledRecords: [
+                    RecordType.DataPermissions,
+                    RecordType.PicturePermissions,
+
+                    // Allergies
+                    RecordType.FoodAllergies,
+                    RecordType.MedicineAllergies,
+                    RecordType.OtherAllergies,
+
+                    // Health
+                    RecordType.Asthma,
+                    RecordType.Epilepsy,
+                    RecordType.HeartDisease,
+                    RecordType.Diabetes,
+                    RecordType.SpecialHealthCare,
+                    RecordType.Medicines,
+                    ...(OrganizationType.Swimming ? [RecordType.SkinCondition] : [RecordType.HayFever]),
+
+                    RecordType.MedicinePermissions,
+
+                    // Other
+                    RecordType.Other,
+                ],
+                doctor: AskRequirement.Optional,
+                emergencyContact: AskRequirement.Optional
+            })
+        }
+
+         if (type === OrganizationType.LGBTQ) {
+            // Request data permissions + emergency contact is optional
+            return OrganizationRecordsConfiguration.create({
+                enabledRecords: [RecordType.DataPermissions],
+                doctor: AskRequirement.NotAsked,
+                emergencyContact: AskRequirement.Optional
+            })
+        }
+
+        // Others are all disabled by default
+        return OrganizationRecordsConfiguration.create({})
+    }
 }
 
 
@@ -225,6 +282,12 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
-    @field({ decoder: OrganizationRecordsConfiguration, version: 53, defaultValue: () => OrganizationRecordsConfiguration.create({}) })
+    @field({ 
+        decoder: OrganizationRecordsConfiguration, 
+        version: 53, 
+        defaultValue: function(this: OrganizationMetaData) {
+            return OrganizationRecordsConfiguration.getDefaultFor(this.type)
+        }
+    })
     recordsConfiguration: OrganizationRecordsConfiguration
 }

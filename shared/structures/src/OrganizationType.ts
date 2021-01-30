@@ -21,6 +21,7 @@ export enum OrganizationType {
     Professional = "Professional",
     Art = "Art",
     Culture = "Culture",
+    LGBTQ = "LGBTQ",
     Other = "Other",
 }
 
@@ -77,7 +78,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Judo,
-                name: "Judo",
+                name: "Vechtkunst",
             },
             {
                 value: OrganizationType.Sport,
@@ -114,6 +115,10 @@ export class OrganizationTypeHelper {
             {
                 value: OrganizationType.Culture,
                 name: "Cultuur",
+            },
+            {
+                value: OrganizationType.LGBTQ,
+                name: "LGBTQ+",
             },
             {
                 value: OrganizationType.Other,

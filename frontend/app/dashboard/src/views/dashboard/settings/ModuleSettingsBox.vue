@@ -2,7 +2,7 @@
     <div class="module-settings-box">
         <div class="module-box">
             <label :class="{ selected: enableMemberModule }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
                     <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
                     <p class="style-description">Gratis</p>
@@ -13,7 +13,7 @@
             </label>
 
             <label :class="{ selected: enableWebshopModule }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops</h2>
                     <p class="style-description">Tijdelijk gratis voor alle shops die je nu aanmaakt</p>
@@ -27,9 +27,8 @@
         <h3>Verwacht in de toekomst</h3>
 
         <div class="module-box">
-
             <label class="disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
                 <div>
                     <h2 class="style-title-list">Activiteiten</h2>
                     <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
@@ -40,7 +39,7 @@
             </label>
 
             <label class="disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg"></div>
                 <div>
                     <h2 class="style-title-list">Bouw zelf je website</h2>
                     <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
@@ -51,7 +50,7 @@
             </label>
 
             <label class="disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg"></div>
                 <div>
                     <h2 class="style-title-list">Ticketverkoop</h2>
                     <p class="style-description">Verkoop en scan tickets met je smartphone</p>
@@ -62,7 +61,7 @@
             </label>
 
             <label class="disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg" /></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg"></div>
                 <div>
                     <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
                     <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
@@ -76,25 +75,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, BackButton, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, CenteredMessage, TooltipDirective} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, UmbrellaOrganization, Version } from "@stamhoofd/structures"
+import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
+import { OrganizationMetaData, OrganizationModules, OrganizationPatch, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import EditGroupsView from '../groups/EditGroupsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
-import GeneralSettingsView from './GeneralSettingsView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
-import MembersYearSetupView from './modules/members/MembersYearSetupView.vue';
-import PaymentSettingsView from './PaymentSettingsView.vue';
-import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
-import PrivacySettingsView from './PrivacySettingsView.vue';
 
 @Component({
     components: {

@@ -6,7 +6,7 @@
                 <span class="icon add" />
                 <span>Nieuw</span>
             </button>
-            <button v-if="!canPop" class="button icon close gray" @click="pop" slot="right" />
+            <button v-if="!canPop" slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
     
         <main>
@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { BackButton, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Logger } from '@stamhoofd/logger';
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';

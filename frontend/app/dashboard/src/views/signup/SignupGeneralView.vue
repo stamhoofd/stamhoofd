@@ -27,9 +27,11 @@
                     </STInputBox>
 
                     <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
-                    <p class="style-description-small">Geen adres? Vul dan een adres in dat in de buurt ligt</p>
+                    <p class="style-description-small">
+                        Geen adres? Vul dan een adres in dat in de buurt ligt
+                    </p>
 
-                    <STInputBox title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox" v-if="false">
+                    <STInputBox v-if="false" title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox">
                         <input
                             v-model="registerCode"
                             class="input"
@@ -57,16 +59,12 @@
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
-                            <option :value="item.value" v-for="item in availableUmbrellaOrganizations" :key="item.value">
+                            <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                 {{ item.name }}
                             </option>
                         </select>
                     </STInputBox>
                 </div>
-
-                <STInputBox title="Hoeveel leden hebben jullie ongeveer?" error-fields="expectedMemberCount" :error-box="errorBox" v-if="false">
-                    <Slider v-model="expectedMemberCount" :max="500" :min="0" />
-                </STInputBox>
             </div>
         </main>
 
@@ -90,8 +88,8 @@ import { NetworkManager } from '@stamhoofd/networking';
 import { Address, Organization, OrganizationMetaData, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import SignupAccountView from './SignupAccountView.vue';
 
+import SignupAccountView from './SignupAccountView.vue';
 import SignupStructureView from './SignupStructureView.vue';
 
 @Component({
@@ -148,7 +146,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "",
-                    human: "Vul de naam van je vereniging in",
+                    human: "Vul de naam van jouw vereniging in",
                     field: "name"
                 })
             }
@@ -156,7 +154,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "",
-                    human: "De naam van je vereniging is te kort",
+                    human: "De naam van jouw vereniging is te kort",
                      field: "name"
                 })
             }
