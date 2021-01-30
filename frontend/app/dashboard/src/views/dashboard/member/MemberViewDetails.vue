@@ -407,42 +407,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get filteredRecords() {
         return this.member.details?.records ? 
-        OrganizationManager.organization.meta.recordsConfiguration.filterRecords(
-            Record.invertRecords(this.member.details.records), 
-            ...(OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.GroupPicturePermissions) ? [RecordType.PicturePermissions] : [])
-        ).filter((record) => {
-            // Some edge cases
-            // Note: inverted types are already reverted here! -> GroupPicturePermissions means no permissions here
-            
-            if (record.type === RecordType.GroupPicturePermissions) {
-                // When both group and normal pictures are allowed, hide the group pictures message
-                if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.PicturePermissions) && this.member.details?.records.find(r => r.type === RecordType.PicturePermissions)) {
-                    // Permissions for pictures -> this is okay
-                    return false
-                }
-
-                if (!OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.PicturePermissions)) {
-                    // This is not a special case
-                    return false
-                }
-            }
-
-            // If no permissions for pictures but permissions for group pictures, only show the group message
-            if (record.type === RecordType.PicturePermissions) {
-                if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.GroupPicturePermissions) && this.member.details?.records.find(r => r.type === RecordType.GroupPicturePermissions)) {
-                    // Only show the 'only permissions for group pictures' banner
-                    return false
-                }
-            }
-
-
-            // Member is older than 18 years, and no permissions for medicines
-            if (record.type === RecordType.MedicinePermissions && (this.member.details?.age ?? 18) >= 18) {
-                return false
-            }
-
-            return true
-        }) : undefined
+            OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
+                this.member.details.records, 
+                this.member.details?.age ?? null
+            ) 
+        : undefined
     }
 
     get sortedRecords() {

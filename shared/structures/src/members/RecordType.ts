@@ -142,6 +142,7 @@ export class RecordTypeHelper {
             case RecordType.Rheumatism:
             case RecordType.SleepWalking:
             case RecordType.Diabetes:
+            case RecordType.MedicinePermissions:
                 return "Gezondheid";
 
             case RecordType.CanNotSwim:

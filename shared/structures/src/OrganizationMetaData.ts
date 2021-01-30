@@ -111,6 +111,50 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         return false
     }
+
+    /**
+     * This fixes how inverted and special records are returned.
+     * E.g. MedicalPermissions is returned if the member did NOT give permissions -> because we need to show a message
+     * PicturePermissions is returned if no group picture permissions was given and normal picture permissions are disabled
+     */
+    filterForDisplay(records: Record[], age: number | null): Record[] {
+        return this.filterRecords(
+            Record.invertRecords(records), 
+            ...(this.shouldAsk(RecordType.GroupPicturePermissions) ? [RecordType.PicturePermissions] : [])
+        ).filter((record) => {
+            // Some edge cases
+            // Note: inverted types are already reverted here! -> GroupPicturePermissions means no permissions here
+            
+            if (record.type === RecordType.GroupPicturePermissions) {
+                // When both group and normal pictures are allowed, hide the group pictures message
+                if (this.shouldAsk(RecordType.PicturePermissions) && records.find(r => r.type === RecordType.PicturePermissions)) {
+                    // Permissions for pictures -> this is okay
+                    return false
+                }
+
+                if (!this.shouldAsk(RecordType.PicturePermissions)) {
+                    // This is not a special case
+                    return false
+                }
+            }
+
+            // If no permissions for pictures but permissions for group pictures, only show the group message
+            if (record.type === RecordType.PicturePermissions) {
+                if (this.shouldAsk(RecordType.GroupPicturePermissions) && records.find(r => r.type === RecordType.GroupPicturePermissions)) {
+                    // Only show the 'only permissions for group pictures' banner
+                    return false
+                }
+            }
+
+
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.type === RecordType.MedicinePermissions && (age ?? 18) >= 18) {
+                return false
+            }
+
+            return true
+        })
+    }
 }
 
 
