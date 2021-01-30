@@ -42,7 +42,7 @@
                 </p>
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.FinancialProblems)" class="long-text" @change="setBooleanType(RecordType.FinancialProblems, $event)">
+            <Checkbox v-model="financialProblems">
                 Vraag of het gezin financiële moeilijkheden heeft (kansarm gezin)
                 <p class="style-description-small">
                     Je moet dit zeker vragen als je verminderd lidgeld hebt ingesteld. Of vink dit aan als je deze informatie nodig hebt voor andere zaken (bv. voor het uitdelen van tweedehands materiaal).
@@ -289,6 +289,21 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         }
 
         this.$set(this.organizationPatch.meta.recordsConfiguration, 'emergencyContact', val)
+    }
+
+    get financialProblems() {
+        return this.getBooleanType(RecordType.FinancialProblems)
+    }
+
+    set financialProblems(enabled: boolean) {
+        const hasReduced = !!this.organization.groups.find(g => {
+            return !!g.settings.prices.find(p => p.reducedPrice !== null)
+        })
+        if (hasReduced && !enabled) {
+            new Toast("Eén of meerdere leeftijdsgroepen maken gebruik van verminderd lidgeld. Schakel dat eerst overal uit.", "error red").show()
+            return
+        }
+        this.setBooleanType(RecordType.FinancialProblems, enabled)
     }
 
     async save() {
