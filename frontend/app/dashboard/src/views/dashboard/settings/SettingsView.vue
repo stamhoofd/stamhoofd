@@ -215,55 +215,55 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         this.invites = response.data.invites
     }
 
-    openGeneral() {
+    openGeneral(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(GeneralSettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    openPersonalize() {
+    openPersonalize(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PersonalizeSettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    openPrivacy() {
+    openPrivacy(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PrivacySettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    openAdmins() {
+    openAdmins(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(AdminsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    setupEmail() {
+    setupEmail(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EmailSettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    openPayment() {
+    openPayment(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentSettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    manageGroups() {
+    manageGroups(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditGroupsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    manageRecords() {
+    manageRecords(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(RecordsSettingsView, {})
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    importMembers() {
+    importMembers(animated = true) {
         if (this.organization.groups.length == 0) {
             new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
             return
@@ -276,7 +276,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                     return new ComponentWithProperties(comp, {})
                 }
             })
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
     get hasPolicy() {
@@ -311,7 +311,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
             // Open mollie settings
-            this.openPayment()
+            this.openPayment(false)
             return
         }
 
@@ -320,30 +320,37 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings
-            this.openGeneral()
+            this.openGeneral(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
             // Open mollie settings
-            this.openPayment()
+            this.openPayment(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {
             // Open mollie settings
-            this.openPrivacy()
+            this.openPrivacy(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'personalize') {
             // Open mollie settings
-            this.openPersonalize()
+            this.openPersonalize(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'admins') {
             // Open mollie settings
-            this.openAdmins()
+            this.openAdmins(false)
         }
 
-        this.loadAdmins()
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'records') {
+            // Open mollie settings
+            this.manageRecords(false)
+        }
+
+        this.loadAdmins().catch(e => {
+            console.error(e)
+        })
     }
 }
 </script>

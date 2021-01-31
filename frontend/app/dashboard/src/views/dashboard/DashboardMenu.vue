@@ -180,12 +180,12 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             if (parts[1] == "all") {
-                this.openAll()
+                this.openAll(false)
                 didSet = true
             } else {
                 for (const group of this.organization.groups) {
                     if (parts[1] == Formatter.slug(group.settings.name)) {
-                        this.openGroup(group)
+                        this.openGroup(group, false)
                         didSet = true
                         break;
                     }
@@ -196,7 +196,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
             for (const webshop of this.organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop)
+                    this.openWebshop(webshop, false)
                     didSet = true
                     break;
                 }
@@ -209,7 +209,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
             if (this.groups.length > 0) {
-                this.openGroup(this.groups[0])
+                this.openGroup(this.groups[0], false)
             } else {
                 if (this.fullAccess) {
                     this.manageSettings(false)
@@ -242,7 +242,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (!didSet) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
-                this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup"))
+                this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup").setAnimated(false))
             }
         }
     }
@@ -318,38 +318,38 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.deactivateSession()
     }
 
-    openAll() {
+    openAll(animated = true) {
         if (this.groups.length <= 1) {
             return;
         }
         this.currentlySelected = "group-all"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
     }
 
-    openGroup(group: Group) {
+    openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
     }
 
-    openWebshop(webshop: WebshopPreview) {
+    openWebshop(webshop: WebshopPreview, animated = true) {
         this.currentlySelected = "webshop-"+webshop.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }).setAnimated(animated));
     }
 
     managePayments(animated = true) {
         this.currentlySelected = "manage-payments"
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(PaymentsView, {}) }), animated);
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(PaymentsView, {}) }).setAnimated(animated));
     }
 
     manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }), animated);
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }).setAnimated(animated));
     }
 
     manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AccountSettingsView, {}) }), animated);
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AccountSettingsView, {}) }).setAnimated(animated));
     }
 
     manageWhatsNew() {
@@ -368,7 +368,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     openSyncScoutsEnGidsen(animated = true) {
         this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.splitViewController?.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SGVGroepsadministratieView, {}) }), animated);
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SGVGroepsadministratieView, {}) }).setAnimated(animated));
     }
 
     importMembers() {
