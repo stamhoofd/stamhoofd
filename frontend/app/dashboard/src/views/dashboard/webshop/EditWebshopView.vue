@@ -5,7 +5,7 @@
                 <BackButton v-if="canPop" @click="pop" />
             </template>
             <template #right>
-                <button class="button text" @click="deleteWebshop" v-if="!isNew">
+                <button v-if="!isNew" class="button text" @click="deleteWebshop">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
@@ -13,14 +13,14 @@
             </template>
         </STNavigationBar>
         <STNavigationTitle>
-            <span class="icon-spacer">{{ title }}</span>
+            <span class="icon-spacer">{{ title }}</span>
         </STNavigationTitle>
 
         <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
 
-        <component :is="tab" :webshop="patchedWebshop" @patch="patch"/>
+        <component :is="tab" :webshop="patchedWebshop" @patch="patch" />
 
-         <STToolbar>
+        <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="save">
@@ -34,22 +34,19 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, STToolbar, SegmentedControl, LoadingButton } from "@stamhoofd/components";
+import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Gender,MemberWithRegistrations, PrivateWebshop, Version, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { GlobalEventBus } from '../../../classes/EventBus';
-import MemberViewDetails from "./MemberViewDetails.vue";
-import MemberViewPayments from "./MemberViewPayments.vue";
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
 import EditWebshopPageView from './EditWebshopPageView.vue';
 import EditWebshopProductsView from './EditWebshopProductsView.vue';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
