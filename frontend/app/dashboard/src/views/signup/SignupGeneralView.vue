@@ -1,7 +1,7 @@
 <template>
     <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Stamhoofd gratis uitproberen">
-            <button slot="right" type="button" class="button icon close gray" @click="dismiss" />
+            <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -55,6 +55,9 @@
                             </optgroup>
                         </select>
                     </STInputBox>
+                    <p class="style-description-small">
+                        Hiermee stellen we automatisch al enkele instellingen goed.
+                    </p>
 
                     <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
                         <select v-model="umbrellaOrganization" class="input">
@@ -104,7 +107,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
@@ -308,8 +311,8 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         )
     }
 
-    shouldNavigateAway() {
-        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
+    async shouldNavigateAway() {
+        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten?", "Sluiten")) {
             plausible('closeSignup');
             return true;
         }
