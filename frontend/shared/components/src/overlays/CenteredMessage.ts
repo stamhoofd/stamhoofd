@@ -1,6 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors'
 
-export type CenteredMessageListener = (centeredMessage: CenteredMessage) => void
+export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unknown
 
 export class CenteredMessageButton {
     text: string
