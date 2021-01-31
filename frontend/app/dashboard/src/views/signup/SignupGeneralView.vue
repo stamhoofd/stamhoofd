@@ -1,10 +1,9 @@
 <template>
-    <div id="signup-general-view" class="st-view">
+    <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Stamhoofd gratis uitproberen">
-            <button slot="right" class="button icon close gray" @click="dismiss" />
+            <button slot="right" type="button" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         
-
         <main>
             <h1>
                 Nieuwe vereniging aansluiten bij Stamhoofd
@@ -90,16 +89,16 @@
             </Checkbox>
         </main>
 
-        <STToolbar>
+        <STToolbar :sticky="false">
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" @click.prevent="goNext">
                         Vereniging registreren
                     </button>
                 </LoadingButton>
             </template>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">

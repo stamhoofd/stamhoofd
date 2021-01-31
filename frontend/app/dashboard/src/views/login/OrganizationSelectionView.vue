@@ -2,7 +2,7 @@
     <div class="organization-selection-view padded-view">
         <h1>Kies je vereniging</h1>
         <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
-        <input v-model="query" @input="query = $event.target.value" class="input search" placeholder="Zoek op postcode of naam">
+        <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
 
         <Spinner v-if="loading" class="gray center" />
         <template v-else>
@@ -19,13 +19,13 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
-import { asyncComponent } from '../../App.vue';
 
+import { asyncComponent } from '../../App.vue';
 import LoginView from './LoginView.vue';
 
 const throttle = (func, limit) => {
@@ -82,7 +82,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             const registerCode = parts[1] ?? "";
             this.present(new ComponentWithProperties(NavigationController, {
                 root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
-            }).setDisplayStyle("popup"))
+            }).setDisplayStyle("popup").setAnimated(false))
         }
     }
 

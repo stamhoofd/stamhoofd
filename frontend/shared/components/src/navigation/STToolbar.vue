@@ -1,5 +1,5 @@
 <template>
-    <div class="st-toolbar">
+    <div class="st-toolbar" :class="{ sticky }">
         <div>
             <div>
                 <slot name="left" />
@@ -12,10 +12,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
-export default class STToolbar extends Vue {}
+export default class STToolbar extends Vue {
+    /**
+     * Set sticky to false if a user is required to scroll down before completing a flow (this removes the unneeded CTA in the middle of the flow).
+     */
+    @Prop({ default: true })
+    sticky!: boolean
+}
 </script>
 
 <style lang="scss">
@@ -26,10 +32,13 @@ export default class STToolbar extends Vue {}
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     padding-top: var(--st-vertical-padding, 20px);
-    position: sticky;
     bottom: 0;
     overflow: hidden;
     pointer-events: none; // fix browser bug not able to click through
+
+    &.sticky {
+        position: sticky;
+    }
 
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);

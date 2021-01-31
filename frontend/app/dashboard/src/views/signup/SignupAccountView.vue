@@ -62,17 +62,15 @@
                     Ik <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
             </div>
-
-            
         </main>
 
-        <STToolbar>
+        <STToolbar :sticky="false">
             <template #left>
                 Het aanmaken van de verenging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary">
+                    <button class="button primary" @click.prevent="goNext">
                         Account aanmaken
                     </button>
                 </LoadingButton>
@@ -86,7 +84,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength, ConfirmEmailView } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
 import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
 import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';

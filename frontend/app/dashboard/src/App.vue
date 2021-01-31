@@ -66,7 +66,7 @@ export default class App extends Vue {
         if (parts.length == 2 && parts[0] == 'reset-password') {
             // tood: password reset view
             const session = new Session(parts[1]);
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup"));
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup").setAnimated(false));
         }
 
         if (parts.length == 2 && parts[0] == 'verify-email') {
@@ -132,7 +132,7 @@ export default class App extends Vue {
                             
                         }
                     })
-                }).setDisplayStyle("popup"));
+                }).setDisplayStyle("popup").setAnimated(false));
             }
         }
     }
