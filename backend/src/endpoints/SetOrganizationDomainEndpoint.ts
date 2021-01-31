@@ -75,9 +75,9 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 })
             }
 
-            organization.registerDomain = request.body.registerDomain
+            organization.registerDomain = request.body.registerDomain?.toLowerCase() ?? null
 
-            organization.privateMeta.pendingMailDomain = request.body.mailDomain
+            organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
             organization.privateMeta.mailDomain = null
 
             // Reset notification counters

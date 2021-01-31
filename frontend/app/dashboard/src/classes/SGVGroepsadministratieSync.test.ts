@@ -14,6 +14,7 @@ describe("Groepsadministratie Sync", () => {
                 postalCode: "9000",
                 country: "BE"
             }),
+            birthDay: new Date(),
             parents: [
                 Parent.create({
                     firstName: "",
@@ -30,6 +31,7 @@ describe("Groepsadministratie Sync", () => {
         })
 
         const details2 = MemberDetails.create({
+            birthDay: new Date(),
             parents: [
                 Parent.create({
                     firstName: "",
@@ -120,6 +122,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("No address change", () => {
         const details = MemberDetails.create({
+            birthDay: new Date(),
             address: Address.create({
                 street: "Teststraat",
                 number: "11",
@@ -218,6 +221,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("Only one postadres", () => {
         const details = MemberDetails.create({
+            birthDay: new Date(),
             address: Address.create({
                 street: "Teststraat",
                 number: "11",
@@ -269,6 +273,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("Keep contact id", () => {
         const details = MemberDetails.create({
+            birthDay: new Date(),
             parents: [
                 Parent.create({
                     firstName: "Simon",
@@ -369,6 +374,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("Keep existing functies, remove managed functies", () => {
          const details = MemberDetails.create({
+            birthDay: new Date(),
             parents: []
         })
 

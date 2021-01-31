@@ -32,13 +32,10 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput, BackButton, LoadingButton, Toast } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, ParentType, ParentTypeHelper, Group } from "@stamhoofd/structures"
+import { MemberDetails, Group } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
 import { FamilyManager } from '../../../../classes/FamilyManager';
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { OrganizationManager } from '../../../../classes/OrganizationManager';

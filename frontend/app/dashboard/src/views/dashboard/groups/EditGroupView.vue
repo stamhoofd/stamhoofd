@@ -129,8 +129,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, WaitingListType } from "@stamhoofd/structures"
+import { AgeInput, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
+import { OrganizationMetaData, RecordType } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -343,7 +344,26 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         }
         this.saving = true
 
-        await OrganizationManager.patch(this.organizationPatch)
+        let patch = this.organizationPatch
+
+        // Check if reduced price is enabled
+        if (this.group.settings.prices.find(g => g.reducedPrice !== null) && !this.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+            console.log("Auto enabled financial problems record")
+
+            const p = OrganizationRecordsConfiguration.patch({});
+            p.enabledRecords.addPut(RecordType.FinancialProblems)
+            const organizationPatch = Organization.patch({
+                meta:  OrganizationMetaData.patch({
+                    recordsConfiguration: p
+                })
+            })
+
+            patch = patch.patch(organizationPatch)
+
+            new Toast("We vragen nu ook bij het inschrijven of een lid in een kansarm gezin leeft zodat we het verminderd lidgeld kunnen toepassen", "info-filled").show()
+        }
+
+        await OrganizationManager.patch(patch)
         this.saving = false
         this.pop({ force: true })
     }

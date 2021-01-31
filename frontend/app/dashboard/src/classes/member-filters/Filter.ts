@@ -1,10 +1,10 @@
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Organization } from '@stamhoofd/structures';
 
 export interface Filter {
     getName(): string;
-    doesMatch(member: MemberWithRegistrations): boolean;
+    doesMatch(member: MemberWithRegistrations, organization: Organization): boolean;
 }
 
 export interface DescriptiveFilter {
-    getDescription(member: MemberWithRegistrations): string;
+    getDescription(member: MemberWithRegistrations, organization: Organization): string;
 }

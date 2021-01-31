@@ -1,7 +1,7 @@
 <template>
     <div id="emergency-contact-view" class="st-view">
         <STNavigationBar title="Noodcontact">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -33,34 +33,38 @@
                             <option value="Grootmoeder" />
                         </datalist>
                     </STInputBox>
-                    <p class="style-description-small">*Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.</p>
+                    <p class="style-description-small">
+                        *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
+                    </p>
                 </div>
 
                 <div>
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer" />
+                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer" />
                 </div>
             </div>
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" v-if="false">
+            <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
                 Overslaan
             </button>
-            <button slot="right" class="button primary" @click="goNext">
-                Volgende
-            </button>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" @click="goNext">
+                    Volgende
+                </button>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, BirthDayInput, AddressInput, RadioGroup, Radio, PhoneInput, Checkbox, Validator, BackButton } from "@stamhoofd/components"
-import { Address, Country, Organization, OrganizationMetaData, OrganizationType, Gender, MemberDetails, Parent, EmergencyContact } from "@stamhoofd/structures"
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, BirthDayInput, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AskRequirement,EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import MemberParentsView from './MemberParentsView.vue';
+
+import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
@@ -76,7 +80,8 @@ import { MemberManager } from '../../classes/MemberManager';
         Radio,
         PhoneInput,
         Checkbox,
-        BackButton
+        BackButton,
+        LoadingButton
     }
 })
 export default class EmergencyContactView extends Mixins(NavigationMixin) {
@@ -84,12 +89,13 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
     contact: EmergencyContact | null // tood
 
     @Prop({ required: true })
-    handler: (contact: EmergencyContact, component: EmergencyContactView) => void;
+    handler: (contact: EmergencyContact | null, component: EmergencyContactView) => Promise<void>;
 
     name = ""
     title = ""
     phone: string | null = null
     errorBox: ErrorBox | null = null
+    loading = false
 
     validator = new Validator()
 
@@ -108,7 +114,19 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
         }
     }
 
+    get isOptional() {
+        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
+    }
+
+    skipStep() {
+        this.handler(null, this)
+    }
+
     async goNext() {
+        if (this.loading) {
+            return;
+        }
+
         const errors = new SimpleErrors()
         if (this.name.length < 2) {
             errors.addError(new SimpleError({
@@ -134,6 +152,8 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
             this.errorBox = null
             valid = true
         }
+
+        this.loading = true
         valid = valid && await this.validator.validate()
 
         if (valid) {
@@ -149,7 +169,15 @@ export default class EmergencyContactView extends Mixins(NavigationMixin) {
                 })
             }
 
-           this.handler(this.contact, this)
+            try {
+                await this.handler(this.contact, this)
+            } catch (e) {
+                this.errorBox = new ErrorBox(e)
+            }
+            this.loading = false
+
+        } else {
+            this.loading = false
         }
     }
 }

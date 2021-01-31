@@ -152,7 +152,7 @@
         </div>
 
         <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && !member.details.isPlaceholder)">
+            <template v-if="(member.details && !member.details.isPlaceholder && !shouldSkipRecords)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -181,7 +181,7 @@
                     </li>
                 </ul>
 
-                <p v-if="member.details.records.length == 0" class="info-box">
+                <p v-if="sortedRecords.length == 0" class="info-box">
                     {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
                 </p>
 
@@ -237,10 +237,11 @@
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
@@ -273,6 +274,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get placeholderAccounts() {
         return this.member.users.filter(u => u.publicKey === null)
+    }
+
+    get shouldSkipRecords() {
+        return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
     }
 
     isOldEmail(email: string) {
@@ -400,8 +405,17 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         return this.familyManager.members.filter(m => m.id != this.member.id)
     }
 
+    get filteredRecords() {
+        return this.member.details?.records ? 
+            OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
+                this.member.details.records, 
+                this.member.details?.age ?? null
+            ) 
+        : undefined
+    }
+
     get sortedRecords() {
-        return this.member.details?.records.sort((record1, record2) => {
+        return this.filteredRecords?.sort((record1, record2) => {
             const priority1: string = RecordTypeHelper.getPriority(record1.type);
             const priority2: string = RecordTypeHelper.getPriority(record2.type)
 

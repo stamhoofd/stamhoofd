@@ -45,7 +45,7 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
         }
         if (request.query.domain.endsWith("." + process.env.HOSTNAME_WEBSHOP)) {
             const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_WEBSHOP).length )
-            if (strippped.includes(".") || !request.query.uri) {
+            if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",
                     message: "This domain format is not supported",
@@ -65,7 +65,7 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
             }
 
             // Search webshop
-            const webshop = await Webshop.getByURI(organization.id, request.query.uri)
+            const webshop = await Webshop.getByURI(organization.id, request.query.uri ?? "")
 
             if (!webshop) {
                 throw new SimpleError({

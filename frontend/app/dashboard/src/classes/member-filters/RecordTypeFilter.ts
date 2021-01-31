@@ -1,4 +1,4 @@
-import { MemberWithRegistrations, RecordType, RecordTypeHelper } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Organization, RecordType, RecordTypeHelper } from '@stamhoofd/structures';
 
 import { DescriptiveFilter, Filter } from "./Filter";
 
@@ -13,12 +13,17 @@ export class RecordTypeFilter implements Filter, DescriptiveFilter {
         return this.category;
     }
 
-    doesMatch(member: MemberWithRegistrations): boolean {
+    doesMatch(member: MemberWithRegistrations, organization: Organization): boolean {
         if (!member.details) {
             return false;
         }
 
-        return member.details.records.some((record) => {
+        const records = organization.meta.recordsConfiguration.filterForDisplay(
+            member.details?.records ?? [], 
+            member.details?.age ?? null
+        ) 
+
+        return records.some((record) => {
             return RecordTypeHelper.getFilterCategory(record.type) === this.category
         });
     }
@@ -35,12 +40,17 @@ export class RecordTypeFilter implements Filter, DescriptiveFilter {
         return [...map.values()]
     }
 
-    getDescription(member: MemberWithRegistrations): string {
+    getDescription(member: MemberWithRegistrations, organization: Organization): string {
         if (!member.details) {
             return "";
         }
 
-        return member.details.records.flatMap((record) => {
+        const records = organization.meta.recordsConfiguration.filterForDisplay(
+            member.details?.records ?? [], 
+            member.details?.age ?? null
+        ) 
+
+        return records.flatMap((record) => {
             if (RecordTypeHelper.getFilterCategory(record.type) === this.category) {
                 return [RecordTypeHelper.getName(record.type)+(record.description.length > 0 ? ": "+record.description : "")]
             }

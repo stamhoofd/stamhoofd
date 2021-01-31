@@ -29,6 +29,14 @@ export enum MollieStatus {
     Completed = "Completed"
 }
 
+export enum AcquisitionType {
+    Recommended = "Recommended",
+    Seen = "Seen",
+    SocialMedia = "SocialMedia",
+    Search = "Search",
+    Other = "Other"
+}
+
 export class MollieOnboarding extends AutoEncoder  {
     @field({ decoder: BooleanDecoder })
     canReceivePayments = false
@@ -81,4 +89,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     // Only set for admins
     @field({ decoder: StringDecoder, nullable: true, version: 29 })
     payconiqApiKey: string | null = null
+
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 56 })
+    acquisitionTypes: AcquisitionType[] = [];
 }

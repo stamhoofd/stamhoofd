@@ -84,22 +84,4 @@ describe("Model.User", () => {
         }));
         expect(user).toBeUndefined();
     });
-
-    /*test("Login a user", async () => {
-        const user: any = await User.login(organization, "existing@domain.com", "myPassword");
-        expect(user).toBeInstanceOf(User);
-        expect(user.password).toBeUndefined();
-        expect(user.savedProperties.get("password")).toBeUndefined();
-        expect(user.id).not.toBeEmpty()
-    });
-
-    test("Providing a wrong password fails login", async () => {
-        const user: any = await User.login(organization, "existing@domain.com", "myPassword2");
-        expect(user).toBeUndefined();
-    });
-
-    test("Providing a wrong email fails login", async () => {
-        const user: any = await User.login(organization, "not-existing@domain.com", "myPassword");
-        expect(user).toBeUndefined();
-    });*/
 });

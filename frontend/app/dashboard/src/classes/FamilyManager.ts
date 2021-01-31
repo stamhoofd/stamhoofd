@@ -136,6 +136,8 @@ export class FamilyManager {
         // Search for duplicate addresses and duplicate parents
         this.removeDuplicates()
 
+        console.log(member.details)
+
         const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
         if (encryptedMembers.length == 0) {
             return;

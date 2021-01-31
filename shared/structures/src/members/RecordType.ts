@@ -1,5 +1,54 @@
 export enum RecordType {
     // Privacy
+    DataPermissions = "DataPermissions",
+    PicturePermissions = "PicturePermissions",
+    GroupPicturePermissions = "GroupPicturePermissions",
+
+    // Diet
+    Vegetarian = "Vegetarian",
+    Vegan = "Vegan",
+    Halal = "Halal",
+    Kosher = "Kosher",
+    Diet = "Diet",
+
+    // Allergies & diet
+    FoodAllergies = "FoodAllergies",
+    MedicineAllergies = "MedicineAllergies",
+    OtherAllergies = "OtherAllergies",
+
+    // Medicines
+    MedicinePermissions = "MedicinePermissions",
+
+    // Health, hygiene and sleep
+    HayFever = "HayFever",
+    Asthma = "Asthma",
+    BedWaters = "BedWaters",
+    Epilepsy = "Epilepsy",
+    HeartDisease = "HeartDisease",
+    SkinCondition = "SkinCondition",
+    Rheumatism = "Rheumatism",
+    SleepWalking = "SleepWalking",
+    Diabetes = "Diabetes",
+    SpecialHealthCare = "SpecialHealthCare",
+    Medicines = "Medicines",
+
+    // Sport, games, social
+    CanNotSwim = "CanNotSwim",
+    TiredQuickly = "TiredQuickly",
+    CanNotParticipateInSport = "CanNotParticipateInSport",
+    SpecialSocialCare = "SpecialSocialCare",
+    FinancialProblems = "FinancialProblems",
+
+    // Other
+    Other = "Other"
+}
+
+/**
+ * We removed all the inverse records, because they are getting too complicated, to fast.
+ * We've moved them away to seperate ones
+ */
+export enum OldRecordType {
+    // Privacy
     NoData = "NoData",
     NoPictures = "NoPictures",
     OnlyGroupPictures = "OnlyGroupPictures",
@@ -50,11 +99,31 @@ export enum RecordTypePriority {
 }
 
 export class RecordTypeHelper {
+    /**
+     * Some types are only saved if permission is granted. But they should only be displayed
+     * when they are not present. So the names and descriptions are only relevant when they are missing.
+     * 
+     * So before they are displayed, we switch them up: if they are not present, they are added
+     * if they are present, they are removed
+     */
+    static isInverted(type: RecordType): boolean {
+        switch (type) {
+            case RecordType.DataPermissions:
+            case RecordType.PicturePermissions:
+            case RecordType.MedicinePermissions:
+            // Group picturs is not inverted -> we show a warning if there is only permissions for group pictures
+                return true;
+         
+        }
+
+        return false
+    }
+
     static getFilterCategory(type: RecordType): string | undefined {
         switch (type) {
-            case RecordType.NoData:
-            case RecordType.NoPictures:
-            case RecordType.OnlyGroupPictures:
+            case RecordType.DataPermissions:
+            case RecordType.PicturePermissions:
+            case RecordType.GroupPicturePermissions:
                 return "Privacy";
 
             case RecordType.Vegetarian:
@@ -73,6 +142,7 @@ export class RecordTypeHelper {
             case RecordType.Rheumatism:
             case RecordType.SleepWalking:
             case RecordType.Diabetes:
+            case RecordType.MedicinePermissions:
                 return "Gezondheid";
 
             case RecordType.CanNotSwim:
@@ -86,9 +156,9 @@ export class RecordTypeHelper {
 
     static getCategory(type: RecordType): string | undefined {
         switch (type) {
-            case RecordType.NoData:
-            case RecordType.NoPictures:
-            case RecordType.OnlyGroupPictures:
+            case RecordType.DataPermissions:
+            case RecordType.PicturePermissions:
+            case RecordType.GroupPicturePermissions:
                 return "Privacy";
 
             case RecordType.Vegetarian:
@@ -119,15 +189,15 @@ export class RecordTypeHelper {
 
     static getName(type: RecordType): string {
         switch (type) {
-            case RecordType.NoData:
+            case RecordType.DataPermissions:
                 return "Geen toestemming voor verzamelen gevoelige gegevens";
-            case RecordType.NoPictures:
-                return "Geen foto's maken";
-            case RecordType.OnlyGroupPictures:
-                return "Wel toestemming voor groepsfoto's";
+            case RecordType.PicturePermissions:
+                return "Geen foto's publiceren";
+            case RecordType.GroupPicturePermissions:
+                return "Enkel groepsfoto's mogen worden gepubliceerd";
 
             case RecordType.FoodAllergies:
-                return "Allergisch voor voeding";
+                return "Allergisch of overgevoelig voor bepaalde voeding";
             case RecordType.MedicineAllergies:
                 return "Allergisch voor geneesmiddelen";
             case RecordType.OtherAllergies:
@@ -136,7 +206,7 @@ export class RecordTypeHelper {
             case RecordType.Vegetarian:
                 return "Vegetarisch dieet";
             case RecordType.Vegan:
-                return "Veganistisch dieet (geen dierlijke producten)";
+                return "Veganistisch dieet";
             case RecordType.Halal:
                 return "Halal dieet";
             case RecordType.Kosher:
@@ -163,18 +233,18 @@ export class RecordTypeHelper {
             case RecordType.Diabetes:
                 return "Diabetes";
             case RecordType.Medicines:
-                return "Moet medicijnen nemen";
+                return "Moet geneesmiddelen nemen";
             case RecordType.SpecialHealthCare:
                 return "Speciale zorg om risico's te voorkomen";
             case RecordType.CanNotSwim:
-                return "Kan niet zwemmen";
+                return "Kan niet (of onvoldoende) zwemmen";
             case RecordType.TiredQuickly:
                 return "Is snel moe";
             case RecordType.CanNotParticipateInSport:
                 return "Kan niet deelenemen aan sport en spel afgestemd op leeftijd";
             case RecordType.SpecialSocialCare:
-                return "Speciale aandacht nodig bij sociale omgang";
-            case RecordType.NoPermissionForMedicines:
+                return "Bijzondere aandacht nodig bij sociale omgang";
+            case RecordType.MedicinePermissions:
                 return "Geen toestemming voor het toedienen van medicatie";
             case RecordType.FinancialProblems:
                 return "Gezin met financiële moeilijkheden";
@@ -183,13 +253,32 @@ export class RecordTypeHelper {
         }
     }
 
+    static getHint(type: RecordType): string | null {
+        switch (type) {
+            case RecordType.Vegan:
+                return "Geen dierlijke producten";
+
+            case RecordType.Medicines:
+                return "Dagelijks, wekelijks...";
+
+            case RecordType.OtherAllergies:
+                return "Zoals verf, insecten...";
+
+            case RecordType.Diet:
+                return "Geen allergieën";
+           
+        }
+
+        return null
+    }
+
     static getInternalDescription(type: RecordType): string | null {
         switch (type) {
-            case RecordType.NoData:
+            case RecordType.DataPermissions:
                 return "Dit gezin heeft ervoor gekozen om de steekkaart niet in te vullen omdat er geen toestemming werd gegeven i.v.m. het verzamelen van gevoelige gegevens. Bespreek dit zeker met de ouders.";
-            case RecordType.NoPictures:
+            case RecordType.PicturePermissions:
                 return "Bij het inschrijven is er geen toestemming gegeven voor het publiceren van foto's op de website of sociale media.";
-            case RecordType.OnlyGroupPictures:
+            case RecordType.GroupPicturePermissions:
                 return "Bij het inschrijven is er wel toestemming gegeven voor het publiceren van groepsfoto's op de website of sociale media.";
             case RecordType.Vegetarian:
                 return "Dit lid eet geen vlees en waarschijnlijk ook geen vis (dat vraag je best eens na). Hou hier rekening mee of bespreek dit met het lid.";
@@ -199,7 +288,7 @@ export class RecordTypeHelper {
                 return "Kijk in onderstaande artikelen wat een Halal dieet precies inhoudt.";
             case RecordType.Kosher:
                 return "Kijk in onderstaande artikelen wat een Koosjer dieet precies inhoudt.";
-            case RecordType.NoPermissionForMedicines:
+            case RecordType.MedicinePermissions:
                 return "Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via de steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp. In dit geval hebben de ouders geen toestemming gegeven.";
             case RecordType.FinancialProblems:
                 return "Tijdens het inschrijven kunnen leden en hun ouders aangeven dat de kost zwaar op hun gezin kan liggen. Spring hier uiterst discreet mee om, maar communiceer dit ook naar de juiste personen om dit discreet te kunnen houden: je wilt absoluut niet dat medeleiding de vraag “heb jij je kampgeld al betaald?” stelt zonder dat ze van iets weten. Neem zeker een kijkje op onderstaande links.";
@@ -209,21 +298,21 @@ export class RecordTypeHelper {
 
     static getInternalLinks(type: RecordType): {name: string; url: string}[] {
         switch (type) {
-            case RecordType.NoData:
+            case RecordType.DataPermissions:
                 return [
                     {
                         "name": "Welke persoonsgegevens worden als gevoelig beschouwd?",
                         "url": "https://ec.europa.eu/info/law/law-topic/data-protection/reform/rules-business-and-organisations/legal-grounds-processing-data/sensitive-data/what-personal-data-considered-sensitive_nl"
                     }
                 ]
-            case RecordType.NoPictures:
+            case RecordType.PicturePermissions:
                 return [
                     {
                         "name": "Recht op afbeelding",
                         "url": "https://www.gegevensbeschermingsautoriteit.be/recht-op-afbeelding"
                     }
                 ]
-            case RecordType.OnlyGroupPictures:
+            case RecordType.GroupPicturePermissions:
                 return [
                     {
                         "name": "Recht op afbeelding",
@@ -256,11 +345,11 @@ export class RecordTypeHelper {
 
     static getPriority(type: RecordType): string {
         switch (type) {
-            case RecordType.NoData:
+            case RecordType.DataPermissions:
                 return RecordTypePriority.High;
-            case RecordType.NoPictures:
+            case RecordType.PicturePermissions:
                 return RecordTypePriority.High;
-            case RecordType.OnlyGroupPictures:
+            case RecordType.GroupPicturePermissions:
                 return RecordTypePriority.High;
             case RecordType.FoodAllergies:
                 return RecordTypePriority.Medium;
@@ -308,7 +397,7 @@ export class RecordTypeHelper {
                 return RecordTypePriority.Low;
             case RecordType.SpecialSocialCare:
                 return RecordTypePriority.Medium;
-            case RecordType.NoPermissionForMedicines:
+            case RecordType.MedicinePermissions:
                 return RecordTypePriority.High;
             case RecordType.FinancialProblems:
                 return RecordTypePriority.High;

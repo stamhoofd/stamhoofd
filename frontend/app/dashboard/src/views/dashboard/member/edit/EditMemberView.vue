@@ -43,6 +43,7 @@ import EditMemberContactsView from './EditMemberContactsView.vue';
 import { FamilyManager } from "../../../../classes/FamilyManager";
 import EditMemberRecordsView from './EditMemberRecordsView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 
 @Component({
     components: {
@@ -55,7 +56,6 @@ import EditMemberGroupView from './EditMemberGroupView.vue';
     },
 })
 export default class EditMemberView extends Mixins(NavigationMixin) {
-    tabs = [EditMemberGeneralView, EditMemberContactsView, EditMemberRecordsView];
     tabLabels = ["Algemeen", "Contacten", "Steekkaart"];
     loading = false
 
@@ -66,13 +66,20 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     member!: MemberWithRegistrations | null;
 
     @Prop({ default: null })
-    initialTabIndex: number | null
+    initialTabIndex!: number | null
 
     tab: any = this.tabs[this.initialTabIndex ?? 0];
 
     familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
     memberDetails = this.member ? this.member.details : null// do not link with member, only link on save!
+
+    get tabs() {
+        if (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.memberDetails?.age ?? null)) {
+            return [EditMemberGeneralView, EditMemberContactsView]
+        }
+        return [EditMemberGeneralView, EditMemberContactsView, EditMemberRecordsView];
+    }
 
     get changeTab() {
         return this.tab

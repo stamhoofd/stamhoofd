@@ -20,7 +20,7 @@ export class UmbrellaOrganizationHelper {
         case UmbrellaOrganization.FOS: return "FOS Open Scouting"
         case UmbrellaOrganization.JeugdRodeKruis: return "Jeugd Rode Kruis"
         case UmbrellaOrganization.JNM: return "JNM"
-        case UmbrellaOrganization.Other: return "Andere"
+        case UmbrellaOrganization.Other: return "Andere / geen"
         }
     }
 

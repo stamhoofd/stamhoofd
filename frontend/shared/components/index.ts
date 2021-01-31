@@ -83,3 +83,6 @@ export * from "./src/views/PaymentHandler"
 export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vue"
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
+
+// Members
+export { default as RecordCheckbox } from "./src/members/RecordCheckbox.vue"

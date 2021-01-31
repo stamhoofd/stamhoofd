@@ -20,8 +20,11 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <main v-if="tab == 'Steekkaart'">
-            <template v-for="group of createSamenvattingSteekkaart()">
-                <hr>
+            <p v-if="createSamenvattingSteekkaart().length == 0" class="info-box">
+                Er werd niet bijzonder aangeduid op de geselecteerde steekkaarten
+            </p>
+            <div v-for="(group, index) of createSamenvattingSteekkaart()" :key="group.title" class="container">
+                <hr v-if="index > 0">
                 <h2>{{ group.title }}</h2>
 
                 <dl class="details-grid small">
@@ -30,7 +33,7 @@
                         <dd v-text="text" />
                     </template>
                 </dl>
-            </template>
+            </div>
         </main>
         <main v-else class="split-main">
             <div v-for="group of createContacts()">
@@ -74,6 +77,8 @@ import { Formatter } from '@stamhoofd/utility';
 // PDFKit is used! Wrong warning below!
 import PDFKit from "pdfkit"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 const mm = 2.834666666666667 // = 1 mm
 
@@ -130,7 +135,11 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         // Sort by record type (start with first record types)
         for (const recordType of Object.values(RecordType)) {
             for (const member of members) {
-                for (const record of member.details!.records) {
+                const records = OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
+                    member.details?.records ?? [], 
+                    member.details?.age ?? null
+                ) 
+                for (const record of records) {
                     if (record.type != recordType) {
                         continue
                     }
@@ -173,11 +182,11 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
             }
 
             for (const parent of member.details!.parents) {
-                group.items.set(ParentTypeHelper.getName(parent.type), parent.name+"\n"+parent.phone)
+                group.items.set(ParentTypeHelper.getName(parent.type), parent.name+(parent.phone ? "\n"+parent.phone : ""))
             }
 
             for (const contact of [...member.details!.emergencyContacts, ...(member.details!.doctor ? [member.details!.doctor] : [])]) {
-                group.items.set(contact.title, contact.name+"\n"+contact.phone)
+                group.items.set(contact.title, contact.name + (contact.phone ? "\n"+contact.phone : ""))
             }
 
             groups.push(group)
@@ -413,6 +422,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
+        padding-top: 25px;
     }
 
     .details-grid dd {

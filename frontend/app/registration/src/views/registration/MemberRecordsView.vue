@@ -6,226 +6,121 @@
         
         <main>
             <h1>
-                Persoonlijke steekkaart van {{ memberDetails.firstName }}<span v-tooltip="'Enkel zichtbaar voor leiding en kookploeg. Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy middle" />
+                Persoonlijke steekkaart van {{ memberDetails.firstName }}<span v-tooltip="'Net zoals alle gegevens zijn deze versleuteld opgeslagen en is de toegang op een cryptografische manier vastgelegd.'" class="icon gray privacy middle" />
             </h1>
 
-            <hr>
-            <h2>Privacy</h2>
+            <STErrorsDefault :error-box="errorBox" />
 
-            <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
-            </Checkbox>
-            <Checkbox v-else v-model="allowData" class="long-text">
-                Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }}, dewelke ik hieronder kan vermelden, te verzamelen en te verwerken (o.a. voor medische steekkaart).
-            </Checkbox>
-
-            <Checkbox v-if="allowData && memberDetails.age < 18" v-model="isParent" class="long-text">
-                Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
-            </Checkbox>
-            <Checkbox v-model="allowPictures" class="long-text">
-                {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
-            </Checkbox>
-            <Checkbox v-if="!allowPictures" v-model="allowOnlyGroupPictures" class="long-text">
-                Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
-            </Checkbox>
-
-            <p v-if="!allowData" class="warning-box">
-                Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
-            </p>
-
-            <template v-if="allowData">
+            <template v-if="shouldAsk(RecordType.DataPermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions)">
                 <hr>
-                <h2>Allergieën</h2>
+                <h2>Privacy</h2>
 
-                <Checkbox v-model="foodAllergies">
-                    Allergisch of overgevoelig voor bepaalde voeding
-                </Checkbox>
-                <div v-if="foodAllergies" class="textarea-container">
-                    <textarea v-model="foodAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
-                </div>
-
-                <Checkbox v-model="medicineAllergies">
-                    Allergisch voor geneesmiddelen
-                </Checkbox>
-                <div v-if="medicineAllergies" class="textarea-container">
-                    <textarea v-model="medicineAllergiesDescription" class="input" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
-                </div>
-
-                <Checkbox v-model="hayFever">
-                    Hooikoorts
-                </Checkbox>
-                <div v-if="false && hayFever" class="textarea-container">
-                    <textarea v-model="hayFeverDescription" class="input" placeholder="Eventuele opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="otherAllergies">
-                    Allergisch voor andere zaken (verf, insecten...)
-                </Checkbox>
-                <div v-if="otherAllergies" class="textarea-container">
-                    <textarea v-model="otherAllergiesDescription" class="input" placeholder="Som hier op welke zaken." />
-                </div>
-
-                <hr>
-                <h2>Dieet</h2>
-
-                <Checkbox v-model="vegetarian">
-                    Vegetarisch dieet
-                </Checkbox>
-                <Checkbox v-model="vegan">
-                    Veganistisch dieet (geen dierlijke producten)
-                </Checkbox>
-                <Checkbox v-model="halal">
-                    Halal dieet
-                </Checkbox>
-                <Checkbox v-model="kosher">
-                    Koosjer dieet
-                </Checkbox>
-
-                <Checkbox v-model="diet">
-                    Ander dieet (geen allergieën)
-                </Checkbox>
-                <div v-if="diet" class="textarea-container">
-                    <textarea v-model="dietDescription" class="input" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
-                </div>
-
-                <hr>
-                <h2>Gezondheid, hygiëne &amp; slapen</h2>
-
-                <Checkbox v-model="asthma">
-                    Astma
-                </Checkbox>
-                <div v-if="asthma" class="textarea-container">
-                    <textarea v-model="asthmaDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="bedWaters">
-                    Bedwateren
-                </Checkbox>
-                <div v-if="bedWaters" class="textarea-container">
-                    <textarea v-model="bedWatersDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="epilepsy">
-                    Epilepsie
-                </Checkbox>
-                <div v-if="epilepsy" class="textarea-container">
-                    <textarea v-model="epilepsyDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="heartDisease">
-                    Hartkwaal
-                </Checkbox>
-                <div v-if="heartDisease" class="textarea-container">
-                    <textarea v-model="heartDiseaseDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="skinCondition">
-                    Huidaandoening
-                </Checkbox>
-                <div v-if="skinCondition" class="textarea-container">
-                    <textarea v-model="skinConditionDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="rheumatism">
-                    Reuma
-                </Checkbox>
-                <div v-if="rheumatism" class="textarea-container">
-                    <textarea v-model="rheumatismDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="sleepWalking">
-                    Slaapwandelen
-                </Checkbox>
-                <div v-if="sleepWalking" class="textarea-container">
-                    <textarea v-model="sleepWalkingDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="diabetes">
-                    Suikerziekte
-                </Checkbox>
-                <div v-if="diabetes" class="textarea-container">
-                    <textarea v-model="diabetesDescription" class="input" placeholder="Opmerkingen (optioneel)" />
-                </div>
-
-                <Checkbox v-model="medicines">
-                    Moet geneesmiddelen nemen (dagelijks, wekelijks...)
-                </Checkbox>
-                <div v-if="medicines" class="textarea-container">
-                    <textarea v-model="medicinesDescription" class="input" placeholder="Welke, wanneer en hoe vaak?" />
-                    <p>Gelieve ons ook de noodzakelijke doktersattesten te bezorgen.</p>
-                </div>
-
-                <Checkbox v-model="specialHealthCare">
-                    Er is bijzondere aandacht nodig om risico's te voorkomen
-                </Checkbox>
-                <div v-if="specialHealthCare" class="textarea-container">
-                    <textarea v-model="specialHealthCareDescription" class="input" placeholder="Welke?" />
-                </div>
-
-                <hr>
-                <h2>Sport, spel en sociale omgang</h2>
-
-                <Checkbox v-model="canNotSwim">
-                    Kan niet (of onvoldoende) zwemmen
-                </Checkbox>
-
-                <Checkbox v-model="tiredQuickly">
-                    Vlug moe
-                </Checkbox>
-                <div v-if="tiredQuickly" class="textarea-container">
-                    <textarea v-model="tiredQuicklyDescription" class="input" placeholder="Eventuele opmerkingen" />
-                </div>
-
-                <Checkbox v-model="canNotParticipateInSport">
-                    Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
-                </Checkbox>
-                <div v-if="canNotParticipateInSport" class="textarea-container">
-                    <textarea v-model="canNotParticipateInSportDescription" class="input" placeholder="Meer informatie" />
-                </div>
-
-                <Checkbox v-model="specialSocialCare">
-                    Er is bijzondere aandacht nodig bij sociale omgang
-                </Checkbox>
-                <div v-if="specialSocialCare" class="textarea-container">
-                    <textarea v-model="specialSocialCareDescription" class="input" placeholder="Meer informatie" />
-                </div>
-
-                <hr>
-                <h2>Andere inlichtingen</h2>
-
-                <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
-
-                <template v-if="memberDetails.age < 18">
-                    <hr>
-                    <h2>Toedienen van medicatie</h2>
-
-                    <p class="style-description">
-                        Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
-                    </p>
-
-                    <Checkbox v-model="allowMedicines">
-                        Wij geven toestemming aan de leiding om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                <template v-if="shouldAsk(RecordType.DataPermissions)">
+                    <Checkbox v-if="privacyUrl" v-model="allowData" class="long-text">
+                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart). Hoe we met deze gegevens omgaan staat vermeld in <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
                     </Checkbox>
-
-                    <p class="style-description-small">
-                        * gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang
-                    </p>
+                    <Checkbox v-else v-model="allowData" class="long-text">
+                        Ik geef toestemming aan {{ organization.name }} om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart).
+                    </Checkbox>
+                    <Checkbox v-if="allowData && memberDetails.age && memberDetails.age < 18" v-model="isParent" class="long-text">
+                        Ik ben wettelijke voogd of ouder van {{ memberDetails.firstName }} en mag deze toestemming geven.
+                    </Checkbox>
                 </template>
 
+                <Checkbox v-if="shouldAsk(RecordType.PicturePermissions)" v-model="allowPictures" class="long-text">
+                    {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media van {{ organization.name }}.
+                </Checkbox>
+                <Checkbox v-if="(!allowPictures || !shouldAsk(RecordType.PicturePermissions)) && shouldAsk(RecordType.GroupPicturePermissions)" v-model="allowGroupPictures" class="long-text">
+                    Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media van {{ organization.name }}.
+                </Checkbox>
+
+                <p v-if="!allowData && dataRequired" class="warning-box">
+                    Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
+                </p>
+            </template>
+
+            <template v-if="allowData">
+                <template v-if="shouldAsk(RecordType.FoodAllergies, RecordType.MedicineAllergies, RecordType.HayFever, RecordType.OtherAllergies)">
+                    <hr>
+                    <h2>Allergieën</h2>
+
+                    <RecordCheckbox v-if="shouldAsk(RecordType.FoodAllergies)" v-model="records" :type="RecordType.FoodAllergies" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.MedicineAllergies)" v-model="records" :type="RecordType.MedicineAllergies" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.HayFever)" v-model="records" :type="RecordType.HayFever" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.OtherAllergies)" v-model="records" :type="RecordType.OtherAllergies" placeholder="Som hier op welke zaken" />
+                </template>
+
+                <template v-if="shouldAsk(RecordType.Vegetarian, RecordType.Vegan, RecordType.Halal, RecordType.Kosher, RecordType.Diet)">
+                    <hr>
+                    <h2>Dieet</h2>
+
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Vegetarian)" v-model="records" :type="RecordType.Vegetarian" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Vegan)" v-model="records" :type="RecordType.Vegan" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Halal)" v-model="records" :type="RecordType.Halal" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Kosher)" v-model="records" :type="RecordType.Kosher" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Diet)" v-model="records" name="Ander dieet" :type="RecordType.Diet" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
+                </template>
+
+                <template v-if="shouldAsk(RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes, RecordType.Medicines, RecordType.SpecialHealthCare)">
+                    <hr>
+                    <h2>Gezondheid, hygiëne &amp; slapen</h2>
+
+                    <RecordCheckbox v-for="type in [RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes ]" v-if="shouldAsk(type)" :key="type" v-model="records" :type="type" :comments="true" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.Medicines)" v-model="records" :type="RecordType.Medicines" placeholder="Welke, wanneer en hoe vaak?" comment="Gelieve ons ook de noodzakelijke doktersattesten te bezorgen." />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialHealthCare)" v-model="records" :type="RecordType.SpecialHealthCare" placeholder="Welke?" />
+                </template>
+
+                <template v-if="shouldAsk(RecordType.CanNotSwim, RecordType.TiredQuickly, RecordType.CanNotParticipateInSport, RecordType.SpecialSocialCare)">
+                    <hr>
+                    <h2>Sport, spel &amp; sociale omgang</h2>
+
+                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotSwim)" v-model="records" :type="RecordType.CanNotSwim" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.TiredQuickly)" v-model="records" :type="RecordType.TiredQuickly" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotParticipateInSport)" v-model="records" :type="RecordType.CanNotParticipateInSport" placeholder="Meer informatie" />
+                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialSocialCare)" v-model="records" :type="RecordType.SpecialSocialCare" placeholder="Meer informatie" />
+                </template>
+
+                <template v-if="shouldAsk(RecordType.Other)">
+                    <hr>
+                    <h2>Andere inlichtingen</h2>
+                    <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
+                </template>
+            </template>
+
+            <template v-if="(memberDetails.age !== null && memberDetails.age < 18) && shouldAsk(RecordType.MedicinePermissions)">
                 <hr>
-                <h2>Contactgegevens huisarts</h2>
+                <h2>Toedienen van medicatie</h2>
 
-                <div class="split-inputs">
-                    <div>
-                        <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
-                            <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
-                        </STInputBox>
-                    </div>
+                <p class="style-description">
+                    Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
+                </p>
 
-                    <div>
-                        <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" />
+                <Checkbox v-model="allowMedicines">
+                    Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*
+                </Checkbox>
+
+                <p class="style-description-small">
+                    * gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang
+                </p>
+            </template>
+        
+            <template v-if="allowData">
+                <template v-if="doctorRequired || doctorOptional">
+                    <hr>
+                    <h2>Contactgegevens huisarts</h2>
+
+                    <div class="split-inputs">
+                        <div>
+                            <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
+                                <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
+                            </STInputBox>
+                        </div>
+
+                        <div>
+                            <PhoneInput v-model="doctorPhone" title="Telefoonnummer huisarts" :validator="validator" placeholder="Telefoonnummer" :required="!doctorOptional" />
+                        </div>
                     </div>
-                </div>
+                </template>
             </template>
         </main>
         <STToolbar>
@@ -241,8 +136,8 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
-import { EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
+import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
+import { AskRequirement, EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -260,7 +155,8 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         Checkbox,
         BackButton,
         PhoneInput,
-        LoadingButton
+        LoadingButton,
+        RecordCheckbox
     },
     "directives": { Tooltip }
 })
@@ -303,6 +199,27 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         }
     }
 
+    get doctorRequired() {
+        return OrganizationManager.organization.meta.recordsConfiguration.doctor === AskRequirement.Required
+    }
+
+    get doctorOptional() {
+        return OrganizationManager.organization.meta.recordsConfiguration.doctor === AskRequirement.Optional
+    }
+
+    shouldAsk(...types: RecordType[]) {
+        return OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(...types)
+    }
+
+    get dataRequired() {
+        return OrganizationManager.organization.meta.recordsConfiguration.needsData()
+    }
+
+    get RecordType() {
+        return RecordType
+    }
+
+
     get privacyUrl(): string | null {
         if (OrganizationManager.organization.meta.privacyPolicyUrl) {
             return OrganizationManager.organization.meta.privacyPolicyUrl
@@ -318,174 +235,94 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
             return
         }
         this.errorBox =  null;
-
-        if (this.allowData) {
-            const errors = new SimpleErrors()
-            if (this.doctorName.length < 2) {
-                errors.addError(new SimpleError({
-                    code: "invalid_field",
-                    message: "Vul de naam van de dokter in",
-                    field: "doctorName"
-                }))
-            }
-
-            const valid = await this.validator.validate()
-
-            if (!valid || errors.errors.length > 0) {
-                if (errors.errors.length > 0) {
-                    this.errorBox = new ErrorBox(errors)
-                }
-                return;
-            }
-
-            this.memberDetails.doctor = EmergencyContact.create({
-                name: this.doctorName,
-                phone: this.doctorPhone,
-                title: "Huisdokter"
-            })
-        } else {
-            this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.NoData || r.type == RecordType.NoPictures || r.type == RecordType.OnlyGroupPictures || r.type == RecordType.NoPermissionForMedicines )
-            this.memberDetails.doctor = null
-        }
-        
-        this.memberDetails.lastReviewed = new Date()
-
         this.loading = true
 
         try {
-            await MemberManager.patchAllMembersWith(this.member)
+            if (this.allowData) {
+                const errors = new SimpleErrors()
+                if (this.doctorRequired && this.doctorName.length < 2) {
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Vul de naam van de dokter in",
+                        field: "doctorName"
+                    }))
+                }
 
-            this.dismiss({ force: true })
+                if ((this.memberDetails.age ?? 99) < 18 && !this.isParent) {
+                    // already accepted previous time
+                    errors.addError(new SimpleError({
+                        code: "invalid_field",
+                        message: "Enkel een voogd of ouder kan toestemming geven voor het verwerken van gevoelige gegevens.",
+                        field: "allowData"
+                    }))
+                }
+
+                const valid = await this.validator.validate()
+
+                if (!valid || errors.errors.length > 0) {
+                    if (errors.errors.length > 0) {
+                        this.errorBox = new ErrorBox(errors)
+                    }
+                    this.loading = false
+                    return;
+                }
+
+                if (this.doctorRequired || (this.doctorOptional && (this.doctorName.length > 0 || (this.doctorPhone?.length ?? 0) > 0))) {
+                    this.memberDetails.doctor = EmergencyContact.create({
+                        name: this.doctorName,
+                        phone: this.doctorPhone,
+                        title: "Huisdokter"
+                    })
+                } else {
+                    this.memberDetails.doctor = null
+                }
+
+                
+            } else {
+                // Remove all records except...
+                this.memberDetails.records = this.memberDetails.records.filter(r => r.type == RecordType.PicturePermissions || r.type == RecordType.GroupPicturePermissions || r.type == RecordType.MedicinePermissions )
+                this.memberDetails.doctor = null
+            }
+
+            // Filter records (remove records that were disabled and might be already saved somehow)
+            this.memberDetails.records = OrganizationManager.organization.meta.recordsConfiguration.filterRecords(this.memberDetails.records)
+
+            if (!this.memberDetails.age || this.memberDetails.age >= 18) {
+                // remove medicine permission (not needed any longer)
+                this.memberDetails.records = this.memberDetails.records.filter(r => r.type !== RecordType.MedicinePermissions)
+            }
+            
+            this.memberDetails.lastReviewed = new Date()
         } catch (e) {
             console.error(e);
-            alert("Er ging iets mis...")
+            this.loading = false
+            this.errorBox = new ErrorBox(e)
+            return
+        }
+
+        try {
+            await MemberManager.patchAllMembersWith(this.member)
+            this.dismiss({ force: true })
+        } catch (e) {
+            this.loading = false
+            console.error(e);
+            this.errorBox = new ErrorBox(e)
+            return
         }
     }
 
-    get allowData() { return !this.getBooleanType(RecordType.NoData) }
-    set allowData(enabled: boolean) { this.setBooleanType(RecordType.NoData, !enabled) }
+    get allowData() { return this.getBooleanType(RecordType.DataPermissions) }
+    set allowData(enabled: boolean) { this.setBooleanType(RecordType.DataPermissions, enabled) }
     
-    
-    get allowPictures() { return !this.getBooleanType(RecordType.NoPictures) }
-    set allowPictures(enabled: boolean) { 
-        this.setBooleanType(RecordType.NoPictures, !enabled) 
-        if (enabled) {
-            // Remove only group pictures: we have permission for all pictures
-            this.allowOnlyGroupPictures = false
-        }
-    }
+    get allowPictures() { return this.getBooleanType(RecordType.PicturePermissions) }
+    set allowPictures(enabled: boolean) { this.setBooleanType(RecordType.PicturePermissions, enabled) }
 
-    get allowOnlyGroupPictures() { return this.getBooleanType(RecordType.OnlyGroupPictures) }
-    set allowOnlyGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.OnlyGroupPictures, enabled) }
+    get allowGroupPictures() { return this.getBooleanType(RecordType.GroupPicturePermissions) }
+    set allowGroupPictures(enabled: boolean) { this.setBooleanType(RecordType.GroupPicturePermissions, enabled) }
 
-    get allowMedicines() { return !this.getBooleanType(RecordType.NoPermissionForMedicines) }
-    set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.NoPermissionForMedicines, !enabled) }
-
-    get foodAllergies() { return this.getBooleanType(RecordType.FoodAllergies) }
-    set foodAllergies(enabled: boolean) { this.setBooleanType(RecordType.FoodAllergies, enabled) }
-    get foodAllergiesDescription() { return this.getTypeDescription(RecordType.FoodAllergies) }
-    set foodAllergiesDescription(description: string) { this.setTypeDescription(RecordType.FoodAllergies, description) }
-
-    get medicineAllergies() { return this.getBooleanType(RecordType.MedicineAllergies) }
-    set medicineAllergies(enabled: boolean) { this.setBooleanType(RecordType.MedicineAllergies, enabled) }
-    get medicineAllergiesDescription() { return this.getTypeDescription(RecordType.MedicineAllergies) }
-    set medicineAllergiesDescription(description: string) { this.setTypeDescription(RecordType.MedicineAllergies, description) }
-
-    get hayFever() { return this.getBooleanType(RecordType.HayFever) }
-    set hayFever(enabled: boolean) { this.setBooleanType(RecordType.HayFever, enabled) }
-    get hayFeverDescription() { return this.getTypeDescription(RecordType.HayFever) }
-    set hayFeverDescription(description: string) { this.setTypeDescription(RecordType.HayFever, description) }
-
-    get otherAllergies() { return this.getBooleanType(RecordType.OtherAllergies) }
-    set otherAllergies(enabled: boolean) { this.setBooleanType(RecordType.OtherAllergies, enabled) }
-    get otherAllergiesDescription() { return this.getTypeDescription(RecordType.OtherAllergies) }
-    set otherAllergiesDescription(description: string) { this.setTypeDescription(RecordType.OtherAllergies, description) }
-
-    get vegetarian() { return this.getBooleanType(RecordType.Vegetarian) }
-    set vegetarian(enabled: boolean) { this.setBooleanType(RecordType.Vegetarian, enabled) }
-
-    get vegan() { return this.getBooleanType(RecordType.Vegan) }
-    set vegan(enabled: boolean) { this.setBooleanType(RecordType.Vegan, enabled) }
-
-    get halal() { return this.getBooleanType(RecordType.Halal) }
-    set halal(enabled: boolean) { this.setBooleanType(RecordType.Halal, enabled) }
-
-    get kosher() { return this.getBooleanType(RecordType.Kosher) }
-    set kosher(enabled: boolean) { this.setBooleanType(RecordType.Kosher, enabled) }
-
-    get diet() { return this.getBooleanType(RecordType.Diet) }
-    set diet(enabled: boolean) { this.setBooleanType(RecordType.Diet, enabled) }
-    get dietDescription() { return this.getTypeDescription(RecordType.Diet) }
-    set dietDescription(description: string) { this.setTypeDescription(RecordType.Diet, description) }
-
-    get asthma() { return this.getBooleanType(RecordType.Asthma) }
-    set asthma(enabled: boolean) { this.setBooleanType(RecordType.Asthma, enabled) }
-    get asthmaDescription() { return this.getTypeDescription(RecordType.Asthma) }
-    set asthmaDescription(description: string) { this.setTypeDescription(RecordType.Asthma, description) }
-
-    get bedWaters() { return this.getBooleanType(RecordType.BedWaters) }
-    set bedWaters(enabled: boolean) { this.setBooleanType(RecordType.BedWaters, enabled) }
-    get bedWatersDescription() { return this.getTypeDescription(RecordType.BedWaters) }
-    set bedWatersDescription(description: string) { this.setTypeDescription(RecordType.BedWaters, description) }
-
-    get epilepsy() { return this.getBooleanType(RecordType.Epilepsy) }
-    set epilepsy(enabled: boolean) { this.setBooleanType(RecordType.Epilepsy, enabled) }
-    get epilepsyDescription() { return this.getTypeDescription(RecordType.Epilepsy) }
-    set epilepsyDescription(description: string) { this.setTypeDescription(RecordType.Epilepsy, description) }
-
-    get heartDisease() { return this.getBooleanType(RecordType.HeartDisease) }
-    set heartDisease(enabled: boolean) { this.setBooleanType(RecordType.HeartDisease, enabled) }
-    get heartDiseaseDescription() { return this.getTypeDescription(RecordType.HeartDisease) }
-    set heartDiseaseDescription(description: string) { this.setTypeDescription(RecordType.HeartDisease, description) }
-
-    get skinCondition() { return this.getBooleanType(RecordType.SkinCondition) }
-    set skinCondition(enabled: boolean) { this.setBooleanType(RecordType.SkinCondition, enabled) }
-    get skinConditionDescription() { return this.getTypeDescription(RecordType.SkinCondition) }
-    set skinConditionDescription(description: string) { this.setTypeDescription(RecordType.SkinCondition, description) }
-
-    get rheumatism() { return this.getBooleanType(RecordType.Rheumatism) }
-    set rheumatism(enabled: boolean) { this.setBooleanType(RecordType.Rheumatism, enabled) }
-    get rheumatismDescription() { return this.getTypeDescription(RecordType.Rheumatism) }
-    set rheumatismDescription(description: string) { this.setTypeDescription(RecordType.Rheumatism, description) }
-
-    get sleepWalking() { return this.getBooleanType(RecordType.SleepWalking) }
-    set sleepWalking(enabled: boolean) { this.setBooleanType(RecordType.SleepWalking, enabled) }
-    get sleepWalkingDescription() { return this.getTypeDescription(RecordType.SleepWalking) }
-    set sleepWalkingDescription(description: string) { this.setTypeDescription(RecordType.SleepWalking, description) }
- 
-    get diabetes() { return this.getBooleanType(RecordType.Diabetes) }
-    set diabetes(enabled: boolean) { this.setBooleanType(RecordType.Diabetes, enabled) }
-    get diabetesDescription() { return this.getTypeDescription(RecordType.Diabetes) }
-    set diabetesDescription(description: string) { this.setTypeDescription(RecordType.Diabetes, description) }
-
-    get medicines() { return this.getBooleanType(RecordType.Medicines) }
-    set medicines(enabled: boolean) { this.setBooleanType(RecordType.Medicines, enabled) }
-    get medicinesDescription() { return this.getTypeDescription(RecordType.Medicines) }
-    set medicinesDescription(description: string) { this.setTypeDescription(RecordType.Medicines, description) }
-
-    get specialHealthCare() { return this.getBooleanType(RecordType.SpecialHealthCare) }
-    set specialHealthCare(enabled: boolean) { this.setBooleanType(RecordType.SpecialHealthCare, enabled) }
-    get specialHealthCareDescription() { return this.getTypeDescription(RecordType.SpecialHealthCare) }
-    set specialHealthCareDescription(description: string) { this.setTypeDescription(RecordType.SpecialHealthCare, description) }
-
-    get canNotSwim() { return this.getBooleanType(RecordType.CanNotSwim) }
-    set canNotSwim(enabled: boolean) { this.setBooleanType(RecordType.CanNotSwim, enabled) }
-
-    get tiredQuickly() { return this.getBooleanType(RecordType.TiredQuickly) }
-    set tiredQuickly(enabled: boolean) { this.setBooleanType(RecordType.TiredQuickly, enabled) }
-    get tiredQuicklyDescription() { return this.getTypeDescription(RecordType.TiredQuickly) }
-    set tiredQuicklyDescription(description: string) { this.setTypeDescription(RecordType.TiredQuickly, description) }
-
-    get canNotParticipateInSport() { return this.getBooleanType(RecordType.CanNotParticipateInSport) }
-    set canNotParticipateInSport(enabled: boolean) { this.setBooleanType(RecordType.CanNotParticipateInSport, enabled) }
-    get canNotParticipateInSportDescription() { return this.getTypeDescription(RecordType.CanNotParticipateInSport) }
-    set canNotParticipateInSportDescription(description: string) { this.setTypeDescription(RecordType.CanNotParticipateInSport, description) }
-
-    get specialSocialCare() { return this.getBooleanType(RecordType.SpecialSocialCare) }
-    set specialSocialCare(enabled: boolean) { this.setBooleanType(RecordType.SpecialSocialCare, enabled) }
-    get specialSocialCareDescription() { return this.getTypeDescription(RecordType.SpecialSocialCare) }
-    set specialSocialCareDescription(description: string) { this.setTypeDescription(RecordType.SpecialSocialCare, description) }
-
+    get allowMedicines() { return this.getBooleanType(RecordType.MedicinePermissions) }
+    set allowMedicines(enabled: boolean) { this.setBooleanType(RecordType.MedicinePermissions, enabled) }
+   
     get otherDescription() { return this.getTypeDescription(RecordType.Other) }
     set otherDescription(description: string) { 
         if (description.length > 0) { 
@@ -514,6 +351,14 @@ export default class MemberRecordsView extends Mixins(NavigationMixin) {
         } else {
             this.memberDetails.records.splice(index, 1)
         }
+    }
+
+    get records() {
+        return this.memberDetails.records
+    }
+
+    set records(records: Record[]) {
+        this.memberDetails.records = records
     }
 
     getTypeDescription(type: RecordType) {

@@ -13,6 +13,7 @@ export enum OrganizationType {
     Basketball = "Basketball",
     Judo = "Judo",
     Sport = "Sport",
+    School = "School",
     Student = "Student",
     HorseRiding = "HorseRiding",
     Neighborhood = "Neighborhood",
@@ -21,6 +22,7 @@ export enum OrganizationType {
     Professional = "Professional",
     Art = "Art",
     Culture = "Culture",
+    LGBTQ = "LGBTQ",
     Other = "Other",
 }
 
@@ -77,7 +79,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Judo,
-                name: "Judo",
+                name: "Vechtkunst",
             },
             {
                 value: OrganizationType.Sport,
@@ -116,9 +118,57 @@ export class OrganizationTypeHelper {
                 name: "Cultuur",
             },
             {
+                value: OrganizationType.LGBTQ,
+                name: "LGBTQ+",
+            },
+            {
+                value: OrganizationType.School,
+                name: "School",
+            },
+            {
                 value: OrganizationType.Other,
                 name: "Andere",
             },
         ]
+    }
+
+    static getCategory(type: OrganizationType): string {
+        switch (type) {
+            case OrganizationType.Youth:
+            case OrganizationType.Student:
+                return "Jeugd";
+
+            case OrganizationType.Sport:
+            case OrganizationType.Football:
+            case OrganizationType.Tennis:
+            case OrganizationType.Golf:
+            case OrganizationType.Athletics:
+            case OrganizationType.Badminton:
+            case OrganizationType.Hockey:
+            case OrganizationType.Cycling:
+            case OrganizationType.Swimming:
+            case OrganizationType.Dance:
+            case OrganizationType.Volleyball:
+            case OrganizationType.Basketball:
+            case OrganizationType.Judo:
+            case OrganizationType.HorseRiding:
+                return "Sport";
+
+            
+
+            case OrganizationType.Culture:
+            case OrganizationType.Art:
+            case OrganizationType.Music:
+                return "Cultuur";
+
+
+            case OrganizationType.Other:
+            case OrganizationType.LGBTQ:
+            case OrganizationType.Nature:
+            case OrganizationType.Professional:
+            case OrganizationType.Neighborhood:
+            case OrganizationType.School:
+                return "Overige";
+        }
     }
 }

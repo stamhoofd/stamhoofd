@@ -5,8 +5,12 @@
                 <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
-                    <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
                     <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
+
+                    <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                        <span class="icon clock-small" />
+                        <span>Wachtlijst</span>
+                    </button>
 
                     <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                         <span class="icon add" />
@@ -30,7 +34,11 @@
         <main>
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
-                <span v-if="hasWaitingList" class="style-tag" @click="openWaitingList">Wachtlijst</span>
+
+                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                    <span class="icon clock-small" />
+                    <span>Wachtlijst</span>
+                </button>
 
                 <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                     <span class="icon add" />
@@ -133,12 +141,12 @@
             
 
             <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
-                <button class="button text gray" v-if="canGoBack" @click="goBack">
+                <button v-if="canGoBack" class="button text gray" @click="goBack">
                     <span class="icon arrow-left" />
                     <span>Vorige inschrijvingsperiode</span>
                 </button>
 
-                <button class="button text gray" v-if="canGoNext" @click="goNext">
+                <button v-if="canGoNext" class="button text gray" @click="goNext">
                     <span>Volgende inschrijvingsperiode</span>
                     <span class="icon arrow-right" />
                 </button>
@@ -198,6 +206,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { CanNotSwimFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
 import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
@@ -335,7 +344,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
 
-            if (!this.waitingList && this.group && this.group.settings.maxMembers !== null) {
+            if (!this.waitingList && this.group && this.group.hasWaitingList) {
                 this.checkWaitingList()
             }
         })
@@ -498,7 +507,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.isDescriptiveFilter()) {
-            return (this.filters[this.selectedFilter] as any).getDescription(member)
+            return (this.filters[this.selectedFilter] as any).getDescription(member, OrganizationManager.organization)
         }
 
         return member.info
@@ -507,7 +516,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get filteredMembers(): SelectableMember[] {
         this.selectionCountHidden = 0;
         const filtered = this.members.filter((member: SelectableMember) => {
-            if (this.filters[this.selectedFilter].doesMatch(member.member)) {
+            if (this.filters[this.selectedFilter].doesMatch(member.member, OrganizationManager.organization)) {
                 return true;
             }
             this.selectionCountHidden += member.selected ? 1 : 0;
