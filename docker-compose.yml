@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  # Builds the shared depenencies and fetches the shared packages
+  common: 
+    build: .
+    image: stamhoofd_common
+
+  backend_db:
+    image: mysql:5.7 
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DB: stamhoofd
+      MYSQL_USER: stamhoofd
+      MYSQL_PASSWORD: stamhoofd
+      MYSQL_ROOT_PASSWORD: stamhoofd
+    volumes:
+      - db:/var/lib/myql
+    expose:
+      - '3306'
+
+  backend:
+    build: ./backend
+    image: stamhoofd_backend
+    ports:
+      - '9090:9090'
+    environment:
+      DB_HOST: db
+      DB_USER: stamhoofd
+      DB_PASS: stamhoofd
+      DB_DATABASE: stamhoofd
+    links:
+      - 'backend_db:db'
+    depends_on:
+      - common
+      - backend_db
+    expose:
+      - '9090'
+
+volumes:
+  db:
