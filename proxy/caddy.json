@@ -21,7 +21,7 @@
                                     "handler": "reverse_proxy",
                                     "upstreams": [
                                         {
-                                            "dial": "api:9090"
+                                            "dial": "api:80"
                                         }
                                     ],
                                     "headers": {
