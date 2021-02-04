@@ -12,32 +12,47 @@ services:
     ports:
       - '3306:3306'
     environment:
-      MYSQL_DB: stamhoofd
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: stamhoofd
+      MYSQL_DATABASE: stamhoofd
       MYSQL_USER: stamhoofd
       MYSQL_PASSWORD: stamhoofd
-      MYSQL_ROOT_PASSWORD: stamhoofd
     volumes:
       - db:/var/lib/myql
     expose:
       - '3306'
 
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     image: stamhoofd_backend
-    ports:
-      - '9090:9090'
+    expose:
+      - 80
     environment:
       DB_HOST: db
       DB_USER: stamhoofd
       DB_PASS: stamhoofd
       DB_DATABASE: stamhoofd
+      PORT: 80
     links:
       - 'backend_db:db'
     depends_on:
       - common
       - backend_db
+
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - '8080:80'
     expose:
-      - '9090'
+      - 8080
+    environment:
+      PMA_HOST: db
+      # PMA_USER: stamhoofd
+      # PMA_PASSWORD: stamhoofd
+    links:
+      - 'backend_db:db'
 
   proxy:
     build: ./proxy
