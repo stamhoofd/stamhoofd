@@ -22,6 +22,22 @@ services:
     expose:
       - '3306'
 
+  migrations:
+    build:
+      context: ./backend
+      dockerfile: migrations.Dockerfile
+    image:
+      stamhoofd_migratios
+    environment:
+      DB_HOST: db
+      DB_USER: stamhoofd
+      DB_PASS: stamhoofd
+      DB_DATABASE: stamhoofd
+    links:
+      - "backend_db:db"
+    depends_on:
+      - backend_db
+
   backend:
     build: 
       context: ./backend
@@ -40,6 +56,7 @@ services:
     depends_on:
       - common
       - backend_db
+      - migrations
 
   phpmyadmin:
     image: phpmyadmin
