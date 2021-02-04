@@ -7,7 +7,8 @@ services:
     image: stamhoofd_common
 
   backend_db:
-    image: mysql:5.7 
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
       - '3306:3306'
@@ -18,7 +19,7 @@ services:
       MYSQL_USER: stamhoofd
       MYSQL_PASSWORD: stamhoofd
     volumes:
-      - db:/var/lib/myql
+      - db:/var/lib/mysql
     expose:
       - '3306'
 
@@ -37,6 +38,7 @@ services:
       - "backend_db:db"
     depends_on:
       - backend_db
+    restart: on-failure
 
   backend:
     build: 
@@ -66,8 +68,8 @@ services:
       - 8080
     environment:
       PMA_HOST: db
-      # PMA_USER: stamhoofd
-      # PMA_PASSWORD: stamhoofd
+      PMA_USER: stamhoofd
+      PMA_PASSWORD: stamhoofd
     links:
       - 'backend_db:db'
 
@@ -87,4 +89,4 @@ services:
       - '443'
 
 volumes:
-  db:
+  db: ./db
