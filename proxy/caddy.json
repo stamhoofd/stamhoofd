@@ -1,0 +1,44 @@
+{
+    "apps": {
+        "http": {
+            "servers": {
+                "stamhoofd.dev": {
+                    "listen": [
+                        ":80"
+                    ],
+                    "routes": [
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "api.stamhoofd.dev",
+                                        "*.api.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "api:9090"
+                                        }
+                                    ],
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "x-real-ip": [
+                                                    "{http.request.remote}"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

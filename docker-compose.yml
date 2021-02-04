@@ -39,5 +39,20 @@ services:
     expose:
       - '9090'
 
+  proxy:
+    build: ./proxy
+    image: stamhoofd_proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    links:
+      - "backend:api"
+    depends_on:
+      - backend
+    expose:
+      - '80'
+      - '443'
+
 volumes:
   db:
