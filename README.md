@@ -34,7 +34,7 @@ This is what you need to know:
 
 To run everything locally, we need to glue all the packages together and build them. We only publish packages to the NPM registry during a release.
 
-1. We use `yarn`. Do not use `npm`. That will break things.
+1. We use `yarn`. Do not use `npm`. That will break things. Use `yarn policies set-version 1.22.10` to set the version of yarn to the one used in the project (and the server). Replace 1.22.10 with the version in package.json > engines > yarn
 2. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root. We use yarn workspaces to glue all packages together in the monorepo. We don't publish individual packages (not anymore, we used to do that).
 3. Use `yarn build` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
 4. Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).

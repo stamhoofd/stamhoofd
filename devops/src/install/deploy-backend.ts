@@ -20,7 +20,7 @@ export async function deployBackend(server: Server): Promise<void> {
     console.error(stderr);
 
     console.log("Installing node dependencies...")
-    await server.execCommand("nvm install --reinstall-packages-from=node && nvm use && yarn policies set-version 1.18.0 && yarn install --production", { cwd:'/etc/stamhoofd/'} );
+    await server.execCommand("nvm install --reinstall-packages-from=node && nvm use && yarn policies set-version 1.22.10 && yarn install --production", { cwd:'/etc/stamhoofd/'} );
 
     console.log("Stopping current backend...")
 
