@@ -60,19 +60,6 @@ services:
       - backend_db
       - migrations
 
-  phpmyadmin:
-    image: phpmyadmin
-    ports:
-      - '8080:80'
-    expose:
-      - 8080
-    environment:
-      PMA_HOST: db
-      PMA_USER: stamhoofd
-      PMA_PASSWORD: stamhoofd
-    links:
-      - 'backend_db:db'
-
   proxy:
     build: ./proxy
     image: stamhoofd_proxy
