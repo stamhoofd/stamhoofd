@@ -153,71 +153,66 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         newAddresses[0].postadres = true
     }
 
-    const newFuncties: any[] = []
     let hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
     const mapping = buildGroupMapping(allGroups, groepFuncties)
     const remainingFuncties: any[] = []
 
-    for (const functie of lid.functies ?? []) {
-        // Keep all functies that have been ended
-        if (functie.einde) {
-            newFuncties.push(functie)
-            continue;
-        } 
+    // Due to some bugs in the SGV API it is essential that we keep the same order
+    // as the one we received from the api
+    // Deep clone
 
-        // Keep all functies that are not managed by Stamhoofd
-        const info = groepFuncties.find(f => f.id == functie.functie)
-        if (!info) {
+    const newFuncties = JSON.parse(JSON.stringify(lid.functies ?? []))
+
+    // Find a match in groepsadmin
+    for (const [functieId, _groeps] of mapping) {
+        // Loop all the groups in Stamhoofd that ar connected to a given function ID in SGV
+
+        const functie =  groepFuncties.find(f => f.id == functieId)
+        if (!functie) {
             // Keep.
-            console.warn("Unknown functie "+functie.functie)
-            newFuncties.push(functie)
             hasActiveFunctie = true
             continue
         }
 
-        if (mapping.has(functie.functie)) {
-            // Managed by stamhoofd
-        } else {
-            newFuncties.push(functie)
-            hasActiveFunctie = true
-            continue
-        }
-
-        // All functies that should end, unless we add them again
-        remainingFuncties.push(functie)
-    }
-
-
-    // Map all groepen
-    for (const groep of groups) {
-        // Find a match in groepsadmin
-        for (const [functieId, _groeps] of mapping) {
+        // Should this member get registered in this functie?
+        let found = false
+        for (const groep of groups) {
             for (const _groep of _groeps) {
-                if (groep.id == _groep.id) {
-                    const functie =  groepFuncties.find(f => f.id == functieId)
-                    const remaingFunctieIndex = remainingFuncties.findIndex(f => f.functie == functie.id)
-
-                    if (remaingFunctieIndex != -1) {
-                        const [spl] = remainingFuncties.splice(remaingFunctieIndex, 1)
-                        newFuncties.push(spl)
-                        hasActiveFunctie = true
-                    } else {
-                        newFuncties.push({
-                            groep: groepNummer,
-                            functie: functie.id,
-                            begin: Formatter.dateIso(new Date()),
-                        })
-                        hasActiveFunctie = true
-                    }
-                    // keep looping, a group can be connected to multiple functies if needed
+                if (groep.id == _groep.id) {                   
+                    found = true
+                    break
                 }
             }
+            if (found) {
+                break
+            }
         }
-    }
 
-    // Add all remaing functies, but end them
-    for (const functie of remainingFuncties) {
-        newFuncties.push(Object.assign({}, functie, { einde: Formatter.dateIso(new Date()), }))
+        if (!found) {
+            // No, end all functies with this id
+            for (const f of newFuncties) {
+                if (!f.einde && f.functie == functie.id) {
+                    f.einde = Formatter.dateIso(new Date())
+                }
+            }
+        } else {
+            // Register or keep register.
+            hasActiveFunctie = true
+
+            // This member should be in this group.
+            const currentFunctie = newFuncties.find(f => f.functie == functie.id && !f.einde)
+            if (currentFunctie) {
+                // Already in this group
+                continue;
+            }
+
+            // Add.
+            newFuncties.push({
+                groep: groepNummer,
+                functie: functie.id,
+                begin: Formatter.dateIso(new Date()),
+            })
+        }
     }
 
     if (!hasActiveFunctie) {
@@ -270,7 +265,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 }
 
 /**
- * Returns a list of groepsadmin ids => group that Stamhoofd will handle for this group
+ * Returns a list of groepsadmin ids => groups that Stamhoofd will handle for this group
  */
 export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {

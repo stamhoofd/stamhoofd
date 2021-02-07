@@ -391,7 +391,7 @@ describe("Groepsadministratie Sync", () => {
                     "begin": "123",
                 },
                 { // will get removed = managed by stamhoofd
-                    "functie": "d5f75b320b812440010b812555c1039b",
+                    "functie": "d5f75b320b812440010b812555c1039b", // = JIN
                     "begin": "123",
                 }
             ],
@@ -441,12 +441,18 @@ describe("Groepsadministratie Sync", () => {
         expect(p2.functies).toHaveLength(5);
         expect(p3.functies).toHaveLength(5);
 
+        // Check order is still the same
         expect(p.functies[0]).toMatchObject({
             "functie": "859",
             "begin": "123",
             "einde": "586"
         })
         expect(p2.functies[0]).toMatchObject({
+            "functie": "859",
+            "begin": "123",
+            "einde": "586"
+        })
+        expect(p3.functies[0]).toMatchObject({
             "functie": "859",
             "begin": "123",
             "einde": "586"
@@ -460,51 +466,72 @@ describe("Groepsadministratie Sync", () => {
             "functie": "notmanaged",
             "begin": "123",
         })
+        expect(p3.functies[1]).toMatchObject({
+            "functie": "notmanaged",
+            "begin": "123",
+        })
         expect(p.functies[1].einde).not.toBeDefined()
         expect(p2.functies[1].einde).not.toBeDefined()
+        expect(p3.functies[1].einde).not.toBeDefined()
 
+        // Jin ended in p en p3 (not p2)
         expect(p.functies[2]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555c1039b",
+            "begin": "123",
+        });
+        expect(p3.functies[2]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555c1039b",
+             "begin": "123",
+        });
+        expect(p.functies[2].einde).toBeDefined()
+        expect(p3.functies[2].einde).toBeDefined()
+
+        // Jin not ended in p2 (because not managed by Stamhoofd)
+         expect(p2.functies[2]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555c1039b",
+             "begin": "123",
+        });
+        expect(p2.functies[2].einde).not.toBeDefined()
+
+        // Added kapoenen in p, p2 & p3
+        expect(p.functies[3]).toMatchObject({
             "functie": "d5f75b320b812440010b812555de03a2",
         })
-        expect(p.functies[2].einde).not.toBeDefined()
+        expect(p.functies[3].einde).not.toBeDefined()
+
         expect(p2.functies[3]).toMatchObject({
             "functie": "d5f75b320b812440010b812555de03a2",
         })
         expect(p2.functies[3].einde).not.toBeDefined()
 
+        expect(p3.functies[3]).toMatchObject({
+            "functie": "d5f75b320b812440010b812555de03a2",
+        })
+        expect(p3.functies[3].einde).not.toBeDefined()
 
-        expect(p.functies[3]).toMatchObject({
+        // Add woutlopers in p
+        expect(p.functies[4]).toMatchObject({
             "functie": "woudloperscustom",
         })
-        expect(p.functies[3].einde).not.toBeDefined()
+        expect(p.functies[4].einde).not.toBeDefined()
 
+        // Add givers in p2 (based on age)
         expect(p2.functies[4]).toMatchObject({
             "functie": "d5f75b320b812440010b8125565203c1", // givers
         })
         expect(p2.functies[4].einde).not.toBeDefined()
 
-        expect(p3.functies[3]).toMatchObject({
+        // Add wouterlopers as wouters in p3 (since woutlopers not defined in groepsadmin)
+        expect(p3.functies[4]).toMatchObject({
             "functie": "d5f75b320b812440010b8125567703cb", // when woudloper is missing in groepsadmin => to wouters
         })
-        expect(p3.functies[3].einde).not.toBeDefined()
+        expect(p3.functies[4].einde).not.toBeDefined()
 
-        // Tussentakken ook bij bijhorende leeftijdsgroep inschrijven
-        expect(p.functies[4]).toMatchObject({
+         // Tussentakken ook bij bijhorende leeftijdsgroep inschrijven (woutlopers zowel bij woutlopers als wouters in groepsadmin)
+        expect(p.functies[5]).toMatchObject({
             "functie": "d5f75b320b812440010b8125567703cb",
         })
-        expect(p.functies[4].einde).not.toBeDefined()
-
-        // Ended functies
-        expect(p.functies[5]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555c1039b",
-            "begin": "123",
-        })
-        expect(p2.functies[2]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555c1039b",
-            "begin": "123",
-        })
-        expect(p.functies[5].einde).toBeDefined()
-        expect(p2.functies[2].einde).not.toBeDefined() // do not end this, since this is managed by stamhoofd
+        expect(p.functies[5].einde).not.toBeDefined()
     });
 
 });
