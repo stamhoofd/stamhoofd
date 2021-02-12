@@ -131,7 +131,8 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         } catch (e) {
             toast.hide()
             console.error(e)
-            new Toast(e.message, "error red").setWithOffset().show()
+
+            Toast.fromError(e).setWithOffset().show()
         }
         this.loading = false
     }
