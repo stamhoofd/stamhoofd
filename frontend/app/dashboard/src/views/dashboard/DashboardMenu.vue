@@ -25,27 +25,36 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
-        <hr v-if="groups.length > 0 && enableMemberModule">
-
-        <div v-if="groups.length > 0 && enableMemberModule">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
-                <span class="icon user" />
-                <span>Leden</span>
-                <button v-if="groups.length > 1" class="button">
-                    Alle
+        <template v-if="groups.length > 0 && enableMemberModule">
+            <hr>
+            <div>
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
+                    <span class="icon user" />
+                    <span>Leden</span>
+                    <button v-if="groups.length > 1" class="button">
+                        Alle
+                    </button>
                 </button>
-            </button>
 
-            <button
-                v-for="group in groups"
-                :key="group.id"
-                class="menu-button button"
-                :class="{ selected: currentlySelected == 'group-'+group.id }"
-                @click="openGroup(group)"
-            >
-                {{ group.settings.name }}
-            </button>
-        </div>
+                <button
+                    v-for="group in groups"
+                    :key="group.id"
+                    class="menu-button button"
+                    :class="{ selected: currentlySelected == 'group-'+group.id }"
+                    @click="openGroup(group)"
+                >
+                    {{ group.settings.name }}
+                </button>
+            </div>
+
+            <hr>
+            <div>
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
+                    <span class="icon flag" />
+                    <span>Activiteiten</span>
+                </button>
+            </div>
+        </template>
         
         <hr v-if="enableWebshopModule">
 
