@@ -29,7 +29,7 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
 
     areNumbersValues(examples: string[]) {
         for (const example of examples) {
-            if (isNaN(parseFloat(example))) {
+            if (isNaN(parseFloat(example.toLowerCase().replace(/[€$\s,]+/g, "").trim()))) {
                 return false
             }
         }
@@ -42,15 +42,8 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
-
-        const value = cell.v.toLowerCase().trim()
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        const value = ((cell.w ?? cell.v)+"").toLowerCase().replace(/[€$\s,]+/g, "").trim()
         const b = parseFloat(value)
         
         if (isNaN(b)) {

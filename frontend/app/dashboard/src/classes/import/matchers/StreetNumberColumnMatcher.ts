@@ -20,7 +20,7 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
         
-        const possibleMatch = ["huisnummer", "street number"]
+        const possibleMatch = ["huisnummer", "street number", "huis"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -47,15 +47,15 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        const number = ((cell.w ?? cell.v)+"")
+
+        if (number.length == 0) {
             throw new SimpleError({
                 code: "invalid_type",
                 message: "Geen tekst in deze cel"
             })
         }
-
-        const number = cell.v
 
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {

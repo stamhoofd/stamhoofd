@@ -93,6 +93,8 @@ export class ImportingMember {
 
         for(let row = range.s.r + 1; row <= range.e.r; row++){
             const member = new ImportingMember(row, organization)
+            let allEmpty = true
+            const errorStack: ImportError[] = []
 
             for (const column of columns) {
                 if (!column.selected) {
@@ -105,16 +107,26 @@ export class ImportingMember {
 
                 const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject
 
+                if (valueCell) {
+                    allEmpty = false
+                }
+
                 try {
                     await column.matcher.apply(valueCell, member)
                 } catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
-                        result.errors.push(new ImportError(row, column.index, e.getHuman()))
+                        errorStack.push(new ImportError(row, column.index, e.getHuman()))
                     } else {
-                        result.errors.push(new ImportError(row, column.index, e.message))
+                        errorStack.push(new ImportError(row, column.index, e.message))
                     }
                 }
             }
+
+            if (allEmpty) {
+                // ignore empty row
+                continue
+            }
+            result.errors.push(...errorStack)
 
             // Check if we find the same member
             if (member.details.firstName.length > 0 && member.details.lastName.length > 0) {

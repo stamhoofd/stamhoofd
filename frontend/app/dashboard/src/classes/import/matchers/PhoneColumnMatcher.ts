@@ -42,15 +42,8 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
             return
         }
 
-         // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
-
-        const phoneRaw = cell.v
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        const phoneRaw = ((cell.w ?? cell.v)+"").trim()
         const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
         const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, "BE")
 

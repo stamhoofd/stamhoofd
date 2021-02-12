@@ -87,15 +87,8 @@ export class PaidColumnMatcher implements ColumnMatcher {
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
-
-        const value = cell.v.toLowerCase().trim()
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        const value = ((cell.w ?? cell.v)+"").toLowerCase().trim()
         const b = this.castBoolean(value)
         
         if (b === null) {
