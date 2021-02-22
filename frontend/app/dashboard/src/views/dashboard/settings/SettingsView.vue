@@ -97,10 +97,10 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
-                            Leeftijdsgroepen
+                            Inschrijvingsgroepen
                         </h2>
                         <p class="style-description">
-                            Prijzen, leeftijden, wachtlijsten
+                            Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
                         </p>
 
                         <template slot="right">
@@ -158,6 +158,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import AdminsView from '../admins/AdminsView.vue';
+import EditCategoryView from '../groups/EditCategoryView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
@@ -253,8 +254,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     manageGroups(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditGroupsView, {})
+            root: new ComponentWithProperties(EditCategoryView, {
+                category: this.organization.meta.rootCategory,
+                organization: this.organization,
+                saveHandler: (patch) => {
+                    console.log(patch)
+                }
+            })
         }).setDisplayStyle("popup").setAnimated(animated))
+
+
+        /*this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditGroupsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))*/
     }
 
     manageRecords(animated = true) {

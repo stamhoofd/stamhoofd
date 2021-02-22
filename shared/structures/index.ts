@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 56
+export const Version = 57
 
 // General
 export * from "./src/addresses/Address"
@@ -8,6 +8,7 @@ export * from "./src/addresses/CountryDecoder"
 export * from "./src/addresses/Province"
 export * from "./src/addresses/SearchRegions"
 export * from "./src/Group"
+export * from "./src/GroupCategory"
 export * from "./src/GroupGenderType"
 export * from "./src/GroupPrices"
 export * from "./src/GroupPrivateSettings"
