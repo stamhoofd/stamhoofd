@@ -1,11 +1,8 @@
 <template>
     <div class="st-view">
         <STNavigationBar :title="title">
-            <template slot="right">
-                <button class="button text" v-if="!isNew" @click="editMe">
-                    <span class="icon settings"/>
-                    <span>Wijzigen</span>
-                </button>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <template slot="right" v-else>
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
@@ -21,7 +18,27 @@
           
             <STErrorsDefault :error-box="errorBox" />
 
+            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van deze categorie"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <Checkbox v-model="limitRegistrations">
+                Een lid kan maar in één groep inschrijven
+            </Checkbox>
+
+            <Checkbox v-model="isHidden">
+               Verberg deze categorie voor leden
+            </Checkbox>
+
             <template v-if="categories.length > 0">
+                <hr>
                 <h2>Categorieën</h2>
                 <STList>
                     <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)"/>
@@ -29,6 +46,7 @@
             </template>
 
             <template v-else-if="groups.length > 0">
+                <hr>
                 <h2>Inschrijvingsgroepen</h2>
                 <STList>
                     <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)"/>
@@ -56,7 +74,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, CenteredMessage, LoadingButton } from "@stamhoofd/components";
+import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, CenteredMessage, LoadingButton, BackButton, Checkbox } from "@stamhoofd/components";
 import { GroupCategory, Organization, Version, GroupCategorySettings, OrganizationMetaData, Group } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import GroupRow from "./GroupRow.vue"
@@ -72,7 +90,9 @@ import EditCategoryView from './EditCategoryView.vue';
         STList,
         GroupRow,
         GroupCategoryRow,
-        LoadingButton
+        LoadingButton,
+        BackButton,
+        Checkbox
     },
 })
 export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
@@ -120,6 +140,44 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     get name() {
         return this.patchedCategory.settings.name
+    }
+
+    set name(name: string) {
+        this.addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    name
+                })
+            })
+        )
+    }
+
+    get limitRegistrations() {
+        return this.patchedCategory.settings.maximumRegistrations !== null
+    }
+
+    set limitRegistrations(limitRegistrations: boolean) {
+        this.addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    maximumRegistrations: limitRegistrations ? 1 : null
+                })
+            })
+        )
+    }
+
+    get isHidden() {
+        return !this.patchedCategory.settings.public
+    }
+
+    set isHidden(isHidden: boolean) {
+        this.addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    public: !isHidden
+                })
+            })
+        )
     }
 
     get groups() {

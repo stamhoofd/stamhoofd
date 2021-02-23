@@ -1,12 +1,13 @@
 <template>
     <div class="st-view group-edit-view">
         <STNavigationBar :title="isNew ? 'Nieuwe groep toevoegen' : name+' bewerken'">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
                 <button class="button text" v-if="!isNew" @click="deleteMe">
                     <span class="icon trash"/>
                     <span>Verwijderen</span>
                 </button>
-                <button class="button icon close gray" @click="pop" />
+                <button class="button icon close gray" v-if="!canPop" @click="pop" />
             </template>
         </STNavigationBar>
 
@@ -139,7 +140,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
+import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator, BackButton } from "@stamhoofd/components";
 import { OrganizationMetaData, RecordType, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -164,7 +165,8 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         Slider,
         LoadingButton,
         TimeInput,
-        EditGroupPriceBox
+        EditGroupPriceBox,
+        BackButton
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {

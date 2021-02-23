@@ -1,4 +1,6 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { v4 as uuidv4 } from "uuid";
+
 
 export enum PermissionLevel {
     /** No access */
@@ -27,6 +29,55 @@ export function getPermissionLevelNumber(level: PermissionLevel): number {
     }
 }
 
+export class PermissionRole extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = "";
+}
+
+export class PermissionRoleDetailed extends PermissionRole {
+    /**
+     * Access to payments
+     */
+    @field({ decoder: BooleanDecoder })
+    managePayments = false
+
+    /**
+     * Can create new webshops
+     */
+    @field({ decoder: BooleanDecoder })
+    createWebshops = false
+
+    /**
+     * Can view all webshops
+     */
+    @field({ decoder: BooleanDecoder })
+    readWebshops = false
+
+    /**
+     * Manage settings of webshops with read access
+     */
+    @field({ decoder: BooleanDecoder })
+    manageWebshops = false
+}
+
+/**
+ * Give access to a given resouce based by the roles of a user
+ */
+export class PermissionsByRole extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    read: PermissionRole[] = []
+
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    write: PermissionRole[] = []
+
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    full: PermissionRole[] = []
+}
+
+
 export class GroupPermissions extends AutoEncoder {
     @field({ decoder: StringDecoder })
     groupId: string
@@ -48,6 +99,9 @@ export class Permissions extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
     groups: GroupPermissions[] = []
+
+    @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
+    roles: PermissionRole[] = []
 
     hasAccess(level: PermissionLevel, groupId: string | null = null) {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {

@@ -159,8 +159,6 @@ import { Component, Mixins } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import AdminsView from '../admins/AdminsView.vue';
 import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
-import EditCategoryView from '../groups/EditCategoryView.vue';
-import EditGroupsView from '../groups/EditGroupsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';

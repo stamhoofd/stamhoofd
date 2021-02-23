@@ -34,20 +34,35 @@
             </STInputBox>
 
             <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
-        
-            <hr>
-            <h2>Geef toegang tot...</h2>
 
             <STList>
                 <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                     <Checkbox slot="left" v-model="fullAccess" />
-                    Maak administrator
+                    Toegang tot alles (administrator)
 
                     <template #right>
-                        Kan alle instellingen en beheerders bewerken
+                        Kan alles bekijken en bewerken
                     </template>
                 </STListItem>
-                <STListItem v-if="!fullAccess" element-name="label" :selectable="true" class="right-description smartphone-wrap">
+            </STList>
+
+            <div class="container" v-if="!fullAccess">
+                <hr>
+                <h2>Beheerdersrollen</h2>
+                <p>Ken rollen toe aan alle beheerders om hen toegang te geven tot bepaalde onderdelen van Stamhoofd. Zonder rollen heeft deze beheerder nergens toegang tot. Je kan rollen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
+
+                <STList v-if="roles.length > 0">
+                    <STListItem v-for="role in roles" element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                        <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
+                        {{ role.name }}
+                    </STListItem>
+                </STList>
+
+                <p v-else class="info-box">Je hebt nog geen rollen aangemaakt. Maak straks jouw eerste rol aan.</p>
+            </div>
+
+            <STList v-if="!fullAccess">
+                <STListItem  element-name="label" :selectable="true" class="right-description smartphone-wrap">
                     <Checkbox slot="left" v-model="writeAccess" />
                     Toegang tot alle groepen
 
@@ -125,7 +140,7 @@ import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErr
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, OrganizationKeyUser, PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures"
+import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, OrganizationKeyUser, PermissionLevel, PermissionRole, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -220,6 +235,28 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     canShareKey(key: string) {
         return !!Keychain.getItem(key)
+    }
+
+    get roles() {
+        return this.organization.privateMeta?.roles ?? []
+    }
+
+    getRole(role: PermissionRole) {
+        return !!(this.user ?? this.invite).permissions?.roles.find(r => r.id === role.id)
+    }
+
+    setRole(role: PermissionRole, enable: boolean) {
+        const p = Permissions.patch({})
+
+        if (enable) {
+            if (this.getRole(role)) {
+                return
+            }
+             p.roles.addPut(role)
+        } else {
+            p.roles.addDelete(role.id)
+        }
+        this.addPermissionsPatch(p)
     }
 
     async shareKey(key: string) {
@@ -388,9 +425,9 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const permissions = Permissions.create({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
+        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
 
-        if (!this.writeAccess && !this.fullAccess) {
+        /*if (!this.writeAccess && !this.fullAccess) {
             for (const group of this.groups) {
                 if (group.selected) {
                     permissions.groups.push(GroupPermissions.create({
@@ -399,7 +436,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     }))
                 }
             }
-        }
+        }*/
         this.addPermissionsPatch(permissions)
 
         if (this.isNew) {
@@ -567,17 +604,17 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     addInviteUserPatch(patch: PartialWithoutMethods<PatchType<InviteUserDetails>>) {
-        this.addInvitePatch({ userDetails: InviteUserDetails.patchType().create(patch) })
+        this.addInvitePatch({ userDetails: InviteUserDetails.patch(patch) })
     }
 
     addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
         if (this.user) {
             // User always have permission set, so no need to check if it already is created
-            this.addUserPatch({ permissions: Permissions.patchType().create(patch) })
+            this.addUserPatch({ permissions: Permissions.patch(patch) })
             return
         }
         // Invite always have permission set, so no need to check if it already is created
-        this.addInvitePatch({ permissions: Permissions.patchType().create(patch) })
+        this.addInvitePatch({ permissions: Permissions.patch(patch) })
     }
 
     addInvitePatch(patch: PartialWithoutMethods<PatchType<Invite>>) {

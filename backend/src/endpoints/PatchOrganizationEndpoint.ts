@@ -2,14 +2,16 @@ import { Database } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod } from "@stamhoofd/structures";
+import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, Permissions } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 import { GroupBuilder } from '../helpers/GroupBuilder';
 import { Group } from '../models/Group';
+import { Invite } from '../models/Invite';
 import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
 import { Token } from '../models/Token';
+import { User } from '../models/User';
 
 type Params = {};
 type Query = undefined;
@@ -73,6 +75,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
+                organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
 
                 if (request.body.privateMeta.payconiqApiKey !== undefined) {
                     if (request.body.privateMeta.payconiqApiKey === null) {
@@ -91,6 +94,52 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
                 
+            }
+
+            // Allow admin patches (permissions only atm). No put atm
+            if (request.body.admins) {
+                for (const patch of request.body.admins.getPatches()) {
+                    if (patch.permissions) {
+                        const admin = await User.getByID(patch.id)
+                        if (!admin || admin.organizationId !== user.organizationId) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
+                                field: "admins"
+                            })
+                        }
+
+                        if (patch.permissions.isPatch()) {
+                            admin.permissions = admin.permissions ? admin.permissions.patch(patch.permissions) : Permissions.create({}).patch(patch.permissions)
+                        } else {
+                            admin.permissions = patch.permissions
+                        }
+                        await admin.save()
+                    }
+                }
+            }
+
+            // Allow admin patches (permissions only atm). No put atm
+            if (request.body.invites) {
+                for (const patch of request.body.invites.getPatches()) {
+                    if (patch.permissions) {
+                        const invite = await Invite.getByID(patch.id)
+                        if (!invite || invite.organizationId !== invite.organizationId) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
+                                field: "invites"
+                            })
+                        }
+
+                        if (patch.permissions.isPatch()) {
+                            invite.permissions = invite.permissions ? invite.permissions.patch(patch.permissions) : Permissions.create({}).patch(patch.permissions)
+                        } else {
+                            invite.permissions = patch.permissions
+                        }
+                        await invite.save()
+                    }
+                }
             }
 
             if (request.body.meta) {

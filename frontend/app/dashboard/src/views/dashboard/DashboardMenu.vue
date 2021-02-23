@@ -25,10 +25,11 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
+        <template v-if="groups.length > 0 && enableMemberModule">
         <div v-for="category in organization.categoryTree.categories">
             <hr>
             <div>
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openCategory(category)">
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                     <span class="icon group" />
                     <span>{{ category.settings.name }}</span>
                 </button>
@@ -55,38 +56,8 @@
             </div>
 
         </div>
-
-        <template v-if="groups.length > 0 && enableMemberModule">
-            <hr>
-            <div>
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
-                    <span class="icon user" />
-                    <span>Leden</span>
-                    <button v-if="groups.length > 1" class="button">
-                        Alle
-                    </button>
-                </button>
-
-                <button
-                    v-for="group in groups"
-                    :key="group.id"
-                    class="menu-button button"
-                    :class="{ selected: currentlySelected == 'group-'+group.id }"
-                    @click="openGroup(group)"
-                >
-                    {{ group.settings.name }}
-                </button>
-            </div>
-
-            <hr>
-            <div>
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
-                    <span class="icon flag" />
-                    <span>Activiteiten</span>
-                </button>
-            </div>
         </template>
-        
+    
         <hr v-if="enableWebshopModule">
 
         <div v-if="enableWebshopModule">
@@ -511,7 +482,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     padding-right: var(--horizontal-padding, 30px);
 }
 
-.menu > hr {
+.menu hr {
     height: $border-width;
     border-radius: $border-width/2;
     background: $color-gray-light;

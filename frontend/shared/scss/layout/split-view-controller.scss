@@ -6,14 +6,12 @@
 
     > .master {
         z-index: 100;
+        background: $color-white-shade;
+        border-right: 2px solid $color-border;
     }
 
     > .detail {
         background: var(--color-current-background);
-        border-top-left-radius: $border-radius;
-        border-bottom-left-radius: $border-radius;
-        
-        @extend .style-side-view-shadow;
     }
 
     &[data-has-detail="true"] {

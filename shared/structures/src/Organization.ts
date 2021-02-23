@@ -3,9 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
 import { Group } from './Group';
-import { GroupCategory, GroupCategoryTree } from './GroupCategory';
+import { GroupCategoryTree } from './GroupCategory';
+import { Invite } from './Invite';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
+import { User } from './User';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class OrganizationKey extends AutoEncoder {
@@ -84,20 +86,18 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(WebshopPreview), version: 38, upgrade: () => []})
     webshops: WebshopPreview[] = [];
-}
-
-export class OrganizationSimple extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    id: string;
 
     /**
-     * Name of the organization you are creating
+     * Only available for patching. Also available with lazy loading OrganizationAdmins
      */
-    @field({ decoder: StringDecoder })
-    name: string;
+    @field({ decoder: new ArrayDecoder(User), optional: true, version: 60 })
+    admins?: User[]
 
-    @field({ decoder: Address })
-    address: Address;
+    /**
+     * Only available for patching. Also available with lazy loading OrganizationAdmins
+     */
+    @field({ decoder: new ArrayDecoder(Invite), optional: true, version: 60 })
+    invites?: Invite[]
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {

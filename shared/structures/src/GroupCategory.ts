@@ -1,7 +1,29 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
+import { PermissionRole } from './Permissions';
+
+/**
+ * Give access to a given resouce based by the roles of a user
+ */
+export class GroupCategoryPermissions extends AutoEncoder {
+    /**
+     * Can create new subgroups or categories in this category
+     */
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    create: PermissionRole[] = []
+
+    /// Permissions for groups, subcategories in this category
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    read: PermissionRole[] = []
+
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    write: PermissionRole[] = []
+
+    @field({ decoder: new ArrayDecoder(PermissionRole) })
+    full: PermissionRole[] = []
+}
 
 export class GroupCategorySettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -16,8 +38,15 @@ export class GroupCategorySettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     public = true
 
-    // Todo: insert inheritable prices and settings here
+    @field({ decoder: IntegerDecoder, nullable: true, version: 59 })
+    maximumRegistrations: number | null = null
+
+    /// Might move these to private settings, but is not an issue atm
+    @field({ decoder: GroupCategoryPermissions, version: 61 })
+    permissions = GroupCategoryPermissions.create({})
 }
+
+
 
 export class GroupCategory extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

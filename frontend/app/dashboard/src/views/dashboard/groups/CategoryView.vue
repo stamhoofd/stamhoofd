@@ -45,8 +45,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, STListItem } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, STListItem, BackButton } from "@stamhoofd/components";
 import { Group, GroupCategory } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -60,7 +60,8 @@ import GroupMembersView from "./GroupMembersView.vue";
         STInputBox,
         STErrorsDefault,
         STList,
-        STListItem
+        STListItem,
+        BackButton
     },
 })
 export default class CategoryView extends Mixins(NavigationMixin) {
@@ -115,8 +116,10 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         })
     }
 
-    openCategory() {
-
+    openCategory(category: GroupCategory) {
+        this.show(new ComponentWithProperties(CategoryView, {
+            category
+        }))
     }
 
     openGroup(group: Group) {
@@ -126,13 +129,15 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     editMe() {
-        this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
-            category: this.category, 
-            organization: this.organization, 
-            async saveHandler(patch) {
-                patch.id = this.organization.id
-                await OrganizationManager.patch(patch)
-            }
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(EditCategoryGroupsView, { 
+                category: this.category, 
+                organization: this.organization, 
+                async saveHandler(patch) {
+                    patch.id = this.organization.id
+                    await OrganizationManager.patch(patch)
+                }
+            })
         }).setDisplayStyle("popup"))
     }
     

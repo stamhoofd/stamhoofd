@@ -1,0 +1,474 @@
+<template>
+    <div class="st-view">
+        <STNavigationBar title="Beheerders">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <template slot="right">
+                <button class="button text" v-if="!isNew" @click="deleteMe">
+                    <span class="icon trash"/>
+                    <span>Verwijderen</span>
+                </button>
+                <button class="button icon close gray" @click="pop" />
+            </template>
+        </STNavigationBar>
+
+        <main>
+            <h1>
+                {{ title }}
+            </h1>
+
+            <STErrorsDefault :error-box="errorBox" />
+
+            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van deze rol"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <div class="container" v-if="enableMemberModule">
+                <hr>
+                <h2>Toegang tot inschrijvingsgroepen</h2>
+                <p>Je kan de toegang tot groepen regelen door een groep of categorie te bewerken</p>
+
+                <STList v-if="groups.length > 0">
+                    <STListItem v-for="group in groups" :key="group.id" element-name="label" :selectable="true">
+                        <h2 class="style-title-list">{{ group.name }}</h2>
+                        <p class="style-description-small">{{ group.description }}</p>
+                    </STListItem>
+                </STList>
+
+                <p v-else class="info-box">Deze rol heeft geen toegang tot inschrijvingsgroepen</p>
+
+            </div>
+
+             <div class="container" v-if="enableWebshopModule">
+                <hr>
+                <h2>Toegang tot webshops</h2>
+                <p>Je kan de toegang tot individuele webshops regelen door een webshop te bewerken</p>
+
+                <Checkbox v-model="manageWebshops">Geef volledige toegang tot alle webshops</Checkbox>
+                <Checkbox v-if="!manageWebshops" v-model="readWebshops">Geef toegang tot bestellingen van alle webshops</Checkbox>
+                <Checkbox v-if="!manageWebshops" v-model="createWebshops">Kan nieuwe webshops maken</Checkbox>
+
+                <STList v-if="webshops.length > 0">
+                    <STListItem v-for="webshop in webshops" :key="group.id" element-name="label" :selectable="true">
+                        <h2 class="style-title-list">{{ webshop.name }}</h2>
+                        <p class="style-description-small">{{ webshop.description }}</p>
+                    </STListItem>
+                </STList>
+
+                <p v-else-if="!manageWebshops && !readWebshops && !createWebshops" class="info-box">Deze rol heeft geen toegang tot webshops</p>
+            </div>
+
+            <hr>
+            <h2>Beheerders met deze rol</h2>
+
+            <STList>
+                <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
+                    <Checkbox slot="left" :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+
+                    <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
+                    <p class="style-description-small">{{ admin.email }}</p>
+                </STListItem>
+
+                <STListItem v-for="invite in invites" :key="invite.id" element-name="label" :selectable="true">
+                    <Checkbox slot="left" :checked="hasAdminRole(invite)" @change="setInviteRole(invite, $event)" />
+
+                    <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
+                    <p class="style-description-small">{{ invite.userDetails.email }}</p>
+                </STListItem>
+            </STList>
+
+        </main>
+
+        <STToolbar>
+            <template slot="right">
+                <button class="button secundary" @click="cancel">
+                    Annuleren
+                </button>
+                <LoadingButton :loading="saving">
+                    <button class="button primary" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
+    </div>
+</template>
+
+
+<script lang="ts">
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, BackButton, ErrorBox, Validator, STErrorsDefault, STInputBox, LoadingButton, CenteredMessage } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, User, OrganizationAdmins, Invite, PermissionRoleDetailed, Organization, OrganizationPrivateMetaData, Version, Permissions, PermissionRole } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { Sorter } from "@stamhoofd/utility";
+
+@Component({
+    components: {
+        Checkbox,
+        STNavigationBar,
+        STToolbar,
+        STList,
+        STListItem,
+        Spinner,
+        BackButton,
+        STInputBox,
+        STErrorsDefault,
+        LoadingButton
+    }
+})
+export default class EditRoleView extends Mixins(NavigationMixin) {
+    errorBox: ErrorBox | null = null
+    validator = new Validator()
+    saving = false
+
+    @Prop({ required: true })
+    role: PermissionRoleDetailed
+
+    @Prop({ required: true })
+    organization: Organization
+    
+    patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
+
+    /**
+     * Pass all the changes we made back when we save this category
+     */
+    @Prop({ required: true })
+    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+
+    SessionManager = SessionManager // needed to make session reactive
+    loading = true
+
+    mounted() {
+        this.load().catch(e => {
+            console.error(e)
+        })
+    }
+
+    get patchedOrganization() {
+        return this.organization.patch(this.patchOrganization)
+    }
+
+    get patchedRole() {
+        const c = this.patchedOrganization.privateMeta?.roles.find(c => c.id == this.role.id)
+        if (c) {
+            return c
+        }
+        return this.role
+    }
+
+    get isNew() {
+        return this.patchedRole.name.length == 0
+    }
+
+    get title() {
+        return this.isNew ? "Nieuwe beheerdersrol maken" : this.patchedRole.name
+    }
+
+    get name() {
+        return this.patchedRole.name
+    }
+
+    set name(name: string) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                name
+            })
+        )
+    }
+
+    get createWebshops() {
+        return this.patchedRole.createWebshops
+    }
+
+    set createWebshops(createWebshops: boolean) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                createWebshops
+            })
+        )
+    }
+
+    get readWebshops() {
+        return this.patchedRole.readWebshops
+    }
+
+    set readWebshops(readWebshops: boolean) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                readWebshops
+            })
+        )
+    }
+
+    get manageWebshops() {
+        return this.patchedRole.manageWebshops
+    }
+
+    set manageWebshops(manageWebshops: boolean) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                manageWebshops
+            })
+        )
+    }
+
+    get groups(): { name: string, description: string }[] {
+        const g: { name: string, description: string }[] = []
+
+        for (const group of this.patchedOrganization.groups) {
+            if (group.privateSettings?.roles.full.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: group.settings.name,
+                    description: "Leden bekijken, aanpassen en instellingen bewerken"
+                })
+                continue
+            }
+
+            if (group.privateSettings?.roles.write.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: group.settings.name,
+                    description: "Leden bekijken en aanpassen"
+                })
+                continue
+            }
+
+            if (group.privateSettings?.roles.read.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: group.settings.name,
+                    description: "Leden bekijken"
+                })
+                continue
+            }
+        }
+
+        for (const category of this.patchedOrganization.meta.categories) {
+            if (category.settings.permissions.full.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: category.settings.name,
+                    description: "Volledige toegang tot deze categorie en alle groepen in deze categorie"
+                })
+                continue
+            }
+
+            if (category.settings.permissions.create.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: category.settings.name,
+                    description: "Kan nieuwe inschrijvingsgroepen maken in deze categorie"
+                })
+                // do not continue
+            }
+
+            if (category.settings.permissions.write.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: category.settings.name,
+                    description: "Kan alle leden bekijken en bewerken in deze categorie"
+                })
+                continue
+            }
+
+            if (category.settings.permissions.read.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: category.settings.name,
+                    description: "Kan alle leden bekijken in deze categorie"
+                })
+                continue
+            }
+        }
+
+        return g
+    }
+
+    get webshops(): { name: string, description: string }[] {
+        const g: { name: string, description: string }[] = []
+
+        for (const webshop of this.patchedOrganization.webshops) {
+            if (webshop.privateMeta.roles.full.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: webshop.meta.name,
+                    description: "Volledige toegang"
+                })
+                continue
+            }
+
+            if (webshop.privateMeta.roles.write.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: webshop.meta.name,
+                    description: "Bestellingen bekijken en aanpassen"
+                })
+                continue
+            }
+
+            if (webshop.privateMeta.roles.read.find(r => r.id === this.role.id)) {
+                g.push({
+                    name: webshop.meta.name,
+                    description: "Bestellingen bekijken"
+                })
+                continue
+            }
+        }
+
+        return g
+    }
+
+    addRolePatch(patch: AutoEncoderPatchType<PermissionRoleDetailed>) {
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addPatch(PermissionRoleDetailed.patch(Object.assign({}, patch, { id: this.role.id })))
+
+        this.addPatch(Organization.patch({
+            privateMeta
+        }))
+    }
+
+    addPatch(patch: AutoEncoderPatchType<Organization>) {
+        this.patchOrganization = this.patchOrganization.patch(patch)
+        console.log(this.patchOrganization)
+        console.log(this.patchedOrganization)
+    }
+
+    async load() {
+        if (this.organization.admins && this.organization.invites) {
+            this.loading = false
+            return
+        }
+
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+
+        this.organization.admins = response.data.users
+        this.organization.invites = response.data.invites
+        this.loading = false
+    }
+
+    get admins() {
+        return (this.patchedOrganization.admins ?? [])
+    }
+
+    get invites() {
+        return this.patchedOrganization.invites ?? []
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
+    }
+
+    get enableWebshopModule() {
+        return this.organization.meta.modules.useWebshops
+    }
+
+    get sortedAdmins() {
+        // Sort by inital value, without changes to the admin itself
+
+        return this.admins.sort((a, b) => {
+            const af = a.permissions?.hasFullAccess() ?? false
+            const bf = b.permissions?.hasFullAccess() ?? false
+
+            const ag = this.patchedOrganization.groups.filter(g => a.permissions?.hasWriteAccess(g.id)) ?? []
+            const bg = this.patchedOrganization.groups.filter(g => b.permissions?.hasWriteAccess(g.id)) ?? []
+
+            const ac = ag.length
+            const bc = bg.length
+
+            return Sorter.stack(
+                Sorter.byBooleanValue(af, bf), 
+                Sorter.byNumberValue(ac, bc), 
+                ac == 1 && bc == 1 ? Group.defaultSort(ag[0], bg[0]) : 0,
+                Sorter.byStringValue(a.firstName ?? "", b.firstName ?? ""),
+                Sorter.byStringValue(a.lastName ?? "", b.lastName ?? "")
+            )!
+        })
+    }
+
+    hasAdminRole(admin: User | Invite) {
+        return admin.permissions?.roles.find(f => f.id === this.role.id) ?? false
+    }
+
+    setAdminRole(admin: User, enable: boolean) {
+        console.log("set", enable)
+        const permissionPatch = Permissions.patch({})
+
+        if (enable) {
+            if (this.hasAdminRole(admin)) {
+                return
+            }
+            permissionPatch.roles.addPut(PermissionRole.create(this.role))
+        } else {
+            permissionPatch.roles.addDelete(this.role.id)
+        }
+        const userPatch = User.patch({
+            id: admin.id,
+            permissions: permissionPatch
+        })
+        const p = Organization.patch({})
+        p.admins!.addPatch(userPatch)
+        this.addPatch(p)
+        console.log(p)
+    }
+
+    setInviteRole(admin: Invite, enable: boolean) {
+        const permissionPatch = Permissions.patch({})
+
+        if (enable) {
+            if (this.hasAdminRole(admin)) {
+                return
+            }
+            permissionPatch.roles.addPut(PermissionRole.create(this.role))
+        } else {
+            permissionPatch.roles.addDelete(this.role.id)
+        }
+        const userPatch = Invite.patch({
+            id: admin.id,
+            permissions: permissionPatch
+        })
+        const p = Organization.patch({})
+        p.invites!.addPatch(userPatch)
+        this.addPatch(p)
+    }
+
+    save() {
+        this.saveHandler(this.patchOrganization)
+        this.pop({ force: true })
+    }
+
+    async deleteMe() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+            return
+        }
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addDelete(this.role.id)
+        const p = Organization.patch({
+            privateMeta
+        })
+        this.saveHandler(p)
+        this.pop({ force: true })
+    }
+
+    cancel() {
+        this.pop()
+    }
+
+    isChanged() {
+        return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        console.log("should navigate away")
+        if (!this.isChanged()) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    }
+}
+
+</script>

@@ -59,7 +59,13 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     message: "Je hebt geen rechten om de rechten van deze gebruiker te wijzigen"
                 })
             }
-            editUser.permissions = editUser.permissions ? editUser.permissions.patch(request.body.permissions) : Permissions.create(request.body.permissions)
+
+            if (request.body.permissions.isPatch()) {
+                editUser.permissions = editUser.permissions ? editUser.permissions.patch(request.body.permissions) : Permissions.create({}).patch(request.body.permissions)
+            } else {
+                editUser.permissions = request.body.permissions
+            }
+            
         }
 
         if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.publicKey !== null && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {

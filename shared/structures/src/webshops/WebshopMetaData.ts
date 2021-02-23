@@ -9,6 +9,7 @@ import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
+import { PermissionsByRole } from '../Permissions';
 import { TransferSettings } from './TransferSettings';
 
 export class WebshopTimeSlot extends AutoEncoder {
@@ -217,8 +218,14 @@ export class WebshopMetaData extends AutoEncoder {
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    placeholder = ""
+    /**
+     * Automatically has full access
+     */
+    @field({ decoder: StringDecoder, version: 59 })
+    authorId = ""
+
+    @field({ decoder: PermissionsByRole, version: 59 })
+    roles = PermissionsByRole.create({})
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

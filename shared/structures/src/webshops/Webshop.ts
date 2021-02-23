@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from '../Organization';
 import { Category } from './Category';
 import { Product } from './Product';
@@ -12,6 +13,9 @@ export class WebshopPreview extends AutoEncoder {
 
     @field({ decoder: WebshopMetaData })
     meta = WebshopMetaData.create({})
+
+    @field({ decoder: WebshopPrivateMetaData, version: 62 })
+    privateMeta = WebshopPrivateMetaData.create({})
 }
 
 export class Webshop extends AutoEncoder {

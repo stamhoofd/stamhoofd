@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field
 
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
+import { PermissionRoleDetailed } from './Permissions';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -92,4 +93,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 56 })
     acquisitionTypes: AcquisitionType[] = [];
+
+    @field({ decoder: new ArrayDecoder(PermissionRoleDetailed), version: 60 })
+    roles: PermissionRoleDetailed[] = []
 }
