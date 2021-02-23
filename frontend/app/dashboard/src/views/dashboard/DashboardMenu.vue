@@ -25,6 +25,37 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
+        <div v-for="category in organization.categoryTree.categories">
+            <hr>
+            <div>
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openCategory(category)">
+                    <span class="icon group" />
+                    <span>{{ category.settings.name }}</span>
+                </button>
+
+                <button
+                    v-for="group in category.groups"
+                    :key="group.id"
+                    class="menu-button button"
+                    :class="{ selected: currentlySelected == 'group-'+group.id }"
+                    @click="openGroup(group)"
+                >
+                    {{ group.settings.name }}
+                </button>
+
+                <button
+                    v-for="c in category.categories"
+                    :key="c.id"
+                    class="menu-button button"
+                    :class="{ selected: currentlySelected == 'category-'+c.id }"
+                    @click="openCategory(c)"
+                >
+                    {{ c.settings.name }}
+                </button>
+            </div>
+
+        </div>
+
         <template v-if="groups.length > 0 && enableMemberModule">
             <hr>
             <div>
@@ -117,7 +148,7 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -126,6 +157,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
+import CategoryView from "./groups/CategoryView.vue";
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
@@ -338,6 +370,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
+    }
+
+    openCategory(category: GroupCategory, animated = true) {
+        this.currentlySelected = "category-"+category.id
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CategoryView, { category }) }).setAnimated(animated));
     }
 
     openWebshop(webshop: WebshopPreview, animated = true) {

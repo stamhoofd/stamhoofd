@@ -89,7 +89,8 @@ export class Organization extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 
@@ -207,7 +208,7 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort)
+            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null })))
         })
     }
 

@@ -10,7 +10,7 @@
             </h1>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openGeneral">
+                <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
                     <h2 class="style-title-list">
                         Algemeen
@@ -21,7 +21,7 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPersonalize">
+                <STListItem :selectable="true" class="left-center" @click="openPersonalize(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg">
                     <h2 class="style-title-list">
                         Personaliseren
@@ -32,7 +32,7 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="setupEmail">
+                <STListItem :selectable="true" class="left-center" @click="setupEmail(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
                     <h2 class="style-title-list">
                         E-mailadressen
@@ -46,7 +46,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openAdmins">
+                <STListItem :selectable="true" class="left-center" @click="openAdmins(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
                     <h2 class="style-title-list">
                         Beheerders
@@ -60,7 +60,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPrivacy">
+                <STListItem :selectable="true" class="left-center" @click="openPrivacy(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg">
                     <h2 class="style-title-list">
                         Privacy
@@ -94,7 +94,7 @@
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
                             Inschrijvingsgroepen
@@ -109,7 +109,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/import-excel.svg">
                         <h2 class="style-title-list">
                             Leden importeren
@@ -123,7 +123,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                         <h2 class="style-title-list">
                             Wijzig gevraagde gegevens
@@ -158,6 +158,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import AdminsView from '../admins/AdminsView.vue';
+import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
 import EditCategoryView from '../groups/EditCategoryView.vue';
 import EditGroupsView from '../groups/EditGroupsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
@@ -254,11 +255,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     manageGroups(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditCategoryView, {
+            root: new ComponentWithProperties(EditCategoryGroupsView, {
                 category: this.organization.meta.rootCategory,
                 organization: this.organization,
-                saveHandler: (patch) => {
-                    console.log(patch)
+                async saveHandler(patch) {
+                    patch.id = this.organization.id
+                    await OrganizationManager.patch(patch)
                 }
             })
         }).setDisplayStyle("popup").setAnimated(animated))

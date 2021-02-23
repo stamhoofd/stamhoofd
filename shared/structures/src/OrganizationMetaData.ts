@@ -320,5 +320,4 @@ export class OrganizationMetaData extends AutoEncoder {
     get rootCategory(): GroupCategory | undefined {
         return this.categories.find(c => c.id === this.rootCategoryId)
     }
-
 }
