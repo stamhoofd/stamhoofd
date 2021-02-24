@@ -2,7 +2,11 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right" v-else>
+            <template slot="right">
+                <button class="button text" v-if="!isNew" @click="deleteMe">
+                    <span class="icon trash"/>
+                    <span>Verwijderen</span>
+                </button>
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
@@ -18,24 +22,26 @@
           
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze categorie"
-                    autocomplete=""
-                >
-            </STInputBox>
+            <template v-if="!isRoot">
+                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        placeholder="Naam van deze categorie"
+                        autocomplete=""
+                    >
+                </STInputBox>
 
-            <Checkbox v-model="limitRegistrations">
-                Een lid kan maar in één groep inschrijven
-            </Checkbox>
+                <Checkbox v-model="limitRegistrations">
+                    Een lid kan maar in één groep inschrijven
+                </Checkbox>
 
-            <Checkbox v-model="isHidden">
-               Verberg deze categorie voor leden
-            </Checkbox>
+                <Checkbox v-model="isHidden">
+                Verberg deze categorie voor leden
+                </Checkbox>
+            </template>
 
             <template v-if="categories.length > 0">
                 <hr>
@@ -45,15 +51,45 @@
                 </STList>
             </template>
 
-            <template v-else-if="groups.length > 0">
+            <template v-else>
                 <hr>
                 <h2>Inschrijvingsgroepen</h2>
                 <STList>
                     <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)"/>
                 </STList>
             </template>
-            
-            
+
+            <p v-if="categories.length == 0">
+                <button class="button text" @click="createGroup">
+                    <span class="icon add"/>
+                    <span>Nieuwe groep toevoegen</span>
+                </button>
+            </p>
+            <p>
+                <button class="button text" @click="createCategory">
+                    <span class="icon add"/>
+                    <span>Nieuwe categorie toevoegen</span>
+                </button>
+            </p>
+
+            <div class="container" v-if="!isRoot">
+                <hr>
+                <h2>Wie kan groepen maken in deze categorie?</h2>
+                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersrollen bewerken bij je instellingen.</p>
+    
+                <STList v-if="roles.length > 0">
+                    <STListItem>
+                        <Checkbox :checked="true" :disabled="true" slot="left" />
+                        Administrators
+                    </STListItem>
+                    <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
+                        <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />
+                        {{ role.name }}
+                    </STListItem>
+                </STList>
+
+                <p v-else-if="fullAccess" class="info-box">Je hebt nog geen rollen aangemaakt. Maak beheerdersrollen aan via instellingen > beheerders</p>
+            </div>
         </main>
 
         <STToolbar>
@@ -74,12 +110,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, CenteredMessage, LoadingButton, BackButton, Checkbox } from "@stamhoofd/components";
-import { GroupCategory, Organization, Version, GroupCategorySettings, OrganizationMetaData, Group } from "@stamhoofd/structures"
+import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, CenteredMessage, LoadingButton, BackButton, Checkbox, STListItem } from "@stamhoofd/components";
+import { GroupCategory, Organization, Version, GroupCategorySettings, OrganizationMetaData, Group, PermissionRole, GroupCategoryPermissions, OrganizationPrivateMetaData, GroupSettings, OrganizationGenderType, GroupGenderType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import GroupRow from "./GroupRow.vue"
 import GroupCategoryRow from "./GroupCategoryRow.vue"
 import EditCategoryView from './EditCategoryView.vue';
+import { SessionManager } from '@stamhoofd/networking';
+import EditGroupView from './EditGroupView.vue';
 
 @Component({
     components: {
@@ -92,7 +130,8 @@ import EditCategoryView from './EditCategoryView.vue';
         GroupCategoryRow,
         LoadingButton,
         BackButton,
-        Checkbox
+        Checkbox,
+        STListItem
     },
 })
 export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
@@ -134,8 +173,34 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         return this.category.id === this.organization.meta.rootCategoryId
     }
 
+    get fullAccess() {
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+    }
+
+    get roles() {
+        return this.patchedOrganization.privateMeta?.roles ?? []
+    }
+
+    getCreateRole(role: PermissionRole) {
+        return !!this.patchedCategory.settings.permissions.create.find(r => r.id === role.id)
+    }
+
+    setCreateRole(role: PermissionRole, enable: boolean) {
+        const p = GroupCategoryPermissions.patch({})
+
+        if (enable) {
+            if (this.getCreateRole(role)) {
+                return
+            }
+            p.create.addPut(role)
+        } else {
+            p.create.addDelete(role.id)
+        }
+        this.addPermissionsPatch(p)
+    }
+
     get title() {
-        return this.isRoot ? 'Inschrijvingsgroepen bewerken' : this.name+''
+        return this.isRoot ? 'Inschrijvingsgroepen bewerken' : (this.isNew ? "Nieuwe categorie" : this.name)
     }
 
     get name() {
@@ -206,6 +271,14 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
         this.addPatch(Organization.patch({
             meta
+        }))
+    }
+
+    addPermissionsPatch(patch: AutoEncoderPatchType<GroupCategoryPermissions>) {
+        this.addCategoryPatch(GroupCategory.patch({
+            settings: GroupCategorySettings.patch({
+                permissions: GroupCategoryPermissions.patch(patch)
+            })
         }))
     }
 
@@ -280,6 +353,74 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 this.addPatch(patch)
             }
         }).setDisplayStyle("popup"))
+    }
+
+    createGroup() {
+        const group = Group.create({
+            settings: GroupSettings.create({
+                name: "",
+                startDate: this.organization.meta.defaultStartDate,
+                endDate: this.organization.meta.defaultEndDate,
+                prices: this.organization.meta.defaultPrices,
+                genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
+            })
+        })
+        const meta = OrganizationMetaData.patch({})
+
+        const me = GroupCategory.patch({ id: this.category.id })
+        me.groupIds.addPut(group.id)
+        meta.categories.addPatch(me)
+
+        const p = Organization.patch({
+            id: this.organization.id,
+            meta
+        })
+
+        p.groups.addPut(group)
+        
+        this.show(new ComponentWithProperties(EditGroupView, { 
+            group, 
+            organization: this.patchedOrganization.patch(p), 
+            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
+                this.addPatch(p.patch(patch))
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    createCategory() {
+        const category = GroupCategory.create({})
+        const meta = OrganizationMetaData.patch({})
+        meta.categories.addPut(category)
+
+        const me = GroupCategory.patch({ id: this.category.id })
+        me.categoryIds.addPut(category.id)
+        meta.categories.addPatch(me)
+
+        const p = Organization.patch({
+            id: this.organization.id,
+            meta
+        })
+        
+        this.show(new ComponentWithProperties(EditCategoryGroupsView, { 
+            category: category, 
+            organization: this.patchedOrganization.patch(p), 
+            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+                this.addPatch(p.patch(patch))
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    async deleteMe() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+            return
+        }
+        const meta = OrganizationMetaData.patch({})
+        meta.categories.addDelete(this.category.id)
+        const p = Organization.patch({
+            meta
+        })
+        this.saveHandler(p)
+        this.pop({ force: true })
     }
 
     cancel() {

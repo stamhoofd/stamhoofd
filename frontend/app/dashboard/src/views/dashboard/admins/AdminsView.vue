@@ -16,24 +16,41 @@
             <p>Voeg hier beheerders toe en deel ze op in rollen. Een beheerder kan meerdere rollen hebben. Je kan vervolgens de toegang tot zaken regelen per rol.</p>
 
             <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
-                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe!
+                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
             </p>
 
             <Spinner v-if="loading" />
             
             <hr>
-            <h2 class="style-with-button">
-                <div>
-                    Administrators
-                </div>
-                <div>
-                    <button class="button text">
-                        <span class="icon settings"/>
-                        <span>Bewerken</span>
-                    </button>
-                </div>
+            <h2>
+                Administrators
             </h2>
             <p>Administrators hebben toegang tot alles, zonder beperkingen.</p>
+
+            <Spinner v-if="loading" />
+                <STList v-else>
+                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
+                        <p class="style-description-small">{{ admin.email }}</p>
+                        <p class="style-description-small">{{ permissionList(admin) }}</p>
+
+                        <template slot="right">
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
+                        <p class="style-description-small">{{ invite.userDetails.email }}</p>
+                        <p class="style-description-small">{{ permissionList(invite) }}</p>
+
+                        <template slot="right">
+                            <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
+                            <p v-else>Uitnodiging nog niet geaccepteerd</p>
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
 
             <div v-for="role in roles" class="container">
                 <hr>
@@ -73,12 +90,53 @@
                         </template>
                     </STListItem>
                 </STList>
+
+                <p class="info-box" v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0">Geen beheerders met deze rol</p>
+            </div>
+
+            <div class="container" v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0">
+                <hr>
+                    <h2 class="style-with-button">
+                    <div>
+                        Beheerders zonder rollen
+                    </div>
+                </h2>
+
+                <STList v-if="!loading">
+                    <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
+                        <p class="style-description-small">{{ admin.email }}</p>
+                        <p class="style-description-small">{{ permissionList(admin) }}</p>
+
+                        <template slot="right">
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
+                        <p class="style-description-small">{{ invite.userDetails.email }}</p>
+                        <p class="style-description-small">{{ permissionList(invite) }}</p>
+
+                        <template slot="right">
+                            <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
+                            <p v-else>Uitnodiging nog niet geaccepteerd</p>
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
             </div>
 
             <p>
                 <button class="button text" @click="addRole">
                     <span class="icon add"/>
                     <span>Nieuwe rol toevoegen</span>
+                </button>
+            </p>
+            <p>
+                <button class="button text" @click="createAdmin">
+                    <span class="icon add"/>
+                    <span>Nieuwe beheerder toevoegen</span>
                 </button>
             </p>
         </main>
@@ -247,6 +305,28 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     getInvitesForRole(role: PermissionRole) {
         return this.invites.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
+    }
+
+    getAdminsWithoutRole() {
+        // We still do a check on ID because users might have a role that is deleted
+        const ids = this.roles.map(r => r.id)
+        return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
+    }
+
+    getInvitesWithoutRole() {
+        // We still do a check on ID because users might have a role that is deleted
+        const ids = this.roles.map(r => r.id)
+        return this.invites.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
+    }
+
+    getAdmins() {
+        // We still do a check on ID because users might have a role that is deleted
+        return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess())
+    }
+
+    getInviteAdmins() {
+        // We still do a check on ID because users might have a role that is deleted
+        return this.invites.filter(a => !!a.permissions?.hasFullAccess())
     }
 
     addRole() {

@@ -52,31 +52,22 @@
                 <p>Ken rollen toe aan alle beheerders om hen toegang te geven tot bepaalde onderdelen van Stamhoofd. Zonder rollen heeft deze beheerder nergens toegang tot. Je kan rollen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
                 <STList v-if="roles.length > 0">
-                    <STListItem v-for="role in roles" element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                    <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
                         <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
                         {{ role.name }}
                     </STListItem>
                 </STList>
 
-                <p v-else class="info-box">Je hebt nog geen rollen aangemaakt. Maak straks jouw eerste rol aan.</p>
+                <p v-else class="info-box">Je hebt nog geen rollen aangemaakt. Maak een beheerdersrol aan om beheerders op te delen.</p>
+
+                <p>
+                    <button class="button text" @click="addRole">
+                        <span class="icon add"/>
+                        <span>Nieuwe rol toevoegen</span>
+                    </button>
+                </p>
             </div>
 
-            <STList v-if="!fullAccess">
-                <STListItem  element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="writeAccess" />
-                    Toegang tot alle groepen
-
-                    <template #right>
-                        Kan alle leden bekijken en bewerken
-                    </template>
-                </STListItem>
-                <template v-if="!writeAccess && !fullAccess">
-                    <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
-                        <Checkbox slot="left" v-model="group.selected" />
-                        {{ group.group.settings.name }}
-                    </STListItem>
-                </template>
-            </STList>
 
             <template v-if="editUser !== null">
                 <hr>
@@ -135,16 +126,17 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, OrganizationKeyUser, PermissionLevel, PermissionRole, Permissions, User, Version } from "@stamhoofd/structures"
+import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import EditRoleView from './EditRoleView.vue';
 import SendInviteView from './SendInviteView.vue';
 
 class SelectableGroup {
@@ -257,6 +249,28 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             p.roles.addDelete(role.id)
         }
         this.addPermissionsPatch(p)
+    }
+
+    addRole() {
+        const role = PermissionRoleDetailed.create({})
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addPut(role)
+
+        const patch = Organization.patch({ 
+            id: this.organization.id,
+            privateMeta
+        })
+        
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(EditRoleView, { 
+                role,
+                organization: this.organization.patch(patch),
+                async saveHandler(p: AutoEncoderPatchType<Organization>) {
+                    const doSave = patch.patch(p)
+                    await OrganizationManager.patch(doSave)
+                }
+            }),
+        }).setDisplayStyle("popup"))
     }
 
     async shareKey(key: string) {

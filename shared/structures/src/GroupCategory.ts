@@ -9,7 +9,7 @@ import { PermissionRole } from './Permissions';
  */
 export class GroupCategoryPermissions extends AutoEncoder {
     /**
-     * Can create new subgroups or categories in this category
+     * Can create new groups in this category or subcategories
      */
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     create: PermissionRole[] = []

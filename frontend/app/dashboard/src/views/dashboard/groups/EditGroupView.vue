@@ -144,6 +144,7 @@ import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIco
 import { OrganizationMetaData, RecordType, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 import EditGroupPriceBox from "./EditGroupPriceBox.vue"
 
@@ -194,7 +195,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
     get isNew() {
-        return this.patchOrganization.groups.getPuts().length > 0
+        return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
     }
 
     get patchedOrganization() {
