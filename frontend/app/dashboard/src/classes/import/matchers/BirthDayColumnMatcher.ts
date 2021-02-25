@@ -66,10 +66,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             const date_info = new Date(utc_value * 1000);
             const month = date_info.getMonth() + 1;
             text = `${date_info.getDate()}/${month}/${date_info.getFullYear()}`
-
-            console.log(cell.v, cell.w, text)
         } else if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            console.log(cell)
             throw new SimpleError({
                 code: "invalid_type",
                 message: "Geen tekst in deze cel"
