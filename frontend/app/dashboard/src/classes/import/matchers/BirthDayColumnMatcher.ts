@@ -58,7 +58,9 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             usa = false
 
             /**
-             *  Excel stores timestamps as a real number representing the number of days since 1 January 1900. 25569 is the number of days between 1 January 1900 and 1 January 1970, which is what we need to convert to a UNIX timestamp that can be used for Date.
+             * https://github.com/SheetJS/sheetjs/issues/279
+             * © pushpenderjunglee, arliber
+             * Excel stores timestamps as a real number representing the number of days since 1 January 1900. 25569 is the number of days between 1 January 1900 and 1 January 1970, which is what we need to convert to a UNIX timestamp that can be used for Date.
              */
             const utc_value = Math.floor(cell.v- 25569) * 86400;
             const date_info = new Date(utc_value * 1000);
