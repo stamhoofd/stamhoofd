@@ -3,8 +3,8 @@
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
-                <button class="button text" v-if="!isNew" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -39,7 +39,7 @@
                 </Checkbox>
 
                 <Checkbox v-model="isHidden">
-                Verberg deze categorie voor leden
+                    Verberg deze categorie voor leden
                 </Checkbox>
             </template>
 
@@ -47,7 +47,7 @@
                 <hr>
                 <h2>Categorieën</h2>
                 <STList>
-                    <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)"/>
+                    <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
                 </STList>
             </template>
 
@@ -55,31 +55,31 @@
                 <hr>
                 <h2>Inschrijvingsgroepen</h2>
                 <STList>
-                    <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)"/>
+                    <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
                 </STList>
             </template>
 
             <p v-if="categories.length == 0">
                 <button class="button text" @click="createGroup">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
                 </button>
             </p>
             <p>
                 <button class="button text" @click="createCategory">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Nieuwe categorie toevoegen</span>
                 </button>
             </p>
 
-            <div class="container" v-if="!isRoot">
+            <div v-if="!isRoot" class="container">
                 <hr>
                 <h2>Wie kan groepen maken in deze categorie?</h2>
                 <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersrollen bewerken bij je instellingen.</p>
     
                 <STList v-if="roles.length > 0">
                     <STListItem>
-                        <Checkbox :checked="true" :disabled="true" slot="left" />
+                        <Checkbox slot="left" :checked="true" :disabled="true" />
                         Administrators
                     </STListItem>
                     <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
@@ -88,7 +88,9 @@
                     </STListItem>
                 </STList>
 
-                <p v-else-if="fullAccess" class="info-box">Je hebt nog geen rollen aangemaakt. Maak beheerdersrollen aan via instellingen > beheerders</p>
+                <p v-else-if="fullAccess" class="info-box">
+                    Je hebt nog geen rollen aangemaakt. Maak beheerdersrollen aan via instellingen > beheerders
+                </p>
             </div>
         </main>
 
@@ -110,14 +112,15 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator, CenteredMessage, LoadingButton, BackButton, Checkbox, STListItem } from "@stamhoofd/components";
-import { GroupCategory, Organization, Version, GroupCategorySettings, OrganizationMetaData, Group, PermissionRole, GroupCategoryPermissions, OrganizationPrivateMetaData, GroupSettings, OrganizationGenderType, GroupGenderType } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import GroupRow from "./GroupRow.vue"
-import GroupCategoryRow from "./GroupCategoryRow.vue"
-import EditCategoryView from './EditCategoryView.vue';
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
+import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import EditCategoryView from './EditCategoryView.vue';
 import EditGroupView from './EditGroupView.vue';
+import GroupCategoryRow from "./GroupCategoryRow.vue"
+import GroupRow from "./GroupRow.vue"
 
 @Component({
     components: {

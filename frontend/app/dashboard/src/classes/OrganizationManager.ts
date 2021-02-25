@@ -10,6 +10,10 @@ export class OrganizationManagerStatic {
         return SessionManager.currentSession!.organization!
     }
 
+    get user() {
+        return SessionManager.currentSession!.user!
+    }
+
     set organization(organization: Organization) {
         SessionManager.currentSession!.setOrganization(organization)
     }

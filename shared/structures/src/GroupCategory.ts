@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringD
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
-import { PermissionRole } from './Permissions';
+import { PermissionRole, Permissions } from './Permissions';
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -44,6 +44,25 @@ export class GroupCategorySettings extends AutoEncoder {
     /// Might move these to private settings, but is not an issue atm
     @field({ decoder: GroupCategoryPermissions, version: 61 })
     permissions = GroupCategoryPermissions.create({})
+
+    canEdit(permissions: Permissions): boolean {
+        if (permissions.hasFullAccess()) {
+            return true
+        }
+        return false
+    }
+
+    canCreate(permissions: Permissions): boolean {
+        if (permissions.hasFullAccess()) {
+            return true
+        }
+        for (const role of this.permissions.create) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 
