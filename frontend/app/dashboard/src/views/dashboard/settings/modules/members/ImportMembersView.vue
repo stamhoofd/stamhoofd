@@ -234,7 +234,6 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         // Read all the names + some examples and try to match them to columns
         for(let colNum = range.s.c; colNum <= range.e.c; colNum++){
             const cell = this.sheet[XLSX.utils.encode_cell({r: range.s.r, c: colNum})] as XLSX.CellObject
-            console.log(cell)
             const columnName = (cell.w ?? cell.v ?? "")+""
             const matched = new MatchedColumn(colNum, columnName, this.matchers)
 
@@ -249,13 +248,10 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
             for (const [index, matcher] of availableMatchers.entries()) {
                 if (matcher.doesMatch(columnName, matched.examples)) {
-                    console.log(matcher)
                     availableMatchers.splice(index, 1)
 
                     matched.matcher = matcher
                     matched.selected = true
-
-                    console.log(matched)
                     break
                 }
             }
