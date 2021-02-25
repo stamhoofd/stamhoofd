@@ -51,7 +51,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
             return cell.v
         }
 
-        let text = cell.w ?? cell.v as string
+        const text = cell.w ?? cell.v as string
         let usa = false
 
         if (cell.t == "n" && typeof cell.v === "number") {
@@ -64,8 +64,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
              */
             const utc_value = Math.floor(cell.v- 25569) * 86400;
             const date_info = new Date(utc_value * 1000);
-            const month = date_info.getMonth() + 1;
-            text = `${date_info.getDate()}/${month}/${date_info.getFullYear()}`
+            return date_info
         } else if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
             throw new SimpleError({
                 code: "invalid_type",

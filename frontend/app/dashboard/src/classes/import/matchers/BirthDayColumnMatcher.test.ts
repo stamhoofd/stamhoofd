@@ -1,3 +1,4 @@
+import { Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
 import { BirthDayColumnMatcher } from "./BirthDayColumnMatcher";
@@ -52,7 +53,7 @@ describe("BirthDayColumnMatcher", () => {
             w: "don't use me",
         };
 
-        expect(matcher.dateFromCell(numberCell)).toEqual(date)
+        expect(Formatter.date(matcher.dateFromCell(numberCell))).toEqual(Formatter.date(date))
 
         // As string
         const stringCell: XLSX.CellObject = {
