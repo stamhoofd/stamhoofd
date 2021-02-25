@@ -31,20 +31,24 @@
                 <hr>
             </div>
 
-            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cartItem="cartItem" :optionMenu="optionMenu" />
+            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" />
 
             <h2>Aantal</h2>
 
-            <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true"/>
-            <p class="st-list-description" v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining">Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje zitten</template></p>
+            <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
+            <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
+                Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">
+                    , waarvan er al {{ count }} in jouw winkelmandje zitten
+                </template>
+            </p>
         </main>
 
-        <STToolbar>
-            <button slot="right" class="button primary" @click="addToCart" v-if="oldItem">
+        <STToolbar :sticky="oldItem ? true : false">
+            <button v-if="oldItem" slot="right" class="button primary" @click="addToCart">
                 <span class="icon basket" />
                 <span>Opslaan</span>
             </button>
-            <button slot="right" class="button primary" @click="addToCart" v-else>
+            <button v-else slot="right" class="button primary" @click="addToCart">
                 <span class="icon basket" />
                 <span>Toevoegen</span>
             </button>
@@ -55,7 +59,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { NumberInput,Radio,STList, STListItem,STNavigationBar, STToolbar, Toast, StepperInput} from '@stamhoofd/components';
+import { NumberInput,Radio,StepperInput,STList, STListItem,STNavigationBar, STToolbar, Toast} from '@stamhoofd/components';
 import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
