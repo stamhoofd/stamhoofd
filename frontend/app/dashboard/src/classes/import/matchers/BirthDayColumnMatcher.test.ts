@@ -1,3 +1,6 @@
+import { Formatter } from "@stamhoofd/utility";
+import XLSX from "xlsx";
+
 import { BirthDayColumnMatcher } from "./BirthDayColumnMatcher";
 
 describe("BirthDayColumnMatcher", () => {
@@ -38,4 +41,34 @@ describe("BirthDayColumnMatcher", () => {
         expect(() => matcher.parseDate("december", false)).toThrow(/datum/i)
         expect(() => matcher.parseDate("sdgsdgsg", false)).toThrow(/datum/i)
     });
+
+    test("cell parsing", () => {
+        const matcher = new BirthDayColumnMatcher()
+
+        // As number
+        const date = new Date(2005, 4 - 1, 21)
+        const numberCell: XLSX.CellObject = {
+            v: 38463,
+            t: "n",
+            w: "don't use me",
+        };
+
+        expect(Formatter.date(matcher.dateFromCell(numberCell))).toEqual(Formatter.date(date))
+
+        // As string
+        const stringCell: XLSX.CellObject = {
+            t: "s",
+            w: "21/04/05",
+            v: "21/04/05",
+        };
+        expect(matcher.dateFromCell(stringCell)).toEqual(date)
+
+        // As date
+        const dateCell: XLSX.CellObject = {
+            t: "d",
+            v: date,
+            w: "don't use me",
+        };
+        expect(matcher.dateFromCell(dateCell)).toEqual(date)
+    })
 });

@@ -32,7 +32,7 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
         return false
     }
 
-    apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
+    dateFromCell(cell: XLSX.CellObject | undefined) {
         if (!cell) {
             throw new SimpleError({
                 code: "invalid_type",
@@ -48,26 +48,35 @@ export class BirthDayColumnMatcher implements ColumnMatcher {
                 })
             }
 
-            member.details.birthDay = cell.v
-            return
+            return cell.v
         }
 
-        let text = cell.w ?? cell.v as string
+        const text = cell.w ?? cell.v as string
         let usa = false
 
-        if (cell.t == "n" && cell.w) {
-            text = cell.w
-            usa = true
+        if (cell.t == "n" && typeof cell.v === "number") {
+            usa = false
+
+            /**
+             * https://github.com/SheetJS/sheetjs/issues/279
+             * © pushpenderjunglee, arliber
+             * Excel stores timestamps as a real number representing the number of days since 1 January 1900. 25569 is the number of days between 1 January 1900 and 1 January 1970, which is what we need to convert to a UNIX timestamp that can be used for Date.
+             */
+            const utc_value = Math.floor(cell.v- 25569) * 86400;
+            const date_info = new Date(utc_value * 1000);
+            return date_info
         } else if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            console.log(cell)
             throw new SimpleError({
                 code: "invalid_type",
                 message: "Geen tekst in deze cel"
             })
         }
 
-        member.details.birthDay = this.parseDate(text, usa)
-        
+        return this.parseDate(text, usa)
+    }
+
+    apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
+        member.details.birthDay = this.dateFromCell(cell)
     }
 
     parseDate(str: string, usa = false) {
