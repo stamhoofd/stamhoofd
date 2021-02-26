@@ -3,10 +3,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { GroupCategory } from './GroupCategory';
 import { GroupGenderType } from './GroupGenderType';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListSkipReason,WaitingListType } from './GroupSettings';
 import { MemberExistingStatus } from './members/MemberDetails';
+import { Permissions } from './Permissions';
 
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -241,6 +243,94 @@ export class Group extends AutoEncoder {
             case WaitingListType.All: return null;
             case WaitingListType.PreRegistrations: return null;
         }
+    }
+
+    /**
+     * Returns all parent and grandparents of this group
+     */
+    getParentCategories(all: GroupCategory[]): GroupCategory[] {
+        const map = new Map<string, GroupCategory>()
+        
+        const parents = all.filter(g => g.groupIds.includes(this.id))
+        for (const parent of parents) {
+            map.set(parent.id, parent)
+
+            const hisParents = parent.getParentCategories(all)
+            for (const pp of hisParents) {
+                 map.set(pp.id, pp)
+            }
+        }
+
+        return [...map.values()]
+    }
+
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    canViewMembers(permissions: Permissions): boolean {
+        // Out of date check
+        if (permissions.hasReadAccess(this.id)) {
+            return true
+        }
+
+        if (!this.privateSettings) {
+            return false
+        }
+
+        // Check roles
+        for (const role of this.privateSettings.permissions.read) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return true
+            }
+        }
+
+        return this.canEditMembers(permissions)
+    }
+
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    canEditMembers(permissions: Permissions): boolean {
+        // Out of date check
+        if (permissions.hasWriteAccess(this.id)) {
+            return true
+        }
+
+        if (!this.privateSettings) {
+            return false
+        }
+
+        // Check roles
+        for (const role of this.privateSettings.permissions.write) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return true
+            }
+        }
+
+        return this.canEditSettings(permissions)
+    }
+
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    canEditSettings(permissions: Permissions): boolean {
+        // Out of date check
+        if (permissions.hasFullAccess(this.id)) {
+            return true
+        }
+
+        if (!this.privateSettings) {
+            return false
+        }
+
+        // Check roles
+        for (const role of this.privateSettings.permissions.full) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return true
+            }
+        }
+
+        return false
     }
 
 }

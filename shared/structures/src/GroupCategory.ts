@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringD
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
+import { KeyConstants } from './KeyConstants';
 import { PermissionRole, Permissions } from './Permissions';
 
 /**
@@ -44,25 +45,6 @@ export class GroupCategorySettings extends AutoEncoder {
     /// Might move these to private settings, but is not an issue atm
     @field({ decoder: GroupCategoryPermissions, version: 61 })
     permissions = GroupCategoryPermissions.create({})
-
-    canEdit(permissions: Permissions): boolean {
-        if (permissions.hasFullAccess()) {
-            return true
-        }
-        return false
-    }
-
-    canCreate(permissions: Permissions): boolean {
-        if (permissions.hasFullAccess()) {
-            return true
-        }
-        for (const role of this.permissions.create) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return true
-            }
-        }
-        return false
-    }
 }
 
 
@@ -86,6 +68,54 @@ export class GroupCategory extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     categoryIds: string[] = []
+
+    /**
+     * Returns all parent and grandparents of this group
+     */
+    getParentCategories(all: GroupCategory[]): GroupCategory[] {
+        const map = new Map<string, GroupCategory>()
+
+        // Avoid recursive loop: can never call getParentCategories on itself again
+        const filteredAll = all.filter(g => g.id !== this.id)
+        
+        const parents = filteredAll.filter(g => g.categoryIds.includes(this.id))
+        for (const parent of parents) {
+            map.set(parent.id, parent)
+
+            const hisParents = parent.getParentCategories(filteredAll)
+            for (const pp of hisParents) {
+                 map.set(pp.id, pp)
+            }
+        }
+
+        return [...map.values()]
+    }
+
+    canEdit(permissions: Permissions): boolean {
+        if (permissions.hasFullAccess()) {
+            return true
+        }
+        return false
+    }
+
+    canCreate(permissions: Permissions, categories: GroupCategory[] = []): boolean {
+        if (permissions.hasFullAccess()) {
+            return true
+        }
+        for (const role of this.settings.permissions.create) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return true
+            }
+        }
+
+        const parents = this.getParentCategories(categories)
+        for (const parent of parents) {
+            if (parent.canCreate(permissions, [])) {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 export class GroupCategoryTree extends GroupCategory {
@@ -95,19 +125,58 @@ export class GroupCategoryTree extends GroupCategory {
     @field({ decoder: new ArrayDecoder(GroupCategoryTree) })
     categories: GroupCategoryTree[] = []
 
-    static build(root: GroupCategory, categories: GroupCategory[], groups: Group[]): GroupCategoryTree {
+    get depth(): number {
+        if (this.groups.length > 0) {
+            return 0
+        }
+        if (this.categories.length == 0) {
+            return 0
+        }
+
+        return Math.max(...this.categories.map(c => c.depth)) + 1
+    }
+
+    /**
+     * 
+     * @param root 
+     * @param categories 
+     * @param groups 
+     * @param permissions 
+     * @param maxDepth Should be at least 1, we don't support building only groups
+     */
+    static build(root: GroupCategory, categories: GroupCategory[], groups: Group[], permissions: Permissions | null = null, maxDepth: number | null = null): GroupCategoryTree {
         return GroupCategoryTree.create({ 
             ...root,
             categories: root.categoryIds.flatMap(id => {
                 const f = categories.find(c => c.id === id)
                 if (f) {
-                    return [GroupCategoryTree.build(f, categories, groups)]
+                    const t = GroupCategoryTree.build(f, categories, groups, permissions)
+
+                    if (permissions !== null && t.categories.length == 0 && t.groups.length == 0 && !f.canCreate(permissions, categories)) {
+                        // Hide empty categories where we cannot create new groups
+                        return []
+                    }
+
+                    if (maxDepth !== null && t.depth >= maxDepth) {
+                        for (const cat of t.categories) {
+                            // Clone reference
+                            cat.settings = GroupCategorySettings.create(cat.settings)
+                            cat.settings.name = t.settings.name + " / " + cat.settings.name
+                        }
+                        // Concat here
+                        return t.categories
+                    }
+                    return [t]
                 }
                 return []
             }),
             groups: root.groupIds.flatMap(id => {
                 const g = groups.find(c => c.id === id)
                 if (g) {
+                    // Hide groups we don't have permissions for
+                    if (permissions && !g.canViewMembers(permissions)) {
+                        return []
+                    }
                     return [g]
                 }
                 return []

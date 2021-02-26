@@ -7,6 +7,7 @@ import { GroupCategoryTree } from './GroupCategory';
 import { Invite } from './Invite';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
+import { Permissions } from './Permissions';
 import { User } from './User';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
@@ -74,6 +75,35 @@ export class Organization extends AutoEncoder {
         console.warn("Root category ID is missing in categories. Migration might be needed")
         return GroupCategoryTree.create({ })
     }
+
+    /**
+     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     */
+    categoryTreeForPermissions(permissions: Permissions): GroupCategoryTree {
+        const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
+        if (root) {
+            return GroupCategoryTree.build(root, this.meta.categories, this.groups, permissions)
+        }
+
+        // Broken setup here
+        console.warn("Root category ID is missing in categories. Migration might be needed")
+        return GroupCategoryTree.create({ })
+    }
+
+    /**
+     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     */
+    getCategoryTreeWithDepth(maxDepth: number): GroupCategoryTree {
+        const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
+        if (root) {
+            return GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
+        }
+
+        // Broken setup here
+        console.warn("Root category ID is missing in categories. Migration might be needed")
+        return GroupCategoryTree.create({ })
+    }
+
 
     /**
      * Only set for users with full access to the organization

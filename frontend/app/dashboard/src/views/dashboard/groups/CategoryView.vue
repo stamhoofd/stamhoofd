@@ -20,7 +20,7 @@
             <template v-if="categories.length > 0">
                 <STList>
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
-                        {{ category.settings.name }}
+                        {{ category.settings.name }}
 
                         <template slot="right">
                             <span class="icon arrow-right-small gray" />
@@ -56,7 +56,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, GroupCategory, GroupGenderType, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -91,6 +91,10 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         return this.category
     }
 
+    get tree() {
+        return GroupCategoryTree.build(this.reactiveCategory, this.organization.meta.categories, this.organization.groups, OrganizationManager.user.permissions)
+    }
+
     get organization() {
         return OrganizationManager.organization
     }
@@ -108,31 +112,19 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canEdit() {
-        return OrganizationManager.user.permissions ? this.category.settings.canEdit(OrganizationManager.user.permissions) : false
+        return OrganizationManager.user.permissions ? this.category.canEdit(OrganizationManager.user.permissions) : false
     }
 
     get canCreate() {
-        return OrganizationManager.user.permissions ? this.category.settings.canCreate(OrganizationManager.user.permissions) : false
+        return OrganizationManager.user.permissions ? this.category.canCreate(OrganizationManager.user.permissions, this.organization.meta.categories) : false
     }
 
     get groups() {
-        return this.reactiveCategory.groupIds.flatMap(id => {
-            const group = this.organization.groups.find(g => g.id === id)
-            if (group) {
-                return [group]
-            }
-            return []
-        })
+        return this.tree.groups
     }
 
     get categories() {
-        return this.reactiveCategory.categoryIds.flatMap(id => {
-            const category = this.organization.meta.categories.find(c => c.id === id)
-            if (category) {
-                return [category]
-            }
-            return []
-        })
+        return this.tree.categories
     }
 
     openCategory(category: GroupCategory) {

@@ -25,37 +25,36 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
-        <template v-if="groups.length > 0 && enableMemberModule">
-        <div v-for="category in organization.categoryTree.categories">
-            <hr>
-            <div>
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
-                    <span class="icon group" />
-                    <span>{{ category.settings.name }}</span>
-                </button>
+        <template v-if="enableMemberModule">
+            <div v-for="category in tree.categories">
+                <hr>
+                <div>
+                    <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                        <span class="icon group" />
+                        <span>{{ category.settings.name }}</span>
+                    </button>
 
-                <button
-                    v-for="group in category.groups"
-                    :key="group.id"
-                    class="menu-button button"
-                    :class="{ selected: currentlySelected == 'group-'+group.id }"
-                    @click="openGroup(group)"
-                >
-                    {{ group.settings.name }}
-                </button>
+                    <button
+                        v-for="group in category.groups"
+                        :key="group.id"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'group-'+group.id }"
+                        @click="openGroup(group)"
+                    >
+                        {{ group.settings.name }}
+                    </button>
 
-                <button
-                    v-for="c in category.categories"
-                    :key="c.id"
-                    class="menu-button button"
-                    :class="{ selected: currentlySelected == 'category-'+c.id }"
-                    @click="openCategory(c)"
-                >
-                    {{ c.settings.name }}
-                </button>
+                    <button
+                        v-for="c in category.categories"
+                        :key="c.id"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'category-'+c.id }"
+                        @click="openCategory(c)"
+                    >
+                        {{ c.settings.name }}
+                    </button>
+                </div>
             </div>
-
-        </div>
         </template>
     
         <hr v-if="enableWebshopModule">
@@ -119,7 +118,7 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -157,6 +156,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     get isSGV() {
         return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+    }
+
+    get tree() {
+        return this.organization.categoryTreeForPermissions(OrganizationManager.user.permissions ?? Permissions.create({}))
     }
 
     mounted() {
@@ -220,15 +223,15 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
-            if (this.groups.length > 0) {
-                this.openGroup(this.groups[0], false)
-            } else {
+            //if (this.groups.length > 0) {
+                //this.openGroup(this.groups[0], false)
+            //} else {
                 if (this.fullAccess) {
                     this.manageSettings(false)
                 } else {
                     this.manageAccount(false)
                 }
-            }
+            //}
         }
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
@@ -316,12 +319,6 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
     }
 
-    get groups() {
-        return this.organization.groups.filter(g => {
-            return this.hasAccessToGroup(g)
-        })
-    }
-
     get webshops() {
         return this.organization.webshops
     }
@@ -331,9 +328,6 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     openAll(animated = true) {
-        if (this.groups.length <= 1) {
-            return;
-        }
         this.currentlySelected = "group-all"
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
     }

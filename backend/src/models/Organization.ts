@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -212,7 +212,7 @@ export class Organization extends Model {
         })
     }
 
-    async getPrivateStructure(): Promise<OrganizationStruct> {
+    async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {
         const groups = await Group.where({ organizationId: this.id })
         const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
         return OrganizationStruct.create({
@@ -224,7 +224,13 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort),
+            groups: groups.map(g => {
+                const struct = GroupStruct.create(g)
+                if (!struct.canViewMembers(permissions)) {
+                    struct.privateSettings = null
+                }
+                return struct
+            }).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta,
             webshops: webshops.map(w => WebshopPreview.create(w))
         })

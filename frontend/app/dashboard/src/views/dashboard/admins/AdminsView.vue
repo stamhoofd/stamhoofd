@@ -54,7 +54,7 @@
 
             <div v-for="role in roles" class="container">
                 <hr>
-                    <h2 class="style-with-button">
+                <h2 class="style-with-button">
                     <div>
                         {{ role.name }}
                     </div>

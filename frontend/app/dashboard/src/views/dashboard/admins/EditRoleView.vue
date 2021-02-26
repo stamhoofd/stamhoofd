@@ -3,8 +3,8 @@
         <STNavigationBar title="Beheerders">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
-                <button class="button text" v-if="!isNew" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -28,39 +28,84 @@
                 >
             </STInputBox>
 
-            <div class="container" v-if="enableMemberModule">
+            <div v-if="enableMemberModule" class="container">
                 <hr>
-                <h2>Toegang tot inschrijvingsgroepen</h2>
-                <p>Je kan de toegang tot groepen regelen door een groep of categorie te bewerken</p>
+                <h2 class="style-with-button">
+                    <div>
+                        Toegang tot inschrijvingsgroepen
+                    </div>
+                    <div>
+                        <button class="button text" @click="editGroups()">
+                            <span class="icon settings"/>
+                            <span>Bewerken</span>
+                        </button>
+                    </div>
+                </h2>
 
                 <STList v-if="groups.length > 0">
                     <STListItem v-for="group in groups" :key="group.id" element-name="label" :selectable="true">
-                        <h2 class="style-title-list">{{ group.name }}</h2>
-                        <p class="style-description-small">{{ group.description }}</p>
+                        <h2 class="style-title-list">
+                            {{ group.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ group.description }}
+                        </p>
                     </STListItem>
                 </STList>
 
-                <p v-else class="info-box">Deze rol heeft geen toegang tot inschrijvingsgroepen</p>
+                <p v-else class="info-box">
+                    Deze rol heeft geen toegang tot inschrijvingsgroepen
+                </p>
 
+                <hr>
+                <h2>Nieuwe activiteiten, workshops, inschrijvingsgroepen... maken</h2>
+                <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
+
+                <STList v-if="categories.length > 0">
+                    <STListItem v-for="category in categories" :key="category.id" element-name="label" :selectable="true">
+                        <h2 class="style-title-list">
+                            {{ category.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ category.description }}
+                        </p>
+                    </STListItem>
+                </STList>
+
+                <p v-else class="info-box">
+                    Deze rol kan geen inschrijvingsgroepen maken
+                </p>
             </div>
 
-             <div class="container" v-if="enableWebshopModule">
+            <div v-if="enableWebshopModule" class="container">
                 <hr>
                 <h2>Toegang tot webshops</h2>
                 <p>Je kan de toegang tot individuele webshops regelen door een webshop te bewerken</p>
 
-                <Checkbox v-model="manageWebshops">Geef volledige toegang tot alle webshops</Checkbox>
-                <Checkbox v-if="!manageWebshops" v-model="readWebshops">Geef toegang tot bestellingen van alle webshops</Checkbox>
-                <Checkbox v-if="!manageWebshops" v-model="createWebshops">Kan nieuwe webshops maken</Checkbox>
+                <Checkbox v-model="manageWebshops">
+                    Geef volledige toegang tot alle webshops
+                </Checkbox>
+                <Checkbox v-if="!manageWebshops" v-model="readWebshops">
+                    Geef toegang tot bestellingen van alle webshops
+                </Checkbox>
+                <Checkbox v-if="!manageWebshops" v-model="createWebshops">
+                    Kan nieuwe webshops maken
+                </Checkbox>
 
                 <STList v-if="webshops.length > 0">
-                    <STListItem v-for="webshop in webshops" :key="group.id" element-name="label" :selectable="true">
-                        <h2 class="style-title-list">{{ webshop.name }}</h2>
-                        <p class="style-description-small">{{ webshop.description }}</p>
+                    <STListItem v-for="webshop in webshops" :key="webshop.id" element-name="label" :selectable="true">
+                        <h2 class="style-title-list">
+                            {{ webshop.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ webshop.description }}
+                        </p>
                     </STListItem>
                 </STList>
 
-                <p v-else-if="!manageWebshops && !readWebshops && !createWebshops" class="info-box">Deze rol heeft geen toegang tot webshops</p>
+                <p v-else-if="!manageWebshops && !readWebshops && !createWebshops" class="info-box">
+                    Deze rol heeft geen toegang tot webshops
+                </p>
             </div>
 
             <hr>
@@ -70,18 +115,25 @@
                 <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
                     <Checkbox slot="left" :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
 
-                    <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
-                    <p class="style-description-small">{{ admin.email }}</p>
+                    <h2 class="style-title-list">
+                        {{ admin.firstName }} {{ admin.lastName }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ admin.email }}
+                    </p>
                 </STListItem>
 
                 <STListItem v-for="invite in invites" :key="invite.id" element-name="label" :selectable="true">
                     <Checkbox slot="left" :checked="hasAdminRole(invite)" @change="setInviteRole(invite, $event)" />
 
-                    <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
-                    <p class="style-description-small">{{ invite.userDetails.email }}</p>
+                    <h2 class="style-title-list">
+                        {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ invite.userDetails.email }}
+                    </p>
                 </STListItem>
             </STList>
-
         </main>
 
         <STToolbar>
@@ -101,14 +153,14 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, BackButton, ErrorBox, Validator, STErrorsDefault, STInputBox, LoadingButton, CenteredMessage } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, User, OrganizationAdmins, Invite, PermissionRoleDetailed, Organization, OrganizationPrivateMetaData, Version, Permissions, PermissionRole } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
-
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
+import { Component, Mixins, Prop } from "vue-property-decorator";
+import EditRoleGroupsView from './EditRoleGroupsView.vue';
 
 @Component({
     components: {
@@ -220,11 +272,22 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         )
     }
 
+    editGroups() {
+        this.present(new ComponentWithProperties(EditRoleGroupsView, {
+            role: this.patchedRole,
+            organization: this.patchedOrganization,
+            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
+                console.log(patch)
+                this.addPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
+    }
+
     get groups(): { name: string, description: string }[] {
         const g: { name: string, description: string }[] = []
 
         for (const group of this.patchedOrganization.groups) {
-            if (group.privateSettings?.roles.full.find(r => r.id === this.role.id)) {
+            if (group.privateSettings?.permissions.full.find(r => r.id === this.role.id)) {
                 g.push({
                     name: group.settings.name,
                     description: "Leden bekijken, aanpassen en instellingen bewerken"
@@ -232,7 +295,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
                 continue
             }
 
-            if (group.privateSettings?.roles.write.find(r => r.id === this.role.id)) {
+            if (group.privateSettings?.permissions.write.find(r => r.id === this.role.id)) {
                 g.push({
                     name: group.settings.name,
                     description: "Leden bekijken en aanpassen"
@@ -240,7 +303,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
                 continue
             }
 
-            if (group.privateSettings?.roles.read.find(r => r.id === this.role.id)) {
+            if (group.privateSettings?.permissions.read.find(r => r.id === this.role.id)) {
                 g.push({
                     name: group.settings.name,
                     description: "Leden bekijken"
@@ -248,6 +311,12 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
                 continue
             }
         }
+
+        return g
+    }
+
+    get categories(): { name: string, description: string }[] {
+        const g: { name: string, description: string }[] = []
 
         for (const category of this.patchedOrganization.meta.categories) {
             if (category.settings.permissions.full.find(r => r.id === this.role.id)) {

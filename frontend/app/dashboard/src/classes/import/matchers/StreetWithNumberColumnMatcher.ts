@@ -50,6 +50,7 @@ export class StreetWithNumberColumnMatcher extends SharedMatcher implements Colu
 
         // Check if string value
         if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
+            console.log(cell)
             throw new SimpleError({
                 code: "invalid_type",
                 message: "Geen tekst in deze cel"
