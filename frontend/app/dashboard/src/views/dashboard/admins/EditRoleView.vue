@@ -43,7 +43,7 @@
                 </h2>
 
                 <STList v-if="groups.length > 0">
-                    <STListItem v-for="group in groups" :key="group.id" element-name="label" :selectable="true">
+                    <STListItem v-for="group in groups" :key="group.id">
                         <h2 class="style-title-list">
                             {{ group.name }}
                         </h2>

@@ -27,8 +27,8 @@
                         </h2>
 
                         <div slot="right" v-if="getSelectGroup(group)">
-                            <button class="button text" @click.stop.prevent>
-                                <span>{{ getGroupPermission(group) }}</span>
+                            <button class="button text" @click.stop.prevent="chooseGroupPermission(group, $event)">
+                                <span>{{ getLevelText(getGroupPermission(group)) }}</span>
                                 <span class="icon arrow-down-small" />
                             </button>
                         </div>
@@ -58,11 +58,12 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupPrivateSettings, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
 @Component({
     components: {
@@ -267,6 +268,26 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
             this.addPatch(p)
             return
         }
+    }
+
+    getLevelText(level: "none" | "write" | "read" | "full"): string {
+        switch(level) {
+            case "none": return "Geen toegang";
+            case "write": return "Bekijken en bewerken";
+            case "read": return "Bekijken";
+            case "full": return "Volledige toegang";
+        }
+    }
+
+    chooseGroupPermission(group, event) {
+        const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
+            x: event.clientX,
+            y: event.clientY,
+            callback: (level: "none" | "write" | "read" | "full") => {
+                this.setGroupPermission(group, level)
+            }
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
 
