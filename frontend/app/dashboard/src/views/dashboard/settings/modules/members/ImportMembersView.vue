@@ -188,7 +188,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
                 return
             }
             const data = new Uint8Array(e.target.result as any);
-            const workbook = XLSX.read(data, {type: 'array'});
+            const workbook = XLSX.read(data, {type: 'array', raw: true });
 
             /* DO SOMETHING WITH workbook HERE */
             const keys = Object.keys(workbook.Sheets)
