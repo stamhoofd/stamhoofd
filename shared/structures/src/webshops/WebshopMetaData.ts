@@ -224,8 +224,8 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 59 })
     authorId = ""
 
-    @field({ decoder: PermissionsByRole, version: 59 })
-    roles = PermissionsByRole.create({})
+    @field({ decoder: PermissionsByRole, version: 60, optional: true })
+    permissions = PermissionsByRole.create({})
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

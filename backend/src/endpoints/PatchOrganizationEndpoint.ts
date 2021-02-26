@@ -12,6 +12,7 @@ import { PayconiqPayment } from '../models/PayconiqPayment';
 import { Payment } from '../models/Payment';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
+import { Webshop } from '../models/Webshop';
 
 type Params = {};
 type Query = undefined;
@@ -233,6 +234,32 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
+            }
+            
+            await model.save();
+        }
+
+        for (const struct of request.body.webshops.getPatches()) {
+            const model = await Webshop.getByID(struct.id)
+            if (!model || model.organizationId != organization.id) {
+                errors.addError(new SimpleError({
+                    code: "invalid_id",
+                    message: "No webshop found with id " + struct.id
+                }))
+                continue;
+            }
+
+
+            if (!user.permissions.hasFullAccess(model.id)) {
+                throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this webshop", statusCode: 403 })
+            }
+
+            if (struct.meta) {
+                model.meta.patchOrPut(struct.meta)
+            }
+            
+            if (struct.privateMeta) {
+                model.privateMeta.patchOrPut(struct.privateMeta)
             }
             
             await model.save();

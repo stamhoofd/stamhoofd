@@ -49,18 +49,6 @@ export class PermissionRoleDetailed extends PermissionRole {
      */
     @field({ decoder: BooleanDecoder })
     createWebshops = false
-
-    /**
-     * Can view all webshops
-     */
-    @field({ decoder: BooleanDecoder })
-    readWebshops = false
-
-    /**
-     * Manage settings of webshops with read access
-     */
-    @field({ decoder: BooleanDecoder })
-    manageWebshops = false
 }
 
 /**

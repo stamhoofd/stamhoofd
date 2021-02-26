@@ -75,34 +75,37 @@
 
             <div v-if="enableWebshopModule" class="container">
                 <hr>
-                <h2>Toegang tot webshops</h2>
-                <p>Je kan de toegang tot individuele webshops regelen door een webshop te bewerken</p>
+                <h2 class="style-with-button">
+                    <div>
+                        Webshops
+                    </div>
+                    <div>
+                        <button class="button text" @click="editWebshops()">
+                            <span class="icon add"/>
+                            <span class="hide-smartphone">Toevoegen</span>
+                        </button>
+                    </div>
+                </h2>
 
-                <Checkbox v-model="manageWebshops">
-                    Geef volledige toegang tot alle webshops
-                </Checkbox>
-                <Checkbox v-if="!manageWebshops" v-model="readWebshops">
-                    Geef toegang tot bestellingen van alle webshops
-                </Checkbox>
-                <Checkbox v-if="!manageWebshops" v-model="createWebshops">
+                <Checkbox v-model="createWebshops">
                     Kan nieuwe webshops maken
                 </Checkbox>
 
                 <STList v-if="webshops.length > 0">
-                    <STListItem v-for="webshop in webshops" :key="webshop.id" element-name="label" :selectable="true">
-                        <h2 class="style-title-list">
-                            {{ webshop.name }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ webshop.description }}
-                        </p>
-                    </STListItem>
+                    <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
                 </STList>
 
-                <p v-else-if="!manageWebshops && !readWebshops && !createWebshops" class="info-box">
+                <p v-else class="info-box">
                     Deze rol heeft geen toegang tot webshops
                 </p>
             </div>
+
+            <hr>
+            <h2>Overschrijvingen</h2>
+
+            <Checkbox v-model="managePayments">
+                Kan overschrijvingen bekijken en beheren
+            </Checkbox>
 
             <hr>
             <h2>Beheerders met deze rol</h2>
@@ -153,13 +156,15 @@ import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version } from '@stamhoofd/structures';
+import { Group, GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
 import GroupPermissionRow from './GroupPermissionRow.vue';
 import CategoryPermissionRow from './CategoryPermissionRow.vue';
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
+import EditRoleWebshopsView from './EditRoleWebshopsView.vue';
+import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({
     components: {
@@ -174,7 +179,8 @@ import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
         STErrorsDefault,
         LoadingButton,
         GroupPermissionRow,
-        CategoryPermissionRow
+        CategoryPermissionRow,
+        WebshopPermissionRow
     }
 })
 export default class EditRoleView extends Mixins(NavigationMixin) {
@@ -249,26 +255,15 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         )
     }
 
-    get readWebshops() {
-        return this.patchedRole.readWebshops
+
+    get managePayments() {
+        return this.patchedRole.managePayments
     }
 
-    set readWebshops(readWebshops: boolean) {
+    set managePayments(managePayments: boolean) {
         this.addRolePatch(
             PermissionRoleDetailed.patch({ 
-                readWebshops
-            })
-        )
-    }
-
-    get manageWebshops() {
-        return this.patchedRole.manageWebshops
-    }
-
-    set manageWebshops(manageWebshops: boolean) {
-        this.addRolePatch(
-            PermissionRoleDetailed.patch({ 
-                manageWebshops
+                managePayments
             })
         )
     }
@@ -285,6 +280,16 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
 
     editCategories() {
         this.present(new ComponentWithProperties(EditRoleCategoriesView, {
+            role: this.patchedRole,
+            organization: this.patchedOrganization,
+            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
+                this.addPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    editWebshops() {
+        this.present(new ComponentWithProperties(EditRoleWebshopsView, {
             role: this.patchedRole,
             organization: this.patchedOrganization,
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
@@ -365,36 +370,50 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         return [...g.values()]
     }
 
-    get webshops(): { name: string, description: string }[] {
-        const g: { name: string, description: string }[] = []
+    get webshops(): WebshopPreview[] {
+        const g = new Map<string, WebshopPreview>()
 
-        for (const webshop of this.patchedOrganization.webshops) {
-            if (webshop.privateMeta.roles.full.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: webshop.meta.name,
-                    description: "Volledige toegang"
-                })
+        // Keep both old and new
+        for (const group of this.organization.webshops) {
+            if (group.privateMeta?.permissions.full.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
                 continue
             }
 
-            if (webshop.privateMeta.roles.write.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: webshop.meta.name,
-                    description: "Bestellingen bekijken en aanpassen"
-                })
+            if (group.privateMeta?.permissions.write.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
                 continue
             }
 
-            if (webshop.privateMeta.roles.read.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: webshop.meta.name,
-                    description: "Bestellingen bekijken"
-                })
+            if (group.privateMeta?.permissions.read.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
                 continue
             }
         }
 
-        return g
+        for (const group of this.patchedOrganization.webshops) {
+            if (group.privateMeta?.permissions.full.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (group.privateMeta?.permissions.write.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (group.privateMeta?.permissions.read.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (g.has(group.id)) {
+                // Override with patched value
+                g.set(group.id, group)
+            }
+        }
+
+        return [...g.values()]
     }
 
     addRolePatch(patch: AutoEncoderPatchType<PermissionRoleDetailed>) {
