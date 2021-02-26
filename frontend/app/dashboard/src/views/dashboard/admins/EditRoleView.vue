@@ -32,12 +32,12 @@
                 <hr>
                 <h2 class="style-with-button">
                     <div>
-                        Toegang tot inschrijvingsgroepen
+                        Inschrijvingsgroepen
                     </div>
                     <div>
                         <button class="button text" @click="editGroups()">
-                            <span class="icon settings"/>
-                            <span>Bewerken</span>
+                            <span class="icon add"/>
+                            <span class="hide-smartphone">Toevoegen</span>
                         </button>
                     </div>
                 </h2>
@@ -51,18 +51,21 @@
                 </p>
 
                 <hr>
-                <h2>Nieuwe activiteiten, workshops, inschrijvingsgroepen... maken</h2>
-                <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
+                <h2 class="style-with-button">
+                    <div>
+                        Inschrijvingscategorieën
+                    </div>
+                    <div>
+                        <button class="button text" @click="editCategories()">
+                            <span class="icon add"/>
+                            <span class="hide-smartphone">Toevoegen</span>
+                        </button>
+                    </div>
+                </h2>
+                <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
 
                 <STList v-if="categories.length > 0">
-                    <STListItem v-for="category in categories" :key="category.id">
-                        <h2 class="style-title-list">
-                            {{ category.name }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ category.description }}
-                        </p>
-                    </STListItem>
+                    <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
                 </STList>
 
                 <p v-else class="info-box">
@@ -150,11 +153,13 @@ import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version } from '@stamhoofd/structures';
+import { Group, GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
 import GroupPermissionRow from './GroupPermissionRow.vue';
+import CategoryPermissionRow from './CategoryPermissionRow.vue';
+import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
 
 @Component({
     components: {
@@ -168,7 +173,8 @@ import GroupPermissionRow from './GroupPermissionRow.vue';
         STInputBox,
         STErrorsDefault,
         LoadingButton,
-        GroupPermissionRow
+        GroupPermissionRow,
+        CategoryPermissionRow
     }
 })
 export default class EditRoleView extends Mixins(NavigationMixin) {
@@ -272,7 +278,16 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
             role: this.patchedRole,
             organization: this.patchedOrganization,
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                console.log(patch)
+                this.addPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    editCategories() {
+        this.present(new ComponentWithProperties(EditRoleCategoriesView, {
+            role: this.patchedRole,
+            organization: this.patchedOrganization,
+            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
                 this.addPatch(patch)
             }
         }).setDisplayStyle("popup"))
@@ -324,20 +339,30 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         return [...g.values()]
     }
 
-    get categories(): { name: string, description: string }[] {
-        const g: { name: string, description: string }[] = []
+    get categories(): GroupCategory[] {
+        const g = new Map<string, GroupCategory>()
 
-        for (const category of this.patchedOrganization.meta.categories) {
+        // Keep both old and new
+        for (const category of this.organization.meta.categories) {
             if (category.settings.permissions.create.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: category.settings.name,
-                    description: "Kan nieuwe inschrijvingsgroepen maken in deze categorie"
-                })
-                // do not continue
+                g.set(category.id, category)
+                continue
             }
         }
 
-        return g
+        for (const category of this.patchedOrganization.meta.categories) {
+            if (category.settings.permissions.create.find(r => r.id === this.role.id)) {
+                g.set(category.id, category)
+                continue
+            }
+
+            if (g.has(category.id)) {
+                // Override with patched value
+                g.set(category.id, category)
+            }
+        }
+
+        return [...g.values()]
     }
 
     get webshops(): { name: string, description: string }[] {

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Toegang tot inschrijvingsgroepen aanpassen">
+        <STNavigationBar title="Toegang tot categorieën aanpassen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
                 <button class="button icon close gray" @click="pop" />
@@ -9,23 +9,14 @@
 
         <main>
             <h1>
-                Toegang tot inschrijvingsgroepen aanpassen
+                Toegang tot categorieën aanpassen
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
-
-            <div class="container" v-for="category in tree.categories" :key="category.id">
                 
-                <hr>
-                <h2>{{ category.settings.name }}</h2>
-
-                <STList v-if="category.groups.length > 0">
-                    <GroupPermissionRow v-for="group in category.groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
-                </STList>
-
-            </div>
-
-
+            <STList>
+                <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
+            </STList>
         </main>
 
         <STToolbar>
@@ -50,7 +41,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import GroupPermissionRow from './GroupPermissionRow.vue';
+import CategoryPermissionRow from './CategoryPermissionRow.vue';
 
 @Component({
     components: {
@@ -64,10 +55,10 @@ import GroupPermissionRow from './GroupPermissionRow.vue';
         STInputBox,
         STErrorsDefault,
         LoadingButton,
-        GroupPermissionRow
+        CategoryPermissionRow
     }
 })
-export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
+export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
@@ -103,9 +94,10 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
     }
 
     /// Returns a flattened category tree with maximum 2 levels
-    get tree() {
-        return this.patchedOrganization.getCategoryTreeWithDepth(1)
+    get categories() {
+        return this.patchedOrganization.meta.categories
     }
+
 
     save() {
         this.saveHandler(this.patchOrganization)
