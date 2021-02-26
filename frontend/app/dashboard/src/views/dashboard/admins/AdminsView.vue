@@ -175,7 +175,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     loading = true
 
     mounted() {
-        this.load().catch(e => {
+        this.load(true).catch(e => {
             console.error(e)
         })
 

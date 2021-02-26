@@ -31,7 +31,19 @@ export class OrganizationManagerStatic {
             body: patch,
             decoder: Organization as Decoder<Organization>
         })
+
+        // Keep admins + invites loaded
+        const admins = this.organization.admins
+        const invites = this.organization.invites
         this.organization.set(response.data)
+
+        if (!this.organization.admins) {
+            this.organization.admins = admins
+        }
+
+        if (!this.organization.invites) {
+            this.organization.invites = invites
+        }
     }
 }
 
