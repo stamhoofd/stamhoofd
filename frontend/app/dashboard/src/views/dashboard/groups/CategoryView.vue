@@ -104,7 +104,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isRoot ? 'Inschrijvingsgroepen bewerken' : this.name+''
+        return this.isRoot ? 'Inschrijvingsgroepen' : this.name+''
     }
 
     get name() {

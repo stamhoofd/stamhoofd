@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
 import { Group } from './Group';
-import { GroupCategoryTree } from './GroupCategory';
+import { GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
 import { Invite } from './Invite';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
@@ -68,7 +68,19 @@ export class Organization extends AutoEncoder {
     get categoryTree(): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            return GroupCategoryTree.build(root, this.meta.categories, this.groups)
+            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups)
+
+            if (tree.categories.length == 0 && tree.groups.length > 0) {
+                tree.settings.name = "Inschrijvingsgroepen"
+                return GroupCategoryTree.create({
+                    settings: GroupCategorySettings.create({
+                        name: ""
+                    }),
+                    categories: [tree]
+                })
+            }
+
+            return tree
         }
 
         // Broken setup here
@@ -82,7 +94,18 @@ export class Organization extends AutoEncoder {
     categoryTreeForPermissions(permissions: Permissions): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            return GroupCategoryTree.build(root, this.meta.categories, this.groups, permissions)
+            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups, permissions)
+            if (tree.categories.length == 0 && tree.groups.length > 0) {
+                tree.settings.name = "Inschrijvingsgroepen"
+                return GroupCategoryTree.create({
+                    settings: GroupCategorySettings.create({
+                        name: ""
+                    }),
+                    categories: [tree]
+                })
+            }
+
+            return tree
         }
 
         // Broken setup here
@@ -96,7 +119,19 @@ export class Organization extends AutoEncoder {
     getCategoryTreeWithDepth(maxDepth: number): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            return GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
+            const tree =  GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
+
+            if (tree.categories.length == 0 && tree.groups.length > 0) {
+                tree.settings.name = "Inschrijvingsgroepen"
+                return GroupCategoryTree.create({
+                    settings: GroupCategorySettings.create({
+                        name: ""
+                    }),
+                    categories: [tree]
+                })
+            }
+
+            return tree
         }
 
         // Broken setup here

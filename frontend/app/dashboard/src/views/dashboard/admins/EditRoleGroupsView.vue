@@ -20,19 +20,7 @@
                 <h2>{{ category.settings.name }}</h2>
 
                 <STList v-if="category.groups.length > 0">
-                    <STListItem v-for="group in category.groups" :key="group.id" element-name="label" :selectable="true">
-                        <Checkbox slot="left" :checked="getSelectGroup(group)" @change="setSelectGroup(group, $event)" />
-                        <h2 class="style-title-list">
-                            {{ group.settings.name }}
-                        </h2>
-
-                        <div slot="right" v-if="getSelectGroup(group)">
-                            <button class="button text" @click.stop.prevent="chooseGroupPermission(group, $event)">
-                                <span>{{ getLevelText(getGroupPermission(group)) }}</span>
-                                <span class="icon arrow-down-small" />
-                            </button>
-                        </div>
-                    </STListItem>
+                    <GroupPermissionRow v-for="group in category.groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
                 </STList>
 
             </div>
@@ -63,7 +51,7 @@ import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner,
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupPrivateSettings, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
+import GroupPermissionRow from './GroupPermissionRow.vue';
 
 @Component({
     components: {
@@ -76,7 +64,8 @@ import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
         BackButton,
         STInputBox,
         STErrorsDefault,
-        LoadingButton
+        LoadingButton,
+        GroupPermissionRow
     }
 })
 export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
@@ -118,15 +107,6 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
         }
         return this.role
     }
-   
-    addRolePatch(patch: AutoEncoderPatchType<PermissionRoleDetailed>) {
-        const privateMeta = OrganizationPrivateMetaData.patch({})
-        privateMeta.roles.addPatch(PermissionRoleDetailed.patch(Object.assign({}, patch, { id: this.role.id })))
-
-        this.addPatch(Organization.patch({
-            privateMeta
-        }))
-    }
 
     addPatch(patch: AutoEncoderPatchType<Organization>) {
         this.patchOrganization = this.patchOrganization.patch(patch)
@@ -154,142 +134,6 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
         this.organization.invites = response.data.invites
         this.loading = false
     }
-
-    getSelectGroup(group: Group) {
-        return this.getGroupPermission(group) !== "none"
-    }
-
-    setSelectGroup(group: Group, selected: boolean) {
-        if (selected === this.getSelectGroup(group)) {
-            return
-        }
-
-        console.log(group, selected)
-        
-        if (selected) {
-            this.setGroupPermission(group, "read")
-        } else {
-            this.setGroupPermission(group, "none")
-        }
-    }
-
-    getGroupPermission(group: Group): "none" | "write" | "read" | "full" {
-        for (const role of group.privateSettings!.permissions.full) {
-            if (role.id === this.role.id) {
-                return "full"
-            }
-        }
-
-        for (const role of group.privateSettings!.permissions.write) {
-            if (role.id === this.role.id) {
-                return "write"
-            }
-        }
-
-        for (const role of group.privateSettings!.permissions.read) {
-            if (role.id === this.role.id) {
-                return "read"
-            }
-        }
-
-        return "none"
-    }
-
-    setGroupPermission(group: Group, level: "none" | "write" | "read" | "full") {
-        if (this.getGroupPermission(group) === level) {
-            return
-        }
-
-        const p = Organization.patch({ id: this.organization.id })
-        const del: PatchableArrayAutoEncoder<PermissionRole> = new PatchableArray()
-        del.addDelete(this.role.id)
-
-        const add: PatchableArrayAutoEncoder<PermissionRole> = new PatchableArray()
-        add.addPut(this.role)
-
-        if (level === "none") {
-            p.groups.addPatch(Group.patch({
-                id: group.id,
-                privateSettings: GroupPrivateSettings.patch({
-                    permissions: PermissionsByRole.patch({
-                        read: del,
-                        write: del,
-                        full: del
-                    })
-                })
-            }))
-            this.addPatch(p)
-            return
-        }
-
-        if (level === "read") {
-            p.groups.addPatch(Group.patch({
-                id: group.id,
-                privateSettings: GroupPrivateSettings.patch({
-                    permissions: PermissionsByRole.patch({
-                        read: add,
-                        write: del,
-                        full: del
-                    })
-                })
-            }))
-            this.addPatch(p)
-            console.log(p)
-            console.log(this.patchedOrganization)
-            return
-        }
-
-        if (level === "write") {
-            p.groups.addPatch(Group.patch({
-                id: group.id,
-                privateSettings: GroupPrivateSettings.patch({
-                    permissions: PermissionsByRole.patch({
-                        read: del,
-                        write: add,
-                        full: del
-                    })
-                })
-            }))
-            this.addPatch(p)
-            return
-        }
-
-        if (level === "full") {
-            p.groups.addPatch(Group.patch({
-                id: group.id,
-                privateSettings: GroupPrivateSettings.patch({
-                    permissions: PermissionsByRole.patch({
-                        read: del,
-                        write: del,
-                        full: add
-                    })
-                })
-            }))
-            this.addPatch(p)
-            return
-        }
-    }
-
-    getLevelText(level: "none" | "write" | "read" | "full"): string {
-        switch(level) {
-            case "none": return "Geen toegang";
-            case "write": return "Bekijken en bewerken";
-            case "read": return "Bekijken";
-            case "full": return "Volledige toegang";
-        }
-    }
-
-    chooseGroupPermission(group, event) {
-        const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
-            callback: (level: "none" | "write" | "read" | "full") => {
-                this.setGroupPermission(group, level)
-            }
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
 
     save() {
         this.saveHandler(this.patchOrganization)

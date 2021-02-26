@@ -43,14 +43,7 @@
                 </h2>
 
                 <STList v-if="groups.length > 0">
-                    <STListItem v-for="group in groups" :key="group.id">
-                        <h2 class="style-title-list">
-                            {{ group.name }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ group.description }}
-                        </p>
-                    </STListItem>
+                    <GroupPermissionRow v-for="group in groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
                 </STList>
 
                 <p v-else class="info-box">
@@ -62,7 +55,7 @@
                 <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
 
                 <STList v-if="categories.length > 0">
-                    <STListItem v-for="category in categories" :key="category.id" element-name="label" :selectable="true">
+                    <STListItem v-for="category in categories" :key="category.id">
                         <h2 class="style-title-list">
                             {{ category.name }}
                         </h2>
@@ -161,6 +154,7 @@ import { Group, Invite, Organization, OrganizationAdmins, OrganizationPrivateMet
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
+import GroupPermissionRow from './GroupPermissionRow.vue';
 
 @Component({
     components: {
@@ -173,7 +167,8 @@ import EditRoleGroupsView from './EditRoleGroupsView.vue';
         BackButton,
         STInputBox,
         STErrorsDefault,
-        LoadingButton
+        LoadingButton,
+        GroupPermissionRow
     }
 })
 export default class EditRoleView extends Mixins(NavigationMixin) {
@@ -283,72 +278,62 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    get groups(): { name: string, description: string }[] {
-        const g: { name: string, description: string }[] = []
+    get groups(): Group[] {
+        const g = new Map<string, Group>()
 
-        for (const group of this.patchedOrganization.groups) {
+        // Keep both old and new
+        for (const group of this.organization.groups) {
             if (group.privateSettings?.permissions.full.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: group.settings.name,
-                    description: "Leden bekijken, aanpassen en instellingen bewerken"
-                })
+                g.set(group.id, group)
                 continue
             }
 
             if (group.privateSettings?.permissions.write.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: group.settings.name,
-                    description: "Leden bekijken en aanpassen"
-                })
+                g.set(group.id, group)
                 continue
             }
 
             if (group.privateSettings?.permissions.read.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: group.settings.name,
-                    description: "Leden bekijken"
-                })
+                g.set(group.id, group)
                 continue
             }
         }
 
-        return g
+        for (const group of this.patchedOrganization.groups) {
+            if (group.privateSettings?.permissions.full.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (group.privateSettings?.permissions.write.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (group.privateSettings?.permissions.read.find(r => r.id === this.role.id)) {
+                g.set(group.id, group)
+                continue
+            }
+
+            if (g.has(group.id)) {
+                // Override with patched value
+                g.set(group.id, group)
+            }
+        }
+
+        return [...g.values()]
     }
 
     get categories(): { name: string, description: string }[] {
         const g: { name: string, description: string }[] = []
 
         for (const category of this.patchedOrganization.meta.categories) {
-            if (category.settings.permissions.full.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: category.settings.name,
-                    description: "Volledige toegang tot deze categorie en alle groepen in deze categorie"
-                })
-                continue
-            }
-
             if (category.settings.permissions.create.find(r => r.id === this.role.id)) {
                 g.push({
                     name: category.settings.name,
                     description: "Kan nieuwe inschrijvingsgroepen maken in deze categorie"
                 })
                 // do not continue
-            }
-
-            if (category.settings.permissions.write.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: category.settings.name,
-                    description: "Kan alle leden bekijken en bewerken in deze categorie"
-                })
-                continue
-            }
-
-            if (category.settings.permissions.read.find(r => r.id === this.role.id)) {
-                g.push({
-                    name: category.settings.name,
-                    description: "Kan alle leden bekijken in deze categorie"
-                })
-                continue
             }
         }
 

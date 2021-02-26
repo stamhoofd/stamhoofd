@@ -2,7 +2,8 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringD
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
-import { KeyConstants } from './KeyConstants';
+// Eslint wants to remove Permissions, but it is needed for types!
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PermissionRole, Permissions } from './Permissions';
 
 /**
@@ -14,16 +15,6 @@ export class GroupCategoryPermissions extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     create: PermissionRole[] = []
-
-    /// Permissions for groups, subcategories in this category
-    @field({ decoder: new ArrayDecoder(PermissionRole) })
-    read: PermissionRole[] = []
-
-    @field({ decoder: new ArrayDecoder(PermissionRole) })
-    write: PermissionRole[] = []
-
-    @field({ decoder: new ArrayDecoder(PermissionRole) })
-    full: PermissionRole[] = []
 }
 
 export class GroupCategorySettings extends AutoEncoder {

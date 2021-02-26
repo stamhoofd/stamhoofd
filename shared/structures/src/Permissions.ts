@@ -9,7 +9,7 @@ export enum PermissionLevel {
     /** Read all data, but not allowed to write */
     Read = "Read",
     
-    /** Read and write child data, but not allowed to modify settings */
+    /** Read, write, add, delete child data, but not allowed to modify settings */
     Write = "Write",
     
     /** Full access */
@@ -45,7 +45,7 @@ export class PermissionRoleDetailed extends PermissionRole {
     managePayments = false
 
     /**
-     * Can create new webshops
+     * Can create new webshops = write
      */
     @field({ decoder: BooleanDecoder })
     createWebshops = false
