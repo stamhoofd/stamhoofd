@@ -46,7 +46,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: "permission_denied",
                 message: "No permissions for this webshop",
-                human: "Je hebt geen toegang tot de bestellingen van deze webshop"
+                human: "Je hebt geen toegang tot de bestellingen van deze webshop",
+                statusCode: 403
             })
         }
         

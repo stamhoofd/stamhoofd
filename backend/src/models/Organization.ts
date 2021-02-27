@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, Permissions, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -232,7 +232,12 @@ export class Organization extends Model {
                 return struct
             }).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta,
-            webshops: webshops.map(w => WebshopPreview.create(w))
+            webshops: webshops.flatMap(w => {
+                if (w.privateMeta.permissions.getPermissionLevel(permissions) === PermissionLevel.None) {
+                    return []
+                }
+                return [WebshopPreview.create(w)]
+            })
         })
     }
 

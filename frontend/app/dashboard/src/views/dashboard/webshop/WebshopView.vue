@@ -151,7 +151,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
@@ -276,6 +276,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
         }).catch((e) => {
             console.error(e)
+            Toast.fromError(e).show()
         }).finally(() => {
             this.loading = false
         })
@@ -301,6 +302,8 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             this.loadNextOrders()
         }).catch((e) => {
             console.error(e)
+            Toast.fromError(e).show()
+            this.nextQuery = null
         })
     }
 

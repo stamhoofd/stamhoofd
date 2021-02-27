@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { Organization } from './Organization';
+
 
 export enum PermissionLevel {
     /** No access */
@@ -167,5 +169,26 @@ export class Permissions extends AutoEncoder {
 
     hasFullAccess(groupId: string | null = null) {
         return this.hasAccess(PermissionLevel.Full, groupId)
+    }
+
+    /**
+     * @param roles All available roles of the organizatino (to query)
+     */
+    canCreateWebshops(roles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess()) {
+            return true
+        }
+        for (const r of this.roles) {
+            const f = roles.find(rr => r.id === r.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (f.createWebshops) {
+                return true
+            }
+        }
+
+        return false
     }
 }

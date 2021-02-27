@@ -36,10 +36,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions || !user.permissions.canCreateWebshops(token.user.organization.privateMeta.roles)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
+                human: "Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.",
                 statusCode: 403
             })
         }
