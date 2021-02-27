@@ -63,6 +63,44 @@ export class PermissionsByRole extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     full: PermissionRole[] = []
+
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    getPermissionLevel(permissions: Permissions): PermissionLevel {
+        if (permissions.hasFullAccess()) {
+            return PermissionLevel.Full
+        }
+
+        for (const role of this.full) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return PermissionLevel.Full
+            }
+        }
+
+        if (permissions.hasWriteAccess()) {
+            return PermissionLevel.Write
+        }
+
+        for (const role of this.write) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return PermissionLevel.Write
+            }
+        }
+
+        if (permissions.hasReadAccess()) {
+            return PermissionLevel.Read
+        }
+
+        for (const role of this.read) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return PermissionLevel.Read
+            }
+        }
+
+        return PermissionLevel.None
+    }
+
 }
 
 

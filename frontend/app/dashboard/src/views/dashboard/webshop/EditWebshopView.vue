@@ -155,6 +155,7 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         } catch (e) {
             console.error("Failed")
             console.error(e)
+            Toast.fromError(e).show()
         }
 
         this.saving = false

@@ -44,6 +44,7 @@ export class Toast {
                 message: errors.message
             }))
         }
+        console.log(simpleErrors.errors)
         return new Toast(simpleErrors.getHuman(), "error red")
     }
 

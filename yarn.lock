@@ -1523,10 +1523,10 @@
     svgicons2svgfont "9.1.1"
     ttf2woff "2.0.2"
 
-"@simonbackx/simple-database@1.11.16":
-  version "1.11.16"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.11.16.tgz#66791e4a561eebc9a782172c2b0c9a80adf268ec"
-  integrity sha512-xNZ/p1m155QcRiKTbt3NE+bsxQ0Yi3YURPNgNqVkpREuwbk0wIRpJK3s/FjHSiTWEJUJZDsSgB76wIGTRWLcxw==
+"@simonbackx/simple-database@^1.12":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.12.0.tgz#a99a27c315e1fd7c21515cbe1fb443951c1e61d2"
+  integrity sha512-I1Pjx7IwX/hP29XvMGNIi7z/0HZB6QSVhOBHCsvDSGUSbqS/ZOV/hzhQ7/u8qXr02oGVZbXqLs/vE5djDs81Mg==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -1542,9 +1542,9 @@
   integrity sha512-vfHr7eDzAIgGS03gpU2dmTAZeq0Fj6qaBNNl1oeeL3+Fwa5gGQ4rEUOdKXNTcPGs3FY8CxfyNl/m3XY7Lj/voA==
 
 "@simonbackx/simple-errors@^1.2":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.2.0.tgz#3788b376bb4fd347fb0b0499cdc2ec607c40d0d5"
-  integrity sha512-Tq+rbGIfUycN4rDlwluOp29bAKW+F/YwjBC497RYKkFKKQqf0TbSV8v2h7yFR4gZbaLw4j0q8DJSEDg2R8xThg==
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.2.1.tgz#3886bfc480c01c5a556ebdc5a9591edc4caeaa7f"
+  integrity sha512-gxzQMkN040nFDTLonfcW4nWSuXg+pitXOzmCkmCj1xwl97rlSj05hTBIzJFOvcfrce5dOImTwTp/FBvcsCX6hw==
 
 "@simonbackx/simple-networking@~1.4.0":
   version "1.4.0"

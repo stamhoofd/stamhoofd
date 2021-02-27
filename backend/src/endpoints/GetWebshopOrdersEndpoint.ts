@@ -1,7 +1,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
@@ -42,7 +42,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             })
         }
 
-        if (!token.user.permissions || !token.user.permissions.hasFullAccess()) {
+        if (!token.user.permissions || webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions) === PermissionLevel.None) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "No permissions for this webshop",

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Group } from './Group';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PermissionRole, Permissions } from './Permissions';
+import { PermissionLevel, PermissionRole, Permissions } from './Permissions';
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -15,6 +15,23 @@ export class GroupCategoryPermissions extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     create: PermissionRole[] = []
+
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    getPermissionLevel(permissions: Permissions): PermissionLevel.None | "Create" {
+        if (permissions.hasFullAccess()) {
+            return "Create"
+        }
+
+        for (const role of this.create) {
+            if (permissions.roles.find(r => r.id === role.id)) {
+                return "Create"
+            }
+        }
+
+        return PermissionLevel.None
+    }
 }
 
 export class GroupCategorySettings extends AutoEncoder {
