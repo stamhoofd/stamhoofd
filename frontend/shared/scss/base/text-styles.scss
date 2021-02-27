@@ -262,7 +262,7 @@
     }
 
     &, > .container {
-            > h2 {
+        > h2 {
             @extend .style-title-2;
             padding-bottom: 15px;
         }
@@ -283,6 +283,8 @@
 
         > hr {
             @extend .style-hr;
+            margin: 30px 0;
+            margin: 30px calc(-1 * var(--st-horizontal-padding, 40px));
         }
     }
 }

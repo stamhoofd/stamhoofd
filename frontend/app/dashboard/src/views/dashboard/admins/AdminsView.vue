@@ -52,16 +52,18 @@
                     </STListItem>
                 </STList>
 
-            <div v-for="role in roles" class="container">
+            <div v-for="(role, index) in roles" class="container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>
                         {{ role.name }}
                     </div>
                     <div>
+                        <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)"></button>
+                        <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)"></button>
                         <button class="button text" @click="editRole(role)">
                             <span class="icon settings"/>
-                            <span>Bewerken</span>
+                            <span class="hide-smartphone">Bewerken</span>
                         </button>
                     </div>
                 </h2>
@@ -281,6 +283,34 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     isExpired(invite: Invite) {
         return invite.validUntil.getTime() < new Date().getTime()+10*1000
+    }
+
+    moveRoleUp(index: number, role: PermissionRoleDetailed) {
+        if (index == 0) {
+            return
+        }
+        const prev = this.roles[index - 2]?.id
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addMove(role.id, prev ?? null)
+        const patch = Organization.patch({
+            id: this.organization.id,
+            privateMeta
+        })
+        OrganizationManager.patch(patch)
+    }
+
+    moveRoleDown(index: number, role: PermissionRoleDetailed) {
+        if (index >= this.roles.length - 1) {
+            return
+        }
+        const prev = this.roles[index + 1]?.id
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addMove(role.id, prev ?? null)
+        const patch = Organization.patch({
+            id: this.organization.id,
+            privateMeta
+        })
+        OrganizationManager.patch(patch)
     }
 
     editAdmin(admin: User) {
