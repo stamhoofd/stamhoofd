@@ -99,8 +99,11 @@
                         <h2 class="style-title-list">
                             Inschrijvingsgroepen
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description" v-if="enableActivities">
                             Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
+                        </p>
+                        <p class="style-description" v-else>
+                            Leeftijdsgroepen aanmaken en beheren
                         </p>
 
                         <template slot="right">
@@ -141,7 +144,7 @@
 
             <hr>
             <h2>Kies de functies die je wilt activeren</h2>
-            <p>We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+            <p>Binnenkort voeren we nieuwe prijzen in, maar hierbij blijven bepaalde onderdelen gratis voor bestaande gebruikers (als je dit leest ben je een bestaande gebruiker). <a class="inline-link" target="_blank" href="https://www.stamhoofd.be/release-notes/2021-02-16-toekomst-van-stamhoofd">Meer info op onze website.</a> We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
             <ModuleSettingsBox />
         </main>
@@ -149,11 +152,11 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
+import { GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationMetaData, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -234,9 +237,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     openAdmins(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(AdminsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.show(
+            new ComponentWithProperties(AdminsView, {}).setAnimated(animated)
+        )
     }
 
     setupEmail(animated = true) {
@@ -252,6 +255,31 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     manageGroups(animated = true) {
+        if (!this.organization.meta.rootCategory) {
+            // Auto restore missing root category
+            const category = GroupCategory.create({})
+            const meta = OrganizationMetaData.patch({
+                rootCategoryId: category.id
+            })
+            meta.categories.addPut(category)
+
+            const p = Organization.patch({
+                id: this.organization.id,
+                meta
+            })
+            
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EditCategoryGroupsView, { 
+                    category: category, 
+                    organization: this.organization.patch(p), 
+                    saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+                        patch.id = this.organization.id
+                        await OrganizationManager.patch(p.patch(patch))
+                    }
+                })
+            }).setDisplayStyle("popup").setAnimated(animated))
+            return
+        }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditCategoryGroupsView, {
                 category: this.organization.meta.rootCategory,
@@ -313,6 +341,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get enableWebshopModule() {
         return this.organization.meta.modules.useWebshops
+    }
+
+    get enableActivities() {
+        return this.organization.meta.modules.useActivities
     }
 
     mounted() {

@@ -87,15 +87,15 @@
                     </div>
                 </h2>
 
-                <Checkbox v-model="createWebshops">
-                    Kan nieuwe webshops maken
-                </Checkbox>
-
-                <STList v-if="webshops.length > 0">
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <Checkbox v-model="createWebshops" slot="left" />
+                        Kan nieuwe webshops maken
+                    </STListItem>
                     <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
                 </STList>
 
-                <p v-else class="info-box">
+                <p v-if="webshops.length == 0" class="info-box">
                     Deze beheerdersgroep heeft geen toegang tot webshops
                 </p>
             </div>

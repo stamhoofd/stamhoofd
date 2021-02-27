@@ -5,7 +5,7 @@ import { Image } from './files/Image';
 import { GroupCategory } from './GroupCategory';
 import { GroupPrices } from './GroupPrices';
 import { Record } from './members/Record';
-import { RecordType, RecordTypeHelper } from './members/RecordType';
+import { RecordType } from './members/RecordType';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
@@ -18,6 +18,16 @@ export class OrganizationModules extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder })
     useWebshops = false
+
+    /**
+     * We use inverse property here because this can only be used in combination with useMembers == true
+     */
+    @field({ decoder: BooleanDecoder, version: 63 })
+    disableActivities = true
+
+    get useActivities(): boolean {
+        return this.useMembers && !this.disableActivities
+    }
 }
 
 export enum AskRequirement {

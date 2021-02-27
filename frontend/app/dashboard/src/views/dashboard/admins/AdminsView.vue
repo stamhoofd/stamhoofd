@@ -103,10 +103,8 @@
 
             <div class="container" v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0">
                 <hr>
-                    <h2 class="style-with-button">
-                    <div>
+                <h2>
                         Beheerders die niet in een groep zitten
-                    </div>
                 </h2>
                 <p>Deze beheerders hebben nergens toegang tot, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 

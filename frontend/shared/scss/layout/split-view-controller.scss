@@ -7,7 +7,7 @@
     > .master {
         z-index: 100;
         background: $color-white-shade;
-        border-right: 2px solid $color-border;
+        
     }
 
     > .detail {
@@ -16,6 +16,7 @@
 
     &[data-has-detail="true"] {
         > .master {
+            border-right: 2px solid $color-border;
         }
     }
 }

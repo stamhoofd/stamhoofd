@@ -3,7 +3,7 @@
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
+                <button v-if="!isNew && !isRoot" class="button text" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>

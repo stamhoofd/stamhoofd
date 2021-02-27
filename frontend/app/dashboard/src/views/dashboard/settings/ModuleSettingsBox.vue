@@ -16,7 +16,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops</h2>
-                    <p class="style-description">Tijdelijk gratis voor alle shops die je nu aanmaakt</p>
+                    <p class="style-description">Gratis tot 1 mei, daarna manueel overschakelen op betalende versie. Webshops blijven daarna (tijdelijk) actief.</p>
                 </div>
                 <div>
                     <Checkbox v-model="enableWebshopModule" />
