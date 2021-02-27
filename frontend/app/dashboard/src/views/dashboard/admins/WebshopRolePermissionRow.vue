@@ -4,6 +4,7 @@
         <h2 class="style-title-list">
             {{ role.name }}
         </h2>
+        <p class="style-description-small" v-if="isMe">Jij zit in deze groep</p>
 
         <div slot="right" v-if="selected">
             <button class="button text" @click.stop.prevent="choosePermissions($event)">
@@ -21,6 +22,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, STListItem } from "@stamhoofd/components";
 import { Organization, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
 @Component({
@@ -41,6 +43,10 @@ export default class WebshopRolePermissionRow extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
         this.$emit("patch", patch)
+    }
+
+    get isMe() {
+        return !!OrganizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
     }
 
     get selected() {

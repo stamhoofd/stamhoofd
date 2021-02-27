@@ -1,9 +1,14 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <button slot="right" class="button text" @click="createAdmin">
+            <button slot="right" class="button text" @click="createAdmin" aria-label="Nieuwe beheerder">
                 <span class="icon add"/>
-                <span>Nieuw</span>
+                <span>Beheerder</span>
+            </button>
+
+            <button slot="right" class="button text hide-smartphone" @click="addRole" aria-label="Nieuwe groep">
+                <span class="icon add"/>
+                <span>Groep</span>
             </button>
 
             <BackButton v-if="canPop" slot="left" @click="pop" />
@@ -130,6 +135,8 @@
                 </STList>
             </div>
 
+            <hr>
+
             <p>
                 <button class="button text" @click="addRole">
                     <span class="icon add"/>
@@ -249,24 +256,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        return this.admins.sort((a, b) => {
-            const af = a.permissions?.hasFullAccess() ?? false
-            const bf = b.permissions?.hasFullAccess() ?? false
-
-            const ag = this.organization.groups.filter(g => a.permissions?.hasWriteAccess(g.id)) ?? []
-            const bg = this.organization.groups.filter(g => b.permissions?.hasWriteAccess(g.id)) ?? []
-
-            const ac = ag.length
-            const bc = bg.length
-
-            return Sorter.stack(
-                Sorter.byBooleanValue(af, bf), 
-                Sorter.byNumberValue(ac, bc), 
-                ac == 1 && bc == 1 ? Group.defaultSort(ag[0], bg[0]) : 0,
-                Sorter.byStringValue(a.firstName ?? "", b.firstName ?? ""),
-                Sorter.byStringValue(a.lastName ?? "", b.lastName ?? "")
-            )!
-        })
+        return this.admins.sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
     }
 
     createAdmin() {

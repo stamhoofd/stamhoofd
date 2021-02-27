@@ -466,26 +466,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        // Sort by inital value, without changes to the admin itself
-
-        return this.admins.sort((a, b) => {
-            const af = a.permissions?.hasFullAccess() ?? false
-            const bf = b.permissions?.hasFullAccess() ?? false
-
-            const ag = this.patchedOrganization.groups.filter(g => a.permissions?.hasWriteAccess(g.id)) ?? []
-            const bg = this.patchedOrganization.groups.filter(g => b.permissions?.hasWriteAccess(g.id)) ?? []
-
-            const ac = ag.length
-            const bc = bg.length
-
-            return Sorter.stack(
-                Sorter.byBooleanValue(af, bf), 
-                Sorter.byNumberValue(ac, bc), 
-                ac == 1 && bc == 1 ? Group.defaultSort(ag[0], bg[0]) : 0,
-                Sorter.byStringValue(a.firstName ?? "", b.firstName ?? ""),
-                Sorter.byStringValue(a.lastName ?? "", b.lastName ?? "")
-            )!
-        })
+        return this.admins.sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
     }
 
     hasAdminRole(admin: User | Invite) {

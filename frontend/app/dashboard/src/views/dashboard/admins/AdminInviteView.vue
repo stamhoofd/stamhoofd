@@ -20,6 +20,9 @@
             <p v-if="isNew" class="info-box">
                 Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
             </p>
+            <p v-else-if="editUser === null" class="warning-box">
+                Deze beheerder heeft de uitnodiging nog niet geaccepteerd
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
             <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
