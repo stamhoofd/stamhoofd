@@ -63,7 +63,7 @@
             <button class="menu-button heading">
                 <span class="icon basket" />
                 <span>Verkopen</span>
-                <button v-if="fullAccess" class="button text" @click="addWebshop()">
+                <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -392,6 +392,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     addWebshop() {
         this.present(new ComponentWithProperties(EditWebshopView, { }).setDisplayStyle("popup"))
+    }
+
+    get canCreateWebshops() {
+        return OrganizationManager.user.permissions?.canCreateWebshops(OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get fullAccess() {

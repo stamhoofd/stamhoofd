@@ -6,7 +6,7 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
 
-                    <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
+                    <button class="button gray icon settings" v-if="hasFullPermissions" v-tooltip="'Instellingen'" @click="editSettings" />
                     <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
                 </STNavigationTitle>
             </template>
@@ -157,7 +157,7 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
@@ -248,6 +248,13 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     formatDateTime(date: Date) {
         console.log(date)
         return Formatter.dateTime(date)
+    }
+
+    get hasFullPermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
     }
 
     toggleSort(field: string) {
