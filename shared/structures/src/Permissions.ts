@@ -191,4 +191,25 @@ export class Permissions extends AutoEncoder {
 
         return false
     }
+
+    /**
+     * @param roles All available roles of the organizatino (to query)
+     */
+    canManagePayments(roles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess()) {
+            return true
+        }
+        for (const r of this.roles) {
+            const f = roles.find(rr => r.id === r.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (f.managePayments) {
+                return true
+            }
+        }
+
+        return false
+    }
 }

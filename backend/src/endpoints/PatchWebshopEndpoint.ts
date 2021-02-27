@@ -91,6 +91,15 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             webshop.uri = request.body.uri
         }
 
+        // Verify if we have full access
+        if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            throw new SimpleError({
+                code: "missing_permissions",
+                message: "You cannot restrict your own permissions",
+                human: "Je kan je eigen volledige toegang tot deze webshop niet verwijderen (algemeen > toegangsbeheer). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
+            })
+        }
+
         await webshop.save()
         
         errors.throwIfNotEmpty()

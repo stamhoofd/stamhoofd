@@ -2,7 +2,7 @@
     <STListItem element-name="label" :selectable="true">
         <Checkbox slot="left" v-model="selected" />
         <h2 class="style-title-list">
-            {{ webshop.meta.name }}
+            {{ role.name }}
         </h2>
 
         <div slot="right" v-if="selected">
@@ -19,7 +19,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STListItem } from "@stamhoofd/components";
-import { Organization, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { Organization, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
@@ -29,17 +29,17 @@ import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
         STListItem
     }
 })
-export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
+export default class WebshopRolePermissionRow extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshop: WebshopPreview
+    webshop: PrivateWebshop
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+    role: PermissionRole
 
     @Prop({ required: true })
     organization: Organization
 
-    addPatch(patch: AutoEncoderPatchType<Organization>) {
+    addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
         this.$emit("patch", patch)
     }
 
@@ -86,7 +86,6 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
             return
         }
 
-        const p = Organization.patch({ id: this.organization.id })
         const del: PatchableArrayAutoEncoder<PermissionRole> = new PatchableArray()
         del.addDelete(this.role.id)
 
@@ -94,7 +93,7 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
         add.addPut(this.role)
 
         if (level === "none") {
-            p.webshops.addPatch(WebshopPreview.patch({
+            this.addPatch(PrivateWebshop.patch({
                 id: this.webshop.id,
                 privateMeta: WebshopPrivateMetaData.patch({
                     permissions: PermissionsByRole.patch({
@@ -104,12 +103,11 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
                     })
                 })
             }))
-            this.addPatch(p)
             return
         }
 
         if (level === "read") {
-            p.webshops.addPatch(WebshopPreview.patch({
+            this.addPatch(PrivateWebshop.patch({
                 id: this.webshop.id,
                 privateMeta: WebshopPrivateMetaData.patch({
                     permissions: PermissionsByRole.patch({
@@ -119,12 +117,11 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
                     })
                 })
             }))
-            this.addPatch(p)
             return
         }
 
         if (level === "write") {
-            p.webshops.addPatch(WebshopPreview.patch({
+            this.addPatch(PrivateWebshop.patch({
                 id: this.webshop.id,
                 privateMeta: WebshopPrivateMetaData.patch({
                     permissions: PermissionsByRole.patch({
@@ -134,12 +131,11 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
                     })
                 })
             }))
-            this.addPatch(p)
             return
         }
 
         if (level === "full") {
-            p.webshops.addPatch(WebshopPreview.patch({
+            this.addPatch(PrivateWebshop.patch({
                 id: this.webshop.id,
                 privateMeta: WebshopPrivateMetaData.patch({
                     permissions: PermissionsByRole.patch({
@@ -149,7 +145,6 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
                     })
                 })
             }))
-            this.addPatch(p)
             return
         }
     }

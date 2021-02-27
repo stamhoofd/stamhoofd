@@ -110,6 +110,16 @@
                 <span>Leveringsoptie toevoegen</span>
             </button>
         </p>
+
+        <div class="container" v-if="roles.length > 0">
+            <hr>
+            <h2>Toegangsbeheer</h2>
+            <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+
+            <STList>
+                <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
+            </STList>
+        </div>
     </main>
 </template>
 
@@ -118,12 +128,13 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { AnyCheckoutMethod, CheckoutMethod, Organization, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
 import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
+import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
 
 @Component({
     components: {
@@ -136,7 +147,8 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
         DateSelection,
         TimeInput,
         RadioGroup,
-        Radio
+        Radio,
+        WebshopRolePermissionRow
     },
     directives: { Tooltip },
 })
@@ -154,6 +166,14 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
     set name(name: string) {
         const patch = WebshopMetaData.patch({ name })
         this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get roles() {
+        return this.organization.privateMeta?.roles ?? []
+    }
+
+    addPatch(patch: AutoEncoderPatchType<Organization>) {
+        this.$emit("patch", patch)
     }
 
     addTakeoutMethod() {

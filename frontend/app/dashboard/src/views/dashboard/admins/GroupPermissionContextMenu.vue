@@ -1,7 +1,7 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="setPermission('read')">
-            Leden bekijken
+            Bekijken
         </ContextMenuItem>
         <ContextMenuItem @click="setPermission('write')">
             Bekijken en bewerken

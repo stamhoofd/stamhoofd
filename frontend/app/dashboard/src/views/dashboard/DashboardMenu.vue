@@ -81,11 +81,13 @@
         </div>
 
         <hr>
+        <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
+            <span class="icon card" />
+            <span>Overschrijvingen</span>
+        </button>
+
         <div v-if="fullAccess">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
-                <span class="icon card" />
-                <span>Overschrijvingen</span>
-            </button>
+            
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                 <span class="icon settings" />
                 <span>Instellingen</span>
@@ -96,7 +98,7 @@
                 <span>Groepsadministratie</span>
             </button>
         </div>
-        <hr v-if="fullAccess">
+        <hr v-if="fullAccess || canManagePayments">
         <div class="">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
                 <span class="icon user" />
@@ -175,7 +177,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
-            if (this.fullAccess) {
+            if (this.canManagePayments) {
                 this.managePayments(false)
                 didSet = true
             }
@@ -396,6 +398,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     get canCreateWebshops() {
         return OrganizationManager.user.permissions?.canCreateWebshops(OrganizationManager.organization.privateMeta?.roles ?? [])
+    }
+
+    get canManagePayments() {
+        return OrganizationManager.user.permissions?.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get fullAccess() {

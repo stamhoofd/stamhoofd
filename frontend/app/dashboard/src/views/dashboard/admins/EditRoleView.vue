@@ -23,7 +23,7 @@
                     v-model="name"
                     class="input"
                     type="text"
-                    placeholder="Naam van deze rol"
+                    placeholder="Naam van deze groep"
                     autocomplete=""
                 >
             </STInputBox>
@@ -47,7 +47,7 @@
                 </STList>
 
                 <p v-else class="info-box">
-                    Deze rol heeft geen toegang tot inschrijvingsgroepen
+                    Deze beheerdersgroep heeft geen toegang tot inschrijvingsgroepen
                 </p>
 
                 <hr>
@@ -69,7 +69,7 @@
                 </STList>
 
                 <p v-else class="info-box">
-                    Deze rol kan geen inschrijvingsgroepen maken
+                    Deze beheerdersgroep kan geen inschrijvingsgroepen maken
                 </p>
             </div>
 
@@ -96,7 +96,7 @@
                 </STList>
 
                 <p v-else class="info-box">
-                    Deze rol heeft geen toegang tot webshops
+                    Deze beheerdersgroep heeft geen toegang tot webshops
                 </p>
             </div>
 
@@ -108,7 +108,7 @@
             </Checkbox>
 
             <hr>
-            <h2>Beheerders met deze rol</h2>
+            <h2>Beheerders in deze groep</h2>
 
             <STList>
                 <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
@@ -228,7 +228,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isNew ? "Nieuwe beheerdersrol maken" : this.patchedRole.name
+        return this.isNew ? "Nieuwe beheerdersgroep" : this.patchedRole.name
     }
 
     get name() {

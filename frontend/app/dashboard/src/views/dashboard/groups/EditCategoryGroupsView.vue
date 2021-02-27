@@ -75,7 +75,7 @@
             <div v-if="!isRoot" class="container">
                 <hr>
                 <h2>Wie kan groepen maken in deze categorie?</h2>
-                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersrollen bewerken bij je instellingen.</p>
+                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
     
                 <STList v-if="roles.length > 0">
                     <STListItem>
@@ -89,7 +89,7 @@
                 </STList>
 
                 <p v-else-if="fullAccess" class="info-box">
-                    Je hebt nog geen rollen aangemaakt. Maak beheerdersrollen aan via instellingen > beheerders
+                    Je hebt nog geen beheerdersgroepen aangemaakt. Maak beheerdersgroepen aan via instellingen > beheerders
                 </p>
             </div>
         </main>

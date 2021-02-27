@@ -48,8 +48,8 @@
 
             <div class="container" v-if="!fullAccess">
                 <hr>
-                <h2>Beheerdersrollen</h2>
-                <p>Ken rollen toe aan alle beheerders om hen toegang te geven tot bepaalde onderdelen van Stamhoofd. Zonder rollen heeft deze beheerder nergens toegang tot. Je kan rollen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
+                <h2>Beheerdersgroepen</h2>
+                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot. Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
                 <STList v-if="roles.length > 0">
                     <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
@@ -58,12 +58,12 @@
                     </STListItem>
                 </STList>
 
-                <p v-else class="info-box">Je hebt nog geen rollen aangemaakt. Maak een beheerdersrol aan om beheerders op te delen.</p>
+                <p v-else class="info-box">Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.</p>
 
                 <p>
                     <button class="button text" @click="addRole">
                         <span class="icon add"/>
-                        <span>Nieuwe rol toevoegen</span>
+                        <span>Nieuwe groep toevoegen</span>
                     </button>
                 </p>
             </div>

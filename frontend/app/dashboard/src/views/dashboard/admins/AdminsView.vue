@@ -13,7 +13,7 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en deel ze op in rollen. Een beheerder kan meerdere rollen hebben. Je kan vervolgens de toegang tot zaken regelen per rol.</p>
+            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
 
             <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
                 Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
@@ -91,16 +91,17 @@
                     </STListItem>
                 </STList>
 
-                <p class="info-box" v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0">Geen beheerders met deze rol</p>
+                <p class="info-box" v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0">Geen beheerders in deze groep</p>
             </div>
 
             <div class="container" v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0">
                 <hr>
                     <h2 class="style-with-button">
                     <div>
-                        Beheerders zonder rollen
+                        Beheerders die niet in een groep zitten
                     </div>
                 </h2>
+                <p>Deze beheerders hebben nergens toegang tot, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 
                 <STList v-if="!loading">
                     <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
@@ -130,7 +131,7 @@
             <p>
                 <button class="button text" @click="addRole">
                     <span class="icon add"/>
-                    <span>Nieuwe rol toevoegen</span>
+                    <span>Nieuwe beheerdersgroep toevoegen</span>
                 </button>
             </p>
             <p>

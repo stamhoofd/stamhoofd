@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { PrivateWebshop } from "@stamhoofd/structures";
+import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
 
 import { Token } from '../models/Token';
 import { Webshop } from '../models/Webshop';
@@ -34,7 +34,7 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions ) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
@@ -48,6 +48,14 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 code: "not_found",
                 message: "Webshop not found",
                 human: "De webshop die je wilt aanpassen bestaat niet (meer)"
+            })
+        }
+
+        if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "You do not have permissions for this endpoint",
+                statusCode: 403
             })
         }
         
