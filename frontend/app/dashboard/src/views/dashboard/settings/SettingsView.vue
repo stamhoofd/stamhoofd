@@ -156,7 +156,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationMetaData, PaymentMethod, User } from "@stamhoofd/structures"
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Invite, Organization, OrganizationAdmins, OrganizationMetaData, OrganizationTypeHelper, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -280,13 +280,51 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             }).setDisplayStyle("popup").setAnimated(animated))
             return
         }
+
+        let cat = this.organization.meta.rootCategory
+
+        let p = Organization.patch({
+            id: this.organization.id
+        })
+
+        if (!this.enableActivities) {
+            const full = GroupCategoryTree.build(cat, this.organization.meta.categories, this.organization.groups)
+            if (full.categories.length === 0) {
+
+                // Create a new one and open that one instead
+                const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
+                const category = defaultCategories[0] ?? GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen",
+                        
+                    })
+                })
+                category.groupIds = this.organization.groups.map(g => g.id)
+                
+                const meta = OrganizationMetaData.patch({})
+                meta.categories.addPut(category)
+
+                const me = GroupCategory.patch({ id: cat.id })
+                me.categoryIds.addPut(category.id)
+                meta.categories.addPatch(me)
+
+                p = p.patch({
+                    meta
+                })
+
+                cat = category
+
+            } else {
+                cat = full.categories[0]
+            }
+        }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditCategoryGroupsView, {
-                category: this.organization.meta.rootCategory,
-                organization: this.organization,
+                category: cat,
+                organization: this.organization.patch(p),
                 async saveHandler(patch) {
                     patch.id = this.organization.id
-                    await OrganizationManager.patch(patch)
+                    await OrganizationManager.patch(p.patch(patch))
                 }
             })
         }).setDisplayStyle("popup").setAnimated(animated))

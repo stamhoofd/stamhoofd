@@ -413,7 +413,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
         try {
             await this.saveHandler(p)
-            this.pop({ force: true })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

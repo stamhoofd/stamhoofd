@@ -3,7 +3,7 @@
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
-                <button v-if="!isNew && !isRoot" class="button text" @click="deleteMe">
+                <button v-if="!isNew && !isRoot && enableActivities" class="button text" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
@@ -15,7 +15,7 @@
             <h1>
                 {{ title }}
             </h1>
-            <p v-if="isRoot">
+            <p v-if="isRoot && enableActivities">
                 Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen kan onderverdelen. Zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
                 Jouw leden krijgen dan alle mogelijke (openbare) inschrijvingsgroepen te zien op jouw inschrijvingspagina.
             </p>
@@ -34,16 +34,18 @@
                     >
                 </STInputBox>
 
-                <Checkbox v-model="limitRegistrations">
-                    Een lid kan maar in één groep inschrijven
-                </Checkbox>
+                <template v-if="enableActivities">
+                    <Checkbox v-model="limitRegistrations">
+                        Een lid kan maar in één groep inschrijven
+                    </Checkbox>
 
-                <Checkbox v-model="isHidden">
-                    Verberg deze categorie voor leden
-                </Checkbox>
+                    <Checkbox v-model="isHidden">
+                        Verberg deze categorie voor leden
+                    </Checkbox>
+                </template>
             </template>
 
-            <template v-if="categories.length > 0">
+            <template v-if="categories.length > 0 && enableActivities">
                 <hr>
                 <h2>Categorieën</h2>
                 <STList>
@@ -65,7 +67,7 @@
                     <span>Nieuwe groep toevoegen</span>
                 </button>
             </p>
-            <p>
+            <p v-if="enableActivities">
                 <button class="button text" @click="createCategory">
                     <span class="icon add" />
                     <span>Nieuwe categorie toevoegen</span>
@@ -155,6 +157,10 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
      */
     @Prop({ required: true })
     saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+
+    get enableActivities() {
+        return this.organization.meta.modules.useActivities
+    }
 
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)

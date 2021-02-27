@@ -80,6 +80,9 @@ export class Organization extends AutoEncoder {
                 })
             }
 
+            if (!this.meta.modules.useActivities && tree.categories.length > 1) {
+                tree.categories = [tree.categories[0]]
+            }
             return tree
         }
 
@@ -103,6 +106,10 @@ export class Organization extends AutoEncoder {
                     }),
                     categories: [tree]
                 })
+            }
+
+            if (!this.meta.modules.useActivities && tree.categories.length > 1) {
+                tree.categories = [tree.categories[0]]
             }
 
             return tree
@@ -129,6 +136,10 @@ export class Organization extends AutoEncoder {
                     }),
                     categories: [tree]
                 })
+            }
+
+            if (!this.meta.modules.useActivities && tree.categories.length > 1) {
+                tree.categories = [tree.categories[0]]
             }
 
             return tree
