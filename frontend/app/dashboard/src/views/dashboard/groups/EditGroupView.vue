@@ -43,6 +43,9 @@
                     />
                 </STInputBox>
 
+                <hr>
+                <h2>Inschrijven</h2>
+
                 <div class="split-inputs">
                     <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
                         <DateSelection v-model="startDate" />
@@ -81,14 +84,10 @@
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
-            </template>
-            <template v-if="tab == 'payments'">
-                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
-                <STErrorsDefault :error-box="errorBox" />
-            </template>
 
-            <template v-if="tab == 'queue'">
-                <STInputBox title="Wachtlijst" error-fields="genderType" :error-box="errorBox" class="max">
+                <hr>
+                <h2>Wachtlijst</h2>
+                <STInputBox error-fields="genderType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
                             Geen wachtlijst
@@ -120,6 +119,19 @@
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
             </template>
+            <template v-if="tab == 'payments'">
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
+                <STErrorsDefault :error-box="errorBox" />
+            </template>
+
+            <template v-if="tab == 'permissions'">
+                <h2>Toegangsbeheer</h2>
+                <p>Kies welke beheerdersgroepen toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
+                
+                <STList>
+                    <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :showRole="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
+                </STList>
+            </template>
         </main>
 
         <STToolbar>
@@ -140,13 +152,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
+import { STList, AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
 import { OrganizationMetaData, RecordType, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditGroupPriceBox from "./EditGroupPriceBox.vue"
+import GroupPermissionRow from "../admins/GroupPermissionRow.vue"
 
 @Component({
     components: {
@@ -167,16 +180,18 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         LoadingButton,
         TimeInput,
         EditGroupPriceBox,
-        BackButton
+        BackButton,
+        STList,
+        GroupPermissionRow
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    tabs = ["general", "payments", "queue"];
+    tabs = ["general", "payments", "permissions"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld", "Wachtlijst"];
+    tabLabels = ["Algemeen", "Lidgeld", "Toegang"];
 
     saving = false
 
@@ -208,6 +223,17 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
             return c
         }
         return this.group
+    }
+
+    get roles() {
+        return this.patchedOrganization.privateMeta?.roles ?? []
+    }
+
+    addOrganizationPatch(patch: AutoEncoderPatchType<Organization> ) {
+        if (this.saving) {
+            return
+        }
+        this.patchOrganization = this.patchOrganization.patch(patch)
     }
 
     addPatch(patch: AutoEncoderPatchType<Group> ) {

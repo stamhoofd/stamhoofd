@@ -274,6 +274,10 @@
             padding-bottom: 0;
         }
 
+        .segmented-control + h2 {
+            padding-top: 20px;
+        }
+
         > h2 + p {
             &:not([class]) {
                 @extend .style-description;

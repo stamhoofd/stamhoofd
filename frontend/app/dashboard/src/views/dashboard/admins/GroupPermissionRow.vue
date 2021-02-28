@@ -2,7 +2,7 @@
     <STListItem element-name="label" :selectable="true">
         <Checkbox slot="left" v-model="selectGroup" />
         <h2 class="style-title-list">
-            {{ group.settings.name }}
+            {{ showRole ? role.name : group.settings.name }}
         </h2>
 
         <div slot="right" v-if="selectGroup">
@@ -38,6 +38,9 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     organization: Organization
+
+    @Prop({ default: false })
+    showRole!: boolean
    
     addRolePatch(patch: AutoEncoderPatchType<PermissionRoleDetailed>) {
         const privateMeta = OrganizationPrivateMetaData.patch({})
