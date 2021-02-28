@@ -39,7 +39,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     }
 
     editProduct() {
-        this.show(new ComponentWithProperties(EditGroupView, { 
+        this.present(new ComponentWithProperties(EditGroupView, { 
             group: this.group, 
             organization: this.organization, 
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {

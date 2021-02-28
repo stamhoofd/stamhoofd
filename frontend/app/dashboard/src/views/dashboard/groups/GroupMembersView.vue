@@ -12,6 +12,8 @@
                         <span>Wachtlijst</span>
                     </button>
 
+                    <button v-if="group" class="button icon settings gray" @click="modifyGroup"></button>
+                    
                     <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                         <span class="icon add" />
                         <span>Nieuw</span>
@@ -39,6 +41,8 @@
                     <span class="icon clock-small" />
                     <span>Wachtlijst</span>
                 </button>
+
+                <button v-if="group" class="button icon settings gray" @click="modifyGroup"></button>
 
                 <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
                     <span class="icon add" />
@@ -192,6 +196,7 @@
 </template>
 
 <script lang="ts">
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
@@ -200,7 +205,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Registration, WaitingListType } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, Registration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -212,6 +217,7 @@ import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
+import EditGroupView from "./EditGroupView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 
 class SelectableMember {
@@ -428,6 +434,26 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditMemberView, {
 
             })
+        }).setDisplayStyle("popup"))
+    }
+
+    modifyGroup() {
+        if (!this.group) {
+            return;
+        }
+        this.present(new ComponentWithProperties(EditGroupView, { 
+            group: this.group, 
+            organization: OrganizationManager.organization, 
+            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+                patch.id = OrganizationManager.organization.id
+                await OrganizationManager.patch(patch)
+                const g = OrganizationManager.organization.groups.find(g => g.id === this.group!.id)
+                if (!g) {
+                    this.pop({ force: true })
+                } else {
+                    this.group!.set(g)
+                }
+            }
         }).setDisplayStyle("popup"))
     }
 

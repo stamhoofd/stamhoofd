@@ -65,7 +65,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -162,7 +162,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                 endDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
-            })
+            }),
+            privateSettings: GroupPrivateSettings.create({})
         })
         const meta = OrganizationMetaData.patch({})
 

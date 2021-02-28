@@ -153,7 +153,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STList, AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
-import { OrganizationMetaData, RecordType, Version } from '@stamhoofd/structures';
+import { GroupPrivateSettings, GroupSettingsPatch, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -209,6 +209,35 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
+    mounted() {
+        // Auto assign roles
+        if (this.isNew && OrganizationManager.user.permissions && this.group.privateSettings!.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+            const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
+            for (const cat of categories) {
+                // Get all roles that have create permissions in the categories that this group will get added into
+                const roles = cat.settings.permissions.create.flatMap(r => {
+                    const role = OrganizationManager.organization.privateMeta?.roles.find(i => i.id === r.id)
+                    const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
+                    if (role && has) {
+                        return [PermissionRole.create(role)]
+                    }
+                    return []
+                })
+
+                if (roles.length > 0) {
+                    const permissions = PermissionsByRole.patch({})
+                    for (const role of roles) {
+                        permissions.full.addPut(role)
+                    }
+                    this.addPrivateSettingsPatch(GroupPrivateSettings.patch({
+                        permissions
+                    }))
+                }
+                
+            }
+        }
+    }
+
     get isNew() {
         return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
     }
@@ -255,6 +284,13 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addPatch(Group.patch({ 
             id: this.group.id, 
             settings: GroupSettings.patch(patch)
+        }))
+    }
+
+    addPrivateSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupPrivateSettings>> ) {
+        this.addPatch(Group.patch({ 
+            id: this.group.id, 
+            privateSettings: GroupPrivateSettings.patch(patch)
         }))
     }
 
