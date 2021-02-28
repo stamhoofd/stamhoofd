@@ -200,7 +200,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, Group, Member,MemberWithRegistrations, Registration, WaitingListType } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Registration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -242,8 +242,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     tabs = ["all", "waitingList"]
     tab = this.tabs[0]
 
-    @Prop()
+    @Prop({ default: null })
     group!: Group | null;
+
+    @Prop({ default: null })
+    category!: GroupCategoryTree | null;
 
     @Prop({ default: false })
     waitingList!: boolean;
@@ -270,8 +273,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
             document.title = "Stamhoofd - "+this.group.settings.name
         } else {
-            HistoryManager.setUrl("/groups/all")    
-            document.title = "Stamhoofd - Alle leden"
+            if (this.category) {
+                HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
+                document.title = "Stamhoofd - "+ Formatter.slug(this.category.settings.name) +" - Alle leden"
+            } else {
+                HistoryManager.setUrl("/groups/all")    
+                document.title = "Stamhoofd - Alle leden"
+            }
+            
         }
     }
 
@@ -325,8 +334,18 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return this.group.settings.maxMembers
     }
 
+    get groupIds() {
+        if (this.group) {
+            return [this.group.id]
+        }
+        if (this.category) {
+            return this.category.groups.map(g => g.id) // needed because of permission check + existing check!
+        }
+        return []
+    }
+
     checkWaitingList() {
-        MemberManager.loadMembers(this.group?.id ?? null, true).then((members) => {
+        MemberManager.loadMembers(this.groupIds, true).then((members) => {
             this.cachedWaitingList = members.length > 0
         }).catch((e) => {
             console.error(e)
@@ -335,7 +354,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     reload() {
         this.loading = true;
-        MemberManager.loadMembers(this.group?.id ?? null, this.waitingList, this.cycleOffset).then((members) => {
+        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset).then((members) => {
             this.members = members.map((member) => {
                 return new SelectableMember(member, !this.waitingList);
             }) ?? [];
@@ -371,7 +390,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : "Alle leden")
+        return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
     }
 
     get titleDescription() {

@@ -86,7 +86,7 @@ export class ImportingMember {
         }
 
          // Start! :D
-        const allMembers = await MemberManager.loadMembers(null, null, null)
+        const allMembers = await MemberManager.loadMembers([], null, null)
 
         const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
         const result = new ImportResult()

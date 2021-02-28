@@ -552,7 +552,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const matchedMembers: SGVLidMatch[] = []
 
         // Start! :D
-        const allMembers = await MemberManager.loadMembers(null, false)
+        const allMembers = await MemberManager.loadMembers([], false)
 
         for (const member of allMembers) {
             if (!member.details) {

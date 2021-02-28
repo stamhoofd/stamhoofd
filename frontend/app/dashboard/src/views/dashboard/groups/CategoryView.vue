@@ -29,8 +29,17 @@
                 </STList>
             </template>
 
+            
+
             <template v-else-if="groups.length > 0">
                 <STList>
+                    <STListItem v-if="groups.length > 1" :selectable="true" @click="openAll()">
+                        Alle leden
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
                         {{ group.settings.name }}
 
@@ -136,6 +145,12 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     openGroup(group: Group) {
         this.show(new ComponentWithProperties(GroupMembersView, {
             group
+        }))
+    }
+
+    openAll() {
+        this.show(new ComponentWithProperties(GroupMembersView, {
+            category: this.tree
         }))
     }
 
