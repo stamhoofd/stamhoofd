@@ -515,12 +515,26 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.addPatch(p)
     }
 
-    save() {
-        this.saveHandler(this.patchOrganization)
-        this.pop({ force: true })
+    async save() {
+        if (this.saving) {
+            return
+        }
+        this.saving = true;
+
+        try {
+            await this.saveHandler(this.patchOrganization)
+            this.pop({ force: true }) 
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.saving = false
     }
 
     async deleteMe() {
+        if (this.saving) {
+            return
+        }
+        
         if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
             return
         }
@@ -529,8 +543,15 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         const p = Organization.patch({
             privateMeta
         })
-        this.saveHandler(p)
-        this.pop({ force: true })
+        this.saving = true;
+
+        try {
+            await this.saveHandler(p)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.saving = false
     }
 
     cancel() {

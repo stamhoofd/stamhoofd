@@ -268,7 +268,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditRoleView, { 
                 role,
                 organization: this.organization.patch(patch),
-                async saveHandler(p: AutoEncoderPatchType<Organization>) {
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
                     const doSave = patch.patch(p)
                     await OrganizationManager.patch(doSave)
                 }

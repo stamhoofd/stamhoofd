@@ -322,7 +322,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditCategoryGroupsView, {
                 category: cat,
                 organization: this.organization.patch(p),
-                async saveHandler(patch) {
+                saveHandler: async (patch) => {
                     patch.id = this.organization.id
                     await OrganizationManager.patch(p.patch(patch))
                 }

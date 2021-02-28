@@ -104,7 +104,7 @@
             <div class="container" v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0">
                 <hr>
                 <h2>
-                        Beheerders die niet in een groep zitten
+                    Beheerders die niet in een groep zitten
                 </h2>
                 <p>Deze beheerders hebben nergens toegang tot, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 
@@ -192,6 +192,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     async load(force = false) {
+        console.log("called load", force)
         if (!force && this.organization.admins && this.organization.invites) {
             this.loading = false
             return
@@ -362,9 +363,12 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditRoleView, { 
                 role,
                 organization: this.organization.patch(patch),
-                async saveHandler(p: AutoEncoderPatchType<Organization>) {
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
                     const doSave = patch.patch(p)
                     await OrganizationManager.patch(doSave)
+                    if (doSave.admins || doSave.invites) {
+                        await this.load(true)
+                    }
                 }
             }),
         }).setDisplayStyle("popup"))
@@ -379,10 +383,10 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditRoleView, { 
                 role,
                 organization: this.organization,
-                async saveHandler(p: AutoEncoderPatchType<Organization>) {
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
                     const doSave = patch.patch(p)
                     await OrganizationManager.patch(doSave)
-                    if (p.admins || p.invites) {
+                    if (doSave.admins || doSave.invites) {
                         await this.load(true)
                     }
                 }

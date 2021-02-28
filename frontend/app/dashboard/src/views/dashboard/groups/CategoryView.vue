@@ -180,7 +180,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditGroupView, { 
             group, 
             organization: this.organization.patch(p), 
-            async saveHandler(patch: AutoEncoderPatchType<Organization>) {
+            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
                 await OrganizationManager.patch(p.patch(patch))
             }
         }).setDisplayStyle("popup"))
@@ -191,7 +191,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(EditCategoryGroupsView, { 
                 category: this.category, 
                 organization: this.organization, 
-                async saveHandler(patch) {
+                saveHandler: async (patch) => {
                     patch.id = this.organization.id
                     await OrganizationManager.patch(patch)
                 }

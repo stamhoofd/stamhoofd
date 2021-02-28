@@ -37,12 +37,12 @@ export class OrganizationManagerStatic {
         const invites = this.organization.invites
         this.organization.set(response.data)
 
-        if (!this.organization.admins) {
-            this.organization.admins = admins
+        if (admins && !this.organization.admins && patch.admins) {
+            this.organization.admins = patch.admins.applyTo(admins)
         }
 
-        if (!this.organization.invites) {
-            this.organization.invites = invites
+        if (invites && !this.organization.invites && patch.invites) {
+            this.organization.invites = patch.invites.applyTo(invites)
         }
     }
 }
