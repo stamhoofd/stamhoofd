@@ -50,27 +50,29 @@
                     Deze beheerdersgroep heeft geen toegang tot inschrijvingsgroepen
                 </p>
 
-                <hr>
-                <h2 class="style-with-button">
-                    <div>
-                        Inschrijvingscategorieën
-                    </div>
-                    <div>
-                        <button class="button text" @click="editCategories()">
-                            <span class="icon add"/>
-                            <span class="hide-smartphone">Toevoegen</span>
-                        </button>
-                    </div>
-                </h2>
-                <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
+                <template v-if="enableActivities">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>
+                            Inschrijvingscategorieën
+                        </div>
+                        <div>
+                            <button class="button text" @click="editCategories()">
+                                <span class="icon add"/>
+                                <span class="hide-smartphone">Toevoegen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel administrators kunnen categorieën toevoegen en bewerken.</p>
 
-                <STList v-if="categories.length > 0">
-                    <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
-                </STList>
+                    <STList v-if="categories.length > 0">
+                        <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
+                    </STList>
 
-                <p v-else class="info-box">
-                    Deze beheerdersgroep kan geen inschrijvingsgroepen maken
-                </p>
+                    <p v-else class="info-box">
+                        Deze beheerdersgroep kan geen inschrijvingsgroepen maken
+                    </p>
+                </template>
             </div>
 
             <div v-if="enableWebshopModule" class="container">
@@ -463,6 +465,10 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
 
     get enableWebshopModule() {
         return this.organization.meta.modules.useWebshops
+    }
+
+    get enableActivities() {
+        return this.organization.meta.modules.useActivities
     }
 
     get sortedAdmins() {

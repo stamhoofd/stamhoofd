@@ -74,7 +74,7 @@
                 </button>
             </p>
 
-            <div v-if="!isRoot" class="container">
+            <div v-if="!isRoot && enableActivities" class="container">
                 <hr>
                 <h2>Wie kan groepen maken in deze categorie?</h2>
                 <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
