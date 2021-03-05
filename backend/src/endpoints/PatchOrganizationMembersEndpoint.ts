@@ -158,7 +158,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            if (!member.hasWriteAccess(user, groups)) {
+            if (!await member.hasWriteAccess(user, groups, false, true)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",
@@ -272,7 +272,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            if (!member.hasWriteAccess(user, groups, true)) {
+            if (!await member.hasWriteAccess(user, groups, true, false)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",

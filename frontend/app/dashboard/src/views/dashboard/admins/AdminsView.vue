@@ -1,13 +1,13 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <button slot="right" class="button text" @click="createAdmin" aria-label="Nieuwe beheerder">
-                <span class="icon add"/>
+            <button slot="right" class="button text" aria-label="Nieuwe beheerder" @click="createAdmin">
+                <span class="icon add" />
                 <span>Beheerder</span>
             </button>
 
-            <button slot="right" class="button text hide-smartphone" @click="addRole" aria-label="Nieuwe groep">
-                <span class="icon add"/>
+            <button slot="right" class="button text hide-smartphone" aria-label="Nieuwe groep" @click="addRole">
+                <span class="icon add" />
                 <span>Groep</span>
             </button>
 
@@ -20,7 +20,7 @@
             <h1>Beheerders</h1>
             <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
 
-            <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
+            <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
                 Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
             </p>
 
@@ -33,41 +33,57 @@
             <p>Administrators hebben toegang tot alles, zonder beperkingen.</p>
 
             <Spinner v-if="loading" />
-                <STList v-else>
-                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                        <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
-                        <p class="style-description-small">{{ admin.email }}</p>
-                        <p class="style-description-small">{{ permissionList(admin) }}</p>
+            <STList v-else>
+                <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                    <h2 class="style-title-list">
+                        {{ admin.firstName }} {{ admin.lastName }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ admin.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(admin) }}
+                    </p>
 
-                        <template slot="right">
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
+                    <template slot="right">
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
 
-                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                        <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
-                        <p class="style-description-small">{{ invite.userDetails.email }}</p>
-                        <p class="style-description-small">{{ permissionList(invite) }}</p>
+                <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                    <h2 class="style-title-list">
+                        {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ invite.userDetails.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(invite) }}
+                    </p>
 
-                        <template slot="right">
-                            <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
-                            <p v-else>Uitnodiging nog niet geaccepteerd</p>
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-                </STList>
+                    <template slot="right">
+                        <p v-if="isExpired(invite)">
+                            Uitnodiging vervallen
+                        </p>
+                        <p v-else>
+                            Uitnodiging nog niet geaccepteerd
+                        </p>
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
+            </STList>
 
-            <div v-for="(role, index) in roles" class="container">
+            <div v-for="(role, index) in roles" :key="role.id" class="container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>
-                        {{ role.name }}
+                        {{ role.name }}
                     </div>
                     <div>
-                        <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)"></button>
-                        <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)"></button>
+                        <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)" />
+                        <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)" />
                         <button class="button text" @click="editRole(role)">
-                            <span class="icon settings"/>
+                            <span class="icon settings" />
                             <span class="hide-smartphone">Bewerken</span>
                         </button>
                     </div>
@@ -76,9 +92,15 @@
                 <Spinner v-if="loading" />
                 <STList v-else>
                     <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                        <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
-                        <p class="style-description-small">{{ admin.email }}</p>
-                        <p class="style-description-small">{{ permissionList(admin) }}</p>
+                        <h2 class="style-title-list">
+                            {{ admin.firstName }} {{ admin.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(admin) }}
+                        </p>
 
                         <template slot="right">
                             <span><span class="icon gray edit" /></span>
@@ -86,22 +108,34 @@
                     </STListItem>
 
                     <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                        <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
-                        <p class="style-description-small">{{ invite.userDetails.email }}</p>
-                        <p class="style-description-small">{{ permissionList(invite) }}</p>
+                        <h2 class="style-title-list">
+                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ invite.userDetails.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(invite) }}
+                        </p>
 
                         <template slot="right">
-                            <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
-                            <p v-else>Uitnodiging nog niet geaccepteerd</p>
+                            <p v-if="isExpired(invite)">
+                                Uitnodiging vervallen
+                            </p>
+                            <p v-else>
+                                Uitnodiging nog niet geaccepteerd
+                            </p>
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
                 </STList>
 
-                <p class="info-box" v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0">Geen beheerders in deze groep</p>
+                <p v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0" class="info-box">
+                    Geen beheerders in deze groep
+                </p>
             </div>
 
-            <div class="container" v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0">
+            <div v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0" class="container">
                 <hr>
                 <h2>
                     Beheerders die niet in een groep zitten
@@ -110,9 +144,15 @@
 
                 <STList v-if="!loading">
                     <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                        <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
-                        <p class="style-description-small">{{ admin.email }}</p>
-                        <p class="style-description-small">{{ permissionList(admin) }}</p>
+                        <h2 class="style-title-list">
+                            {{ admin.firstName }} {{ admin.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(admin) }}
+                        </p>
 
                         <template slot="right">
                             <span><span class="icon gray edit" /></span>
@@ -120,13 +160,23 @@
                     </STListItem>
 
                     <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                        <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
-                        <p class="style-description-small">{{ invite.userDetails.email }}</p>
-                        <p class="style-description-small">{{ permissionList(invite) }}</p>
+                        <h2 class="style-title-list">
+                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ invite.userDetails.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(invite) }}
+                        </p>
 
                         <template slot="right">
-                            <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
-                            <p v-else>Uitnodiging nog niet geaccepteerd</p>
+                            <p v-if="isExpired(invite)">
+                                Uitnodiging vervallen
+                            </p>
+                            <p v-else>
+                                Uitnodiging nog niet geaccepteerd
+                            </p>
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
@@ -137,13 +187,13 @@
 
             <p>
                 <button class="button text" @click="addRole">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Nieuwe beheerdersgroep toevoegen</span>
                 </button>
             </p>
             <p>
                 <button class="button text" @click="createAdmin">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Nieuwe beheerder toevoegen</span>
                 </button>
             </p>
@@ -153,19 +203,18 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties,NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, CenteredMessage, BackButton } from "@stamhoofd/components";
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties,HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch, User, OrganizationAdmins, Invite, PermissionRoleDetailed, Organization, OrganizationPrivateMetaData } from '@stamhoofd/structures';
-import { OrganizationGenderType } from '@stamhoofd/structures';
+import { Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData,PermissionRoleDetailed, User } from '@stamhoofd/structures';
+import { PermissionRole } from "@stamhoofd/structures";
+import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import AdminInviteView from './AdminInviteView.vue';
-import { Sorter } from "@stamhoofd/utility";
 import EditRoleView from "./EditRoleView.vue";
-import { PermissionRole } from "@stamhoofd/structures";
 
 @Component({
     components: {
@@ -227,26 +276,14 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     permissionList(user: User | Invite) {
-        if (user.permissions?.hasFullAccess()) {
-            return "Administrator"
-        }
-
-        if (user.permissions?.hasWriteAccess()) {
-            return "Alle groepen"
-        }
-
         const list: string[] = []
-
-        for (const group of this.organization.groups) {
-            if (user.permissions?.hasWriteAccess(group.id)) {
-                list.push(group.settings.name)
-            }
+        if (user.permissions?.hasFullAccess()) {
+            list.push("Administrators")
         }
 
-        if (list.length == this.organization.groups.length) {
-            return "Alle groepen"
+        for (const role of user.permissions?.roles ?? []) {
+            list.push(role.name)
         }
-
         return list.join(", ")
     }
 

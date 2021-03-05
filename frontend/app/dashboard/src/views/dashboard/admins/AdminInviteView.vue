@@ -38,34 +38,34 @@
 
             <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
 
-            <STList>
-                <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="fullAccess" />
-                    Toegang tot alles (administrator)
-
-                    <template #right>
-                        Kan alles bekijken en bewerken
-                    </template>
-                </STListItem>
-            </STList>
-
-            <div class="container" v-if="!fullAccess">
+            <div class="container">
                 <hr>
                 <h2>Beheerdersgroepen</h2>
-                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot. Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
+                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor administrators). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
-                <STList v-if="roles.length > 0">
+                <STList>
+                    <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                        <Checkbox slot="left" v-model="fullAccess" />
+                        Administrators
+
+                        <template #right>
+                            Kan alles bekijken en bewerken
+                        </template>
+                    </STListItem>
+
                     <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
                         <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
-                        {{ role.name }}
+                        {{ role.name }}
                     </STListItem>
                 </STList>
 
-                <p v-else class="info-box">Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.</p>
+                <p v-if="roles.length == 0" class="info-box">
+                    Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.
+                </p>
 
                 <p>
                     <button class="button text" @click="addRole">
-                        <span class="icon add"/>
+                        <span class="icon add" />
                         <span>Nieuwe groep toevoegen</span>
                     </button>
                 </p>

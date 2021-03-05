@@ -13,11 +13,7 @@ export default new Migration(async () => {
     const organizations = await Organization.all();
 
     for (const organization of organizations) {
-        // tmp reset
-        organization.meta.categories = [GroupCategory.create({ id: "root" })]
-        organization.meta.rootCategoryId = "root"
         // Setup default root groups
-
         if (organization.meta.categories.length <= 1) {
             console.log(organization.name)
 

@@ -314,33 +314,47 @@ export class Member extends Model {
         return true
     }
 
-    hasWriteAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false) {
+    async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false, checkFamily = false) {
         if (!user.permissions) {
             return false
         }
-        let hasAccess = user.permissions.hasWriteAccess()
 
-        if (!hasAccess) {
-            for (const registration of this.registrations) {
-                const group = groups.find(g => g.id === registration.groupId)
-                if (!group) {
-                    continue;
+        if (user.permissions.hasWriteAccess()) {
+            return true;
+        }
+
+        for (const registration of this.registrations) {
+            const group = groups.find(g => g.id === registration.groupId)
+            if (!group) {
+                continue;
+            }
+
+            if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                if (!needAll) {
+                    return true;
                 }
-
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
-                    hasAccess = true
-                } else {
-                    if (needAll) {
-                        return false
-                    }
+            } else {
+                if (needAll) {
+                    return false
                 }
             }
         }
 
-        if (!hasAccess) {
-            return false
-        }            
-        return true
+        if (needAll) {
+            return true;
+        }         
+        
+        // Check family acccess
+        if (checkFamily) {
+            const members = (await Member.getFamilyWithRegistrations(this.id))
+            for (const member of members) {
+                if (await member.hasWriteAccess(user, groups, false, false)) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
 
     /// This is defined here instead of registrations to prevent reference cycles...
