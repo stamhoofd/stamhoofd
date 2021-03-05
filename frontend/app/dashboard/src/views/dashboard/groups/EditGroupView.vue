@@ -488,6 +488,8 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
+        console.log(this.patchOrganization)
+        console.log(this.organization)
         return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
     }
 
