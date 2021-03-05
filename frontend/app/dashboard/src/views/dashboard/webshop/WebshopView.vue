@@ -6,8 +6,8 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
 
-                    <button class="button gray icon settings" v-if="hasFullPermissions" v-tooltip="'Instellingen'" @click="editSettings" />
-                    <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
+                    <button v-if="hasFullPermissions" v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
+                    <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
                 </STNavigationTitle>
             </template>
             <template #middle>
@@ -27,8 +27,8 @@
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
-                <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
+                <button v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
+                <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
             <Spinner v-if="loading" class="center" />
@@ -36,7 +36,7 @@
                 Je hebt nog geen bestellingen ontvangen
             </p>
 
-            <table v-else class="data-table">
+            <table v-else-if="!isLoadingOrders" class="data-table">
                 <thead>
                     <tr>
                         <th>
@@ -88,7 +88,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
-                        <td @click.stop="" class="prefix">
+                        <td class="prefix" @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
                         <td class="hide-smartphone tiny">
@@ -124,7 +124,7 @@
             <Spinner v-if="isLoadingOrders" class="center" />
         </main>
 
-        <STToolbar :class="{'hide-smartphone': selectionCount == 0}">
+        <STToolbar :class="{'hide-smartphone': selectionCount == 0 }">
             <template #left>
                 {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "bestelling" : "bestellingen" }} geselecteerd
                 <template v-if="selectionCountHidden">
@@ -132,11 +132,11 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" :disabled="selectionCount == 0" @click="markAs">
+                <button class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
                     <span class="dropdown-text">Markeren als...</span>
                 </button>
                 <LoadingButton :loading="actionLoading">
-                    <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
+                    <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
                         <span class="dropdown-text">Mailen</span>
                         <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
@@ -160,8 +160,8 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
 
+import { NoFilter, NotPaidFilter,StatusFilter } from '../../../classes/order-filters';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import MailView from '../mail/MailView.vue';
 import EditWebshopView from './EditWebshopView.vue';
