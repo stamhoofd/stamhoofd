@@ -152,13 +152,6 @@ export class Permissions extends AutoEncoder {
 
     }
 
-    hasReadAccessForAtLeastOneGroup() {
-        if (this.hasReadAccess()) {
-            return true;
-        }
-        return this.groups.find(g => (getPermissionLevelNumber(g.level) >= getPermissionLevelNumber(PermissionLevel.Read)))
-    }
-
     hasReadAccess(groupId: string | null = null) {
         return this.hasAccess(PermissionLevel.Read, groupId)
     }
