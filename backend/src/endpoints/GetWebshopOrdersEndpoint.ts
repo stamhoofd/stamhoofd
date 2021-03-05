@@ -64,7 +64,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        const limit = 5
+        const limit = 50
 
         const orders = await Order.where(q, {
             limit: limit,
