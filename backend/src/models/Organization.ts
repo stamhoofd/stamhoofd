@@ -199,7 +199,8 @@ export class Organization extends Model {
 
     async getStructure(): Promise<OrganizationStruct> {
         const groups = await Group.where({organizationId: this.id})
-        return OrganizationStruct.create({
+
+        const struct = OrganizationStruct.create({
             id: this.id,
             name: this.name,
             meta: this.meta,
@@ -210,6 +211,14 @@ export class Organization extends Model {
             website: this.website,
             groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null })))
         })
+
+        if (this.meta.modules.disableActivities) {
+            // Only show groups that are in a given category
+            struct.groups = struct.categoryTree.categories[0]?.groups ?? []
+        }
+
+        return struct
+        
     }
 
     async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {

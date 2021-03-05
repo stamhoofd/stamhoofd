@@ -158,7 +158,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            if (!this.checkMemberWriteAccess(user, member, groups)) {
+            if (!member.hasWriteAccess(user, groups)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",
@@ -272,7 +272,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            if (!this.checkMemberWriteAccess(user, member, groups, true)) {
+            if (!member.hasWriteAccess(user, groups, true)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",
@@ -286,35 +286,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));
-    }
-
-    checkMemberWriteAccess(user: User, member: MemberWithRegistrations, groups: Group[], needAll = false) {
-        if (!user.permissions) {
-            return false
-        }
-        let hasAccess = user.permissions.hasWriteAccess()
-
-        if (!hasAccess) {
-            for (const registration of member.registrations) {
-                const group = groups.find(g => g.id === registration.groupId)
-                if (!group) {
-                    continue;
-                }
-
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
-                    hasAccess = true
-                } else {
-                    if (needAll) {
-                        return false
-                    }
-                }
-            }
-        }
-
-        if (!hasAccess) {
-            return false
-        }            
-        return true
     }
 
     async addRegistration(member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {

@@ -3,6 +3,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Order as OrderStruct, PaymentPatch, PaymentStatus } from "@stamhoofd/structures";
+import { Group } from '../models/Group';
 
 import { Member } from '../models/Member';
 import { Order } from '../models/Order';
@@ -42,7 +43,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
         const user = token.user
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You don't have permissions to access payments",
@@ -50,15 +51,39 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             })
         }
 
+
         const payments = await this.getPaymentsWithRegistrations(user.organizationId)
         const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
 
-
-
+        let groups: Group[] = []
+        if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
+            groups = await Group.where({organizationId: user.organization.id})
+        }
 
         // Modify payments
         for (const patch of request.body) {
-            const model = payments.find(p => p.id == patch.id) ?? orderPayments.find(p => p.id == patch.id)
+            const pay = payments.find(p => p.id == patch.id)
+
+            if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
+                if (!pay) {
+                    throw new SimpleError({
+                        code: "payment_not_found",
+                        message: "Payment with id "+patch.id+" does not exist",
+                        human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
+                    })
+                }
+                // Check permissions if not full permissions or paymetn permissions
+                const registrations = pay.registrations
+                if (!Member.haveRegistrationsWriteAccess(registrations, user, groups, true)) {
+                    throw new SimpleError({
+                        code: "payment_not_found",
+                        message: "Payment with id "+patch.id+" does not exist",
+                        human: "Je hebt geen toegang om deze betaling te wijzigen. Vraag het aan een hoofdbeheerder of beheerder met rechten voor het financieel beheer."
+                    })
+                }
+            }
+
+            const model = pay ?? orderPayments.find(p => p.id == patch.id)
             if (!model) {
                 throw new SimpleError({
                     code: "payment_not_found",
