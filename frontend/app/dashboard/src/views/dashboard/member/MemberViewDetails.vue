@@ -5,7 +5,7 @@
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
                     <div class="hover-show">
-                        <button class="button icon gray edit" @click="editMember()" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editMember()" />
                     </div>
                 </h2>
                 <dl class="details-grid">
@@ -23,7 +23,7 @@
                         <dt>Groep</dt>
                         <dd class="hover-box">
                             {{ member.groups.map(g => g.settings.name).join(", ") }}
-                            <button class="hover-show button icon gray sync" @click="editGroup()" />
+                            <button v-if="hasWrite" class="hover-show button icon gray sync" @click="editGroup()" />
                         </dd>
                     </template>
 
@@ -57,7 +57,7 @@
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
                     <div class="hover-show">
-                        <button class="button icon gray edit" @click="editParent(parent)" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editParent(parent)" />
                     </div>
                 </h2>
 
@@ -90,7 +90,7 @@
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
                     <div class="hover-show">
-                        <button class="button icon gray edit" @click="editContact(contact)" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editContact(contact)" />
                     </div>
                 </h2>
 
@@ -108,7 +108,7 @@
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
                     <div class="hover-show">
-                        <button class="button icon gray edit" @click="editContact(member.details.doctor)" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editContact(member.details.doctor)" />
                     </div>
                 </h2>
 
@@ -163,7 +163,7 @@
                         />
                     </div>
                     <div class="hover-show">
-                        <button class="button icon gray edit" @click="editMemberRecords()" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editMemberRecords()" />
                     </div>
                 </h2>
 
@@ -237,7 +237,7 @@
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { EmergencyContact,MemberWithRegistrations, Parent, ParentTypeHelper, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
@@ -266,6 +266,20 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
     }
 
     get activeAccounts() {

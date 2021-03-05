@@ -12,9 +12,9 @@
                         <span>Wachtlijst</span>
                     </button>
 
-                    <button v-if="group" class="button icon settings gray" @click="modifyGroup"></button>
+                    <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
                     
-                    <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
+                    <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                         <span class="icon add" />
                         <span>Nieuw</span>
                     </button>
@@ -42,9 +42,9 @@
                     <span>Wachtlijst</span>
                 </button>
 
-                <button v-if="group" class="button icon settings gray" @click="modifyGroup"></button>
+                <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
 
-                <button v-if="cycleOffset === 0 && !waitingList" class="button text" @click="addMember">
+                <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -205,7 +205,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, Registration, WaitingListType } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -299,6 +299,51 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get canGoNext() {
         return this.cycleOffset > 0
+    }
+
+    get hasFull(): boolean {
+        if (!this.group) {
+            return false
+        }
+
+        if (!this.group.privateSettings || !OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+            return false
+        }
+        return true
+    }
+
+    get canCreate(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (!this.group) {
+            if (this.category) {
+                for (const group of this.category.groups) {
+                    if (!group.privateSettings) {
+                        continue
+                    }
+
+                    if(getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+
+        if (!this.group.privateSettings) {
+            return false
+        }
+
+        if(getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            return false
+        }
+        return true
     }
 
     goNext() {

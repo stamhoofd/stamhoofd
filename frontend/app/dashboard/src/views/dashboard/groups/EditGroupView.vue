@@ -19,9 +19,9 @@
                 {{ name }} bewerken
             </h1>
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
+            <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="tab == 'general'">
-                <STErrorsDefault :error-box="errorBox" />
                 <STInputBox title="Naam" error-fields="settings.name" :error-box="errorBox">
                     <input
                         ref="firstInput"
@@ -121,7 +121,6 @@
             </template>
             <template v-if="tab == 'payments'">
                 <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
-                <STErrorsDefault :error-box="errorBox" />
             </template>
 
             <template v-if="tab == 'permissions'">
@@ -129,7 +128,7 @@
                 <p>Kies welke beheerdersgroepen toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
                 
                 <STList>
-                    <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :showRole="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
+                    <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
                 </STList>
             </template>
         </main>
@@ -152,14 +151,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
+import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
 import { GroupPrivateSettings, GroupSettingsPatch, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import EditGroupPriceBox from "./EditGroupPriceBox.vue"
 import GroupPermissionRow from "../admins/GroupPermissionRow.vue"
+import EditGroupPriceBox from "./EditGroupPriceBox.vue"
 
 @Component({
     components: {

@@ -250,7 +250,15 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.settings = struct.settings
             model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
 
-            // todo: check if current user has permissions to this new group -> else fail with error
+            // Check if current user has permissions to this new group -> else fail with error
+            if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+                throw new SimpleError({
+                    code: "missing_permissions",
+                    message: "You cannot restrict your own permissions",
+                    human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep (stel dit in via het tabblad toegang)"
+                })
+            }
+
             await model.save();
         }
 
@@ -274,6 +282,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
+
+                if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+                    throw new SimpleError({
+                        code: "missing_permissions",
+                        message: "You cannot restrict your own permissions",
+                        human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen (stel dit in via het tabblad toegang). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
+                    })
+                }
             }
             
             await model.save();

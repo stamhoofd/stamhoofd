@@ -1,14 +1,21 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem @click="editMember">
-            Wijzig gegevens
-            <span slot="right" class="icon edit" />
+        <ContextMenuItem @click="openMember">
+            Openen
+            <span slot="right" class="icon info-filled" />
         </ContextMenuItem>
 
-        <ContextMenuItem @click="changeGroup">
-            Wijzig groep
-            <span slot="right" class="icon sync" />
-        </ContextMenuItem>
+        <template v-if="hasWrite">
+            <ContextMenuItem @click="editMember">
+                Wijzig gegevens
+                <span slot="right" class="icon edit" />
+            </ContextMenuItem>
+
+            <ContextMenuItem @click="changeGroup">
+                Wijzig groep
+                <span slot="right" class="icon sync" />
+            </ContextMenuItem>
+        </template>
 
         <template v-if="member.details && member.details.parents.length > 0">
             <ContextMenuLine />
@@ -39,13 +46,13 @@
             </ContextMenuItem>
         </template>
 
-        <ContextMenuLine />
+        <ContextMenuLine v-if="hasWrite || canDelete" />
 
-        <ContextMenuItem @click="deleteRegistration">
+        <ContextMenuItem v-if="hasWrite" @click="deleteRegistration">
             Uitschrijven
             <span slot="right" class="icon unregister" />
         </ContextMenuItem>
-        <ContextMenuItem @click="deleteData">
+        <ContextMenuItem v-if="canDelete" @click="deleteData">
             <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
@@ -58,15 +65,17 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
-import { Group, MemberWithRegistrations, ParentTypeHelper } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, Group, MemberWithRegistrations, ParentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from '../../../classes/MemberManager';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import SMSView from "../sms/SMSView.vue";
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
+import MemberView from "./MemberView.vue";
 
 @Component({
     components: {
@@ -102,6 +111,45 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         window.location.href = "tel://" + phone.replace(" ", "");
     }
 
+    get canDelete(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        for (const group of this.member.groups) {
+            if(!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                return false
+            }
+        }
+        
+        return true
+    }
+
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    openMember() {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberView, {
+                member: this.member,
+                group: this.group,
+                cycleOffset: this.cycleOffset,
+                waitingList: this.waitingList
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
 
     editMember() {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
