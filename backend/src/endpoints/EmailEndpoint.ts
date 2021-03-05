@@ -36,7 +36,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasReadAccessForAtLeastOneGroup()) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
