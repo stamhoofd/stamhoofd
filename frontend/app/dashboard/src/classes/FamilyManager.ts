@@ -1,10 +1,9 @@
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder,VersionBox } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { Keychain, SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainItem, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Registration,User,Version } from '@stamhoofd/structures';
+import { SessionManager } from '@stamhoofd/networking';
+import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration,User } from '@stamhoofd/structures';
 
 import { MemberManager } from './MemberManager';
-import { OrganizationManager } from './OrganizationManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {

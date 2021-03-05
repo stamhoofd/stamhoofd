@@ -285,6 +285,35 @@ export class Member extends Model {
         })
     }
 
+    hasReadAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false) {
+        if (!user.permissions) {
+            return false
+        }
+        let hasAccess = user.permissions.hasWriteAccess()
+
+        if (!hasAccess) {
+            for (const registration of this.registrations) {
+                const group = groups.find(g => g.id === registration.groupId)
+                if (!group) {
+                    continue;
+                }
+
+                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Read)) {
+                    hasAccess = true
+                } else {
+                    if (needAll) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        if (!hasAccess) {
+            return false
+        }            
+        return true
+    }
+
     hasWriteAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false) {
         if (!user.permissions) {
             return false

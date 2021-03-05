@@ -1,6 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
+import { Group } from "../models/Group";
 
 import { Member } from '../models/Member';
 import { Token } from '../models/Token';
@@ -31,27 +32,23 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasReadAccess(request.params.id)) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang tot deze groep"
             })
         }
 
-        const members = await Member.getFamilyWithRegistrations(request.params.id)
+        const groups = await Group.where({ organizationId: user.organizationId })
+        const members = (await Member.getFamilyWithRegistrations(request.params.id))
 
         // You can access a family when you have access to one of the members
-        let canAccess = false
+        let canAccess = true
 
         for (const member of members) {
             if (member.organizationId != user.organizationId ) {
                 canAccess = false;
                 break;
-            }
-            for (const reg of member.registrations) {
-                if (user.permissions.hasReadAccess(reg.groupId)) {
-                    canAccess = true
-                }
             }
         }
 
@@ -63,6 +60,6 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        return new Response(members.map(m => m.getStructureWithRegistrations()));
+        return new Response(members.filter(member => member.hasReadAccess(user, groups)).map(m => m.getStructureWithRegistrations()));
     }
 }
