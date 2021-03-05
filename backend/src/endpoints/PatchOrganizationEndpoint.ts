@@ -53,7 +53,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasReadAccess()) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
@@ -200,6 +200,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         const ids = patch.groupIds.getPuts().map(p => p.put)
                         allowedIds.push(...ids)
                         category.groupIds.push(...ids)
+                    }
+
+                    if (allowedIds.length > 0) {
+                        await organization.save()
                     }
                 }
             }
