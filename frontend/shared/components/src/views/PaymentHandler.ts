@@ -65,6 +65,7 @@ export class PaymentHandler {
         if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
+                created: true,
                 organization,
                 payment,
                 settings: transferSettings,

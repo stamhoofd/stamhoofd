@@ -68,9 +68,11 @@ export default class STListItem extends Vue {
     }
 
     &.right-description {
-        .right {
+        > .main > div > .right {
             @extend .style-description;
             text-align: right;
+            flex-shrink: 10;
+            padding-left: 15px;
         }
     }
 
