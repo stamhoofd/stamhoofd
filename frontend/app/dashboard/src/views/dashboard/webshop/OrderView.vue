@@ -114,7 +114,7 @@
                 </STListItem>
             </STList>
 
-            <div v-if="order.data.checkoutMethod.description" class="container">
+            <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
                 <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
                     Afhaalopmerkingen
