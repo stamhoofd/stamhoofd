@@ -34,7 +34,7 @@
                         <img v-if="QRCodeUrl" :src="QRCodeUrl">
                     </div>
                     <div class="rectangle">
-                        <div class="rectangle-top hide-smartphone">
+                        <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
                             Of typ het over
                         </div>
                         <table class="payment-transfer-table rectangle">
