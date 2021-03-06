@@ -28,7 +28,8 @@
                             Scan met deze apps
                         </div>
                         <div class="rectangle-bottom">
-                            <img src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
+                            <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
+                            <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
                         </div>
                         <img v-if="QRCodeUrl" :src="QRCodeUrl">
                     </div>
@@ -70,6 +71,9 @@
                 <template v-else-if="payment.price > 0 && created">
                     <p v-if="isBelgium" class="hide-smartphone warning-box">
                         Typ de gegevens over als de QR-code niet lukt, dat is net hetzelfde. Dit is geen gewone Bancontact/Payconiq QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: KBC, ING, Belfius of Argenta, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
+                    </p>     
+                    <p v-else class="hide-smartphone warning-box">
+                        Typ de gegevens over als de QR-code niet lukt, dat is net hetzelfde. Dit is geen gewone iDEAL QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: ING of Bunq; niet met je ingebouwde QR-scanner of andere apps.
                     </p>     
                     <p class="only-smartphone warning-box">
                         Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
@@ -172,7 +176,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         return "Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!"
     }
 
-    isBelgium() {
+    get isBelgium() {
         return this.organization.address.country == "BE"
     }
 
