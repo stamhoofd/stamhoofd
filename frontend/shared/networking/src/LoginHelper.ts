@@ -255,6 +255,9 @@ export class LoginHelper {
         if (traded) {
             // We need the user for decrypting the next invite
             session.user = null
+
+            // Need to clear organization, because we might have more access now (to new groups)
+            session.organization = null
         }
 
         this.clearStoredInvites()
@@ -369,9 +372,9 @@ export class LoginHelper {
             await session.setEncryptionKey(storedKeys.authEncryptionKey)
             await this.tradeInvitesIfNeeded(session)
 
-            // if user got cleared due to an invite
-            if (!session.user) {
-                await session.fetchUser()
+            // if user / organization got cleared due to an invite
+            if (!session.isComplete()) {
+                await session.updateData()
                 // need to wait on this because it changes the permissions
             }
         } finally {
@@ -482,9 +485,10 @@ export class LoginHelper {
 
         await this.tradeInvitesIfNeeded(session)
 
-        // if user got cleared due to an invite
-        if (!session.user) {
-            await session.fetchUser()
+        // if user / orgaznization got cleared due to an invite
+        if (!session.isComplete()) {
+            await session.updateData()
+            // need to wait on this because it changes the permissions
         }
 
         await SessionManager.setCurrentSession(session)
