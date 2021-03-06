@@ -20,9 +20,10 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Toast } from '@stamhoofd/components';
 import Spinner from "@stamhoofd/components/src/Spinner.vue";
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
-import { OrganizationSimple } from '@stamhoofd/structures';
+import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { asyncComponent } from '../../App.vue';
@@ -84,6 +85,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
             }).setDisplayStyle("popup").setAnimated(false))
         }
+
+        this.updateDefault()
     }
 
     activated() {
@@ -92,8 +95,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     throttleUpdateResults = throttle(this.updateResults.bind(this), 1000);
 
-    get defaultOrganizations() {
-        return SessionManager.availableSessions().map(s => s.organization)
+    defaultOrganizations: Organization[] = []
+
+    updateDefault() {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.defaultOrganizations = SessionManager.availableSessions().filter(s => !!s.organization).map(s => s.organization!)
     }
 
     get filteredResults() {
@@ -133,7 +139,16 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     loginOrganization(organization: OrganizationSimple) {
         const session = SessionManager.getSessionForOrganization(organization.id)
         if (session && session.canGetCompleted()) {
-            SessionManager.setCurrentSession(session)
+            SessionManager.setCurrentSession(session).then(() => {
+                this.updateDefault()
+                if (!session.canGetCompleted() && !session.isComplete()) {
+                    this.loginOrganization(organization)
+                }
+            }).catch(e => {
+                this.updateDefault()
+                Toast.fromError(e).show()
+                console.error(e)
+            })
             return
         }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))

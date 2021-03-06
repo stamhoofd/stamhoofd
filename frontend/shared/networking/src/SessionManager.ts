@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Version } from '@stamhoofd/structures';
 
 import { Session } from './Session';
@@ -75,6 +76,18 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
+    removeOrganizationFromStorage(organizationId: string) {
+        console.log("remove organization from storage")
+        const storage = this.getSessionStorage()
+        const index = storage.organizations.map(o => o.id).indexOf(organizationId)
+
+        // todo: improve this a lot
+        if (index !== -1) {
+            storage.organizations.splice(index, 1)
+        }
+        this.saveSessionStorage(storage)
+    }
+
     logout() {
         if (this.currentSession) {
             this.currentSession.logout()
@@ -103,6 +116,19 @@ export class SessionManagerStatic {
             try {
                 await session.updateData()
             } catch (e) {
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    if (e.hasCode("invalid_organization")) {
+                        // Clear from session storage
+                        this.removeOrganizationFromStorage(session.organizationId)
+                        this.logout()
+                        throw new SimpleError({
+                            code: "invalid_organization",
+                            message: e.message,
+                            human: "Deze vereniging bestaat niet (meer)"
+                        })
+                    }
+                }
+
                 // still set the current session, but logout that session
                 console.log(e)
                 session.temporaryLogout()
