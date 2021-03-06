@@ -134,22 +134,13 @@ import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErr
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
+import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import EditRoleView from './EditRoleView.vue';
 import SendInviteView from './SendInviteView.vue';
-
-class SelectableGroup {
-    group: Group;
-    selected = false
-    constructor(group: Group, selected = false) {
-        this.selected = selected
-        this.group = group
-    }
-}
 
 @Component({
     components: {
@@ -189,8 +180,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     // use when editing an invite
     patchInvite: AutoEncoderPatchType<Invite> | null = null
-
-    groups: SelectableGroup[] = []
     
     /*fullAccess = false
     writeAccess = false*/
@@ -346,11 +335,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        for (const group of this.organization.groups) {
-            
-            this.groups.push(new SelectableGroup(group, (this.user ?? this.invite).permissions?.hasWriteAccess(group.id) ?? false))
-        }
-
         if (this.editUser) {
             this.downloadKeys().catch(e => {
                 console.error(e)
@@ -444,16 +428,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
         const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
 
-        /*if (!this.writeAccess && !this.fullAccess) {
-            for (const group of this.groups) {
-                if (group.selected) {
-                    permissions.groups.push(GroupPermissions.create({
-                        groupId: group.group.id,
-                        level: PermissionLevel.Write
-                    }))
-                }
-            }
-        }*/
         this.addPermissionsPatch(permissions)
 
         if (this.isNew) {

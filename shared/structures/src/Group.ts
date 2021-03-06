@@ -268,11 +268,6 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canViewMembers(permissions: Permissions): boolean {
-        // Out of date check
-        if (permissions.hasReadAccess(this.id)) {
-            return true
-        }
-
         if (!this.privateSettings) {
             return false
         }
@@ -291,11 +286,6 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canEditMembers(permissions: Permissions): boolean {
-        // Out of date check
-        if (permissions.hasWriteAccess(this.id)) {
-            return true
-        }
-
         if (!this.privateSettings) {
             return false
         }
@@ -314,10 +304,6 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canEditSettings(permissions: Permissions): boolean {
-        // Out of date check
-        if (permissions.hasFullAccess(this.id)) {
-            return true
-        }
 
         if (!this.privateSettings) {
             return false

@@ -87,7 +87,6 @@
         </button>
 
         <div v-if="fullAccess">
-            
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                 <span class="icon settings" />
                 <span>Instellingen</span>
@@ -386,10 +385,6 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     importMembers() {
         new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
-    }
-
-    hasAccessToGroup(group: Group) {
-        return SessionManager.currentSession!.user!.permissions!.hasReadAccess(group.id)
     }
 
     addWebshop() {

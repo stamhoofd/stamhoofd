@@ -125,43 +125,34 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PermissionLevel) })
     level: PermissionLevel
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(GroupPermissions) })
     groups: GroupPermissions[] = []
 
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
-    hasAccess(level: PermissionLevel, groupId: string | null = null) {
+    hasAccess(level: PermissionLevel): boolean {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
             return true;
         }
 
-        if (!groupId) {
-            return false
-        }
-
-        const permission = this.groups.find(g => g.groupId === groupId)
-        if (permission) {
-            if (getPermissionLevelNumber(permission.level) >= getPermissionLevelNumber(level)) {
-                return true;
-            }
-        }
-
         return false
-
     }
 
-    hasReadAccess(groupId: string | null = null) {
-        return this.hasAccess(PermissionLevel.Read, groupId)
+    hasReadAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Read)
     }
 
-    hasWriteAccess(groupId: string | null = null) {
-        return this.hasAccess(PermissionLevel.Write, groupId)
+    hasWriteAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Write)
     }
 
-    hasFullAccess(groupId: string | null = null) {
-        return this.hasAccess(PermissionLevel.Full, groupId)
+    hasFullAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Full)
     }
 
     /**

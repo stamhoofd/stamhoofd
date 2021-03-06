@@ -86,13 +86,12 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
       
 
         if (invite.permissions) {
-            // Merge permissions without giving more permissions than the sender, and without reducing the permissions of the reducer
-
             if (!user.permissions) {
                 user.permissions = Permissions.create({ level: PermissionLevel.None })
             }
 
-            if (!sender.permissions!.hasAccess(invite.permissions.level)) {
+            // Check invites of old administrators
+            if (!sender.permissions!.hasFullAccess()) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "This invite is invalid or expired",
@@ -106,28 +105,7 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 user.permissions.level = invite.permissions.level
             }
 
-            for (const group of invite.permissions.groups) {
-                if (!sender.permissions!.hasAccess(group.level, group.groupId)) {
-                    throw new SimpleError({
-                        code: "not_found",
-                        message: "This invite is invalid or expired",
-                        human: "Deze link is niet langer geldig omdat hij aangemaakt is door een beheerder die zelf geen toegang meer heeft",
-                        statusCode: 404
-                    })
-                }
-                if (!user.permissions.hasAccess(group.level, group.groupId)) {
-                    const existing = user.permissions.groups.find(g => g.groupId == group.groupId)
-                    if (existing) {
-                        existing.level = group.level
-                    } else {
-                        user.permissions.groups.push(GroupPermissions.create({
-                            level: group.level,
-                            groupId: group.groupId
-                        }))
-                    }
-                    
-                }
-            }
+            user.permissions.roles = invite.permissions.roles
 
             await user.save();
         }
