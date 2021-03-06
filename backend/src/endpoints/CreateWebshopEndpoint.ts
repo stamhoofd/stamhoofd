@@ -69,7 +69,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
             throw new SimpleError({
                 code: "missing_permissions",
-                message: "You cannot create a webshop whithout having full permissions on the created webshop",
+                message: "You cannot create a webshop without having full permissions on the created webshop",
                 human: "Als je een webshop aanmaakt moet je ervoor zorgen dat jezelf ook volledige toegang hebt. Geef jezelf toegang via algemaan > toegangsbeheer voor je de webshop aanmaakt."
             })
         }
