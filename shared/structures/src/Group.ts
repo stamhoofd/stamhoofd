@@ -268,6 +268,10 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canViewMembers(permissions: Permissions): boolean {
+        if (permissions.hasReadAccess()) {
+            return true
+        }
+
         if (!this.privateSettings) {
             return false
         }
@@ -286,6 +290,10 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canEditMembers(permissions: Permissions): boolean {
+        if (permissions.hasWriteAccess()) {
+            return true
+        }
+
         if (!this.privateSettings) {
             return false
         }
@@ -304,6 +312,9 @@ export class Group extends AutoEncoder {
      * Whetever a given user has access to the members in this group. 
      */
     canEditSettings(permissions: Permissions): boolean {
+        if (permissions.hasFullAccess()) {
+            return true
+        }
 
         if (!this.privateSettings) {
             return false
