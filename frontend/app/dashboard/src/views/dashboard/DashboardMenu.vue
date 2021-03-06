@@ -57,9 +57,9 @@
             </div>
         </template>
     
-        <hr v-if="enableWebshopModule">
+        <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
-        <div v-if="enableWebshopModule">
+        <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
             <button class="menu-button heading">
                 <span class="icon basket" />
                 <span>Verkopen</span>
