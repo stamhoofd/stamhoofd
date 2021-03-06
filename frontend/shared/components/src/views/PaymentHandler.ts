@@ -58,6 +58,7 @@ export class PaymentHandler {
         transferSettings: TransferSettings | null;
         additionalReference?: string;
         component: NavigationMixin; 
+        type: "order" | "registration";
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         let finishedHandler: (() => void) | null = null
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings, additionalReference } = settings;
@@ -66,6 +67,7 @@ export class PaymentHandler {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
                 created: true,
+                type: settings.type,
                 organization,
                 payment,
                 settings: transferSettings,

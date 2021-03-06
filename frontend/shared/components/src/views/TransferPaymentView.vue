@@ -6,14 +6,20 @@
             </STNavigationBar>
 
             <main>
-                <h1 v-if="created">
-                    Gelukt! Schrijf het bedrag meteen over
+                <h1 v-if="created && type == 'order'">
+                    Bestelling geplaatst!
+                </h1>
+                <h1 v-else-if="created">
+                    Gelukt! Schrijf nu het bedrag over
                 </h1>
                 <h1 v-else>
                     Bedrag overschrijven
                 </h1>
-                <p v-if="payment.price > 0 && payment.status != 'Succeeded'">
+                <p v-if="payment.price > 0 && payment.status != 'Succeeded' && created">
                     Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
+                </p>
+                <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
+                    We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
                 </p>
 
                 <div class="payment-split">
@@ -61,9 +67,9 @@
                 <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
                     We hebben de betaling ontvangen.
                 </p>
-                <template v-else-if="payment.price > 0 && cretaed">
+                <template v-else-if="payment.price > 0 && created">
                     <p v-if="isBelgium" class="hide-smartphone warning-box">
-                        Typ de gegevens over als de QR-code niet werkt, dat is net hetzelfde. Dit is geen gewone Bancontact/Payconiq QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De QR-code voert enkel een overschrijving uit, de website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: KBC, ING, Belfius of Argenta, niet met je ingebouwde QR-scanner en ook niet met Payconiq.
+                        Typ de gegevens over als de QR-code niet lukt, dat is net hetzelfde. Dit is geen gewone Bancontact/Payconiq QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: KBC, ING, Belfius of Argenta, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
                     </p>     
                     <p class="only-smartphone warning-box">
                         Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
@@ -77,7 +83,7 @@
                     <span>Het lukt niet</span>
                 </button>
                 <button slot="right" class="button primary" @click="goNext">
-                    <span>Doorgaan</span>
+                    <span>Ik heb overgeschreven</span>
                     <span class="icon arrow-right" />
                 </button>
             </STToolbar>
@@ -115,6 +121,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     @Prop({ default: false })
     created: boolean
 
+    @Prop({ required: true })
+    type: "registration" | "order"
+
     @Prop({ required: true }) 
     organization: Organization
 
@@ -136,6 +145,31 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     mounted() {
         this.generateQRCode().catch(e => console.error(e))
+        this.setLeave()
+    }
+
+    beforeDestroy() {
+        console.log("destroy")
+        window.removeEventListener("beforeunload", this.preventLeave);
+    }
+
+    setLeave() {
+        if (!this.created) {
+            return;
+        }
+        if (this.type === "order") {
+            window.addEventListener("beforeunload", this.preventLeave);
+        }
+    }
+
+    preventLeave(event) {
+        // Cancel the event
+        event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
+
+        // This message is not visible on most browsers
+        return "Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!"
     }
 
     isBelgium() {
@@ -183,7 +217,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     helpMe() {
-        new CenteredMessage("Het lukt niet", "Herlaad de pagina zeker niet, en probeer vooral niet opnieuw, want alles is al doorgegeven. Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren. ").addCloseButton().show()
+        if (this.type === "order") {
+            new CenteredMessage("Het lukt niet", "Herlaad de pagina zeker niet, en probeer vooral niet opnieuw, want jouw bestelling is al geplaatst. Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+        } else {
+            new CenteredMessage("Het lukt niet", "Herlaad de pagina zeker niet, en probeer vooral niet opnieuw, want jouw inschrijving is al in orde. Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+        }
     }
 
     goNext() {
@@ -208,6 +246,10 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     display: flex;
     flex-direction: row;
     padding: 15px 0;
+
+    @media (max-width: 800px) {
+        flex-direction: column;
+    }
 
     > .rectangle {
         border: 2px solid $color-border;
@@ -257,6 +299,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         &:first-child {
             margin-right: 15px;;
             padding: 15px 15px;
+
+            @media (max-width: 800px) {
+                margin-right: 0px;
+                margin-bottom: 30px;
+            }
         }
     }
 }

@@ -239,6 +239,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.order && this.order.payment && this.order.payment.method == PaymentMethod.Transfer) {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TransferPaymentView, {
+                    type: "order",
                     payment: this.order.payment,
                     organization: WebshopManager.organization,
                     settings: WebshopManager.webshop.meta.transferSettings,
