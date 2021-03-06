@@ -14,7 +14,7 @@ export default new Migration(async () => {
 
     for (const organization of organizations) {
         // Setup default root groups
-        if (organization.meta.categories.length <= 1) {
+        if (organization.meta.modules.useMembers && organization.meta.categories.length <= 1) {
             console.log(organization.name)
 
             const groups = await Group.where({ organizationId: organization.id })

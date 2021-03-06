@@ -28,9 +28,9 @@
             
             <hr>
             <h2>
-                Administrators
+                Hoofdbeheerders
             </h2>
-            <p>Administrators hebben toegang tot alles, zonder beperkingen.</p>
+            <p>Hoofdbeheerders hebben toegang tot alles, zonder beperkingen.</p>
 
             <Spinner v-if="loading" />
             <STList v-else>
@@ -278,7 +278,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     permissionList(user: User | Invite) {
         const list: string[] = []
         if (user.permissions?.hasFullAccess()) {
-            list.push("Administrators")
+            list.push("Hoofdbeheerders")
         }
 
         for (const role of user.permissions?.roles ?? []) {

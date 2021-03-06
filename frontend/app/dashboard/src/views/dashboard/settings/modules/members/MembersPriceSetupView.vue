@@ -39,6 +39,7 @@ import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import EditCategoryGroupsView from '../../../groups/EditCategoryGroupsView.vue';
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
 import EditGroupsView from '../../../groups/EditGroupsView.vue';
+import { buildManageGroupsComponent } from '../../buildManageGroupsComponent';
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 import EmailSettingsView from './EmailSettingsView.vue';
@@ -126,77 +127,8 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
     }
 
     manageGroups(animated = true) {
-        if (!this.organization.meta.rootCategory) {
-            // Auto restore missing root category
-            const category = GroupCategory.create({})
-            const meta = OrganizationMetaData.patch({
-                rootCategoryId: category.id
-            })
-            meta.categories.addPut(category)
-
-            const p = Organization.patch({
-                id: this.organization.id,
-                meta
-            })
-            
-            this.navigationController!.push(
-                new ComponentWithProperties(EditCategoryGroupsView, { 
-                    category: category, 
-                    organization: this.organization.patch(p), 
-                    saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                        patch.id = this.organization.id
-                        await OrganizationManager.patch(p.patch(patch))
-                    }
-                })
-            , true, this.navigationController!.components.length)
-            return
-        }
-
-        let cat = this.organization.meta.rootCategory
-
-        let p = Organization.patch({
-            id: this.organization.id
-        })
-
-        if (!this.enableActivities) {
-            const full = GroupCategoryTree.build(cat, this.organization.meta.categories, this.organization.groups)
-            if (full.categories.length === 0) {
-
-                // Create a new one and open that one instead
-                const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
-                const category = defaultCategories[0] ?? GroupCategory.create({
-                    settings: GroupCategorySettings.create({
-                        name: "Leeftijdsgroepen",
-                        
-                    })
-                })
-                category.groupIds = this.organization.groups.map(g => g.id)
-                
-                const meta = OrganizationMetaData.patch({})
-                meta.categories.addPut(category)
-
-                const me = GroupCategory.patch({ id: cat.id })
-                me.categoryIds.addPut(category.id)
-                meta.categories.addPatch(me)
-
-                p = p.patch({
-                    meta
-                })
-
-                cat = category
-
-            } else {
-                cat = full.categories[0]
-            }
-        }
-        this.navigationController!.push(new ComponentWithProperties(EditCategoryGroupsView, {
-            category: cat,
-            organization: this.organization.patch(p),
-            saveHandler: async (patch) => {
-                patch.id = this.organization.id
-                await OrganizationManager.patch(p.patch(patch))
-            }
-        }), true, this.navigationController!.components.length)
+        const component = buildManageGroupsComponent(this.organization)
+        this.navigationController!.push(component, animated, this.navigationController!.components.length)
     }
 
     async shouldNavigateAway() {

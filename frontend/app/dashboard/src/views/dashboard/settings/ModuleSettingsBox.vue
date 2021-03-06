@@ -1,18 +1,19 @@
 <template>
     <div class="module-settings-box">
         <div class="module-box">
-            <label :class="{ selected: enableMemberModule }">
+            <label class="box" :class="{ selected: enableMemberModule }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
                     <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
                     <p class="style-description">Gratis</p>
                 </div>
                 <div>
-                    <Checkbox v-model="enableMemberModule" />
+                    <Spinner v-if="loadingModule == 'members'" />
+                    <Checkbox v-else v-model="enableMemberModule" />
                 </div>
             </label>
 
-            <label :class="{ selected: enableWebshopModule }">
+            <label class="box" :class="{ selected: enableWebshopModule }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops</h2>
@@ -27,7 +28,7 @@
         <h3>Verwacht in de toekomst</h3>
 
         <div class="module-box">
-            <label class="disabled">
+            <label class="box disabled">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
                 <div>
                     <h2 class="style-title-list">Activiteiten</h2>
@@ -38,7 +39,7 @@
                 </div>
             </label>
 
-            <label class="disabled">
+            <label class="box disabled">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg"></div>
                 <div>
                     <h2 class="style-title-list">Bouw zelf je website</h2>
@@ -49,7 +50,7 @@
                 </div>
             </label>
 
-            <label class="disabled">
+            <label class="box disabled">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg"></div>
                 <div>
                     <h2 class="style-title-list">Ticketverkoop</h2>
@@ -60,7 +61,7 @@
                 </div>
             </label>
 
-            <label class="disabled">
+            <label class="box disabled">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg"></div>
                 <div>
                     <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
@@ -77,58 +78,45 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective,Validator} from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Spinner, Toast } from "@stamhoofd/components";
 import { OrganizationMetaData, OrganizationModules, OrganizationPatch, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import EditGroupsView from '../groups/EditGroupsView.vue';
+import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
         Checkbox,
-        DateSelection,
-        RadioGroup,
-        Radio,
-        BackButton,
-        LoadingButton,
-        IBANInput,
-        FileInput,
-        STList,
-        STListItem
-    },
-    directives: {
-        tooltip: TooltipDirective
+        Spinner,
     }
 })
 export default class ModuleSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    temp_organization = OrganizationManager.organization
-    showDomainSettings = true
-    loadingMollie = false
+    loadingModule: string | null = null
 
     get organization() {
         return OrganizationManager.organization
     }
 
-    patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>, message: string) {
-        OrganizationManager.patch(OrganizationPatch.create({
-            id: this.organization.id,
-            meta: OrganizationMetaData.patch({
-                modules: OrganizationModules.patch(patch)
-            })
-        })).then(() => {
+    async patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>, message: string) {
+        if (patch.useMembers !== undefined) {
+            this.loadingModule = "members"
+        }
+        try {
+            await OrganizationManager.patch(OrganizationPatch.create({
+                id: this.organization.id,
+                meta: OrganizationMetaData.patch({
+                    modules: OrganizationModules.patch(patch)
+                })
+            }))
             new Toast(message, "success green").show()
-        }).catch(e => {
+            this.loadingModule = null
+        } catch (e) {
             CenteredMessage.fromError(e).show()
-        })
+            this.loadingModule = null
+            throw e
+        }
     }
 
     get enableMemberModule() {
@@ -147,13 +135,21 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 }).setDisplayStyle("popup"))
             } else {
                 // Activate + show groups
-                this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
-                this.present(new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(EditGroupsView, {})
-                }).setDisplayStyle("popup"))
+                this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").then(() => {
+                    // Wait for the backend to fill in all the default categories and groups
+                    this.manageGroups(true)
+                })
             }
             
         }
+    }
+
+    manageGroups(animated = true) {
+        const component = buildManageGroupsComponent(this.organization)
+            
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: component
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
     get enableWebshopModule() {
@@ -190,7 +186,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             grid-template-columns: 100%;
         }
 
-        > label {
+        .box {
             min-width: 0;
             max-width: 100%;
             box-sizing: border-box;

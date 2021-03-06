@@ -19,9 +19,10 @@
                 {{ name }} bewerken
             </h1>
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
-            <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="tab == 'general'">
+                <STErrorsDefault :error-box="errorBox" />
+
                 <STInputBox title="Naam" error-fields="settings.name" :error-box="errorBox">
                     <input
                         ref="firstInput"
@@ -120,16 +121,20 @@
                 </Checkbox>
             </template>
             <template v-if="tab == 'payments'">
+                <STErrorsDefault :error-box="errorBox" />
                 <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
             </template>
 
             <template v-if="tab == 'permissions'">
                 <h2>Toegangsbeheer</h2>
                 <p>Kies welke beheerdersgroepen toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
-                
-                <STList>
+                <STErrorsDefault :error-box="errorBox" />
+
+                <STList v-if="roles.length > 0">
                     <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
                 </STList>
+
+                <p class="info-box" v-else>Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.</p>
             </template>
         </main>
 

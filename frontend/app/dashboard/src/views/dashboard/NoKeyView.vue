@@ -11,11 +11,11 @@
             <p class="style-description">Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:</p>
 
             <hr>
-            <h2>Een andere beheerder met administrator rechten helpt je uit de nood</h2>
-            <p class="style-description">Vraag het volgende aan je mede beheerder.</p>
+            <h2>Een hoofdbeheerder helpt je uit de nood</h2>
+            <p class="style-description">Vraag het volgende aan een hoofdbeheerder.</p>
 
             <ol>
-                <li>Ga naar Stamhoofd, klik op "Beheerders" in het menu.</li>
+                <li>Ga naar Stamhoofd, klik op Instellingen > Beheerders in het menu.</li>
                 <li>Klik op jouw naam</li>
                 <li>Onderaan bij 'Encryptiesleutels' geef je toegang tot alle sleutels</li>
             </ol>
@@ -23,8 +23,8 @@
             <p class="style-description">Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je de een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.</p>
 
             <hr>
-            <h2>Andere beheerders hebben geen administrator rechten</h2>
-            <p class="style-description">Geef een bestaande beheerder administrator rechten en volg de stappen hierboven. Opgelet: Je kan geen nieuwe beheerders aanmaken als je de sleutel mist. Voor je verder gaat moet je zeker een nieuwe sleutel aanmaken anders heb je ook geen toegang tot nieuwe leden of aanpassingen.</p>
+            <h2>Andere beheerders zijn geen hoofdbeheerders</h2>
+            <p class="style-description">Verander een bestaande beheerder in een hoofdbeheerder (instellingen > beheerders) en volg de stappen hierboven. Opgelet: Je kan geen nieuwe beheerders aanmaken als je de sleutel mist. Voor je verder gaat moet je zeker een nieuwe sleutel aanmaken anders heb je ook geen toegang tot nieuwe leden of aanpassingen.</p>
 
             <hr>
             <h2>Er zijn geen andere beheerders</h2>
@@ -52,17 +52,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin, NavigationController } from "@simonbackx/vue-app-navigation";
-import { BirthYearInput, DateSelection, ErrorBox, BackButton, RadioGroup, Checkbox, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, AddressInput, Validator, LoadingButton, EmailInput, Toast } from "@stamhoofd/components";
-import { SessionManager, LoginHelper } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationMetaData, Image, ResolutionRequest, ResolutionFit, Version, User } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DomainSettingsView from './DomainSettingsView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
-import ChangePasswordView from './ChangePasswordView.vue';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { STInputBox, STNavigationBar, STToolbar, LoadingButton } from "@stamhoofd/components";
+import { Component, Mixins } from "vue-property-decorator";
 import CreateNewKeyView from './CreateNewKeyView.vue';
 
 @Component({

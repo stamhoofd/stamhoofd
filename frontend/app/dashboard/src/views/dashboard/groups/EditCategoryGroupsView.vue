@@ -82,7 +82,7 @@
                 <STList v-if="roles.length > 0">
                     <STListItem>
                         <Checkbox slot="left" :checked="true" :disabled="true" />
-                        Administrators
+                        Hoofdbeheerders
                     </STListItem>
                     <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
                         <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />

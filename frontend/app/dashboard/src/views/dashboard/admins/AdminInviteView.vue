@@ -41,12 +41,12 @@
             <div class="container">
                 <hr>
                 <h2>Beheerdersgroepen</h2>
-                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor administrators). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
+                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
                 <STList>
                     <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                         <Checkbox slot="left" v-model="fullAccess" />
-                        Administrators
+                        Hoofdbeheerders
 
                         <template #right>
                             Kan alles bekijken en bewerken

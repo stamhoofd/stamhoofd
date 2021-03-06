@@ -315,7 +315,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             console.error(e)
 
             // Show warnign instead
-            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een administrator om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
                 this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
             })).show()
         }

@@ -152,16 +152,16 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Invite, Organization, OrganizationAdmins, OrganizationMetaData, OrganizationTypeHelper, PaymentMethod, User } from "@stamhoofd/structures"
+import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import AdminsView from '../admins/AdminsView.vue';
-import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
+import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
@@ -255,84 +255,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     manageGroups(animated = true) {
-        if (!this.organization.meta.rootCategory) {
-            // Auto restore missing root category
-            const category = GroupCategory.create({})
-            const meta = OrganizationMetaData.patch({
-                rootCategoryId: category.id
-            })
-            meta.categories.addPut(category)
-
-            const p = Organization.patch({
-                id: this.organization.id,
-                meta
-            })
+        const component = buildManageGroupsComponent(this.organization)
             
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EditCategoryGroupsView, { 
-                    category: category, 
-                    organization: this.organization.patch(p), 
-                    saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                        patch.id = this.organization.id
-                        await OrganizationManager.patch(p.patch(patch))
-                    }
-                })
-            }).setDisplayStyle("popup").setAnimated(animated))
-            return
-        }
-
-        let cat = this.organization.meta.rootCategory
-
-        let p = Organization.patch({
-            id: this.organization.id
-        })
-
-        if (!this.enableActivities) {
-            const full = GroupCategoryTree.build(cat, this.organization.meta.categories, this.organization.groups)
-            if (full.categories.length === 0) {
-
-                // Create a new one and open that one instead
-                const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
-                const category = defaultCategories[0] ?? GroupCategory.create({
-                    settings: GroupCategorySettings.create({
-                        name: "Leeftijdsgroepen",
-                        
-                    })
-                })
-                category.groupIds = this.organization.groups.map(g => g.id)
-                
-                const meta = OrganizationMetaData.patch({})
-                meta.categories.addPut(category)
-
-                const me = GroupCategory.patch({ id: cat.id })
-                me.categoryIds.addPut(category.id)
-                meta.categories.addPatch(me)
-
-                p = p.patch({
-                    meta
-                })
-
-                cat = category
-
-            } else {
-                cat = full.categories[0]
-            }
-        }
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditCategoryGroupsView, {
-                category: cat,
-                organization: this.organization.patch(p),
-                saveHandler: async (patch) => {
-                    patch.id = this.organization.id
-                    await OrganizationManager.patch(p.patch(patch))
-                }
-            })
+            root: component
         }).setDisplayStyle("popup").setAnimated(animated))
-
-
-        /*this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditGroupsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))*/
     }
 
     manageRecords(animated = true) {
@@ -448,3 +375,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 }
 
 </style>
+
+function buildManageGroupsComponent(organization: Organization) {
+  throw new Error('Function not implemented.');
+}
