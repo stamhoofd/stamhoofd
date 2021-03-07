@@ -1,5 +1,5 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled: scrolled, sticky: sticky }">
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large }">
         <div>
             <slot name="left" />
         </div>
@@ -26,6 +26,9 @@ export default class STNavigationBar extends Vue {
 
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
+
+    @Prop({ default: false, type: Boolean })
+    large!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
@@ -112,6 +115,11 @@ export default class STNavigationBar extends Vue {
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + 20px);
     padding: var(--st-safe-area-top, 0px) var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
     height: 60px;
+
+    &.large {
+        height: 90px;
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+    }
     -webkit-app-region: drag;
 
     &.sticky {

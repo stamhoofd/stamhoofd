@@ -3,7 +3,19 @@
 
 .view {
     > main {
-       @extend .main-text-container;
+        @extend .main-text-container;
+
+        &.limit-width {
+            --st-horizontal-padding: calc((100vw - 900px) / 2);
+            --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - 900px) / 2));
+
+            @media(max-width: 940px) {
+                --st-horizontal-padding: 20px;
+            }
+
+            padding: 0 var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+            padding: 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px)) 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px));
+        }
     }
 }
 .st-view {
@@ -13,6 +25,9 @@
     min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+    
+    // Save padding if we make changes
+    --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
     .st-toolbar {
         margin-top: auto;
@@ -27,8 +42,11 @@
     &.background {
         background: $color-white;
     }
-}
 
+    &.shade {
+        background: $color-background-shade;
+    }
+}
 
 .sheet .st-view {
     min-height: auto;

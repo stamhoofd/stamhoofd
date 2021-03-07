@@ -15,7 +15,7 @@ import { Component, Vue } from "vue-property-decorator";
 
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
-import LoginView from './views/login/LoginView.vue';
+import HomeView from './views/login/HomeView.vue';
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
 
 async function getDefaultView() {
@@ -108,9 +108,7 @@ export default class App extends Vue {
                     }
                 }),
                 loginRoot: new ComponentWithProperties(ModalStackComponent, {
-                    root: new ComponentWithProperties(RegistrationSteps, { 
-                        root: new ComponentWithProperties(LoginView, {}) 
-                    })
+                    root: new ComponentWithProperties(HomeView, {}) 
                 })
             });
         } catch (e) {

@@ -1,6 +1,10 @@
 <template>
     <div class="boxed-view">
         <form class="signup-view st-view" @submit.prevent="submit">
+            <STNavigationBar title="Inloggen">
+                <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
+            </STNavigationBar>
+
             <main>
                 <h1>Account aanmaken</h1>
 
@@ -171,110 +175,4 @@ export default class SignupView extends Mixins(NavigationMixin){
     @use "~@stamhoofd/scss/base/variables.scss" as *;
     @use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
-    .split-login-view {
-        padding-top: 100px;
-        max-width: 850px;
-        margin: 0 auto;
-        display: grid;
-        width: 100%;
-        grid-template-columns: minmax(300px, 380px) auto;
-        gap: 60px;
-        align-items: center;
-
-        @media (max-width: 800px) {
-            padding-top: 0;
-            display: block;
-
-            > aside {
-                padding: 0 var(--st-horizontal-padding, 20px);
-            }
-        }
-
-        ol {
-            list-style: none; 
-            counter-reset: li;
-            @extend .style-text-large;
-            padding-left: 30px;
-
-            li {
-                counter-increment: li;
-                padding: 8px 0;
-            }
-
-            li::before {
-                content: counter(li)"."; 
-                @extend .style-title-2;
-                color: $color-primary;
-                display: inline-block; 
-                width: 30px;
-                margin-left: -30px;;
-            }
-        }
-
-        aside > h1 {
-            @extend .style-title-1;
-            padding-bottom: 30px;;
-        }
-    }
-
-    .login-view {
-        @media (min-width: 800px + 50px*2 - 1px) {
-            @include style-side-view-shadow();
-            background: $color-white;
-            border-radius: $border-radius;
-        }
-
-        > h1 {
-            @extend .style-huge-title-1;
-            padding-bottom: 20px;
-        }
-
-        > p {
-            @extend .style-description;
-            padding-bottom: 10px;
-        }
-
-        > input.search {
-            max-width: none;
-        }
-
-        > .spinner-container {
-            padding: 10px 0;
-        }
-
-        > .search-result {
-            @extend .style-input-shadow;
-            background: $color-white url('~@stamhoofd/assets/images/icons/gray/arrow-right-small.svg') right 10px center no-repeat;
-            border: $border-width solid $color-gray-light;
-            padding: 20px 20px;
-            border-radius: $border-radius;
-            margin: 10px 0;
-            transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            display: block;
-            width: 100%;
-            text-align: left;
-
-            > h1 {
-                @extend .style-title-3;
-                padding-bottom: 2px;
-            }
-
-            > p {
-                @extend .style-description;
-            }
-
-            &:hover {
-                border-color: $color-primary-gray-light;
-            }
-
-
-            &:active {
-                transform: scale(0.95, 0.95);
-                border-color: $color-primary;
-            }
-        }
-    }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <form class="auto st-view login-view" @submit.prevent="submit">
-        <STNavigationBar title="Inloggen">
+        <STNavigationBar title="Wachtwoord wijzigen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
         <main>
