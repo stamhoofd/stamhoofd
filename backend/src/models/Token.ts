@@ -58,7 +58,8 @@ export class Token extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 

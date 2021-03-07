@@ -158,6 +158,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     component: this,
                     transferSettings: OrganizationManager.organization.meta.transferSettings,
                     additionalReference: Formatter.uniqueArray(this.selectedMembers.map(r => r.details?.lastName ?? "?")).join(", "),
+                    type: "registration"
                 }, (payment: Payment) => {
                     console.log("Success")
                     // success

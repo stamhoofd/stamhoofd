@@ -34,12 +34,14 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
+import { PermissionRole } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { GlobalEventBus } from '../../../classes/EventBus';
@@ -78,6 +80,18 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         } else {
             this.webshop = PrivateWebshop.create({})
             this.webshop.meta.paymentMethods = OrganizationManager.organization.meta.paymentMethods
+
+            // Auto assign roles
+            if (OrganizationManager.user.permissions && this.webshop.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+                const roles = OrganizationManager.user.permissions.roles.filter(r => {
+                    const role = OrganizationManager.organization.privateMeta?.roles.find(i => i.id === r.id)
+                    if (role && role.createWebshops) {
+                        return true
+                    }
+                    return false
+                }).map(r => PermissionRole.create(r))
+                this.webshop.privateMeta.permissions.full.push(...roles)
+            }
         }
     }
 
@@ -118,6 +132,14 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
+            if (this.patchedWebshop.meta.name.length === 0) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Name is empty",
+                    human: "Vul een naam in voor jouw webshop voor je doorgaat",
+                    field: "name"
+                })
+            }
             if (this.isNew) {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
@@ -155,6 +177,7 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         } catch (e) {
             console.error("Failed")
             console.error(e)
+            Toast.fromError(e).show()
         }
 
         this.saving = false

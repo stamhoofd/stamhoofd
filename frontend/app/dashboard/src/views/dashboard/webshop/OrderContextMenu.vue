@@ -67,7 +67,7 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
                 })
             }
         } catch (e) {
-            new Toast(e.message, "error red").show()
+            Toast.fromError(e).show()
             return;
         }
 

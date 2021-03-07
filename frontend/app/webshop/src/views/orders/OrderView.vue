@@ -100,18 +100,6 @@
                                 {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
                             </template>
                         </STListItem>
-                        <STListItem v-if="order.data.checkoutMethod.description" class="right-description">
-                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                                Afhaalopmerkingen
-                            </template>
-                            <template v-else>
-                                Leveringsopmerkingen
-                            </template>
-
-                            <template slot="right">
-                                {{ order.data.checkoutMethod.description }}
-                            </template>
-                        </STListItem>
                     </template>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                         Leveringskost
@@ -128,6 +116,18 @@
                         </template>
                     </STListItem>
                 </STList>
+
+                <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
+                    <hr>
+                    <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                        Afhaalopmerkingen
+                    </h2>
+                    <h2 v-else>
+                        Leveringsopmerkingen
+                    </h2>
+
+                    <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
+                </div>
 
                 <hr>
 
@@ -239,6 +239,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.order && this.order.payment && this.order.payment.method == PaymentMethod.Transfer) {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TransferPaymentView, {
+                    type: "order",
                     payment: this.order.payment,
                     organization: WebshopManager.organization,
                     settings: WebshopManager.webshop.meta.transferSettings,
@@ -349,6 +350,10 @@ export default class OrderView extends Mixins(NavigationMixin){
                 height: 100px;
             }
         }
+    }
+    .pre-wrap {
+        @extend .style-description;
+        white-space: pre-wrap;
     }
 }
 </style>

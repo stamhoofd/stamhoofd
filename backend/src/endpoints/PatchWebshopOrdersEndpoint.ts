@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Order as OrderStruct,Payment as PaymentStruct } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Order as OrderStruct,Payment as PaymentStruct, PermissionLevel } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
@@ -41,11 +41,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
-        if (!token.user.permissions || !token.user.permissions.hasFullAccess()) {
+        if (!token.user.permissions || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "No permissions for this webshop",
-                human: "Je hebt geen toegang tot de bestellingen van deze webshop"
+                human: "Je hebt geen toegang om bestellingen te bewerken van deze webshop",
+                statusCode: 403
             })
         }
 

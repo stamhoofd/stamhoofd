@@ -1,5 +1,6 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
+import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
 import { GroupPrices } from './GroupPrices';
 
@@ -80,6 +81,9 @@ export class GroupSettings extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 16 })
     priorityForFamily = true
+
+    @field({ decoder: new ArrayDecoder(Image), version: 58 })
+    images: Image[] = []
 
     getGroupPrices(date: Date) {
         let foundPrice: GroupPrices | undefined = undefined

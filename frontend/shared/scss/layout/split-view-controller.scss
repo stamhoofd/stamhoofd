@@ -6,18 +6,17 @@
 
     > .master {
         z-index: 100;
+        background: $color-white-shade;
+        
     }
 
     > .detail {
         background: var(--color-current-background);
-        border-top-left-radius: $border-radius;
-        border-bottom-left-radius: $border-radius;
-        
-        @extend .style-side-view-shadow;
     }
 
     &[data-has-detail="true"] {
         > .master {
+            border-right: 2px solid $color-border;
         }
     }
 }

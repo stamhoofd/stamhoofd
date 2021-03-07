@@ -58,10 +58,14 @@ export class PatchInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (request.body.permissions) {
-            if (!invite.permissions) {
-                invite.permissions = Permissions.create(request.body.permissions)
+            if (request.body.permissions.isPatch()) {
+                if (!invite.permissions) {
+                    invite.permissions = Permissions.create({}).patch(request.body.permissions)
+                } else {
+                    invite.permissions = invite.permissions.patch(request.body.permissions)
+                }
             } else {
-                invite.permissions = invite.permissions.patch(request.body.permissions)
+                invite.permissions = request.body.permissions
             }
         }
         

@@ -1,6 +1,7 @@
 import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMember, EncryptedMemberWithRegistrations, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+import { Group } from './Group';
 
 import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
@@ -282,5 +283,107 @@ export class Member extends Model {
             member: EncryptedMember.create(registration.member),
             waitingList: registration.waitingList,
         })
+    }
+
+    hasReadAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false) {
+        if (!user.permissions) {
+            return false
+        }
+        let hasAccess = user.permissions.hasWriteAccess()
+
+        if (!hasAccess) {
+            for (const registration of this.registrations) {
+                const group = groups.find(g => g.id === registration.groupId)
+                if (!group) {
+                    continue;
+                }
+
+                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Read)) {
+                    hasAccess = true
+                } else {
+                    if (needAll) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        if (!hasAccess) {
+            return false
+        }            
+        return true
+    }
+
+    async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false, checkFamily = false) {
+        if (!user.permissions) {
+            return false
+        }
+
+        if (user.permissions.hasWriteAccess()) {
+            return true;
+        }
+
+        for (const registration of this.registrations) {
+            const group = groups.find(g => g.id === registration.groupId)
+            if (!group) {
+                continue;
+            }
+
+            if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                if (!needAll) {
+                    return true;
+                }
+            } else {
+                if (needAll) {
+                    return false
+                }
+            }
+        }
+
+        if (needAll) {
+            return true;
+        }         
+        
+        // Check family acccess
+        if (checkFamily) {
+            const members = (await Member.getFamilyWithRegistrations(this.id))
+            for (const member of members) {
+                if (await member.hasWriteAccess(user, groups, false, false)) {
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+
+    /// This is defined here instead of registrations to prevent reference cycles...
+    static haveRegistrationsWriteAccess(registrations: RegistrationWithMember[], user: User, groups: Group[], needAll = false) {
+        if (!user.permissions) {
+            return false
+        }
+        let hasAccess = user.permissions.hasWriteAccess()
+
+        if (!hasAccess) {
+            for (const registration of registrations) {
+                const group = groups.find(g => g.id === registration.groupId)
+                if (!group) {
+                    continue;
+                }
+
+                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                    hasAccess = true
+                } else {
+                    if (needAll) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        if (!hasAccess) {
+            return false
+        }            
+        return true
     }
 }

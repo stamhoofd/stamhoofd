@@ -1,3 +1,6 @@
+import { GroupCategory, GroupCategorySettings } from "./GroupCategory";
+import { UmbrellaOrganization } from "./UmbrellaOrganization";
+
 export enum OrganizationType {
     Youth = "Youth",
     Football = "Football",
@@ -170,5 +173,136 @@ export class OrganizationTypeHelper {
             case OrganizationType.School:
                 return "Overige";
         }
+    }
+
+    /**
+     * Return default group categories for a given type and umbrella (optional), without the root category
+     * @param type 
+     * @param umbrella 
+     */
+    static getDefaultGroupCategories(type: OrganizationType, umbrella?: UmbrellaOrganization): GroupCategory[] {
+        if (type === OrganizationType.Youth) {
+            if (umbrella === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+                const activities = [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Weekends"
+                        })
+                    }),
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Kampen"
+                        })
+                    }),
+                ]
+
+                return [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Takken"
+                        })
+                    }),
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Activiteiten"
+                        }),
+                        categoryIds: activities.map(c => c.id)
+                    }),
+                    ...activities
+                ]
+            }
+
+            if (umbrella === UmbrellaOrganization.ChiroNationaal) {
+                const activities = [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Weekends"
+                        })
+                    }),
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Kampen"
+                        })
+                    }),
+                ]
+
+                return [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Afdelingen"
+                        })
+                    }),
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Activiteiten"
+                        }),
+                        categoryIds: activities.map(c => c.id)
+                    }),
+                    ...activities
+                ]
+            }
+
+            // Feel free to add more customizations here
+            const activities = [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Weekends"
+                    })
+                }),
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Kampen"
+                    })
+                }),
+            ]
+
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen"
+                    })
+                }),
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Activiteiten"
+                    }),
+                    categoryIds: activities.map(c => c.id)
+                }),
+                ...activities
+            ]
+        }
+
+        if (type === OrganizationType.Dance) {
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Danslessen"
+                    })
+                }),
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Activiteiten"
+                    }),
+                }),
+            ]
+        }
+        
+        if (this.getCategory(type) == "Sport") {
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen"
+                    })
+                }),
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Activiteiten"
+                    }),
+                }),
+            ]
+        }
+
+        // Feel free to add more customizations here
+        return []
     }
 }

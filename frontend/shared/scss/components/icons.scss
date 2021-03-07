@@ -73,6 +73,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/arrow-right-small.svg);
     }
 
+     &.arrow-down-small:after {
+        font-icon: url(@stamhoofd/assets/images/icons/arrow-down-small.svg);
+    }
+
     &.close:after {
         font-icon: url(@stamhoofd/assets/images/icons/close.svg);
     }

@@ -33,14 +33,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective, Tooltip } from "@stamhoofd/components";
+import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, DNSRecord, OrganizationDomains } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Organization, OrganizationDomains } from "@stamhoofd/structures"
+import { Component, Mixins } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 

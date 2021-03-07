@@ -20,6 +20,9 @@
             <p v-if="isNew" class="info-box">
                 Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
             </p>
+            <p v-else-if="editUser === null" class="warning-box">
+                Deze beheerder heeft de uitnodiging nog niet geaccepteerd
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
             <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -34,34 +37,40 @@
             </STInputBox>
 
             <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
-        
-            <hr>
-            <h2>Geef toegang tot...</h2>
 
-            <STList>
-                <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="fullAccess" />
-                    Maak administrator
+            <div class="container">
+                <hr>
+                <h2>Beheerdersgroepen</h2>
+                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
-                    <template #right>
-                        Kan alle instellingen en beheerders bewerken
-                    </template>
-                </STListItem>
-                <STListItem v-if="!fullAccess" element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                    <Checkbox slot="left" v-model="writeAccess" />
-                    Toegang tot alle groepen
+                <STList>
+                    <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                        <Checkbox slot="left" v-model="fullAccess" />
+                        Hoofdbeheerders
 
-                    <template #right>
-                        Kan alle leden bekijken en bewerken
-                    </template>
-                </STListItem>
-                <template v-if="!writeAccess && !fullAccess">
-                    <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
-                        <Checkbox slot="left" v-model="group.selected" />
-                        {{ group.group.settings.name }}
+                        <template #right>
+                            Kan alles bekijken en bewerken
+                        </template>
                     </STListItem>
-                </template>
-            </STList>
+
+                    <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                        <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
+                        {{ role.name }}
+                    </STListItem>
+                </STList>
+
+                <p v-if="roles.length == 0" class="info-box">
+                    Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.
+                </p>
+
+                <p>
+                    <button class="button text" @click="addRole">
+                        <span class="icon add" />
+                        <span>Nieuwe groep toevoegen</span>
+                    </button>
+                </p>
+            </div>
+
 
             <template v-if="editUser !== null">
                 <hr>
@@ -120,26 +129,18 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupPermissions, Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, OrganizationKeyUser, PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures"
+import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import EditRoleView from './EditRoleView.vue';
 import SendInviteView from './SendInviteView.vue';
-
-class SelectableGroup {
-    group: Group;
-    selected = false
-    constructor(group: Group, selected = false) {
-        this.selected = selected
-        this.group = group
-    }
-}
 
 @Component({
     components: {
@@ -179,8 +180,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     // use when editing an invite
     patchInvite: AutoEncoderPatchType<Invite> | null = null
-
-    groups: SelectableGroup[] = []
     
     /*fullAccess = false
     writeAccess = false*/
@@ -220,6 +219,50 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
     canShareKey(key: string) {
         return !!Keychain.getItem(key)
+    }
+
+    get roles() {
+        return this.organization.privateMeta?.roles ?? []
+    }
+
+    getRole(role: PermissionRole) {
+        return !!(this.user ?? this.invite).permissions?.roles.find(r => r.id === role.id)
+    }
+
+    setRole(role: PermissionRole, enable: boolean) {
+        const p = Permissions.patch({})
+
+        if (enable) {
+            if (this.getRole(role)) {
+                return
+            }
+             p.roles.addPut(role)
+        } else {
+            p.roles.addDelete(role.id)
+        }
+        this.addPermissionsPatch(p)
+    }
+
+    addRole() {
+        const role = PermissionRoleDetailed.create({})
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addPut(role)
+
+        const patch = Organization.patch({ 
+            id: this.organization.id,
+            privateMeta
+        })
+        
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(EditRoleView, { 
+                role,
+                organization: this.organization.patch(patch),
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
+                    const doSave = patch.patch(p)
+                    await OrganizationManager.patch(doSave)
+                }
+            }),
+        }).setDisplayStyle("popup"))
     }
 
     async shareKey(key: string) {
@@ -292,11 +335,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        for (const group of this.organization.groups) {
-            
-            this.groups.push(new SelectableGroup(group, (this.user ?? this.invite).permissions?.hasWriteAccess(group.id) ?? false))
-        }
-
         if (this.editUser) {
             this.downloadKeys().catch(e => {
                 console.error(e)
@@ -388,18 +426,8 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const permissions = Permissions.create({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
+        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
 
-        if (!this.writeAccess && !this.fullAccess) {
-            for (const group of this.groups) {
-                if (group.selected) {
-                    permissions.groups.push(GroupPermissions.create({
-                        groupId: group.group.id,
-                        level: PermissionLevel.Write
-                    }))
-                }
-            }
-        }
         this.addPermissionsPatch(permissions)
 
         if (this.isNew) {
@@ -567,17 +595,17 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     addInviteUserPatch(patch: PartialWithoutMethods<PatchType<InviteUserDetails>>) {
-        this.addInvitePatch({ userDetails: InviteUserDetails.patchType().create(patch) })
+        this.addInvitePatch({ userDetails: InviteUserDetails.patch(patch) })
     }
 
     addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
         if (this.user) {
             // User always have permission set, so no need to check if it already is created
-            this.addUserPatch({ permissions: Permissions.patchType().create(patch) })
+            this.addUserPatch({ permissions: Permissions.patch(patch) })
             return
         }
         // Invite always have permission set, so no need to check if it already is created
-        this.addInvitePatch({ permissions: Permissions.patchType().create(patch) })
+        this.addInvitePatch({ permissions: Permissions.patch(patch) })
     }
 
     addInvitePatch(patch: PartialWithoutMethods<PatchType<Invite>>) {

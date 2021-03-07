@@ -1,7 +1,14 @@
 <template>
     <div class="st-view group-edit-view">
         <STNavigationBar :title="isNew ? 'Nieuwe groep toevoegen' : name+' bewerken'">
-            <button slot="right" class="button icon close gray" @click="pop" />
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <template slot="right">
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
+                    <span>Verwijderen</span>
+                </button>
+                <button v-if="!canPop" class="button icon close gray" @click="pop" />
+            </template>
         </STNavigationBar>
 
         <main>
@@ -15,6 +22,7 @@
 
             <template v-if="tab == 'general'">
                 <STErrorsDefault :error-box="errorBox" />
+
                 <STInputBox title="Naam" error-fields="settings.name" :error-box="errorBox">
                     <input
                         ref="firstInput"
@@ -35,6 +43,9 @@
                         autocomplete=""
                     />
                 </STInputBox>
+
+                <hr>
+                <h2>Inschrijven</h2>
 
                 <div class="split-inputs">
                     <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
@@ -74,14 +85,10 @@
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
-            </template>
-            <template v-if="tab == 'payments'">
-                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
-                <STErrorsDefault :error-box="errorBox" />
-            </template>
 
-            <template v-if="tab == 'queue'">
-                <STInputBox title="Wachtlijst" error-fields="genderType" :error-box="errorBox" class="max">
+                <hr>
+                <h2>Wachtlijst</h2>
+                <STInputBox error-fields="genderType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
                             Geen wachtlijst
@@ -113,28 +120,49 @@
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
             </template>
+            <template v-if="tab == 'payments'">
+                <STErrorsDefault :error-box="errorBox" />
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
+            </template>
+
+            <template v-if="tab == 'permissions'">
+                <h2>Toegangsbeheer</h2>
+                <p>Kies welke beheerdersgroepen toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
+                <STErrorsDefault :error-box="errorBox" />
+
+                <STList v-if="roles.length > 0">
+                    <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
+                </STList>
+
+                <p class="info-box" v-else>Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.</p>
+            </template>
         </main>
 
         <STToolbar>
             <template slot="right">
-                <Spinner v-if="saving" />
-                <button class="button primary" @click="save">
-                    Opslaan
+                <button class="button secundary" @click="cancel">
+                    Annuleren
                 </button>
+                <LoadingButton :loading="saving">
+                    <button class="button primary" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, Checkbox, DateSelection, ErrorBox, FemaleIcon, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
-import { OrganizationMetaData, RecordType } from '@stamhoofd/structures';
-import { Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
+import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
+import { GroupPrivateSettings, GroupSettingsPatch, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, Version } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from '../../../classes/OrganizationManager';
+import GroupPermissionRow from "../admins/GroupPermissionRow.vue"
 import EditGroupPriceBox from "./EditGroupPriceBox.vue"
 
 @Component({
@@ -153,54 +181,103 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         Checkbox,
         AgeInput,
         Slider,
-        Spinner,
+        LoadingButton,
         TimeInput,
-        EditGroupPriceBox
+        EditGroupPriceBox,
+        BackButton,
+        STList,
+        GroupPermissionRow
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    tabs = ["general", "payments", "queue"];
+    tabs = ["general", "payments", "permissions"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld", "Wachtlijst"];
+    tabLabels = ["Algemeen", "Lidgeld", "Toegang"];
 
     saving = false
 
-    @Prop()
-    groupId!: string;
+    /**
+     * Pass all the changes we made back when we save this category
+     */
+    @Prop({ required: true })
+    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
-    @Prop()
-    organizationPatch!: AutoEncoderPatchType<Organization> & AutoEncoder ;
+    @Prop({ required: true })
+    group: Group
 
-    get isNew() {
-        return this.organizationPatch.groups.getPuts().length > 0
-    }
+    @Prop({ required: true })
+    organization: Organization
+    
+    patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
-    get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
-    }
+    mounted() {
+        // Auto assign roles
+        if (this.isNew && OrganizationManager.user.permissions && this.group.privateSettings!.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+            const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
+            for (const cat of categories) {
+                // Get all roles that have create permissions in the categories that this group will get added into
+                const roles = cat.settings.permissions.create.flatMap(r => {
+                    const role = OrganizationManager.organization.privateMeta?.roles.find(i => i.id === r.id)
+                    const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
+                    if (role && has) {
+                        return [PermissionRole.create(role)]
+                    }
+                    return []
+                })
 
-    get group() {
-        const organization = this.organization
-        for (const group of organization.groups) {
-            if (group.id === this.groupId) {
-                return group
+                if (roles.length > 0) {
+                    const permissions = PermissionsByRole.patch({})
+                    for (const role of roles) {
+                        permissions.full.addPut(role)
+                    }
+                    this.addPrivateSettingsPatch(GroupPrivateSettings.patch({
+                        permissions
+                    }))
+                }
+                
             }
         }
-        throw new Error("Group not found")
+    }
+
+    get isNew() {
+        return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
+    }
+
+    get patchedOrganization() {
+        return this.organization.patch(this.patchOrganization)
+    }
+
+    get patchedGroup() {
+        const c = this.patchedOrganization.groups.find(c => c.id == this.group.id)
+        if (c) {
+            return c
+        }
+        return this.group
+    }
+
+    get roles() {
+        return this.patchedOrganization.privateMeta?.roles ?? []
+    }
+
+    addOrganizationPatch(patch: AutoEncoderPatchType<Organization> ) {
+        if (this.saving) {
+            return
+        }
+        this.patchOrganization = this.patchOrganization.patch(patch)
     }
 
     addPatch(patch: AutoEncoderPatchType<Group> ) {
         if (this.saving) {
             return
         }
-        (this.organizationPatch as any).groups.addPatch(patch)
+        this.patchOrganization.groups.addPatch(patch)
     }
 
     getPrices() {
-        return this.group.settings.prices
+        return this.patchedGroup.settings.prices
     }
 
     addPricesPatch(patch: PatchableArrayAutoEncoder<GroupPrices>) {
@@ -208,14 +285,21 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>> ) {
-        this.addPatch(GroupPatch.create({ 
-            id: this.groupId, 
-            settings: GroupSettingsPatch.create(patch)
+        this.addPatch(Group.patch({ 
+            id: this.group.id, 
+            settings: GroupSettings.patch(patch)
+        }))
+    }
+
+    addPrivateSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupPrivateSettings>> ) {
+        this.addPatch(Group.patch({ 
+            id: this.group.id, 
+            privateSettings: GroupPrivateSettings.patch(patch)
         }))
     }
 
     get name() {
-        return this.group.settings.name
+        return this.patchedGroup.settings.name
     }
 
     set name(name: string) {
@@ -223,7 +307,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get description() {
-        return this.group.settings.description
+        return this.patchedGroup.settings.description
     }
 
     set description(description: string) {
@@ -231,7 +315,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get startDate() {
-        return this.group.settings.startDate
+        return this.patchedGroup.settings.startDate
     }
 
     set startDate(startDate: Date) {
@@ -239,7 +323,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get endDate() {
-        return this.group.settings.endDate
+        return this.patchedGroup.settings.endDate
     }
 
     set endDate(endDate: Date) {
@@ -247,7 +331,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get genderType() {
-        return this.group.settings.genderType
+        return this.patchedGroup.settings.genderType
     }
 
     set genderType(genderType: GroupGenderType) {
@@ -256,7 +340,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     // Birth years
     get minAge() {
-        return this.group.settings.minAge
+        return this.patchedGroup.settings.minAge
     }
 
     set minAge(minAge: number | null) {
@@ -264,7 +348,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get maxAge() {
-        return this.group.settings.maxAge
+        return this.patchedGroup.settings.maxAge
     }
     
     set maxAge(maxAge: number | null) {
@@ -291,7 +375,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     // Waiting list
 
     get waitingListType() {
-        return this.group.settings.waitingListType
+        return this.patchedGroup.settings.waitingListType
     }
 
     set waitingListType(waitingListType: WaitingListType) {
@@ -311,7 +395,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get preRegistrationsDate() {
-        return this.group.settings.preRegistrationsDate
+        return this.patchedGroup.settings.preRegistrationsDate
     }
 
     set preRegistrationsDate(preRegistrationsDate: Date | null) {
@@ -319,7 +403,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get maxMembers() {
-        return this.group.settings.maxMembers
+        return this.patchedGroup.settings.maxMembers
     }
 
     set maxMembers(maxMembers: number | null) {
@@ -327,7 +411,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     get priorityForFamily() {
-        return this.group.settings.priorityForFamily
+        return this.patchedGroup.settings.priorityForFamily
     }
 
     set priorityForFamily(priorityForFamily: boolean) {
@@ -337,6 +421,10 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     // Saving
 
     async save() {
+        if (this.saving) {
+            return
+        }
+
         const valid = await this.validator.validate()
 
         if (!valid) {
@@ -344,28 +432,78 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         }
         this.saving = true
 
-        let patch = this.organizationPatch
+        let patch = this.patchOrganization
 
         // Check if reduced price is enabled
-        if (this.group.settings.prices.find(g => g.reducedPrice !== null) && !this.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+        if (this.patchedGroup.settings.prices.find(g => g.reducedPrice !== null) && !this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
             console.log("Auto enabled financial problems record")
 
             const p = OrganizationRecordsConfiguration.patch({});
             p.enabledRecords.addPut(RecordType.FinancialProblems)
-            const organizationPatch = Organization.patch({
+            const patchOrganization = Organization.patch({
                 meta:  OrganizationMetaData.patch({
                     recordsConfiguration: p
                 })
             })
 
-            patch = patch.patch(organizationPatch)
+            patch = patch.patch(patchOrganization)
 
             new Toast("We vragen nu ook bij het inschrijven of een lid in een kansarm gezin leeft zodat we het verminderd lidgeld kunnen toepassen", "info-filled").show()
         }
 
-        await OrganizationManager.patch(patch)
+        this.errorBox = null
+
+        try {
+            await this.saveHandler(patch)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
         this.saving = false
+    }
+
+    async deleteMe() {
+        if (this.saving) {
+            return
+        }
+
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze inschrijvingsgroep wilt verwijderen?", "Verwijderen")) {
+            return
+        }
+        const p = Organization.patch({})
+        p.groups.addDelete(this.group.id)
+
+        this.errorBox = null
+        this.saving = true
+
+        try {
+            await this.saveHandler(p)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.saving = false
+
         this.pop({ force: true })
+    }
+
+    cancel() {
+        this.pop()
+    }
+
+    isChanged() {
+        console.log(this.patchOrganization)
+        console.log(this.organization)
+        return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        console.log("should navigate away")
+        if (!this.isChanged()) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
 

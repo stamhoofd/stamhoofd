@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct, getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
 import { Group } from '../models/Group';
@@ -69,7 +69,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.placeholder = struct.placeholder
 
             for (const registrationStruct of struct.registrations) {
-                if (!user.permissions.hasWriteAccess(registrationStruct.groupId)) {
+                const group = groups.find(g => g.id === registrationStruct.groupId)
+                if (!group) {
+                    throw new SimpleError({
+                        code: "invalid_group",
+                        message: "Invalid group",
+                        human: "De groep waar je dit lid wilt toevoegen bestaat niet (meer)",
+                        statusCode: 404
+                    })
+                }
+                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
                     throw new SimpleError({
                         code: "permission_denied",
                         message: "No permissions to create member in this group",
@@ -149,25 +158,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            let hasAccess = user.permissions.hasWriteAccess()
-
-            if (!hasAccess) {
-                for (const registration of member.registrations) {
-                    if (user.permissions.hasWriteAccess(registration.groupId)) {
-                        hasAccess = true
-                    }   
-                }
-            }
-
-            if (!hasAccess) {
+            if (!await member.hasWriteAccess(user, groups, false, true)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",
                     human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
                     statusCode: 403
                 })
-            }            
-
+            }
             // Check permissions (todo)
 
             member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
@@ -177,8 +175,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.publicKey = patch.publicKey ?? member.publicKey
             member.placeholder = patch.placeholder ?? member.placeholder
             await member.save();
-
-           
 
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
@@ -276,24 +272,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
-            let hasAccess = user.permissions.hasWriteAccess()
-
-            if (!hasAccess) {
-                for (const registration of member.registrations) {
-                    if (user.permissions.hasWriteAccess(registration.groupId)) {
-                        hasAccess = true
-                    }   
-                }
-            }
-
-            if (!hasAccess) {
+            if (!await member.hasWriteAccess(user, groups, true, false)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions to edit members in this group",
-                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
+                    human: "Je hebt niet voldoende rechten om dit lid te verwijderen",
                     statusCode: 403
                 })
-            }        
+            }     
 
             await User.deleteForDeletedMember(member.id)
             await member.delete()

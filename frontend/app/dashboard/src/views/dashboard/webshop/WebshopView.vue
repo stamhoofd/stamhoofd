@@ -6,8 +6,8 @@
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
 
-                    <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
-                    <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
+                    <button v-if="hasFullPermissions" v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
+                    <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
                 </STNavigationTitle>
             </template>
             <template #middle>
@@ -27,8 +27,8 @@
             <h1 v-if="canPop">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <button class="button gray icon settings" v-tooltip="'Instellingen'" @click="editSettings" />
-                <a class="button gray icon external" v-tooltip="'Webshop openen'" :href="'https://'+webshopUrl" target="_blank" />
+                <button v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
+                <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
             <Spinner v-if="loading" class="center" />
@@ -36,7 +36,7 @@
                 Je hebt nog geen bestellingen ontvangen
             </p>
 
-            <table v-else class="data-table">
+            <table v-else-if="!isLoadingOrders" class="data-table">
                 <thead>
                     <tr>
                         <th>
@@ -88,7 +88,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
-                        <td @click.stop="" class="prefix">
+                        <td class="prefix" @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
                         <td class="hide-smartphone tiny">
@@ -124,7 +124,7 @@
             <Spinner v-if="isLoadingOrders" class="center" />
         </main>
 
-        <STToolbar :class="{'hide-smartphone': selectionCount == 0}">
+        <STToolbar :class="{'hide-smartphone': selectionCount == 0 }">
             <template #left>
                 {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "bestelling" : "bestellingen" }} geselecteerd
                 <template v-if="selectionCountHidden">
@@ -132,11 +132,11 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" :disabled="selectionCount == 0" @click="markAs">
+                <button class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
                     <span class="dropdown-text">Markeren als...</span>
                 </button>
                 <LoadingButton :loading="actionLoading">
-                    <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
+                    <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
                         <span class="dropdown-text">Mailen</span>
                         <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
@@ -151,17 +151,17 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { NoFilter, StatusFilter, NotPaidFilter } from '../../../classes/order-filters';
 
+import { NoFilter, NotPaidFilter,StatusFilter } from '../../../classes/order-filters';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import MailView from '../mail/MailView.vue';
 import EditWebshopView from './EditWebshopView.vue';
@@ -250,6 +250,13 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         return Formatter.dateTime(date)
     }
 
+    get hasFullPermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
+    }
+
     toggleSort(field: string) {
         if (this.sortBy == field) {
             if (this.sortDirection == "ASC") {
@@ -276,6 +283,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
         }).catch((e) => {
             console.error(e)
+            Toast.fromError(e).show()
         }).finally(() => {
             this.loading = false
         })
@@ -301,6 +309,8 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             this.loadNextOrders()
         }).catch((e) => {
             console.error(e)
+            Toast.fromError(e).show()
+            this.nextQuery = null
         })
     }
 

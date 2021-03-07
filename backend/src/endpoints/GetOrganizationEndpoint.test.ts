@@ -15,6 +15,8 @@ describe("Endpoint.GetOrganization", () => {
         const organization = await new OrganizationFactory({}).create()
         const user = await new UserFactory({ organization }).create()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
+        organization.meta.rootCategory!.groupIds.push(...groups.map(g => g.id))
+        await organization.save()
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v3/organization", organization.getApiHost());

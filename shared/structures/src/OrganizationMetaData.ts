@@ -2,9 +2,10 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, fiel
 
 import { File } from './files/File';
 import { Image } from './files/Image';
+import { GroupCategory } from './GroupCategory';
 import { GroupPrices } from './GroupPrices';
 import { Record } from './members/Record';
-import { RecordType, RecordTypeHelper } from './members/RecordType';
+import { RecordType } from './members/RecordType';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentMethod } from './PaymentMethod';
@@ -17,6 +18,16 @@ export class OrganizationModules extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder })
     useWebshops = false
+
+    /**
+     * We use inverse property here because this can only be used in combination with useMembers == true
+     */
+    @field({ decoder: BooleanDecoder, version: 63 })
+    disableActivities = true
+
+    get useActivities(): boolean {
+        return this.useMembers && !this.disableActivities
+    }
 }
 
 export enum AskRequirement {
@@ -226,6 +237,32 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(UmbrellaOrganization), nullable: true })
     umbrellaOrganization: UmbrellaOrganization | null = null;
 
+    /**
+     * Logo used in a horizontal environment (e.g. menu bar)
+     */
+    @field({ decoder: Image, nullable: true, version: 11 })
+    horizontalLogo: Image | null = null
+
+    /**
+     * Set either file or url for the privacy policy. If both are set, the url has priority
+     */
+    @field({ decoder: File, nullable: true, version: 25 })
+    privacyPolicyFile: File | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 25 })
+    privacyPolicyUrl: string | null = null
+
+    /**
+     * Logo to display (small)
+     */
+    @field({ decoder: Image, nullable: true, version: 11 })
+    squareLogo: Image | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 21 })
+    color: string | null = null
+
+    // Everything below should move to registrations meta data
+
     @field({ decoder: IntegerDecoder })
     expectedMemberCount = 0
 
@@ -256,30 +293,6 @@ export class OrganizationMetaData extends AutoEncoder {
     })
     transferSettings = TransferSettings.create({})
 
-    /**
-     * Logo used in a horizontal environment (e.g. menu bar)
-     */
-    @field({ decoder: Image, nullable: true, version: 11 })
-    horizontalLogo: Image | null = null
-
-    /**
-     * Set either file or url for the privacy policy. If both are set, the url has priority
-     */
-    @field({ decoder: File, nullable: true, version: 25 })
-    privacyPolicyFile: File | null = null
-
-    @field({ decoder: StringDecoder, nullable: true, version: 25 })
-    privacyPolicyUrl: string | null = null
-
-    /**
-     * Logo to display (small)
-     */
-    @field({ decoder: Image, nullable: true, version: 11 })
-    squareLogo: Image | null = null
-
-    @field({ decoder: StringDecoder, nullable: true, version: 21 })
-    color: string | null = null
-
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
@@ -292,4 +305,29 @@ export class OrganizationMetaData extends AutoEncoder {
         defaultValue: () => OrganizationRecordsConfiguration.create({})
     })
     recordsConfiguration: OrganizationRecordsConfiguration
+
+    /**
+     * All the available categories
+     */
+    @field({ 
+        decoder: new ArrayDecoder(GroupCategory), 
+        version: 57
+    })
+    categories: GroupCategory[] = [GroupCategory.create({ id: "root" })] // we use ID root here because this ID needs to stay the same since it won't be saved
+
+    /**
+     * We use one invisible root category to simplify the difference between non-root and root category
+     */
+    @field({ 
+        decoder: StringDecoder, 
+        version: 57
+    })
+    rootCategoryId = this.categories[0]?.id ?? ""
+
+    /**
+     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     */
+    get rootCategory(): GroupCategory | undefined {
+        return this.categories.find(c => c.id === this.rootCategoryId)
+    }
 }

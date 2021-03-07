@@ -1,7 +1,7 @@
 import { AutoEncoder, BooleanDecoder,Decoder,field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PermissionLevel } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { KeychainItem } from '../models/KeychainItem';
@@ -42,7 +42,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasReadAccess(request.params.id)) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang tot deze groep"
@@ -56,8 +56,15 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 message: "De groep die je opvraagt bestaat niet (meer)"
             })
         }
-
         const [group] = groups
+
+        if (group.privateSettings.permissions.getPermissionLevel(user.permissions) === PermissionLevel.None) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "Je hebt geen toegang tot deze groep"
+            })
+        }
+
         const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)
 
         if (request.request.getVersion() <= 35) {

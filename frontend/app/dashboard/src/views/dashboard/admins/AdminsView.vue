@@ -1,9 +1,14 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <button slot="right" class="button text" @click="createAdmin">
-                <span class="icon add"/>
-                <span>Nieuw</span>
+            <button slot="right" class="button text" aria-label="Nieuwe beheerder" @click="createAdmin">
+                <span class="icon add" />
+                <span>Beheerder</span>
+            </button>
+
+            <button slot="right" class="button text hide-smartphone" aria-label="Nieuwe groep" @click="addRole">
+                <span class="icon add" />
+                <span>Groep</span>
             </button>
 
             <BackButton v-if="canPop" slot="left" @click="pop" />
@@ -13,52 +18,203 @@
     
         <main>
             <h1>Beheerders</h1>
+            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
 
-            <p class="error-box" v-if="admins.length == 1 && enableMemberModule">
-                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe!
+            <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
+                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
             </p>
 
             <Spinner v-if="loading" />
+            
+            <hr>
+            <h2>
+                Hoofdbeheerders
+            </h2>
+            <p>Hoofdbeheerders hebben toegang tot alles, zonder beperkingen.</p>
+
+            <Spinner v-if="loading" />
             <STList v-else>
-                <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                    <h2 class="style-title-list">{{ admin.firstName }} {{ admin.lastName }}</h2>
-                    <p class="style-description-small">{{ admin.email }}</p>
-                    <p class="style-description-small">{{ permissionList(admin) }}</p>
+                <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                    <h2 class="style-title-list">
+                        {{ admin.firstName }} {{ admin.lastName }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ admin.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(admin) }}
+                    </p>
 
                     <template slot="right">
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
 
-                <STListItem v-for="invite in invites" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                    <h2 class="style-title-list">{{ invite.userDetails.firstName || "?" }} {{  invite.userDetails.lastName || "" }}</h2>
-                    <p class="style-description-small">{{ invite.userDetails.email }}</p>
-                    <p class="style-description-small">{{ permissionList(invite) }}</p>
+                <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                    <h2 class="style-title-list">
+                        {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ invite.userDetails.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(invite) }}
+                    </p>
 
                     <template slot="right">
-                        <p v-if="isExpired(invite)">Uitnodiging vervallen</p>
-                        <p v-else>Uitnodiging nog niet geaccepteerd</p>
+                        <p v-if="isExpired(invite)">
+                            Uitnodiging vervallen
+                        </p>
+                        <p v-else>
+                            Uitnodiging nog niet geaccepteerd
+                        </p>
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>
             </STList>
+
+            <div v-for="(role, index) in roles" :key="role.id" class="container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>
+                        {{ role.name }}
+                    </div>
+                    <div>
+                        <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)" />
+                        <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)" />
+                        <button class="button text" @click="editRole(role)">
+                            <span class="icon settings" />
+                            <span class="hide-smartphone">Bewerken</span>
+                        </button>
+                    </div>
+                </h2>
+
+                <Spinner v-if="loading" />
+                <STList v-else>
+                    <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <h2 class="style-title-list">
+                            {{ admin.firstName }} {{ admin.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(admin) }}
+                        </p>
+
+                        <template slot="right">
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <h2 class="style-title-list">
+                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ invite.userDetails.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(invite) }}
+                        </p>
+
+                        <template slot="right">
+                            <p v-if="isExpired(invite)">
+                                Uitnodiging vervallen
+                            </p>
+                            <p v-else>
+                                Uitnodiging nog niet geaccepteerd
+                            </p>
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
+
+                <p v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0" class="info-box">
+                    Geen beheerders in deze groep
+                </p>
+            </div>
+
+            <div v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0" class="container">
+                <hr>
+                <h2>
+                    Beheerders die niet in een groep zitten
+                </h2>
+                <p>Deze beheerders hebben nergens toegang tot, deel ze op in groepen op basis van hun functie in de vereniging.</p>
+
+                <STList v-if="!loading">
+                    <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <h2 class="style-title-list">
+                            {{ admin.firstName }} {{ admin.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(admin) }}
+                        </p>
+
+                        <template slot="right">
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <h2 class="style-title-list">
+                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ invite.userDetails.email }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ permissionList(invite) }}
+                        </p>
+
+                        <template slot="right">
+                            <p v-if="isExpired(invite)">
+                                Uitnodiging vervallen
+                            </p>
+                            <p v-else>
+                                Uitnodiging nog niet geaccepteerd
+                            </p>
+                            <span><span class="icon gray edit" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
+
+            <hr>
+
+            <p>
+                <button class="button text" @click="addRole">
+                    <span class="icon add" />
+                    <span>Nieuwe beheerdersgroep toevoegen</span>
+                </button>
+            </p>
+            <p>
+                <button class="button text" @click="createAdmin">
+                    <span class="icon add" />
+                    <span>Nieuwe beheerder toevoegen</span>
+                </button>
+            </p>
         </main>
     </div>
 </template>
 
 
 <script lang="ts">
-import { ComponentWithProperties,NavigationMixin, NavigationController, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, Spinner, CenteredMessage, BackButton } from "@stamhoofd/components";
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties,HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch, User, OrganizationAdmins, Invite } from '@stamhoofd/structures';
-import { OrganizationGenderType } from '@stamhoofd/structures';
+import { Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData,PermissionRoleDetailed, User } from '@stamhoofd/structures';
+import { PermissionRole } from "@stamhoofd/structures";
+import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import { Decoder } from '@simonbackx/simple-encoding';
 import AdminInviteView from './AdminInviteView.vue';
-import { Sorter } from "@stamhoofd/utility";
+import EditRoleView from "./EditRoleView.vue";
 
 @Component({
     components: {
@@ -74,11 +230,9 @@ import { Sorter } from "@stamhoofd/utility";
 export default class AdminsView extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     loading = true
-    admins: User[] = []
-    invites: Invite[] = []
 
     mounted() {
-        this.load().catch(e => {
+        this.load(true).catch(e => {
             console.error(e)
         })
 
@@ -86,16 +240,31 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         document.title = "Stamhoofd - Beheerders"
     }
 
-    async load() {
+    async load(force = false) {
+        console.log("called load", force)
+        if (!force && this.organization.admins && this.organization.invites) {
+            this.loading = false
+            return
+        }
+
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/admins",
             decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
         })
-        this.admins = response.data.users
-        this.invites = response.data.invites
+
+        this.organization.admins = response.data.users
+        this.organization.invites = response.data.invites
         this.loading = false
+    }
+
+    get admins() {
+        return this.organization.admins ?? []
+    }
+
+    get invites() {
+        return this.organization.invites ?? []
     }
 
     get organization() {
@@ -107,48 +276,23 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     permissionList(user: User | Invite) {
-        if (user.permissions?.hasFullAccess()) {
-            return "Administrator"
-        }
-
-        if (user.permissions?.hasWriteAccess()) {
-            return "Alle groepen"
-        }
-
         const list: string[] = []
-
-        for (const group of this.organization.groups) {
-            if (user.permissions?.hasWriteAccess(group.id)) {
-                list.push(group.settings.name)
-            }
+        if (user.permissions?.hasFullAccess()) {
+            list.push("Hoofdbeheerders")
         }
 
-        if (list.length == this.organization.groups.length) {
-            return "Alle groepen"
+        for (const role of user.permissions?.roles ?? []) {
+            list.push(role.name)
         }
-
         return list.join(", ")
     }
 
+    get roles() {
+        return this.organization.privateMeta?.roles ?? []
+    }
+
     get sortedAdmins() {
-        return this.admins.sort((a, b) => {
-            const af = a.permissions?.hasFullAccess() ?? false
-            const bf = b.permissions?.hasFullAccess() ?? false
-
-            const ag = this.organization.groups.filter(g => a.permissions?.hasWriteAccess(g.id)) ?? []
-            const bg = this.organization.groups.filter(g => b.permissions?.hasWriteAccess(g.id)) ?? []
-
-            const ac = ag.length
-            const bc = bg.length
-
-            return Sorter.stack(
-                Sorter.byBooleanValue(af, bf), 
-                Sorter.byNumberValue(ac, bc), 
-                ac == 1 && bc == 1 ? Group.defaultSort(ag[0], bg[0]) : 0,
-                Sorter.byStringValue(a.firstName ?? "", b.firstName ?? ""),
-                Sorter.byStringValue(a.lastName ?? "", b.lastName ?? "")
-            )!
-        })
+        return this.admins.sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
     }
 
     createAdmin() {
@@ -167,6 +311,34 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         return invite.validUntil.getTime() < new Date().getTime()+10*1000
     }
 
+    moveRoleUp(index: number, role: PermissionRoleDetailed) {
+        if (index == 0) {
+            return
+        }
+        const prev = this.roles[index - 2]?.id
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addMove(role.id, prev ?? null)
+        const patch = Organization.patch({
+            id: this.organization.id,
+            privateMeta
+        })
+        OrganizationManager.patch(patch)
+    }
+
+    moveRoleDown(index: number, role: PermissionRoleDetailed) {
+        if (index >= this.roles.length - 1) {
+            return
+        }
+        const prev = this.roles[index + 1]?.id
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addMove(role.id, prev ?? null)
+        const patch = Organization.patch({
+            id: this.organization.id,
+            privateMeta
+        })
+        OrganizationManager.patch(patch)
+    }
+
     editAdmin(admin: User) {
        this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(AdminInviteView, { 
@@ -181,6 +353,81 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 }
             }) ,
             
+        }).setDisplayStyle("popup"))
+    }
+
+    getAdminsForRole(role: PermissionRole) {
+        return this.sortedAdmins.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
+    }
+
+    getInvitesForRole(role: PermissionRole) {
+        return this.invites.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
+    }
+
+    getAdminsWithoutRole() {
+        // We still do a check on ID because users might have a role that is deleted
+        const ids = this.roles.map(r => r.id)
+        return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
+    }
+
+    getInvitesWithoutRole() {
+        // We still do a check on ID because users might have a role that is deleted
+        const ids = this.roles.map(r => r.id)
+        return this.invites.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
+    }
+
+    getAdmins() {
+        // We still do a check on ID because users might have a role that is deleted
+        return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess())
+    }
+
+    getInviteAdmins() {
+        // We still do a check on ID because users might have a role that is deleted
+        return this.invites.filter(a => !!a.permissions?.hasFullAccess())
+    }
+
+    addRole() {
+        const role = PermissionRoleDetailed.create({})
+        const privateMeta = OrganizationPrivateMetaData.patch({})
+        privateMeta.roles.addPut(role)
+
+        const patch = Organization.patch({ 
+            id: this.organization.id,
+            privateMeta
+        })
+        
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(EditRoleView, { 
+                role,
+                organization: this.organization.patch(patch),
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
+                    const doSave = patch.patch(p)
+                    await OrganizationManager.patch(doSave)
+                    if (doSave.admins || doSave.invites) {
+                        await this.load(true)
+                    }
+                }
+            }),
+        }).setDisplayStyle("popup"))
+    }
+
+    editRole(role: PermissionRoleDetailed) {
+        const patch = Organization.patch({ 
+            id: this.organization.id
+        })
+        
+        this.present(new ComponentWithProperties(NavigationController, { 
+            root: new ComponentWithProperties(EditRoleView, { 
+                role,
+                organization: this.organization,
+                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
+                    const doSave = patch.patch(p)
+                    await OrganizationManager.patch(doSave)
+                    if (doSave.admins || doSave.invites) {
+                        await this.load(true)
+                    }
+                }
+            }),
         }).setDisplayStyle("popup"))
     }
 

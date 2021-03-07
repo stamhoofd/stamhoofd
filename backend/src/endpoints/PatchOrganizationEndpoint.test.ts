@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
-import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,Permissions } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,PermissionRole,PermissionRoleDetailed,Permissions } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
@@ -65,30 +65,22 @@ describe("Endpoint.PatchOrganization", () => {
 
     test("Change the name of a group with access", async () => {
         const organization = await new OrganizationFactory({}).create()
+        const role = PermissionRoleDetailed.create({
+            name: "Role"
+        })
+        organization.privateMeta.roles.push(
+            role
+        )
+        await organization.save()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
+
+        groups[0].privateSettings.permissions.full.push(PermissionRole.create(role))
+        await groups[0].save()
 
         const validPermissions = [
             Permissions.create({
-                level: PermissionLevel.Read,
-                groups: [
-                    GroupPermissions.create({
-                        groupId: groups[0].id,
-                        level: PermissionLevel.Full
-                    })
-                ]
-            }),
-            Permissions.create({
-                level: PermissionLevel.Write,
-                groups: [
-                    GroupPermissions.create({
-                        groupId: groups[1].id,
-                        level: PermissionLevel.Read
-                    }),
-                    GroupPermissions.create({
-                        groupId: groups[0].id,
-                        level: PermissionLevel.Full
-                    })
-                ]
+                level: PermissionLevel.None,
+                roles: [PermissionRole.create(role)]
             }),
             Permissions.create({
                 level: PermissionLevel.Full
@@ -128,27 +120,38 @@ describe("Endpoint.PatchOrganization", () => {
     });
 
     test("Can't change name of group without access", async () => {
-        const organization = await new OrganizationFactory({}).create()
+         const organization = await new OrganizationFactory({}).create()
+        const role = PermissionRoleDetailed.create({
+            name: "Role"
+        })
+        const role2 = PermissionRoleDetailed.create({
+            name: "Role2"
+        })
+        organization.privateMeta.roles.push(
+            role,
+            role2
+        )
+        await organization.save()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
+
+        groups[0].privateSettings.permissions.write.push(PermissionRole.create(role))
+        await groups[0].save()
+
+        groups[0].privateSettings.permissions.read.push(PermissionRole.create(role2))
+        await groups[0].save()
 
         const invalidPermissions = [
             Permissions.create({
                 level: PermissionLevel.Read,
-                groups: [
-                    GroupPermissions.create({
-                        groupId: groups[0].id,
-                        level: PermissionLevel.Write
-                    })
-                ]
+                roles: [PermissionRole.create(role)]
             }),
             Permissions.create({
-                level: PermissionLevel.Read,
-                groups: [
-                    GroupPermissions.create({
-                        groupId: groups[0].id,
-                        level: PermissionLevel.Read
-                    })
-                ]
+                level: PermissionLevel.None,
+                roles: [PermissionRole.create(role2)]
+            }),
+            Permissions.create({
+                level: PermissionLevel.Write,
+                roles: [PermissionRole.create(role2), PermissionRole.create(role)]
             }),
             Permissions.create({
                 level: PermissionLevel.Write

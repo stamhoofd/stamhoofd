@@ -34,7 +34,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!user.permissions || !user.permissions.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
-                message: "Je moet administrator zijn om mollie te kunnen connecteren"
+                message: "Je moet hoofdbeheerder zijn om mollie te kunnen connecteren"
             })
         }
 

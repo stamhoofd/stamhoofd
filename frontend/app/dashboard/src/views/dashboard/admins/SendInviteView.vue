@@ -164,6 +164,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     .link-box {
         overflow-x: auto;
         text-overflow: visible;
+        white-space: nowrap;
     }
 
     .qr-code {

@@ -25,35 +25,45 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
-        <hr v-if="groups.length > 0 && enableMemberModule">
+        <template v-if="enableMemberModule">
+            <div v-for="category in tree.categories">
+                <hr>
+                <div>
+                    <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                        <span class="icon group" />
+                        <span>{{ category.settings.name }}</span>
+                    </button>
 
-        <div v-if="groups.length > 0 && enableMemberModule">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'group-all'}" @click="openAll()">
-                <span class="icon user" />
-                <span>Leden</span>
-                <button v-if="groups.length > 1" class="button">
-                    Alle
-                </button>
-            </button>
+                    <button
+                        v-for="group in category.groups"
+                        :key="group.id"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'group-'+group.id }"
+                        @click="openGroup(group)"
+                    >
+                        {{ group.settings.name }}
+                    </button>
 
-            <button
-                v-for="group in groups"
-                :key="group.id"
-                class="menu-button button"
-                :class="{ selected: currentlySelected == 'group-'+group.id }"
-                @click="openGroup(group)"
-            >
-                {{ group.settings.name }}
-            </button>
-        </div>
-        
-        <hr v-if="enableWebshopModule">
+                    <button
+                        v-for="c in category.categories"
+                        :key="c.id"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'category-'+c.id }"
+                        @click="openCategory(c)"
+                    >
+                        {{ c.settings.name }}
+                    </button>
+                </div>
+            </div>
+        </template>
+    
+        <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
-        <div v-if="enableWebshopModule">
+        <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
             <button class="menu-button heading">
                 <span class="icon basket" />
                 <span>Verkopen</span>
-                <button v-if="fullAccess" class="button text" @click="addWebshop()">
+                <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -71,11 +81,12 @@
         </div>
 
         <hr>
+        <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
+            <span class="icon card" />
+            <span>Overschrijvingen</span>
+        </button>
+
         <div v-if="fullAccess">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
-                <span class="icon card" />
-                <span>Overschrijvingen</span>
-            </button>
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                 <span class="icon settings" />
                 <span>Instellingen</span>
@@ -86,7 +97,7 @@
                 <span>Groepsadministratie</span>
             </button>
         </div>
-        <hr v-if="fullAccess">
+        <hr v-if="fullAccess || canManagePayments">
         <div class="">
             <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
                 <span class="icon user" />
@@ -108,7 +119,7 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, OrganizationType, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -117,6 +128,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
+import CategoryView from "./groups/CategoryView.vue";
 import GroupMembersView from "./groups/GroupMembersView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
@@ -147,6 +159,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 
+    get tree() {
+        return this.organization.categoryTreeForPermissions(OrganizationManager.user.permissions ?? Permissions.create({}))
+    }
+
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
@@ -160,7 +176,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
-            if (this.fullAccess) {
+            if (this.canManagePayments) {
                 this.managePayments(false)
                 didSet = true
             }
@@ -208,15 +224,15 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
-            if (this.groups.length > 0) {
-                this.openGroup(this.groups[0], false)
-            } else {
+            //if (this.groups.length > 0) {
+                //this.openGroup(this.groups[0], false)
+            //} else {
                 if (this.fullAccess) {
                     this.manageSettings(false)
                 } else {
                     this.manageAccount(false)
                 }
-            }
+            //}
         }
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
@@ -298,16 +314,10 @@ export default class Menu extends Mixins(NavigationMixin) {
             console.error(e)
 
             // Show warnign instead
-            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een administrator om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
                 this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
             })).show()
         }
-    }
-
-    get groups() {
-        return this.organization.groups.filter(g => {
-            return this.hasAccessToGroup(g)
-        })
     }
 
     get webshops() {
@@ -319,9 +329,6 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     openAll(animated = true) {
-        if (this.groups.length <= 1) {
-            return;
-        }
         this.currentlySelected = "group-all"
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
     }
@@ -329,6 +336,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
+    }
+
+    openCategory(category: GroupCategory, animated = true) {
+        this.currentlySelected = "category-"+category.id
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CategoryView, { category }) }).setAnimated(animated));
     }
 
     openWebshop(webshop: WebshopPreview, animated = true) {
@@ -375,12 +387,16 @@ export default class Menu extends Mixins(NavigationMixin) {
         new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
     }
 
-    hasAccessToGroup(group: Group) {
-        return SessionManager.currentSession!.user!.permissions!.hasReadAccess(group.id)
-    }
-
     addWebshop() {
         this.present(new ComponentWithProperties(EditWebshopView, { }).setDisplayStyle("popup"))
+    }
+
+    get canCreateWebshops() {
+        return OrganizationManager.user.permissions?.canCreateWebshops(OrganizationManager.organization.privateMeta?.roles ?? [])
+    }
+
+    get canManagePayments() {
+        return OrganizationManager.user.permissions?.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get fullAccess() {
@@ -465,7 +481,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     padding-right: var(--horizontal-padding, 30px);
 }
 
-.menu > hr {
+.menu hr {
     height: $border-width;
     border-radius: $border-width/2;
     background: $color-gray-light;

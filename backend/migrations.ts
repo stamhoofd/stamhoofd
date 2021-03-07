@@ -1,5 +1,14 @@
 require('dotenv').config()
-import { Migration } from "@simonbackx/simple-database";
+import { Column, Migration } from "@simonbackx/simple-database";
+import { Version } from "@stamhoofd/structures";
+
+Column.jsonVersion = Version
+process.env.TZ = "UTC";
+
+// Validate UTC timezone
+if (new Date().getTimezoneOffset() != 0) {
+    throw new Error("Process should always run in UTC timezone");
+}
 
 const start = async () => {
     await Migration.runAll(__dirname + "/src/migrations");

@@ -1,5 +1,5 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
-import { SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
 import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, User, Version } from '@stamhoofd/structures'
@@ -225,7 +225,7 @@ export class Session implements RequestMiddleware {
         this.organization = response.data.data
 
         Keychain.addItems(response.data.keychainItems)
-
+       
         this.callListeners()
         return this.organization
     }

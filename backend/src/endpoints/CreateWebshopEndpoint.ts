@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { PrivateWebshop } from "@stamhoofd/structures";
+import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Token } from '../models/Token';
@@ -36,10 +36,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions || !user.permissions.canCreateWebshops(token.user.organization.privateMeta.roles)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
+                human: "Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.",
                 statusCode: 403
             })
         }
@@ -62,6 +63,15 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         if (request.body.domainUri !== undefined) {
             webshop.domainUri = request.body.domainUri
+        }
+
+        // Verify if we have full access
+        if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            throw new SimpleError({
+                code: "missing_permissions",
+                message: "You cannot create a webshop without having full permissions on the created webshop",
+                human: "Als je een webshop aanmaakt moet je ervoor zorgen dat jezelf ook volledige toegang hebt. Geef jezelf toegang via algemaan > toegangsbeheer voor je de webshop aanmaakt."
+            })
         }
 
         await webshop.save()

@@ -2,7 +2,7 @@ import { ArrayDecoder,AutoEncoder, DateDecoder,field, StringDecoder } from '@sim
 import { v4 as uuidv4 } from "uuid";
 
 import { InviteUserDetails } from './InviteUserDetails';
-import { Organization, OrganizationSimple } from './Organization';
+import { OrganizationSimple } from './OrganizationSimple';
 import { Permissions } from './Permissions';
 import { NewUser, User } from './User';
 

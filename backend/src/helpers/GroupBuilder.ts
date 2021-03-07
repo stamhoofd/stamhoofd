@@ -1,7 +1,8 @@
-import { GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, UmbrellaOrganization } from '@stamhoofd/structures'
+import { GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
 
 import { Group } from '../models/Group'
 import { Organization } from '../models/Organization'
+import { Group as GroupStruct } from "@stamhoofd/structures";
 
 export class GroupBuilder {
     organization: Organization
@@ -11,22 +12,63 @@ export class GroupBuilder {
     }
 
     async build() {
-        const groups = await Group.where({ organizationId: this.organization.id })
+        const oldGroups = await Group.where({ organizationId: this.organization.id })
 
-        if (groups.length > 0) {
-            // Do not add new groups
-            return
+        if (oldGroups.length === 0) {
+            // Setup default groups if possible
+            if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+                await this.createSGVGroups()
+            } else if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
+                await this.createChiroGroups()
+            }
         }
 
-        // Setup default groups if possible
-        if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
-            await this.createSGVGroups()
-        } else if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
-            await this.createChiroGroups()
+        // Reload
+        const groups = await Group.where({ organizationId: this.organization.id })
+        
+
+        // Setup default root groups
+        if (this.organization.meta.categories.length <= 1) {
+            const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
+
+            const defaults = OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
+
+            this.organization.meta.categories.push(...defaults)
+
+            // Only assign categories that are at the top level to the root category
+            const filter = defaults.flatMap(d => d.categoryIds)
+            this.organization.meta.rootCategory?.categoryIds.push(...defaults.map(d => d.id).filter(id => !filter.includes(id)))
+
+            if (defaults.length > 0) {
+                defaults[0].groupIds.push(...sortedGroupIds)
+            } else {
+                this.organization.meta.rootCategory!.groupIds.push(...sortedGroupIds)
+            }
+
+            await this.organization.save()
+        } else {
+            const newGroups = groups.filter(g => !oldGroups.find(gg => gg.id === g.id))
+            const sortedGroupIds = newGroups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
+            let root = this.organization.meta.rootCategory!
+            if (root.categoryIds.length > 0) {
+                for (const id of root.categoryIds) {
+                    const f = this.organization.meta.categories.find(c => c.id === id)
+                    if (f) {
+                        root = f
+                        break
+                    }
+                }
+            }
+
+            if (newGroups.length > 0) {
+                root.groupIds.push(...sortedGroupIds)
+                await this.organization.save()
+            }
         }
     }
     
     async createSGVGroups() {
+        const createdGroups: Group[] = []
         const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale ? 
         GroupGenderType.OnlyMale : 
             (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale ? 
@@ -45,6 +87,7 @@ export class GroupBuilder {
             maxAge: 7
         })
         await kapoenen.save();
+        createdGroups.push(kapoenen);
 
         const jin = new Group()
         jin.organizationId = this.organization.id
@@ -58,6 +101,7 @@ export class GroupBuilder {
             maxAge: 17
         })
         await jin.save();
+        createdGroups.push(jin);
 
         if (this.organization.meta.genderType == OrganizationGenderType.Mixed) {
             const wouters = new Group()
@@ -72,6 +116,7 @@ export class GroupBuilder {
                 maxAge: 10
             })
             await wouters.save();
+            createdGroups.push(wouters);
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
@@ -85,6 +130,7 @@ export class GroupBuilder {
                 maxAge: 13
             })
             await jonggivers.save();
+            createdGroups.push(jonggivers);
 
             const givers = new Group()
             givers.organizationId = this.organization.id
@@ -98,6 +144,7 @@ export class GroupBuilder {
                 maxAge: 16
             })
             await givers.save();
+            createdGroups.push(givers);
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
@@ -113,6 +160,7 @@ export class GroupBuilder {
                 maxAge: 10
             })
             await wouters.save();
+            createdGroups.push(wouters);
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
@@ -126,6 +174,7 @@ export class GroupBuilder {
                 maxAge: 13
             })
             await jonggivers.save();
+            createdGroups.push(jonggivers);
 
             const givers = new Group()
             givers.organizationId = this.organization.id
@@ -139,6 +188,7 @@ export class GroupBuilder {
                 maxAge: 16
             })
             await givers.save();
+            createdGroups.push(givers);
         }
 
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyMale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
@@ -154,6 +204,7 @@ export class GroupBuilder {
                 maxAge: 10
             })
             await wouters.save();
+            createdGroups.push(wouters);
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
@@ -167,6 +218,7 @@ export class GroupBuilder {
                 maxAge: 13
             })
             await jonggivers.save();
+            createdGroups.push(jonggivers);
 
             const givers = new Group()
             givers.organizationId = this.organization.id
@@ -180,7 +232,10 @@ export class GroupBuilder {
                 maxAge: 16
             })
             await givers.save();
+            createdGroups.push(givers);
         }
+
+        return createdGroups
     }
 
     async createChiroGroups() {

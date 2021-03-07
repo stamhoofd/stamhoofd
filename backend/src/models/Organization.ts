@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -89,7 +89,8 @@ export class Organization extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 
@@ -198,7 +199,8 @@ export class Organization extends Model {
 
     async getStructure(): Promise<OrganizationStruct> {
         const groups = await Group.where({organizationId: this.id})
-        return OrganizationStruct.create({
+
+        const struct = OrganizationStruct.create({
             id: this.id,
             name: this.name,
             meta: this.meta,
@@ -207,11 +209,19 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort)
+            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null })))
         })
+
+        if (this.meta.modules.disableActivities) {
+            // Only show groups that are in a given category
+            struct.groups = struct.categoryTree.categories[0]?.groups ?? []
+        }
+
+        return struct
+        
     }
 
-    async getPrivateStructure(): Promise<OrganizationStruct> {
+    async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {
         const groups = await Group.where({ organizationId: this.id })
         const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
         return OrganizationStruct.create({
@@ -223,9 +233,20 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(g)).sort(GroupStruct.defaultSort),
+            groups: groups.map(g => {
+                const struct = GroupStruct.create(g)
+                if (!struct.canViewMembers(permissions)) {
+                    struct.privateSettings = null
+                }
+                return struct
+            }).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta,
-            webshops: webshops.map(w => WebshopPreview.create(w))
+            webshops: webshops.flatMap(w => {
+                if (w.privateMeta.permissions.getPermissionLevel(permissions) === PermissionLevel.None) {
+                    return []
+                }
+                return [WebshopPreview.create(w)]
+            })
         })
     }
 

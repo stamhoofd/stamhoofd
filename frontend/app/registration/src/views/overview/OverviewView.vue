@@ -242,6 +242,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(TransferPaymentView, {
+                type: "registration",
                 organization: OrganizationManager.organization,
                 payment,
                 settings: OrganizationManager.organization.meta.transferSettings,

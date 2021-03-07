@@ -40,11 +40,12 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
         const user = token.user
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions || !user.permissions.canManagePayments(token.user.organization.privateMeta.roles)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You don't have permissions to access payments",
-                human: "Je hebt geen toegang tot betalingen"
+                human: "Je hebt geen toegang tot betalingen",
+                statusCode: 403
             })
         }
 

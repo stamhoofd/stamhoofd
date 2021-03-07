@@ -18,7 +18,7 @@
                     </button>
                 </p>
                 <p v-else class="warning-box">
-                    Een administrator van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
+                    Een hoofdbeheerder van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
                 </p>
             </template>
 

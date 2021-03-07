@@ -63,7 +63,7 @@
 
 <script lang="ts">
 import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
-import { LoadingButton,STToolbar } from "@stamhoofd/components";
+import { CenteredMessage, LoadingButton,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed,MemberWithRegistrations, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -114,10 +114,9 @@ export default class MemberViewPayments extends Vue {
         }
 
         if (data.length > 0) {
-            if (!confirm("Ben je zeker dat deze overschrijving uitgevoerd is?")) {
+            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling uitgevoerd is?", "Markeer als betaald")) {
                 return;
             }
-
             this.loading = true
             const session = SessionManager.currentSession!
 
@@ -130,9 +129,10 @@ export default class MemberViewPayments extends Vue {
                 })
                 this.updatePayments(response.data)
                 MemberManager.callListeners("payment", this.member)
-            } finally {
-                this.loading = false
+            } catch (e) {
+                Toast.fromError(e).show()
             }
+            this.loading = false
             
         }
     }
@@ -175,7 +175,7 @@ export default class MemberViewPayments extends Vue {
         }
 
         if (data.length > 0) {
-            if (!confirm("Ben je zeker dat deze overschrijving niet uitgevoerd is?")) {
+            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling niet uitgevoerd is?", "Markeer als niet betaald")) {
                 return;
             }
 
@@ -192,9 +192,10 @@ export default class MemberViewPayments extends Vue {
 
                 this.updatePayments(response.data)
                 MemberManager.callListeners("payment", this.member)
-            } finally {
-                this.loading = false
+            } catch (e) {
+                Toast.fromError(e).show()
             }
+            this.loading = false
             
         }
     }

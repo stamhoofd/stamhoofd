@@ -3,7 +3,7 @@
 import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, Group, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
+import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, Group, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, PermissionLevel, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -174,39 +174,48 @@ export class MemberManagerStatic {
         return members;
     }
 
-    async loadMembers(groupId: string | null = null, waitingList: boolean | null = false, cycleOffset: number | null = 0): Promise<MemberWithRegistrations[]> {
+    async loadMembers(groupIds: string[] = [], waitingList: boolean | null = false, cycleOffset: number | null = 0): Promise<MemberWithRegistrations[]> {
         if (waitingList === null) {
             // Load both waiting list and without waiting list
             const members: MemberWithRegistrations[] = []
-            members.push(...(await this.loadMembers(groupId, true, cycleOffset)))
-            members.push(...(await this.loadMembers(groupId, false, cycleOffset)))
+            members.push(...(await this.loadMembers(groupIds, true, cycleOffset)))
+            members.push(...(await this.loadMembers(groupIds, false, cycleOffset)))
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
         if (cycleOffset === null) {
             // Load both waiting list and without waiting list
             const members: MemberWithRegistrations[] = []
-            members.push(...(await this.loadMembers(groupId, waitingList, 1)))
-            members.push(...(await this.loadMembers(groupId, waitingList, 0)))
+            members.push(...(await this.loadMembers(groupIds, waitingList, 1)))
+            members.push(...(await this.loadMembers(groupIds, waitingList, 0)))
 
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
         const session = SessionManager.currentSession!
 
-        if (groupId === null) {
+        if (groupIds.length === 0) {
             const members: MemberWithRegistrations[] = []
             for (const group of session.organization!.groups) {
-                if (session.user!.permissions!.hasReadAccess(group.id)) {
-                    members.push(...(await this.loadMembers(group.id, waitingList, cycleOffset)))
+                if (group.privateSettings && group.privateSettings.permissions.getPermissionLevel(session.user!.permissions!) !== PermissionLevel.None) {
+                    members.push(...(await this.loadMembers([group.id], waitingList, cycleOffset)))
                 }
+            }
+            // remove duplicates
+            return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
+        }
+
+        if (groupIds.length > 1) {
+            const members: MemberWithRegistrations[] = []
+            for (const groupId of groupIds) {
+                members.push(...(await this.loadMembers([groupId], waitingList, cycleOffset)))
             }
             // remove duplicates
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
         const response = await session.authenticatedServer.request({
             method: "GET",
-            path: "/organization/group/" + groupId + "/members",
+            path: "/organization/group/" + groupIds[0] + "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)),
             query: { waitingList, cycleOffset }
         })

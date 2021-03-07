@@ -26,7 +26,7 @@
                 </template>
 
                 <p class="stamhoofd-footer">
-                    <a href="https://www.stamhoofd.be" target="_blank" class="button text">Gratis webshop van <strong>Stamhoofd</strong>, software voor verenigingen</a>
+                    <a href="https://www.stamhoofd.be" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
                 </p>
             </main>
         </div>

@@ -5,7 +5,8 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
 //const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
-const CircularDependencyPlugin = require('circular-dependency-plugin')
+// const CircularDependencyPlugin = require('circular-dependency-plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
@@ -45,7 +46,7 @@ if (process.env.LOAD_ENV) {
 module.exports = {
     mode: "development",
     target: 'web',
-    //stats: 'none',
+    stats: 'minimal',
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension (so that you don't have to add it explicitly)
         extensions: [".ts", ".tsx", ".js"],
@@ -76,7 +77,7 @@ module.exports = {
         disableHostCheck: true,
         historyApiFallback: true,
     },
-    //devtool: "source-map",
+    devtool: "eval",
     module: {
         rules: [
             {
@@ -90,7 +91,7 @@ module.exports = {
             { 
                 test: /\.tsx?$/, 
                 use: [
-                    {
+                    ...(process.env.NODE_ENV === "production" ? [{
                         loader: 'babel-loader',
                         options: {
                             babelrc: false,
@@ -124,10 +125,14 @@ module.exports = {
                             //    "@babel/plugin-transform-regenerator"		
                             //]
                         }
-                    },
+                    }] : []),
                     {
                         loader: 'ts-loader',
-                        options: { appendTsSuffixTo: [/\.vue$/] },
+                        options: { 
+                            appendTsSuffixTo: [/\.vue$/],
+                            transpileOnly: process.env.NODE_ENV !== "production",
+                            happyPackMode: process.env.NODE_ENV !== "production",
+                        },
                     }
                 ]
             },
@@ -294,6 +299,22 @@ module.exports = {
             // add errors to webpack instead of warnings
             failOnError: true,
         })*/
+        ...(process.env.NODE_ENV === "production") ? [] : [new ForkTsCheckerWebpackPlugin(
+            {
+                typescript: {
+                    enabled: true,
+                    extensions: {
+                        vue: {
+                            enabled: true,
+                        }
+                    },
+                    diagnosticOptions: {
+                        semantic: true,
+                        syntactic: true,
+                    }
+                },
+            }
+        )]
     ],
     experiments: {
         syncWebAssembly: true // temporary, until fixed
