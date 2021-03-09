@@ -1,6 +1,6 @@
 <template>
     <div class="category-box container">
-        <h1>{{ category.name }}</h1>
+        <h2>{{ category.name }}</h2>
 
         <ProductGrid :products="products" />
         <hr>

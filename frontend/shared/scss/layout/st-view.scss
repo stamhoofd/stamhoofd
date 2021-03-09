@@ -16,9 +16,12 @@
     padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) var(--st-horizontal-padding, 40px);
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
-    > main {
+    > * {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
+    }
+
+    > main {
 
         &.limit-width {
             display: flex;

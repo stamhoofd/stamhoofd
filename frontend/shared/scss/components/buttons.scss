@@ -230,13 +230,31 @@
         line-height: 34px;
         white-space: nowrap;
         transition: 0.2s opacity, 0.2s color;
+        position: relative;
 
         &.small {
             font-size: 12px;
         }
 
+        &.selected {
+            color: $color-primary;
+        }
+
         > * {
             vertical-align: top;
+        }
+
+        > .bubble {
+            background: $color-primary;
+            border-radius: 30px;
+            font-size: 11px;
+            color: $color-white;
+            display: inline-block;
+            padding: 0 7px;
+            height: 20px;
+            font-weight: 600;
+            line-height: 20px;
+            vertical-align: text-bottom;
         }
 
         &:active {

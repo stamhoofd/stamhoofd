@@ -1,5 +1,5 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled, sticky, large }">
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed }">
         <div>
             <slot name="left" />
         </div>
@@ -26,6 +26,9 @@ export default class STNavigationBar extends Vue {
 
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
+
+    @Prop({ default: false, type: Boolean })
+    fixed!: boolean;
 
     @Prop({ default: false, type: Boolean })
     large!: boolean;
@@ -126,6 +129,14 @@ export default class STNavigationBar extends Vue {
     &.sticky {
         position: sticky;
         top: 0;
+    }
+
+    &.fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
     }
 
     display: grid;

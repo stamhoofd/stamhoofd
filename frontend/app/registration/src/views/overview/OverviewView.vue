@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :large="true">
+        <STNavigationBar :large="true" v-if="false">
             <template slot="left">
                 <OrganizationLogo :organization="organization" />
             </template>

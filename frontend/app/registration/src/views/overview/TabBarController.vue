@@ -1,12 +1,25 @@
 <template>
     <div class="tab-bar-controller">
+        <STNavigationBar class="hide-smartphone" :fixed="true" :large="true">
+            <template slot="left">
+                <OrganizationLogo :organization="organization"/>
+            </template>
+            <template slot="right">
+                <button v-for="item in items" :key="item.component.key" class="button text" :class="{ selected: activeItem === item }" @click="selectItem(item)">
+                    <span :class="'icon '+item.icon" />
+                    <span>{{ item.name }}</span>
+                    <span class="bubble" v-if="item.badge">{{ item.badge }}</span>
+                </button>
+            </template>
+        </STNavigationBar>
         <div class="main">
             <FramedComponent ref="component" :key="root.key" :root="root" />
         </div>
-        <div class="tab-bar">
+        <div class="tab-bar only-smartphone">
             <button v-for="item in items" :key="item.component.key" class="button text small" :class="{ selected: activeItem === item }" @click="selectItem(item)">
                 <span :class="'icon '+item.icon" />
                 <span>{{ item.name }}</span>
+                <span class="bubble" v-if="item.badge">{{ item.badge }}</span>
             </button>
         </div>
     </div>
@@ -17,10 +30,13 @@
 import { ComponentWithProperties, FramedComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins,Prop } from "vue-property-decorator";
+import { STNavigationBar, OrganizationLogo } from "@stamhoofd/components"
+import { OrganizationManager } from "../../classes/OrganizationManager";
 
 export class TabBarItem {
     name = ""
     icon = ""
+    badge: string | null = ""
     component: ComponentWithProperties
     savedScrollPosition: null | number = null
 
@@ -33,7 +49,9 @@ export class TabBarItem {
 
 @Component({
     components: {
-        FramedComponent
+        FramedComponent,
+        STNavigationBar,
+        OrganizationLogo
     }
 })
 export default class TabBarController extends Mixins(NavigationMixin){
@@ -48,6 +66,10 @@ export default class TabBarController extends Mixins(NavigationMixin){
 
     get root() {
         return this.activeItem.component
+    }
+
+    get organization() {
+        return OrganizationManager.organization
     }
 
     selectItem(item: TabBarItem) {
@@ -127,9 +149,14 @@ export default class TabBarController extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 .tab-bar-controller {
     --saved-st-safe-area-bottom: var(--st-safe-area-bottom);
-
+    --st-safe-area-top: var(--st-safe-area-top);
     > .main {
-        --st-safe-area-bottom: calc(var(--saved-st-safe-area-bottom, 0px) + 62px);
+        @media (min-width: 451px) {
+            --st-safe-area-top: calc(var(--saved-st-safe-area-top, 0px) + 80px);
+        }
+         @media (max-width: 450px) {
+            --st-safe-area-bottom: calc(var(--saved-st-safe-area-bottom, 0px) + 62px);
+         }
     }
 
     >.tab-bar {
