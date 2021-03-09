@@ -1,43 +1,49 @@
 <template>
-    <div id="account-view" class="st-view background">
+    <div id="account-view" class="st-view">
         <STNavigationBar title="Mijn account">
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
-        <main>
-            <h1>
-                Mijn account
-            </h1>
-        
-            <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                    </div>
-                    <div>
-                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                    </div>
-                </div>
-            </STInputBox>
+        <main class="limit-width">
+            <section class="white-top view">
+                <main class="container">
+                    <h1>
+                        Mijn account
+                    </h1>
+                
+                    <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                        <div class="input-group">
+                            <div>
+                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            </div>
+                            <div>
+                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            </div>
+                        </div>
+                    </STInputBox>
 
-            <button class="button text" @click="openChangePassword">
-                Wachtwoord wijzigen
-            </button>
+                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+
+                    <button class="button text" @click="openChangePassword">
+                        Wachtwoord wijzigen
+                    </button>
+                </main>
+                <STToolbar>
+                    <template slot="right">
+                        <LoadingButton :loading="saving">
+                            <button class="button primary" @click="save">
+                                Opslaan
+                            </button>
+                        </LoadingButton>
+                    </template>
+                </STToolbar>
+            </section>
         </main>
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
+        
     </div>
 </template>
 

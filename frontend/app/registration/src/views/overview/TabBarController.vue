@@ -1,6 +1,6 @@
 <template>
     <div class="tab-bar-controller">
-        <STNavigationBar class="hide-smartphone" :fixed="true" :large="true">
+        <STNavigationBar :fixed="true" :large="true">
             <template slot="left">
                 <OrganizationLogo :organization="organization"/>
             </template>
@@ -15,7 +15,7 @@
         <div class="main">
             <FramedComponent ref="component" :key="root.key" :root="root" />
         </div>
-        <div class="tab-bar only-smartphone">
+        <div class="tab-bar">
             <button v-for="item in items" :key="item.component.key" class="button text small" :class="{ selected: activeItem === item }" @click="selectItem(item)">
                 <span :class="'icon '+item.icon" />
                 <span>{{ item.name }}</span>
@@ -151,15 +151,24 @@ export default class TabBarController extends Mixins(NavigationMixin){
     --saved-st-safe-area-bottom: var(--st-safe-area-bottom);
     --st-safe-area-top: var(--st-safe-area-top);
     > .main {
-        @media (min-width: 451px) {
+        @media (min-width: 701px) {
             --st-safe-area-top: calc(var(--saved-st-safe-area-top, 0px) + 80px);
         }
-         @media (max-width: 450px) {
+        @media (max-width: 700px) {
             --st-safe-area-bottom: calc(var(--saved-st-safe-area-bottom, 0px) + 62px);
-         }
+        }
+    }
+
+    > .st-navigation-bar {
+        @media (max-width: 700px) {
+            display: none;
+        }
     }
 
     >.tab-bar {
+        @media (min-width: 701px) {
+            display: none;
+        }
         position: fixed;
         bottom: 0;
         left: 0;

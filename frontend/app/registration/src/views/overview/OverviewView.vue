@@ -1,20 +1,8 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :large="true" v-if="false">
+        <STNavigationBar :large="true" :sticky="false" class="only-tab-bar">
             <template slot="left">
                 <OrganizationLogo :organization="organization" />
-            </template>
-
-            <template slot="right">
-                <button class="button text limit-space" @click="openPayments">
-                    <span class="icon user" />
-                    <span>Account</span>
-                </button>
-
-                <button class="button text limit-space" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
             </template>
         </STNavigationBar>
         <main class="limit-width">
@@ -60,11 +48,11 @@
                 </main>
 
                 <main v-if="registeredMembers.length > 0" class="container">
-                    <h1>Ingeschreven leden</h1>
+                    <h1>Leden bewerken en inschrijven</h1>
                     <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
 
                     <STList>
-                        <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
+                        <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
                             <span slot="left" class="icon user" />
 
                             <h2 class="payment-period">
@@ -75,17 +63,14 @@
                             </p>
 
                             <template slot="right">
-                                <button class="button text limit-space" @click.stop="editMember(member)">
-                                    <span class="icon edit" />
-                                    <span>Bewerken</span>
-                                </button>
+                                <span class="icon arrow-right gray" />
                             </template>
                         </STListItem>
                     </STList>
-                    <STToolbar>
+                    <STToolbar :sticky="false">
                         <button slot="right" class="primary button" @click="addNewMember">
                             <span class="icon white left add" />
-                            <span>Lid inschrijven</span>
+                            <span>Nieuw lid toevoegen</span>
                         </button>
                     </STToolbar>
                 </main>
@@ -112,6 +97,7 @@ import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
+import MemberView from "./MemberView.vue";
 import PaymentsView from "./PaymentsView.vue";
 import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
@@ -237,12 +223,13 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     editMember(member: MemberWithRegistrations) {
-        this.present(new ComponentWithProperties(NavigationController, {
+        this.show(new ComponentWithProperties(MemberView, { member }))
+        /*this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberGeneralView, {
                 initialMember: member,
                 editOnly: true
             })
-        }).setDisplayStyle("popup"))
+        }).setDisplayStyle("popup"))*/
     }
 
     canOpenPayment(payment: PaymentDetailed) {
