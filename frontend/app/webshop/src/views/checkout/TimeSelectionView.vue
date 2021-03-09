@@ -1,6 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1 v-if="checkoutMethod.type == 'Takeout'">
                     Kies je afhaaltijdstip
@@ -44,7 +48,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -62,7 +66,8 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STListItem,
         Radio,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        BackButton
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),

@@ -16,12 +16,14 @@ export class EventBus<E, Value> {
     }
 
     async sendEvent(type: E, value: Value) {
+        const values: any[] = []
         for (const listener of this.listeners.values()) {
             if (listener.type == type) {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                await listener.listener(value, type)
+                values.push(await listener.listener(value, type))
             }
         }
+        return values
     }
 }
 

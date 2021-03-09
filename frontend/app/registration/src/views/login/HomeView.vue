@@ -1,8 +1,8 @@
 <template>
-    <div id="home-view" class="st-view shade">
+    <div id="home-view" class="st-view">
         <STNavigationBar :large="true">
             <template slot="left">
-                <OrganizationLogo />
+                <OrganizationLogo :organization="organization" />
             </template>
 
             <template slot="right">
@@ -50,27 +50,23 @@
             </div>
 
             <div class="container gray-shadow">
-                <GroupTree :category="rootCategory"/>
+                <GroupTree :category="rootCategory" />
             </div>
-
         </main>
-
-        
     </div>
 </template>
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import SignupView from './SignupView.vue';
-import OrganizationLogo from '../menu/OrganizationLogo.vue';
 import GroupTree from '../../components/GroupTree.vue';
 import LoginView from './LoginView.vue';
+import SignupView from './SignupView.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -241,34 +237,6 @@ export default class HomeView extends Mixins(NavigationMixin){
         strong {
             color: $color-primary-original;
         }
-    }
-
-    .gray-shadow {
-        background: $color-background-shade;
-        margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-        padding: 0 var(--st-horizontal-padding, 15px);
-        padding-top: var(--st-vertical-padding, 20px);
-        padding-top: calc(var(--st-vertical-padding, 20px) + 20px);
-        position: relative;
-
-        &:before {
-            content: "";
-            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
-            height: 60px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-        }
-    }
-
-    .white-top {
-        background: $color-background;
-        margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-        padding: 0 var(--st-horizontal-padding, 15px);
-        padding-bottom: var(--st-vertical-padding, 20px);
-
-
     }
 }
 

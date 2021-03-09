@@ -38,6 +38,7 @@ export { default as STList } from "./src/layout/STList.vue"
 export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
+export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 
@@ -73,6 +74,7 @@ export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 
 // Shared views should be last
+export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"
 export { default as ConfirmEmailView } from "./src/views/ConfirmEmailView.vue"
 export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"
 export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vue"

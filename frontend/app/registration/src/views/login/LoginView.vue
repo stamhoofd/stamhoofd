@@ -7,7 +7,7 @@
             <h1>Inloggen</h1>
                     
             <STInputBox title="E-mailadres" class="max">
-                <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email" autofocus>
+                <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
             </STInputBox>
 
             <STInputBox title="Wachtwoord" class="max">
@@ -33,13 +33,11 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import SignupView from './SignupView.vue';
-import OrganizationLogo from '../menu/OrganizationLogo.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;

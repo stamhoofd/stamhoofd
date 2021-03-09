@@ -1,6 +1,6 @@
 <template>
     <form class="st-view accept-invite-view" @submit.prevent="submit">
-        <STNavigationBar title="Ongelidge uitnodiging">
+        <STNavigationBar title="Ongeldige uitnodiging">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
         <main>

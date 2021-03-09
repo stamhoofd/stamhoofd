@@ -8,16 +8,14 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import { WebshopManager } from './classes/WebshopManager';
-import CheckoutSteps from './views/CheckoutSteps.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
-import OrderView from './views/orders/OrderView.vue';
 import WebshopView from './views/WebshopView.vue';
 
 @Component({
@@ -54,7 +52,7 @@ export default class App extends Vue {
                 }
 
                 return new ComponentWithProperties(ModalStackComponent, {
-                    root: new ComponentWithProperties(CheckoutSteps, { 
+                    root: new ComponentWithProperties(NavigationController, { 
                         root: new ComponentWithProperties(WebshopView, {}) 
                     })
                 })

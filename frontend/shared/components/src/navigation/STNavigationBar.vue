@@ -117,8 +117,9 @@ export default class STNavigationBar extends Vue {
     height: 60px;
 
     &.large {
-        height: 90px;
-        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+        height: 80px;
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px) + 10px);
+        margin-bottom: 20px;
     }
     -webkit-app-region: drag;
 
@@ -132,6 +133,7 @@ export default class STNavigationBar extends Vue {
     align-items: center;
     gap: 10px;
     background: white;
+    background: var(--color-current-background, white);
     z-index: 11;
 
     > div {

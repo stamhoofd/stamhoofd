@@ -229,6 +229,11 @@
         height: 34px;
         line-height: 34px;
         white-space: nowrap;
+        transition: 0.2s opacity, 0.2s color;
+
+        &.small {
+            font-size: 12px;
+        }
 
         > * {
             vertical-align: top;
@@ -236,6 +241,7 @@
 
         &:active {
             opacity: 0.4;
+            transition: 0.2s color;
         }
 
         @media (max-width: 440px) {

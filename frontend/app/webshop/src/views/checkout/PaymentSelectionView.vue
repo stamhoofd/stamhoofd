@@ -1,6 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1>Kies je betaalmethode</h1>
 
@@ -24,8 +28,8 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -45,7 +49,8 @@ import { CheckoutStepType } from './CheckoutStepsManager';
         Radio,
         LoadingButton,
         STErrorsDefault,
-        PaymentSelectionList
+        PaymentSelectionList,
+        BackButton
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -150,7 +155,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
                     
-                    this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
+                    this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView, {})}).setDisplayStyle("popup"))
                     this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                 }
             }

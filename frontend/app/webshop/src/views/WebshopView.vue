@@ -1,43 +1,65 @@
 <template>
-    <section class="padded-view">
-        <div class="webshop-view">
+    <section class="st-view webshop-view">
+        <STNavigationBar :large="true">
+            <template slot="left">
+                <OrganizationLogo :organization="organization" />
+            </template>
+
+            <template slot="right">
+                <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
+                    <span class="icon privacy" />
+                    <span>Privacy</span>
+                </a>
+                <button class="primary button" @click="openCart">
+                    <span class="icon basket" />
+                    <span>{{ cartCount }}</span>
+                </button>
+            </template>
+        </STNavigationBar>
+
+        <main class="limit-width">
             <figure v-if="bannerImageSrc" class="webshop-banner">
                 <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
             </figure>
 
-            <main>
-                <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
-                <p v-text="webshop.meta.description" />
+            <section class="white-top view">
+                <main>
+                    <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
+                    <p v-text="webshop.meta.description" />
+                </main>
+            </section>
+            <section class="gray-shadow view">
+                <main>
+                    <p v-if="webshop.categories.length == 0 && webshop.products.length == 0" class="warning-box">
+                        Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
+                    </p>
 
-                <p v-if="webshop.categories.length == 0 && webshop.products.length == 0" class="warning-box">
-                    Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
-                </p>
+                    <p v-if="closed" class="error-box">
+                        Bestellingen zijn gesloten
+                    </p>
+                    <p v-else-if="almostClosed" class="warning-box">
+                        Bestellen kan tot {{ webshop.meta.availableUntil | time }}
+                    </p>
 
-                <p v-if="closed" class="error-box">
-                    Bestellingen zijn gesloten
-                </p>
-                <p v-else-if="almostClosed" class="warning-box">
-                    Bestellen kan tot {{ webshop.meta.availableUntil | time }}
-                </p>
+                    <template v-if="!closed">
+                        <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
+                        <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
+                    </template>
 
-                <template v-if="!closed">
-                    <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
-                    <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
-                </template>
-
-                <p class="stamhoofd-footer">
-                    <a href="https://www.stamhoofd.be" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
-                </p>
-            </main>
-        </div>
+                    <p class="stamhoofd-footer">
+                        <a href="https://www.stamhoofd.be" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
+                    </p>
+                </main>
+            </section>
+        </main>
     </section>
 </template>
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,LoadingView, PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -60,7 +82,8 @@ import ProductGrid from "./products/ProductGrid.vue"
         LoadingView,
         Checkbox,
         CategoryBox,
-        ProductGrid
+        ProductGrid,
+        OrganizationLogo
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -68,8 +91,35 @@ import ProductGrid from "./products/ProductGrid.vue"
     }
 })
 export default class WebshopView extends Mixins(NavigationMixin){
+    CheckoutManager = CheckoutManager
+    CheckoutStepsManager = CheckoutStepsManager
+    WebshopManager = WebshopManager
+    visible = true
+
+    get organization() {
+        return WebshopManager.organization
+    }
+    
     get webshop() {
         return WebshopManager.webshop
+    }
+
+    get privacyUrl() {
+        if (WebshopManager.organization.meta.privacyPolicyUrl) {
+            return WebshopManager.organization.meta.privacyPolicyUrl
+        }
+        if (WebshopManager.organization.meta.privacyPolicyFile) {
+            return WebshopManager.organization.meta.privacyPolicyFile.getPublicPath()
+        }
+        return null
+    }
+
+    get cartCount() {
+        return CheckoutManager.cart.count
+    }
+
+    openCart() {
+        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView, {}) }).setDisplayStyle("popup"))
     }
 
     get bannerImage() {
@@ -117,7 +167,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
 
             const comp = await nextStep.getComponent();
-            this.show(new ComponentWithProperties(comp, {}))
+            if (this.visible) {
+                this.show(new ComponentWithProperties(comp, {}).setAnimated(true))
+            } else {
+                return comp
+            }
         })
 
         ComponentWithProperties.debug = true
@@ -144,7 +198,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         } else if (path.length == 1 && path[0] == 'cart') {
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
-            this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
+            this.openCart()
         } else {
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
         }
@@ -174,7 +228,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
         Promise.all(components).then(comp => {
             if (comp.length == 0) {
-                this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"));
+                this.openCart()
                 return;
             }
             const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
@@ -189,6 +243,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         // For an unknown reason, activated is also called when the view is displayed for the first time
         // so we need to only start setting the url when we were deactivated first
         this.canSetUrl = true
+        this.visible = false
 
     }
 
@@ -197,6 +252,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     activated() {
+        this.visible = true
         console.log("activated "+this.canSetUrl)
         if (this.canSetUrl) {
             console.log("set url!!!")
@@ -216,34 +272,33 @@ export default class WebshopView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .webshop-view {
-    display: flex;
+    /*display: flex;
     flex-direction: column;
     min-height: 100vh;
     box-sizing: border-box;
-    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: calc(var(--vh, 1vh) * 100);*/
 
     .webshop-banner {
-        height: 300px;
+        height: 0px;
+        width: 100%;
+        margin: 0 auto;
+        padding-bottom: 300 / 720 * 100%;
         background: $color-gray;
         border-radius: $border-radius;
         margin-bottom: 40px;
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+        position: relative;
 
         img {
+            position: absolute;
             border-radius: $border-radius;
             height: 100%;
             width: 100%;
             object-fit: cover;
-        }
-
-        @media (max-width: 800px) {
-            border-radius: 0;
-            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-            margin-bottom: 30px;
-            height: calc(100vw / 720 * 300);
-
-            img {
-                border-radius: 0;
-            }
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
     }
 
@@ -276,12 +331,12 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
     }
 
-    padding: 0 var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+    //padding: 0 var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
     
-    @media (min-width: 801px) {
+    /*@media (min-width: 801px) {
         max-width: 800px;
         margin: 0 auto;
         min-height: auto;
-    }
+    }*/
 }
 </style>

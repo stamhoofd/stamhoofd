@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast,Validator, PasswordStrength } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";

@@ -97,8 +97,13 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
          try {
-            await GlobalEventBus.sendEvent("checkout", "cart")
-            this.dismiss({ force: true })
+            const values = await GlobalEventBus.sendEvent("checkout", "cart")
+            if (values.length == 1 && values[0] !== undefined) {
+                console.log("push instead of dismiss")
+                this.show(new ComponentWithProperties(values[0], {}).setAnimated(true))
+            } else {
+                this.dismiss({ force: true })
+            }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

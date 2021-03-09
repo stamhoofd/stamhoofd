@@ -1,10 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
-            <STNavigationBar v-if="isPopup" title="Overschrijven">
-                <button slot="right" class="button icon gray close" @click="pop" />
-            </STNavigationBar>
+    <div class="st-view boxed">
+        <STNavigationBar :large="true" title="Overschrijven">
+            <button v-if="isPopup" slot="right" class="button icon gray close" @click="pop" />
+        </STNavigationBar>
 
+        <div class="box">
             <main>
                 <h1 v-if="created && type == 'order'">
                     Bestelling geplaatst!
@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton,Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Organization,Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
@@ -111,7 +111,8 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
         STList,
         STListItem,
         LoadingView,
-        Checkbox
+        Checkbox,
+        BackButton
     },
     filters: {
         price: Formatter.price

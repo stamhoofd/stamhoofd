@@ -30,6 +30,13 @@
                 </div>
             </div>
 
+            <Checkbox v-model="expandLogo">
+                Logo groter weergeven
+            </Checkbox>
+            <p class="st-list-description">
+                Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten (want dan wordt het lomp). Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
+            </p>
+
             <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />
             <p class="st-list-description">
                 Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
@@ -161,13 +168,23 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     get squareLogoResolutions() {
         return [
             ResolutionRequest.create({
-                height: 44,
-                width: 44,
+                height: 50,
+                width: 50,
                 fit: ResolutionFit.Inside
             }),
             ResolutionRequest.create({
-                height: 44*3,
-                width: 44*3,
+                height: 70,
+                width: 70,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 50*3,
+                width: 50*3,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 70*3,
+                width: 70*3,
                 fit: ResolutionFit.Inside
             })
         ]
@@ -176,15 +193,25 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     get horizontalLogoResolutions() {
         return [
             ResolutionRequest.create({
-                height: 44,
+                height: 50,
                 width: 300,
                 fit: ResolutionFit.Inside
             }),
             ResolutionRequest.create({
-                height: 44*3,
+                height: 70,
+                width: 300,
+                fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 50*3,
                 width: 300*3,
                 fit: ResolutionFit.Inside
-            })
+            }),
+            ResolutionRequest.create({
+                height: 70*3,
+                width: 300*3,
+                fit: ResolutionFit.Inside
+            }),
         ]
     }
 
@@ -211,6 +238,19 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
 
         this.$set(this.organizationPatch.meta!, "squareLogo", image)
     }
+
+    get expandLogo() {
+        return this.organization.meta.expandLogo
+    }
+
+    set expandLogo(enable: boolean) {
+        if (!this.organizationPatch.meta) {
+            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
+        }
+
+        this.$set(this.organizationPatch.meta!, "expandLogo", enable)
+    }
+
 
     get horizontalLogo() {
         return this.organization.meta.horizontalLogo

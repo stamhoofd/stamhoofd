@@ -130,7 +130,8 @@ export default class CheckoutSteps extends Mixins(NavigationMixin){
     }
 
     openCart() {
-        this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
+        // depreacated= need navigation controller here
+        //this.present(new ComponentWithProperties(CartView, {}).setDisplayStyle("popup"))
     }
 
     beforeDestroy() {

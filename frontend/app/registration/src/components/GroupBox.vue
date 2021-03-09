@@ -49,7 +49,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
     
     get imageSrc() {
         return undefined
-        return this.product.images[0]?.getPathForSize(100, 100)
+        //return this.product.images[0]?.getPathForSize(100, 100)
     }
 
     get price() {

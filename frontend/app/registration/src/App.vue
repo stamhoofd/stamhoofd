@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
@@ -17,13 +17,19 @@ import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import RegistrationSteps from './views/login/RegistrationSteps.vue';
+import TabBarController, { TabBarItem } from './views/overview/TabBarController.vue';
 
 async function getDefaultView() {
-    if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
-        return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
-    }
-    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/RegistrationOverviewView.vue")).default;
+    //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
+    //    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
+    //}
+    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default;
 }
+
+async function getAccountView() {
+    return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/overview/AccountSettingsView.vue")).default;
+}
+
 
 @Component({
     components: {
@@ -74,7 +80,7 @@ export default class App extends Vue {
                             // tood: password reset view
                             const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
                             return new ComponentWithProperties(ModalStackComponent, {
-                                root: new ComponentWithProperties(RegistrationSteps, { 
+                                root: new ComponentWithProperties(NavigationController, { 
                                     root: new ComponentWithProperties(PaymentPendingView, {
                                         server: SessionManager.currentSession!.authenticatedServer,
                                         paymentId: new URL(window.location.href).searchParams.get("id"),
@@ -101,8 +107,30 @@ export default class App extends Vue {
                         }
 
                         return new ComponentWithProperties(ModalStackComponent, {
-                            root: new ComponentWithProperties(RegistrationSteps, { 
-                                root: new ComponentWithProperties(await getDefaultView(), {}),
+                            root: new ComponentWithProperties(TabBarController, { 
+                                items: [
+                                    new TabBarItem(
+                                        "Inschrijven",
+                                        "edit",
+                                        new ComponentWithProperties(NavigationController, { 
+                                            root: new ComponentWithProperties(await getDefaultView(), {}),
+                                        })
+                                    ),
+                                    new TabBarItem(
+                                        "Account",
+                                        "user",
+                                        new ComponentWithProperties(NavigationController, { 
+                                            root: new ComponentWithProperties(await getAccountView(), {}),
+                                        })
+                                    ),
+                                    new TabBarItem(
+                                        "Mandje",
+                                        "basket",
+                                        new ComponentWithProperties(NavigationController, { 
+                                            root: new ComponentWithProperties(await getDefaultView(), {}),
+                                        })
+                                    )
+                                ]
                             })
                         })
                     }

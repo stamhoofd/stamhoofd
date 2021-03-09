@@ -1,9 +1,9 @@
 <template>
     <div class="category-box container">
-        <hr>
-        <h2>{{ category.name }}</h2>
+        <h1>{{ category.name }}</h1>
 
         <ProductGrid :products="products" />
+        <hr>
     </div>
 </template>
 
@@ -14,6 +14,7 @@ import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } 
 import { Category, Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import ProductGrid from "./ProductGrid.vue"
 
 @Component({

@@ -1,6 +1,6 @@
 <template>
     <div class="steps-layout">
-        <StepsHeader :progress="totalSteps && step ? ((step - 1) / totalSteps) : 0">
+        <STNavigationBar :large="true" :fixed="true" :progress="totalSteps && step ? ((step - 1) / totalSteps) : 0">
             <template #left>
                 <slot name="left" :step="step" :canPop="canPop">
                     <transition name="move" mode="out-in">
@@ -19,7 +19,7 @@
             <template #right>
                 <slot name="right" :step="step" :canPop="canPop" />
             </template>
-        </StepsHeader>
+        </STNavigationBar>
 
         <main>
             <NavigationController
@@ -35,6 +35,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { Component, Prop,Ref,Vue } from "vue-property-decorator";
+import { STNavigationBar } from "@stamhoofd/components"
 
 import StepsHeader from "./StepsHeader.vue";
 
@@ -42,6 +43,7 @@ import StepsHeader from "./StepsHeader.vue";
     components: {
         StepsHeader,
         NavigationController,
+        STNavigationBar
     },
 })
 export default class Steps extends Vue {
@@ -87,7 +89,6 @@ export default class Steps extends Vue {
 $header-height: 70px;
 
 .steps-layout {
-    background: $color-white-shade;
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
 
@@ -95,119 +96,10 @@ $header-height: 70px;
         background: $color-white;
     }
 
-    > header {
-        > div {
-            position: fixed;
-            left: 0;
-            top: 0;
-            right: 0;
-            height: $header-height - 30px;
-            display: flex;
-            flex-direction: row;
-            padding: 15px 15px;
-            z-index: 10;
-
-            background: $color-white-shade;
-
-            @media (max-width: 800px) {
-                background: $color-white;
-            }
-
-            &::before {
-                content: "";
-                left: 0;
-                right: 0;
-                top: $header-height;
-                height: 50px;
-                background: linear-gradient($color-white-shade, rgba($color-white-shade, 0));
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.4s;
-                position: absolute;
-
-                @media (max-width: 800px) {
-                    background: linear-gradient($color-white, rgba($color-white, 0));
-                }
-            }
-
-            > .progress {
-                position: absolute;
-                left: 0;
-                top: 0;
-                height: $border-width;
-                pointer-events: none;
-                background: $color-primary;
-                border-top-right-radius: $border-width/2;
-                border-bottom-right-radius: $border-width/2;
-                width: 0;
-                opacity: 1;
-                transition: width 0.3s, opacity 0.3s;
-
-                &.hide {
-                    transition: width 0.3s, opacity 0.2s 0.3s;
-                    opacity: 0;
-                }
-            }
-
-            > .left {
-                flex-grow: 1;
-                flex-basis: 0;
-                flex-shrink: 10;
-                text-align: left;
-
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-            }
-
-            > .right {
-                flex-grow: 1;
-                flex-basis: 0;
-                flex-shrink: 10;
-
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-
-                .button {
-                    margin: 0 10px;
-
-                    @media (max-width: 450px) {
-                        margin: 0 10px;
-                    }
-
-                    &:first-child {
-                        margin-left: 0;
-                    }
-
-                    &:last-child {
-                        margin-right: 0;
-                    }
-                }
-            }
-
-            > .center {
-                padding: 10px;
-                flex-basis: 0;
-                flex-shrink: 0;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
-
-        &[data-scrolled="true"] {
-            & > div {
-                &::before {
-                    opacity: 1;
-                }
-            }
-        }
-    }
+    
 
     > main {
+        --st-safe-area-top: 90px;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
         box-sizing: border-box;
@@ -217,10 +109,12 @@ $header-height: 70px;
         }
         
     }
+
+    
 }
 
 .steps-layout {
-    .padded-view, .boxed-view {
+    /*.padded-view, .boxed-view {
         padding-top: $header-height;
         min-height: 100vh;
         min-height: calc(var(--vh, 1vh) * 100);
@@ -230,16 +124,21 @@ $header-height: 70px;
             padding-top: $header-height + 10px;
             padding-bottom: $header-height;
         }
-    }
+    }*/
 
     .boxed-view {
-        @media (min-width: 801px) {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: calc(var(--vh, 1vh) * 100);
+        box-sizing: border-box;
+        padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+        padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+        background: $color-background-shade;
 
         > .st-view {
+            // We fixed the safe area, no need to recorrect it again
+            --st-safe-area-top: 0px;
             width: 100%;
 
             &:not(:only-child) {

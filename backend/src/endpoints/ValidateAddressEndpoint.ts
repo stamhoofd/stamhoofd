@@ -35,7 +35,7 @@ export class ValidateAddressEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "Invalid postal code format (NL)",
-                    human: "Ongelidg postcode formaat, voer in zoals '8011 PK'",
+                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
                     field: "postalCode"
                 })
             }
@@ -45,7 +45,7 @@ export class ValidateAddressEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "Invalid postal code format (NL)",
-                    human: "Ongelidg postcode formaat, voer in zoals '8011 PK'",
+                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
                     field: "postalCode"
                 })
             }
