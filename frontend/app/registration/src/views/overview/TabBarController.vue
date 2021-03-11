@@ -30,7 +30,7 @@
 import { ComponentWithProperties, FramedComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { STNavigationBar, OrganizationLogo } from "@stamhoofd/components"
+import { STNavigationBar, OrganizationLogo, CenteredMessage, CenteredMessageView } from "@stamhoofd/components"
 import { OrganizationManager } from "../../classes/OrganizationManager";
 
 export class TabBarItem {
@@ -128,6 +128,16 @@ export default class TabBarController extends Mixins(NavigationMixin){
             }
             return this.getScrollElement(element.parentElement);
         }
+    }
+
+    mounted() {
+        CenteredMessage.addListener(this, (centeredMessage) => {
+            this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+        })
+    }
+
+    beforeDestroy() {
+        CenteredMessage.removeListener(this)
     }
 
     destroyed() {

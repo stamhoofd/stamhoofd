@@ -59,7 +59,7 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, CenteredMessageView, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -140,6 +140,14 @@ export default class HomeView extends Mixins(NavigationMixin){
         if (clearPath) {
             HistoryManager.setUrl("/")   
         }
+
+        CenteredMessage.addListener(this, (centeredMessage) => {
+            this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+        })
+    }
+
+    beforeDestroy() {
+        CenteredMessage.removeListener(this)
     }
 
     get organization() {

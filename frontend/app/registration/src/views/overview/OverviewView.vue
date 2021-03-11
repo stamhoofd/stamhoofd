@@ -96,9 +96,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import MemberView from "./MemberView.vue";
-import PaymentsView from "./PaymentsView.vue";
 import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
@@ -142,10 +140,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
             SessionManager.currentSession.logout()
             return;
         }
-    }
-
-    openPayments() {
-        this.show(new ComponentWithProperties(PaymentsView, {}))
     }
 
     /**

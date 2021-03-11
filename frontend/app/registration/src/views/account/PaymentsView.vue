@@ -1,51 +1,37 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar :large="true">
-            <template slot="left">
-                <OrganizationLogo :organization="organization" />
-            </template>
+    <section>
+        <main>
+            <h1>Afrekeningen</h1>
+            <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
-            <template slot="right">
-                <button class="button text limit-space" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
-            </template>
-        </STNavigationBar>
-        <main class="limit-width">
-            <section class="white-top view">
-                <main>
-                    <h1>Afrekeningen</h1>
-                    <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
+            <p v-if="payments.length === 0" class="info-box">Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account</p>
 
-                    <STList>
-                        <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
-                            <span slot="left" class="icon card" />
+            <STList v-else>
+                <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
+                    <span slot="left" class="icon card" />
 
-                            <h2 class="style-title-list">
-                                {{ getPaymentPeriod(payment) }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ payment.getMemberNames() }}
-                            </p>
-                            <p v-if="payment.status == 'Succeeded'" class="style-description-small">
-                                {{ paymentMethodName(payment.method) }}
-                            </p>
-                            <p v-else class="style-description-small">
-                                Betaal via overschrijving
-                            </p>
+                    <h2 class="style-title-list">
+                        {{ getPaymentPeriod(payment) }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ payment.getMemberNames() }}
+                    </p>
+                    <p v-if="payment.status == 'Succeeded'" class="style-description-small">
+                        {{ paymentMethodName(payment.method) }}
+                    </p>
+                    <p v-else class="style-description-small">
+                        Betaal via overschrijving
+                    </p>
 
-                            <template slot="right">
-                                {{ payment.price | price }}
-                                <span v-if="payment.status == 'Succeeded'" class="icon green success" />
-                                <span v-else class="icon arrow-right" />
-                            </template>
-                        </STListItem>
-                    </STList>
-                </main>
-            </section>
+                    <template slot="right">
+                        {{ payment.price | price }}
+                        <span v-if="payment.status == 'Succeeded'" class="icon green success" />
+                        <span v-else class="icon arrow-right" />
+                    </template>
+                </STListItem>
+            </STList>
         </main>
-    </div>
+    </section>
 </template>
 
 <script lang="ts">
@@ -60,7 +46,7 @@ import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import RegistrationOverviewView from './RegistrationOverviewView.vue';
+import RegistrationOverviewView from '../overview/RegistrationOverviewView.vue';
 
 @Component({
     components: {

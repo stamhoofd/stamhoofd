@@ -16,7 +16,6 @@ import { Component, Vue } from "vue-property-decorator";
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
-import RegistrationSteps from './views/login/RegistrationSteps.vue';
 import TabBarController, { TabBarItem } from './views/overview/TabBarController.vue';
 
 async function getDefaultView() {
@@ -27,7 +26,7 @@ async function getDefaultView() {
 }
 
 async function getAccountView() {
-    return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/overview/AccountSettingsView.vue")).default;
+    return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/account/AccountSettingsView.vue")).default;
 }
 
 

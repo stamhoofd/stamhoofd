@@ -122,12 +122,6 @@ export default class RegistrationSteps extends Mixins(NavigationMixin){
         (this.$refs.steps as any).navigationController.pop();
     }
 
-    mounted() {
-        CenteredMessage.addListener(this, (centeredMessage) => {
-            this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
-        })
-    }
-
     beforeDestroy() {
         CenteredMessage.removeListener(this)
     }

@@ -11,10 +11,11 @@
                     <h1>
                         Mijn account
                     </h1>
+                    <p>Met een account kan je één of meerdere leden beheren.</p>
                 
                     <STErrorsDefault :error-box="errorBox" />
 
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox" v-if="isAdmin">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -27,9 +28,28 @@
 
                     <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-                    <button class="button text" @click="openChangePassword">
-                        Wachtwoord wijzigen
-                    </button>
+                    <hr>
+
+                    <p>
+                        <button class="button text" @click.prevent="openChangePassword" type="button">
+                            <span class="icon key"/>
+                            <span>Wachtwoord wijzigen</span>
+                        </button>
+                    </p>
+
+                    <p>
+                        <button class="button text" @click.prevent="logout" type="button">
+                            <span class="icon privacy"/>
+                            <span>Privacyvoorwaarden</span>
+                        </button>
+                    </p>
+
+                    <p>
+                        <button class="button text" @click.prevent="logout" type="button">
+                            <span class="icon logout"/>
+                            <span>Uitloggen</span>
+                        </button>
+                    </p>
                 </main>
                 <STToolbar>
                     <template slot="right">
@@ -41,6 +61,7 @@
                     </template>
                 </STToolbar>
             </section>
+            <PaymentsView class="gray-shadow view" />
         </main>
 
         
@@ -51,12 +72,12 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator, ChangePasswordView } from "@stamhoofd/components";
+import { BackButton, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator, ChangePasswordView, CenteredMessage } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 import { OrganizationManager } from '../../classes/OrganizationManager';
-
+import PaymentsView from "./PaymentsView.vue"
 
 @Component({
     components: {
@@ -69,7 +90,8 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         RadioGroup,
         BackButton,
         LoadingButton,
-        EmailInput
+        EmailInput,
+        PaymentsView
     },
 })
 export default class AccountSettingsView extends Mixins(NavigationMixin) {
@@ -91,6 +113,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     get email() {
         return this.patchedUser.email
+    }
+
+    get isAdmin() {
+        return this.user.permissions !== null
     }
 
     set email(email: string) {
@@ -157,11 +183,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    shouldNavigateAway() {
+    async shouldNavigateAway() {
         if (!patchContainsChanges(this.userPatch, this.user, { version: Version })) {
             return true;
         }
-        if (confirm("Ben je zeker dat je de instellingen wilt sluiten zonder op te slaan?")) {
+        if (await CenteredMessage.confirm("Ben je zeker dat je de instellingen wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {
             return true;
         }
         return false;
@@ -170,6 +196,13 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     openChangePassword() {
         this.present(new ComponentWithProperties(ChangePasswordView, {}).setDisplayStyle("sheet"))
     }
+
+    async logout() {
+        if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
+            SessionManager.currentSession?.logout()
+        }
+    }
+    
 
 }
 </script>
