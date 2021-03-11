@@ -38,10 +38,10 @@
                     </p>
 
                     <p>
-                        <button class="button text" @click.prevent="logout" type="button">
+                        <a v-if="privacyUrl" class="button text" type="button" :href="privacyUrl" target="_blank">
                             <span class="icon privacy"/>
                             <span>Privacyvoorwaarden</span>
-                        </button>
+                        </a>
                     </p>
 
                     <p>
@@ -137,6 +137,16 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     set lastName(lastName: string | null) {
         this.$set(this.userPatch, "lastName", lastName)
+    }
+
+    get privacyUrl() {
+        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
+            return OrganizationManager.organization.meta.privacyPolicyUrl
+        }
+        if (OrganizationManager.organization.meta.privacyPolicyFile) {
+            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
+        }
+        return null
     }
 
     async save() {
