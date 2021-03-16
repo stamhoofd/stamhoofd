@@ -64,8 +64,8 @@ import { AddressInput, BackButton, BirthDayInput, Checkbox, ErrorBox, LoadingBut
 import { AskRequirement,EmergencyContact } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../dashboard/src/classes/OrganizationManager';
 import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {

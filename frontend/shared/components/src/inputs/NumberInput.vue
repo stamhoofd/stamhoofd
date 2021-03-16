@@ -1,0 +1,234 @@
+<template>
+    <div class="number-container">
+        <label class="number-input" :class="{ error: !valid }">
+            <!-- 
+                We use type = text here because the specs of number inputs ensure that we can't get 
+                the raw string value, but we need this for our placeholder logic.
+                Also inputmode is more specific on mobile devices. 
+                Only downside is that we lose the stepper input on desktop.
+            -->
+            <input
+                ref="input"
+                v-model="valueString"
+                type="text"
+                inputmode="decimal"
+                step="any"
+                @blur="clean"
+                @keydown.up.prevent="step(1)"
+                @keydown.down.prevent="step(-1)"
+            >
+            <div v-if="!valid">
+                <span>{{ valueString }}</span>
+            </div>
+            <div v-else-if="valueString != ''">
+                <span>{{ valueString }}</span> {{ internalValue == 1 && suffixSingular !== null ? suffixSingular : suffix }}
+            </div>
+            <div v-else>{{ placeholder }}</div>
+        </label>
+        <StepperInput v-if="stepper" v-model="stepperValue" :min="min" :max="max" />
+    </div>
+</template>
+
+<script lang="ts">
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import StepperInput from "./StepperInput.vue"
+
+@Component({
+    components: {
+        StepperInput
+    }
+})
+export default class NumberInput extends Vue {
+    /** Price in cents */
+    @Prop({ default: 0 })
+    min!: number | null
+
+    /** Price in cents */
+    @Prop({ default: null })
+    max!: number | null;
+
+    @Prop({ default: false })
+    stepper!: boolean;
+
+    valueString = "";
+    valid = true;
+
+    /** Price in cents */
+    @Prop({ default: 0 })
+    value!: number
+
+    @Prop({ default: "" })
+    suffix: string;
+
+    @Prop({ default: null })
+    suffixSingular: string | null;
+
+    @Prop({ default: "" })
+    placeholder!: string
+
+    @Prop({ default: false })
+    floatingPoint!: boolean // In cents if floating point, never returns floats!
+
+    get internalValue() {
+        return this.value
+    }
+
+    set internalValue(val: number) {
+        this.$emit("input", val)
+    }
+
+    get stepperValue() {
+        return this.value
+    }
+
+    set stepperValue(val: number) {
+        this.$emit("input", val)
+        this.$nextTick(() => {
+            this.clean(val);
+        })
+    }
+
+    mounted() {
+        this.clean(this.internalValue)
+    }
+
+    @Watch("valueString")
+    onValueChanged(value: string, _oldValue: string) {
+        // We need the value string here! Vue does some converting to numbers automatically
+        // but for our placeholder system we need exactly the same string
+        if (value == "") {
+            this.valid = true;
+            this.internalValue = Math.max(0, this.min ?? 0);
+        } else {
+            if (!value.includes(".")) {
+                // We do this for all locales since some browsers report the language locale instead of the formatting locale
+                value = value.replace(",", ".");
+            }
+            const v = parseFloat(value);
+            if (isNaN(v)) {
+                this.valid = false;
+                this.internalValue = this.min ?? 0;
+            } else {
+                this.valid = true;
+
+                // Remove extra decimals
+                this.internalValue = this.constrain(Math.round(v * (this.floatingPoint ? 100 : 1)));
+            }
+        }
+    }
+
+    /// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
+    whatDecimalSeparator(): string {
+        const n = 1.1;
+        const str = n.toLocaleString().substring(1, 2);
+        return str;
+    }
+
+    // Restore invalid input, make the input value again
+    // And set valueString
+    clean(value: number) {
+        if (!this.valid) {
+            return;
+        }
+        // Check if has decimals
+        const float = this.value / (this.floatingPoint ? 100 : 1)
+        const decimals = float % 1;
+        const abs = Math.abs(float);
+
+        if (decimals != 0) {
+            // Include decimals
+            this.valueString =
+                (float < 0 ? "-" : "") +
+                Math.floor(abs) +
+                this.whatDecimalSeparator() +
+                 (""+Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, "0");
+        } else {
+            // Hide decimals
+            this.valueString = float + "";
+        }
+    }
+
+    // Limit value to bounds
+    constrain(value: number): number {
+        if (this.min !== null && value < this.min) {
+             value = this.min;
+        } else if (this.max !== null && value > this.max) {
+            value = this.max;
+        }
+        return value
+    }
+
+    step(add: number) {
+        if (!this.valid) {
+            return;
+        }
+        const v = this.constrain(this.internalValue + add);
+        this.internalValue = v
+        this.$nextTick(() => {
+            this.clean(v);
+        })
+        
+    }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss">
+@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "~@stamhoofd/scss/components/inputs.scss";
+
+.number-container {
+    display: flex;
+
+    .number-input {
+        min-width: 0;
+    }
+
+    .stepper-input {
+        margin-left: 5px;
+        min-width: 0;
+        flex-shrink: 0;
+    }
+}
+.number-input {
+    @extend .input;
+    position: relative;
+
+    & > div {
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+
+        span {
+            white-space: pre;
+        }
+    }
+
+    & > input {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px 15px;
+        height: 44px - 2 * $border-width;
+        line-height: 44px - 10px - 2 * $border-width;
+
+        &:focus {
+            opacity: 1;
+
+            & + div {
+                opacity: 0.5;
+
+                span {
+                    visibility: hidden;
+                }
+            }
+        }
+    }
+}
+</style>

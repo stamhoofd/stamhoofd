@@ -36,15 +36,15 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../dashboard/src/classes/OrganizationManager";
 import { CheckoutManager } from "../classes/CheckoutManager";
 import { MemberManager } from "../classes/MemberManager";
+import { OrganizationManager } from "../classes/OrganizationManager";
 
 @Component({
     components: {

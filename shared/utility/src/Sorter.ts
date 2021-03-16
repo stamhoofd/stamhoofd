@@ -41,6 +41,9 @@ export class Sorter {
         return 1
     }
 
+    /**
+     * Sort from large to small - DESC
+     */
     static byNumberValue( a: number, b: number) {
         if (a === b) {
             return 0
@@ -51,6 +54,9 @@ export class Sorter {
         return 1
     }
 
+    /**
+     * Sort from new to old - DESC
+     */
     static byDateValue( a: Date, b: Date) {
         if (a === b) {
             return 0

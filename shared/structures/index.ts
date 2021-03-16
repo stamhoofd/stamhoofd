@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 66
+export const Version = 68
 
 // General
 export * from "./src/addresses/Address"
@@ -51,6 +51,7 @@ export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
 
 // Grouping
+export * from "./src/grouping/KeychainedMembers"
 export * from "./src/grouping/KeychainedResponse"
 export * from "./src/grouping/PaginatedResponse"
 
@@ -63,6 +64,7 @@ export * from "./src/Invite"
 export * from "./src/InviteUserDetails"
 export * from "./src/members/EmergencyContact"
 export * from "./src/members/EncryptedMember"
+export * from "./src/members/EncryptedMemberDetails"
 export * from "./src/members/EncryptedMemberWithRegistrations"
 export * from "./src/members/EncryptedPaymentDetailed"
 export * from "./src/members/Gender"

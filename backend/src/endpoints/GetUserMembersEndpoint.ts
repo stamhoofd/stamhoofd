@@ -39,17 +39,34 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
             }));
         }
 
-        // Load the needed keychains the user has access to
-        const keychainItems = await KeychainItem.where({
-            userId: user.id,
-            publicKey: {
-                sign: "IN",
-                value: members.map(m => m.publicKey)
+        // Query all the keys needed
+        const otherKeys: Set<string> = new Set();
+        for (const member of members) {
+            for (const details of member.encryptedDetails) {
+                // Only keys for organization, because else this might be too big
+                otherKeys.add(details.publicKey)
             }
-        })
+        }
+
+        // Load the needed keychains the user has access to
+        if (otherKeys.size > 0) {
+            const keychainItems = await KeychainItem.where({
+                userId: user.id,
+                publicKey: {
+                    sign: "IN",
+                    value: [...otherKeys.values()]
+                }
+            })
+            return new Response(new KeychainedResponse({
+                data: members.map(m => m.getStructureWithRegistrations()),
+                keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+            }));
+        }
+
         return new Response(new KeychainedResponse({
             data: members.map(m => m.getStructureWithRegistrations()),
-            keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+            keychainItems: []
         }));
+        
     }
 }

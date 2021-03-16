@@ -135,6 +135,16 @@ export class MemberWithRegistrations extends Member {
         return this.inactiveRegistrations.length === 0
     }
 
+    static fromMember(member: Member, registrations: Registration[], users: User[], groups: Group[]) {
+        const m = MemberWithRegistrations.create({
+            ...member,
+            registrations,
+            users
+        })
+        m.fillGroups(groups)
+        return m
+    }
+
     /**
      * Pass all the groups of an organization to the member so we can fill in all the groups and registrations that are active
      */

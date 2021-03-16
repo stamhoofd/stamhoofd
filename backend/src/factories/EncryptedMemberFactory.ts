@@ -1,11 +1,10 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMember, Gender, KeychainItem, MemberDetails, ParentType, Record, RecordType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberDetails, Gender, KeychainItem, MemberDetails, MemberDetailsMeta, ParentType, Record, RecordType, Version } from '@stamhoofd/structures';
 
-import { Member } from "../models/Member";
 import { Organization } from "../models/Organization";
-import { User, UserWithOrganization } from "../models/User";
+import { UserWithOrganization } from "../models/User";
 import { EmergencyContactFactory } from './EmergencyContactFactory';
 import { OrganizationFactory } from './OrganizationFactory';
 import { ParentFactory } from './ParentFactory';
@@ -129,20 +128,33 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
         const member = new EncryptedMember()
         member.firstName = memberDetails.firstName
-        member.publicKey = memberKeyPair.publicKey
-        member.organizationPublicKey = organization.publicKey
 
         // Encrypt the details
         const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))
-        member.encryptedForMember = await Sodium.sealMessage(data, member.publicKey)
-        member.encryptedForOrganization = await Sodium.sealMessage(data, organization.publicKey)
+        member.encryptedDetails.push(EncryptedMemberDetails.create({
+            publicKey: memberKeyPair.publicKey,
+            ciphertext: await Sodium.sealMessage(data, memberKeyPair.publicKey),
+            byOrganization: true,
+            forOrganization: false,
+            authorId: "factory",
+            meta: MemberDetailsMeta.createFor(memberDetails)
+        }))
+
+        member.encryptedDetails.push(EncryptedMemberDetails.create({
+            publicKey: organization.publicKey,
+            ciphertext: await Sodium.sealMessage(data, organization.publicKey),
+            byOrganization: true,
+            forOrganization: true,
+            authorId: "factory",
+            meta: MemberDetailsMeta.createFor(memberDetails)
+        }))
 
         let keychainItem: KeychainItem | undefined;
 
         if (this.options.user && this.options.userPrivateKey && this.options.user.publicKey) {
             // Add the private key to the keychain for this user (if possible)
             keychainItem = new KeychainItem()
-            keychainItem.publicKey = member.publicKey
+            keychainItem.publicKey = memberKeyPair.publicKey
             keychainItem.encryptedPrivateKey = await Sodium.sealMessageAuthenticated(
                 memberKeyPair.privateKey,
                 this.options.user.publicKey,

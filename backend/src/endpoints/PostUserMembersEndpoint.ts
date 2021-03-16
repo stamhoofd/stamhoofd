@@ -6,7 +6,6 @@ import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as K
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from '../models/Member';
 import { Token } from '../models/Token';
-import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = PatchMembers
@@ -42,17 +41,17 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         for (const struct of request.body.addMembers) {
             const member = new Member()
             member.id = struct.id
-            member.publicKey = struct.publicKey
+            //member.publicKey = struct.publicKey
             member.organizationId = user.organizationId
-            member.encryptedForMember = struct.encryptedForMember
-            member.encryptedForOrganization = struct.encryptedForOrganization
-            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
+            //member.encryptedForMember = struct.encryptedForMember
+            //member.encryptedForOrganization = struct.encryptedForOrganization
+            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
 
-            console.log(member)
             await member.save()
 
             addedMembers.push(member)
+            throw new Error("Wip: update data here")
         }
 
         if (addedMembers.length > 0) {
@@ -71,19 +70,21 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     human: "Je probeert een lid aan te passen die niet (meer) bestaat. Er ging ergens iets mis."
                 })
             }
-            member.encryptedForMember = struct.encryptedForMember
-            member.encryptedForOrganization = struct.encryptedForOrganization
+            //member.encryptedForMember = struct.encryptedForMember
+            //member.encryptedForOrganization = struct.encryptedForOrganization
             member.firstName = struct.firstName
-            member.publicKey = struct.publicKey
-            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
+            //member.publicKey = struct.publicKey
+            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             await member.save();
+
+            throw new Error("Wip: update data here")
         }
 
         const addedKeychainItems: KeychainItem[] = []
 
         // Create keychains (adjusting is not allowed atm)
         for (const keychainItem of request.body.keychainItems) {
-            if (!members.find(m => m.publicKey == keychainItem.publicKey)) {
+            if (!members.find(m => m.encryptedDetails.find(k => k.publicKey === keychainItem.publicKey))) {
                 throw new SimpleError({
                     code: "invalid_public_key",
                     message: "Could not find the member for which you are trying to create a keychain item",
@@ -107,18 +108,33 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }));
         }
 
-        // Load the needed keychains the user has access to
-        const keychainItems = await KeychainItem.where({
-            userId: user.id,
-            publicKey: {
-                sign: "IN",
-                value: members.map(m => m.publicKey)
+        // Query all the keys needed
+        const otherKeys: Set<string> = new Set();
+        for (const member of members) {
+            for (const details of member.encryptedDetails) {
+                // Only keys for organization, because else this might be too big
+                otherKeys.add(details.publicKey)
             }
-        })
+        }
+
+        // Load the needed keychains the user has access to
+        if (otherKeys.size > 0) {
+            const keychainItems = await KeychainItem.where({
+                userId: user.id,
+                publicKey: {
+                    sign: "IN",
+                    value: [...otherKeys.values()]
+                }
+            })
+            return new Response(new KeychainedResponse({
+                data: members.map(m => m.getStructureWithRegistrations()),
+                keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+            }));
+        }
 
         return new Response(new KeychainedResponse({
             data: members.map(m => m.getStructureWithRegistrations()),
-            keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+            keychainItems: []
         }));
     }
 }

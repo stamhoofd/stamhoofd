@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="member.name">
             <template slot="left">
-                <BackButton v-if="canPop" @click="pop"/>
+                <BackButton v-if="canPop" @click="pop" />
             </template>
         </STNavigationBar>
         
@@ -20,15 +20,16 @@
                 <span class="icon arrow-right" />
             </button>
         </STToolbar>
-</div>
+    </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
-import { MemberWithRegistrations, Parent } from '@stamhoofd/structures';
+import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../../dashboard/src/classes/OrganizationManager";
+
+import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue";
 
 @Component({

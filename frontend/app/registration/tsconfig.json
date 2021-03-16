@@ -2,7 +2,9 @@
     "extends": "../../tsconfig.json",
     "exclude": [
         "node_modules",
-        "dist"
+        "dist",
+        "../dashboard",
+        "../webshop",
     ],
     "compilerOptions": {
         "resolveJsonModule": true

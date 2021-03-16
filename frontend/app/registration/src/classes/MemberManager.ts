@@ -1,9 +1,10 @@
 
 
-import { ArrayDecoder, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, PatchMembers, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+import { Sorter } from '@stamhoofd/utility';
 import { Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from './OrganizationManager';
@@ -15,6 +16,73 @@ export class MemberManagerStatic {
     /// Currently saved members
     members: MemberWithRegistrations[] | null = null
 
+    async decryptMemberDetails(encrypted: EncryptedMemberDetails): Promise<MemberDetails> {
+        const keychainItem = Keychain.getItem(encrypted.publicKey)
+
+        if (!keychainItem) {
+            throw new Error("Keychain item missing for this member")
+        }
+        const session = SessionManager.currentSession!
+        const keyPair = await session.decryptKeychainItem(keychainItem)
+        const json = await Sodium.unsealMessage(encrypted.ciphertext, keyPair.publicKey, keyPair.privateKey)
+        const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
+        return data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
+    }
+
+    async decryptMember(member: EncryptedMember): Promise<Member> {
+        // Get the newest complete blob where we have a key for
+
+        let latest: EncryptedMemberDetails | null = null
+        for (const encryptedDetails of member.encryptedDetails) {
+            if (!encryptedDetails.meta.incomplete && (!latest || latest.meta.date < encryptedDetails.meta.date)) {
+                // Do we have a key?
+                const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
+                if (keychainItem) {
+                    latest = encryptedDetails
+                }
+            }
+        }
+
+        if (!latest) {
+            // We don't have complete data.
+            // Use the last one available
+            for (const encryptedDetails of member.encryptedDetails) {
+                if (!latest || latest.meta.date < encryptedDetails.meta.date) {
+                    // Do we have a key?
+                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
+                    if (keychainItem) {
+                        latest = encryptedDetails
+                    }
+                }
+            }
+        }
+
+        if (!latest) {
+            // todo: return placeholder
+            throw new Error("not yet implemented")
+        }
+
+        const details = await this.decryptMemberDetails(latest)
+
+        if (!latest.meta.incomplete) {
+            // Search for updates that are not complete after this date
+            for (const encryptedDetails of member.encryptedDetails) {
+                if (latest.meta.date < encryptedDetails.meta.date) {
+                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
+                    if (keychainItem) {
+                        const updates = await this.decryptMemberDetails(encryptedDetails)
+                        details.applyChange(updates)
+                    }
+                }
+            }
+        } else {
+            // The details are not complete, so mark them
+            details.setPlaceholder()
+        }
+
+        return Member.create({ ...member, details })
+    }
+
     async getRegistrationsWithMember(data: RegistrationWithEncryptedMember[]): Promise<RegistrationWithMember[]> {
 
         const registrations: RegistrationWithMember[] = []
@@ -22,36 +90,7 @@ export class MemberManagerStatic {
 
         for (const registration of data) {
             const member = registration.member
-            const keychainItem = Keychain.getItem(member.publicKey)
-
-            let decryptedDetails: MemberDetails | undefined
-            if (!keychainItem) {
-                console.warn("Missing keychain item for member " + member.id)
-            } else {
-                if (!member.encryptedForMember) {
-                    console.warn("encryptedForMember not set for member " + member.id)
-                } else {
-                    try {
-                        const session = SessionManager.currentSession!
-                        const keyPair = await session.decryptKeychainItem(keychainItem)
-                        const json = await Sodium.unsealMessage(member.encryptedForMember, keyPair.publicKey, keyPair.privateKey)
-                        const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
-                        decryptedDetails = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
-                    } catch (e) {
-                        console.error(e)
-                        console.error("Failed to read member data for " + member.id)
-                    }
-                }
-
-            }
-
-            const decryptedMember = Member.create({
-                id: member.id,
-                details: decryptedDetails,
-                publicKey: member.publicKey,
-                firstName: member.firstName,
-                organizationPublicKey: member.organizationPublicKey
-            })
+            const decryptedMember = await this.decryptMember(member)
 
             const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
                 member: decryptedMember,
@@ -72,42 +111,12 @@ export class MemberManagerStatic {
         const groups = OrganizationManager.organization.groups
 
         for (const member of data.data) {
-            const keychainItem = Keychain.getItem(member.publicKey)
-
-            let decryptedDetails: MemberDetails | null = null
-            if (!keychainItem) {
-                console.warn("Missing keychain item for member " + member.id)
-            } else {
-                if (!member.encryptedForMember) {
-                    console.warn("encryptedForMember not set for member " + member.id)
-                } else {
-                    try {
-                        const session = SessionManager.currentSession!
-                        const keyPair = await session.decryptKeychainItem(keychainItem)
-                        const json = await Sodium.unsealMessage(member.encryptedForMember, keyPair.publicKey, keyPair.privateKey)
-                        const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
-                        decryptedDetails = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
-                    } catch (e) {
-                        console.error(e)
-                        console.error("Failed to read member data for " + member.id)
-                    }
-                }
-
-            }
-
-            const decryptedMember = MemberWithRegistrations.create({
-                id: member.id,
-                details: decryptedDetails,
-                publicKey: member.publicKey,
-                organizationPublicKey: member.organizationPublicKey,
-                registrations: member.registrations,
-                firstName: member.firstName,
-                users: member.users
-            })
-            decryptedMember.fillGroups(groups)
-
-            console.log(decryptedMember)
-
+            const decryptedMember = MemberWithRegistrations.fromMember(
+                await this.decryptMember(member),
+                member.registrations,
+                member.users,
+                groups
+            )
             this.members!.push(decryptedMember)
         }
     }
@@ -122,7 +131,19 @@ export class MemberManagerStatic {
         await this.setMembers(response.data)
     }
 
-    async addMember(member: MemberDetails): Promise<MemberWithRegistrations | null> {
+    async encryptDetails(memberDetails: MemberDetails, publicKey: string, forOrganization: boolean): Promise<EncryptedMemberDetails> {
+        const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))
+        return EncryptedMemberDetails.create({
+            publicKey: publicKey,
+            ciphertext: await Sodium.sealMessage(data, publicKey),
+            byOrganization: false,
+            forOrganization,
+            authorId: SessionManager.currentSession!.user!.id,
+            meta: MemberDetailsMeta.createFor(memberDetails)
+        })
+    }
+
+    async addMember(memberDetails: MemberDetails): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
 
         // Create a keypair
@@ -130,87 +151,131 @@ export class MemberManagerStatic {
         const keychainItem = await session.createKeychainItem(keyPair)
 
         // Create member
-        const decryptedMember = MemberWithRegistrations.create({
-            details: member,
-            publicKey: keyPair.publicKey,
-            organizationPublicKey: "", // wait for encryption before setting this
-            registrations: [],
-            firstName: member.firstName,
-            users: []
+        const encryptedMember = EncryptedMember.create({
+            firstName: memberDetails.firstName
         })
 
-        const members = (this.members ?? []).filter(m => !!m.details)
-        const { encryptedMembers, keychainItems} = await this.getEncryptedMembers(members)
-        const addMembers = (await this.getEncryptedMembers([decryptedMember])).encryptedMembers
-        keychainItems.push(keychainItem)
+        // Add encryption blobs
+        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false))
+        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true))
+
+        // Prepare patch
+        const patch = KeychainedMembers.patch({})
+        patch.keychainItems.addPut(keychainItem)
+        patch.members.addPut(encryptedMember)
+
+        // Also update other members that might have been changed (e.g. when a shared address have been changed)
+        const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
+        patch.patch(await this.getEncryptedMembers(members))
 
         // Send the request
         const response = await session.authenticatedServer.request({
-            method: "POST",
+            method: "PATCH",
             path: "/user/members",
-            body: PatchMembers.create({
-                addMembers,
-                updateMembers: encryptedMembers,
-                keychainItems: keychainItems
-            }),
+            body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
 
         await MemberManager.setMembers(response.data)
-
-        return this.members?.find(m => m.id == decryptedMember.id) ?? null
+        return this.members?.find(m => m.id == encryptedMember.id) ?? null
     }
 
-    async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<{encryptedMembers: EncryptedMember[], keychainItems: KeychainItem[]}> {
-        const encryptedMembers: EncryptedMember[] = [];
-        const keychainItems: KeychainItem[] = []
+    /// Prepare a patch of updated members
+    async getEncryptedMembers(members: MemberWithRegistrations[]): Promise<AutoEncoderPatchType<KeychainedMembers>> {
+        const patch = KeychainedMembers.patch({})
         const session = SessionManager.currentSession!
 
         for (const member of members) {
-            if (!member.details) {
-                throw new Error("Can't save member with undefined details!")
+            // Gather all public keys that we are going to encrypt for
+            const keys = new Set<string>()
+
+            // Add access for the organization
+            keys.add(OrganizationManager.organization.publicKey)
+
+            // Check if we have at least one key where we have the private key for
+            let doWeHaveOne = false
+
+            // Search for a public key that we have
+            // Sort details from new to old
+            for (const encryptedDetails of member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))) {
+                if (encryptedDetails.forOrganization) {
+                    // Only use the last one for an organization
+                    continue
+                }
+
+                if (!doWeHaveOne) {
+                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
+                    if (keychainItem) {
+                        // We could use this one
+                        doWeHaveOne = true
+
+                        // Always include this one
+                        keys.add(encryptedDetails.publicKey)
+                    }
+                }
+
+                // Keep appending until maximum 5 keys
+                // 5 most recently used keys
+                if (keys.size > 5) {
+                    break
+                }
+                keys.add(encryptedDetails.publicKey)
             }
-            const data = JSON.stringify(new VersionBox(member.details).encode({ version: Version }))
 
-            // Check if we still have the private key of this member.
-            let keychainItem = Keychain.getItem(member.publicKey)
+            if (!doWeHaveOne) {
+                // Create a new one
+                const keyPair = await Sodium.generateEncryptionKeyPair()
+                const keychainItem = await session.createKeychainItem(keyPair)
 
-            if (keychainItem) {
-                try {
-                    await session.decryptKeychainItem(keychainItem)
-                } catch (e) {
-                    console.error(e)
-                    console.error("No longer has access to this members private key, so create a new one instead.")
-                    keychainItem = undefined
+                // Add this key in the encrypted details
+                keys.add(keyPair.publicKey)
+                patch.keychainItems.addPut(keychainItem)
+            }
+
+            const memberPatch = EncryptedMember.patch({ id: member.id })
+
+            for (const publicKey of keys) {
+                const encryptedDetails = await this.encryptDetails(
+                    member.details,
+                    publicKey,
+                    OrganizationManager.organization.publicKey === publicKey
+                )
+                
+                const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
+                if (!keychainItem) {
+                    const oldKeys = member.encryptedDetails.filter(e => e.publicKey === publicKey)
+                    // If we don't have this key ourselves, don't update the date to today, because
+                    // we need to save which keys were last used
+                    if (oldKeys.length > 0) {
+                        encryptedDetails.meta.ownerDate = new Date(Math.max(...oldKeys.map(m => m.meta.date.getTime())))
+                    } else {
+                        // Was encrypted for the first time for this key (probably organization key), keep current date
+                    }
+                }
+
+                memberPatch.encryptedDetails.addPut(
+                    encryptedDetails
+                )
+            }
+
+            if (!member.details.isPlaceholder) {
+                // We have new and complete data, delete all older keys
+                for (const encryptedDetails of member.encryptedDetails) {
+                    memberPatch.encryptedDetails.addDelete(encryptedDetails.id)
                 }
             }
 
-            if (!keychainItem) {
-                // Create a keypair
-                const keyPair = await Sodium.generateEncryptionKeyPair()
-                keychainItem = await session.createKeychainItem(keyPair)
-                member.publicKey = keychainItem.publicKey
-                keychainItems.push(keychainItem)
-            }
-
-            encryptedMembers.push(
-                EncryptedMember.create({
-                    id: member.id,
-                    encryptedForOrganization: await Sodium.sealMessage(data, OrganizationManager.organization.publicKey),
-                    encryptedForMember: await Sodium.sealMessage(data, member.publicKey),
-                    publicKey: member.publicKey,
-                    organizationPublicKey: OrganizationManager.organization.publicKey,
-                    firstName: member.details.firstName,
-                    createdAt: member.createdAt,
-                    updatedAt: member.updatedAt
-                })
-            )
+            patch.members.addPatch(memberPatch)
         }
-        return {encryptedMembers, keychainItems}
+
+        return patch
     }
 
+    /**
+     * Patch all members that are not placeholders, and force a save for the given members (even when they are placeholders)
+     */
     async patchAllMembersWith(...patchMembers: MemberWithRegistrations[]) {
-        const members = (this.members ?? []).filter(m => !!m.details)
+        const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
 
         for (const member of patchMembers) {
             const ex = members.findIndex(m => m.id == member.id)
@@ -221,45 +286,18 @@ export class MemberManagerStatic {
             }
         }
         
-        const { encryptedMembers, keychainItems } = await this.getEncryptedMembers(members)
-        if (encryptedMembers.length == 0) {
-            return;
-        }
-
-        const session = SessionManager.currentSession!
-
-        // Send the request
-        const response = await session.authenticatedServer.request({
-            method: "POST",
-            path: "/user/members",
-            body: PatchMembers.create({
-                addMembers: [],
-                updateMembers: encryptedMembers,
-                keychainItems: keychainItems
-            }),
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
-        })
-        await this.setMembers(response.data)
+        return await this.patchMembers(members)
     }
 
     async patchMembers(members: MemberWithRegistrations[]) {
-
-        const { encryptedMembers, keychainItems} = await this.getEncryptedMembers(members)
-         if (encryptedMembers.length == 0) {
-            return;
-        }
-
+        const patch = await this.getEncryptedMembers(members)
         const session = SessionManager.currentSession!
 
         // Send the request
         const response = await session.authenticatedServer.request({
-            method: "POST",
+            method: "PATCH",
             path: "/user/members",
-            body: PatchMembers.create({
-                addMembers: [],
-                updateMembers: encryptedMembers,
-                keychainItems: keychainItems
-            }),
+            body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
         await this.setMembers(response.data)

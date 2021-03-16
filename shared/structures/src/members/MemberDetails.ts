@@ -142,6 +142,7 @@ export class MemberDetails extends AutoEncoder {
     lastReviewed: Date | null = null;
 
     /**
+     * @deprecated
      * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
      * This can get cleared after registration, but is not needed since we keep track of the group cycle.
      */
@@ -161,6 +162,7 @@ export class MemberDetails extends AutoEncoder {
     preferredGroups: PreferredGroup[] = []
 
     /**
+     * @deprecated
      * During registration, we sometimes need to know if it is an existing member, new member or a broter/sister of an existing member.
      * We don't ask this information if it is not needed or when we can calculate it automatically based on the member history 
      * (this behaviour is determined by the shouldKnowExisting method of Group)
@@ -170,7 +172,7 @@ export class MemberDetails extends AutoEncoder {
     existingStatus: MemberExistingStatus | null = null
 
     /**
-     * Set to true when this is automatically generated because we don't have the data
+     * Set to true when this is automatically generated because we don't have all the data
      */
     private _isPlaceholder = false
 
@@ -405,5 +407,9 @@ export class MemberDetails extends AutoEncoder {
         if (other.lastReviewed) {
             this.lastReviewed = other.lastReviewed
         }
+    }
+
+    applyChange(details: MemberDetails) {
+        // todo
     }
 }

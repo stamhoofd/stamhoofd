@@ -59,7 +59,8 @@ describe("Endpoint.GetUserMembers", () => {
                 })
             ).sort(Sorter.byID)
         )
-        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
+        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
+        throw new Error("Todo: update")
     });
 
     test("Request user without members", async () => {
@@ -105,7 +106,8 @@ describe("Endpoint.GetUserMembers", () => {
         expect(response.body.keychainItems).toHaveLength(1)
         expect(response.body.data[0]).toMatchObject(EncryptedMember.create(member))
         expect(response.body.data[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
-        expect(response.body.keychainItems[0].publicKey).toEqual(member.publicKey)
+        //expect(response.body.keychainItems[0].publicKey).toEqual(member.publicKey)
+        throw new Error("Todo: update")
     });
 
     test("Request user members when signed in when no member is registered yet", async () => {
@@ -147,7 +149,8 @@ describe("Endpoint.GetUserMembers", () => {
             ).sort(Sorter.byID)
         )
         
-        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
+        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
+        throw new Error("Todo: update")
     });
 
     test("Do not include keychain items of other users when no member is registered yet", async () => {

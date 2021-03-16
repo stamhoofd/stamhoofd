@@ -40,7 +40,8 @@ describe("Endpoint.PostUserMembers", () => {
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
         expect(response.body.data.map(m => Object.assign({}, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)).toEqual(members.map(m => Object.assign({ registrations: [], users: [UserStruct.create(user)] }, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)) // created user won't have any registrations
-        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
+        throw new Error("Not yet updated")
+        // expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
     });
 
     test("Create a new member and update a member", async () => {
@@ -58,10 +59,10 @@ describe("Endpoint.PostUserMembers", () => {
 
         const existingMemberEncrypted = EncryptedMember.create({
             id: existingMember.id,
-            encryptedForMember: members[0].encryptedForMember,
-            encryptedForOrganization: members[0].encryptedForOrganization,
-            publicKey: existingMember.publicKey,
-            organizationPublicKey: organization.publicKey,
+            //encryptedForMember: members[0].encryptedForMember,
+            //encryptedForOrganization: members[0].encryptedForOrganization,
+            //publicKey: existingMember.publicKey,
+            //organizationPublicKey: organization.publicKey,
             firstName: existingMember.firstName
         })
 
@@ -101,6 +102,9 @@ describe("Endpoint.PostUserMembers", () => {
                 })
             ).sort(Sorter.byID)
         )
-        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => m.publicKey))
+
+        // tood here!
+        throw new Error("Not yet updated")
+        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => m.publicKey))
     });
 });

@@ -1,5 +1,6 @@
 import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMember, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { Group } from './Group';
 
@@ -36,29 +37,8 @@ export class Member extends Model {
     @column({ type: "string" })
     organizationId: string;
 
-    @column({ type: "string", nullable: true })
-    encryptedForOrganization: string | null = null;
-
-    @column({ type: "string", nullable: true })
-    encryptedForMember: string | null = null;
-
-    /**
-     * @deprecated
-     */
-    @column({ type: "boolean" })
-    placeholder = false;
-
-    /**
-    * Public key used for encryption
-    */
-    @column({ type: "string" })
-    publicKey: string;
-
-    /**
-    * Public key used for encryption of the organization
-    */
-    @column({ type: "string" })
-    organizationPublicKey: string;
+    @column({ type: "json", decoder: new ArrayDecoder(EncryptedMemberDetails) })
+    encryptedDetails: EncryptedMemberDetails[] = []
 
     @column({
         type: "datetime", beforeSave(old?: any) {

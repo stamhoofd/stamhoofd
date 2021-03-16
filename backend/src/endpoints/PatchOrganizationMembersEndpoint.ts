@@ -58,11 +58,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const struct = put.put
             const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             member.id = struct.id
-            member.publicKey = struct.publicKey
+            //member.publicKey = struct.publicKey
             member.organizationId = user.organizationId
-            member.encryptedForMember = struct.encryptedForMember
-            member.encryptedForOrganization = struct.encryptedForOrganization
-            member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
+            //member.encryptedForMember = struct.encryptedForMember
+            //member.encryptedForOrganization = struct.encryptedForOrganization
+            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
 
             for (const registrationStruct of struct.registrations) {
@@ -142,6 +142,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             for (const placeholder of struct.users) {
                 await this.linkUser(placeholder, member)
             }
+
+            throw new Error("Wip: update data here")
         }
 
         // Loop all members one by one
@@ -163,13 +165,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     statusCode: 403
                 })
             }
-            // Check permissions (todo)
-
-            member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
-            member.encryptedForOrganization = patch.encryptedForOrganization ?? member.encryptedForOrganization
-            member.organizationPublicKey = patch.organizationPublicKey ?? member.organizationPublicKey
+            
+            // TODO! update data here with a patch instead
+            //member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
+            //member.encryptedForOrganization = patch.encryptedForOrganization ?? member.encryptedForOrganization
+            //member.organizationPublicKey = patch.organizationPublicKey ?? member.organizationPublicKey
             member.firstName = patch.firstName ?? member.firstName
-            member.publicKey = patch.publicKey ?? member.publicKey
+            //member.publicKey = patch.publicKey ?? member.publicKey
             await member.save();
 
             // Update registrations
@@ -255,6 +257,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             members.push(member)
+
+            throw new Error("Wip: update data here")
         }
 
         // Loop all members one by one

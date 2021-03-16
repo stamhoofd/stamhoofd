@@ -75,8 +75,11 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // New
         const otherKeys: Set<string> = new Set();
         for (const member of members) {
-            if (member.organizationPublicKey != user.organization.publicKey) {
-                otherKeys.add(member.organizationPublicKey)
+            for (const details of member.encryptedDetails) {
+                if (details.publicKey != user.organization.publicKey && details.forOrganization === true) {
+                    // Only keys for organization, because else this might be too big
+                    otherKeys.add(details.publicKey)
+                }
             }
         }
 
