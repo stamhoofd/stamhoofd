@@ -117,6 +117,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/success.svg);
     }
 
+    &.star:after {
+        font-icon: url(@stamhoofd/assets/images/icons/star.svg);
+    }
+
     &.error:after {
         font-icon: url(@stamhoofd/assets/images/icons/error.svg);
     }

@@ -43,11 +43,7 @@ export class Member extends Model {
     encryptedForMember: string | null = null;
 
     /**
-     * Set to true for members who did not confirm their membership.
-     * E.g. when the member is imported from last year. 
-     * 
-     * If a new member creates an account with the same firstName, lastName and birthDay, it will get merged (except the memberDetails).
-     * This merging behaviour happens in the dashboard in the front-end, not on the server.
+     * @deprecated
      */
     @column({ type: "boolean" })
     placeholder = false;

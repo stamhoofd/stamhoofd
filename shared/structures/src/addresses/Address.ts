@@ -87,7 +87,7 @@ export class Address extends AutoEncoder {
         })
     }
 
-    static splitAddressLine(addressLine1: string): Address {
+    static splitAddressLine(addressLine1: string) {
         if (addressLine1.length == 0) {
             throw new SimpleError({
                 code: "invalid_field",

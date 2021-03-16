@@ -246,15 +246,40 @@
 
         > .bubble {
             background: $color-primary;
+            background: $color-error;
             border-radius: 30px;
-            font-size: 11px;
+            font-size: 13px;
             color: $color-white;
             display: inline-block;
-            padding: 0 7px;
-            height: 20px;
-            font-weight: 600;
-            line-height: 20px;
+            padding: 0 4px;
+            height: 21px;
+            min-width: 21px;
+            box-sizing: border-box;
+            font-weight: bold;
+            line-height: 21px;
             vertical-align: text-bottom;
+        }
+
+        &.column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: auto;
+            line-height: 1;
+            position: relative;
+            overflow: visible;
+
+            > span {
+                margin-bottom: 4px;
+            }
+
+            > .bubble {
+                background: $color-error;
+                position: absolute;
+                left: 50%;
+                top: 0;
+                transform: translate(calc(12px - 20%), -20%);
+            }
         }
 
         &:active {

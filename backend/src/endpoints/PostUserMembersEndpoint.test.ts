@@ -62,8 +62,7 @@ describe("Endpoint.PostUserMembers", () => {
             encryptedForOrganization: members[0].encryptedForOrganization,
             publicKey: existingMember.publicKey,
             organizationPublicKey: organization.publicKey,
-            firstName: existingMember.firstName,
-            placeholder: existingMember.placeholder
+            firstName: existingMember.firstName
         })
 
         const r = Request.buildJson("POST", "/v20/user/members", organization.getApiHost(), {

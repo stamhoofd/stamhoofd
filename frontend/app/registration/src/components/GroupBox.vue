@@ -1,16 +1,24 @@
 <template>
-    <article class="group-box" :class="{selected: false}" @click="onClicked">
+    <article class="group-box" :class="{selected: selectedCount > 0}" @click="onClicked">
         <div class="left" />
         <div class="content">
             <div>
                 <h3>
+                    <div class="counter">
+                        {{ selectedCount }} x
+                    </div>
                     {{ group.settings.name }}
                 </h3>
                 <p v-if="group.settings.description" class="description" v-text="group.settings.description" />
                 <p class="price">
-                    {{ price | price }}
+                    <template v-if="minimumPrice !== null">
+                        {{ minimumPrice | price }} tot
+                    </template>{{ price | price }}
 
-                    <span class="style-tag">Wachtlijst</span>
+                    <span v-if="group.closed" class="style-tag error">Gesloten</span>
+                    <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
+                    <span v-else-if="newWaitingList" class="style-tag warn">Wachtlijst nieuwe leden</span>
+                    <span v-else-if="waitingList" class="style-tag error">Wachtlijst</span>
                 </p>
             </div>
             <hr>
@@ -23,11 +31,15 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group } from '@stamhoofd/structures';
+import { Group, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { CheckoutManager } from "../classes/CheckoutManager";
+import GroupMemberSelectionView from "../views/groups/GroupMemberSelectionView.vue";
+import GroupView from "../views/groups/GroupView.vue";
 
 @Component({
     components: {
@@ -45,34 +57,56 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class GroupBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
     group: Group
+
+    CheckoutManager = CheckoutManager
     
     
     get imageSrc() {
-        return undefined
-        //return this.product.images[0]?.getPathForSize(100, 100)
+        return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(100, 100)
+    }
+
+    get minimumPrice(): number | null {
+        const prices = this.group.settings.getGroupPrices(new Date())
+        const nums: number[] = [
+            prices?.familyPrice,
+            prices?.extraFamilyPrice,
+            prices?.reducedPrice
+        ].filter(p => p !== undefined && p !== null) as number[]
+
+        if (nums.length === 0) {
+            return null
+        }
+
+        return Math.min(...nums)
+    }
+
+    get selectedCount() {
+        return CheckoutManager.cart.items.filter(i => i.group.id === this.group.id).length
     }
 
     get price() {
-        return 999
+        return this.group.settings.getGroupPrices(new Date())?.price ?? 0
+    }
+
+    get preRegistrations() {
+        return this.group.activePreRegistrationDate !== null
+    }
+
+    get waitingList() {
+        return this.group.settings.waitingListType === WaitingListType.All
+    }
+
+    get newWaitingList() {
+        return this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst
     }
 
     onClicked() {
-        /*if (this.product.isSoldOut) {
-            new Toast("Dit artikel is jammer genoeg uitverkocht", "error red").show()
-            return;
-        }
-
-        if (this.product.remainingStock != null && this.product.remainingStock <= this.count) {
-            new Toast("Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.", "error red").show()
-            return;
-        }
-
-        const cartItem = CartItem.create({
-            product: this.product,
-            productPrice: this.product.prices[0]
-        })
-
-        this.present(new ComponentWithProperties(CartItemView, { cartItem }).setDisplayStyle("sheet"))*/
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(GroupView, {
+                group: this.group
+            })
+        }).setDisplayStyle("popup"))
+        //this.show(new ComponentWithProperties(GroupView, { group: this.group }))
     }
 
 }
@@ -118,7 +152,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
         }
     }
 
-    @media (min-width: 801px) {
+    //@media (min-width: 801px) {
         background: $color-white;
         border-radius: $border-radius;
         margin: 0;
@@ -127,7 +161,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
         > .content > hr {
             display: none;
         }
-    }
+    //}
 
     &:active {
         transition: none;
@@ -246,6 +280,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
             width: 70px;
             height: 70px;
             border-radius: $border-radius;
+            object-fit: cover;
 
             @media (min-width: 340px) {
                 width: 80px;

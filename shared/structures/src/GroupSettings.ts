@@ -82,8 +82,17 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 16 })
     priorityForFamily = true
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(Image), version: 58 })
     images: Image[] = []
+
+    @field({ decoder: Image, nullable: true, version: 65 })
+    coverPhoto: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 66 })
+    squarePhoto: Image | null = null
 
     getGroupPrices(date: Date) {
         let foundPrice: GroupPrices | undefined = undefined

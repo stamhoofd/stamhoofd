@@ -53,7 +53,7 @@
             </p>
 
             <STList v-if="files.length > 0" title="Bijlages">
-                <STListItem v-for="(file, index) of files" :key="index" class="file-list-item right-description right-stack">
+                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
                     <span slot="left" class="icon file" />
                     {{ file.name }}
 

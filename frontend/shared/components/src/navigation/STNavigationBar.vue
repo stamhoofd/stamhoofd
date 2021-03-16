@@ -121,7 +121,7 @@ export default class STNavigationBar extends Vue {
 
     &.large {
         height: 80px;
-        margin-top: calc(-1 * var(--st-vertical-padding, 20px) + 10px);
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
         margin-bottom: 20px;
     }
     -webkit-app-region: drag;

@@ -284,6 +284,37 @@ export class MemberDetails extends AutoEncoder {
         return true
     }
 
+    getMatchingError(group: Group): string {
+        const age = this.ageForYear(group.settings.startDate.getFullYear())
+        if (group.settings.minAge || group.settings.maxAge) {
+            if (age) {
+                if (group.settings.minAge && age < group.settings.minAge) {
+                    return "Te jong"
+                }
+
+                if (group.settings.maxAge && age > group.settings.maxAge) {
+                    return "Te oud"
+                }
+            }
+        }
+
+        if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
+            if (age && age < 18) {
+                return "Enkel voor meisjes"
+            }
+            return "Enkel voor vrouwen"
+        }
+
+        if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
+            if (age && age < 18) {
+                return "Enkel voor jongens"
+            }
+            return "Enkel voor mannen"
+        }
+        
+        return "Kan niet inschrijven"
+    }
+
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
     }

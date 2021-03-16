@@ -6,78 +6,48 @@
             </template>
         </STNavigationBar>
         <main class="limit-width">
-            <section class="white-top view">
-                <main v-if="waitingMembers.length > 0" class="container">
-                    <h1>Leden op wachtlijst</h1>
-                    <p>Deze leden staan nog op een wachtlijst. We houden je op de hoogte, dan kan je verdere informatie aanvullen en het lidgeld betalen.</p>
-
-                    <STList>
-                        <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
-                            <span v-if="member.acceptedWaitingGroups.length == 0" slot="left" class="icon clock" />
-                            <span v-else slot="left" class="icon green success" />
-
-                            <h2 class="payment-period">
-                                {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
-                            </h2>
-                            <p v-if="member.waitingGroups.length > 0" class="style-description-small">
-                                Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}
-                            </p>
-                            <p v-if="member.acceptedWaitingGroups.length > 0" class="style-description-small">
-                                Kan zich nu inschrijven voor {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}
-                            </p>
-
-                            <template slot="right">
-                                <button v-if="member.acceptedWaitingGroups.length == 0" class="button text limit-space" @click.stop="editMember(member)">
-                                    <span class="icon edit" />
-                                    <span>Bewerken</span>
-                                </button>
-                                <button v-else class="button text limit-space" @click.stop="addNewMember">
-                                    <span>Inschrijven</span>
-                                    <span class="icon arrow-right" />
-                                </button>
-                            </template>
-                        </STListItem>
-                    </STList>
-
-                    <STToolbar v-if="registeredMembers.length == 0">
-                        <button slot="right" class="primary button" @click="addNewMember">
-                            <span class="icon white left add" />
-                            <span>Lid inschrijven</span>
-                        </button>
-                    </STToolbar>
-                </main>
-
-                <main v-if="registeredMembers.length > 0" class="container">
+            <section class="white-top view shade">
+                <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
-                    <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
 
                     <STList>
-                        <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
+                        <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
                             <span slot="left" class="icon user" />
 
                             <h2 class="payment-period">
                                 {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
                             </h2>
-                            <p class="style-description-small">
+                            <p class="style-description-small" v-if="false">
                                 Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
+                            </p>
+                            <p class="style-description-small">
+                                Eén inschrijving in mandje
                             </p>
 
                             <template slot="right">
-                                <span class="icon arrow-right gray" />
+                                <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
                     </STList>
-                    <STToolbar :sticky="false">
-                        <button slot="right" class="primary button" @click="addNewMember">
-                            <span class="icon white left add" />
-                            <span>Nieuw lid toevoegen</span>
-                        </button>
+
+                    <STToolbar>
+                    <button slot="right" class="button secundary full" @click="addNewMember">
+                        <span class="icon left add" />
+                        <span>Nieuw lid toevoegen</span>
+                    </button>
                     </STToolbar>
                 </main>
+
+                
             </section>
 
             <section class="view gray-shadow">
                 <main>
+                    <h1>Inschrijven</h1>
+                    <p>Suggesties voor bestaande leden. Onderaan deze pagina vind je alle groepen waarvoor je kan inschrijven.</p>
+                    <GroupTree :category="availableTree" :parentLevel="0" />
+                </main>
+                <main v-if="false">
                     <GroupTree :category="rootCategory" />
                 </main>
             </section>
@@ -96,8 +66,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
-import MemberView from "./MemberView.vue";
-import RegistrationOverviewView from './RegistrationOverviewView.vue';
+import MemberView from "../members/MemberView.vue";
 
 @Component({
     components: {
@@ -131,8 +100,38 @@ export default class OverviewView extends Mixins(NavigationMixin){
         return OrganizationManager.organization
     }
 
+    get availableTree() {
+        const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)
+        // Filter the tree
+
+        tree.groups = tree.groups.filter(g => {
+            for (const member of this.members) {
+                if (member.doesMatchGroup(g, OrganizationManager.organization.meta.categories)) {
+                    return true
+                }
+            }
+            return false
+        })
+
+        for (const cat of tree.categories) {
+            cat.groups = cat.groups.filter(g => {
+                for (const member of this.members) {
+                    if (member.doesMatchGroup(g, OrganizationManager.organization.meta.categories)) {
+                        return true
+                    }
+                }
+                return false
+            })
+        }
+        tree.categories = tree.categories.filter(c => c.groups.length > 0)
+
+        return tree
+    }
+
     get rootCategory() {
-        return this.organization.categoryTree
+        const tree = this.organization.categoryTree
+
+        return tree
     }
 
     logout() {
@@ -213,17 +212,13 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     addNewMember() {
-        this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
+        //this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
     }
 
     editMember(member: MemberWithRegistrations) {
-        this.show(new ComponentWithProperties(MemberView, { member }))
-        /*this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberGeneralView, {
-                initialMember: member,
-                editOnly: true
-            })
-        }).setDisplayStyle("popup"))*/
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberView, { member })
+        }).setDisplayStyle("popup"))
     }
 
     canOpenPayment(payment: PaymentDetailed) {

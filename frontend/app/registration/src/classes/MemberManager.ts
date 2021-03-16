@@ -1,10 +1,11 @@
 
 
-import { ArrayDecoder, Decoder, ObjectData, VersionBoxDecoder, VersionBox } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, SessionManager } from '@stamhoofd/networking'
-import { MemberWithRegistrations, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, MemberDetails, Version, PatchMembers, Parent, Address, Payment, PaymentDetailed, RegistrationWithMember, Member, RegistrationWithEncryptedMember, EmergencyContact, KeychainItem } from '@stamhoofd/structures'
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberWithRegistrations, Parent, PatchMembers, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
+
 import { OrganizationManager } from './OrganizationManager';
 
 /**
@@ -49,7 +50,6 @@ export class MemberManagerStatic {
                 details: decryptedDetails,
                 publicKey: member.publicKey,
                 firstName: member.firstName,
-                placeholder: member.placeholder,
                 organizationPublicKey: member.organizationPublicKey
             })
 
@@ -102,7 +102,6 @@ export class MemberManagerStatic {
                 organizationPublicKey: member.organizationPublicKey,
                 registrations: member.registrations,
                 firstName: member.firstName,
-                placeholder: member.placeholder,
                 users: member.users
             })
             decryptedMember.fillGroups(groups)
@@ -137,7 +136,6 @@ export class MemberManagerStatic {
             organizationPublicKey: "", // wait for encryption before setting this
             registrations: [],
             firstName: member.firstName,
-            placeholder: false,
             users: []
         })
 
@@ -203,7 +201,6 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false,
                     createdAt: member.createdAt,
                     updatedAt: member.updatedAt
                 })

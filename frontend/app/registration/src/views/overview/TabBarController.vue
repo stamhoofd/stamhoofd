@@ -16,7 +16,7 @@
             <FramedComponent ref="component" :key="root.key" :root="root" />
         </div>
         <div class="tab-bar">
-            <button v-for="item in items" :key="item.component.key" class="button text small" :class="{ selected: activeItem === item }" @click="selectItem(item)">
+            <button v-for="item in items" :key="item.component.key" class="button text small column" :class="{ selected: activeItem === item }" @click="selectItem(item)">
                 <span :class="'icon '+item.icon" />
                 <span>{{ item.name }}</span>
                 <span class="bubble" v-if="item.badge">{{ item.badge }}</span>
@@ -195,19 +195,6 @@ export default class TabBarController extends Mixins(NavigationMixin){
         
         > button {
             flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: auto;
-            line-height: 1;
-
-            &.selected {
-                color: $color-primary;
-            }
-
-            > span {
-                margin-bottom: 4px;
-            }
         }
     }
 }

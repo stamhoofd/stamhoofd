@@ -221,31 +221,6 @@ export class Group extends AutoEncoder {
     }
 
     /**
-     * Use this during registration to check if we need to register for waiting list. Return null if we can't skip the waiting list
-     */
-    canSkipWaitingList(existingStatus: MemberExistingStatus | null = null): WaitingListSkipReason | null {
-        switch (this.settings.waitingListType) {
-            case WaitingListType.None: return WaitingListSkipReason.None;
-            case WaitingListType.ExistingMembersFirst: {
-                if (existingStatus === null) {
-                    return null
-                }
-
-                if (existingStatus.isNew) {
-                    if (this.settings.priorityForFamily && existingStatus.hasFamily) {
-                        return WaitingListSkipReason.Family
-                    }
-                    return null
-                }
-
-                return WaitingListSkipReason.ExistingMember
-            }
-            case WaitingListType.All: return null;
-            case WaitingListType.PreRegistrations: return null;
-        }
-    }
-
-    /**
      * Returns all parent and grandparents of this group
      */
     getParentCategories(all: GroupCategory[]): GroupCategory[] {

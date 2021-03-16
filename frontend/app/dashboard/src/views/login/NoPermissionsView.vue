@@ -28,7 +28,6 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import FinancialProblemsView from './FinancialProblemsView.vue';
-import RegistrationOverviewView from './RegistrationOverviewView.vue';
 
 @Component({
     components: {

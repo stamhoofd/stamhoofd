@@ -73,7 +73,6 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             if (navigation!.components.length > 1) {
                 this.pop();
             } else {
-                //navigation?.push(new ComponentWithProperties(RegistrationOverviewView, {}), true, 1, true)
                 this.finishedHandler.call(this, this.payment)
             }
         }

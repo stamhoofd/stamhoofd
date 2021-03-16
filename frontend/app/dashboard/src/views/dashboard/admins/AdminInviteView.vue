@@ -84,7 +84,7 @@
                 <Spinner v-if="loadingKeys" />
 
                 <STList>
-                    <STListItem v-for="key of availableKeys" :key="key.publicKey">
+                    <STListItem v-for="key in availableKeys" :key="key.publicKey">
                         <span class="icon key" slot="left"/>
                         <h2 class="style-title-list">
                             Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}

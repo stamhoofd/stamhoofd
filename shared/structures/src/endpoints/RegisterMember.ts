@@ -2,6 +2,9 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder,EnumDecoder,field, StringDecod
 
 import { PaymentMethod } from '../PaymentMethod';
 
+/**
+ * @deprecated
+ */
 export class RegisterMember extends AutoEncoder {
     @field({ decoder: StringDecoder })
     memberId: string
@@ -19,6 +22,9 @@ export class RegisterMember extends AutoEncoder {
     waitingList = false
 }
 
+/**
+ * @deprecated
+ */
 export class RegisterMembers extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RegisterMember) })
     members: RegisterMember[]

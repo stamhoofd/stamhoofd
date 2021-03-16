@@ -12,6 +12,7 @@ import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox 
 import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
+import { CheckoutManager } from './classes/CheckoutManager';
 
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
@@ -29,6 +30,9 @@ async function getAccountView() {
     return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/account/AccountSettingsView.vue")).default;
 }
 
+async function getCartView() {
+    return (await import(/* webpackChunkName: "CartView" */ "./views/checkout/CartView.vue")).default;
+}
 
 @Component({
     components: {
@@ -105,6 +109,16 @@ export default class App extends Vue {
                             })
                         }
 
+                        const basket = new TabBarItem(
+                            "Mandje",
+                            "basket",
+                            new ComponentWithProperties(NavigationController, { 
+                                root: new ComponentWithProperties(await getCartView(), {}),
+                            })
+                        )
+                        CheckoutManager.watchTabBar = basket
+                        basket.badge = CheckoutManager.cart.count + ""
+
                         return new ComponentWithProperties(ModalStackComponent, {
                             root: new ComponentWithProperties(TabBarController, { 
                                 items: [
@@ -122,13 +136,7 @@ export default class App extends Vue {
                                             root: new ComponentWithProperties(await getAccountView(), {}),
                                         })
                                     ),
-                                    new TabBarItem(
-                                        "Mandje",
-                                        "basket",
-                                        new ComponentWithProperties(NavigationController, { 
-                                            root: new ComponentWithProperties(await getDefaultView(), {}),
-                                        })
-                                    )
+                                    basket
                                 ]
                             })
                         })

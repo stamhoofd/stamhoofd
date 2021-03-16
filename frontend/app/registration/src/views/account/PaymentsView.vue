@@ -38,15 +38,12 @@
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, LoadingView, OrganizationLogo,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
+import { Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import GroupTree from '../../components/GroupTree.vue';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import RegistrationOverviewView from '../overview/RegistrationOverviewView.vue';
 
 @Component({
     components: {
@@ -56,7 +53,6 @@ import RegistrationOverviewView from '../overview/RegistrationOverviewView.vue';
         STListItem,
         LoadingView,
         Checkbox,
-        GroupTree,
         OrganizationLogo
     },
     filters: {
@@ -159,19 +155,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
 
     mounted() {
         HistoryManager.setUrl("/")
-    }
-
-    addNewMember() {
-        this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
-    }
-
-    editMember(member: MemberWithRegistrations) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberGeneralView, {
-                initialMember: member,
-                editOnly: true
-            })
-        }).setDisplayStyle("popup"))
     }
 
     canOpenPayment(payment: PaymentDetailed) {

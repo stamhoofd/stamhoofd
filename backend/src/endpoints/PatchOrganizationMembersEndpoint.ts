@@ -65,9 +65,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
 
-            // Created by organization = placeholder
-            member.placeholder = struct.placeholder
-
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
                 if (!group) {
@@ -173,7 +170,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.organizationPublicKey = patch.organizationPublicKey ?? member.organizationPublicKey
             member.firstName = patch.firstName ?? member.firstName
             member.publicKey = patch.publicKey ?? member.publicKey
-            member.placeholder = patch.placeholder ?? member.placeholder
             await member.save();
 
             // Update registrations

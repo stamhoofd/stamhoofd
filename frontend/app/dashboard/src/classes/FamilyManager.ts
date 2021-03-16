@@ -55,8 +55,6 @@ export class FamilyManager {
             publicKey: keyPair.publicKey,
             registrations: registrations,
             firstName: member.firstName,
-            placeholder: true,
-
             users,
             organizationPublicKey: "" // doesn't matter since we only going to set this when we encrypt it
         })

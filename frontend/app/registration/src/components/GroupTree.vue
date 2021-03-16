@@ -1,14 +1,15 @@
 <template>
     <div class="group-tree">
-        <component :is="'h'+level" v-if="level > 0">{{ category.settings.name }}</component>
-        <p v-if="level === 1">Hier komt een beschrijving</p>
+        <component :is="'h'+level" v-if="level > 0 && category.settings.name.length > 0">
+            {{ category.settings.name }}
+        </component>
 
-        <div class="group-grid" v-if="category.groups.length > 0">
+        <div v-if="category.groups.length > 0" class="group-grid">
             <GroupBox v-for="group in category.groups" :key="group.id" :group="group" />
         </div>
-        <GroupTree v-else v-for="category in category.categories" :key="category.id" :category="category" :parentLevel="level" />
+        <GroupTree v-for="category in category.categories" v-else :key="category.id" :category="category" :parent-level="level" />
 
-        <hr v-if="level == 1" />
+        <hr v-if="category.groups.length == 0" >
     </div>
 </template>
 

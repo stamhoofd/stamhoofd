@@ -249,7 +249,6 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: member.placeholder,
                     registrations: member.registrations,
                     users: member.users
                 })
@@ -303,7 +302,6 @@ export class MemberManagerStatic {
                     publicKey: member.publicKey,
                     organizationPublicKey: OrganizationManager.organization.publicKey,
                     firstName: member.details.firstName,
-                    placeholder: false,
                     users: missing
                 })
             )

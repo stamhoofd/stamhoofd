@@ -20,9 +20,6 @@ export class EncryptedMember extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 35 })
     organizationPublicKey: string
 
-    @field({ decoder: BooleanDecoder, version: 20 })
-    placeholder = false
-
     @field({ decoder: DateDecoder, version: 31 })
     createdAt: Date = new Date()
 

@@ -119,6 +119,42 @@
                 <Checkbox v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
+
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Omslagfoto</div>
+                    <div>
+                        <button v-if="coverPhoto" class="button text" @click="coverPhoto = null">
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
+                        </button>
+                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hs" />
+                    </div>
+                </h2>
+
+                <p>Deze foto wordt getoond met een grootte van 1800 x 750 pixels, bovenaan de informatiepagina van deze groep.</p>
+
+                <figure v-if="coverPhotoSrc" class="cover-photo">
+                    <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
+                </figure>
+
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Vierkante foto</div>
+                    <div>
+                        <button v-if="squarePhoto" class="button text" @click="squarePhoto = null">
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
+                        </button>
+                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hsSquare" />
+                    </div>
+                </h2>
+
+                <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens up te loaden.</p>
+
+                <figure v-if="squarePhotoSrc" class="square-photo">
+                    <img :src="squarePhotoSrc">
+                </figure>
             </template>
             <template v-if="tab == 'payments'">
                 <STErrorsDefault :error-box="errorBox" />
@@ -134,7 +170,9 @@
                     <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
                 </STList>
 
-                <p class="info-box" v-else>Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.</p>
+                <p v-else class="info-box">
+                    Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.
+                </p>
             </template>
         </main>
 
@@ -156,9 +194,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
-import { GroupPrivateSettings, GroupSettingsPatch, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, Version } from '@stamhoofd/structures';
-import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
+import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
+import { GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -186,7 +224,8 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         EditGroupPriceBox,
         BackButton,
         STList,
-        GroupPermissionRow
+        GroupPermissionRow,
+        UploadButton
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
@@ -506,15 +545,121 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
+    // Cover picture
+    get coverPhoto() {
+        return this.patchedGroup.settings.coverPhoto
+    }
+
+    set coverPhoto(coverPhoto: Image | null) {
+        this.addSettingsPatch(GroupSettings.patch({
+            coverPhoto
+        }))
+    }
+
+     get hs() {
+        return [
+            ResolutionRequest.create({
+                width: 1600
+            }),
+            ResolutionRequest.create({
+                width: 800
+            }),
+            ResolutionRequest.create({
+                height: 250,
+                width: 250,
+                fit: ResolutionFit.Cover
+            })
+        ]
+    }
+
+    get coverPhotoResolution() {
+        const image = this.coverPhoto
+        if (!image) {
+            return null
+        }
+        return image.getResolutionForSize(800, 200)
+    }
+
+    get coverPhotoSrc() {
+        const image = this.coverPhoto
+        if (!image) {
+            return null
+        }
+        return this.coverPhotoResolution?.file.getPublicPath()
+    }
+    
+    get coverImageWidth() {
+        return this.coverPhotoResolution?.width
+    }
+
+    get coverImageHeight() {
+        return this.coverPhotoResolution?.height
+    }
+
+     // Cover picture
+    get squarePhoto() {
+        return this.patchedGroup.settings.squarePhoto
+    }
+
+    set squarePhoto(squarePhoto: Image | null) {
+        this.addSettingsPatch(GroupSettings.patch({
+            squarePhoto
+        }))
+    }
+
+     get hsSquare() {
+        return [
+            ResolutionRequest.create({
+                height: 250,
+                width: 250,
+                fit: ResolutionFit.Cover
+            })
+        ]
+    }
+
+    get squarePhotoSrc() {
+        const image = this.squarePhoto
+        if (!image) {
+            return null
+        }
+        return image.getResolutionForSize(250, 250).file.getPublicPath()
+    }
 
 }
 </script>
 
 <style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-edit-view {
-    
+    .cover-photo {
+        height: 0;
+        position: relative;
+        padding-bottom: 750/1800*100%;
+        background: $color-gray;
+        border-radius: $border-radius;
+        margin-top: 20px;
+
+        img {
+            border-radius: $border-radius;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+
+    .square-photo {
+        img {
+            height: 200px;
+            width: 200px;
+            border-radius: $border-radius;
+            object-fit: contain;
+        }
+    }
 
 }
 </style>

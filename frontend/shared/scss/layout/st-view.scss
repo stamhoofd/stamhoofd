@@ -34,22 +34,30 @@
             padding: 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px)) 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px));
         }
 
-        > .gray-shadow {
-            background: $color-background-shade;
-            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-            margin-bottom: calc(-1 * var(--st-vertical-padding, 20px));
-            margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
+        > .view {
+            margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
             padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 15px);
-            padding-bottom: calc(var(--st-safe-area-bottom, 0px) + var(--st-vertical-padding, 20px));
-            padding-top: calc(var(--st-vertical-padding, 20px) + 30px);
-            position: relative;
             flex-grow: 1;
+
+            display: flex;
+            flex-direction: column;
 
             @media(min-width: 940px) {
                 > main {
                     --st-horizontal-padding: 0px;
                 }
             }
+        }
+
+        > .gray-shadow {
+            background: $color-background-shade;
+            margin-top: 0;
+            margin-bottom: calc(-1 * var(--st-vertical-padding, 20px));
+            margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
+            padding-bottom: calc(var(--st-safe-area-bottom, 0px) + var(--st-vertical-padding, 20px));
+            padding-top: calc(var(--st-vertical-padding, 20px) + 30px);
+            position: relative;
+            flex-grow: 1;
 
             &:before {
                 content: "";
@@ -64,15 +72,7 @@
 
         > .white-top {
             background: $color-background;
-            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-            margin-top: calc(-1 * var(--st-vertical-padding, 20px));
-            padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 15px);
-
-            @media(min-width: 940px) {
-                > main {
-                    --st-horizontal-padding: 0px;
-                }
-            }
+            margin-bottom: 0;
         }
     }
 
@@ -140,4 +140,11 @@
 
 .sheet .st-view {
     min-height: auto;
+}
+
+.popup .st-view {
+    > main.limit-width {
+        --st-horizontal-padding: var(--st-view-horizontal-padding);
+        padding: 0;
+    }
 }
