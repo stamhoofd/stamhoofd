@@ -59,7 +59,7 @@ export default new Migration(async () => {
                     forOrganization: false,
                     authorId: "migration",
                     meta: MemberDetailsMeta.create({
-                        date: new Date(),
+                        ownerDate: member.createdAt,
 
                         // Not known, but most of the existing records
                         // will contain everything
@@ -78,7 +78,7 @@ export default new Migration(async () => {
                     forOrganization: true,
                     authorId: "migration",
                     meta: MemberDetailsMeta.create({
-                        date: new Date(),
+                        ownerDate: member.updatedAt,
 
                         // Not known, but most of the existing records
                         // will contain everything

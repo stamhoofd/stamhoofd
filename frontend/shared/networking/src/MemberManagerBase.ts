@@ -159,11 +159,14 @@ export class MemberManagerBase {
                     const oldKeys = member.encryptedDetails.filter(e => e.publicKey === publicKey)
                     // If we don't have this key ourselves, don't update the date to today, because
                     // we need to save which keys were last used
+                    // Save the date that someone with the private key encrypted a blob with the same public key
                     if (oldKeys.length > 0) {
                         encryptedDetails.meta.ownerDate = new Date(Math.max(...oldKeys.map(m => m.meta.date.getTime())))
                     } else {
                         // Was encrypted for the first time for this key (probably organization key), keep current date
                     }
+                } else {
+                    // We have the owner date
                 }
 
                 memberPatch.encryptedDetails.addPut(

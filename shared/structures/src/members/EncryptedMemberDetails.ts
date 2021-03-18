@@ -38,7 +38,6 @@ export class MemberDetailsMeta extends AutoEncoder {
 
     static createFor(details: MemberDetails): MemberDetailsMeta {
         return MemberDetailsMeta.create({
-            date: new Date(),
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
             hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
             hasEmergency: details.emergencyContacts.length > 0,
