@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -558,9 +558,52 @@ export class LoginHelper {
         */
     }
 
+    static async shareKey(keyPair: { publicKey: string; privateKey: string; }, receiverId: string, receiverPulicKey: string): Promise<Invite> {
+        // Create an invite (automatic one)
+        const items = new VersionBox([InviteKeychainItem.create({
+            publicKey: keyPair.publicKey,
+            privateKey: keyPair.privateKey
+        })])
+
+        const invite = NewInvite.create({ 
+            userDetails: null,
+            permissions: null,
+            receiverId,
+            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), receiverPulicKey)
+        })
+
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "POST",
+            path: "/invite",
+            body: invite,
+            decoder: Invite as Decoder<Invite>
+        })
+        return response.data
+    }
+
+    static async loadAdmins(): Promise<OrganizationAdmins> {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+
+        return response.data
+    }
+
     static async changeOrganizationKey(session: Session) {
         const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
         const item = await session.createKeychainItem(organizationKeyPair)
+
+        // Send invites to all other administrators
+        // Before we change the key
+        const organization = await this.loadAdmins()
+        for (const admin of organization.users) {
+            if (admin.publicKey && admin.id !== SessionManager.currentSession!.user!.id) {
+                await this.shareKey(organizationKeyPair, admin.id, admin.publicKey)
+            }
+        }
 
         // Do netwowrk request to create organization
         await session.authenticatedServer.request({

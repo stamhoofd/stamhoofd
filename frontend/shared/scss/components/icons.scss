@@ -145,6 +145,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/key.svg);
     }
 
+    &.key-lost:after {
+        font-icon: url(@stamhoofd/assets/images/icons/key-lost.svg);
+    }
+
     &.lock-missing:after {
         font-icon: url(@stamhoofd/assets/images/icons/lock-missing.svg);
     }

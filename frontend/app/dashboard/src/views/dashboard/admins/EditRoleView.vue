@@ -36,7 +36,7 @@
                     </div>
                     <div>
                         <button class="button text" @click="editGroups()">
-                            <span class="icon add"/>
+                            <span class="icon add" />
                             <span class="hide-smartphone">Toevoegen</span>
                         </button>
                     </div>
@@ -58,7 +58,7 @@
                         </div>
                         <div>
                             <button class="button text" @click="editCategories()">
-                                <span class="icon add"/>
+                                <span class="icon add" />
                                 <span class="hide-smartphone">Toevoegen</span>
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                     </div>
                     <div>
                         <button class="button text" @click="editWebshops()">
-                            <span class="icon add"/>
+                            <span class="icon add" />
                             <span class="hide-smartphone">Toevoegen</span>
                         </button>
                     </div>
@@ -91,7 +91,7 @@
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
-                        <Checkbox v-model="createWebshops" slot="left" />
+                        <Checkbox slot="left" v-model="createWebshops" />
                         Kan nieuwe webshops maken
                     </STListItem>
                     <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
@@ -161,11 +161,13 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import EditRoleGroupsView from './EditRoleGroupsView.vue';
-import GroupPermissionRow from './GroupPermissionRow.vue';
+
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import CategoryPermissionRow from './CategoryPermissionRow.vue';
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
+import EditRoleGroupsView from './EditRoleGroupsView.vue';
 import EditRoleWebshopsView from './EditRoleWebshopsView.vue';
+import GroupPermissionRow from './GroupPermissionRow.vue';
 import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({
@@ -434,20 +436,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     async load() {
-        if (this.organization.admins && this.organization.invites) {
-            this.loading = false
-            return
-        }
-
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/admins",
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
-        })
-
-        this.organization.admins = response.data.users
-        this.organization.invites = response.data.invites
+        await OrganizationManager.loadAdmins(false)
         this.loading = false
     }
 

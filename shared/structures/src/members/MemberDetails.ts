@@ -373,6 +373,19 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
+     * This will add or update the parent (possibily partially if not all data is present)
+     */
+    addRecord(record: Record) {
+        for (const [index, _record] of this.records.entries()) {
+            if (_record.type === record.type) {
+                this.records[index] = record
+                return
+            }
+        }
+        this.records.push(record)
+    }
+
+    /**
      * Return all the e-mail addresses that should have access to this user
      */
     getManagerEmails(): string[] {
@@ -448,6 +461,10 @@ export class MemberDetails extends AutoEncoder {
             } else {
                 this.lastReviewed = other.lastReviewed
             }
+        }
+
+        for (const record of other.records) {
+            this.addRecord(record)
         }
     }
 }

@@ -125,7 +125,7 @@
                             <p v-text="getMemberDescription(member.member)" />
                         </td>
                         <td>
-                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray lock-missing" />
+                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>

@@ -93,10 +93,10 @@ export class MemberManagerBase {
 
         for (const member of members) {
             // Gather all public keys that we are going to encrypt for
-            const keys = new Set<string>()
+            const keys = new Map<string, boolean>()
 
             // Add access for the organization
-            keys.add(organizationPublicKey)
+            keys.set(organizationPublicKey, true)
 
             // Check if we have at least one key where we have the private key for
             let doWeHaveOne = false
@@ -119,7 +119,7 @@ export class MemberManagerBase {
                         doWeHaveOne = true
 
                         // Always include this one
-                        keys.add(encryptedDetails.publicKey)
+                        keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
                     }
                 }
 
@@ -132,7 +132,7 @@ export class MemberManagerBase {
                     // Keep going, we might find one that we have access to
                     continue
                 }
-                keys.add(encryptedDetails.publicKey)
+                keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
             }
 
             if (createPersonalKey && !doWeHaveOne) {
@@ -141,7 +141,7 @@ export class MemberManagerBase {
                 const keychainItem = await session.createKeychainItem(keyPair)
 
                 // Add this key in the encrypted details
-                keys.add(keyPair.publicKey)
+                keys.set(keyPair.publicKey, false)
                 patch.keychainItems.addPut(keychainItem)
             } else {
                 if (!doWeHaveOne) {
@@ -155,11 +155,11 @@ export class MemberManagerBase {
             const memberPatch = EncryptedMember.patch({ id: member.id })
             memberPatch.firstName = member.details.firstName
 
-            for (const publicKey of keys) {
+            for (const [publicKey, forOrganization] of keys) {
                 const encryptedDetails = await this.encryptDetails(
                     member.details,
                     publicKey,
-                    organizationPublicKey === publicKey
+                    organizationPublicKey === publicKey || forOrganization
                 )
                 
                 const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
