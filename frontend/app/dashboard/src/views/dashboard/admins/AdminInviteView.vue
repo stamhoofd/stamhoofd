@@ -181,9 +181,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     // use when editing an invite
     patchInvite: AutoEncoderPatchType<Invite> | null = null
     
-    /*fullAccess = false
-    writeAccess = false*/
-
     @Prop({ default: null })
     editInvite: Invite | null
 
@@ -426,7 +423,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (this.writeAccess ? PermissionLevel.Write : PermissionLevel.None )})
+        const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (PermissionLevel.None )})
 
         this.addPermissionsPatch(permissions)
 
@@ -676,24 +673,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         this.addInviteUserPatch({ email: !email || email.length == 0 ? null : email })
     }
 
-
-    get writeAccess() {
-        const user = this.user ?? this.invite
-        return !!user.permissions && user.permissions.hasWriteAccess()
-    }
-
-    set writeAccess(writeAccess: boolean) {
-        if (writeAccess && this.writeAccess) {
-            return
-        }
-
-        if (writeAccess) {
-            this.addPermissionsPatch({ level: PermissionLevel.Write })
-        } else {
-            this.addPermissionsPatch({ level: PermissionLevel.None })
-        }
-    }
-
     get fullAccess() {
         const user = this.user ?? this.invite
         return !!user.permissions && user.permissions.hasFullAccess()
@@ -707,7 +686,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         if (fullAccess) {
             this.addPermissionsPatch({ level: PermissionLevel.Full })
         } else {
-            this.addPermissionsPatch({ level: this.writeAccess ? PermissionLevel.Write : PermissionLevel.None })
+            this.addPermissionsPatch({ level: PermissionLevel.None })
         }
     }
 
