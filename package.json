@@ -50,7 +50,6 @@
         "@babel/plugin-transform-regenerator": "^7.10.4",
         "@babel/plugin-transform-runtime": "^7.11.0",
         "@babel/preset-env": "^7.11.0",
-        "@simonbackx/iconfont-webpack-plugin": "^4.3.0",
         "@types/jest": "^26.0.20",
         "@typescript-eslint/eslint-plugin": "^4.17.0",
         "@typescript-eslint/parser": "^4.17.0",
@@ -91,6 +90,7 @@
     },
     "resolutions": {
         "prosemirror-model": "1.9.1",
-        "**/axios": "^0.21.1"
+        "**/axios": "^0.21.1",
+        "elliptic": "^6.5.4"
     }
 }

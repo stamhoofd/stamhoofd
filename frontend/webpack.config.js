@@ -3,7 +3,6 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
-//const IconfontWebpackPlugin = require('@simonbackx/iconfont-webpack-plugin');
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');

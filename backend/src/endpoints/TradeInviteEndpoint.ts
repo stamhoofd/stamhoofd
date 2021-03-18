@@ -100,11 +100,6 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
 
-            // Safe merge permissions without decreasing permissions of the user
-            if (!user.permissions.hasAccess(invite.permissions.level)) {
-                user.permissions.level = invite.permissions.level
-            }
-
             user.permissions.roles = invite.permissions.roles
 
             await user.save();

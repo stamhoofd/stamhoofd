@@ -9,7 +9,7 @@
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "test": "yarn build:full && jest",
-        "migrations": "yarn build && node ./dist/migrations.js",
+        "migrations": "yarn build:full && node ./dist/migrations.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "upgrade:internal": "yarn upgrade --scope simonbackx",
         "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
