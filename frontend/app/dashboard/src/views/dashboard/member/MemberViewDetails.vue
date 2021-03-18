@@ -149,10 +149,25 @@
                     </STListItem>
                 </STList>
             </div>
+
+            <div v-if="!member.details || member.details.isRecovered">
+                <hr>
+                <p v-if="!hasLatestKey" class="error-box">
+                    Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
+                </p>
+                <p v-else class="error-box">
+                    Een deel van de gegevens van dit lid is nog versleuteld met een oude sleutel die je niet hebt — en is dus onleesbaar voor jou. Je kan aan een hoofdbeheerder - die deze sleutel wel heeft - vragen om die ook met jou te delen (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven). Of je kan de gegevens terug aanvullen (of laten aanvullen) en de oude onbereikbare gegevens verwijderen om deze melding weg te halen.
+                </p>
+                <hr v-if="hasLatestKey">
+                <button v-if="hasLatestKey" class="button destructive" @click="markAsComplete">
+                    <span class="icon trash" />
+                    <span>Verwijder versleutelde gegevens</span>
+                </button>
+            </div>
         </div>
 
-        <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && !member.details.isPlaceholder && !shouldSkipRecords)">
+        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0" class="hover-box">
+            <template v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -226,17 +241,13 @@
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
             </template>
         </div>
-        <div v-if="!member.details || member.details.isPlaceholder">
-            <p class="error-box">
-                Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen toegang meer hebt tot de encryptiesleutel van de vereniging die door dit lid gebruikt werd. Vraag een hoofdbeheerder om jou terug toegang te geven (dat kan in beheerders > jouw naam > encryptiesleutels > toegang geven).
-            </p>
-        </div>
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { Keychain } from "@stamhoofd/networking";
 import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -263,9 +274,15 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
     familyManager!: FamilyManager;
 
+    loadingComplete = false
+
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    get hasLatestKey() {
+        return Keychain.hasItem(OrganizationManager.organization.publicKey)
     }
 
     get hasWrite(): boolean {
@@ -292,6 +309,26 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get shouldSkipRecords() {
         return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
+    }
+
+    async markAsComplete() {
+        if (this.loadingComplete) {
+            return
+        }
+        if (!await CenteredMessage.confirm("Ben je zeker dat je alle onbereikbare gegevens wilt verwijderen?", "Ja, verwijderen")) {
+            return
+        }
+        this.loadingComplete = true
+        try {
+            // Mark this member as complete again
+            this.member.details.isRecovered = false
+            await this.familyManager.patchAllMembersWith(this.member)
+        } catch (e) {
+            // Reset
+            this.member.details.isRecovered = true
+            console.error(e)
+        }
+        this.loadingComplete = false
     }
 
     isOldEmail(email: string) {

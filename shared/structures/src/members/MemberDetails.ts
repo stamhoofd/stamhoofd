@@ -172,16 +172,25 @@ export class MemberDetails extends AutoEncoder {
     existingStatus: MemberExistingStatus | null = null
 
     /**
-     * Set to true when this is automatically generated because we don't have all the data
+     * Keep track whether this are recovered member details. Only set this back to false when:
+     * - The data is entered manually again (by member / parents)
+     * - Warning message is dismissed / removed in the dashboard by organization
      */
-    private _isPlaceholder = false
+    @field({ decoder: BooleanDecoder, version: 69 })
+    isRecovered = false
 
+    /**
+     * @deprecated
+     */
     get isPlaceholder() {
-        return this._isPlaceholder
+        return this.isRecovered
     }
 
+    /**
+     * @deprecated
+     */
     setPlaceholder() {
-        this._isPlaceholder = true
+        this.isRecovered = true
     }
 
     /**
@@ -335,12 +344,32 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
+    /**
+     * This will SET the parent
+     */
     updateParent(parent: Parent) {
         for (const [index, _parent] of this.parents.entries()) {
             if (_parent.id == parent.id) {
                 this.parents[index] = parent
             }
         }
+    }
+
+    /**
+     * This will add or update the parent (possibily partially if not all data is present)
+     */
+    addParent(parent: Parent) {
+        for (const [index, _parent] of this.parents.entries()) {
+            if (_parent.id == parent.id) {
+                this.parents[index].merge(parent)
+                return
+            }
+            if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
+                this.parents[index].merge(parent)
+                return
+            }
+        }
+        this.parents.push(parent)
     }
 
     /**
@@ -362,7 +391,10 @@ export class MemberDetails extends AutoEncoder {
         return emails
     }
 
-    copyFrom(other: MemberDetails) {
+    /**
+     * Apply newer details without deleting data or replacing filled in data with empty data
+     */
+    merge(other: MemberDetails) {
         if (other.firstName.length > 0) {
             this.firstName = other.firstName
         }
@@ -378,7 +410,10 @@ export class MemberDetails extends AutoEncoder {
             this.birthDay = other.birthDay
         }
 
-        this.gender = other.gender
+        if (other.gender !== Gender.Other) {
+            // Always copy gender
+            this.gender = other.gender
+        }
 
         if (other.address) {
             if (this.address) {
@@ -397,7 +432,10 @@ export class MemberDetails extends AutoEncoder {
         }
 
         if (other.parents.length > 0) {
-            this.parents = other.parents
+            for (const parent of other.parents) {
+                // Will override existing parent if possible
+                this.addParent(parent)
+            }
         }
 
         if (other.emergencyContacts.length > 0) {
@@ -405,11 +443,11 @@ export class MemberDetails extends AutoEncoder {
         }
 
         if (other.lastReviewed) {
-            this.lastReviewed = other.lastReviewed
+            if (this.lastReviewed && this.lastReviewed > other.lastReviewed) {
+                // keep current one
+            } else {
+                this.lastReviewed = other.lastReviewed
+            }
         }
-    }
-
-    applyChange(details: MemberDetails) {
-        // todo
     }
 }

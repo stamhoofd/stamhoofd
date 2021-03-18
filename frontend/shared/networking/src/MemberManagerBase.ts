@@ -1,4 +1,5 @@
 import { AutoEncoderPatchType, Decoder,ObjectData, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding"
+import { SimpleError } from "@simonbackx/simple-errors"
 import { Sodium } from "@stamhoofd/crypto"
 import { EncryptedMember, EncryptedMemberDetails, KeychainedMembers, Member,MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Version } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
@@ -22,13 +23,13 @@ export class MemberManagerBase {
 
     async decryptMember(member: EncryptedMember): Promise<Member> {
         // Get the newest complete blob where we have a key for
+        const oldToNew = member.encryptedDetails.sort((a, b) => Sorter.byDateValue(b.meta.date, a.meta.date))
 
         let latest: EncryptedMemberDetails | null = null
-        for (const encryptedDetails of member.encryptedDetails) {
-            if (!encryptedDetails.meta.incomplete && (!latest || latest.meta.date < encryptedDetails.meta.date)) {
+        for (const encryptedDetails of oldToNew) {
+            if (!encryptedDetails.meta.isRecovered) {
                 // Do we have a key?
-                const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
-                if (keychainItem) {
+                if (Keychain.hasItem(encryptedDetails.publicKey)) {
                     latest = encryptedDetails
                 }
             }
@@ -36,14 +37,14 @@ export class MemberManagerBase {
 
         if (!latest) {
             // We don't have complete data.
-            // Use the last one available
-            for (const encryptedDetails of member.encryptedDetails) {
-                if (!latest || latest.meta.date < encryptedDetails.meta.date) {
-                    // Do we have a key?
-                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
-                    if (keychainItem) {
-                        latest = encryptedDetails
-                    }
+            // Use the oldest available recovered blob and keep applying all the updates
+            for (const encryptedDetails of oldToNew) {
+                // Do we have a key?
+                if (Keychain.hasItem(encryptedDetails.publicKey)) {
+                    latest = encryptedDetails
+
+                    // We need the oldest
+                    break
                 }
             }
         }
@@ -52,26 +53,23 @@ export class MemberManagerBase {
             // todo: return placeholder
             const details = new MemberDetails()
             details.firstName = member.firstName
-            details.setPlaceholder()
+
+            // Mark as recovered details (prevents us from deleting the old encrypted blobs)
+            details.isRecovered = true
             return Member.create({ ...member, details })
         }
 
         const details = await this.decryptMemberDetails(latest)
 
-        if (!latest.meta.incomplete) {
-            // Search for updates that are not complete after this date
-            for (const encryptedDetails of member.encryptedDetails) {
-                if (latest.meta.date < encryptedDetails.meta.date) {
-                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
-                    if (keychainItem) {
-                        const updates = await this.decryptMemberDetails(encryptedDetails)
-                        details.applyChange(updates)
-                    }
+        // Apply newer (incomplete blobs)
+        // From old to new
+        for (const encryptedDetails of oldToNew) {
+            if (encryptedDetails.id !== latest.id && encryptedDetails.meta.isRecovered && latest.meta.date < encryptedDetails.meta.date) {
+                if (Keychain.hasItem(encryptedDetails.publicKey)) {
+                    const updates = await this.decryptMemberDetails(encryptedDetails)
+                    details.merge(updates)
                 }
             }
-        } else {
-            // The details are not complete, so mark them
-            details.setPlaceholder()
         }
 
         return Member.create({ ...member, details })
@@ -103,17 +101,20 @@ export class MemberManagerBase {
             // Check if we have at least one key where we have the private key for
             let doWeHaveOne = false
 
+            if (Keychain.hasItem(organizationPublicKey)) {
+                doWeHaveOne = true
+            }
+
             // Search for a public key that we have
             // Sort details from new to old
             for (const encryptedDetails of member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))) {
-                if (encryptedDetails.forOrganization) {
-                    // Only use the last one for an organization
+                if (encryptedDetails.forOrganization && (doWeHaveOne || createPersonalKey)) {
+                    // Only use the last one for an organization, unless we don't have the key and we are not planning to add one
                     continue
                 }
 
                 if (!doWeHaveOne) {
-                    const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
-                    if (keychainItem) {
+                    if (Keychain.hasItem(encryptedDetails.publicKey)) {
                         // We could use this one
                         doWeHaveOne = true
 
@@ -142,6 +143,13 @@ export class MemberManagerBase {
                 // Add this key in the encrypted details
                 keys.add(keyPair.publicKey)
                 patch.keychainItems.addPut(keychainItem)
+            } else {
+                if (!doWeHaveOne) {
+                    /*throw new SimpleError({
+                        code: "missing_key",
+                        message: "Je kan deze leden niet bewerken omdat je geen sleutel hebt"
+                    })*/
+                }
             }
 
             const memberPatch = EncryptedMember.patch({ id: member.id })
@@ -174,7 +182,7 @@ export class MemberManagerBase {
                 )
             }
 
-            if (!member.details.isPlaceholder) {
+            if (doWeHaveOne && !member.details.isRecovered) {
                 // We have new and complete data, delete all older keys
                 for (const encryptedDetails of member.encryptedDetails) {
                     memberPatch.encryptedDetails.addDelete(encryptedDetails.id)

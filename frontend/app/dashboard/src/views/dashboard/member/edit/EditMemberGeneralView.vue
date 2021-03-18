@@ -125,13 +125,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 field: "firstName"
             }))
         }
-        if (this.lastName.length < 2) {
-            errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "Vul de achternaam in",
-                field: "lastName"
-            }))
-        }
 
         let valid = false
 

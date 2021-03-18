@@ -16,7 +16,6 @@ export class MemberDetailsMeta extends AutoEncoder {
     ownerDate: Date = new Date()
 
     // Keep track of the filled tracks
-
     @field({ decoder: BooleanDecoder })
     hasMemberGeneral = false
 
@@ -30,6 +29,12 @@ export class MemberDetailsMeta extends AutoEncoder {
     hasRecords = false
 
     /**
+     * Whether this change was made without having all the available data
+     */
+    @field({ decoder: BooleanDecoder, version: 70 })
+    isRecovered = false
+
+    /**
      * Set to true when essential data is missing
      */
     get incomplete(): boolean {
@@ -41,7 +46,8 @@ export class MemberDetailsMeta extends AutoEncoder {
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
             hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
             hasEmergency: details.emergencyContacts.length > 0,
-            hasRecords: details.records.length > 0
+            hasRecords: details.records.length > 0,
+            isRecovered: details.isRecovered
         })
     }
 }

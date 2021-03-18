@@ -23,6 +23,10 @@ export class KeychainStatic {
     getItem(publicKey: string) {
         return this.items.get(publicKey)
     }
+
+    hasItem(publicKey: string) {
+        return this.items.has(publicKey)
+    }
 }
 
 export const Keychain = new KeychainStatic()
