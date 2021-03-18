@@ -95,7 +95,7 @@ export default class App extends Vue {
                                                     path: "/payments/"+payment.id+"/registrations",
                                                     decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                                 })
-                                                const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
+                                                const registrations = await MemberManager.decryptRegistrationWithMember(response.data.registrations)
                                                 this.show(new ComponentWithProperties(RegistrationSuccessView, {
                                                     registrations
                                                 }))

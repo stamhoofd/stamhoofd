@@ -1,5 +1,5 @@
 import { OneToManyRelation } from '@simonbackx/simple-database';
-import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct, getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
@@ -14,7 +14,7 @@ import { Token } from '../models/Token';
 import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
-type Body = ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>
+type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
 type ResponseBody = EncryptedMemberWithRegistrations[]
 
 /**
@@ -58,11 +58,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const struct = put.put
             const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             member.id = struct.id
-            //member.publicKey = struct.publicKey
             member.organizationId = user.organizationId
-            //member.encryptedForMember = struct.encryptedForMember
-            //member.encryptedForOrganization = struct.encryptedForOrganization
-            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
+            member.encryptedDetails = struct.encryptedDetails
             member.firstName = struct.firstName
 
             for (const registrationStruct of struct.registrations) {
@@ -128,9 +125,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            console.log(member)
             await member.save()
-
             members.push(member)
 
             // Add registrations
@@ -142,13 +137,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             for (const placeholder of struct.users) {
                 await this.linkUser(placeholder, member)
             }
-
-            throw new Error("Wip: update data here")
         }
 
         // Loop all members one by one
         for (const patch of request.body.getPatches()) {
-            const member = await Member.getWithRegistrations(patch.id)
+            const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
             if (!member || member.organizationId != user.organizationId) {
                  throw new SimpleError({
                     code: "permission_denied",
@@ -166,12 +159,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
             
-            // TODO! update data here with a patch instead
-            //member.encryptedForMember = patch.encryptedForMember ?? member.encryptedForMember
-            //member.encryptedForOrganization = patch.encryptedForOrganization ?? member.encryptedForOrganization
-            //member.organizationPublicKey = patch.organizationPublicKey ?? member.organizationPublicKey
             member.firstName = patch.firstName ?? member.firstName
-            //member.publicKey = patch.publicKey ?? member.publicKey
+            if (patch.encryptedDetails) {
+                member.encryptedDetails = patch.encryptedDetails.applyTo(member.encryptedDetails)
+            }
             await member.save();
 
             // Update registrations
@@ -256,9 +247,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 await this.unlinkUser(userId, member)
             }
 
-            members.push(member)
-
-            throw new Error("Wip: update data here")
+            if (!members.find(m => m.id === member.id)) {
+                members.push(member)
+            }
         }
 
         // Loop all members one by one

@@ -4,6 +4,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration,User } from '@stamhoofd/structures';
 
 import { MemberManager } from './MemberManager';
+import { OrganizationManager } from './OrganizationManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {
@@ -31,57 +32,47 @@ export class FamilyManager {
         this.setMembers(await MemberManager.decryptMembers(response.data))
     }
 
-    async addMember(member: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
-        member.cleanData()
+    async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
+        memberDetails.cleanData()
 
         const session = SessionManager.currentSession!
-
-        // Create a keypair for this member (and discard it immediately)
-        // We might use the private key in the future to send an invitation or QR-code
-        const keyPair = await Sodium.generateEncryptionKeyPair()
 
         // Add all the needed users that need to have access
         const users: User[] = []
 
-        for (const email of member.getManagerEmails()) {
+        for (const email of memberDetails.getManagerEmails()) {
             users.push(User.create({
                 email
             }))
         }
 
         // Create member
-        const decryptedMember = MemberWithRegistrations.create({
-            details: member,
-            publicKey: keyPair.publicKey,
-            registrations: registrations,
-            firstName: member.firstName,
-            users,
-            organizationPublicKey: "" // doesn't matter since we only going to set this when we encrypt it
+        const encryptedMember = EncryptedMemberWithRegistrations.create({
+            firstName: memberDetails.firstName,
+            registrations
         })
 
-        const members = (this.members ?? []).filter(m => !!m.details)
-        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
-        const addMembers = await MemberManager.getEncryptedMembers([decryptedMember])
+        // Add encryption blob (only one)
+        encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true))
 
-        const patchArray = new PatchableArray()
-        for (const m of encryptedMembers) {
-            patchArray.addPatch(m)
-        }
+        // Prepare patch
+        const patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        patch.addPut(encryptedMember)
 
-        for (const m of addMembers) {
-            patchArray.addPut(m)
-        }
+        // Patch other members
+        const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
+        patch.merge(await MemberManager.getEncryptedMembersPatch(members))
         
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",
             path: "/organization/members",
-            body: patchArray,
+            body: patch,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
         this.setMembers(await MemberManager.decryptMembers(response.data))
-        const m = this.members?.find(m => m.id == decryptedMember.id) ?? null
+        const m = this.members?.find(m => m.id == encryptedMember.id) ?? null
 
         MemberManager.callListeners("created", m)
         return m;
@@ -133,18 +124,7 @@ export class FamilyManager {
         // Search for duplicate addresses and duplicate parents
         this.removeDuplicates()
 
-        console.log(member.details)
-
-        const encryptedMembers = await MemberManager.getEncryptedMembersPatch(members)
-        if (encryptedMembers.length == 0) {
-            return;
-        }
-
-        const patchArray = new PatchableArray()
-        for (const m of encryptedMembers) {
-            patchArray.addPatch(m)
-        }
- 
+        const patchArray = await MemberManager.getEncryptedMembersPatch(members)
         const session = SessionManager.currentSession!
 
         // Send the request

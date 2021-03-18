@@ -145,7 +145,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             })
 
             const payment = response.data.payment
-            const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
+            const registrations = await MemberManager.decryptRegistrationWithMember(response.data.registrations)
             await MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 
             if (payment) {

@@ -65,10 +65,6 @@ export class EncryptedMemberDetails extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     forOrganization = false
 
-    /// Whether this was encrypted by the organization
-    @field({ decoder: BooleanDecoder })
-    byOrganization = false
-
     /// Encryption author
     @field({ decoder: StringDecoder })
     authorId: string

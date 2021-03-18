@@ -56,7 +56,6 @@ export default new Migration(async () => {
                 member.encryptedDetails.push(EncryptedMemberDetails.create({
                     publicKey: member.publicKey,
                     ciphertext: member.encryptedForMember,
-                    byOrganization: true,
                     forOrganization: false,
                     authorId: "migration",
                     meta: MemberDetailsMeta.create({
@@ -76,7 +75,6 @@ export default new Migration(async () => {
                 member.encryptedDetails.push(EncryptedMemberDetails.create({
                     publicKey: member.organizationPublicKey,
                     ciphertext: member.encryptedForOrganization,
-                    byOrganization: true,
                     forOrganization: true,
                     authorId: "migration",
                     meta: MemberDetailsMeta.create({
