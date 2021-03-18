@@ -49,7 +49,8 @@ export class FamilyManager {
         // Create member
         const encryptedMember = EncryptedMemberWithRegistrations.create({
             firstName: memberDetails.firstName,
-            registrations
+            registrations,
+            users
         })
 
         // Add encryption blob (only one)
