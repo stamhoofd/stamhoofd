@@ -284,7 +284,7 @@ export default class Menu extends Mixins(NavigationMixin) {
                 try {
                     const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
                     await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
-                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "lock green").setHide(15*1000).show()
+                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
                 } catch (e) {
                     console.error(e)
                     new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
