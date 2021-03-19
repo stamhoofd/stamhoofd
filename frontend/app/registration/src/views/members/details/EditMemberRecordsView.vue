@@ -182,7 +182,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
     isParent = false
 
     mounted() {
-        if ((this.details.age ?? 99) < 18 && this.details.lastReviewed !== null) {
+        if ((this.details.age ?? 99) < 18 && this.details.reviewTimes.getLastReview("records") !== undefined) {
             // already accepted previous time
             this.isParent = true
         }
@@ -293,8 +293,6 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
                 // remove medicine permission (not needed any longer)
                 this.details.records = this.details.records.filter(r => r.type !== RecordType.MedicinePermissions)
             }
-            
-            this.details.lastReviewed = new Date()
         } catch (e) {
             console.error(e);
             this.loading = false
@@ -303,6 +301,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         }
 
         try {
+            this.details.reviewTimes.markReviewed("records")
             await this.saveHandler(this.details, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)

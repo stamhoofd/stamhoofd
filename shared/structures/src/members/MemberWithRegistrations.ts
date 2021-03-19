@@ -309,25 +309,6 @@ export class MemberWithRegistrations extends Member {
         return null
     }
 
-
-    /**
-     * Return if all information is complete and valid
-     */
-    isComplete(forWaitingList = false) {
-        if (!this.details) {
-            return false
-        }
-
-        // this is the spot where we can validate if a member is still valid for registration, e.g. when he has aged and now has to fill in his/her phone number
-
-        if (forWaitingList) {
-            // todo: still do some minor validation
-            return true
-        }
-
-        return this.details.lastReviewed !== null && this.details.lastReviewed > new Date(new Date().getTime() - 1000*60*60*24*60)
-    }
-
     /**
      * @deprecated
      * Return a list of the groups that this user might register in + if it will be on the waiting list or if we should ask

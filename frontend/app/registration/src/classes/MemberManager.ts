@@ -180,9 +180,12 @@ export class MemberManagerStatic extends MemberManagerBase {
             if (!member.details) {
                 continue
             }
-            if (member.details.emergencyContacts.length > 0 && member.details.lastReviewed && member.details.lastReviewed.getTime() > minDate) {
-                minDate = member.details.lastReviewed.getTime()
-                found = member.details.emergencyContacts[0]
+            if (member.details.emergencyContacts.length > 0) {
+                const lastReviewed = member.details.reviewTimes.getLastReview("emergencyContacts")
+                if ((lastReviewed && lastReviewed.getTime() > minDate) || minDate == -1) {
+                    minDate = lastReviewed?.getTime() ?? -1
+                    found = member.details.emergencyContacts[0]
+                }
             }
         }
 
@@ -203,9 +206,13 @@ export class MemberManagerStatic extends MemberManagerBase {
             if (!member.details) {
                 continue
             }
-            if (member.details.doctor && member.details.lastReviewed && member.details.lastReviewed.getTime() > minDate) {
-                minDate = member.details.lastReviewed.getTime()
-                found = member.details.doctor
+            
+            if (member.details.doctor) {
+                const lastReviewed = member.details.reviewTimes.getLastReview("records")
+                if ((lastReviewed && lastReviewed.getTime() > minDate) || minDate == -1) {
+                    minDate = lastReviewed?.getTime() ?? -1
+                    found = member.details.doctor
+                }
             }
         }
 

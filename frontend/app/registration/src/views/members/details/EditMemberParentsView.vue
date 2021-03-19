@@ -1,7 +1,7 @@
 <template>
     <div id="member-parents-view" class="st-view">
         <STNavigationBar title="Ouders">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -9,20 +9,34 @@
                 Ouders van {{ details.firstName }}
             </h1>
 
-            <p v-if="details.age <= 18">Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.</p>
-            <p v-else>Voeg alle ouders van {{ details.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.</p>
+            <p v-if="details.age <= 18">
+                Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.
+            </p>
+            <p v-else>
+                Voeg alle ouders van {{ details.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.
+            </p>
 
-            <p class="warning-box" v-if="parents.length == 0">Voeg alle ouders toe met de knop onderaan.</p>
+            <p v-if="parents.length == 0" class="warning-box">
+                Voeg alle ouders toe met de knop onderaan.
+            </p>
             <STErrorsDefault :error-box="errorBox" />
 
             <STList>
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                     <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
 
-                    <h2 class="parent-name">{{ parent.parent.firstName }} {{ parent.parent.lastName }}</h2>
-                    <p class="parent-description" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
-                    <p class="parent-description" v-if="parent.parent.email">{{ parent.parent.email }}</p>
-                    <p class="parent-description" v-if="parent.parent.address">{{ parent.parent.address }}</p>
+                    <h2 class="parent-name">
+                        {{ parent.parent.firstName }} {{ parent.parent.lastName }}
+                    </h2>
+                    <p v-if="parent.parent.phone" class="parent-description">
+                        {{ parent.parent.phone }}
+                    </p>
+                    <p v-if="parent.parent.email" class="parent-description">
+                        {{ parent.parent.email }}
+                    </p>
+                    <p v-if="parent.parent.address" class="parent-description">
+                        {{ parent.parent.address }}
+                    </p>
 
                     <button slot="right" class="button text limit-space" @click.stop="editParent(parent.parent)">
                         <span class="icon edit" />
@@ -49,17 +63,18 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, STList, STListItem, Checkbox, BackButton } from "@stamhoofd/components"
+import { BackButton,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { MemberDetails, Parent } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
-import ParentView from './ParentView.vue';
+
 import { MemberManager } from '../../../classes/MemberManager';
+import ParentView from './ParentView.vue';
 
 class SelectableParent {
     selected = false
     parent: Parent
 
-    constructor(parent: Parent, selected: boolean = false) {
+    constructor(parent: Parent, selected = false) {
         this.selected = selected
         this.parent = parent
     }
@@ -172,6 +187,7 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
         this.loading = true
 
         try {
+            this.details.reviewTimes.markReviewed("parents")
             await this.saveHandler(this.details, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)

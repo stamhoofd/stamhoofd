@@ -165,6 +165,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 return
             }
 
+            this.details.reviewTimes.markReviewed("details")
             await this.saveHandler(this.details, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)

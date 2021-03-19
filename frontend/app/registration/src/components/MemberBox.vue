@@ -141,6 +141,8 @@ export default class MemberBox extends Mixins(NavigationMixin){
             if (this.member.details.isRecovered) {
                 let meta: MemberDetailsMeta | undefined
                 // Only add the steps that are missing for the organization
+                // Don't check for reviews
+                
                 const newToOld = this.member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))
                 for (const encryptedDetails of newToOld) {
                     if (!encryptedDetails.meta.isRecovered && encryptedDetails.forOrganization) {
@@ -176,13 +178,22 @@ export default class MemberBox extends Mixins(NavigationMixin){
                     steps.push(EditMemberStepType.Records)
                 }
             } else {
-                // We still have all the data. Ask everything, so we can review without problems
-                // todo: might only do this if it was more than 2 months ago
+                // We still have all the data. Ask everything that is older than 3 months
+                if (this.member.details.reviewTimes.isOutdated("details", 60*1000*60*24*31*3)) {
+                    steps.push(EditMemberStepType.Details)
+                }
 
-                steps.push(EditMemberStepType.Details)
-                steps.push(EditMemberStepType.Parents)
-                steps.push(EditMemberStepType.EmergencyContact)
-                steps.push(EditMemberStepType.Records)
+                if (this.member.details.reviewTimes.isOutdated("parents", 60*1000*60*24*31*3)) {
+                    steps.push(EditMemberStepType.Parents)
+                }
+
+                if (this.member.details.reviewTimes.isOutdated("emergencyContacts", 60*1000*60*24*31*3)) {
+                    steps.push(EditMemberStepType.EmergencyContact)
+                }
+
+                if (this.member.details.reviewTimes.isOutdated("records", 60*1000*60*24*31*3)) {
+                    steps.push(EditMemberStepType.Records)
+                }
             }
         }
 

@@ -183,6 +183,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
             ]
 
             try {
+                this.details.reviewTimes.markReviewed("emergencyContacts")
                 await this.saveHandler(this.details, this)
             } catch (e) {
                 this.errorBox = new ErrorBox(e)

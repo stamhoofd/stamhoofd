@@ -5,6 +5,7 @@ import { Address } from '../addresses/Address';
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
+import { ReviewTimes } from './EncryptedMemberDetails';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { OldRecord, Record } from './Record';
@@ -138,8 +139,18 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Last time the records were reviewed
      */
-    @field({ decoder: DateDecoder, nullable: true, version: 20 })
-    lastReviewed: Date | null = null;
+    @field({ decoder: DateDecoder, nullable: true, version: 20, field: "lastReviewed" })
+    @field({ decoder: ReviewTimes, version: 71, upgrade: (oldDate: Date | null) => {
+        const times = ReviewTimes.create({})
+        if (oldDate) {
+            times.markReviewed("records", oldDate)
+            times.markReviewed("parents", oldDate)
+            times.markReviewed("emergencyContacts", oldDate)
+            times.markReviewed("details", oldDate)
+        }
+        return times
+    } })
+    reviewTimes = ReviewTimes.create({})
 
     /**
      * @deprecated
@@ -455,13 +466,7 @@ export class MemberDetails extends AutoEncoder {
             this.emergencyContacts = other.emergencyContacts
         }
 
-        if (other.lastReviewed) {
-            if (this.lastReviewed && this.lastReviewed > other.lastReviewed) {
-                // keep current one
-            } else {
-                this.lastReviewed = other.lastReviewed
-            }
-        }
+        this.reviewTimes.merge(other.reviewTimes)
 
         for (const record of other.records) {
             this.addRecord(record)
