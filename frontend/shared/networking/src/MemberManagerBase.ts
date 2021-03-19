@@ -145,10 +145,10 @@ export class MemberManagerBase {
                 patch.keychainItems.addPut(keychainItem)
             } else {
                 if (!doWeHaveOne) {
-                    /*throw new SimpleError({
+                    throw new SimpleError({
                         code: "missing_key",
                         message: "Je kan deze leden niet bewerken omdat je geen sleutel hebt"
-                    })*/
+                    })
                 }
             }
 
