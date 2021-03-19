@@ -1,28 +1,28 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PatchMembers } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from '../models/Member';
 import { Token } from '../models/Token';
 type Params = {};
 type Query = undefined;
-type Body = PatchMembers
-type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>;
+type Body = AutoEncoderPatchType<KeychainedMembers>
+type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
-export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = PatchMembers as Decoder<PatchMembers>
+export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = KeychainedMembers.patchType() as Decoder<AutoEncoderPatchType<KeychainedMembers>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "POST") {
+        if (request.method != "PATCH") {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/user/members", {});
+        const params = Endpoint.parseParameters(request.url, "/members", {});
 
         if (params) {
             return [true, params as Params];
@@ -38,20 +38,17 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Process changes
         const addedMembers: Member[] = []
-        for (const struct of request.body.addMembers) {
+        for (const put of request.body.members.getPuts()) {
+            const struct = put.put
+
             const member = new Member()
             member.id = struct.id
-            //member.publicKey = struct.publicKey
             member.organizationId = user.organizationId
-            //member.encryptedForMember = struct.encryptedForMember
-            //member.encryptedForOrganization = struct.encryptedForOrganization
-            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
             member.firstName = struct.firstName
+            member.encryptedDetails = struct.encryptedDetails
 
             await member.save()
-
             addedMembers.push(member)
-            throw new Error("Wip: update data here")
         }
 
         if (addedMembers.length > 0) {
@@ -61,7 +58,7 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Modify members
         const members = await Member.getMembersWithRegistrationForUser(user)
-        for (const struct of request.body.updateMembers) {
+        for (const struct of request.body.members.getPatches()) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
                 throw new SimpleError({
@@ -70,20 +67,19 @@ export class PostUserMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     human: "Je probeert een lid aan te passen die niet (meer) bestaat. Er ging ergens iets mis."
                 })
             }
-            //member.encryptedForMember = struct.encryptedForMember
-            //member.encryptedForOrganization = struct.encryptedForOrganization
-            member.firstName = struct.firstName
-            //member.publicKey = struct.publicKey
-            //member.organizationPublicKey = struct.organizationPublicKey ?? user.organization.publicKey
-            await member.save();
 
-            throw new Error("Wip: update data here")
+            member.firstName = struct.firstName ?? member.firstName
+            if (struct.encryptedDetails) {
+                member.encryptedDetails = struct.encryptedDetails.applyTo(member.encryptedDetails)
+            }
+            await member.save();
         }
 
         const addedKeychainItems: KeychainItem[] = []
 
         // Create keychains (adjusting is not allowed atm)
-        for (const keychainItem of request.body.keychainItems) {
+        for (const put of request.body.keychainItems.getPuts()) {
+            const keychainItem = put.put
             if (!members.find(m => m.encryptedDetails.find(k => k.publicKey === keychainItem.publicKey))) {
                 throw new SimpleError({
                     code: "invalid_public_key",

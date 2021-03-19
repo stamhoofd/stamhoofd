@@ -31,7 +31,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return { 
                     memberId: m.id,
@@ -72,7 +72,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return { 
                     memberId: m.id,
@@ -112,7 +112,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,
@@ -153,7 +153,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,
@@ -193,7 +193,7 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/user/members/register", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
             members: members.map(m => {
                 return {
                     memberId: m.id,

@@ -3,7 +3,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, PatchMembers, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
 import { Sorter } from '@stamhoofd/utility';
 import { Vue } from "vue-property-decorator";
 
@@ -36,11 +36,14 @@ export class MemberManagerStatic extends MemberManagerBase {
         return registrations
     }
 
+    /**
+     * Set the members, but keep all the existing member references
+     */
     async setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
         Keychain.addItems(data.keychainItems)
 
-        Vue.set(this, "members", [])
+        const s: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
 
         for (const member of data.data) {
@@ -50,15 +53,25 @@ export class MemberManagerStatic extends MemberManagerBase {
                 member.users,
                 groups
             )
-            this.members!.push(decryptedMember)
+
+            const m = this.members?.find(_m => _m.id == member.id)
+
+            if (m) {
+                m.copyFrom(decryptedMember)
+                s.push(m)
+            } else {
+                s.push(decryptedMember)
+            }
         }
+
+        Vue.set(this, "members", s)
     }
 
     async loadMembers() {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
             method: "GET",
-            path: "/user/members",
+            path: "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
         await this.setMembers(response.data)
@@ -92,7 +105,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",
-            path: "/user/members",
+            path: "/members",
             body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
@@ -126,7 +139,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",
-            path: "/user/members",
+            path: "/members",
             body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })

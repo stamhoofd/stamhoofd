@@ -64,6 +64,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
+import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 import MemberView from "../members/MemberView.vue";
 
 @Component({
@@ -209,8 +210,17 @@ export default class OverviewView extends Mixins(NavigationMixin){
         HistoryManager.setUrl("/")
     }
 
-    addNewMember() {
-        //this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
+    async addNewMember() {
+        // Only ask details + parents for new members
+        // We'll ask the other things when selecting the details
+        const stepManager = new EditMemberStepsManager([
+            EditMemberStepType.Details,
+            EditMemberStepType.Parents
+        ])
+        const component = await stepManager.getFirstComponent()
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: component
+        }).setDisplayStyle("popup"))
     }
 
     editMember(member: MemberWithRegistrations) {

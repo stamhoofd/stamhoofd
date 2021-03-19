@@ -7,13 +7,12 @@ import { MemberFactory } from '../factories/MemberFactory';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { UserFactory } from '../factories/UserFactory';
 import { Token } from '../models/Token';
-import { User } from '../models/User';
-import { PostUserMembersEndpoint } from './PostUserMembersEndpoint';
+import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 
 
-describe("Endpoint.PostUserMembers", () => {
+describe("Endpoint.PatchUserMembersEndpoint", () => {
     // Test endpoint
-    const endpoint = new PostUserMembersEndpoint();
+    const endpoint = new PatchUserMembersEndpoint();
 
     test("Register a new member", async () => {
         const organization = await new OrganizationFactory({}).create()
@@ -26,10 +25,23 @@ describe("Endpoint.PostUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v20/user/members", organization.getApiHost(), {
-            addMembers: members,
-            updateMembers: [],
-            keychainItems: keychainItems
+        const r = Request.buildJson("POST", "/v20/members", organization.getApiHost(), {
+            members: {
+                changes: [
+                    members.map(m => { return {
+                            put: m
+                        }
+                    })
+                ]
+            },
+            keychainItems: {
+                changes: [
+                    keychainItems.map(m => { return {
+                            put: m
+                        }
+                    })
+                ]
+            }
         });
         r.headers.authorization = "Bearer " + token.accessToken
 
@@ -66,7 +78,7 @@ describe("Endpoint.PostUserMembers", () => {
             firstName: existingMember.firstName
         })
 
-        const r = Request.buildJson("POST", "/v20/user/members", organization.getApiHost(), {
+        const r = Request.buildJson("POST", "/v20/members", organization.getApiHost(), {
             addMembers: members,
             updateMembers: [
                 existingMemberEncrypted

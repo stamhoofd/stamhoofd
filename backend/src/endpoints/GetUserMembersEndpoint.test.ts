@@ -28,7 +28,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -71,7 +71,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v5/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v5/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -95,7 +95,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -117,7 +117,7 @@ describe("Endpoint.GetUserMembers", () => {
         const members = await new MemberFactory({ user, userPrivateKey: userFactory.lastPrivateKey }).createMultiple(2)
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -168,7 +168,7 @@ describe("Endpoint.GetUserMembers", () => {
         // Continue as normal
         const token = await Token.createToken(userB)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -206,7 +206,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
 
         await expect(endpoint.test(r)).rejects.toThrow(/missing/i)
     });
@@ -216,7 +216,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken + "d"
 
         await expect(endpoint.test(r)).rejects.toThrow(/invalid/i)
@@ -227,7 +227,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createExpiredToken(user)
 
-        const r = Request.buildJson("GET", "/v1/user/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         await expect(endpoint.test(r)).rejects.toThrow(/expired/i)

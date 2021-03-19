@@ -136,7 +136,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
             const response = await session.authenticatedServer.request({
                 method: "POST",
-                path: "/user/members/register",
+                path: "/members/register",
                 body: RegisterMembers.create({
                     members: registerMembers,
                     paymentMethod: this.selectedPaymentMethod
