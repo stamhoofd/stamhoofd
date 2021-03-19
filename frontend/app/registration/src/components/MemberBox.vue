@@ -135,51 +135,55 @@ export default class MemberBox extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const steps: EditMemberStepType[] = []
 
-        if (this.member.details.isRecovered) {
-            let meta: MemberDetailsMeta | undefined
-            // Only add the steps that are missing for the organization
-            const newToOld = this.member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))
-            for (const encryptedDetails of newToOld) {
-                if (!encryptedDetails.meta.isRecovered && encryptedDetails.forOrganization) {
-                    // Organization still has full access to this member
-                    if (meta) {
-                        // We already had recovered data, so we have access to it. Merge the meta
-                        encryptedDetails.meta.merge(meta)
-                    }
-                    meta = encryptedDetails.meta
-                    break
-                } else {
-                    if (encryptedDetails.forOrganization) {
-                        // We have some recovered data
+        if (this.item.waitingList) {
+            // no steps
+        } else {
+            if (this.member.details.isRecovered) {
+                let meta: MemberDetailsMeta | undefined
+                // Only add the steps that are missing for the organization
+                const newToOld = this.member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))
+                for (const encryptedDetails of newToOld) {
+                    if (!encryptedDetails.meta.isRecovered && encryptedDetails.forOrganization) {
+                        // Organization still has full access to this member
                         if (meta) {
                             // We already had recovered data, so we have access to it. Merge the meta
                             encryptedDetails.meta.merge(meta)
                         }
                         meta = encryptedDetails.meta
+                        break
+                    } else {
+                        if (encryptedDetails.forOrganization) {
+                            // We have some recovered data
+                            if (meta) {
+                                // We already had recovered data, so we have access to it. Merge the meta
+                                encryptedDetails.meta.merge(meta)
+                            }
+                            meta = encryptedDetails.meta
+                        }
                     }
                 }
-            }
 
-            if (!meta || !meta.hasMemberGeneral) {
+                if (!meta || !meta.hasMemberGeneral) {
+                    steps.push(EditMemberStepType.Details)
+                }
+                if (!meta || !meta.hasParents) {
+                    steps.push(EditMemberStepType.Parents)
+                }
+                if (!meta || !meta.hasEmergency) {
+                    steps.push(EditMemberStepType.EmergencyContact)
+                }
+                if (!meta || !meta.hasRecords) {
+                    steps.push(EditMemberStepType.Records)
+                }
+            } else {
+                // We still have all the data. Ask everything, so we can review without problems
+                // todo: might only do this if it was more than 2 months ago
+
                 steps.push(EditMemberStepType.Details)
-            }
-            if (!meta || !meta.hasParents) {
                 steps.push(EditMemberStepType.Parents)
-            }
-            if (!meta || !meta.hasEmergency) {
                 steps.push(EditMemberStepType.EmergencyContact)
-            }
-            if (!meta || !meta.hasRecords) {
                 steps.push(EditMemberStepType.Records)
             }
-        } else {
-            // We still have all the data. Ask everything, so we can review without problems
-            // todo: might only do this if it was more than 2 months ago
-
-            steps.push(EditMemberStepType.Details)
-            steps.push(EditMemberStepType.Parents)
-            steps.push(EditMemberStepType.EmergencyContact)
-            steps.push(EditMemberStepType.Records)
         }
 
         const stepManager = new EditMemberStepsManager(
