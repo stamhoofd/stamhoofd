@@ -13,6 +13,7 @@ import { OrganizationServerMetaData } from '../structures/OrganizationServerMeta
 import { Group } from './Group';
 import { User } from './User';
 import { Webshop } from './Webshop';
+import { Member } from "./Member";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -528,39 +529,37 @@ export class Organization extends Model {
     }
 
     async getKeyHistory(): Promise<OrganizationKey[]> {
-        const query = "select organizationPublicKey, min(updatedAt) as min, max(updatedAt) as max from members where organizationId = ? group by organizationPublicKey"
-        const [rows] = await Database.select(query, [this.id])
-        const keys: OrganizationKey[] = [
+        // Todo: we need some performance improvements here, or save the key history separately
+        const members = await Member.where({
+            organizationId: this.id
+        })
+
+        const keys = new Map<string, OrganizationKey>();
+        keys.set(
+            this.publicKey,
             OrganizationKey.create({
                 publicKey: this.publicKey,
-                start: this.createdAt
+                start: new Date()
             })
-        ]
+        )
 
-        if (rows.length == 0) {
-            return keys
-        }
-
-        for (const row of rows) {
-            console.log(row)
-            const organizationPublicKey = row["members"]["organizationPublicKey"]
-            const min: Date = row[""]["min"]
-            const max: Date | null = row[""]["max"]
-
-            if (organizationPublicKey == this.publicKey) {
-                keys[0].start = min;
-                continue;
+        for (const member of members) {
+            for (const d of member.encryptedDetails) {
+                if (d.forOrganization) {
+                    const existing = keys.get(d.publicKey)
+                    keys.set(
+                        d.publicKey,
+                        OrganizationKey.create({
+                            publicKey: d.publicKey,
+                            start: existing && existing.start < d.meta.ownerDate ? existing.start : d.meta.ownerDate,
+                            end: existing && !existing.end ? null : (existing && existing.end && existing.end > d.meta.date ? existing.end : d.meta.date)
+                        })
+                    )
+                }
             }
-
-            keys.push(OrganizationKey.create({
-                publicKey: organizationPublicKey,
-                start: min,
-                end: max
-            }))
         }
 
-        // Read member + address from first row
-        return keys
+        return [...keys.values()]
     }
 
     getDefaultEmail(): { from: string; replyTo: string | undefined } {

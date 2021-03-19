@@ -17,40 +17,44 @@
             </template>
         </STNavigationBar>
         <main class="limit-width">
-            <div class="container white-top">
-                <div class="split-login-view">
-                    <div class="container login-view">
-                        <h1>Begin met inschrijven</h1>
-                        <p>Onderaan deze pagina vind je meer informatie over waar je zoal voor kan inschrijven.</p>
-                        
-                        <div class="button-box">
-                            <button class="button primary full" @click="login">
-                                <span class="lock" />
-                                Inloggen
-                            </button>
-                            <button class="button secundary full" type="button" @click="createAccount">
-                                Account aanmaken
-                            </button>
+            <div class="white-top view">
+                <main>
+                    <div class="split-login-view">
+                        <div class="container login-view">
+                            <h1>Begin met inschrijven</h1>
+                            <p>Onderaan deze pagina vind je meer informatie over waar je zoal voor kan inschrijven.</p>
+                            
+                            <div class="button-box">
+                                <button class="button primary full" @click="login">
+                                    <span class="lock" />
+                                    Inloggen
+                                </button>
+                                <button class="button secundary full" type="button" @click="createAccount">
+                                    Account aanmaken
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <aside>
-                        <h1>Hoe schrijf je iemand in?</h1>
-                        <ol>
-                            <li>Log in, of maak een account aan.</li>
-                            <li>Vul alle gegevens van de leden in of kijk ze na.</li>
-                            <li>Betaal het lidgeld.</li>
-                            <li>Klaar! De volgende keer moet je enkel de gegevens nakijken.</li>
-                        </ol>
-                    </aside>
-                </div>
-                <p class="stamhoofd-footer">
-                    <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie software door <strong>Stamhoofd</strong> voor {{ organization.name }}</a>
-                </p>
+                        <aside>
+                            <h1>Hoe schrijf je iemand in?</h1>
+                            <ol>
+                                <li>Log in, of maak een account aan.</li>
+                                <li>Vul alle gegevens van de leden in of kijk ze na.</li>
+                                <li>Betaal het lidgeld.</li>
+                                <li>Klaar! De volgende keer moet je enkel de gegevens nakijken.</li>
+                            </ol>
+                        </aside>
+                    </div>
+                    <p class="stamhoofd-footer">
+                        <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie op maat van {{ organization.name }}, door <strong>Stamhoofd</strong></a>
+                    </p>
+                </main>
             </div>
 
-            <div class="container gray-shadow">
-                <GroupTree :category="rootCategory" />
+            <div class="view gray-shadow">
+                <main>
+                    <GroupTree :category="rootCategory" />
+                </main>
             </div>
         </main>
     </div>

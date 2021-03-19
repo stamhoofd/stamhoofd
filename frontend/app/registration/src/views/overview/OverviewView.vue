@@ -17,7 +17,7 @@
                             <h2 class="payment-period">
                                 {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
                             </h2>
-                            <p class="style-description-small" v-if="false">
+                            <p v-if="false" class="style-description-small">
                                 Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
                             </p>
                             <p class="style-description-small">
@@ -31,28 +31,26 @@
                     </STList>
 
                     <STToolbar>
-                    <button slot="right" class="button secundary full" @click="addNewMember">
-                        <span class="icon left add" />
-                        <span>Nieuw lid toevoegen</span>
-                    </button>
+                        <button slot="right" class="button secundary full" @click="addNewMember">
+                            <span class="icon left add" />
+                            <span>Nieuw lid toevoegen</span>
+                        </button>
                     </STToolbar>
                 </main>
-
-                
             </section>
 
             <section class="view gray-shadow">
                 <main>
                     <h1>Inschrijven</h1>
                     <p>Suggesties voor bestaande leden. Onderaan deze pagina vind je alle groepen waarvoor je kan inschrijven.</p>
-                    <GroupTree :category="availableTree" :parentLevel="0" />
+                    <GroupTree :category="availableTree" :parent-level="0" />
                 </main>
                 <main v-if="false">
                     <GroupTree :category="rootCategory" />
                 </main>
             </section>
         </main>
-</div>
+    </div>
 </template>
 
 <script lang="ts">
