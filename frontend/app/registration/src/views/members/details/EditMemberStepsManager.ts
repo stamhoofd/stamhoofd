@@ -1,7 +1,8 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { AskRequirement, MemberDetails, MemberWithRegistrations, Version } from '@stamhoofd/structures';
+import { component } from 'vue/types/umd';
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -77,14 +78,25 @@ export class EditMemberStepsManager {
     editMember: MemberWithRegistrations | null = null
     isNew = true
     types: EditMemberStepType[]
+    finishHandler: (component: NavigationMixin) => Promise<void>;
+
     /**
      * Intialise a new step flow with all the given steps
      */
-    constructor(types: EditMemberStepType[], editMember?: MemberWithRegistrations) {
+    constructor(types: EditMemberStepType[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
         this.types = types
         if (editMember) {
             this.editMember = editMember
             this.isNew = false
+        }
+
+        if (finishHandler) {
+            this.finishHandler = finishHandler
+        } else {
+            this.finishHandler = (component: NavigationMixin) => {
+                component.dismiss({force: true })
+                return Promise.resolve()
+            }
         }
     }
     /**
@@ -180,14 +192,17 @@ export class EditMemberStepsManager {
             isNew: this.isNew,
 
             // Save details on complete
-            saveHandler: async (details: MemberDetails): Promise<ComponentWithProperties | undefined> => {
-                const component = await this.getNextComponent(step.type, details)
+            saveHandler: async (details: MemberDetails, component: NavigationMixin): Promise<void> => {
+                const next = await this.getNextComponent(step.type, details)
 
-                // Save details AFTER determining the next comonent (because onSkip behaviour might update the details)
+                // Save details AFTER determining the next component (because onSkip behaviour might update the details)
                 await this.saveDetails(details)
 
-                // Return next step
-                return component
+                if (!next) {
+                    await this.finishHandler(component)
+                } else {
+                    component.show(next)
+                }
             }
         })
     }

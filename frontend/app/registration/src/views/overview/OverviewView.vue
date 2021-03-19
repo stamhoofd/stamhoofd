@@ -65,6 +65,7 @@ import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
 import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
 
 @Component({
@@ -213,10 +214,27 @@ export default class OverviewView extends Mixins(NavigationMixin){
     async addNewMember() {
         // Only ask details + parents for new members
         // We'll ask the other things when selecting the details
-        const stepManager = new EditMemberStepsManager([
-            EditMemberStepType.Details,
-            EditMemberStepType.Parents
-        ])
+        const stepManager = new EditMemberStepsManager(
+            [
+                EditMemberStepType.Details,
+                EditMemberStepType.Parents
+            ], 
+            undefined,
+            (component: NavigationMixin) => {
+                // when we are ready, show the 'choose group' view for this member
+                if (stepManager.editMember) {
+                    component.show(
+                        new ComponentWithProperties(MemberChooseGroupsView, { member: stepManager.editMember })
+                    )
+                } else {
+                    // uhm?
+                    // default to dismiss
+                    console.error("Missing edit member at the end of edit member flow")
+                    component.dismiss({ force: true })
+                }
+                return Promise.resolve()
+            }
+        )
         const component = await stepManager.getFirstComponent()
         this.present(new ComponentWithProperties(NavigationController, {
             root: component

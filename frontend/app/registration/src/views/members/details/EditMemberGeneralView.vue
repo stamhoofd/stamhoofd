@@ -104,7 +104,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     details: MemberDetails
 
     @Prop({ required: true })
-    saveHandler: (details: MemberDetails) => Promise<ComponentWithProperties | undefined>
+    saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
     livesAtParents = false
     validator = new Validator()
@@ -165,13 +165,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 return
             }
 
-            const component = await this.saveHandler(this.details)
-
-            if (component) {
-                this.show(component)
-            } else {
-                this.dismiss({ force: true })
-            }
+            await this.saveHandler(this.details, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -179,7 +173,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
+        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
             return true;
         }
         return false;
