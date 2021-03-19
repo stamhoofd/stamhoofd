@@ -50,6 +50,27 @@ export class MemberDetailsMeta extends AutoEncoder {
             isRecovered: details.isRecovered
         })
     }
+
+    merge(other: MemberDetailsMeta) {
+        if (other.hasMemberGeneral) {
+            this.hasMemberGeneral = true
+        }
+
+        if (other.hasParents) {
+            this.hasParents = true
+        }
+        if (other.hasEmergency) {
+            this.hasEmergency = true
+        }
+
+        if (other.hasRecords) {
+            this.hasRecords = true
+        }
+
+        if (!other.isRecovered) {
+            this.isRecovered = false
+        }
+    }
 }
 
 

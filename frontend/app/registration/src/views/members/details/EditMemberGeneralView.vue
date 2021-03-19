@@ -9,10 +9,10 @@
                 Wie ga je inschrijven?
             </h1>
             <h1 v-else-if="details.isRecovered">
-                Gegevens aanvullen van {{ member.details ? member.details.firstName : member.firstName }}
+                Gegevens aanvullen van {{ details.firstName }}
             </h1>
             <h1 v-else>
-                Gegevens wijzigen van {{ member.details ? member.details.firstName : member.firstName }}
+                Gegevens nakijken van {{ details.firstName }}
             </h1>
             
             <STErrorsDefault :error-box="errorBox" />
