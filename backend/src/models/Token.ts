@@ -23,7 +23,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 
 export class Token extends Model {
     static table = "tokens";
-    static MAX_DEVICES = 5;
+    static MAX_DEVICES = 15;
 
     @column({ type: "string", foreignKey: Token.user })
     userId: string;
