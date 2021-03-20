@@ -1,0 +1,105 @@
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/base/text-styles.scss';
+
+.member-view-details {
+    padding: 10px 0;
+    padding-bottom: 30px;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 20px;
+
+    @media (max-width: 700px) {
+        grid-template-columns: 100%;
+    }
+
+    > div,
+    > div > div {
+        --st-horizontal-padding: 0;
+        
+        > h2 {
+            @extend .style-title-2;
+            margin: 20px 0;
+        }
+
+        > p {
+            &:not([class]) {
+                @extend .style-definition-description;
+            }
+        }
+
+        > hr {
+            height: $border-width;
+            border: 0;
+            outline: 0;
+            width: 100%;
+            background: $color-gray-lighter;
+            border-radius: $border-width/2;
+            margin: 30px 0;
+        }
+    }
+
+    .accounts-description {
+        @extend .style-definition-description;
+        margin-top: 15px;
+    }
+
+    .account {
+        @extend .style-definition-description;
+        margin-bottom: 5px;
+    }
+}
+
+.member-records {
+    li {
+        list-style: none;
+        padding: 0 10px;
+        background: $color-white-shade;
+        border-radius: $border-radius;
+        margin: 6px 0;
+        @extend .style-definition-description;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        vertical-align: middle;
+
+        &.High {
+            background: $color-error-background;
+            color: $color-error-dark;
+        }
+
+        &.Medium {
+            background: $color-warning-background;
+            color: $color-warning-dark;
+        }
+
+        .icon:first-child {
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .text {
+            padding: 11px 0;
+        }
+
+        &.more {
+            cursor: help;
+
+            .icon:last-child {
+                display: block;
+                flex-shrink: 0;
+                margin-left: auto;
+                padding-left: 5px;
+                transform: translate(0, 0);
+                opacity: 0.5;
+                transition: transform 0.2s, opacity 0.2s;
+            }
+
+            &:hover {
+                .icon:last-child {
+                    transform: translate(5px, 0);
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}

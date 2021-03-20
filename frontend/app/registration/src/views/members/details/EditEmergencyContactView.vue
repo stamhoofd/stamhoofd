@@ -5,10 +5,18 @@
         </STNavigationBar>
         
         <main>
-            <h1>
+            <h1 v-if="details.parents.length > 0">
                 Gegevens van een reserve noodcontactpersoon
             </h1>
-            <p>Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn. Dit kan bv. een tante, opa of buurvrouw zijn.</p>
+            <h1 v-else>
+                Gegevens van een noodcontactpersoon
+            </h1>
+            <p v-if="details.parents.length > 0">
+                Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn. Dit kan bv. een tante, opa of buurvrouw zijn.
+            </p>
+            <p v-else>
+                Graag hebben we een contactpersoon voor in noodgevallen. Dit kan een ouder, tante, opa, buurvrouw of gelijk wie je verkiest zijn.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
@@ -20,6 +28,9 @@
                     <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
                         <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. oma">
                         <datalist id="emergency-contact-types">
+                            <option v-if="details.parents.length == 0" value="Vader" />
+                            <option v-if="details.parents.length == 0" value="Moeder" />
+                            <option v-if="details.parents.length == 0" value="Ouder" />
                             <option value="Oma" />
                             <option value="Opa" />
                             <option value="Tante" />
@@ -46,7 +57,12 @@
 
         <STToolbar>
             <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
-                Overslaan
+                <template v-if="details.emergencyContacts.length == 0">
+                    Overslaan
+                </template>
+                <template v-else>
+                    Verwijderen
+                </template>
             </button>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goNext">
