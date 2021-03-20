@@ -256,4 +256,30 @@ export class FamilyManager {
         return Array.from(parents.values())
     }
 
+    /**
+     * Get last updated emergency contact
+     */
+    getEmergencyContact(): EmergencyContact | null {
+        if (!this.members) {
+            return null
+        }
+        let minDate = -1
+        let found: EmergencyContact | null = null
+
+        for (const member of this.members) {
+            if (!member.details) {
+                continue
+            }
+            if (member.details.emergencyContacts.length > 0) {
+                const lastReviewed = member.details.reviewTimes.getLastReview("emergencyContacts")
+                if ((lastReviewed && lastReviewed.getTime() > minDate) || minDate == -1) {
+                    minDate = lastReviewed?.getTime() ?? -1
+                    found = member.details.emergencyContacts[0]
+                }
+            }
+        }
+
+        return found
+    }
+
 }
