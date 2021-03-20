@@ -152,27 +152,3 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.payment-method-logo {
-    max-height: 30px;
-}
-
-.payment-app-logo {
-    height: 30px;
-}
-
-.payment-app-banner {
-    display: flex;
-    flex-direction: row;
-    padding-top: 10px;
-
-    > * {
-        margin-right: 15px
-    }
-}
-
-</style>

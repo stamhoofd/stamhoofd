@@ -19,10 +19,10 @@
                         Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
                     </p>
 
-                    <div class="hover-box container">
+                    <div class="container" v-if="member.activeRegistrations.length > 0">
                         <h2 class="style-with-button">
                             <div>Ingeschreven voor</div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button text limit-space" @click="chooseGroups()">
                                     <span class="icon add" />
                                     <span>Inschrijven</span>
@@ -31,7 +31,7 @@
                         </h2>
 
                         <STList>
-                            <STListItem v-for="registration in member.activeRegistrations" :key="registration.id">
+                            <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
                                 <figure slot="left" v-if="imageSrc(registration)" class="registration-image">
                                     <img :src="imageSrc(registration)">
                                     <div>
@@ -39,10 +39,13 @@
                                         <span v-else class="icon gray clock" />
                                     </div>
                                 </figure>
-                                <span v-else slot="left" class="icon green success" />
+                                <template v-else slot="left">
+                                    <span v-if="!registration.waitingList" class="icon green success" />
+                                    <span v-else class="icon gray clock" />
+                                </template>
                                 <h3 class="style-title-list">{{ getGroup(registration.groupId).settings.name }}</h3>
-                                <p class="style-description-small">Ingeschreven op {{ registration.registeredAt | dateTime }}</p>
-                                <p class="style-description-small" v-if="registration.waitingList">Op wachtlijst</p>
+                                <p class="style-description-small" v-if="!registration.waitingList">Ingeschreven op {{ registration.registeredAt | dateTime }}</p>
+                                <p class="style-description-small" v-else>Op wachtlijst sinds {{ registration.registeredAt | dateTime }}</p>
                             </STListItem>
 
                         </STList>
@@ -51,10 +54,10 @@
                     </div>
 
 
-                    <div class="hover-box container">
+                    <div class="container">
                         <h2 class="style-with-button">
                             <div>Algemeen</div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button text limit-space" @click="editGeneral()">
                                     <span class="icon edit" />
                                     <span>Bewerken</span>
@@ -97,11 +100,11 @@
                         </dl>
                     </div>
 
-                    <div v-if="parents.length > 0" class="hover-box container">
+                    <div v-if="parents.length > 0" class="container">
                         <hr>
                         <h2 class="style-with-button">
                             <div>Ouders</div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button text limit-space" @click.stop="editParents()">
                                     <span class="icon edit" />
                                     <span>Bewerken</span>
@@ -126,11 +129,11 @@
                         </STList>
                     </div>
 
-                    <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box">
+                    <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index">
                         <hr>
                         <h2 class="style-with-button">
                             <div>Noodcontact: {{ contact.title }}</div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button icon gray edit" @click="editEmergencyContact(contact)" />
                             </div>
                         </h2>
@@ -144,11 +147,11 @@
                         </dl>
                     </div>
 
-                    <div v-if="member.details.doctor" class="hover-box">
+                    <div v-if="member.details.doctor">
                         <hr>
                         <h2 class="style-with-button">
                             <div>Huisarts</div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button icon gray edit" @click="editRecords()" />
                             </div>
                         </h2>
@@ -172,7 +175,7 @@
 
                     <p>Om de gegevens van onze leden te beschermen, worden deze end-to-end versleuteld opgeslagen. We plaatsen ze dus in een kluis, waar het computersysteem niet in kan. Normaal heb je toegang tot de sleutel van deze kluis, maar je kan deze kwijt geraken als: je jouw wachtwoord vergeet of een nieuw account aanmaakt. We kunnen deze sleutel terug met jou delen, op voorwaarde dat je een account hebt met een wachtwoord dat je kent. Dus zodra je een nieuw wachtwoord hebt gekozen, krijgen wij een melding en kunnen wij op een wiskundig veilige manier de sleutel bij jou brengen zonder dat het computersysteem deze kan lezen. Beetje ingewikkeld, maar op die manier zijn de gegevens van onze leden zo veilig mogelijk opgeslagen.</p>
                 </div>
-                <div v-if="(!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords" class="hover-box">
+                <div v-if="(!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords">
                     <template v-if="((!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
                         <h2 class="style-with-button">
                             <div>
@@ -183,7 +186,7 @@
                                     class="icon gray privacy"
                                 />
                             </div>
-                            <div class="hover-show">
+                            <div>
                                 <button class="button icon gray edit" @click="editRecords()" />
                             </div>
                         </h2>

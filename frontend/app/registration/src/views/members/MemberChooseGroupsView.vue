@@ -12,6 +12,10 @@
             <STList>
                 <MemberBox v-for="group in groups" :key="group.id" :group="group" :member="member" type="group" />
             </STList>
+
+            <p class="error-box" v-if="groups.length == 0">
+                {{ member.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
+            </p>
         </main>
 
         <STToolbar>
@@ -46,7 +50,6 @@ import MemberBox from "../../components/MemberBox.vue";
 export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     member!: MemberWithRegistrations
-
 
     get tree() {
         const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)

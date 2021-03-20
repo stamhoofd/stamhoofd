@@ -77,6 +77,12 @@ export class EditMemberStep {
 export class EditMemberStepsManager {
     editMember: MemberWithRegistrations | null = null
     isNew = true
+
+    /**
+     * Text in the button on the last step
+     */
+    lastButtonText: string
+
     types: EditMemberStepType[]
     finishHandler: (component: NavigationMixin) => Promise<void>;
 
@@ -85,9 +91,12 @@ export class EditMemberStepsManager {
      */
     constructor(types: EditMemberStepType[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
         this.types = types
+        this.lastButtonText = "Toevoegen"
+
         if (editMember) {
             this.editMember = editMember
             this.isNew = false
+            this.lastButtonText = "Opslaan"
         }
 
         if (finishHandler) {
@@ -117,6 +126,7 @@ export class EditMemberStepsManager {
     }
 
     async saveDetails(details: MemberDetails) {
+
         // Save or create member if needed
         if (this.editMember) {
             this.editMember.details = details
@@ -186,10 +196,16 @@ export class EditMemberStepsManager {
         if (!step) {
             return undefined
         }
+
+        const hasNext = !!this.getNextStep(step.type, details)
         return new ComponentWithProperties(await step.getComponent(), {
+            // Details to check if anything is changed
+            originalDetails: this.cloneDetails(details),
+            
             // Details to edit (can happen directly, no need to copy again)
             details: this.cloneDetails(details),
             isNew: this.isNew,
+            nextText: hasNext ? "Doorgaan" : this.lastButtonText,
 
             // Save details on complete
             saveHandler: async (details: MemberDetails, component: NavigationMixin): Promise<void> => {

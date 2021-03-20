@@ -2,6 +2,12 @@
     <div id="emergency-contact-view" class="st-view">
         <STNavigationBar title="Noodcontact">
             <BackButton v-if="canPop" slot="left" @click="pop" />
+
+            <button v-if="isOptional && details.emergencyContacts.length > 0" slot="right" class="button text only-icon-smartphone" type="button" @click="skipStep">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         
         <main>
@@ -56,17 +62,12 @@
         </main>
 
         <STToolbar>
-            <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
-                <template v-if="details.emergencyContacts.length == 0">
-                    Overslaan
-                </template>
-                <template v-else>
-                    Verwijderen
-                </template>
+            <button v-if="isOptional && details.emergencyContacts.length == 0" slot="right" class="button secundary" @click="skipStep">
+                Overslaan
             </button>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goNext">
-                    Volgende
+                    {{ nextText }}
                 </button>
             </LoadingButton>
         </STToolbar>
@@ -76,8 +77,8 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, BirthDayInput, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { AskRequirement,EmergencyContact, MemberDetails } from "@stamhoofd/structures"
+import { AddressInput, BackButton, BirthDayInput, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AskRequirement,EmergencyContact, MemberDetails, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -107,6 +108,9 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     isNew: boolean
 
     @Prop({ required: true })
+    nextText: string
+
+    @Prop({ required: true })
     details: MemberDetails
 
     @Prop({ required: true })
@@ -118,6 +122,22 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     validator = new Validator()
+
+    @Prop({ required: true })
+    originalDetails: MemberDetails
+
+    async shouldNavigateAway() {
+        if (
+            JSON.stringify(this.details.encode({ version: Version })) == JSON.stringify(this.originalDetails.encode({ version: Version }))
+        ) {
+            // Nothing changed
+            return true
+        }
+        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
+            return true;
+        }
+        return false;
+    }
 
     mounted() {
         if (this.details.emergencyContacts.length > 0) {
@@ -148,6 +168,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
         this.loading = true
 
         try {
+            this.details.reviewTimes.markReviewed("emergencyContacts")
             await this.saveHandler(this.details, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)

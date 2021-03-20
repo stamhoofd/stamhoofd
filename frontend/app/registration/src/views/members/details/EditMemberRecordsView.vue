@@ -2,6 +2,7 @@
     <div id="member-records-view" class="st-view">
         <STNavigationBar title="Steekkaart">
             <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         
         <main>
@@ -126,7 +127,7 @@
         <STToolbar>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" @click="goNext">
-                    Doorgaan
+                    {{ nextText }}
                 </button>
             </LoadingButton>
         </STToolbar>
@@ -136,8 +137,8 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
-import { AskRequirement, EmergencyContact,MemberDetails, Record, RecordType } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
+import { AskRequirement, EmergencyContact,MemberDetails, Record, RecordType, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -170,6 +171,9 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
+
+    @Prop({ required: true })
+    nextText: string
 
     organization = OrganizationManager.organization
 
@@ -374,6 +378,22 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
             return
         }
         record.description = description
+    }
+
+    @Prop({ required: true })
+    originalDetails: MemberDetails
+
+    async shouldNavigateAway() {
+        if (
+            JSON.stringify(this.details.encode({ version: Version })) == JSON.stringify(this.originalDetails.encode({ version: Version }))
+        ) {
+            // Nothing changed
+            return true
+        }
+        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
+            return true;
+        }
+        return false;
     }
 }
 </script>

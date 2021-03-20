@@ -2,6 +2,7 @@
     <div id="member-parents-view" class="st-view">
         <STNavigationBar title="Ouders">
             <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         
         <main>
@@ -54,7 +55,7 @@
             </button>
             <!-- Next buttons becomes primary button when two parents are selected. We know lot's of members will only have one parent, but we need to force parents to add both parents if they have two parents -->
             <button slot="right" class="button" :class="{ secundary: parents.length <= 1, primary: parents.length > 1}" @click="goNext">
-                Volgende
+                {{ nextText }}
             </button>
         </STToolbar>
     </div>
@@ -63,8 +64,8 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { MemberDetails, Parent } from "@stamhoofd/structures"
+import { BackButton,CenteredMessage,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { MemberDetails, Parent, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -168,6 +169,25 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
     activated() {
         // Only check for new parents!
         this.checkNewParents()
+    }
+
+    @Prop({ required: true })
+    nextText: string
+
+    @Prop({ required: true })
+    originalDetails: MemberDetails
+
+    async shouldNavigateAway() {
+        if (
+            JSON.stringify(this.details.encode({ version: Version })) == JSON.stringify(this.originalDetails.encode({ version: Version }))
+        ) {
+            // Nothing changed
+            return true
+        }
+        if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
+            return true;
+        }
+        return false;
     }
 
     get selectionCount() {

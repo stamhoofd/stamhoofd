@@ -1,7 +1,8 @@
 <template>
     <form id="member-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Inschrijven">
-            <button slot="right" class="button icon gray close" type="button" @click="pop" />
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         
         <main>
@@ -71,9 +72,9 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AddressInput, BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, BackButton } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, Gender } from "@stamhoofd/structures"
+import { Address, Gender, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -91,7 +92,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         PhoneInput,
         EmailInput,
         Checkbox,
-        LoadingButton
+        LoadingButton,
+        BackButton
     }
 })
 export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
@@ -173,7 +175,16 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         this.loading = false
     }
 
+    @Prop({ required: true })
+    originalDetails: MemberDetails
+
     async shouldNavigateAway() {
+        if (
+            JSON.stringify(this.details.encode({ version: Version })) == JSON.stringify(this.originalDetails.encode({ version: Version }))
+        ) {
+            // Nothing changed
+            return true
+        }
         if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten zonder op te slaan?", "Sluiten")) {
             return true;
         }

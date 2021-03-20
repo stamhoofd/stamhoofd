@@ -15,7 +15,7 @@
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
             </div>
 
-            <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo">
+            <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
         </STListItem>
     </STList>
 </template>
@@ -137,10 +137,15 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
 .payment-method-logo {
     max-height: 30px;
+
+    &.bancontact {
+        max-height: 40px;
+        margin: -5px 0 !important; // Fix white borders in bancontact logo
+    }
 }
 
 .payment-app-logo {
-    height: 30px;
+    height: 35px;
 }
 
 .payment-app-banner {
@@ -149,7 +154,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     padding-top: 10px;
 
     > * {
-        margin-right: 15px
+        margin-right: 5px
     }
 }
 
