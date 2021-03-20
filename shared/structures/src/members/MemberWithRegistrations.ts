@@ -1,102 +1,13 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
-import { WaitingListSkipReason, WaitingListType } from '../GroupSettings';
+import { WaitingListType } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
-export class SelectedGroup {
-    group: Group;
-
-    /**
-     * Whether this group is selected to register on the waiting list
-     */
-    waitingList: boolean
-
-    constructor(group: Group, waitingList: boolean) {
-        this.group = group
-        this.waitingList = waitingList
-    }
-}
-
-
-
-export class SelectableGroup {
-    group: Group;
-
-    /**
-     * Whether still in pre registration phase
-     */
-    get preRegistrations(): boolean {
-        return !!this.group.activePreRegistrationDate
-    }
-
-    /**
-     * Ask existing status before selecting this group
-     */
-    askExistingStatus = false
-
-    /**
-     * Whether waiting lists are enabled for this group
-     */
-    get waitingList(): boolean {
-        return this.group.hasWaitingList()
-    }
-
-    /**
-     * Whether waiting lists are enabled for this group
-     */
-    get willJoinWaitingList(): boolean {
-        return this.group.hasWaitingList() && this.skipReason === null
-    }
-
-    /**
-     * If a skip reason is set, we won't register on the waiting list
-     */
-    skipReason: WaitingListSkipReason | null
-
-    alreadyOnWaitingList = false
-    alreadyRegistered = false
-
-    constructor(group: Group, skipReason: WaitingListSkipReason | null, askExistingStatus: boolean) {
-        this.group = group
-        this.skipReason = skipReason
-        this.askExistingStatus = askExistingStatus
-    }
-
-    /**
-     * Throw if you cannot register
-     */
-    canRegister(member: MemberWithRegistrations) {
-        if (!member.details) {
-            return false
-        }
-
-        if (this.askExistingStatus) {
-            return false;
-        }
-
-        if (this.alreadyOnWaitingList && this.willJoinWaitingList) {
-            throw new SimpleError({
-                code: "already_on_waiting_list",
-                message: "Je staat al op de wachtlijst",
-            })
-        }
-
-        if (this.alreadyRegistered) {
-            throw new SimpleError({
-                code: "already_registered",
-                message: "Je bent al ingeschreven voor deze groep",
-            })
-        }
-
-        this.group.canRegisterInGroup(member.details.existingStatus)
-    }
-}
 
 export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Registration) })
@@ -210,60 +121,6 @@ export class MemberWithRegistrations extends Member {
     }
 
     /**
-     * @deprecated
-     * Return an instance of SelectedGroup if this group is selected (and still selectable) (contains information about whether it is selected for the waiting list or not)
-     */
-    getSelectedGroup(group: Group): SelectedGroup | null {
-        return null;
-    }
-
-    /**
-     * @deprecated
-     * Return the groups that are currently selected for registration, optionally filter by waitingList
-     */
-    getSelectedGroups(groups: Group[]): SelectedGroup[] {
-        return []
-    }
-
-    /**
-     * @deprecated
-     * Whether we should ask parents, emergency contacts and records
-     */
-    shouldAskDetails(groups: Group[]) {
-        if (this.groups.length > 0) {
-            return true
-        }
-
-        // only depends on the selected groups at this point
-        if (this.getSelectedGroups(groups).find(g => !g.waitingList)) {
-            // We want to register
-            return true
-        }
-
-        // Only want to put on waiting list (or none selected)
-        return false
-    }
-
-    /**
-     * @deprecated
-     */
-    isCompleteForSelectedGroups(groups: Group[]): boolean {
-        return false
-    }
-
-    /**
-     * Can this member still register in a new group or waiting list?
-     */
-    hasActiveRegistrations() {
-        // todo: atm it is not possible to register a member in multiple groups
-        if (this.activeRegistrations.find(r => !r.waitingList)) {
-            return true
-        }
-
-        return false
-    }
-
-    /**
      * True if you cannot register because you reached the maximum of a group category
      */
     hasReachedMaximum(group: Group, all: GroupCategory[]): boolean {
@@ -307,15 +164,6 @@ export class MemberWithRegistrations extends Member {
         }
 
         return null
-    }
-
-    /**
-     * @deprecated
-     * Return a list of the groups that this user might register in + if it will be on the waiting list or if we should ask
-     */
-    getSelectableGroups(groups: Group[]): SelectableGroup[] {
-        return []
-
     }
 
     /**

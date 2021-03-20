@@ -1,13 +1,11 @@
 import { AutoEncoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GroupCategory } from './GroupCategory';
-import { GroupGenderType } from './GroupGenderType';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
-import { GroupSettings, WaitingListSkipReason,WaitingListType } from './GroupSettings';
-import { MemberExistingStatus } from './members/MemberDetails';
+import { GroupSettings, WaitingListType } from './GroupSettings';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Permissions } from './Permissions';
 
 export class Group extends AutoEncoder {
@@ -68,128 +66,6 @@ export class Group extends AutoEncoder {
             return null
         }
         return this.settings.preRegistrationsDate
-    }
-
-    /**
-     * Returns true if we need to know if it is a new member or a brother / siter before we can know if a group is valid. Else you can default to false
-     */
-    shouldKnowExisting() {
-        // Check if group has waiting list
-        if (this.settings.waitingListType == WaitingListType.None) {
-            return false;
-        }
-
-        if (this.settings.waitingListType == WaitingListType.All) {
-            return false;
-        }
-
-        if (this.settings.waitingListType == WaitingListType.PreRegistrations) {
-            if (this.settings.startDate < new Date()) {
-                // end of pre registration date: it doesn't matter anymore
-                return false;
-            }
-
-            if (this.settings.preRegistrationsDate !== null && this.settings.preRegistrationsDate < new Date()) {
-                // Pre registrations have started
-                return true;
-            }
-            // Pre registrations haven't started yet
-            return false
-        }
-
-        if (this.settings.waitingListType == WaitingListType.ExistingMembersFirst) {
-            // Existing members join the start date
-            return true
-        }
-
-        return false
-    }
-
-    /**
-     * Returns if a user can register in this group (also true if waiting list). Throws errors if not possible
-     */
-    canRegisterInGroup(existingStatus: MemberExistingStatus | null = null) {
-        const preRegistrationDate = this.activePreRegistrationDate
-        if (preRegistrationDate) {
-            // Pre registrations are active
-            if (existingStatus === null || existingStatus.isExpired()) {
-                throw new SimpleError({
-                    code: "missing_existing_status",
-                    message: "Hmm... Er ging iets mis. Normaal hadden we je ergens moeten vragen of je al een bestaand lid aan het inschrijven bent. We hebben deze informatie nodig om verder te kunnen gaan. Herlaad de pagina en probeer eens opnieuw. Contacteer ons als je het probleem niet kan oplossen."
-                })
-            }
-
-            if (existingStatus.isNew) {
-                if (existingStatus.hasFamily) {
-                    if (!this.settings.priorityForFamily) {
-                        throw new SimpleError({
-                            code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
-                        })
-                    } else {
-                        // okay
-                    }
-                } else {
-                    let t = "broers/zussen"
-                    if (this.settings.genderType == GroupGenderType.OnlyMale) {
-                        t = "broers"
-                    } else if (this.settings.genderType == GroupGenderType.OnlyFemale) {
-                        t = "zussen"
-                    }
-
-                    if (this.settings.priorityForFamily) {
-                       
-                        throw new SimpleError({
-                            code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden en hun "+t+" kunnen momenteel inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden inschrijven."
-                        })
-                    } else {
-                        throw new SimpleError({
-                            code: "",
-                            message: "Momenteel zijn de voorinschrijvingen nog bezig voor deze leeftijdsgroep. Enkel bestaande leden kunnen inschrijven, vanaf "+Formatter.dateTime(this.settings.startDate)+" kunnen ook nieuwe leden of "+t+" inschrijven."
-                        })
-                    }
-                }
-            }
-        }
-
-        const now = new Date()
-
-        if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
-            // Start date or pre registration date are in the future
-
-            if (preRegistrationDate) {
-                let t = "broers/zussen"
-                if (this.settings.genderType == GroupGenderType.OnlyMale) {
-                    t = "broers"
-                } else if (this.settings.genderType == GroupGenderType.OnlyFemale) {
-                    t = "zussen"
-                }
-                
-                if (this.settings.priorityForFamily) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.dateTime(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.dateTime(preRegistrationDate)+" voor bestaande leden en hun "+t
-                    })
-                } else {
-                    throw new SimpleError({
-                        code: "",
-                        message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.dateTime(this.settings.startDate)+". De voorinschrijvingen beginnen op "+Formatter.dateTime(preRegistrationDate)+" voor bestaande leden"
-                    })
-                }
-            }
-            throw new SimpleError({
-                code: "",
-                message: "De inschrijvingen voor deze leeftijdsgroep beginnen pas vanaf "+Formatter.date(this.settings.startDate)
-            })
-        }
-
-        if (this.settings.endDate < now) {
-            throw new SimpleError({
-                code: "",
-                message: "De inschrijvingen voor deze groep zijn gesloten"
-            })
-        }
     }
 
     get closed() {

@@ -21,15 +21,12 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { Organization, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup } from '@stamhoofd/structures';
+import { LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Organization, PaymentMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
 @Component({

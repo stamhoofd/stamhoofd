@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view member-view">
         <STNavigationBar :title="member.name">
             <template slot="left">
                 <BackButton v-if="canPop" @click="pop" />
@@ -10,7 +10,7 @@
         <main>
             <h1>
                 <span>{{ member.name }}</span>
-                <span class="style-tag error">Nog niet ingeschreven</span>
+                <span v-if="member.activeRegistrations.length == 0" class="style-tag error">Nog niet ingeschreven</span>
             </h1>
 
             <div class="member-view-details">
@@ -18,6 +18,38 @@
                     <p v-if="member.details.isRecovered" class="warning-box">
                         Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
                     </p>
+
+                    <div class="hover-box container">
+                        <h2 class="style-with-button">
+                            <div>Ingeschreven voor</div>
+                            <div class="hover-show">
+                                <button class="button text limit-space" @click="chooseGroups()">
+                                    <span class="icon add" />
+                                    <span>Inschrijven</span>
+                                </button>
+                            </div>
+                        </h2>
+
+                        <STList>
+                            <STListItem v-for="registration in member.activeRegistrations" :key="registration.id">
+                                <figure slot="left" v-if="imageSrc(registration)" class="registration-image">
+                                    <img :src="imageSrc(registration)">
+                                    <div>
+                                        <span v-if="!registration.waitingList" class="icon green success" />
+                                        <span v-else class="icon gray clock" />
+                                    </div>
+                                </figure>
+                                <span v-else slot="left" class="icon green success" />
+                                <h3 class="style-title-list">{{ getGroup(registration.groupId).settings.name }}</h3>
+                                <p class="style-description-small">Ingeschreven op {{ registration.registeredAt | dateTime }}</p>
+                                <p class="style-description-small" v-if="registration.waitingList">Op wachtlijst</p>
+                            </STListItem>
+
+                        </STList>
+                        <hr>
+
+                    </div>
+
 
                     <div class="hover-box container">
                         <h2 class="style-with-button">
@@ -188,7 +220,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
-import { MemberWithRegistrations, Parent, Record,RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Parent, Record,RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -208,7 +240,8 @@ import MemberChooseGroupsView from "./MemberChooseGroupsView.vue";
         GroupTree
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price,
+        dateTime: Formatter.dateTime.bind(Formatter)
     },
     directives: { Tooltip },
 })
@@ -258,6 +291,10 @@ export default class MemberView extends Mixins(NavigationMixin){
         return this.member.details?.parents ?? []
     }
 
+    getGroup(groupId: string) {
+        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
     chooseGroups() {
         this.show(new ComponentWithProperties(MemberChooseGroupsView, {
             member: this.member
@@ -274,6 +311,14 @@ export default class MemberView extends Mixins(NavigationMixin){
                 //this.checkNewParents()
             }
         }).setDisplayStyle("popup"))*/
+    }
+
+    imageSrc(registration: Registration) {
+        const group = this.getGroup(registration.groupId)
+        if (!group) {
+            return null
+        }
+        return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
     getIcon(record: Record) {
@@ -325,4 +370,36 @@ export default class MemberView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 @use "@stamhoofd/scss/components/member-details.scss";
+
+.member-view .registration-image {
+    position: relative;
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius;
+        object-fit: cover;
+
+        @media (max-width: 350px) {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    div {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: white;
+        border-radius: 40px;
+        line-height: 24px;
+        transform: translate(40%, 30%);
+        height: 23px; // alignment fix for centered icons
+
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+    }
+}
 </style>

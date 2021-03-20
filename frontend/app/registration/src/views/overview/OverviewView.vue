@@ -17,11 +17,11 @@
                             <h2 class="payment-period">
                                 {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
                             </h2>
-                            <p v-if="false" class="style-description-small">
+                            <p v-if="member.groups.length > 0" class="style-description-small">
                                 Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
                             </p>
-                            <p class="style-description-small">
-                                Eén inschrijving in mandje
+                            <p v-else class="style-description-small">
+                                Nog niet ingeschreven
                             </p>
 
                             <template slot="right">
@@ -30,7 +30,7 @@
                         </STListItem>
                     </STList>
 
-                    <STToolbar>
+                    <STToolbar :sticky="false">
                         <button slot="right" class="button secundary full" @click="addNewMember">
                             <span class="icon left add" />
                             <span>Nieuw lid toevoegen</span>
@@ -139,65 +139,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
             SessionManager.currentSession.logout()
             return;
         }
-    }
-
-    /**
-     * Return members that are currently registered in
-     */
-    get waitingMembers() {
-        if (!this.members) {
-            return []
-        }
-        return this.members.filter(m => m.waitingGroups.length > 0 || m.acceptedWaitingGroups.length > 0)
-    }
-
-    getPaymentPeriod(payment: Payment) {
-        return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
-    }
-
-    paymentMethodName(method: PaymentMethod) {
-        switch (method) {
-            case PaymentMethod.Transfer: return "Betaald via overschrijving"
-            case PaymentMethod.Bancontact: return "Betaald via Bancontact"
-            case PaymentMethod.iDEAL: return "Betaald via iDEAL"
-            case PaymentMethod.Payconiq: return "Betaald via Payconiq by Bancontact"
-        }
-        return "Onbekende betaalmethode"
-    }
-
-    get payments() {
-        if (!this.members) {
-            return []
-        }
-
-        const payments: Map<string, PaymentDetailed> = new Map()
-        const groups = OrganizationManager.organization.groups
-        for (const member of this.members) {
-            for (const registration of member.registrations) {
-                if (!registration.payment) {
-                    continue;
-                }
-                const existing = payments.get(registration.payment.id)
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                if (existing) {
-                    existing.registrations.push(reg)
-                } else {
-                    payments.set(registration.payment.id, PaymentDetailed.create(Object.assign({
-                        registrations: [reg]
-                    }, registration.payment)))
-                }
-            }
-        }
-        return Array.from(payments.values())
     }
 
     get members() {

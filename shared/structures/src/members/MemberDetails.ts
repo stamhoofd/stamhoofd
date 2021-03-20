@@ -1,7 +1,8 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
@@ -11,42 +12,6 @@ import { Parent } from './Parent';
 import { OldRecord, Record } from './Record';
 import { OldRecordType, RecordType } from './RecordType';
 
-// Everything in this file is stored encrypted
-
-export class MemberExistingStatus extends AutoEncoder {
-    /**
-     * Whether this member is new or not
-     */
-    @field({ decoder: BooleanDecoder })
-    isNew: boolean
-
-    /**
-     * Whether this member has an existing brother/sister that was registered in the past year
-     */
-    @field({ decoder: BooleanDecoder })
-    hasFamily: boolean
-
-    @field({ decoder: DateDecoder })
-    lastChanged: Date = new Date()
-
-    isExpired() {
-        return this.lastChanged <= new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 14)
-    }
-}
-
-export class PreferredGroup extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    groupId: string
-
-    /**
-     * Cycle used, in order to invalidate old values
-     */
-    @field({ decoder: IntegerDecoder })
-    cycle: number
-
-    @field({ decoder: BooleanDecoder })
-    waitingList = false
-}
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -151,36 +116,6 @@ export class MemberDetails extends AutoEncoder {
         return times
     } })
     reviewTimes = ReviewTimes.create({})
-
-    /**
-     * @deprecated
-     * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
-     * This can get cleared after registration, but is not needed since we keep track of the group cycle.
-     */
-    @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null, field: "preferredGroupId" })
-    @field({ decoder: new ArrayDecoder(PreferredGroup), version: 17, upgrade: (preferredGroupId: string | null) => {
-        if (preferredGroupId === null) {
-            return []
-        }
-        return [
-            PreferredGroup.create({
-                groupId: preferredGroupId,
-                cycle: 0,
-                waitingList: false
-            })
-        ]
-    } })
-    preferredGroups: PreferredGroup[] = []
-
-    /**
-     * @deprecated
-     * During registration, we sometimes need to know if it is an existing member, new member or a broter/sister of an existing member.
-     * We don't ask this information if it is not needed or when we can calculate it automatically based on the member history 
-     * (this behaviour is determined by the shouldKnowExisting method of Group)
-     * We also keep the date that this was asked, in order to invalidate the response in the future.
-     */
-    @field({ decoder: MemberExistingStatus, nullable: true, version: 18 })
-    existingStatus: MemberExistingStatus | null = null
 
     /**
      * Keep track whether this are recovered member details. Only set this back to false when:

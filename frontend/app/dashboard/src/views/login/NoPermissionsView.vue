@@ -16,18 +16,11 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group, MemberWithRegistrations, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Vue } from "vue-property-decorator";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import FinancialProblemsView from './FinancialProblemsView.vue';
 
 @Component({
     components: {

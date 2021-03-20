@@ -51,7 +51,7 @@
                         </button>
                     </p>
                 </main>
-                <STToolbar>
+                <STToolbar :sticky="false">
                     <template slot="right">
                         <LoadingButton :loading="saving">
                             <button class="button primary" @click="save">
