@@ -1,9 +1,9 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar>
+        <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
             <BackButton slot="left" @click="pop" />
 
-            <button v-if="canDismiss" slot="right" class="button secundary" @click="dismiss">
+            <button v-if="canPop" slot="right" class="button secundary" @click="dismiss">
                 Annuleren
             </button>
         </STNavigationBar>

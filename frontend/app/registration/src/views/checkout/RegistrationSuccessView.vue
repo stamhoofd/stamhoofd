@@ -1,6 +1,7 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :title="text"/>
+        <div class="box">
             <main>
                 <h1>{{ text }}</h1>
                 
@@ -22,15 +23,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins,  Prop } from "vue-property-decorator";
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar, STToolbar, STList, STListItem, LoadingView, Checkbox, ErrorBox, LoadingButton } from "@stamhoofd/components"
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { MemberManager } from '../../classes/MemberManager';
-import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { RegistrationWithMember } from '@stamhoofd/structures';
 
 @Component({
     components: {

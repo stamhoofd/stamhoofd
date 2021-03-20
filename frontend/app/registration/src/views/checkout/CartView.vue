@@ -109,7 +109,7 @@ export default class CartView extends Mixins(NavigationMixin){
                 this.present(
                     new ComponentWithProperties(NavigationController, { 
                         root: new ComponentWithProperties(component, {})
-                    })
+                    }).setDisplayStyle("popup")         
                 );
             } else {
                 // todo

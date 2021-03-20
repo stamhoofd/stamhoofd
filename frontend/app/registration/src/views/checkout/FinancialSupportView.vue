@@ -1,11 +1,9 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar>
-            <BackButton slot="left" @click="pop" />
+        <STNavigationBar title="Financiële ondersteuning">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
 
-            <button v-if="canDismiss" slot="right" class="button secundary" @click="dismiss">
-                Annuleren
-            </button>
+            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss"></button>
         </STNavigationBar>
         <div class="box">
             <main>

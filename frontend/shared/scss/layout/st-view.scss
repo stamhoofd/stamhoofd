@@ -76,7 +76,7 @@
         }
     }
 
-    &.boxed {
+    &.boxed:not(.popup .st-view.boxed) {
         @media (min-width: 801px) {
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
@@ -90,25 +90,27 @@
 
         // the main extend has moved to .box general because CSS stops working (don't know why)
 
-        @media (max-width: 800px) {
-            flex-grow: 1;
-        }
+        &:not(.popup .st-view > .box) {
+            @media (max-width: 800px) {
+                flex-grow: 1;
+            }
 
-        @media (min-width: 801px) {
-            --st-safe-area-top: 0px;
-            max-width: 800px;
-            background: $color-white;
-            @include style-side-view-shadow();
-            border-radius: $border-radius;
-            margin: 20px auto;
-            min-height: auto;
-            width: 100%;
-            box-sizing: border-box;
+            @media (min-width: 801px) {
+                --st-safe-area-top: 0px;
+                max-width: 800px;
+                background: $color-white;
+                @include style-side-view-shadow();
+                border-radius: $border-radius;
+                margin: 20px auto;
+                min-height: auto;
+                width: 100%;
+                box-sizing: border-box;
 
-            padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
-            
-            // With extra top padding safe area default to 20px
-            padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+                padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+                
+                // With extra top padding safe area default to 20px
+                padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+            }
         }
     }
 

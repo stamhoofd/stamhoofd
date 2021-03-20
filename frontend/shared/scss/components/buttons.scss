@@ -301,9 +301,11 @@
     &.icon {
         padding: 10px;
         margin: -10px;
+        transition: 0.2s opacity, 0.2s transform;
 
         &:active {
             opacity: 0.4;
+            transform: scale(0.8, 0.8);
         }
     }
 }
