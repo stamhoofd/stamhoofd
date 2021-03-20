@@ -81,7 +81,7 @@ export default class App extends Vue {
 
                         if (parts.length == 1 && parts[0] == 'payment') {
                             // tood: password reset view
-                            const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
+                            const PaymentPendingView = (await import(/* webpackChunkName: "Checkout" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
                             return new ComponentWithProperties(ModalStackComponent, {
                                 root: new ComponentWithProperties(NavigationController, { 
                                     root: new ComponentWithProperties(PaymentPendingView, {
@@ -89,7 +89,7 @@ export default class App extends Vue {
                                         paymentId: new URL(window.location.href).searchParams.get("id"),
                                         finishedHandler: async function(this: any, payment: Payment | null) {
                                             if (payment && payment.status == PaymentStatus.Succeeded) {
-                                                const RegistrationSuccessView = (await import(/* webpackChunkName: "PaymentPendingView" */ "./views/overview/RegistrationSuccessView.vue")).default
+                                                const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "./views/checkout/RegistrationSuccessView.vue")).default
                                                 const response = await session.authenticatedServer.request({
                                                     method: "GET",
                                                     path: "/payments/"+payment.id+"/registrations",

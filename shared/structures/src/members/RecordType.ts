@@ -247,7 +247,7 @@ export class RecordTypeHelper {
             case RecordType.MedicinePermissions:
                 return "Geen toestemming voor het toedienen van medicatie";
             case RecordType.FinancialProblems:
-                return "Gezin met financiële moeilijkheden";
+                return "Kansarm gezin";
             case RecordType.Other:
                 return "Andere opmerking";
         }

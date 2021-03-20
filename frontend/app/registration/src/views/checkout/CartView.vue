@@ -55,14 +55,15 @@
 
 
 <script lang="ts">
-import { HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { RegisterItem } from '@stamhoofd/structures';
+import { RecordType, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {
@@ -94,11 +95,26 @@ export default class CartView extends Mixins(NavigationMixin){
         if (this.loading) {
             return
         }
+        if (this.cart.items.length == 0) {
+            return
+        }
         this.loading = true
         this.errorBox = null
 
          try {
             // todo: go to checkout ;)
+            if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+                // Go to financial view
+                const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
+                this.present(
+                    new ComponentWithProperties(NavigationController, { 
+                        root: new ComponentWithProperties(component, {})
+                    })
+                );
+            } else {
+                // todo
+            }
+
             await Promise.resolve()
         } catch (e) {
             console.error(e)

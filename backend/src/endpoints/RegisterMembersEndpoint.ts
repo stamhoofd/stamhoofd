@@ -1,9 +1,9 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
-import { ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database';
+import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { GroupPrices, Organization, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterMember,RegisterMembers, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
+import { IDRegisterCheckout, IDRegisterItem, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterItem, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Group } from '../models/Group';
@@ -16,14 +16,14 @@ import { Registration } from '../models/Registration';
 import { Token } from '../models/Token';
 type Params = {};
 type Query = undefined;
-type Body = RegisterMembers
+type Body = IDRegisterCheckout
 type ResponseBody = RegisterResponse
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
 export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = RegisterMembers as Decoder<RegisterMembers>
+    bodyDecoder = IDRegisterCheckout as Decoder<IDRegisterCheckout>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
@@ -39,6 +39,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        if (request.request.getVersion() < 71) {
+            throw new SimpleError({
+                code: "not_supported",
+                message: "This version is no longer supported",
+                human: "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser."
+            })
+        }
         const token = await Token.authenticate(request);
         const user = token.user
 
@@ -49,13 +56,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const payRegistrations: Registration[] = []
         const payNames: string[] = []
 
-        const now = new Date()
         let totalPrice = 0
 
-        if (request.body.members.length == 0) {
+        if (request.body.cart.items.length == 0) {
             throw new SimpleError({
                 code: "empty_data",
-                message: "Oeps, je hebt niemand geselecteerd om in te schrijven"
+                message: "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat."
             })
         }
 
@@ -81,11 +87,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
 
-        // Put groups without a family price in front of the row, so we can improve price calculation
-        const sortedMembers: RegisterMember[] = []
+        // Put registrations without a family price in front of the row, so we can improve price calculation
+        const sortedItems: IDRegisterItem[] = []
 
-        for (const register of request.body.members) {
-            const member = members.find(m => m.id == register.memberId)
+        for (const item of request.body.cart.items) {
+            const member = members.find(m => m.id == item.memberId)
             if (!member) {
                 throw new SimpleError({
                     code: "invalid_member",
@@ -93,7 +99,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const group = groups.find(g => g.id == register.groupId);
+            const group = groups.find(g => g.id == item.groupId);
             if (!group) {
                 throw new SimpleError({
                     code: "invalid_member",
@@ -102,15 +108,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             if (group.settings.prices.find(p => p.familyPrice !== null)) {
                 // append
-                sortedMembers.push(register)
+                sortedItems.push(item)
             } else {
                 // prepend
-                sortedMembers.unshift(register)
+                sortedItems.unshift(item)
             }
         }
 
-        mainLoop: for (const register of sortedMembers) {
-            const member = members.find(m => m.id == register.memberId)
+        mainLoop: for (const item of sortedItems) {
+            const member = members.find(m => m.id == item.memberId)
             if (!member) {
                 throw new SimpleError({
                     code: "invalid_member",
@@ -118,7 +124,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const group = groups.find(g => g.id == register.groupId);
+            const group = groups.find(g => g.id == item.groupId);
             if (!group) {
                 throw new SimpleError({
                     code: "invalid_member",
@@ -146,13 +152,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // 
 
             // Check if this member is already registered in this group?
-            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: register.groupId, cycle: group.cycle })
+            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle })
             let registration: RegistrationWithMember | undefined = undefined;
 
             for (const existingRegistration of existingRegistrations) {
                 registration = existingRegistration.setRelation(registrationMemberRelation, member as Member)
 
-                if (existingRegistration.waitingList && register.waitingList) {
+                if (existingRegistration.waitingList && item.waitingList) {
                     // already on waiting list, no need to repeat it
                     // skip without error
                     registrations.push(registration)
@@ -174,7 +180,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.groupId = group.id
             registration.cycle = group.cycle
 
-            if (register.waitingList) {
+            if (item.waitingList) {
                 registration.waitingList = true
                 await registration.save()
             } else {
@@ -210,7 +216,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     }) 
                 }
 
-                const price = foundPrice.getPriceFor(register.reduced, alreadyRegisteredCount)
+                const price = foundPrice.getPriceFor(item.reduced, alreadyRegisteredCount)
                 totalPrice += price
                 payRegistrations.push(registration)
                 payNames.push(member.firstName)
@@ -288,7 +294,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             paymentId: payment.id,
                         },
                     });
-                    console.log(molliePayment)
                     paymentUrl = molliePayment.getCheckoutUrl()
 
                     // Save payment

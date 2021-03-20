@@ -31,7 +31,6 @@ import { MemberWithRegistrations, Group, PaymentDetailed, RegistrationWithMember
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import MemberGroupView from '../registration/MemberGroupView.vue';
 import { SimpleError } from '@simonbackx/simple-errors';
-import OverviewView from './OverviewView.vue';
 
 @Component({
     components: {
@@ -99,7 +98,7 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
         }
         this.loading = true;
         await MemberManager.loadMembers()
-        this.navigationController!.push(new ComponentWithProperties(OverviewView, {}), true, this.navigationController!.components.length, true)
+        this.dismiss({ force: true })
         this.loading = false;
     }
 

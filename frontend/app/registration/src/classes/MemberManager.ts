@@ -118,7 +118,7 @@ export class MemberManagerStatic extends MemberManagerBase {
      * Patch all members that are not placeholders, and force a save for the given members (even when they are placeholders)
      */
     async patchAllMembersWith(...patchMembers: MemberWithRegistrations[]) {
-        const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
+        const members = (this.members ?? []).filter(m => !m.details.isRecovered)
 
         for (const member of patchMembers) {
             const ex = members.findIndex(m => m.id == member.id)

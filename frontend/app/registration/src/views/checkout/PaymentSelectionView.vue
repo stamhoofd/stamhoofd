@@ -1,7 +1,14 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
-            <main v-if="paymentMethods.length > 1">
+    <div class="st-view boxed">
+        <STNavigationBar>
+            <BackButton slot="left" @click="pop" />
+
+            <button v-if="canDismiss" slot="right" class="button secundary" @click="dismiss">
+                Annuleren
+            </button>
+        </STNavigationBar>
+        <div class="box">
+            <main v-if="needsPay">
                 <h1>Kies een betaalmethode</h1>
 
                 <STErrorsDefault :error-box="errorBox" />
@@ -9,8 +16,8 @@
                 <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
             </main>
             <main v-else>
-                <h1>Bevestig registratie</h1>
-                <p>Heb je alle leden toegevoegd?</p>
+                <h1>Bevestig je inschrijvingen</h1>
+                <p>Heb je alle inschrijvingen toegevoegd aan je mandje? Je kan meerdere inschrijvingen in één keer afrekenen.</p>
 
                 <STErrorsDefault :error-box="errorBox" />
             </main>
@@ -18,7 +25,8 @@
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
-                        <span v-if="willPay">Betalen</span>
+                        <span v-if="needsPay && selectedPaymentMethod == 'Transfer'">Inschrijving bevestigen</span>
+                        <span v-else-if="needsPay">Betalen</span>
                         <span v-else>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>
@@ -30,13 +38,13 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, TransferSettings } from '@stamhoofd/structures';
+import { KeychainedResponse, Payment, PaymentMethod, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
+import { CheckoutManager } from '../../classes/CheckoutManager';
 
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -51,49 +59,34 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
         Radio,
         LoadingButton,
         STErrorsDefault,
-        PaymentSelectionList
+        PaymentSelectionList,
+        BackButton
     }
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     OrganizationManager = OrganizationManager
+    CheckoutManager = CheckoutManager
     step = 3
-
-    @Prop({ required: true })
-    selectedMembers: MemberWithRegistrations[]
-
-    @Prop({ default: false })
-    reduced!: boolean
 
     loading = false
     errorBox: ErrorBox | null = null
-    selectedPaymentMethod: PaymentMethod | null = null
 
-    mounted() {
-        // this is needed because paymetn list is not loaded, and we need to select the first before continueing
-        if (this.paymentMethods.length == 1) {
-            this.selectedPaymentMethod = this.paymentMethods[0]
-        }
+    get selectedPaymentMethod() {
+        return CheckoutManager.checkout.paymentMethod
+    }
+
+    set selectedPaymentMethod(paymentMethod: PaymentMethod) {
+        CheckoutManager.checkout.paymentMethod = paymentMethod
     }
 
     get paymentMethods() {
         return OrganizationManager.organization.meta.paymentMethods
     }
 
-    getSelectedGroups(member: MemberWithRegistrations): SelectedGroup[] {
-        return member.getSelectedGroups(OrganizationManager.organization.groups)
-    }
-
-    getRegisterGroups(member: MemberWithRegistrations): Group[] {
-        return this.getSelectedGroups(member).filter(g => !g.waitingList).map(g => g.group)
-    }
-
-    get willPay() {
-        if (!this.selectedMembers.find(m => this.getRegisterGroups(m).length > 0)) {
-            // only waiting list
-            return false
-        }
-        return true;
+    get needsPay() {
+        // Todo: also check zero prices here
+        return this.CheckoutManager.cart.items.find(i => !i.waitingList)
     }
 
     get organization() {
@@ -101,46 +94,17 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     async goNext() {
-        if (this.loading || !this.selectedPaymentMethod) {
+        if (this.loading || (this.selectedPaymentMethod === PaymentMethod.Unknown || !this.needsPay)) {
             return
         }
         const session = SessionManager.currentSession!
         this.loading = true
 
         try {
-            const groups = OrganizationManager.organization.groups
-            const registerMembers = this.selectedMembers.flatMap(m => {
-                if (!m.details) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "Data is niet leesbaar"
-                    })
-                }
-
-                const preferred = m.getSelectedGroups(groups)
-
-                if (preferred.length == 0) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "Een gekozen leeftijdsgroep is niet meer geldig. Herlaad de pagina eens en probeer opnieuw."
-                    })
-                }
-
-                return preferred.map(g => RegisterMember.create({
-                    memberId: m.id,
-                    groupId: g.group.id,
-                    reduced: this.reduced,
-                    waitingList: g.waitingList
-                }))
-            })
-
             const response = await session.authenticatedServer.request({
                 method: "POST",
                 path: "/members/register",
-                body: RegisterMembers.create({
-                    members: registerMembers,
-                    paymentMethod: this.selectedPaymentMethod
-                }),
+                body: CheckoutManager.checkout.convert(),
                 decoder: RegisterResponse as Decoder<RegisterResponse>
             })
 
@@ -157,10 +121,9 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     returnUrl: "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
                     transferSettings: OrganizationManager.organization.meta.transferSettings,
-                    additionalReference: Formatter.uniqueArray(this.selectedMembers.map(r => r.details?.lastName ?? "?")).join(", "),
+                    additionalReference: Formatter.uniqueArray(this.CheckoutManager.checkout.cart.items.map(r => r.member.details.lastName)).join(", "),
                     type: "registration"
                 }, (payment: Payment) => {
-                    console.log("Success")
                     // success
                     this.loading = false
 

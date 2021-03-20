@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, Payment, Registration } from "@stamhoofd/structures";
+import { SimpleError } from "@simonbackx/simple-errors";
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from '../models/Member';
 import { Token } from '../models/Token';
-import { User } from '../models/User';
 type Params = {};
 type Query = undefined;
 type Body = undefined
@@ -29,6 +29,14 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        if (request.request.getVersion() < 71) {
+            throw new SimpleError({
+                code: "not_supported",
+                message: "This version is no longer supported",
+                human: "Oops! Er is een nieuwe versie beschikbaar van de inschrijvingswebsite. Door grote wijzigingen moet je die verplicht gebruiken: herlaad de website en verwijder indien nodig de cache van jouw browser."
+            })
+        }
+
         const token = await Token.authenticate(request);
         const user = token.user
 

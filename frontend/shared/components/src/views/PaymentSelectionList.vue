@@ -59,7 +59,9 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     paymentMethods: PaymentMethod[]
 
     mounted() {
-        this.selectedPaymentMethod = this.sortedPaymentMethods[0] ?? null
+        if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
+            this.selectedPaymentMethod = this.sortedPaymentMethods[0] ?? null
+        }
     }
 
     get selectedPaymentMethod() {

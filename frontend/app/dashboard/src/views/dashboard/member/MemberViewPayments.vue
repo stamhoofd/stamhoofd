@@ -65,7 +65,7 @@
 import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage, LoadingButton,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EncryptedPaymentDetailed,MemberWithRegistrations, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
+import { EncryptedPaymentDetailed,MemberWithRegistrations, Payment, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -95,7 +95,14 @@ export default class MemberViewPayments extends Vue {
     organization = OrganizationManager.organization
 
     get payments() {
-        return this.member.registrations.flatMap(r => r.payment ? [r.payment] : [])
+        const map = new Map<string, Payment>()
+
+        for (const registration of this.member.registrations) {
+            if (registration.payment && !map.has(registration.payment.id)) {
+                map.set(registration.payment.id, registration.payment)
+            }
+        }
+        return [...map.values()]
     }
 
     async markPaid() {

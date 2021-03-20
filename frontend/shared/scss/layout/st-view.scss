@@ -1,7 +1,7 @@
 @use '../base/variables' as *;
 @use '../base/text-styles' as *;
 
-.view {
+.view, .st-view .box {
     > main {
         @extend .main-text-container;
     }
@@ -88,6 +88,8 @@
         display: flex;
         flex-direction: column;
 
+        // the main extend has moved to .box general because CSS stops working (don't know why)
+
         @media (max-width: 800px) {
             flex-grow: 1;
         }
@@ -107,10 +109,6 @@
             
             // With extra top padding safe area default to 20px
             padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
-        }
-
-        > main {
-            @extend .main-text-container;
         }
     }
 
