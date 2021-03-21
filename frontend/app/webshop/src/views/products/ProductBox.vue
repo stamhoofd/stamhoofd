@@ -13,8 +13,9 @@
                 <p class="price">
                     {{ price | price }}
 
-                    <span v-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
-                    <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} stuks</span>
+                    <span v-if="!product.enabled" class="style-tag error">Tijdelijk onbeschikbaar</span>
+                    <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
+                    <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }}</span>
                 </p>
             </div>
             <hr>
@@ -72,6 +73,11 @@ export default class ProductBox extends Mixins(NavigationMixin){
     }
 
     onClicked() {
+        if (!this.product.enabled) {
+            new Toast("Dit artikel is jammer genoeg tijdelijk onbeschikbaar", "error red").show()
+            return;
+        }
+
         if (this.product.isSoldOut) {
             new Toast("Dit artikel is jammer genoeg uitverkocht", "error red").show()
             return;
