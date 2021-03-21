@@ -9,7 +9,7 @@
         ".yalc/*"
     ],
     "engines": {
-        "yarn": "1.22.10"
+        "yarn": "1.19.0"
     },
     "scripts": {
         "build": "cd shared/crypto && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../..",

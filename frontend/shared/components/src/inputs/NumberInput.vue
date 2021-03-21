@@ -55,8 +55,12 @@ export default class NumberInput extends Vue {
     valid = true;
 
     /** Price in cents */
+    @Prop({ default: true })
+    required!: boolean
+
+    /** Price in cents */
     @Prop({ default: 0 })
-    value!: number
+    value!: number | null
 
     @Prop({ default: "" })
     suffix: string;
@@ -74,23 +78,23 @@ export default class NumberInput extends Vue {
         return this.value
     }
 
-    set internalValue(val: number) {
+    set internalValue(val: number | null) {
         this.$emit("input", val)
     }
 
     get stepperValue() {
-        return this.value
+        return this.value ?? this.min ?? 0
     }
 
     set stepperValue(val: number) {
         this.$emit("input", val)
         this.$nextTick(() => {
-            this.clean(val);
+            this.clean();
         })
     }
 
     mounted() {
-        this.clean(this.internalValue)
+        this.clean()
     }
 
     @Watch("valueString")
@@ -98,8 +102,13 @@ export default class NumberInput extends Vue {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
         if (value == "") {
-            this.valid = true;
-            this.internalValue = Math.max(0, this.min ?? 0);
+            if (this.required) {
+                this.valid = true;
+                this.internalValue = Math.max(0, this.min ?? 0);
+            } else {
+                this.valid = true;
+                this.internalValue = null;
+            }
         } else {
             if (!value.includes(".")) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
@@ -127,12 +136,22 @@ export default class NumberInput extends Vue {
 
     // Restore invalid input, make the input value again
     // And set valueString
-    clean(value: number) {
+    clean() {
         if (!this.valid) {
             return;
         }
+
+        let value = this.value
+        if (value === null) {
+            if (!this.required) {
+                this.valueString = ""
+                return
+            }
+            value = this.min ?? 0
+        }
+
         // Check if has decimals
-        const float = this.value / (this.floatingPoint ? 100 : 1)
+        const float = value / (this.floatingPoint ? 100 : 1)
         const decimals = float % 1;
         const abs = Math.abs(float);
 
@@ -163,10 +182,10 @@ export default class NumberInput extends Vue {
         if (!this.valid) {
             return;
         }
-        const v = this.constrain(this.internalValue + add);
+        const v = this.constrain((this.internalValue ?? this.min ?? 0) + add);
         this.internalValue = v
         this.$nextTick(() => {
-            this.clean(v);
+            this.clean();
         })
         
     }

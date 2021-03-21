@@ -32,6 +32,17 @@ export class Parent extends AutoEncoder {
         return this.firstName + " " + this.lastName;
     }
 
+    matchQuery(query: string): boolean {
+        if (
+            StringCompare.typoCount(this.firstName, query) < 2 ||
+            StringCompare.typoCount(this.lastName, query) < 2 ||
+            StringCompare.typoCount(this.name, query) < 2
+        ) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Call this to clean up capitals in all the available data
      */

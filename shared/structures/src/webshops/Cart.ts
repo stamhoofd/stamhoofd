@@ -104,6 +104,15 @@ export class CartItem extends AutoEncoder {
             })
         }
 
+        if (product.remainingStock !== null && product.remainingStock < this.amount) {
+            throw new SimpleError({
+                code: "product_unavailable",
+                message: "No remaining stock",
+                // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                human: "Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name
+            })
+        }
+
         const productPrice = product.prices.find(p => p.id === this.productPrice.id)
         if (!productPrice) {
             throw new SimpleError({

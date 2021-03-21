@@ -107,7 +107,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Time)
+            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Time, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

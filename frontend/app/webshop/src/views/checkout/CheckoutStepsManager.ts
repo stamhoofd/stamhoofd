@@ -115,7 +115,10 @@ export class CheckoutStepsManager {
         return this.getSteps().filter(s => s.active)
     }
 
-    static getNextStep(step: CheckoutStepType | undefined) {
+    static async getNextStep(step: CheckoutStepType | undefined, reload = false) {
+        if (reload) {
+            await WebshopManager.reload()
+        }
         CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
 
         const steps = this.getSteps()

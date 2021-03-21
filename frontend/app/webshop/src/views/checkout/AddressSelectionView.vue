@@ -119,7 +119,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-           const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Address)
+           const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

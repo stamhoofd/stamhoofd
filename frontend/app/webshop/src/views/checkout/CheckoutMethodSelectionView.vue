@@ -118,7 +118,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
 
         try {
             // Force a save if nothing changed (to fix timeSlot + updated data)
-            const nextStep = CheckoutStepsManager.getNextStep(CheckoutStepType.Method)
+            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Method, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",

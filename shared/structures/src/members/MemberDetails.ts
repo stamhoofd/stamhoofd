@@ -244,13 +244,18 @@ export class MemberDetails extends AutoEncoder {
     }
 
     matchQuery(query: string): boolean {
-        const lowerQuery = query.toLowerCase();
         if (
-            this.firstName.toLowerCase().includes(lowerQuery) ||
-            this.lastName.toLowerCase().includes(lowerQuery) ||
-            this.name.toLowerCase().includes(lowerQuery)
+            StringCompare.typoCount(this.firstName, query) < 2 ||
+            StringCompare.typoCount(this.lastName, query) < 2 ||
+            StringCompare.typoCount(this.name, query) <= 2
         ) {
             return true;
+        }
+
+        for (const parent of this.parents) {
+            if (parent.matchQuery(query)) {
+                return true
+            }
         }
         return false;
     }

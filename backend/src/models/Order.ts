@@ -96,7 +96,48 @@ export class Order extends Model {
         return orders[0].setRelation(Order.webshop, webshops[0].setRelation(Webshop.organization, organization))
     }
 
+    shouldIncludeStock() {
+        return this.status !== OrderStatus.Canceled
+    }
+
+    async onPaymentFailed(this: Order & { webshop: Webshop }) {
+        if (this.status !== OrderStatus.Canceled) {
+            this.status = OrderStatus.Canceled
+            await this.save()
+            await this.updateStock(false) // remove reserved stock
+        }
+    }
+
+    async updateStock(this: Order & { webshop: Webshop }, add = true) {
+        // Update product stock
+        let changed = false
+        for (const item of this.data.cart.items) {
+            if (item.product.stock !== null) {
+                const product = this.webshop.products.find(p => p.id === item.product.id)
+                if (product) {
+                    if (add) {
+                        product.usedStock += item.amount
+                    } else {
+                        product.usedStock -= item.amount
+                        if (product.usedStock < 0) {
+                            product.usedStock = 0
+                        }
+                    }
+                    changed = true
+                }
+            }
+        }
+        if (changed) {
+            await this.webshop.save()
+        }
+    }
+
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
+        const wasValid = this.validAt !== null
+
+        if (wasValid) {
+            console.warn("Warning: already validated an order")
+        }
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
         this.number = await WebshopCounter.getNextNumber(this.webshopId)
