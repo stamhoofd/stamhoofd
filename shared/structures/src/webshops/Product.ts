@@ -119,6 +119,6 @@ export class Product extends AutoEncoder {
         if (this.stock === null) {
             return null
         }
-        return this.stock - this.usedStock
+        return Math.max(0, this.stock - this.usedStock)
     }
 }
