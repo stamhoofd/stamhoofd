@@ -93,7 +93,7 @@
             <hr>
             <h2>
                 Voorraad
-                {{ useStock ? ('('+ usedStock +' / '+ stock +')') : '' }}
+                {{ useStock ? ('('+ usedStock +' / '+ stock +' verkocht)') : '' }}
             </h2>
 
             <Checkbox v-model="disabled">

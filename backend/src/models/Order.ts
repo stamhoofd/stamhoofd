@@ -97,10 +97,32 @@ export class Order extends Model {
     }
 
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
+        const wasValid = this.validAt !== null
+
+        if (wasValid) {
+            console.warn("Warning: already validated an order")
+        }
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
         this.number = await WebshopCounter.getNextNumber(this.webshopId)
         await this.save()
+
+        if (!wasValid) {
+            // Update product stock
+            let changed = false
+            for (const item of this.data.cart.items) {
+                if (item.product.stock !== null) {
+                    const product = this.webshop.products.find(p => p.id === item.product.id)
+                    if (product) {
+                        product.usedStock += item.amount
+                        changed = true
+                    }
+                }
+            }
+            if (changed) {
+                await this.webshop.save()
+            }
+        }
 
         if (this.data.customer.email.length > 0) {
             const webshop = this.webshop
