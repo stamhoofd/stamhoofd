@@ -2,7 +2,7 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
-import { Country, CountryDecoder } from './CountryDecoder';
+import { Country, CountryDecoder, CountryHelper } from './CountryDecoder';
 
 export class Address extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -21,7 +21,7 @@ export class Address extends AutoEncoder {
     country: Country;
 
     toString() {
-        return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + this.country
+        return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
     }
 
     static createDefault() {
