@@ -13,7 +13,8 @@
                 <p class="price">
                     {{ price | price }}
 
-                    <span class="style-tag" v-if="product.isSoldOut">Uitverkocht</span>
+                    <span v-if="product.isSoldOut" class="style-tag">Uitverkocht</span>
+                    <span v-else-if="remainingStock && remainingStock <= 5" class="style-tag">Nog maar {{ remainingStock }} stuks beschikbaar</span>
                 </p>
             </div>
             <hr>
@@ -87,6 +88,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
         })
 
         this.present(new ComponentWithProperties(CartItemView, { cartItem }).setDisplayStyle("sheet"))
+    }
+
+    get remainingStock() {
+        return this.product.remainingStock
     }
 
 }

@@ -89,30 +89,34 @@
 
             <img v-if="image" :src="imageSrc" class="image">
             <img v-if="image" :src="imageSrc2" class="image">
-            
-            <template v-if="false">
-                <hr>
-                <h2>
-                    Voorraad
-                </h2>
+        
+            <hr>
+            <h2>
+                Voorraad
+                {{ useStock ? ('('+ usedStock +' / '+ stock +')') : '' }}
+            </h2>
 
-                <Checkbox v-model="disabled">
-                    Tijdelijk niet beschikbaar
-                </Checkbox>
+            <Checkbox v-model="disabled">
+                Tijdelijk niet beschikbaar
+            </Checkbox>
 
-                <Checkbox v-model="useStock">
-                    Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
-                </Checkbox>
+            <Checkbox v-model="useStock">
+                Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
+            </Checkbox>
 
-                <div v-if="useStock" class="split-inputs">
-                    <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
-                        <NumberInput v-model="stock" />
-                    </STInputBox>
-                    <STInputBox title="Waarvan reeds besteld" error-fields="usedStock" :error-box="errorBox">
-                        <NumberInput v-model="usedStock" />
-                    </STInputBox>
-                </div>
-            </template>
+            <div v-if="useStock" class="split-inputs">
+                <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
+                    <NumberInput v-model="stock" />
+                </STInputBox>
+            </div>
+
+            <Checkbox v-if="useStock" v-model="resetStock">
+                Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht van de {{ stock }})
+            </Checkbox>
+
+            <STInputBox v-if="useStock && resetStock" title="Verkocht aantal stuks" error-fields="usedStock" :error-box="errorBox">
+                <NumberInput v-model="usedStock" :max="stock" />
+            </STInputBox>
         </main>
 
         <STToolbar>
@@ -224,6 +228,33 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     set stock(stock: number) {
         this.patchProduct = this.patchProduct.patch({ stock })
+    }
+
+    get resetStock() {
+        return this.patchProduct.usedStock !== undefined
+    }
+
+    set resetStock(resetStock: boolean) {
+        if (resetStock === this.resetStock) {
+            return
+        }
+        if (resetStock) {
+            this.usedStockPatch = this.usedStock
+        } else {
+            this.usedStockPatch = null
+        }
+    }
+
+    get usedStockPatch() {
+        return this.patchProduct.usedStock ?? null
+    }
+
+    set usedStockPatch(usedStock: null | number) {
+        if (usedStock === null) {
+            this.$set(this.patchProduct, "usedStock", undefined);
+            return
+        }
+        this.usedStock = usedStock
     }
 
     get usedStock() {
