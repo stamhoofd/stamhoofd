@@ -2,7 +2,7 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
+import { OrderStatus, Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
 
 import { Member } from '../models/Member';
 import { MolliePayment } from '../models/MolliePayment';
@@ -58,6 +58,28 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
+        // Not method on payment because circular references (not supprted in ts)
+        await ExchangePaymentEndpoint.pollStatus(payment, organization)
+
+        if (request.query.exchange) {
+            return new Response(undefined);
+        }
+        
+        return new Response( 
+            PaymentStruct.create({
+                id: payment.id,
+                method: payment.method,
+                status: payment.status,
+                price: payment.price,
+                transferDescription: payment.transferDescription,
+                paidAt: payment.paidAt,
+                createdAt: payment.createdAt,
+                updatedAt: payment.updatedAt
+            })
+        );
+    }
+
+    static async pollStatus(payment: Payment, organization: Organization) {
         if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {
             // if it has registrations
             const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
@@ -98,6 +120,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
                             await payment.save();
                         } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
+                            await order?.onPaymentFailed()
                             payment.status = PaymentStatus.Failed
                             await payment.save();
                         }
@@ -132,6 +155,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
                         await payment.save();
                     } else if (status == PaymentStatus.Failed) {
+                        await order?.onPaymentFailed()
                         payment.status = PaymentStatus.Failed
                         await payment.save();
                     } else {
@@ -142,22 +166,5 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
             }
         }
-
-        if (request.query.exchange) {
-            return new Response(undefined);
-        }
-        
-        return new Response( 
-            PaymentStruct.create({
-                id: payment.id,
-                method: payment.method,
-                status: payment.status,
-                price: payment.price,
-                transferDescription: payment.transferDescription,
-                paidAt: payment.paidAt,
-                createdAt: payment.createdAt,
-                updatedAt: payment.updatedAt
-            })
-        );
     }
 }

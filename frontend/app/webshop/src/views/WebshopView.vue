@@ -68,7 +68,7 @@ import { CheckoutManager } from '../classes/CheckoutManager';
 import { GlobalEventBus } from '../classes/EventBus';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
-import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
+import { CheckoutStep, CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import CategoryBox from "./products/CategoryBox.vue"
 import ProductGrid from "./products/ProductGrid.vue"
@@ -158,7 +158,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     mounted() {
         GlobalEventBus.addListener(this, "checkout", async () => {
             console.log("goto checkout")
-            const nextStep = CheckoutStepsManager.getNextStep(undefined)
+            const nextStep = await CheckoutStepsManager.getNextStep(undefined, true)
 
             if (!nextStep) {
                 // Not possible
@@ -187,14 +187,18 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 } else {
                     this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                     new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                    this.resumeStep(CheckoutStepType.Payment)
+                    this.resumeStep(CheckoutStepType.Payment).catch(e => {
+                        console.error(e)
+                    })
                 }
             } }), false);
         } else if (path.length == 2 && path[0] == 'checkout') {
             const stepName = Formatter.capitalizeFirstLetter(path[1])
             if (Object.values(CheckoutStepType).includes(stepName as any)) {
                 const step = stepName as CheckoutStepType
-                this.resumeStep(step, false)
+                this.resumeStep(step, false).catch(e => {
+                    console.error(e)
+                })
             }
         } else if (path.length == 1 && path[0] == 'cart') {
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
@@ -208,13 +212,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
         })
     }
 
-    resumeStep(destination: CheckoutStepType, animated = true) {
+    async resumeStep(destination: CheckoutStepType, animated = true) {
          // Quickly recreate all steps
         let step: CheckoutStepType | undefined = undefined
         const components: Promise<any>[] = []
+
         while (step != destination) {
             try {
-                const nextStep = CheckoutStepsManager.getNextStep(step)
+                const nextStep = await CheckoutStepsManager.getNextStep(step)
                 if (!nextStep) {
                     break;
                 }
@@ -226,16 +231,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         }
 
-        Promise.all(components).then(comp => {
-            if (comp.length == 0) {
-                this.openCart()
-                return;
-            }
-            const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
-            this.navigationController!.push(replaceWith[replaceWith.length - 1], animated, 0, false, replaceWith.slice(0, replaceWith.length - 1))
-        }).catch(e => {
-            console.error(e)
-        })
+        const comp = await Promise.all(components)
+        if (comp.length == 0) {
+            this.openCart()
+            return;
+        }
+        const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
+        this.navigationController!.push(replaceWith[replaceWith.length - 1], animated, 0, false, replaceWith.slice(0, replaceWith.length - 1))
     }
 
     deactivated() {

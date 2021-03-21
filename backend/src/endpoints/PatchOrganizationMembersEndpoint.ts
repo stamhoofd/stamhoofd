@@ -130,7 +130,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                await this.addRegistration(member, registrationStruct)
+                await this.addRegistration(user, member, registrationStruct)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -234,7 +234,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of patch.registrations.getPuts()) {
-                await this.addRegistration(member, registrationStruct.put)
+                await this.addRegistration(user, member, registrationStruct.put)
             }
 
             // Link users
@@ -279,7 +279,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return new Response(members.map(m => m.getStructureWithRegistrations()));
     }
 
-    async addRegistration(member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+    async addRegistration(user: User, member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
         const registration = new Registration().setOptionalRelation(Registration.payment, null)
         registration.groupId = registrationStruct.groupId
         registration.cycle = registrationStruct.cycle
@@ -300,6 +300,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Check payment
         if (registrationStruct.payment) {
             const payment = new Payment()
+            payment.organizationId = member.organizationId
+            payment.userId = user.id
             payment.method = registrationStruct.payment.method
             payment.paidAt = registrationStruct.payment.paidAt
             payment.price = registrationStruct.payment.price
@@ -331,6 +333,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const d = new Date(new Date().getTime() - Math.random() * 60 * 1000 * 60 * 24 * 60)
 
             const payment = new Payment()
+            payment.organizationId = organization.id
             payment.method = Math.random() < 0.3 ? PaymentMethod.Payconiq : (Math.random()  < 0.5 ? PaymentMethod.Bancontact : PaymentMethod.Transfer )
             if (payment.method == PaymentMethod.Transfer) {
                 payment.transferDescription = Payment.generateDescription(organization.meta.transferSettings, "")

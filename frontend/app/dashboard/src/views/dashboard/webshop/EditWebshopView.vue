@@ -77,6 +77,18 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         if (this.editWebshop) {
             this.isNew = false
             this.webshop = this.editWebshop
+
+            // Reload to make sure the stock is up to date
+            SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/webshop/"+this.webshop.id,
+                decoder: PrivateWebshop as Decoder<PrivateWebshop>
+            }).then((response) => {
+                this.webshop.set(response.data)
+            }).catch((e) => {
+                console.error(e)
+                Toast.fromError(e).show()
+            })
         } else {
             this.webshop = PrivateWebshop.create({})
             this.webshop.meta.paymentMethods = OrganizationManager.organization.meta.paymentMethods

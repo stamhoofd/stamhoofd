@@ -37,7 +37,7 @@
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
-                Er zijn nog maar {{ remainingStock }} stuks beschikbaar<template v-if="count > 0">
+                Er zijn nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">
                     , waarvan er al {{ count }} in jouw winkelmandje zitten
                 </template>
             </p>

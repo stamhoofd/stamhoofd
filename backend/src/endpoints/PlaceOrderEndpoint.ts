@@ -59,10 +59,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         order.createdAt.setMilliseconds(0)
 
         if (totalPrice == 0) {
+            // Reserve stock for 15 minutes
+            await order.updateStock()
             await order.markValid()
+            
             await order.save()
         } else {
             const payment = new Payment()
+            payment.organizationId = organization.id
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice
@@ -80,6 +84,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
                 await order.markValid()
             }
+
+            // Reserve stock for 15 minutes
+            await order.updateStock()
 
             if (payment.method == PaymentMethod.Transfer) {
                 // Only now we can update the transfer description, since we need the order number as a reference

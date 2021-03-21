@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PermissionLevel } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Token } from '../models/Token';
@@ -54,6 +54,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 message: "No order found",
                 human: "De bestelling die je wilt verwijderen bestaat niet (meer)"
             })
+        }
+
+        if (order.shouldIncludeStock()) {
+            // Remove from stock
+            await order.setRelation(Order.webshop, webshop).updateStock(false)
         }
 
         await order.delete()      

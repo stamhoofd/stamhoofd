@@ -1,9 +1,12 @@
+import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
 import { simpleParser } from 'mailparser';
 
 import Email from './email/Email';
+import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { EmailAddress } from './models/EmailAddress';
 import { Organization } from './models/Organization';
+import { Payment } from './models/Payment';
 
 let isRunningCrons = false
 
@@ -282,6 +285,37 @@ async function checkComplaints() {
     }
 }
 
+// Keep checking pending paymetns for 3 days
+async function checkPayments() {
+    const payments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Created, PaymentStatus.Pending]
+        },
+        method: {
+            sign: "IN",
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
+        },
+        createdAt: {
+            sign: ">",
+            value: new Date(new Date().getTime() - 60*1000*60*24*3)
+        },
+    }, {
+        limit: 100
+    })
+
+    console.log("Checking pending payments: "+payments.length)
+
+    for (const payment of payments) {
+        if (payment.organizationId) {
+            const organization = await Organization.getByID(payment.organizationId)
+            if (organization) {
+                await ExchangePaymentEndpoint.pollStatus(payment, organization)
+            }
+        }
+    }
+}
+
 // Schedule automatic paynl charges
 export const crons = () => {
     if (isRunningCrons) {
@@ -289,7 +323,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkComplaints().then(checkReplies).then(checkBounces).then(checkDNS).catch(e => {
+        checkComplaints().then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

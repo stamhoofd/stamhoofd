@@ -266,6 +266,11 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.success) {
             CheckoutManager.cart.items = []
             CheckoutManager.saveCheckout()
+
+            // Update stock in background
+            WebshopManager.reload().catch(e => {
+                console.error(e)
+            })
         }
         if (this.order) {
             HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)

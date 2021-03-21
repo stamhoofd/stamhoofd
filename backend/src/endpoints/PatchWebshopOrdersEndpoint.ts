@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { getPermissionLevelNumber, Order as OrderStruct,Payment as PaymentStruct, PermissionLevel } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Order as OrderStruct,OrderStatus,Payment as PaymentStruct, PermissionLevel } from "@stamhoofd/structures";
 
 import { Order } from '../models/Order';
 import { Payment } from '../models/Payment';
@@ -71,7 +71,17 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 })
             }
 
+            const didIncludeStock = model.shouldIncludeStock()
+
             model.status = patch.status ?? model.status
+
+            if (didIncludeStock && !model.shouldIncludeStock()) {
+                // Remove from stock
+                await model.setRelation(Order.webshop, webshop).updateStock(false)
+            } else if (!didIncludeStock && model.shouldIncludeStock()) {
+                // Add to stock
+                await model.setRelation(Order.webshop, webshop).updateStock()
+            }
         }
 
         for (const order of orders) {
