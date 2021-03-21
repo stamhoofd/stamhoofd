@@ -1,7 +1,6 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeyConstantsHelper,Sodium } from "@stamhoofd/crypto";
 import { ChallengeResponseStruct, NewUser,Token as TokenStruct } from '@stamhoofd/structures';
-import MockDate from "MockDate"
 
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { UserFactory } from '../factories/UserFactory';
