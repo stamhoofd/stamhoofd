@@ -1528,10 +1528,10 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
-"@simonbackx/simple-database@^1.12":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.12.0.tgz#a99a27c315e1fd7c21515cbe1fb443951c1e61d2"
-  integrity sha512-I1Pjx7IwX/hP29XvMGNIi7z/0HZB6QSVhOBHCsvDSGUSbqS/ZOV/hzhQ7/u8qXr02oGVZbXqLs/vE5djDs81Mg==
+"@simonbackx/simple-database@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.13.0.tgz#c137bcc8a8b5df04a2fff5293659c2bb447d55d0"
+  integrity sha512-0FxzI7yn2gKrCuhEQXZCdIOWj+1tYFuQCLnfZZRsMRXPbpBesELxPrnTeIcrHgK7FfBrLnuM5x2vYwd2lvZikw==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -5299,9 +5299,9 @@ follow-redirects@^1.0.0:
   integrity sha512-SSG5xmZh1mkPGyKzjZP8zLjltIfpW32Y5QpdNJyjcfGxK3qo3NDDkZOZSFiGn1A6SclQxY9GzEwAHQ3dmYRWpg==
 
 follow-redirects@^1.10.0:
-  version "1.13.2"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.2.tgz#dd73c8effc12728ba5cf4259d760ea5fb83e3147"
-  integrity sha512-6mPTgLxYm3r6Bkkg0vNM0HTjfGrOEtsfbhagQvbxDEsEkpNhw582upBaoRZylzen6krEmxXJgt9Ju6HiI4O7BA==
+  version "1.13.3"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.3.tgz#e5598ad50174c1bc4e872301e82ac2cd97f90267"
+  integrity sha512-DUgl6+HDzB0iEptNQEXLx/KhTmDb8tZUHSeLqpnjpknR70H0nC2t9N73BK6fN4hOvJ84pKlIQVQ4k5FFlBedKA==
 
 fontkit@^1.8.0:
   version "1.8.1"

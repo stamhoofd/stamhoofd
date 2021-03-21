@@ -97,7 +97,15 @@ export class Order extends Model {
     }
 
     shouldIncludeStock() {
-        return this.validAt !== null && this.status !== OrderStatus.Canceled
+        return this.status !== OrderStatus.Canceled
+    }
+
+    async onPaymentFailed(this: Order & { webshop: Webshop }) {
+        if (this.status !== OrderStatus.Canceled) {
+            this.status = OrderStatus.Canceled
+            await this.save()
+            await this.updateStock(false) // remove reserved stock
+        }
     }
 
     async updateStock(this: Order & { webshop: Webshop }, add = true) {
@@ -134,11 +142,6 @@ export class Order extends Model {
         this.validAt.setMilliseconds(0)
         this.number = await WebshopCounter.getNextNumber(this.webshopId)
         await this.save()
-
-        if (!wasValid) {
-            // Update product stock
-            await this.updateStock()
-        }
 
         if (this.data.customer.email.length > 0) {
             const webshop = this.webshop
