@@ -11,6 +11,11 @@ export default {
             return;
         }
 
+        if ('ontouchstart' in window) {
+            // Ignore on touch devices
+            return;
+        }
+
         // Add a hover listener
         el.addEventListener(
             "mouseenter",
@@ -33,6 +38,7 @@ export default {
                                 y: rect.top + el.offsetHeight + 5,
                             });
                             parentComponent.present(displayedComponent.setDisplayStyle("overlay"));
+                            el.tooltipComponent = displayedComponent
                         }
                     }, 200);
                 }
@@ -46,9 +52,13 @@ export default {
 
                 if (displayedComponent && displayedComponent.vnode) {
                     // Todo: hide component again
-                    displayedComponent.vnode.componentInstance?.$parent.$emit("pop");
-                    displayedComponent = null;
+                    try {
+                        displayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                    } catch (e) {
+                        // Ignore
+                    }
                 }
+                displayedComponent = null;
             },
             { passive: true }
         );

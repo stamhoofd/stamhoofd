@@ -1,6 +1,8 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :title="text"/>
+        <STNavigationBar :title="text">
+            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss"></button>
+        </STNavigationBar>
         <div class="box">
             <main>
                 <h1>{{ text }}</h1>

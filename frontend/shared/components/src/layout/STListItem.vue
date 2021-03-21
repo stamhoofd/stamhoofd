@@ -39,12 +39,20 @@ export default class STListItem extends Vue {
     padding: 5px 0;
 }
 
+a.st-list-item {
+    &, &:hover, &:active, &:visited, &:link {
+        color: inherit;
+        text-decoration: inherit;
+    }
+}
+
 .st-list-item {
     padding-left: var(--st-horizontal-padding, 15px);
     padding-right: 0;
     margin: 0;
-    display: flex;
+    display: flex !important;
     flex-direction: row;
+
 
     >.left {
         flex-shrink: 0;

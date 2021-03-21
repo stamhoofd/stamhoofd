@@ -2,10 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
             <BackButton slot="left" @click="pop" />
-
-            <button v-if="canPop" slot="right" class="button secundary" @click="dismiss">
-                Annuleren
-            </button>
+            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss"></button>
         </STNavigationBar>
         <div class="box">
             <main v-if="needsPay">
@@ -39,7 +36,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
+import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton, CenteredMessage } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { KeychainedResponse, Payment, PaymentMethod, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -78,6 +75,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
     set selectedPaymentMethod(paymentMethod: PaymentMethod) {
         CheckoutManager.checkout.paymentMethod = paymentMethod
+        CheckoutManager.saveCheckout()
     }
 
     get paymentMethods() {
@@ -129,7 +127,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
                     this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
                         registrations
-                    }))
+                    }), true, this.navigationController!.components.length)
                 }, (payment: Payment) => {
                     console.log(payment)
                     // failure
@@ -140,15 +138,22 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
             this.loading = false
             
-            this.show(new ComponentWithProperties(RegistrationSuccessView, {
+            this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
                 registrations
-            }))
+            }), true, this.navigationController!.components.length)
             
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
             this.loading = false
         }
+    }
+
+    async shouldNavigateAway() {
+        if (await CenteredMessage.confirm("Ben je zeker dat je wilt annuleren?", "Inschrijvingen annuleren")) {
+            return true;
+        }
+        return false;
     }
 }
 </script>

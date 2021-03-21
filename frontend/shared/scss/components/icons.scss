@@ -41,6 +41,10 @@
         font-icon: url('@stamhoofd/assets/images/icons/help.svg');
     }
 
+    &.copy:after {
+        font-icon: url('@stamhoofd/assets/images/icons/copy.svg');
+    }
+
     &.arrow-left:after {
         font-icon: url(@stamhoofd/assets/images/icons/arrow-left-big.svg);
     }

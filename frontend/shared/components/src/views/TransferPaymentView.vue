@@ -41,15 +41,15 @@
                             <tbody>
                                 <tr>
                                     <td>Bedrag</td>
-                                    <td>{{ payment.price | price }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">{{ payment.price | price }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Begunstigde</td>
-                                    <td>{{ creditor }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">{{ creditor }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Rekeningnummer</td>
-                                    <td>{{ iban }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">{{ iban }}</td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td v-if="isStructured">
@@ -58,11 +58,57 @@
                                     <td v-else>
                                         Mededeling
                                     </td>
-                                    <td>{{ transferDescription }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">{{ transferDescription }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div class="only-smartphone container" v-if="isBelgium && payment.price > 0 && payment.status != 'Succeeded'">
+                    <hr>
+                    <h2>Openen met app</h2>
+
+                    <STList>
+                        <STListItem elementName="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+                            <h3 class="style-title-list">KBC Mobile</h3>
+                            <p class="style-description">Gegevens worden automatisch ingevuld</p>
+                        </STListItem>
+
+                        <STListItem elementName="a" :href="'bepingib://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+                            <h3 class="style-title-list">ING Banking</h3>
+                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                        </STListItem>
+
+                        <STListItem elementName="a" :href="'BEPbelfius://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
+                            <h3 class="style-title-list">Belfius Mobile</h3>
+                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                        </STListItem>
+
+                        <STListItem elementName="a" :href="'easybanking://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
+                            <h3 class="style-title-list">Easy Banking App (BNP Paribas Fortis)</h3>
+                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                        </STListItem>
+
+                        <STListItem elementName="a" :href="'BEPargenta://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
+                            <h3 class="style-title-list">Argenta-app</h3>
+                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                        </STListItem>
+
+                        <STListItem elementName="a" :href="'HBApp://'+qrMessage">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+                            Hello Bank! app
+                        </STListItem>
+                    </STList>
+
+                    <p class="style-description">
+                        Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.
+                    </p>
                 </div>
 
                 <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
@@ -79,6 +125,7 @@
                         Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
                     </p>              
                 </template>
+                
             </main>
 
             <STToolbar v-if="!isPopup">
@@ -96,8 +143,8 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton,Checkbox,CopyableDirective,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { Organization,Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
@@ -116,6 +163,10 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
     },
     filters: {
         price: Formatter.price
+    },
+    directives: {
+        tooltip: TooltipDirective,
+        copyable: CopyableDirective
     }
 })
 export default class TransferPaymentView extends Mixins(NavigationMixin){
@@ -167,6 +218,8 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
     }
 
+   
+
     preventLeave(event) {
         // Cancel the event
         event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
@@ -200,21 +253,23 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         return this.payment.transferDescription
     }
 
+    get qrMessage() {
+        const iban = this.iban
+        const creditor = this.creditor
+
+        let message: string
+        if (this.isStructured) {
+            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nBetalen";
+        } else {
+            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nBetalen";
+        }
+        return message
+    }
+
     async generateQRCode() {
         try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
-
-            const iban = this.iban
-            const creditor = this.creditor
-
-            let message: string
-            if (this.isStructured) {
-                message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nBetalen";
-            } else {
-                message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nBetalen";
-            }
-
-            this.QRCodeUrl = await QRCode.toDataURL(message)
+            this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage)
         } catch (e) {
             console.error(e)
             return;
@@ -265,6 +320,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        
+        @media (max-width: 800px) {
+            padding: 0;
+            border: 0;
+        }
 
         >.rectangle-top {
             position: absolute;
@@ -315,6 +375,13 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 .payment-transfer-table {
     td {
         vertical-align: baseline;
+        touch-action: manipulation;
+        cursor: pointer;
+
+        &:focus {
+            color: $color-primary;
+            outline: none;
+        }
     }
     td:first-child {
         @extend .style-title-small;
@@ -333,5 +400,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
     }
 }
-
+.payment-app-logo {
+    height: 35px;
+}
 </style>

@@ -9,7 +9,7 @@
                 {{ getDescription(paymentMethod) }}
             </p>
 
-            <div v-if="paymentMethod == 'Payconiq' && selectedPaymentMethod == paymentMethod" class="payment-app-banner">
+            <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
@@ -74,13 +74,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         const r: PaymentMethod[] = []
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "NL") {
+            r.push(PaymentMethod.iDEAL)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "NL") {
-            r.push(PaymentMethod.iDEAL)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
@@ -101,7 +101,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Payconiq (aangeraden)"
+            case PaymentMethod.Payconiq: return "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
             case PaymentMethod.iDEAL: return "iDEAL"
@@ -139,8 +139,8 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     max-height: 30px;
 
     &.bancontact {
-        max-height: 40px;
-        margin: -5px 0 !important; // Fix white borders in bancontact logo
+        max-height: 38px;
+        margin: -4px 0 !important; // Fix white borders in bancontact logo
     }
 }
 
