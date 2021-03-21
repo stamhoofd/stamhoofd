@@ -96,6 +96,34 @@ export class Order extends Model {
         return orders[0].setRelation(Order.webshop, webshops[0].setRelation(Webshop.organization, organization))
     }
 
+    shouldIncludeStock() {
+        return this.validAt !== null && this.status !== OrderStatus.Canceled
+    }
+
+    async updateStock(this: Order & { webshop: Webshop }, add = true) {
+        // Update product stock
+        let changed = false
+        for (const item of this.data.cart.items) {
+            if (item.product.stock !== null) {
+                const product = this.webshop.products.find(p => p.id === item.product.id)
+                if (product) {
+                    if (add) {
+                        product.usedStock += item.amount
+                    } else {
+                        product.usedStock -= item.amount
+                        if (product.usedStock < 0) {
+                            product.usedStock = 0
+                        }
+                    }
+                    changed = true
+                }
+            }
+        }
+        if (changed) {
+            await this.webshop.save()
+        }
+    }
+
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
         const wasValid = this.validAt !== null
 
@@ -109,19 +137,7 @@ export class Order extends Model {
 
         if (!wasValid) {
             // Update product stock
-            let changed = false
-            for (const item of this.data.cart.items) {
-                if (item.product.stock !== null) {
-                    const product = this.webshop.products.find(p => p.id === item.product.id)
-                    if (product) {
-                        product.usedStock += item.amount
-                        changed = true
-                    }
-                }
-            }
-            if (changed) {
-                await this.webshop.save()
-            }
+            await this.updateStock()
         }
 
         if (this.data.customer.email.length > 0) {

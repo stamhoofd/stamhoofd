@@ -93,7 +93,7 @@
             <hr>
             <h2>
                 Voorraad
-                {{ useStock ? ('('+ usedStock +' / '+ stock +' verkocht)') : '' }}
+                {{ remainingStock !== null ? ('(nog '+ remainingStock +' beschikbaar)') : '' }}
             </h2>
 
             <Checkbox v-model="disabled">
@@ -117,6 +117,10 @@
             <STInputBox v-if="useStock && resetStock" title="Verkocht aantal stuks" error-fields="usedStock" :error-box="errorBox">
                 <NumberInput v-model="usedStock" :max="stock" />
             </STInputBox>
+
+            <p v-if="useStock" class="style-description">
+                Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
+            </p>
         </main>
 
         <STToolbar>
@@ -212,6 +216,10 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     set disabled(disabled: boolean) {
         this.patchProduct = this.patchProduct.patch({ enabled: !disabled })
+    }
+
+    get remainingStock() {
+        return this.patchedProduct.remainingStock
     }
 
     get useStock() {

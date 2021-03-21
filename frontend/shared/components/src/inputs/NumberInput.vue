@@ -83,7 +83,7 @@ export default class NumberInput extends Vue {
     }
 
     get stepperValue() {
-        return this.value
+        return this.value ?? this.min ?? 0
     }
 
     set stepperValue(val: number) {

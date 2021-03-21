@@ -13,8 +13,8 @@
                 <p class="price">
                     {{ price | price }}
 
-                    <span v-if="product.isSoldOut" class="style-tag">Uitverkocht</span>
-                    <span v-else-if="remainingStock && remainingStock <= 5" class="style-tag">Nog maar {{ remainingStock }} stuks beschikbaar</span>
+                    <span v-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
+                    <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} stuks</span>
                 </p>
             </div>
             <hr>
