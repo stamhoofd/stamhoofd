@@ -27,7 +27,7 @@ const helper = {
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "Gekopieerd!",
+            text: "Gekopieerd",
             icon: "success green",
             x: rect.left,
             y: rect.top + el.offsetHeight + 5
