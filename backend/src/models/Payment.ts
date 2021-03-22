@@ -19,7 +19,7 @@ export class Payment extends Model {
     status: PaymentStatus;
 
     @column({ type: "string", nullable: true })
-    organizationId: string| null;
+    organizationId: string| null = null
 
     // Link a user for debugging
     @column({ type: "string", nullable: true })
