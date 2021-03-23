@@ -98,6 +98,10 @@
             border: $border-width solid $color-gray-light;
             background: $color-white-shade;
 
+            &:active {
+                transform: none;
+            }
+
             svg > path {
                 stroke: $color-white-shade;
             }
