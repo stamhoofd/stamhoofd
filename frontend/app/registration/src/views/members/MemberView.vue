@@ -13,12 +13,12 @@
                 <span v-if="member.activeRegistrations.length == 0" class="style-tag error">Nog niet ingeschreven</span>
             </h1>
 
+             <p v-if="member.details.isRecovered" class="warning-box">
+                Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
+            </p>
+
             <div class="member-view-details">
                 <div>
-                    <p v-if="member.details.isRecovered" class="warning-box">
-                        Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
-                    </p>
-
                     <div class="container" v-if="member.activeRegistrations.length > 0">
                         <h2 class="style-with-button">
                             <div>Ingeschreven voor</div>
@@ -134,7 +134,10 @@
                         <h2 class="style-with-button">
                             <div>Noodcontact: {{ contact.title }}</div>
                             <div>
-                                <button class="button icon gray edit" @click="editEmergencyContact(contact)" />
+                                <button class="button text limit-space" @click.stop="editEmergencyContact(contact)">
+                                    <span class="icon edit" />
+                                    <span>Bewerken</span>
+                                </button>
                             </div>
                         </h2>
 
@@ -152,7 +155,10 @@
                         <h2 class="style-with-button">
                             <div>Huisarts</div>
                             <div>
-                                <button class="button icon gray edit" @click="editRecords()" />
+                                <button class="button text limit-space" @click="editRecords()">
+                                    <span class="icon edit" />
+                                    <span>Bewerken</span>
+                                </button>
                             </div>
                         </h2>
 
@@ -168,7 +174,6 @@
                             </template>
                         </dl>
                     </div>
-
 
                     <hr>
                     <h2>Hoe worden deze gegevens bewaard?</h2>
@@ -187,7 +192,10 @@
                                 />
                             </div>
                             <div>
-                                <button class="button icon gray edit" @click="editRecords()" />
+                                <button class="button text limit-space" @click="editRecords()">
+                                    <span class="icon edit" />
+                                    <span>Bewerken</span>
+                                </button>
                             </div>
                         </h2>
 
@@ -212,6 +220,10 @@
         </main>
 
         <STToolbar>
+            <button slot="right" class="secundary button" @click="fullCheck">
+                <span class="icon search" />
+                <span>Nakijken</span>
+            </button>
             <button slot="right" class="primary button" @click="chooseGroups">
                 <span class="icon add" />
                 <span>Inschrijven</span>
@@ -268,14 +280,28 @@ export default class MemberView extends Mixins(NavigationMixin){
 
     async editEmergencyContact() {
         await this.openSteps([EditMemberStepType.EmergencyContact])
-    }    
+    }
 
-    async openSteps(steps: EditMemberStepType[]) {
+    async fullCheck() {
+        await this.openSteps([
+            EditMemberStepType.Details,
+            EditMemberStepType.Parents,
+            EditMemberStepType.EmergencyContact,
+            EditMemberStepType.Records,
+        ], async () => {
+            // todo: mark details as complete
+        })
+    }
+
+    async openSteps(steps: EditMemberStepType[], callback?: () => Promise<void>) {
         const stepManager = new EditMemberStepsManager(
             steps, 
             this.member,
-            (component: NavigationMixin) => {
+            async (component: NavigationMixin) => {
                 component.dismiss({ force: true })
+                if (callback) {
+                    await callback()
+                }
                 return Promise.resolve()
             }
         )
@@ -283,6 +309,9 @@ export default class MemberView extends Mixins(NavigationMixin){
 
         if (!component) {
             // Weird
+            if (callback) {
+                await callback()
+            }
         } else {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: component

@@ -10,7 +10,7 @@
                 <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
 
-                    <STList>
+                    <STList v-if="members.length > 0">
                         <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
                             <span slot="left" class="icon user" />
 
@@ -29,6 +29,10 @@
                             </template>
                         </STListItem>
                     </STList>
+
+                    <p class="info-box" v-else>
+                        Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
+                    </p>
 
                     <STToolbar :sticky="false">
                         <button slot="right" class="button secundary full" @click="addNewMember">

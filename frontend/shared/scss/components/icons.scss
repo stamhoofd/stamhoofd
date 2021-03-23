@@ -37,6 +37,10 @@
         font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
 
+    &.search:after {
+        font-icon: url('@stamhoofd/assets/images/icons/search.svg');
+    }
+
     &.help:after {
         font-icon: url('@stamhoofd/assets/images/icons/help.svg');
     }
