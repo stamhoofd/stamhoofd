@@ -11,9 +11,9 @@ $color-dark: #000716;
 
 $color-primary-destination: var(--color-primary, #2700ff);
 
-$color-error: #ff002e;
-$color-error-border: #ffaab9;
-$color-error-border-focus: #ff002e;
+$color-error: #FF1741;
+$color-error-border: #FFCAD3;
+$color-error-border-focus: $color-error;
 
 $color-success: #0CBB69;
 $color-success-background: #E5F6EE;
