@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 71
+export const Version = 72
 
 // General
 export * from "./src/addresses/Address"
@@ -82,6 +82,7 @@ export * from "./src/members/Registration"
 export * from "./src/members/RegistrationPatch"
 export * from "./src/members/RegistrationWithEncryptedMember"
 export * from "./src/members/RegistrationWithMember"
+export * from "./src/members/ReviewTime"
 
 // Register checkout
 export * from "./src/members/checkout/RegisterCart"

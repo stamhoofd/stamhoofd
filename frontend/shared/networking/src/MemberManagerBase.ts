@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder,ObjectData, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { Sodium } from "@stamhoofd/crypto"
-import { EncryptedMember, EncryptedMemberDetails, KeychainedMembers, Member,MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Version } from "@stamhoofd/structures"
+import { EncryptedMember, EncryptedMemberDetails, Group, KeychainedMembers, Member,MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Organization, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
 
 import { Keychain } from "./Keychain"
@@ -25,12 +25,15 @@ export class MemberManagerBase {
         // Get the newest complete blob where we have a key for
         const oldToNew = member.encryptedDetails.sort((a, b) => Sorter.byDateValue(b.meta.date, a.meta.date))
 
-        let latest: EncryptedMemberDetails | null = null
-        for (const encryptedDetails of oldToNew) {
+        let latest: MemberDetails | null = null
+        let latestEncryptedDetails: EncryptedMemberDetails | null = null
+        for (const encryptedDetails of oldToNew.slice().reverse()) {
             if (!encryptedDetails.meta.isRecovered) {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                    latest = encryptedDetails
+                    latest = await this.decryptMemberDetails(encryptedDetails)
+                    latestEncryptedDetails = encryptedDetails
+                    break
                 }
             }
         }
@@ -41,15 +44,23 @@ export class MemberManagerBase {
             for (const encryptedDetails of oldToNew) {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                    latest = encryptedDetails
+                    latest = await this.decryptMemberDetails(encryptedDetails)
+                    latestEncryptedDetails = encryptedDetails
 
                     // We need the oldest
                     break
+                } else {
+                    // Does it have public data?
+                    if (encryptedDetails.publicData) {
+                        latest = encryptedDetails.publicData
+                        latestEncryptedDetails = encryptedDetails
+                        break
+                    }
                 }
             }
         }
 
-        if (!latest) {
+        if (!latest || !latestEncryptedDetails) {
             // todo: return placeholder
             const details = new MemberDetails()
             details.firstName = member.firstName
@@ -59,15 +70,20 @@ export class MemberManagerBase {
             return Member.create({ ...member, details })
         }
 
-        const details = await this.decryptMemberDetails(latest)
+        const details = latest
 
         // Apply newer (incomplete blobs)
         // From old to new
         for (const encryptedDetails of oldToNew) {
-            if (encryptedDetails.id !== latest.id && encryptedDetails.meta.isRecovered && latest.meta.date < encryptedDetails.meta.date) {
+            if (encryptedDetails.id !== latestEncryptedDetails.id && encryptedDetails.meta.isRecovered && latestEncryptedDetails.meta.date < encryptedDetails.meta.date) {
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
                     const updates = await this.decryptMemberDetails(encryptedDetails)
                     details.merge(updates)
+                } else {
+                    if (encryptedDetails.publicData) {
+                        // Merge the non-encrypted blob of data
+                        details.merge(encryptedDetails.publicData)
+                    }
                 }
             }
         }
@@ -75,21 +91,53 @@ export class MemberManagerBase {
         return Member.create({ ...member, details })
     }
 
-    async encryptDetails(memberDetails: MemberDetails, publicKey: string, forOrganization: boolean): Promise<EncryptedMemberDetails> {
+    async decryptMembers(data: EncryptedMember[]) {
+        const members: Member[] = []
+        for (const member of data) {
+            members.push(await this.decryptMember(member))
+        }
+        return members
+    }
+
+    async decryptRegistrationWithMember(registration: RegistrationWithEncryptedMember, groups: Group[]): Promise<RegistrationWithMember> {
+        const member = registration.member
+        const decryptedMember = await this.decryptMember(member)
+
+        const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
+            member: decryptedMember,
+            group: groups.find(g => g.id === registration.groupId)
+        }))
+
+        return decryptedRegistration
+    }
+
+    async decryptRegistrationsWithMember(data: RegistrationWithEncryptedMember[], groups: Group[]): Promise<RegistrationWithMember[]> {
+        const registrations: RegistrationWithMember[] = []
+
+        for (const registration of data) {
+            registrations.push(await this.decryptRegistrationWithMember(registration, groups))
+        }
+
+        return registrations
+    }
+
+    async encryptDetails(memberDetails: MemberDetails, publicKey: string, forOrganization: boolean, organization: Organization): Promise<EncryptedMemberDetails> {
         const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))
         return EncryptedMemberDetails.create({
             publicKey: publicKey,
             ciphertext: await Sodium.sealMessage(data, publicKey),
             forOrganization,
             authorId: SessionManager.currentSession!.user!.id,
+            publicData: EncryptedMemberDetails.getPublicData(memberDetails, organization),
             meta: MemberDetailsMeta.createFor(memberDetails)
         })
     }
 
     /// Prepare a patch of updated members
-    async getEncryptedMembers(members: MemberWithRegistrations[], organizationPublicKey: string, createPersonalKey = true): Promise<AutoEncoderPatchType<KeychainedMembers>> {
+    async getEncryptedMembers(members: MemberWithRegistrations[], organization: Organization, createPersonalKey = true): Promise<AutoEncoderPatchType<KeychainedMembers>> {
         const patch = KeychainedMembers.patch({})
         const session = SessionManager.currentSession!
+        const organizationPublicKey = organization.publicKey
 
         for (const member of members) {
             // Gather all public keys that we are going to encrypt for
@@ -159,7 +207,8 @@ export class MemberManagerBase {
                 const encryptedDetails = await this.encryptDetails(
                     member.details,
                     publicKey,
-                    organizationPublicKey === publicKey || forOrganization
+                    organizationPublicKey === publicKey || forOrganization,
+                    organization
                 )
                 
                 const keychainItem = Keychain.getItem(encryptedDetails.publicKey)

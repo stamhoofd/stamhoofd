@@ -1,9 +1,8 @@
 
 
-import { ArrayDecoder, AutoEncoderPatchType,ConvertArrayToPatchableArray, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchType, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { Sodium } from '@stamhoofd/crypto'
+import { ArrayDecoder,ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import { EncryptedMember, EncryptedMemberWithRegistrations, EncryptedMemberWithRegistrationsPatch, Group, KeychainedResponseDecoder,KeychainItem, Member, MemberDetails, MemberWithRegistrations, PermissionLevel, Registration, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
+import {  EncryptedMemberWithRegistrations, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -31,15 +30,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
     }
 
-    async decryptMembersWithoutRegistrations(data: EncryptedMember[]) {
-        const members: Member[] = []
-        for (const member of data) {
-            members.push(await this.decryptMember(member))
-        }
-        return members
-    }
-
-    async decryptMembers(data: EncryptedMemberWithRegistrations[]) {
+    async decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]) {
         const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
 
@@ -103,7 +94,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         Keychain.addItems(response.data.keychainItems)
-        return await this.decryptMembers(response.data.data)
+        return await this.decryptMembersWithRegistrations(response.data.data)
     }
 
     getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
@@ -155,15 +146,13 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
 
         // Aldo include encryption blobs
-        const p = await this.getEncryptedMembers(members, OrganizationManager.organization.publicKey, false)
+        const p = await this.getEncryptedMembers(members, OrganizationManager.organization, false)
         encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
         return encryptedMembers
-    }
-
-    
+    }    
 
     async patchMembersDetails(members: MemberWithRegistrations[]): Promise<MemberWithRegistrations | null> {
-        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization.publicKey, false)
+        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization, false)
 
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
@@ -172,7 +161,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             body: patch.members,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
-        return (await this.decryptMembers(response.data))[0] ?? null
+        return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
     async patchMembers(members: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>) {
@@ -183,7 +172,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             body: members
         })
-        return await this.decryptMembers(response.data)
+        return await this.decryptMembersWithRegistrations(response.data)
     }
 
     async deleteMembers(members: MemberWithRegistrations[]) {

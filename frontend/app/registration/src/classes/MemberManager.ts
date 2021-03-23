@@ -16,26 +16,6 @@ export class MemberManagerStatic extends MemberManagerBase {
     /// Currently saved members
     members: MemberWithRegistrations[] | null = null
 
-    async decryptRegistrationWithMember(data: RegistrationWithEncryptedMember[]): Promise<RegistrationWithMember[]> {
-
-        const registrations: RegistrationWithMember[] = []
-        const groups = OrganizationManager.organization.groups
-
-        for (const registration of data) {
-            const member = registration.member
-            const decryptedMember = await this.decryptMember(member)
-
-            const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
-                member: decryptedMember,
-                group: groups.find(g => g.id === registration.groupId)
-            }))
-
-            registrations.push(decryptedRegistration)
-        }
-
-        return registrations
-    }
-
     /**
      * Set the members, but keep all the existing member references
      */
@@ -90,8 +70,8 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         // Add encryption blobs
-        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false))
-        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true))
+        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false, OrganizationManager.organization))
+        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
 
         // Prepare patch
         const patch = KeychainedMembers.patch({})
@@ -100,7 +80,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
         const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
-        patch.patch(await this.getEncryptedMembers(members, OrganizationManager.organization.publicKey, true))
+        patch.patch(await this.getEncryptedMembers(members, OrganizationManager.organization, true))
 
         // Send the request
         const response = await session.authenticatedServer.request({
@@ -133,7 +113,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async patchMembers(members: MemberWithRegistrations[]) {
-        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization.publicKey, true)
+        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization, true)
         const session = SessionManager.currentSession!
 
         // Send the request

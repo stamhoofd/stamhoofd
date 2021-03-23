@@ -6,11 +6,11 @@ import { Address } from '../addresses/Address';
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
-import { ReviewTimes } from './EncryptedMemberDetails';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { OldRecord, Record } from './Record';
-import { OldRecordType, RecordType } from './RecordType';
+import { OldRecordType, RecordType, RecordTypeHelper } from './RecordType';
+import { ReviewTimes } from './ReviewTime';
 
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
@@ -336,6 +336,18 @@ export class MemberDetails extends AutoEncoder {
         this.records.push(record)
     }
 
+    removeRecord(type: RecordType) {
+        for (let index = this.records.length - 1; index >= 0; index--) {
+            const record = this.records[index];
+
+            if (record.type === type) {
+                this.records.splice(index, 1)
+                // Keep going to fix possible previous errors that caused duplicate types
+                // This is safe because we loop backwards
+            }
+        }
+    }
+
     /**
      * Return all the e-mail addresses that should have access to this user
      */
@@ -411,5 +423,14 @@ export class MemberDetails extends AutoEncoder {
         for (const record of other.records) {
             this.addRecord(record)
         }
+
+        // If some records are missing in the incoming blob AND if they are public, we need to delete them. Always.
+        // E.g. permissions
+        for (const recordType of Object.values(RecordType)) {
+            if (RecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
+                this.removeRecord(recordType)
+            }
+        }
+
     }
 }

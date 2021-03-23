@@ -136,6 +136,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
             ciphertext: await Sodium.sealMessage(data, memberKeyPair.publicKey),
             forOrganization: false,
             authorId: "factory",
+            publicData: EncryptedMemberDetails.getPublicData(memberDetails, await organization.getStructure()),
             meta: MemberDetailsMeta.createFor(memberDetails)
         }))
 
@@ -144,6 +145,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
             ciphertext: await Sodium.sealMessage(data, organization.publicKey),
             forOrganization: true,
             authorId: "factory",
+            publicData: EncryptedMemberDetails.getPublicData(memberDetails, await organization.getStructure()),
             meta: MemberDetailsMeta.createFor(memberDetails)
         }))
 

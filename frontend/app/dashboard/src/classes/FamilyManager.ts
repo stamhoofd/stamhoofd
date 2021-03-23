@@ -29,7 +29,7 @@ export class FamilyManager {
             path: "/organization/members/"+id+"/family",
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
-        this.setMembers(await MemberManager.decryptMembers(response.data))
+        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
     }
 
     async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
@@ -54,7 +54,7 @@ export class FamilyManager {
         })
 
         // Add encryption blob (only one)
-        encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true))
+        encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
 
         // Prepare patch
         const patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
@@ -72,7 +72,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
-        this.setMembers(await MemberManager.decryptMembers(response.data))
+        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
         const m = this.members?.find(m => m.id == encryptedMember.id) ?? null
 
         MemberManager.callListeners("created", m)
@@ -95,7 +95,7 @@ export class FamilyManager {
             body: patchArray,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
-        const m = (await MemberManager.decryptMembers(response.data))[0]
+        const m = (await MemberManager.decryptMembersWithRegistrations(response.data))[0]
 
         const i = this.members.findIndex(_m => _m.id === m.id)
         if (i != -1) {
@@ -136,7 +136,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
-        this.setMembers(await MemberManager.decryptMembers(response.data))
+        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
     }
 
     setMembers(newMembers: MemberWithRegistrations[]) {

@@ -58,6 +58,7 @@ export default new Migration(async () => {
                     ciphertext: member.encryptedForMember,
                     forOrganization: false,
                     authorId: "migration",
+                    publicData: null,
                     meta: MemberDetailsMeta.create({
                         ownerDate: member.createdAt,
 
@@ -77,6 +78,7 @@ export default new Migration(async () => {
                     ciphertext: member.encryptedForOrganization,
                     forOrganization: true,
                     authorId: "migration",
+                    publicData: null,
                     meta: MemberDetailsMeta.create({
                         ownerDate: member.updatedAt,
 

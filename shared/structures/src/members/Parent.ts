@@ -65,22 +65,22 @@ export class Parent extends AutoEncoder {
     }
 
     merge(other: Parent) {
-        if (this.firstName.length == 0) {
+        if (other.firstName.length > 0) {
             this.firstName = other.firstName
         }
-        if (this.lastName.length == 0) {
+        if (other.lastName.length > 0) {
             this.lastName = other.lastName
         }
 
-        if (other.email && (!this.email || this.email.length == 0)) {
+        if (other.email) {
             this.email = other.email
         }
 
-        if (other.address && !this.address) {
+        if (other.address) {
             this.address = other.address
         }
 
-        if (other.phone && (!this.phone || this.phone.length == 0)) {
+        if (other.phone) {
             this.phone = other.phone
         }
     }

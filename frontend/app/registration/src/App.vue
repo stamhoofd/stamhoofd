@@ -12,8 +12,9 @@ import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox 
 import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
-import { CheckoutManager } from './classes/CheckoutManager';
 
+import { OrganizationManager } from '../../dashboard/src/classes/OrganizationManager';
+import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
@@ -95,7 +96,7 @@ export default class App extends Vue {
                                                     path: "/payments/"+payment.id+"/registrations",
                                                     decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                                 })
-                                                const registrations = await MemberManager.decryptRegistrationWithMember(response.data.registrations)
+                                                const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
                                                 this.show(new ComponentWithProperties(RegistrationSuccessView, {
                                                     registrations
                                                 }))

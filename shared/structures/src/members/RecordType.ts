@@ -119,6 +119,22 @@ export class RecordTypeHelper {
         return false
     }
 
+    /**
+     * Store this information publicly (not end-to-end encrypted)
+     */
+    static isPublic(type: RecordType): boolean {
+        switch (type) {
+            case RecordType.DataPermissions:
+            case RecordType.PicturePermissions:
+            case RecordType.GroupPicturePermissions:
+            case RecordType.MedicinePermissions:
+                return true;
+         
+        }
+
+        return false
+    }
+
     static getFilterCategory(type: RecordType): string | undefined {
         switch (type) {
             case RecordType.DataPermissions:

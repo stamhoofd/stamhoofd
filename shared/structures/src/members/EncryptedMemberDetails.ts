@@ -1,70 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
+import { Organization } from "../Organization";
 // eslint bug thinks MemberDetails is not used
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberDetails } from "./MemberDetails";
-
-/**
- * Keep a timestamp of when certain information was reviewed of a member
- */
-export class ReviewTime extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name: string
-
-    /**
-     * Date that this section was reviewed
-     */
-    @field({ decoder: DateDecoder })
-    reviewedAt: Date
-}
-
-export class ReviewTimes extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(ReviewTime) })
-    times: ReviewTime[] = []
-
-    markReviewed(name: "records" | "parents" | "emergencyContacts" | "details", date?: Date) {
-        for (const time of this.times) {
-            if (time.name === name) {
-                if (date && date < time.reviewedAt) {
-                    // Can't decrease time
-                    return
-                }
-                time.reviewedAt = date ?? new Date()
-                return
-            }
-        }
-        this.times.push(ReviewTime.create({
-            name,
-            reviewedAt: date ?? new Date()
-        }))
-    }
-
-    getLastReview(name: "records" | "parents" | "emergencyContacts" | "details"): Date | undefined {
-        for (const time of this.times) {
-            if (time.name === name) {
-                return time.reviewedAt
-            }
-        }
-    }
-
-    merge(other: ReviewTimes) {
-        for (const time of other.times) {
-            this.markReviewed(time.name as any, time.reviewedAt)
-        }
-    }
-
-    isOutdated(name: "records" | "parents" | "emergencyContacts" | "details", timeoutMs: number): boolean {
-        const time = this.getLastReview(name)
-        if (!time) {
-            return true
-        }
-        if (time.getTime() < new Date().getTime() - timeoutMs) {
-            return true
-        }
-        return false
-    }
-}
+import { RecordTypeHelper } from "./RecordType";
+import { ReviewTimes } from "./ReviewTime";
 
 
 export class MemberDetailsMeta extends AutoEncoder {
@@ -101,14 +43,6 @@ export class MemberDetailsMeta extends AutoEncoder {
      */
     @field({ decoder: ReviewTimes, nullable: true, version: 71 })
     reviewTimes = ReviewTimes.create({})
-
-    /**
-     * @deprecated
-     * Set to true when essential data is missing
-     */
-    get incomplete(): boolean {
-        return !this.hasMemberGeneral
-    }
 
     static createFor(details: MemberDetails): MemberDetailsMeta {
         return MemberDetailsMeta.create({
@@ -159,6 +93,15 @@ export class EncryptedMemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder })
     ciphertext: string
 
+    /**
+     * Some data is public. For example: permissions to collect data and the firstName. In the future we might add
+     * more options to make certain data public
+     * This data is taken from the details before it is encrypted and stored separately.
+     * Please note that the ciphertext should NOT include the same data to prevent known ciphertext attacks
+     */
+    @field({ decoder: MemberDetails, nullable: true, version: 72 })
+    publicData: MemberDetails | null = null
+
     /// Whether this was encrypted with the current organization public key
     @field({ decoder: BooleanDecoder })
     forOrganization = false
@@ -170,4 +113,24 @@ export class EncryptedMemberDetails extends AutoEncoder {
     /// Encryption author
     @field({ decoder: MemberDetailsMeta })
     meta: MemberDetailsMeta
+
+    /**
+     * Get the data of this member details that is stored non encrypted.
+     * @param organization not used at the moment but we'll need it for future organization settings that defines this behaviour
+     */
+    static getPublicData(original: MemberDetails, organization: Organization): MemberDetails | null {
+        if (original.records.length === 0) {
+            // Nothing to announce publicly
+            return null
+        }
+
+        const details = MemberDetails.create({})
+        details.isRecovered = true
+        details.records = original.records.filter(r => RecordTypeHelper.isPublic(r.type))
+
+        if (details.records.length == 0) {
+            return null
+        }
+        return details
+    }
 }

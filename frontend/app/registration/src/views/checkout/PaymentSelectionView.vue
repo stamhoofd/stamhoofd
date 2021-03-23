@@ -2,7 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
             <BackButton slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss"></button>
+            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main v-if="needsPay">
@@ -36,13 +36,13 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton, CenteredMessage } from "@stamhoofd/components"
+import { BackButton, CenteredMessage,ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { KeychainedResponse, Payment, PaymentMethod, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
-import { CheckoutManager } from '../../classes/CheckoutManager';
 
+import { CheckoutManager } from '../../classes/CheckoutManager';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
@@ -107,7 +107,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             })
 
             const payment = response.data.payment
-            const registrations = await MemberManager.decryptRegistrationWithMember(response.data.registrations)
+            const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
             await MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 
             if (payment) {

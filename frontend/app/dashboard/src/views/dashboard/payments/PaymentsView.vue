@@ -228,24 +228,14 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         const payments: PaymentGeneral[] = []
         for (const encryptedPayment of encryptedPayments) {
             // Create a detailed payment without registrations
-            const payment = PaymentGeneral.create({...encryptedPayment, registrations: []})
+            const payment = PaymentGeneral.create({
+                ...encryptedPayment, 
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+            })
 
-            // Decrypt the members and add them one by one
-            for (const registration of encryptedPayment.registrations) {
-                const group = organization.groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    // todo: create a fallback group
-                    throw new Error("Group not found")
-                }
-
-                const [member] = await MemberManager.decryptMembersWithoutRegistrations([registration.member])
-
-                payment.registrations.push(RegistrationWithMember.create({
-                    ...registration,
-                    member,
-                    group,
-                    payment
-                }))
+            // Set payment reference
+            for (const registration of payment.registrations) {
+                registration.payment = payment
             }
 
             payments.push(payment)
