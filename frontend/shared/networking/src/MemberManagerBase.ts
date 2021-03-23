@@ -54,6 +54,11 @@ export class MemberManagerBase {
                     if (encryptedDetails.publicData) {
                         latest = encryptedDetails.publicData
                         latestEncryptedDetails = encryptedDetails
+
+                        if (!latest.firstName) {
+                            // Autofill name
+                            latest.firstName = member.firstName
+                        }
                         break
                     }
                 }

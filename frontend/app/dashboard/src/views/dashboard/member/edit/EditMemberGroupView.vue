@@ -2,7 +2,7 @@
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Kies een groep">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop"></button>
+            <button v-else slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -11,12 +11,16 @@
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
-
-             <STList>
+            
+            <STList>
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                    <Radio slot="left" name="choose-group" v-model="selectedGroup" :value="group"/>
-                    <h2 class="style-title-list">{{ group.settings.name }}</h2>
-                    <p class="style-description-small" v-if="group.settings.description">{{ group.settings.description }}</p>
+                    <Radio slot="left" v-model="selectedGroup" name="choose-group" :value="group" />
+                    <h2 class="style-title-list">
+                        {{ group.settings.name }}
+                    </h2>
+                    <p v-if="group.settings.description" class="style-description-small">
+                        {{ group.settings.description }}
+                    </p>
                 </STListItem>
             </STList>
         </main>
@@ -32,15 +36,16 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput, BackButton, LoadingButton, Toast } from "@stamhoofd/components"
-import { MemberDetails, Group } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { FamilyManager } from '../../../../classes/FamilyManager';
-import { MemberWithRegistrations } from '@stamhoofd/structures';
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import { Registration } from '@stamhoofd/structures';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, Checkbox, EmailInput, ErrorBox, LoadingButton, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components"
+import { Group,MemberDetails } from "@stamhoofd/structures"
+import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { Registration } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { FamilyManager } from '../../../../classes/FamilyManager';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
 
 @Component({
     components: {

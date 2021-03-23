@@ -9,11 +9,15 @@
         <main>
             <h1>Waarvoor wil je {{ member.firstName }} inschrijven?</h1>
 
+            <p v-if="!member.details.age" class="warning-box">
+                Vul de gegevens van {{ member.firstName }} aan om de mogelijke groepen automatisch te filteren.
+            </p>
+
             <STList>
                 <MemberBox v-for="group in groups" :key="group.id" :group="group" :member="member" type="group" />
             </STList>
 
-            <p class="error-box" v-if="groups.length == 0">
+            <p v-if="groups.length == 0" class="error-box">
                 {{ member.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
             </p>
         </main>

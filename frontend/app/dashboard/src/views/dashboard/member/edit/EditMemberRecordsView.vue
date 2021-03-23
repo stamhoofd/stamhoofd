@@ -31,6 +31,12 @@
             </template>
 
             <template v-if="allowData">
+                <template v-if="shouldAsk(RecordType.FinancialProblems)">
+                    <hr>
+                    <h2>Kansarm gezin</h2>
+                    <RecordCheckbox v-model="records" :type="RecordType.FinancialProblems" />
+                </template>
+
                 <template v-if="shouldAsk(RecordType.FoodAllergies, RecordType.MedicineAllergies, RecordType.HayFever, RecordType.OtherAllergies)">
                     <hr>
                     <h2>Allergieën</h2>

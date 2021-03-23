@@ -13,13 +13,13 @@
                 <span v-if="member.activeRegistrations.length == 0" class="style-tag error">Nog niet ingeschreven</span>
             </h1>
 
-             <p v-if="member.details.isRecovered" class="warning-box">
+            <p v-if="member.details.isRecovered" class="warning-box">
                 Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
             </p>
 
             <div class="member-view-details">
                 <div>
-                    <div class="container" v-if="member.activeRegistrations.length > 0">
+                    <div v-if="member.activeRegistrations.length > 0" class="container">
                         <h2 class="style-with-button">
                             <div>Ingeschreven voor</div>
                             <div>
@@ -32,7 +32,7 @@
 
                         <STList>
                             <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
-                                <figure slot="left" v-if="imageSrc(registration)" class="registration-image">
+                                <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
                                     <img :src="imageSrc(registration)">
                                     <div>
                                         <span v-if="!registration.waitingList" class="icon green success" />
@@ -43,14 +43,18 @@
                                     <span v-if="!registration.waitingList" class="icon green success" />
                                     <span v-else class="icon gray clock" />
                                 </template>
-                                <h3 class="style-title-list">{{ getGroup(registration.groupId).settings.name }}</h3>
-                                <p class="style-description-small" v-if="!registration.waitingList">Ingeschreven op {{ registration.registeredAt | dateTime }}</p>
-                                <p class="style-description-small" v-else>Op wachtlijst sinds {{ registration.registeredAt | dateTime }}</p>
+                                <h3 class="style-title-list">
+                                    {{ getGroup(registration.groupId).settings.name }}
+                                </h3>
+                                <p v-if="!registration.waitingList" class="style-description-small">
+                                    Ingeschreven op {{ registration.registeredAt | dateTime }}
+                                </p>
+                                <p v-else class="style-description-small">
+                                    Op wachtlijst sinds {{ registration.registeredAt | dateTime }}
+                                </p>
                             </STListItem>
-
                         </STList>
                         <hr>
-
                     </div>
 
 
