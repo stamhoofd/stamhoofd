@@ -233,7 +233,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get hasWaitingLists() {
-        return !!this.organization.groups.find(g => g.settings.waitingListType !== WaitingListType.None)
+        return !!this.organization.groups.find(g => g.hasWaitingList())
     }
     
     get automaticallyAssigned() {

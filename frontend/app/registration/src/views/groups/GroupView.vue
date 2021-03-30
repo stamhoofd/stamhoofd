@@ -13,33 +13,40 @@
             </figure>
             <p class="style-description" v-text="group.settings.description" />
 
-            <STList>
-                <STListItem v-if="group.activePreRegistrationDate" class="right-description">
-                    Voorinschrijvingen starten op
+            <p class="info-box" v-if="infoBox">
+                {{ infoBox }}
+            </p>
 
-                    <template slot="right">
-                        {{ formatDateTime(group.activePreRegistrationDate) }}
+            <p class="error-box" v-if="errorBox">
+                {{ errorBox }}
+            </p>
+
+            <STList>
+                <STListItem class="right-description">
+                    Wanneer?
+
+                    <template slot="right" v-if="group.settings.displayStartEndTime">
+                        {{ formatDateTime(group.settings.startDate) }} - {{ formatDateTime(group.settings.endDate) }}
+                    </template>
+                    <template slot="right" v-else>
+                        {{ formatDate(group.settings.startDate) }} - {{ formatDate(group.settings.endDate) }}
                     </template>
                 </STListItem>
-                <STListItem v-if="group.settings.startDate > now" class="right-description">
-                    Inschrijven opent op
+                <STListItem v-if="group.settings.location" class="right-description">
+                    Waar?
 
                     <template slot="right">
-                        {{ formatDateTime(group.settings.startDate) }}
+                        {{ group.settings.location }}
                     </template>
                 </STListItem>
                 <STListItem class="right-description">
-                    Inschrijven sluit op
+                    Wie?
 
                     <template slot="right">
-                        {{ formatDateTime(group.settings.endDate) }}
+                        {{ who }}
                     </template>
                 </STListItem>
             </STList>
-
-            <p v-if="closed" class="error-box">
-                De inschrijvingen zijn afgelopen
-            </p>
         </main>
 
         <STToolbar v-if="!closed">
@@ -54,7 +61,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group } from '@stamhoofd/structures';
+import { Group, GroupGenderType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -109,9 +116,101 @@ export default class GroupView extends Mixins(NavigationMixin){
     formatDateTime(date: Date) {
         return Formatter.dateTime(date)
     }
-    
 
-    
+    formatDate(date: Date) {
+        return Formatter.date(date)
+    }
+
+    get infoBox() {
+        if (this.group.settings.registrationStartDate > this.now) {
+            if (this.group.activePreRegistrationDate) {
+                if (this.group.settings.priorityForFamily) {
+                    return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate)
+                        + ". Bestaande leden en broers/zussen kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!) + "."
+                }
+                return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate)
+                        + ". Bestaande leden kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!) + "."
+            }
+            return "De inschrijvingen gaan open op "+ Formatter.dateTime(this.group.settings.registrationStartDate)
+        }
+
+        return null;
+    }
+
+    get errorBox() {
+        if (this.group.settings.registrationEndDate < this.now) {
+            return "De inschrijvingen zijn afgelopen"
+        }
+        return null;
+    }
+
+    get who() {
+        let who = ""
+        if (this.group.settings.minAge && this.group.settings.maxAge) {
+            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
+                if (this.group.settings.minAge >= 18) {
+                    who += "Mannen geboren in"
+                } else {
+                    who += "Jongens geboren in"
+                }
+            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
+                if (this.group.settings.minAge >= 18) {
+                    who += "Vrouwen geboren in"
+                } else {
+                    who += "Meisjes geboren in"
+                }
+            } else {
+                who += "Geboren in"
+            }
+            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.maxAge) + " - " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
+        } else if (this.group.settings.minAge) {
+            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
+                if (this.group.settings.minAge >= 18) {
+                    who += "Mannen geboren in of na"
+                } else {
+                    who += "Jongens geboren in of na"
+                }
+            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
+                if (this.group.settings.minAge >= 18) {
+                    who += "Vrouwen geboren in of na"
+                } else {
+                    who += "Meisjes geboren in of na"
+                }
+            } else {
+                who += "Geboren in of na"
+            }
+            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
+        } else if (this.group.settings.maxAge) {
+            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
+                if (this.group.settings.maxAge > 18) {
+                    who += "Mannen geboren in of voor"
+                } else {
+                    who += "Jongens geboren in of voor"
+                }
+            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
+                if (this.group.settings.maxAge > 18) {
+                    who += "Vrouwen geboren in of voor"
+                } else {
+                    who += "Meisjes geboren in of voor"
+                }
+            } else {
+                who += "Geboren in of voor"
+            }
+            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.maxAge);
+        } else {
+            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
+                who += "Mannen/jongens"
+            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
+                who += "Vrouwen/Meisjes"
+            }
+        }
+
+        if (!who) {
+            return "Iedereen kan inschrijven"
+        }
+
+        return who;
+    }
 }
 </script>
 

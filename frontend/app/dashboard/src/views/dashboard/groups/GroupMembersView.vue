@@ -414,7 +414,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
 
-            if (!this.waitingList && this.group && this.group.hasWaitingList) {
+            if (!this.waitingList && this.group && !this.group.hasWaitingList()) {
                 this.checkWaitingList()
             }
         })
@@ -437,7 +437,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.group) {
             return false;
         }
-        return this.group.settings.waitingListType == WaitingListType.All || this.group.settings.waitingListType == WaitingListType.ExistingMembersFirst
+        return this.group.hasWaitingList()
     }
 
     get title() {

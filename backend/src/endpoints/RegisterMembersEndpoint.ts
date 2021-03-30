@@ -132,8 +132,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const startDate = (group.settings.waitingListType == WaitingListType.PreRegistrations ? group.settings.preRegistrationsDate : group.settings.startDate) ?? group.settings.startDate
-            const endDate = group.settings.endDate
+            const startDate = (group.settings.preRegistrationsDate ? group.settings.preRegistrationsDate : group.settings.registrationStartDate) ?? group.settings.registrationStartDate
+            const endDate = group.settings.registrationEndDate
             const now = new Date()
             if (now < startDate) {
                 throw new SimpleError({
@@ -189,19 +189,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (!(registration.waitingList && registration.canRegister) && group.settings.waitingListType != WaitingListType.None && group.settings.maxMembers !== null) {
                     const _members = await group.getMembersWithRegistration(false)
                     if (_members.length >= group.settings.maxMembers) {
-
-                        if (group.settings.waitingListType != WaitingListType.PreRegistrations) {
-                            throw new SimpleError({
-                                code: "invalid_member",
-                                message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
-                            })
-                        } else {
-                            throw new SimpleError({
-                                code: "invalid_member",
-                                message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
-                            })
-                        }
-                        
+                        throw new SimpleError({
+                            code: "invalid_member",
+                            message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
+                        })
                     }
                 }
 

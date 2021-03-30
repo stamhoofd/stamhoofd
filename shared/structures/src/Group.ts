@@ -58,10 +58,7 @@ export class Group extends AutoEncoder {
      * Return the pre registration date only if is is active right now
      */
     get activePreRegistrationDate() {
-        if (this.settings.waitingListType !== WaitingListType.PreRegistrations) {
-            return null
-        }
-        if (this.settings.startDate < new Date()) {
+        if (this.settings.registrationStartDate < new Date()) {
             // Start date is in the past: registrations are open
             return null
         }
@@ -72,28 +69,20 @@ export class Group extends AutoEncoder {
         const now = new Date()
         const preRegistrationDate = this.activePreRegistrationDate
 
-        if (this.settings.startDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
+        if (this.settings.registrationStartDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
             // Start date or pre registration date are in the future
 
             return true
         }
 
-        if (this.settings.endDate < now) {
+        if (this.settings.registrationEndDate < now) {
             return true
         }
         return false
     }
 
-    /**
-     * Use this during registration to check if we need to register for waiting list. Return null if we can't skip the waiting list
-     */
     hasWaitingList(): boolean {
-        switch (this.settings.waitingListType) {
-            case WaitingListType.None: return false;
-            case WaitingListType.ExistingMembersFirst: return true;
-            case WaitingListType.All: return true;
-            case WaitingListType.PreRegistrations: return false;
-        }
+        return this.settings.waitingListType !== WaitingListType.None
     }
 
     /**

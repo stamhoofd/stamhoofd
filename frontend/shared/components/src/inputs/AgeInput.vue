@@ -40,6 +40,9 @@ export default class AgeInput extends Vue {
     @Prop({ default: 99 })
     max!: number | null
 
+    @Prop({ default: null })
+    year!: number | null
+
     valueString = "";
     valid = true;
 
@@ -62,7 +65,7 @@ export default class AgeInput extends Vue {
         if (!this.value) {
             return ""
         }
-        return "(geboren in "+(new Date().getFullYear() - this.value)+")"
+        return "(geboren in "+((this.year ?? new Date().getFullYear()) - this.value)+")"
     }
 
     mounted() {

@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component
 export default class Slider extends Vue {
@@ -59,6 +59,10 @@ export default class Slider extends Vue {
 
     set internalValue(val: number) {
         this.$emit("input", val)
+    }
+
+    mounted() {
+        this.updateSlider()
     }
 
     attach() {
@@ -157,7 +161,7 @@ export default class Slider extends Vue {
     }
 
     // Set the percentage and value based on a manual entered value
-    updateSlider(_event) {
+    updateSlider() {
         let _value = Math.round(this.value);
         if (_value > this.max) {
             if (this.softBounds) {

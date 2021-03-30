@@ -44,22 +44,52 @@
                     />
                 </STInputBox>
 
-                <hr>
-                <h2>Inschrijven</h2>
-
                 <div class="split-inputs">
-                    <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
+                    <STInputBox title="Startdatum" error-fields="settings.startDate" :error-box="errorBox">
                         <DateSelection v-model="startDate" />
                     </STInputBox>
-                    <TimeInput v-model="startDate" title="Vanaf" :validator="validator" /> 
+                    <TimeInput v-if="displayStartEndTime" v-model="startDate" title="Vanaf welk tijdstip" :validator="validator" /> 
                 </div>
                 
 
                 <div class="split-inputs">
-                    <STInputBox title="Inschrijven sluit op" error-fields="settings.endDate" :error-box="errorBox">
+                    <STInputBox title="Einddatum" error-fields="settings.endDate" :error-box="errorBox">
                         <DateSelection v-model="endDate" />
                     </STInputBox>
-                    <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
+                    <TimeInput v-if="displayStartEndTime" v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
+                </div>
+                <p class="st-list-description">
+                    De start- en einddatum is zichtbaar bij het inschrijven. Let op: dit is niet de datum waarop de inschrijvingen starten en eindigen, dat staat hieronder.
+                </p>
+
+                <Checkbox v-model="displayStartEndTime">Start- en eindtijdstip toevoegen</Checkbox>
+
+                <STInputBox title="Locatie (optioneel)" error-fields="settings.location" :error-box="errorBox">
+                    <input
+                        v-model="location"
+                        class="input"
+                        type="text"
+                        placeholder="Optioneel"
+                        autocomplete=""
+                    >
+                </STInputBox>
+
+                <hr>
+                <h2>Inschrijven</h2>
+
+                <div class="split-inputs">
+                    <STInputBox title="Inschrijven start op" error-fields="settings.registrationStartDate" :error-box="errorBox">
+                        <DateSelection v-model="registrationStartDate" />
+                    </STInputBox>
+                    <TimeInput v-model="registrationStartDate" title="Vanaf" :validator="validator" /> 
+                </div>
+                
+
+                <div class="split-inputs">
+                    <STInputBox title="Inschrijven sluit op" error-fields="settings.registrationEndDate" :error-box="errorBox">
+                        <DateSelection v-model="registrationEndDate" />
+                    </STInputBox>
+                    <TimeInput v-model="registrationEndDate" title="Tot welk tijdstip" :validator="validator" />
                 </div>
                 <p class="st-list-description">
                     Als de inschrijvingen het hele jaar doorlopen, vul dan hier gewoon een datum in ergens op het einde van het jaar. Let op het jaartal.
@@ -67,15 +97,15 @@
       
                 <div class="split-inputs">
                     <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
-                        <AgeInput v-model="minAge" placeholder="Onbeperkt" :nullable="true" />
+                        <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
                     </STInputBox>
 
                     <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errorBox">
-                        <AgeInput v-model="maxAge" placeholder="Onbeperkt" :nullable="true" />
+                        <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
                     </STInputBox>
                 </div>
                 <p class="st-list-description">
-                    *De leeftijd die het lid zal worden in het jaar waarin de inschrijvingen starten. Ter referentie: leden uit het eerste leerjaar worden 6 jaar in september. Leden uit het eerste secundair worden 12 jaar in september.
+                    *De leeftijd van het lid op 31/12/{{ startYear }} (jaar startdatum). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
                 </p>
 
                 <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
@@ -87,36 +117,49 @@
                 </STInputBox>
 
                 <hr>
-                <h2>Wachtlijst</h2>
+                <h2>Maximum aantal leden</h2>
+
+                <Checkbox v-model="enableMaxMembers">
+                    Limiteer maximum aantal ingeschreven leden
+                </Checkbox>
+
+                <STInputBox v-if="enableMaxMembers" title="Maximaal aantal ingeschreven leden">
+                    <Slider v-model="maxMembers" :max="200" />
+                </STInputBox>
+
+                <hr>
+                <h2>Wachtlijst en voorinschrijvingen</h2>
+
                 <STInputBox error-fields="genderType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
                             Geen wachtlijst
                         </Radio>
-                        <Radio v-model="waitingListType" value="PreRegistrations">
-                            Voorinschrijvingen <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven. Bij het openen van de inschrijvingen kan men blijven inschrijven tot het maximaal aantal leden bereikt is. Daarna sluiten de inschrijvingen.</span>
+                        <Radio v-model="waitingListType" value="Limit" v-if="maxMembers !== null">
+                            Wachtlijst als maximum is bereikt
                         </Radio>
                         <Radio v-model="waitingListType" value="ExistingMembersFirst">
-                            Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven. Van de nieuwe leden kies je zelf wie je doorlaat.</span>
+                            Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest komt op de wachtlijst.</span>
                         </Radio>
                         <Radio v-model="waitingListType" value="All">
                             Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span>
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
-               
-                <STInputBox v-if="waitingListType != 'None'" title="Maximaal aantal ingeschreven leden">
-                    <Slider v-model="maxMembers" :max="200" />
-                </STInputBox>
 
-                <div v-if="waitingListType == 'PreRegistrations'" class="split-inputs">
-                    <STInputBox v-if="waitingListType == 'PreRegistrations'" title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
+                <Checkbox v-model="enablePreRegistrations">
+                    Voorinschrijvingen gebruiken <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven.</span>
+                </Checkbox>
+
+                <div v-if="enablePreRegistrations" class="split-inputs">
+                    <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
                         <DateSelection v-model="preRegistrationsDate" />
                     </STInputBox>
                     
                     <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator" /> 
                 </div>
-                <Checkbox v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
+                
+                <Checkbox v-if="enablePreRegistrations || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
 
@@ -197,6 +240,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
 import { GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -345,6 +389,33 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ name })
     }
 
+    get location() {
+        return this.patchedGroup.settings.location
+    }
+
+    set location(location: string) {
+        this.addSettingsPatch({ location })
+    }
+
+    get displayStartEndTime() {
+        return this.patchedGroup.settings.displayStartEndTime
+    }
+
+    set displayStartEndTime(displayStartEndTime: boolean) {
+        this.addSettingsPatch({ displayStartEndTime })
+
+        if (!displayStartEndTime) {
+            // Change dates
+            const start = new Date(this.startDate)
+            start.setHours(0, 0, 0, 0)
+            this.startDate = start
+
+            const end = new Date(this.endDate)
+            end.setHours(23, 59, 59, 0)
+            this.endDate = end
+        }
+    }
+
     get description() {
         return this.patchedGroup.settings.description
     }
@@ -361,12 +432,32 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ startDate })
     }
 
-    get endDate() {
+     get endDate() {
         return this.patchedGroup.settings.endDate
     }
 
     set endDate(endDate: Date) {
         this.addSettingsPatch({ endDate })
+    }
+
+    get startYear() {
+        return this.startDate.getFullYear()
+    }
+
+    get registrationStartDate() {
+        return this.patchedGroup.settings.registrationStartDate
+    }
+
+    set registrationStartDate(registrationStartDate: Date) {
+        this.addSettingsPatch({ registrationStartDate })
+    }
+
+    get registrationEndDate() {
+        return this.patchedGroup.settings.registrationEndDate
+    }
+
+    set registrationEndDate(registrationEndDate: Date) {
+        this.addSettingsPatch({ registrationEndDate })
     }
 
     get genderType() {
@@ -418,18 +509,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     set waitingListType(waitingListType: WaitingListType) {
-        if (waitingListType == WaitingListType.PreRegistrations) {
-            const preRegistrationsDate = new Date(this.startDate.getTime())
-            preRegistrationsDate.setDate(preRegistrationsDate.getDate() - 14)
-            this.addSettingsPatch({ preRegistrationsDate })
-        } else {
-            this.addSettingsPatch({ preRegistrationsDate: null })
-        }
-        if (waitingListType != WaitingListType.None) {
-            this.addSettingsPatch({ maxMembers: this.maxMembers ?? 50 })
-        } else {
-            this.addSettingsPatch({ maxMembers: null })
-        }
         this.addSettingsPatch({ waitingListType })
     }
 
@@ -439,6 +518,42 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     set preRegistrationsDate(preRegistrationsDate: Date | null) {
         this.addSettingsPatch({ preRegistrationsDate })
+    }
+
+    get enablePreRegistrations() {
+        return this.patchedGroup.settings.preRegistrationsDate !== null
+    }
+
+    set enablePreRegistrations(enablePreRegistrations: boolean) {
+        if (enablePreRegistrations === this.enablePreRegistrations) {
+            return
+        }
+
+        const preRegistrationsDate = new Date(this.patchedGroup.settings.startDate.getTime())
+        preRegistrationsDate.setMonth(preRegistrationsDate.getMonth() - 1)
+
+        this.addSettingsPatch({ 
+            preRegistrationsDate: enablePreRegistrations ? preRegistrationsDate : null
+        })
+    }
+
+    get enableMaxMembers() {
+        return this.maxMembers !== null
+    }
+
+    set enableMaxMembers(enableMaxMembers: boolean) {
+        if (enableMaxMembers === this.enableMaxMembers) {
+            return
+        }
+        if (enableMaxMembers) {
+            this.maxMembers = 200
+        } else {
+            this.maxMembers = null
+
+            if (this.waitingListType === WaitingListType.Limit) {
+                this.waitingListType = WaitingListType.None
+            }
+        }
     }
 
     get maxMembers() {

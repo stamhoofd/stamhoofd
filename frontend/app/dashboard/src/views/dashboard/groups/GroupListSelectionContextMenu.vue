@@ -108,7 +108,7 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     }
 
     get hasWaitingList() {
-        return this.group?.hasWaitingList ?? false
+        return this.group?.hasWaitingList() ?? false
     }
 
     async excel() {

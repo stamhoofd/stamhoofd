@@ -97,6 +97,9 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
+    /**
+     * @deprecated
+     */
     canSkipWaitingList(group: Group, family: MemberWithRegistrations[]): boolean  {
         switch (group.settings.waitingListType) {
             case WaitingListType.None: return true
@@ -116,7 +119,7 @@ export class MemberWithRegistrations extends Member {
                 return false
             }
             case WaitingListType.All: return false;
-            case WaitingListType.PreRegistrations: return false;
+            case WaitingListType.Limit: return false;
         }
     }
 
