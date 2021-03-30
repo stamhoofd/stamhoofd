@@ -13,6 +13,30 @@
             </figure>
             <p class="style-description" v-text="group.settings.description" />
 
+            <STList>
+                <STListItem v-if="group.activePreRegistrationDate" class="right-description">
+                    Voorinschrijvingen starten op
+
+                    <template slot="right">
+                        {{ formatDateTime(group.activePreRegistrationDate) }}
+                    </template>
+                </STListItem>
+                <STListItem v-if="group.settings.startDate > now" class="right-description">
+                    Inschrijven opent op
+
+                    <template slot="right">
+                        {{ formatDateTime(group.settings.startDate) }}
+                    </template>
+                </STListItem>
+                <STListItem class="right-description">
+                    Inschrijven sluit op
+
+                    <template slot="right">
+                        {{ formatDateTime(group.settings.endDate) }}
+                    </template>
+                </STListItem>
+            </STList>
+
             <p v-if="closed" class="error-box">
                 De inschrijvingen zijn afgelopen
             </p>
@@ -66,6 +90,10 @@ export default class GroupView extends Mixins(NavigationMixin){
         return this.group.closed
     }
 
+    get now() {
+        return new Date()
+    }
+
     chooseMembers() {
         this.show(new ComponentWithProperties(GroupMemberSelectionView, { group: this.group }))
     }
@@ -76,6 +104,10 @@ export default class GroupView extends Mixins(NavigationMixin){
             return null
         }
         return image.getPathForSize(1800, 750)
+    }
+
+    formatDateTime(date: Date) {
+        return Formatter.dateTime(date)
     }
     
 
