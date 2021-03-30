@@ -186,7 +186,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } else {
 
                 // Check maximum members, but ignore maximum membes if they received an invitation (canRegister)
-                if (!(registration.waitingList && registration.canRegister) && group.settings.waitingListType != WaitingListType.None && group.settings.maxMembers !== null) {
+                if (!(registration.waitingList && registration.canRegister) && group.settings.maxMembers !== null) {
                     const _members = await group.getMembersWithRegistration(false)
                     if (_members.length >= group.settings.maxMembers) {
                         throw new SimpleError({
@@ -248,6 +248,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
                 
                 await registration.save()
+            }
+
+            // Update occupancy
+            for (const group of groups) {
+                if (payRegistrations.find(p => p.groupId === group.id)) {
+                    await group.updateOccupancy()
+                }
             }
 
             let paymentUrl: string | null = null

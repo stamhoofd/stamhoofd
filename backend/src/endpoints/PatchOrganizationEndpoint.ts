@@ -261,6 +261,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 })
             }
 
+            await model.updateOccupancy()
             await model.save();
         }
 
@@ -294,6 +295,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
             }
             
+            await model.updateOccupancy()
             await model.save();
         }
 

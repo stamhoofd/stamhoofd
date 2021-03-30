@@ -18,6 +18,10 @@ export class Registration extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null
 
+    /// Keep spot for this member temporarily
+    @field({ decoder: DateDecoder, nullable: true })
+    reservedUntil: Date | null = null
+
     @field({ decoder: DateDecoder, nullable: true })
     deactivatedAt: Date | null = null
 

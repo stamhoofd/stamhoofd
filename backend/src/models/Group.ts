@@ -124,4 +124,23 @@ export class Group extends Model {
 
     }
 
+    async updateOccupancy() {
+        // todo: add some sort of semaphore here
+        if (!this.settings.maxMembers) {
+            this.settings.registeredMembers = null;
+            return
+        }
+
+        const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (registeredAt is not null or reservedUntil >= ?) and waitingList = 0`
+        
+        const [results] = await Database.select(query, [this.id, this.cycle, new Date()])
+        const count = results[0]['']['c'];
+
+        if (Number.isInteger(count)) {
+            this.settings.registeredMembers = count
+        } else {
+            console.error("Unexpected result for occupancy", results)
+        }
+    }
+
 }
