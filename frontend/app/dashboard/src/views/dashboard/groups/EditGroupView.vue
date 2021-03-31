@@ -62,7 +62,9 @@
                     De start- en einddatum is zichtbaar bij het inschrijven. Let op: dit is niet de datum waarop de inschrijvingen starten en eindigen, dat staat hieronder.
                 </p>
 
-                <Checkbox v-model="displayStartEndTime">Start- en eindtijdstip toevoegen</Checkbox>
+                <Checkbox v-model="displayStartEndTime">
+                    Start- en eindtijdstip toevoegen
+                </Checkbox>
 
                 <STInputBox title="Locatie (optioneel)" error-fields="settings.location" :error-box="errorBox">
                     <input
@@ -123,23 +125,32 @@
                     Limiteer maximum aantal ingeschreven leden
                 </Checkbox>
 
+                <Checkbox v-if="enableMaxMembers" v-model="waitingListIfFull">
+                    Wachtlijst als maximum is bereikt
+                </Checkbox>
+
                 <STInputBox v-if="enableMaxMembers" title="Maximaal aantal ingeschreven leden">
                     <Slider v-model="maxMembers" :max="200" />
                 </STInputBox>
 
+                <p v-if="enableMaxMembers" class="style-description-small">
+                    Bij online betalingen wordt de plaats maximaal 30 minuten vrijgehouden als mensen op de betaalpagina zijn. Normaal kan de betaling daarna niet meer doorkomen. Door een trage verwerking van de bank of een storing bij de bank kan het zijn dat het langer dan 30 minuten duurt voor we een betaalbevestiging krijgen van de bank, dan kunnen we de betaling niet meer weigeren (beperking van bank). Het kan dus zijn dat in die uitzonderlijke situaties, het maximum aantal overschreven wordt. Je kan daarna eventueel zelf overgaan tot terugbetalen en uitschrijven. 
+                </p>
+
+
                 <hr>
                 <h2>Wachtlijst en voorinschrijvingen</h2>
 
-                <STInputBox error-fields="genderType" :error-box="errorBox" class="max">
+                <STInputBox error-fields="waitingListType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
                             Geen wachtlijst
                         </Radio>
-                        <Radio v-model="waitingListType" value="Limit" v-if="maxMembers !== null">
-                            Wachtlijst als maximum is bereikt
-                        </Radio>
                         <Radio v-model="waitingListType" value="ExistingMembersFirst">
                             Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest komt op de wachtlijst.</span>
+                        </Radio>
+                        <Radio v-model="waitingListType" value="PreRegistrations">
+                            Voorinschrijvingen gebruiken <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven.</span>
                         </Radio>
                         <Radio v-model="waitingListType" value="All">
                             Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span>
@@ -147,11 +158,7 @@
                     </RadioGroup>
                 </STInputBox>
 
-                <Checkbox v-model="enablePreRegistrations">
-                    Voorinschrijvingen gebruiken <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven.</span>
-                </Checkbox>
-
-                <div v-if="enablePreRegistrations" class="split-inputs">
+                <div v-if="waitingListType == 'PreRegistrations'" class="split-inputs">
                     <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
                         <DateSelection v-model="preRegistrationsDate" />
                     </STInputBox>
@@ -159,7 +166,7 @@
                     <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator" /> 
                 </div>
                 
-                <Checkbox v-if="enablePreRegistrations || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
+                <Checkbox v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
 
@@ -510,6 +517,12 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     set waitingListType(waitingListType: WaitingListType) {
         this.addSettingsPatch({ waitingListType })
+
+        if (waitingListType === WaitingListType.PreRegistrations && this.preRegistrationsDate === null) {
+            const d = new Date(this.startDate)
+            d.setMonth(d.getMonth() - 1)
+            this.preRegistrationsDate = d
+        }
     }
 
     get preRegistrationsDate() {
@@ -520,21 +533,12 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ preRegistrationsDate })
     }
 
-    get enablePreRegistrations() {
-        return this.patchedGroup.settings.preRegistrationsDate !== null
+    get waitingListIfFull() {
+        return this.patchedGroup.settings.waitingListIfFull
     }
 
-    set enablePreRegistrations(enablePreRegistrations: boolean) {
-        if (enablePreRegistrations === this.enablePreRegistrations) {
-            return
-        }
-
-        const preRegistrationsDate = new Date(this.patchedGroup.settings.startDate.getTime())
-        preRegistrationsDate.setMonth(preRegistrationsDate.getMonth() - 1)
-
-        this.addSettingsPatch({ 
-            preRegistrationsDate: enablePreRegistrations ? preRegistrationsDate : null
-        })
+    set waitingListIfFull(waitingListIfFull: boolean) {
+        this.addSettingsPatch({ waitingListIfFull })
     }
 
     get enableMaxMembers() {
@@ -549,10 +553,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
             this.maxMembers = 200
         } else {
             this.maxMembers = null
-
-            if (this.waitingListType === WaitingListType.Limit) {
-                this.waitingListType = WaitingListType.None
-            }
         }
     }
 

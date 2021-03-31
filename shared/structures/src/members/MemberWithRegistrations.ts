@@ -42,9 +42,49 @@ export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Group), optional: true})
     acceptedWaitingGroups: Group[] = []
 
+    /**
+     * All groups of this organization (used for finding information of groups)
+     */
+    @field({ decoder: new ArrayDecoder(Group), optional: true })
+    allGroups: Group[] = []
+
     get isNew(): boolean {
-        return this.inactiveRegistrations.length === 0
+        if (this.inactiveRegistrations.length === 0) {
+            return true
+        }
+
+        // Check if no year was skipped
+        for (const registration of this.inactiveRegistrations) {
+            const group = this.allGroups.find(g => g.id === registration.groupId)
+            if (group && registration.cycle === group.cycle - 1) {
+                // This was the previous year
+                return true
+            }
+        }
+
+        return false
     }
+
+    /**
+     * Return true if this member was registered in the previous year (current doesn't count)
+     */
+    get isExistingMember(): boolean {
+        if (this.inactiveRegistrations.length === 0) {
+            return false
+        }
+
+        // Check if no year was skipped
+        for (const registration of this.inactiveRegistrations) {
+            const group = this.allGroups.find(g => g.id === registration.groupId)
+            if (group && registration.cycle === group.cycle - 1) {
+                // This was the previous year
+                return true
+            }
+        }
+
+        return false
+    }
+
 
     static fromMember(member: Member, registrations: Registration[], users: User[], groups: Group[]) {
         const m = MemberWithRegistrations.create({
@@ -87,6 +127,7 @@ export class MemberWithRegistrations extends Member {
         this.groups = Array.from(groupMap.values())
         this.waitingGroups = Array.from(waitlistGroups.values())
         this.acceptedWaitingGroups = Array.from(acceptedWaitlistGroups.values())
+        this.allGroups = groups.slice()
     }
     
     get paid(): boolean {
@@ -97,29 +138,76 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
-    /**
-     * @deprecated
-     */
-    canSkipWaitingList(group: Group, family: MemberWithRegistrations[]): boolean  {
-        switch (group.settings.waitingListType) {
-            case WaitingListType.None: return true
-            case WaitingListType.ExistingMembersFirst: {
-                if (!this.isNew) {
-                    return true
-                }
-
-                if (group.settings.priorityForFamily) {
-                    for (const f of family) {
-                        if (!f.isNew) {
-                            return true
-                        }
-                    }
-                }
-
-                return false
+    getRegistrationInfo(group: Group, family: MemberWithRegistrations[]): { closed: boolean; waitingList: boolean; message?: string } {
+        if (group.notYetOpen) {
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Nog niet geopend"
             }
-            case WaitingListType.All: return false;
-            case WaitingListType.Limit: return false;
+        }
+
+        if (group.closed) {
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Gesloten"
+            }
+        }
+
+        const existingMember = this.isExistingMember || (group.settings.priorityForFamily && !!family.find(f => f.isExistingMember))
+
+        // Pre registrations?
+        if (group.activePreRegistrationDate) {
+            if (!existingMember) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Voorinschrijvingen"
+                }
+            }
+        }
+
+        if (group.settings.waitingListType === WaitingListType.All) {
+            return {
+                closed: false,
+                waitingList: true,
+                message: "Wachtlijst"
+            };
+        }
+
+        if (group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+            return {
+                closed: false,
+                waitingList: true,
+                message: "Wachtlijst"
+            };
+        }
+
+        const reachedMaximum = group.settings.maxMembers !== null && group.settings.registeredMembers !== null && group.settings.maxMembers <= group.settings.registeredMembers
+        if (reachedMaximum) {
+            if (!group.settings.waitingListIfFull) {
+                // Maximum reached without waiting list -> closed
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Volzet"
+                }
+            }
+
+            // Still allow waiting list
+            return {
+                closed: false,
+                waitingList: true,
+                message: "Wachtlijst (volzet)"
+            }
+        }
+        
+        // Normal registrations available
+        return {
+            closed: false,
+            waitingList: false,
+            message: group.activePreRegistrationDate ? 'Voorinschrijvingen' : undefined
         }
     }
 

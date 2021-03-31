@@ -316,6 +316,37 @@ async function checkPayments() {
     }
 }
 
+// Keep checking pending paymetns for 3 days
+async function checkReservedUntil() {
+    const payments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Created, PaymentStatus.Pending]
+        },
+        method: {
+            sign: "IN",
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
+        },
+        createdAt: {
+            sign: ">",
+            value: new Date(new Date().getTime() - 60*1000*60*24*3)
+        },
+    }, {
+        limit: 100
+    })
+
+    console.log("Checking pending payments: "+payments.length)
+
+    for (const payment of payments) {
+        if (payment.organizationId) {
+            const organization = await Organization.getByID(payment.organizationId)
+            if (organization) {
+                await ExchangePaymentEndpoint.pollStatus(payment, organization)
+            }
+        }
+    }
+}
+
 // Schedule automatic paynl charges
 export const crons = () => {
     if (isRunningCrons) {

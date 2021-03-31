@@ -51,6 +51,9 @@ export class Registration extends Model {
     @column({ type: "datetime", nullable: true })
     registeredAt: Date | null = null
 
+    @column({ type: "datetime", nullable: true })
+    reservedUntil: Date | null = null
+
     @column({ type: "boolean" })
     waitingList = false
 

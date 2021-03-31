@@ -182,13 +182,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (item.waitingList) {
                 registration.waitingList = true
+                registration.reservedUntil = null
                 await registration.save()
             } else {
 
-                // Check maximum members, but ignore maximum membes if they received an invitation (canRegister)
-                if (!(registration.waitingList && registration.canRegister) && group.settings.maxMembers !== null) {
-                    const _members = await group.getMembersWithRegistration(false)
-                    if (_members.length >= group.settings.maxMembers) {
+                // Check maximum members, but ignore maximum membes if they received an invitation (canRegister) OR if it was reserved and still valid
+                if (!(registration.waitingList && registration.canRegister) && group.settings.maxMembers !== null && (registration.reservedUntil === null || registration.reservedUntil < new Date())) {
+                    await group.updateOccupancy()
+
+                    if (group.settings.registeredMembers === null) {
+                        console.error("Registered members is null after checking update occupancy for group", group.id)
+                    }
+                    if (group.settings.registeredMembers === null || group.settings.registeredMembers >= group.settings.maxMembers) {
                         throw new SimpleError({
                             code: "invalid_member",
                             message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
@@ -238,12 +243,21 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             await payment.save()
 
+            // Save registrations and add extra data if needed
             for (const registration of payRegistrations) {
                 if (!registration.waitingList) {
                     registration.paymentId = payment.id
+                    registration.reservedUntil = null
 
                     if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
                         registration.registeredAt = new Date()
+                    } else {
+                        // Reserve registration for 30 minutes (if needed)
+                        const group = groups.find(g => g.id === registration.groupId)
+
+                        if (group && group.settings.maxMembers !== null) {
+                            registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
+                        }
                     }
                 }
                 

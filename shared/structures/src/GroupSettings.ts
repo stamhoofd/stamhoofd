@@ -5,25 +5,11 @@ import { GroupGenderType } from './GroupGenderType';
 import { GroupPrices } from './GroupPrices';
 
 
-export enum OldWaitingListType {
+export enum WaitingListType {
     None = "None",
     PreRegistrations = "PreRegistrations",
     ExistingMembersFirst = "ExistingMembersFirst",
     All = "All"
-}
-
-export enum WaitingListType {
-    /// Never provide a waiting list. When limit is reached -> reject
-    None = "None",
-
-    /// All new members on waiting list, OR existing members if limit is reached
-    ExistingMembersFirst = "ExistingMembersFirst",
-
-    /// Everyone on waiting list.
-    All = "All",
-
-    /// Only on waiting list if limit is reached
-    Limit = "Limit"
 }
 
 export class GroupSettings extends AutoEncoder {
@@ -87,45 +73,13 @@ export class GroupSettings extends AutoEncoder {
     })
     maxAge: number | null = null
 
-    @field({ decoder: new EnumDecoder(OldWaitingListType), version: 16 })
-    @field({ 
-        decoder: new EnumDecoder(WaitingListType), 
-        version: 75, 
-        upgrade: (old: OldWaitingListType): WaitingListType => {
-            if (old === OldWaitingListType.None) {
-                return WaitingListType.None
-            }
-
-            if (old === OldWaitingListType.All) {
-                return WaitingListType.All
-            }
-
-            if (old === OldWaitingListType.PreRegistrations) {
-                return WaitingListType.Limit
-            }
-
-            if (old === OldWaitingListType.ExistingMembersFirst) {
-                return WaitingListType.ExistingMembersFirst
-            }
-
-            return WaitingListType.Limit
-        }
-    })
+    @field({ decoder: new EnumDecoder(WaitingListType), version: 16 })
     waitingListType: WaitingListType = WaitingListType.None
 
+    /**
+     * Only used for waitingListType = PreRegistrations
+     */
     @field({ decoder: DateDecoder, nullable: true, version: 16 })
-    @field({ 
-        decoder: DateDecoder, 
-        nullable: true, 
-        version: 74, 
-        upgrade: function(this: GroupSettings, old: Date | null): Date | null {
-            // Clear value if waiting list type is not preregistrations
-            if ((this.waitingListType as any as OldWaitingListType) === OldWaitingListType.PreRegistrations) {
-                return old
-            }
-            return null
-        } 
-    })
     preRegistrationsDate: Date | null = null
 
     @field({ 
@@ -137,13 +91,18 @@ export class GroupSettings extends AutoEncoder {
         version: 74, 
         upgrade: function(this: GroupSettings, old: number | null): number | null {
             // Clear value if waiting list type is none
-            if ((this.waitingListType as any as OldWaitingListType) !== OldWaitingListType.None) {
+            if ((this.waitingListType as any as WaitingListType) !== WaitingListType.None) {
                 return old
             }
             return null
         }
     })
     maxMembers: number | null = null
+
+    @field({ 
+        decoder: BooleanDecoder, version: 79, 
+    })
+    waitingListIfFull = true
 
     /**
      * If maxMembers is not null, this will get filled in by the backend
