@@ -3,7 +3,7 @@
         <main class="limit-width">
             <section class="view">
                 <STNavigationBar :title="title">
-                    <span v-if="false && cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
+                    <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
                 </STNavigationBar>
 
                 <main>
@@ -21,6 +21,9 @@
                             <h3>
                                 <span>{{ item.member.name }}</span>
                             </h3>
+                            <p v-if="!item.waitingList" class="description">
+                                {{ item.calculatedPrice | price }}
+                            </p>
 
                             <footer>
                                 <p class="price">
@@ -39,7 +42,7 @@
                 </main>
 
                 <STToolbar v-if="cart.items.length > 0">
-                    <span slot="left" v-if="false">Totaal: {{ cart.price | price }}</span>
+                    <span slot="left">Totaal: {{ cart.price | price }}</span>
                     <LoadingButton slot="right" :loading="loading">
                         <button class="button primary" @click="goToCheckout">
                             <span class="icon flag" />
@@ -137,15 +140,27 @@ export default class CartView extends Mixins(NavigationMixin){
         this.$nextTick(() => {
             HistoryManager.setUrl("/cart")
         })
+
+        this.recalculate()
     }
 
-    mounted() {
+    recalculate() {
         try {
             this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
+        try {
+            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+        } catch (e) {
+            // error in calculation!
+            console.error(e)
+        }
+    }
+
+    mounted() {
+        this.recalculate()
         CheckoutManager.saveCart()
     }
 }
@@ -168,7 +183,6 @@ export default class CartView extends Mixins(NavigationMixin){
         .description {
             @extend .style-description-small;
             padding-top: 5px;
-            white-space: pre-wrap;
         }
 
         .price {
