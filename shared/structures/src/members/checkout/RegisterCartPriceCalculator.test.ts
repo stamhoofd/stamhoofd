@@ -104,28 +104,29 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
-        expect(calculated.items).toHaveLength(3)
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
-        const calculatedBart = calculated.items.find(i => i.memberId === bart.id)
+        const calculatedBart = cart.items.find(i => i.memberId === bart.id)
         expect(calculatedBart).toMatchObject({
             calculatedPrice: 60
         })
 
-        const calculatedAlice = calculated.items.find(i => i.memberId === alice.id)
+        const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
         expect(calculatedAlice).toMatchObject({
             calculatedPrice: 10
         })
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 40
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        expect(cart.price).toEqual(cached)
     })
 
     test("Family discount 4 members", () => {
@@ -249,33 +250,34 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom, linda], [group1, group2, group3, group4], [category])
-        expect(calculated.items).toHaveLength(4)
+        cart.calculatePrices([bart, alice, tom, linda], [group1, group2, group3, group4], [category])
+        expect(cart.items).toHaveLength(4)
 
         // Check if Bart got the cheapest price
-        const calculatedBart = calculated.items.find(i => i.memberId === bart.id)
+        const calculatedBart = cart.items.find(i => i.memberId === bart.id)
         expect(calculatedBart).toMatchObject({
             calculatedPrice: 40
         })
 
-        const calculatedAlice = calculated.items.find(i => i.memberId === alice.id)
+        const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
         expect(calculatedAlice).toMatchObject({
             calculatedPrice: 10
         })
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 20
         })
 
-        const calculatedLinda = calculated.items.find(i => i.memberId === linda.id)
+        const calculatedLinda = cart.items.find(i => i.memberId === linda.id)
         expect(calculatedLinda).toMatchObject({
             calculatedPrice: 80
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice, linda], [group2, group1, group3, group4], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice, linda], [group2, group1, group3, group4], [category])
+        expect(cart.price).toEqual(cached)
     })
 
     test("With existing registration", () => {
@@ -373,22 +375,23 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
-        expect(calculated.items).toHaveLength(2)
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        expect(cart.items).toHaveLength(2)
 
-        const calculatedAlice = calculated.items.find(i => i.memberId === alice.id)
+        const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
         expect(calculatedAlice).toMatchObject({
             calculatedPrice: 10
         })
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 40
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        expect(cart.price).toEqual(cached)
     })
 
     test("With two existing registration", () => {
@@ -492,17 +495,18 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
-        expect(calculated.items).toHaveLength(2)
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        expect(cart.items).toHaveLength(2)
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 20
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        expect(cart.price).toEqual(cached)
     })
 
     test("With reduced price", () => {
@@ -565,29 +569,30 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom], [group1], [category])
-        expect(calculated.items).toHaveLength(3)
+        cart.calculatePrices([bart, alice, tom], [group1], [category])
+        expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
-        const calculatedBart = calculated.items.find(i => i.memberId === bart.id)
+        const calculatedBart = cart.items.find(i => i.memberId === bart.id)
         expect(calculatedBart).toMatchObject({
             calculatedPrice: 40
         })
 
         // Alice is the only one with the reduced price, so plan it as the first memebr without family discount
-        const calculatedAlice = calculated.items.find(i => i.memberId === alice.id)
+        const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
         expect(calculatedAlice).toMatchObject({
             calculatedPrice: 50
         })
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 20
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice], [group1], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice], [group1], [category])
+        expect(cart.price).toEqual(cached)
     })
 
     test("do not group if not maximum", () => {
@@ -674,27 +679,28 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        const calculated = cart.calculatePrices([bart, alice, tom], [group1, group2], [category])
-        expect(calculated.items).toHaveLength(3)
+        cart.calculatePrices([bart, alice, tom], [group1, group2], [category])
+        expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
-        const calculatedBart = calculated.items.find(i => i.memberId === bart.id)
+        const calculatedBart = cart.items.find(i => i.memberId === bart.id)
         expect(calculatedBart).toMatchObject({
             calculatedPrice: 60
         })
 
-        const calculatedAlice = calculated.items.find(i => i.memberId === alice.id)
+        const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
         expect(calculatedAlice).toMatchObject({
             calculatedPrice: 40
         })
 
-        const calculatedTom = calculated.items.find(i => i.memberId === tom.id)
+        const calculatedTom = cart.items.find(i => i.memberId === tom.id)
         expect(calculatedTom).toMatchObject({
             calculatedPrice: 10
         })
 
         // Try in different order
-        const calculated2 = cart.calculatePrices([tom, bart, alice], [group2, group1], [category])
-        expect(calculated2).toEqual(calculated)
+        const cached = cart.price
+        cart.calculatePrices([tom, bart, alice], [group2, group1], [category])
+        expect(cart.price).toEqual(cached)
     })
 })

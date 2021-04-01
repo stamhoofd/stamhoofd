@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 // eslint bug marks types as "unused"
@@ -29,6 +29,12 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: BooleanDecoder})
     waitingList = false
 
+    /**
+     * Will get validated. Is used to check if the price has changed between frontend and backend
+     */
+    @field({ decoder: IntegerDecoder})
+    calculatedPrice = 0
+
     convert(organization: Organization, members: MemberWithRegistrations[]): RegisterItem | null {
         const group = organization.groups.find(g => g.id === this.groupId)
         if (!group) {
@@ -42,34 +48,6 @@ export class IDRegisterItem extends AutoEncoder {
     }
 }
 
-export class IDRegisterItemCalculated extends IDRegisterItem {
-    @field({ decoder: EncryptedMemberWithRegistrations })
-    member: EncryptedMemberWithRegistrations
-
-    @field({ decoder: Group })
-    group: Group
-
-    @field({ decoder: GroupPrices, optional: true })
-    groupPrices!: GroupPrices
-
-    calculatedPrice = 0
-
-    /**
-     * Return an unique ID that is the same for all groups that should have equal family pricing (2nd, 3rd discount)
-     */
-    getFamilyDiscountId(all: GroupCategory[]) {
-        const parents = this.group.getParentCategories(all, false)
-        for (const parent of parents) {
-            if (parent.settings.maximumRegistrations === 1) {
-                return "category-"+parent.id
-            }
-        }
-
-        // Only registrations in same group are elegiable for family discount
-        return "group-"+this.groupId
-    }
-}
-
 /**
  * Used in memory in the client
  * Do not extend IDRegisterItem to prevent leaking information when encoding a RegisterItem as IDRegisterItem.
@@ -80,12 +58,21 @@ export class RegisterItem {
     group: Group
     reduced = false
     waitingList = false
+    calculatedPrice = 0
 
     /**
      * Unique identifier to check if two cart items are the same
      */
     get id(): string {
         return this.member.id+"."+this.group.id
+    }
+
+    get groupId(): string {
+        return this.group.id
+    }
+
+    get memberId(): string {
+        return this.member.id
     }
 
     constructor(member: MemberWithRegistrations, group: Group, settings: {
@@ -101,7 +88,8 @@ export class RegisterItem {
     convert(): IDRegisterItem {
         return IDRegisterItem.create(Object.assign({
             memberId: this.member.id,
-            groupId: this.group.id
+            groupId: this.group.id,
+            calculatedPrice: this.calculatedPrice
         }, this))
     }
 

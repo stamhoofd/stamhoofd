@@ -45,7 +45,7 @@ module.exports = {
                 "import/order": "off",
                 "@typescript-eslint/explicit-function-return-type": "off",
                 "@typescript-eslint/no-explicit-any": "off",
-                "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+                "@typescript-eslint/no-unused-vars": "off", // disabled because broken: marks imports that are only used as types as 'unused'...
                 "@typescript-eslint/no-namespace": "off",
                 "@typescript-eslint/no-floating-promises": "error",
                 "@typescript-eslint/no-misused-promises": "error",
