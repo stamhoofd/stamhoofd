@@ -13,7 +13,7 @@
             <p v-if="members.length === 0" class="info-box">
                 Je hebt nog geen leden aan jouw account toegevoegd. Voeg eerst een lid toe voor je ergens inschrijft.
             </p>
-            <p class="info-box">
+            <p v-else-if="!canRegister" class="info-box">
                 Geen leden uit jouw account kunnen hiervoor inschrijven (zie onder). Voeg eventueel een nieuw lid toe.
             </p>
 
@@ -43,6 +43,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
+import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue"
 
 @Component({
@@ -71,6 +72,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
 
     get closed() {
         return this.group.closed
+    }
+
+    get canRegister() {
+        return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories).closed)
     }
 
     goToBasket() {

@@ -59,9 +59,9 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
         const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)
         // Filter the tree
 
-        tree.groups = tree.groups.filter(g => this.member.doesMatchGroup(g, OrganizationManager.organization.meta.categories))
+        tree.groups = tree.groups.filter(g => this.member.shouldShowGroup(g, OrganizationManager.organization.meta.categories))
         for (const cat of tree.categories) {
-            cat.groups = cat.groups.filter(g => this.member.doesMatchGroup(g, OrganizationManager.organization.meta.categories))
+            cat.groups = cat.groups.filter(g => this.member.shouldShowGroup(g, OrganizationManager.organization.meta.categories))
         }
         tree.categories = tree.categories.filter(c => c.groups.length > 0)
 

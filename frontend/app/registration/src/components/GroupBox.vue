@@ -10,24 +10,7 @@
                     {{ group.settings.name }}
                 </h3>
                 <p v-if="group.settings.description" class="description" v-text="group.settings.description" />
-                <p class="price">
-                    <span v-if="group.notYetOpen" class="style-tag error">Nog niet geopend</span>
-                    <span v-else-if="group.closed" class="style-tag error">Gesloten</span>
-                    <template v-else-if="group.settings.registeredMembers !== null && group.settings.maxMembers !== null">
-                        <span v-if="group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">
-                            Nog {{ group.settings.maxMembers - group.settings.registeredMembers }} {{ group.settings.maxMembers - group.settings.registeredMembers != 1 ? 'plaatsen' : 'plaats' }}
-                        </span>
-                        <span v-else-if="waitingListIfFull" class="style-tag warn">
-                            Wachtlijst
-                        </span>
-                        <span v-else class="style-tag error">
-                            Volzet
-                        </span>
-                        <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
-                    </template>
-                    <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
-                    <span v-else-if="allWaitingList" class="style-tag error">Wachtlijst</span>
-                </p>
+                <GroupTag class="price" :group="group" />
             </div>
             <hr>
         </div>
@@ -46,8 +29,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from "../classes/CheckoutManager";
-import GroupMemberSelectionView from "../views/groups/GroupMemberSelectionView.vue";
 import GroupView from "../views/groups/GroupView.vue";
+import GroupTag from "./GroupTag.vue";
 
 @Component({
     components: {
@@ -56,7 +39,8 @@ import GroupView from "../views/groups/GroupView.vue";
         STList,
         STListItem,
         LoadingView,
-        Checkbox
+        Checkbox,
+        GroupTag
     },
     filters: {
         price: Formatter.price
@@ -88,10 +72,6 @@ export default class GroupBox extends Mixins(NavigationMixin){
         return Math.min(...nums)
     }
 
-    get getRegistrationInfo() {
-        return this.group
-    }
-
     get selectedCount() {
         return CheckoutManager.cart.items.filter(i => i.group.id === this.group.id).length
     }
@@ -105,7 +85,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
     }
 
     get waitingListIfFull() {
-        return this.group.hasWaitingList()
+        return this.group.settings.waitingListIfFull
     }
 
     get allWaitingList() {

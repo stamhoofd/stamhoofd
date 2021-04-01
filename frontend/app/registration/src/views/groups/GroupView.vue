@@ -1,23 +1,29 @@
 <template>
     <div class="st-view group-view">
         <STNavigationBar :title="group.settings.name">
-            <template slot="left">
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
         
         <main>
-            <h1>{{ group.settings.name }}</h1>
+            <h1>
+                {{ group.settings.name }}
+                <GroupTag :group="group" />
+            </h1>
             <figure v-if="coverPhotoSrc" class="cover-photo">
                 <img :src="coverPhotoSrc">
             </figure>
             <p class="style-description" v-text="group.settings.description" />
 
-            <p class="info-box" v-if="infoBox">
-                {{ infoBox }}
+            <p v-if="infoBox" class="info-box">
+                {{ infoBox }}
             </p>
 
-            <p class="error-box" v-if="errorBox">
+            <p v-if="infoBox2" class="info-box">
+                {{ infoBox2 }}
+            </p>
+
+            <p v-if="errorBox" class="error-box">
                 {{ errorBox }}
             </p>
 
@@ -25,10 +31,10 @@
                 <STListItem class="right-description">
                     Wanneer?
 
-                    <template slot="right" v-if="group.settings.displayStartEndTime">
+                    <template v-if="group.settings.displayStartEndTime" slot="right">
                         {{ formatDateTime(group.settings.startDate) }} - {{ formatDateTime(group.settings.endDate) }}
                     </template>
-                    <template slot="right" v-else>
+                    <template v-else slot="right">
                         {{ formatDate(group.settings.startDate) }} - {{ formatDate(group.settings.endDate) }}
                     </template>
                 </STListItem>
@@ -49,7 +55,7 @@
             </STList>
         </main>
 
-        <STToolbar v-if="!closed">
+        <STToolbar v-if="registerButton && !closed">
             <button slot="right" class="primary button" @click="chooseMembers">
                 <span class="icon add" />
                 <span>Inschrijven</span>
@@ -61,13 +67,14 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Group, GroupGenderType } from '@stamhoofd/structures';
+import { Group, GroupGenderType, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
 import MemberBox from "../../components/MemberBox.vue"
 import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
+import GroupTag from "../../components/GroupTag.vue"
 
 @Component({
     components: {
@@ -77,7 +84,8 @@ import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
         STListItem,
         Checkbox,
         BackButton,
-        MemberBox
+        MemberBox,
+        GroupTag
     },
     filters: {
         price: Formatter.price
@@ -86,6 +94,9 @@ import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
 export default class GroupView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     group!: Group
+
+    @Prop({ default: true })
+    registerButton!: boolean
 
     MemberManager = MemberManager
 
@@ -137,10 +148,57 @@ export default class GroupView extends Mixins(NavigationMixin){
         return null;
     }
 
+    get infoBox2() {
+        if (this.group.settings.registrationEndDate < this.now || this.group.settings.isFull) {
+            return null
+        }
+
+        if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst) {
+            if (this.group.settings.priorityForFamily) {
+                return "Bestaande leden en broers en zussen kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten."
+            }
+            return "Bestaande leden kunnen meteen inschrijven. Nieuwe leden komen eerst op de wachtlijst terecht en kunnen later worden toegelaten."
+        }
+
+        if (this.group.settings.waitingListType === WaitingListType.All) {
+            return "Iedereen moet inschrijven op de wachtlijst"
+        }
+        
+
+        return null;
+    }
+
+
     get errorBox() {
         if (this.group.settings.registrationEndDate < this.now) {
             return "De inschrijvingen zijn afgelopen"
         }
+
+        if (this.group.settings.isFull) {
+            if (this.group.settings.waitingListIfFull) {
+                return "Helaas al volzet! Je kan enkel nog op de wachtlijst inschrijven."
+            }
+            return "Helaas al volzet!"
+        }
+
+        /*
+            <span v-if="group.notYetOpen" class="style-tag error">Nog niet geopend</span>
+            <span v-else-if="group.closed" class="style-tag error">Gesloten</span>
+            <template v-else-if="group.settings.registeredMembers !== null && group.settings.maxMembers !== null">
+                <span v-if="group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">
+                    Nog {{ group.settings.maxMembers - group.settings.registeredMembers }} {{ group.settings.maxMembers - group.settings.registeredMembers != 1 ? 'plaatsen' : 'plaats' }}
+                </span>
+                <span v-else-if="waitingListIfFull" class="style-tag warn">
+                    Wachtlijst
+                </span>
+                <span v-else class="style-tag error">
+                    Volzet
+                </span>
+                <span v-if="preRegistrations && group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">Voorinschrijvingen</span>
+            </template>
+            <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
+            <span v-else-if="allWaitingList" class="style-tag error">Wachtlijst</span>
+        */
         return null;
     }
 

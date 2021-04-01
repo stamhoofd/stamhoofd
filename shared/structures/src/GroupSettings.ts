@@ -114,6 +114,10 @@ export class GroupSettings extends AutoEncoder {
     })
     registeredMembers: number | null = null
 
+    get isFull() {
+        return this.maxMembers !== null && this.registeredMembers !== null && this.registeredMembers >= this.maxMembers
+    }
+
     /**
      * Of er voorrang moet gegeven worden aan broers en/of zussen als er wachtlijsten of voorinschrijvingen zijn
      */

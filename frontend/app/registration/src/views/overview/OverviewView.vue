@@ -30,7 +30,7 @@
                         </STListItem>
                     </STList>
 
-                    <p class="info-box" v-else>
+                    <p v-else class="info-box">
                         Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
                     </p>
 
@@ -110,7 +110,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
 
         tree.groups = tree.groups.filter(g => {
             for (const member of this.members) {
-                if (member.doesMatchGroup(g, OrganizationManager.organization.meta.categories)) {
+                if (member.shouldShowGroup(g, OrganizationManager.organization.meta.categories)) {
                     return true
                 }
             }
@@ -120,7 +120,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         for (const cat of tree.categories) {
             cat.groups = cat.groups.filter(g => {
                 for (const member of this.members) {
-                    if (member.doesMatchGroup(g, OrganizationManager.organization.meta.categories)) {
+                    if (member.shouldShowGroup(g, OrganizationManager.organization.meta.categories)) {
                         return true
                     }
                 }

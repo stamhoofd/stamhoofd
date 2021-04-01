@@ -1,34 +1,34 @@
 <template>
-    <STListItem :selectable="canRegister" class="member-box smartphone-wrap left-center" :class="{ disabled: !canRegister}" @click="onClicked">
-        <Checkbox v-if="canRegister" slot="left" :checked="selected" />
+    <STListItem :selectable="!canRegister.closed" class="member-box smartphone-wrap left-center" :class="{ disabled: !canRegister}" @click="onClicked">
+        <Checkbox v-if="!canRegister.closed" slot="left" v-model="selected" @click.native.stop />
         <span v-else slot="left" class="icon canceled gray" />
 
         <h4 class="style-title-list ">
             {{ type == "member" ? member.name : group.settings.name }}
         </h4>
-        <p v-if="!canRegister" class="style-description">
-            {{ matchingError }}
-        </p>
-        <p v-else-if="!selected" class="style-description">
-            <template v-if="item.waitingList">
-                Klik om dit lid op de wachtlijst te zetten
-            </template>
-            <template v-else>
-                Klik om dit lid in te schrijven
-            </template>
-        </p>
-        <p v-else class="style-description">
-            Ga door naar je mandje om te bevestigen
-        </p>
-        <p v-if="item.waitingList && canRegister">
-            <span class="style-tag error">Inschrijven op wachtlijst</span>
+
+        <template v-if="!canRegister.closed">
+            <p v-if="!selected" class="style-description">
+                <template v-if="item.waitingList">
+                    Klik om dit lid op de wachtlijst te zetten
+                </template>
+                <template v-else>
+                    Klik om dit lid in te schrijven
+                </template>
+            </p>
+            <p v-else class="style-description">
+                Ga door naar je mandje om te bevestigen
+            </p>
+        </template>
+        
+        <p v-if="type == 'group'">
+            <button class="button text" @click.stop="openGroup">
+                <span>Meer info</span>
+            </button>
         </p>
 
         <template slot="right">
-            <button v-if="type == 'group'" class="button text" @click.stop="openGroup">
-                <span class="icon info-filled" />
-                <span>Meer info</span>
-            </button>
+            <span v-if="canRegister.message" class="style-tag" :class="{ error: canRegister.closed, warn: canRegister.waitingList }">{{ canRegister.message }}</span>
         </template>
     </STListItem>
 </template>
@@ -45,6 +45,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { CheckoutManager } from "../classes/CheckoutManager";
 import { MemberManager } from "../classes/MemberManager";
 import { OrganizationManager } from "../classes/OrganizationManager";
+import GroupView from "../views/groups/GroupView.vue";
 import { EditMemberStepsManager, EditMemberStepType } from "../views/members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../views/members/MemberChooseGroupsView.vue";
 
@@ -72,55 +73,56 @@ export default class MemberBox extends Mixins(NavigationMixin){
     type: "group" | "member"
 
     CheckoutManager = CheckoutManager
-
-    get canRegister() {
-        return this.matchingError === null
-    }
-
-    get matchingError() {
-       return this.member.getMatchingError(this.group, OrganizationManager.organization.meta.categories)
-
-    }
+    Cart = CheckoutManager.cart
 
     get imageSrc() {
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
+    get canRegister() {
+        return this.member.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
+    }
+
     get item() {
         // Waiting list or not?
-        let waitingList = false
-        if (this.group.hasWaitingList() && !this.member.canSkipWaitingList(this.group, (MemberManager.members ?? []).filter(m => m.id !== this.member.id))) {
-            waitingList = true
-        }
-        console.log(waitingList)
-
-        return new RegisterItem(this.member, this.group, { reduced: false, waitingList })
+        return new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.canRegister.waitingList })
     }
 
     get selected() {
         return this.CheckoutManager.cart.hasItem(this.item)
     }
 
-    openGroup() {
-        // todo
-    }
-
-    onClicked() {
-        if (!this.canRegister) {
-            return;
+    set selected(selected: boolean) {
+        if (this.canRegister.closed) {
+            this.CheckoutManager.cart.removeItem(this.item)
+            CheckoutManager.saveCart()
+            return
         }
 
-        if (this.selected) {
+        if (!selected) {
             this.CheckoutManager.cart.removeItem(this.item)
-            //new Toast("Deze inschrijving is uit je mandje verwijderd", "trash red").setWithOffset().show()
         } else {
-            // Check if everything is filled in correctly
             this.tryToSelect().catch(e => {
                 console.error(e)
                 Toast.fromError(e).show()
             })
         }
         CheckoutManager.saveCart()
+    }
+
+    openGroup() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(
+                GroupView, {
+                    group: this.group,
+                    registerButton: false
+                }
+            )
+        }).setDisplayStyle("popup"))
+    }
+
+    onClicked() {
+        this.selected = !this.selected
     }
 
     doSelect() {
@@ -247,6 +249,10 @@ export default class MemberBox extends Mixins(NavigationMixin){
             width: 100px;
             height: 100px;
         }
+    }
+
+    .tag-box {
+        padding-top: 5px;
     }
 }
 </style>

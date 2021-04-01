@@ -138,7 +138,16 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
-    getRegistrationInfo(group: Group, family: MemberWithRegistrations[]): { closed: boolean; waitingList: boolean; message?: string } {
+    canRegister(group: Group, family: MemberWithRegistrations[], all: GroupCategory[]): { closed: boolean; waitingList: boolean; message?: string } {
+        const shouldShowError = this.shouldShowGroupError(group, all)
+        if (shouldShowError) {
+            return {
+                closed: true,
+                waitingList: false,
+                message: shouldShowError
+            }
+        }
+
         if (group.notYetOpen) {
             return {
                 closed: true,
@@ -180,7 +189,7 @@ export class MemberWithRegistrations extends Member {
             return {
                 closed: false,
                 waitingList: true,
-                message: "Wachtlijst"
+                message: "Wachtlijst nieuwe leden"
             };
         }
 
@@ -228,28 +237,38 @@ export class MemberWithRegistrations extends Member {
         return false
     }
 
-    doesMatchGroup(group: Group, all: GroupCategory[]): boolean {
-        return this.getMatchingError(group, all) === null
+    /**
+     * Return false if this group should be invisible
+     */
+    shouldShowGroup(group: Group, all: GroupCategory[]): boolean {
+        return this.shouldShowGroupError(group, all) === null
     }
 
     /**
-     * Can this member still register in a new group or waiting list?
+     * These messages are generally not visible, just for reference
      */
-    getMatchingError(group: Group, all: GroupCategory[]): string | null {        
+    shouldShowGroupError(group: Group, all: GroupCategory[]): string | null {        
         // Check all categories maximum limits
         if (this.hasReachedMaximum(group, all)) {
             return "Al ingeschreven voor maximum aantal"
         }
 
+        // Already registered
         if (this.groups.find(g => g.id === group.id)) {
             return "Al ingeschreven"
         }
 
-        if (!this.details) {
-            // we have no clue!
-            return null
+        // If activity ended and closed
+        if (group.closed && group.settings.endDate < new Date()) {
+            return "Inschrijvingen gesloten"
         }
 
+        // If closed for more than 2 weeks: hide this group
+        if (group.settings.endDate < new Date(new Date().getTime() - 1000*60*60*24*14)) {
+            return "Inschrijvingen gesloten"
+        }
+
+        // too young / too old / etc
         if (!this.details.doesMatchGroup(group)) {
             return this.details.getMatchingError(group)
         }
