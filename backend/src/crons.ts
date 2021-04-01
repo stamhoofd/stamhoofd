@@ -1,3 +1,4 @@
+import { Database } from '@simonbackx/simple-database';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
 import { simpleParser } from 'mailparser';
@@ -5,8 +6,10 @@ import { simpleParser } from 'mailparser';
 import Email from './email/Email';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { EmailAddress } from './models/EmailAddress';
+import { Group } from './models/Group';
 import { Organization } from './models/Organization';
 import { Payment } from './models/Payment';
+import { Registration } from './models/Registration';
 
 let isRunningCrons = false
 
@@ -316,34 +319,39 @@ async function checkPayments() {
     }
 }
 
-// Keep checking pending paymetns for 3 days
+// Unreserve reserved registrations
 async function checkReservedUntil() {
-    const payments = await Payment.where({
-        status: {
-            sign: "IN",
-            value: [PaymentStatus.Created, PaymentStatus.Pending]
-        },
-        method: {
-            sign: "IN",
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
-        },
-        createdAt: {
-            sign: ">",
-            value: new Date(new Date().getTime() - 60*1000*60*24*3)
+    console.log("Check reserved until...")
+    const registrations = await Registration.where({
+        reservedUntil: {
+            sign: "<",
+            value: new Date()
         },
     }, {
-        limit: 100
+        limit: 200
     })
 
-    console.log("Checking pending payments: "+payments.length)
+    if (registrations.length === 0) {
+        return
+    }
 
-    for (const payment of payments) {
-        if (payment.organizationId) {
-            const organization = await Organization.getByID(payment.organizationId)
-            if (organization) {
-                await ExchangePaymentEndpoint.pollStatus(payment, organization)
-            }
+    // Clear reservedUntil
+    const q = `UPDATE ${Registration.table} SET reservedUntil = NULL where id IN (?) AND reservedUntil < ?`
+    await Database.update(q, [registrations.map(r => r.id), new Date()])
+
+    // Get groups
+    const groupIds = registrations.map(r => r.groupId)
+    const groups = await Group.where({
+        id: {
+            sign: "IN",
+            value: groupIds
         }
+    })
+
+    // Update occupancy
+    for (const group of groups) {
+        await group.updateOccupancy()
+        await group.save()
     }
 }
 
@@ -354,7 +362,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkComplaints().then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkReservedUntil().then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

@@ -20,7 +20,7 @@
             <div class="member-view-details">
                 <div>
                     <div v-if="member.activeRegistrations.length > 0" class="container">
-                        <h2 class="style-with-button">
+                        <h2 class="style-with-button with-list">
                             <div>Ingeschreven voor</div>
                             <div>
                                 <button class="button text limit-space" @click="chooseGroups()">

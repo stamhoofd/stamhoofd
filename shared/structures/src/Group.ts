@@ -102,16 +102,18 @@ export class Group extends AutoEncoder {
     /**
      * Returns all parent and grandparents of this group
      */
-    getParentCategories(all: GroupCategory[]): GroupCategory[] {
+    getParentCategories(all: GroupCategory[], recursive = true): GroupCategory[] {
         const map = new Map<string, GroupCategory>()
         
         const parents = all.filter(g => g.groupIds.includes(this.id))
         for (const parent of parents) {
             map.set(parent.id, parent)
 
-            const hisParents = parent.getParentCategories(all)
-            for (const pp of hisParents) {
-                 map.set(pp.id, pp)
+            if (recursive) {
+                const hisParents = parent.getParentCategories(all)
+                for (const pp of hisParents) {
+                    map.set(pp.id, pp)
+                }
             }
         }
 

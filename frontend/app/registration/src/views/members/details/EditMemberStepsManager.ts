@@ -91,7 +91,7 @@ export class EditMemberStepsManager {
      */
     constructor(types: EditMemberStepType[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
         this.types = types
-        this.lastButtonText = "Toevoegen"
+        this.lastButtonText = "Klaar"
 
         if (editMember) {
             this.editMember = editMember

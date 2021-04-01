@@ -41,7 +41,7 @@
             </STInputBox>
         </div>
         <p v-if="enableFamilyPrice" class="style-description">
-            Als meerdere verlaagde tarieven van toepassing zijn wordt automatisch het laagste gekozen.
+            Het verlaagd tarief voor broers/zussen is enkel van toepassing voor broers/zussen die inschrijven voor dezelfde groep; OF een andere groep uit dezelfde categorie ALS een lid maar voor één groep in die categorie kan inschrijven. Voor dat laatste moet je in de categorie 'Een lid kan maar in één groep inschrijven' aanzetten.
         </p>
     </div>
 </template>

@@ -19,6 +19,10 @@
         > h2 {
             @extend .style-title-2;
             margin: 20px 0;
+
+            &.with-list {
+                margin-bottom: 10px;
+            }
         }
 
         > p {

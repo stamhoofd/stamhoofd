@@ -224,7 +224,7 @@ export class MemberWithRegistrations extends Member {
      * True if you cannot register because you reached the maximum of a group category
      */
     hasReachedMaximum(group: Group, all: GroupCategory[]): boolean {
-        const parents = group.getParentCategories(all)
+        const parents = group.getParentCategories(all, false)
 
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {

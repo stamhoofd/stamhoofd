@@ -3,7 +3,7 @@
         <main class="limit-width">
             <section class="view">
                 <STNavigationBar :title="title">
-                    <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
+                    <span v-if="false && cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
                 </STNavigationBar>
 
                 <main>
@@ -21,7 +21,6 @@
                             <h3>
                                 <span>{{ item.member.name }}</span>
                             </h3>
-                            <p class="description" v-text="'€ 40,00'" />
 
                             <footer>
                                 <p class="price">
@@ -40,7 +39,7 @@
                 </main>
 
                 <STToolbar v-if="cart.items.length > 0">
-                    <span slot="left">Totaal: {{ cart.price | price }}</span>
+                    <span slot="left" v-if="false">Totaal: {{ cart.price | price }}</span>
                     <LoadingButton slot="right" :loading="loading">
                         <button class="button primary" @click="goToCheckout">
                             <span class="icon flag" />
@@ -63,6 +62,7 @@ import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
@@ -141,7 +141,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
     mounted() {
         try {
-            this.cart.validate()
+            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

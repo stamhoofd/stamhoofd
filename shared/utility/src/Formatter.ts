@@ -47,7 +47,7 @@ export class Formatter {
     }
 
     /**
-     * maandag, 1 januari (2020). Year only in different year
+     * maandag, 1 januari (2020) om XX:XX. Year only in different year
      */
     static dateTimeWithDay(date: Date): string {
         return this.weekDay(date) +", "+this.dateTime(date)
@@ -88,7 +88,10 @@ export class Formatter {
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
-    static dateTime(date: Date): string {
+    static dateTime(date: Date, hideZero = false): string {
+        if (hideZero && this.time(date) == "0:00") {
+            return this.date(date)
+        }
         return this.date(date) + " om "+this.time(date)
     }
 

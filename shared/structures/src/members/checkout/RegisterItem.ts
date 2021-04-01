@@ -1,10 +1,15 @@
 import { AutoEncoder, BooleanDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 // eslint bug marks types as "unused"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../../Group';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { GroupCategory } from '../../GroupCategory';
+import { GroupPrices } from '../../GroupPrices';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from '../../Organization';
+import { EncryptedMemberWithRegistrations } from '../EncryptedMemberWithRegistrations';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from '../MemberWithRegistrations';
 
@@ -34,6 +39,34 @@ export class IDRegisterItem extends AutoEncoder {
             return null
         }
         return new RegisterItem(member, group, this)
+    }
+}
+
+export class IDRegisterItemCalculated extends IDRegisterItem {
+    @field({ decoder: EncryptedMemberWithRegistrations })
+    member: EncryptedMemberWithRegistrations
+
+    @field({ decoder: Group })
+    group: Group
+
+    @field({ decoder: GroupPrices, optional: true })
+    groupPrices!: GroupPrices
+
+    calculatedPrice = 0
+
+    /**
+     * Return an unique ID that is the same for all groups that should have equal family pricing (2nd, 3rd discount)
+     */
+    getFamilyDiscountId(all: GroupCategory[]) {
+        const parents = this.group.getParentCategories(all, false)
+        for (const parent of parents) {
+            if (parent.settings.maximumRegistrations === 1) {
+                return "category-"+parent.id
+            }
+        }
+
+        // Only registrations in same group are elegiable for family discount
+        return "group-"+this.groupId
     }
 }
 
@@ -70,5 +103,25 @@ export class RegisterItem {
             memberId: this.member.id,
             groupId: this.group.id
         }, this))
+    }
+
+    validate(family: MemberWithRegistrations[], all: GroupCategory[]) {
+        const canRegister = this.member.canRegister(this.group, family, all)
+        if (canRegister.closed) {
+            throw new SimpleError({
+                code: "invalid_registration",
+                message: "Registration not possible anymore",
+                human: "Je kan "+this.member.firstName+" niet meer inschrijven voor "+this.group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
+            })
+        }
+
+        if (!this.waitingList && canRegister.waitingList) {
+            throw new SimpleError({
+                code: "invalid_registration",
+                message: "Registration not possible anymore",
+                human: "Je kan "+this.member.firstName+" enkel nog inschrijven voor de wachtlijst van "+this.group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
+            })
+        }
+        
     }
 }

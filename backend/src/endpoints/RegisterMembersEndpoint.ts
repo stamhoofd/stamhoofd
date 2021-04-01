@@ -268,6 +268,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             for (const group of groups) {
                 if (payRegistrations.find(p => p.groupId === group.id)) {
                     await group.updateOccupancy()
+                    await group.save()
                 }
             }
 

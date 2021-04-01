@@ -33,9 +33,10 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import { CheckoutManager } from "../../classes/CheckoutManager";
 
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue";
@@ -77,6 +78,9 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
             this.dismiss({ force: true })
         } else {
             this.navigationController?.popToRoot({ force: true })
+        }
+        if (CheckoutManager.cart.items.find(i => i.member.id === this.member.id)) {
+            new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(2000).show()
         }
         
     }

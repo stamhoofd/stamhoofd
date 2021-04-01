@@ -23,7 +23,7 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="secundary button">
+            <button slot="right" class="secundary button" @click="addNewMember">
                 <span class="icon add" />
                 <span>Nieuw lid toevoegen</span>
             </button>
@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -45,6 +45,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue"
+import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 
 @Component({
     components: {
@@ -80,6 +82,27 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
 
     goToBasket() {
         this.dismiss({ force: true })
+    }
+
+    async addNewMember() {
+        // Only ask details + parents for new members
+        // We'll ask the other things when selecting the details
+        const stepManager = new EditMemberStepsManager(
+            [
+                EditMemberStepType.Details,
+                EditMemberStepType.Parents
+            ], 
+            undefined,
+            (component: NavigationMixin) => {
+                // when we are ready, return to this component
+                component.dismiss({ force: true })
+                return Promise.resolve()
+            }
+        )
+        const component = await stepManager.getFirstComponent()
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: component
+        }).setDisplayStyle("popup"))
     }
 
     

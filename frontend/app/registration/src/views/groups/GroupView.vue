@@ -136,13 +136,13 @@ export default class GroupView extends Mixins(NavigationMixin){
         if (this.group.settings.registrationStartDate > this.now) {
             if (this.group.activePreRegistrationDate) {
                 if (this.group.settings.priorityForFamily) {
-                    return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate)
-                        + ". Bestaande leden en broers/zussen kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!) + "."
+                    return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate, true)
+                        + ". Bestaande leden en broers/zussen kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!, true) + "."
                 }
-                return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate)
-                        + ". Bestaande leden kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!) + "."
+                return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate, true)
+                        + ". Bestaande leden kunnen al inschrijven vanaf " + Formatter.dateTime(this.group.settings.preRegistrationsDate!, true) + "."
             }
-            return "De inschrijvingen gaan open op "+ Formatter.dateTime(this.group.settings.registrationStartDate)
+            return "De inschrijvingen gaan open op "+ Formatter.dateTime(this.group.settings.registrationStartDate, true)
         }
 
         return null;
