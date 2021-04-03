@@ -1,5 +1,5 @@
 import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupPrivateSettings,GroupSettings } from '@stamhoofd/structures';
+import { GroupPrivateSettings, GroupSettings, Group as GroupStruct, Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member,MemberWithRegistrations } from './Member';
@@ -122,6 +122,18 @@ export class Group extends Model {
 
         return members
 
+    }
+
+    getStructure() {
+        return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
+    }
+
+    getPrivateStructure(permissions: Permissions) {
+        const struct = GroupStruct.create(this)
+        if (!struct.canViewMembers(permissions)) {
+            struct.privateSettings = null
+        }
+        return struct
     }
 
     async updateOccupancy() {

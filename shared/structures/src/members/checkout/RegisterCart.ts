@@ -12,6 +12,7 @@ import { MemberWithRegistrations } from "../MemberWithRegistrations"
 import { RegisterCartPriceCalculator } from "./RegisterCartPriceCalculator"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { IDRegisterItem, RegisterItem } from "./RegisterItem"
+import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
  * Contains all information about a given checkout
@@ -68,13 +69,13 @@ export class RegisterCart {
         }
     }
 
-    validate(family: MemberWithRegistrations[], all: GroupCategory[]): void {
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]): void {
         const newItems: RegisterItem[] = []
         const errors = new SimpleErrors()
 
         for (const item of this.items) {
             try {
-                item.validate(family, all, newItems)
+                item.validate(family, groups, categories, newItems)
                 newItems.push(item)
             } catch (e) {
                 errors.addError(e)
@@ -85,7 +86,7 @@ export class RegisterCart {
         errors.throwIfNotEmpty()
     }
 
-    calculatePrices(members: EncryptedMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
+    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
         RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories)
     }
 }
@@ -116,7 +117,24 @@ export class IDRegisterCart extends AutoEncoder {
         return cart
     }
 
-    calculatePrices(members: EncryptedMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]): void {
+        const newItems: IDRegisterItem[] = []
+        const errors = new SimpleErrors()
+
+        for (const item of this.items) {
+            try {
+                item.validate(family, groups, categories, newItems)
+                newItems.push(item)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+
+        this.items = newItems
+        errors.throwIfNotEmpty()
+    }
+
+    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
         RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories)
     }
 }

@@ -158,7 +158,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
     recalculate() {
         try {
-            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
+            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
             this.errorBox = null
         } catch (e) {
             console.error(e)
@@ -170,10 +170,6 @@ export default class CartView extends Mixins(NavigationMixin){
             // error in calculation!
             console.error(e)
         }
-    }
-
-    mounted() {
-        this.recalculate()
         CheckoutManager.saveCart()
     }
 }

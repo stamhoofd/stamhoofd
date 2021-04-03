@@ -210,7 +210,7 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null })))
+            groups: groups.map(g => g.getStructure())
         })
 
         if (this.meta.modules.disableActivities) {
@@ -234,13 +234,7 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => {
-                const struct = GroupStruct.create(g)
-                if (!struct.canViewMembers(permissions)) {
-                    struct.privateSettings = null
-                }
-                return struct
-            }).sort(GroupStruct.defaultSort),
+            groups: groups.map(g => g.getPrivateStructure(permissions)).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta,
             webshops: webshops.flatMap(w => {
                 if (w.privateMeta.permissions.getPermissionLevel(permissions) === PermissionLevel.None) {

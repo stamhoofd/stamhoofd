@@ -49,14 +49,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const token = await Token.authenticate(request);
         const user = token.user
 
+        const organization = user.organization
+
         const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.where({ organizationId: user.organizationId })
         
         const registrations: RegistrationWithMember[] = []
         const payRegistrations: Registration[] = []
         const payNames: string[] = []
-
-        let totalPrice = 0
 
         if (request.body.cart.items.length == 0) {
             throw new SimpleError({
@@ -65,32 +65,37 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        let alreadyRegisteredCount = 0
-        for (const member of members) {
-            if (member.registrations.find(r => {
-                if (r.waitingList) {
-                    return false
-                }
-                const group = groups.find(g => g.id == r.groupId)
-                if (!group) {
-                    return false
-                }
-                if (group.cycle == r.cycle) {
-                    return true
-                }
-                return false
-            })) {
-                alreadyRegisteredCount++;
-            }
+        // Update occupancies
+        for (const group of groups) {
+            await group.updateOccupancy()
         }
 
+        // Save the price that the client did calculate (to alert price changes before we continue)
+        const clientSidePrice = request.body.cart.price
+
+        // Should update the calculation methods to also accept a model by using interfaces
+        const groupsStructure = groups.map(g => g.getStructure())
+
+        // Validate the cart
+        request.body.cart.validate(members, groupsStructure, organization.meta.categories)
+
+        // Recalculate the price
+        request.body.cart.calculatePrices(members, groupsStructure, organization.meta.categories)
+
+        const totalPrice = request.body.cart.price
+        if (totalPrice !== clientSidePrice) {
+            throw new SimpleError({
+                code: "empty_data",
+                message: "Oeps! De prijs is gewijzigd terwijl je aan het inschrijven was. De totaalprijs kwam op "+Formatter.price(totalPrice)+", in plaats van "+Formatter.price(clientSidePrice)+". Herlaad je pagina en probeer opnieuw om de aanpassingen te zien doorkomen. Daarna kan je verder met inschrijven. Neem contact op met hallo@stamhoofd.be als je dit probleem blijft krijgen."
+            })
+        }
+
+        
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
 
-        // Put registrations without a family price in front of the row, so we can improve price calculation
-        const sortedItems: IDRegisterItem[] = []
 
-        for (const item of request.body.cart.items) {
+        mainLoop: for (const item of request.body.cart.items) {
             const member = members.find(m => m.id == item.memberId)
             if (!member) {
                 throw new SimpleError({
@@ -106,50 +111,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     message: "De leeftijdsgroep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
                 })
             }
-            if (group.settings.prices.find(p => p.familyPrice !== null)) {
-                // append
-                sortedItems.push(item)
-            } else {
-                // prepend
-                sortedItems.unshift(item)
-            }
-        }
-
-        mainLoop: for (const item of sortedItems) {
-            const member = members.find(m => m.id == item.memberId)
-            if (!member) {
-                throw new SimpleError({
-                    code: "invalid_member",
-                    message: "Het lid dat je probeert in te schrijven konden we niet meer terugvinden. Je herlaadt best even de pagina om opnieuw te proberen."
-                })
-            }
-
-            const group = groups.find(g => g.id == item.groupId);
-            if (!group) {
-                throw new SimpleError({
-                    code: "invalid_member",
-                    message: "De leeftijdsgroep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
-                })
-            }
-
-            const startDate = (group.settings.preRegistrationsDate ? group.settings.preRegistrationsDate : group.settings.registrationStartDate) ?? group.settings.registrationStartDate
-            const endDate = group.settings.registrationEndDate
-            const now = new Date()
-            if (now < startDate) {
-                throw new SimpleError({
-                    code: "invalid_member",
-                    message: "Oeps, je kan "+member.firstName+" nog niet inschrijven. Je moet wachten tot ten minste "+Formatter.dateTime(startDate)+"."
-                })
-            }
-
-            if (now > endDate) {
-                throw new SimpleError({
-                    code: "invalid_member",
-                    message: "Oeps, te laat! De inschrijvingen werden gesloten om "+Formatter.dateTime(startDate)+". Je kan "+member.firstName+" niet meer inschrijven."
-                })
-            }
-
-            // 
 
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle })
@@ -185,38 +146,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration.reservedUntil = null
                 await registration.save()
             } else {
-
-                // Check maximum members, but ignore maximum membes if they received an invitation (canRegister) OR if it was reserved and still valid
-                if (!(registration.waitingList && registration.canRegister) && group.settings.maxMembers !== null && (registration.reservedUntil === null || registration.reservedUntil < new Date())) {
-                    await group.updateOccupancy()
-
-                    if (group.settings.registeredMembers === null) {
-                        console.error("Registered members is null after checking update occupancy for group", group.id)
-                    }
-                    if (group.settings.registeredMembers === null || group.settings.registeredMembers >= group.settings.maxMembers) {
-                        throw new SimpleError({
-                            code: "invalid_member",
-                            message: "Oeps, de leeftijdsgroep "+group.settings.name+" is volzet terwijl je aan het inschrijven was!"
-                        })
-                    }
-                }
-
                 registration.waitingList = false
                 registration.canRegister = false
-                const foundPrice = group.settings.getGroupPrices(now)
-
-                if (!foundPrice) {
-                    throw new SimpleError({
-                        code: "invalid_member",
-                        message: "We konden geen passende prijs vinden voor deze inschrijving. Contacteer ons zodat we dit probleem kunnen recht zetten"
-                    }) 
-                }
-
-                const price = foundPrice.getPriceFor(item.reduced, alreadyRegisteredCount)
-                totalPrice += price
                 payRegistrations.push(registration)
                 payNames.push(member.firstName)
-                alreadyRegisteredCount++;
             }
             registrations.push(registration)
         }

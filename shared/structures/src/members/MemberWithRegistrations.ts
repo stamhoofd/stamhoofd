@@ -5,6 +5,7 @@ import { GroupCategory } from '../GroupCategory';
 import { WaitingListType } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
+import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
 import { Member } from './Member';
 import { Registration } from './Registration';
@@ -49,43 +50,12 @@ export class MemberWithRegistrations extends Member {
     @field({ decoder: new ArrayDecoder(Group), optional: true })
     allGroups: Group[] = []
 
-    get isNew(): boolean {
-        if (this.inactiveRegistrations.length === 0) {
-            return true
-        }
-
-        // Check if no year was skipped
-        for (const registration of this.inactiveRegistrations) {
-            const group = this.allGroups.find(g => g.id === registration.groupId)
-            if (group && registration.cycle === group.cycle - 1) {
-                // This was the previous year
-                return true
-            }
-        }
-
-        return false
-    }
-
     /**
      * Return true if this member was registered in the previous year (current doesn't count)
      */
     get isExistingMember(): boolean {
-        if (this.inactiveRegistrations.length === 0) {
-            return false
-        }
-
-        // Check if no year was skipped
-        for (const registration of this.inactiveRegistrations) {
-            const group = this.allGroups.find(g => g.id === registration.groupId)
-            if (group && registration.cycle === group.cycle - 1) {
-                // This was the previous year
-                return true
-            }
-        }
-
-        return false
+        return RegisterCartValidator.isExistingMember(this, this.allGroups)
     }
-
 
     static fromMember(member: Member, registrations: Registration[], users: User[], groups: Group[]) {
         const m = MemberWithRegistrations.create({
@@ -139,121 +109,19 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
-    canRegister(group: Group, family: MemberWithRegistrations[], all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string } {
-        const shouldShowError = this.shouldShowGroupError(group, all)
-        if (shouldShowError) {
-            return {
-                closed: true,
-                waitingList: false,
-                message: shouldShowError
-            }
-        }
-
-        // Check all categories maximum limits
-        if (this.hasReachedMaximum(group, all, cart)) {
-            // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Niet combineerbaar"
-            }
-        }
-
-        if (group.notYetOpen) {
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Nog niet geopend"
-            }
-        }
-
-        if (group.closed) {
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Gesloten"
-            }
-        }
-
-        const existingMember = this.isExistingMember || (group.settings.priorityForFamily && !!family.find(f => f.isExistingMember))
-
-        // Pre registrations?
-        if (group.activePreRegistrationDate) {
-            if (!existingMember) {
-                return {
-                    closed: true,
-                    waitingList: false,
-                    message: "Voorinschrijvingen"
-                }
-            }
-        }
-
-        if (group.settings.waitingListType === WaitingListType.All) {
-            return {
-                closed: false,
-                waitingList: true,
-                message: "Wachtlijst"
-            };
-        }
-
-        if (group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
-            return {
-                closed: false,
-                waitingList: true,
-                message: "Wachtlijst nieuwe leden"
-            };
-        }
-
-        const reachedMaximum = group.settings.maxMembers !== null && group.settings.registeredMembers !== null && group.settings.maxMembers <= group.settings.registeredMembers
-        if (reachedMaximum) {
-            if (!group.settings.waitingListIfFull) {
-                // Maximum reached without waiting list -> closed
-                return {
-                    closed: true,
-                    waitingList: false,
-                    message: "Volzet"
-                }
-            }
-
-            // Still allow waiting list
-            return {
-                closed: false,
-                waitingList: true,
-                message: "Wachtlijst (volzet)"
-            }
-        }
-        
-        // Normal registrations available
-        return {
-            closed: false,
-            waitingList: false,
-            message: group.activePreRegistrationDate ? 'Voorinschrijvingen' : undefined
-        }
+    canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
+        return RegisterCartValidator.canRegister(this, group, family, this.allGroups, categories, cart)
     }
 
     /**
      * True if you cannot register because you reached the maximum of a group category
      */
-    hasReachedMaximum(group: Group, all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
-        const parents = group.getParentCategories(all, false)
-
-        for (const parent of parents) {
-            if (parent.settings.maximumRegistrations !== null) {
-                const count = this.groups.filter(g => parent.groupIds.includes(g.id)).length
-
-                const waiting = cart.filter(item => {
-                    return item.memberId === this.id && parent.groupIds.includes(item.groupId) && item.groupId !== group.id
-                }).length
-                if (count + waiting >= parent.settings.maximumRegistrations) {
-                    return true
-                }
-            }
-        }
-        return false
+    private hasReachedCategoryMaximum(group: Group, all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
+        return RegisterCartValidator.hasReachedCategoryMaximum(this, group, all, cart)
     }
 
     /**
-     * Return false if this group should be invisible
+     * Return true if this is a suggested group for this members
      */
     shouldShowGroup(group: Group, all: GroupCategory[]): boolean {
         return this.shouldShowGroupError(group, all) === null
@@ -262,9 +130,9 @@ export class MemberWithRegistrations extends Member {
     /**
      * These messages are generally not visible, just for reference
      */
-    shouldShowGroupError(group: Group, all: GroupCategory[]): string | null {        
+    private shouldShowGroupError(group: Group, all: GroupCategory[]): string | null {        
         // Check all categories maximum limits
-        if (this.hasReachedMaximum(group, all)) {
+        if (this.hasReachedCategoryMaximum(group, all)) {
             return "Al ingeschreven voor maximum aantal"
         }
 

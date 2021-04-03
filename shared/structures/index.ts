@@ -88,6 +88,7 @@ export * from "./src/members/ReviewTime"
 export * from "./src/members/checkout/RegisterCart"
 export * from "./src/members/checkout/RegisterCheckout"
 export * from "./src/members/checkout/RegisterItem"
+export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"

@@ -12,6 +12,8 @@ import { Organization } from '../../Organization';
 import { EncryptedMemberWithRegistrations } from '../EncryptedMemberWithRegistrations';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from '../MemberWithRegistrations';
+import { RegisterCartValidator } from './RegisterCartValidator';
+import { UnknownMemberWithRegistrations } from './UnknownMemberWithRegistrations';
 
 /**
  * Version destined for the server and client side storage
@@ -45,6 +47,10 @@ export class IDRegisterItem extends AutoEncoder {
             return null
         }
         return new RegisterItem(member, group, this)
+    }
+
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
+        RegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
     }
 }
 
@@ -93,36 +99,7 @@ export class RegisterItem {
         }, this))
     }
 
-    validate(family: MemberWithRegistrations[], all: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
-        const canRegister = this.member.canRegister(this.group, family, all, previousItems)
-        if (canRegister.closed) {
-            throw new SimpleError({
-                code: "invalid_registration",
-                message: "Registration not possible anymore",
-                human: "Je kan "+this.member.firstName+" niet meer inschrijven voor "+this.group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
-            })
-        }
-
-        if (!this.waitingList && canRegister.waitingList) {
-            throw new SimpleError({
-                code: "invalid_registration",
-                message: "Registration not possible anymore",
-                human: "Je kan "+this.member.firstName+" enkel nog inschrijven voor de wachtlijst van "+this.group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
-            })
-        }
-
-        // Check maximum
-        if (this.group.settings.maxMembers !== null) {
-            const count = previousItems.filter(item => item.groupId === this.groupId).length
-            if (count >= this.group.settings.maxMembers - (this.group.settings.registeredMembers ?? 0)) {
-                throw new SimpleError({
-                    code: "invalid_registration",
-                    message: "Reached maximum members allowed",
-                    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                    human: "Er zijn nog maar " + (this.group.settings.maxMembers - (this.group.settings.registeredMembers ?? 0)) + " plaatsen meer vrij voor "+this.group.settings.name+". Je kan "+this.member.firstName+" niet meer inschrijven."+(this.group.settings.waitingListIfFull ? " Je kan wel op de wachtlijst inschrijven." : "")
-                })
-            }
-        }
-        
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
+        RegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
     }
 }

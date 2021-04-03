@@ -1,24 +1,7 @@
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
 import { GroupPrices } from "../../GroupPrices"
-
-/**
- * Represent both model and structures
- */
-interface Registration {
-    waitingList: boolean
-    groupId: string
-    cycle: number
-    registeredAt: Date | null
-    deactivatedAt: Date | null
-}
-/**
- * Represents both EncryptedMemberWithRegistrations and MemberWithRegistrations
- */
-interface UnknownMemberWithRegistrations {
-    id: string
-    registrations: Registration[]
-}
+import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
  * Represents both RegisterItem's
