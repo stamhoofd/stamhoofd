@@ -110,6 +110,19 @@ export class RegisterItem {
                 human: "Je kan "+this.member.firstName+" enkel nog inschrijven voor de wachtlijst van "+this.group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
             })
         }
+
+        // Check maximum
+        if (this.group.settings.maxMembers !== null) {
+            const count = previousItems.filter(item => item.groupId === this.groupId).length
+            if (count >= this.group.settings.maxMembers - (this.group.settings.registeredMembers ?? 0)) {
+                throw new SimpleError({
+                    code: "invalid_registration",
+                    message: "Reached maximum members allowed",
+                    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+                    human: "Er zijn nog maar " + (this.group.settings.maxMembers - (this.group.settings.registeredMembers ?? 0)) + " plaatsen meer vrij voor "+this.group.settings.name+". Je kan "+this.member.firstName+" niet meer inschrijven."+(this.group.settings.waitingListIfFull ? " Je kan wel op de wachtlijst inschrijven." : "")
+                })
+            }
+        }
         
     }
 }

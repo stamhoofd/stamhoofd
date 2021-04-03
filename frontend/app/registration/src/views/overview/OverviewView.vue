@@ -54,6 +54,7 @@
                     </p>
                     <GroupTree v-if="!isEmpty && filterActive" :category="availableTree" :parent-level="0" />
                     <GroupTree v-else :category="fullTree" :parent-level="0" />
+                    <hr>
                 </main>
                 <main v-else>
                     <p class="warning-box">

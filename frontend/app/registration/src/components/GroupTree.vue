@@ -8,12 +8,8 @@
         <div v-if="category.groups.length > 0" class="group-grid">
             <GroupBox v-for="group in category.groups" :key="group.id" :group="group" />
         </div>
-        <GroupTree v-for="category in category.categories" v-else :key="category.id" :category="category" :parent-level="level" />
-        <p v-if="category.categories.length == 0 && category.groups.length == 0" class="info-box">
-            Deze categorie is leeg
-        </p>
-
-        <hr v-if="category.groups.length == 0">
+        <GroupTree v-for="(c, index) in category.categories" v-else :key="c.id" :category="c" :parent-level="level" :is-last="index >= category.categories.length - 1" />
+        <hr v-if="category.groups.length > 0 && !isLast">
     </div>
 </template>
 
@@ -43,6 +39,9 @@ import GroupBox from "./GroupBox.vue"
 export default class GroupTree extends Mixins(NavigationMixin){
     @Prop({ required: true })
     category: GroupCategoryTree
+
+    @Prop({ default: true })
+    isLast!: boolean
 
     @Prop({ default: -1 })
     parentLevel!: number

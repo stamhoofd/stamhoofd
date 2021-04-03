@@ -159,6 +159,7 @@ export default class CartView extends Mixins(NavigationMixin){
     recalculate() {
         try {
             this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
+            this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
