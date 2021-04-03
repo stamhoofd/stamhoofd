@@ -170,6 +170,10 @@
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
 
+                <p v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" class="info-box">
+                    Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. Let er dus op dat die leden ook in Stamhoofd zijn ingeladen. Je kan leden van vorig jaar importeren via Excel en bij de importeer-instellingen aanduiden dat het gaat om leden van vorig jaar. Leden moeten wel inloggen met een e-mailadres dat verbonden is met een bestaand account. Daarom verstuur je best een uitnodiging naar alle leden, die bevat een link waarmee ze automatisch met het juiste account inloggen (of registreren).
+                </p>
+
                 <hr>
                 <h2 class="style-with-button">
                     <div>Omslagfoto</div>
