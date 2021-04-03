@@ -144,7 +144,7 @@
                 <STInputBox error-fields="waitingListType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
-                            Geen wachtlijst
+                            Geen speciale regeling
                         </Radio>
                         <Radio v-model="waitingListType" value="ExistingMembersFirst">
                             Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest komt op de wachtlijst.</span>
