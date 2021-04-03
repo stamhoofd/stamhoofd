@@ -5,6 +5,7 @@ import { GroupCategory } from '../GroupCategory';
 import { WaitingListType } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
+import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
@@ -138,13 +139,23 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
-    canRegister(group: Group, family: MemberWithRegistrations[], all: GroupCategory[]): { closed: boolean; waitingList: boolean; message?: string } {
+    canRegister(group: Group, family: MemberWithRegistrations[], all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string } {
         const shouldShowError = this.shouldShowGroupError(group, all)
         if (shouldShowError) {
             return {
                 closed: true,
                 waitingList: false,
                 message: shouldShowError
+            }
+        }
+
+        // Check all categories maximum limits
+        if (this.hasReachedMaximum(group, all, cart)) {
+            // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Niet combineerbaar"
             }
         }
 
@@ -223,13 +234,17 @@ export class MemberWithRegistrations extends Member {
     /**
      * True if you cannot register because you reached the maximum of a group category
      */
-    hasReachedMaximum(group: Group, all: GroupCategory[]): boolean {
+    hasReachedMaximum(group: Group, all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
         const parents = group.getParentCategories(all, false)
 
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
                 const count = this.groups.filter(g => parent.groupIds.includes(g.id)).length
-                if (count >= parent.settings.maximumRegistrations) {
+
+                const waiting = cart.filter(item => {
+                    return item.memberId === this.id && parent.groupIds.includes(item.groupId) && item.groupId !== group.id
+                }).length
+                if (count + waiting >= parent.settings.maximumRegistrations) {
                     return true
                 }
             }

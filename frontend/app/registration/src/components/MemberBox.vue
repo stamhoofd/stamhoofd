@@ -80,7 +80,7 @@ export default class MemberBox extends Mixins(NavigationMixin){
     }
 
     get canRegister() {
-        return this.member.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories)
+        return this.member.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
     }
 
     get item() {

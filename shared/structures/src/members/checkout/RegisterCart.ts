@@ -74,7 +74,7 @@ export class RegisterCart {
 
         for (const item of this.items) {
             try {
-                item.validate(family, all)
+                item.validate(family, all, newItems)
                 newItems.push(item)
             } catch (e) {
                 errors.addError(e)

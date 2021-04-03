@@ -93,8 +93,8 @@ export class RegisterItem {
         }, this))
     }
 
-    validate(family: MemberWithRegistrations[], all: GroupCategory[]) {
-        const canRegister = this.member.canRegister(this.group, family, all)
+    validate(family: MemberWithRegistrations[], all: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
+        const canRegister = this.member.canRegister(this.group, family, all, previousItems)
         if (canRegister.closed) {
             throw new SimpleError({
                 code: "invalid_registration",
