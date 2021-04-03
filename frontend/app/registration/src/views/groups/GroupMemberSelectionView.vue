@@ -42,11 +42,11 @@ import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue"
 import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
-import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 
 @Component({
     components: {
@@ -77,7 +77,7 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     }
 
     get canRegister() {
-        return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories).closed)
+        return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items).closed)
     }
 
     goToBasket() {

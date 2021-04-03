@@ -191,4 +191,27 @@ export class GroupCategoryTree extends GroupCategory {
             })
         })
     }
+
+    /**
+     * Remove empty categories and non-public categories
+     * @param admin Whether not-public categories should be visible
+     */
+    filterForDisplay(admin = false): GroupCategoryTree {
+        const categories = this.categories.flatMap((category) => {
+            if (!admin && !category.settings.public) {
+                return []
+            }
+            const filtered = category.filterForDisplay(admin)
+            if (filtered.groups.length == 0 && filtered.categories.length == 0) {
+                return []
+            }
+            return [filtered]
+        })
+
+        return GroupCategoryTree.create(
+            Object.assign({}, this, {
+                categories
+            })
+        )
+    }
 }

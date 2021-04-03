@@ -35,12 +35,12 @@
                 </STInputBox>
 
                 <template v-if="enableActivities">
-                    <Checkbox v-model="limitRegistrations" v-if="categories.length == 0">
+                    <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
                         Een lid kan maar in één groep inschrijven
                     </Checkbox>
 
                     <Checkbox v-model="isHidden">
-                        Verberg deze categorie voor leden
+                        Toon deze categorie enkel voor beheerders
                     </Checkbox>
                 </template>
             </template>

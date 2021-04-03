@@ -2,23 +2,26 @@
     <div class="group-tree">
         <component :is="'h'+level" v-if="level > 0 && category.settings.name.length > 0">
             {{ category.settings.name }}
+            <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
         </component>
 
         <div v-if="category.groups.length > 0" class="group-grid">
             <GroupBox v-for="group in category.groups" :key="group.id" :group="group" />
         </div>
         <GroupTree v-for="category in category.categories" v-else :key="category.id" :category="category" :parent-level="level" />
+        <p v-if="category.categories.length == 0 && category.groups.length == 0" class="info-box">
+            Deze categorie is leeg
+        </p>
 
-        <hr v-if="category.groups.length == 0" >
+        <hr v-if="category.groups.length == 0">
     </div>
 </template>
 
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Category, GroupCategoryTree, Product, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components"
+import { GroupCategoryTree } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import GroupBox from "./GroupBox.vue"
@@ -32,6 +35,9 @@ import GroupBox from "./GroupBox.vue"
         LoadingView,
         Checkbox,
         GroupBox
+    },
+    directives: {
+        tooltip: TooltipDirective
     }
 })
 export default class GroupTree extends Mixins(NavigationMixin){
@@ -64,7 +70,7 @@ export default class GroupTree extends Mixins(NavigationMixin){
         @extend .style-title-2;
     }
 
-    > p {
+    > p:not([class]) {
         @extend .style-description;
         padding-bottom: 40px;
     }

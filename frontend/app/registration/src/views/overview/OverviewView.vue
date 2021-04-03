@@ -44,13 +44,24 @@
             </section>
 
             <section class="view gray-shadow">
-                <main>
-                    <h1>Inschrijven</h1>
-                    <p>Suggesties voor bestaande leden. Onderaan deze pagina vind je alle groepen waarvoor je kan inschrijven.</p>
-                    <GroupTree :category="availableTree" :parent-level="0" />
+                <main v-if="!isEmpty">
+                    <h1>
+                        Suggesties
+                        <span class="icon star yellow" />
+                    </h1>
+                    <p>
+                        Kies een groep waarvoor je je wilt inschrijven of klik bovenaan op een lid dat je wilt inschrijven (dan zie je de suggesties).
+                    </p>
+                    <GroupTree v-if="!isEmpty && filterActive" :category="availableTree" :parent-level="0" />
+                    <GroupTree v-else :category="fullTree" :parent-level="0" />
                 </main>
-                <main v-if="false">
-                    <GroupTree :category="rootCategory" />
+                <main v-else>
+                    <p class="warning-box">
+                        Dit zijn alle beschikbare inschrijvingsgroepen. Je kan je momenteel nergens voor inschrijven, maar je kan eventueel wel een nieuw lid toevoegen.
+                    </p>
+                </main>
+                <main>
+                    <GroupTree :category="fullTree" />
                 </main>
             </section>
         </main>
@@ -61,7 +72,7 @@
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, LoadingView, OrganizationLogo,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
+import { MemberWithRegistrations, PaymentDetailed, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -89,6 +100,7 @@ import MemberView from "../members/MemberView.vue";
 })
 export default class OverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    filterActive = true
 
     /**
      * Return members that are currently registered in
@@ -102,6 +114,17 @@ export default class OverviewView extends Mixins(NavigationMixin){
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get fullTree() {
+        return OrganizationManager.organization.categoryTree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
+    }
+
+    get isEmpty() {
+        if (this.members.length == 0) {
+            return true
+        }
+        return (this.fullTree.categories.length == 0)
     }
 
     get availableTree() {
@@ -127,9 +150,12 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 return false
             })
         }
-        tree.categories = tree.categories.filter(c => c.groups.length > 0)
 
-        return tree
+        return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
+    }
+
+    showAllGroups() {
+        this.filterActive = false
     }
 
     get rootCategory() {
