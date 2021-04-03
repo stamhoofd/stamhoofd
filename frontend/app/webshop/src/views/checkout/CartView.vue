@@ -51,8 +51,8 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';

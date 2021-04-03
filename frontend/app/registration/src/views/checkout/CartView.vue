@@ -17,7 +17,7 @@
                     <STErrorsDefault :error-box="errorBox" />
                 
                     <STList>
-                        <STListItem v-for="item in cart.items" :key="item.id" class="cart-item-row">
+                        <STListItem v-for="item in cart.items" :key="item.id" class="cart-item-row" :selectable="true" @click="openGroup(item.group)">
                             <h3>
                                 <span>{{ item.member.name }}</span>
                             </h3>
@@ -59,7 +59,7 @@
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { RecordType, RegisterItem } from '@stamhoofd/structures';
+import { Group, RecordType, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
@@ -67,6 +67,7 @@ import { Mixins } from 'vue-property-decorator';
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import GroupView from '../groups/GroupView.vue';
 
 @Component({
     components: {
@@ -128,6 +129,17 @@ export default class CartView extends Mixins(NavigationMixin){
 
     imageSrc(item: RegisterItem): string | null {
         return (item.group.settings.squarePhoto ?? item.group.settings.coverPhoto)?.getPathForSize(100, 100) ?? null
+    }
+
+    openGroup(group: Group) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(
+                GroupView, {
+                    group,
+                    registerButton: false
+                }
+            )
+        }).setDisplayStyle("popup"))
     }
 
     deleteItem(RegisterItem: RegisterItem) {

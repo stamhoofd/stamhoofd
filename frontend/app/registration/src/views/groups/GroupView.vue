@@ -13,7 +13,7 @@
             <figure v-if="coverPhotoSrc" class="cover-photo">
                 <img :src="coverPhotoSrc">
             </figure>
-            <p class="style-description" v-text="group.settings.description" />
+            <p v-if="group.settings.description" class="style-description" v-text="group.settings.description" />
 
             <p v-if="infoBox" class="info-box">
                 {{ infoBox }}
@@ -27,7 +27,7 @@
                 {{ errorBox }}
             </p>
 
-            <STList>
+            <STList class="group-info-list">
                 <STListItem class="right-description">
                     Wanneer?
 
@@ -72,9 +72,9 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
+import GroupTag from "../../components/GroupTag.vue"
 import MemberBox from "../../components/MemberBox.vue"
 import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
-import GroupTag from "../../components/GroupTag.vue"
 
 @Component({
     components: {
@@ -294,6 +294,10 @@ export default class GroupView extends Mixins(NavigationMixin){
             left: 0;
             top: 0;
         }
+    }
+
+    p + .group-info-list {
+        margin-top: 20px;
     }
 }
 </style>
