@@ -7,6 +7,9 @@
         <div class="box">
             <main v-if="needsPay">
                 <h1>Kies een betaalmethode</h1>
+                <p>Te betalen: 
+                    <span class="style-tag">{{ cart.price | price }}</span>
+                </p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
@@ -20,6 +23,7 @@
             </main>
 
             <STToolbar>
+                <span slot="left">Totaal: {{ cart.price | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
                         <span v-if="needsPay && selectedPaymentMethod == 'Transfer'">Inschrijving bevestigen</span>
@@ -58,6 +62,9 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
         STErrorsDefault,
         PaymentSelectionList,
         BackButton
+    },
+    filters: {
+        price: Formatter.price.bind(Formatter),
     }
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
@@ -67,6 +74,10 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
     loading = false
     errorBox: ErrorBox | null = null
+
+    mounted() {
+        this.recalculate()
+    }
 
     get selectedPaymentMethod() {
         return CheckoutManager.checkout.paymentMethod
@@ -146,6 +157,27 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
             this.loading = false
         }
+    }
+
+    get cart() {
+        return this.CheckoutManager.cart
+    }
+
+    recalculate() {
+        try {
+            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            this.errorBox = null
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+        }
+        try {
+            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+        } catch (e) {
+            // error in calculation!
+            console.error(e)
+        }
+        CheckoutManager.saveCart()
     }
 }
 </script>

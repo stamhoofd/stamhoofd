@@ -170,6 +170,7 @@ export class GroupCategoryTree extends GroupCategory {
                             // Clone reference
                             cat.settings = GroupCategorySettings.create(cat.settings)
                             cat.settings.name = t.settings.name + " - " + cat.settings.name
+                            cat.settings.public = t.settings.public && cat.settings.public
                         }
                         // Concat here
                         return t.categories

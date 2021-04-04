@@ -17,6 +17,7 @@
             </main>
 
             <STToolbar>
+                <span slot="left">Totaal: {{ cart.price | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" @click="goNext">
                         <span>Doorgaan</span>
@@ -32,10 +33,12 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Record, RecordType } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { Formatter } from "@stamhoofd/utility";
+import { Component, Mixins, Watch } from "vue-property-decorator";
 
 import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from '../../classes/MemberManager';
+import { OrganizationManager } from "../../classes/OrganizationManager";
 import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
@@ -48,6 +51,9 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
         LoadingButton,
         STErrorsDefault,
         BackButton
+    },
+    filters: {
+        price: Formatter.price.bind(Formatter),
     }
 })
 export default class FinancialSupportView extends Mixins(NavigationMixin){
@@ -57,6 +63,20 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     reduced = false
     loading = false
     errorBox: ErrorBox | null = null
+
+    @Watch("reduced")
+    onChangeReduced() {
+        if (this.reduced) {
+            for (const item of CheckoutManager.checkout.cart.items) {
+                item.reduced = true
+            }
+        } else {
+            for (const item of CheckoutManager.checkout.cart.items) {
+                item.reduced = false
+            }
+        }
+        this.recalculate()
+    }
 
     async goNext() {
         if (this.loading) {
@@ -103,6 +123,27 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
             this.loading = false
         }
+    }
+
+    get cart() {
+        return this.CheckoutManager.cart
+    }
+
+    recalculate() {
+        try {
+            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            this.errorBox = null
+        } catch (e) {
+            console.error(e)
+            this.errorBox = new ErrorBox(e)
+        }
+        try {
+            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+        } catch (e) {
+            // error in calculation!
+            console.error(e)
+        }
+        CheckoutManager.saveCart()
     }
 }
 </script>

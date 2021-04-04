@@ -11,7 +11,7 @@
                     <h1>Leden bewerken en inschrijven</h1>
 
                     <p class="info-box email with-button selectable" v-for="invite of invites" :key="invite.id" @click="registerMember(invite.member)">
-                        Je hebt een uitnodiging gekregen om in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} op de wachtlijst, maar je kan de inschrijving afwerken.
+                        Je hebt een uitnodiging gekregen om {{ invite.member.firstName }} in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} nog op de wachtlijst.
                         <span class="button text selected">
                             <span>Inschrijven</span>
                             <span class="icon arrow-right" />
@@ -60,8 +60,7 @@
                     <p>
                         Kies een groep waarvoor je je wilt inschrijven of klik bovenaan op een lid dat je wilt inschrijven (dan zie je de suggesties).
                     </p>
-                    <GroupTree v-if="!isEmpty && filterActive" :category="availableTree" :parent-level="0" />
-                    <GroupTree v-else :category="fullTree" :parent-level="0" />
+                    <GroupTree :category="availableTree" :parent-level="0" />
                     <hr>
                 </main>
                 <main v-else>
@@ -109,7 +108,6 @@ import MemberView from "../members/MemberView.vue";
 })
 export default class OverviewView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
-    filterActive = true
 
     /**
      * Return members that are currently registered in
@@ -133,7 +131,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         if (this.members.length == 0) {
             return true
         }
-        return (this.fullTree.categories.length == 0)
+        return (this.availableTree.categories.length == 0)
     }
 
     get availableTree() {
@@ -163,9 +161,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
         return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
     }
 
-    showAllGroups() {
-        this.filterActive = false
-    }
 
     get rootCategory() {
         const tree = this.organization.categoryTree
