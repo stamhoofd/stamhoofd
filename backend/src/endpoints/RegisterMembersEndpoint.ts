@@ -173,6 +173,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (totalPrice == 0) {
                 payment.status = PaymentStatus.Succeeded
+                payment.method = PaymentMethod.Unknown
                 payment.paidAt = new Date()
             }
 

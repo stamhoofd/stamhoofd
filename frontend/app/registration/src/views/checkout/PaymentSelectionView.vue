@@ -42,7 +42,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { KeychainedResponse, Payment, PaymentMethod, RegisterResponse } from '@stamhoofd/structures';
+import { KeychainedResponse, Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -93,8 +93,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get needsPay() {
-        // Todo: also check zero prices here
-        return this.CheckoutManager.cart.items.find(i => !i.waitingList)
+        return this.CheckoutManager.cart.items.find(i => !i.waitingList) && this.cart.price > 0
     }
 
     get organization() {
@@ -120,7 +119,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
             await MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 
-            if (payment) {
+            if (payment && payment.status !== PaymentStatus.Succeeded) {
                 PaymentHandler.handlePayment({
                     server: session.authenticatedServer, 
                     organization: OrganizationManager.organization, 

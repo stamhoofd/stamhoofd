@@ -64,6 +64,10 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     loading = false
     errorBox: ErrorBox | null = null
 
+    mounted() {
+        this.reduced = !!CheckoutManager.checkout.cart.items.find(i => i.reduced)
+    }
+
     @Watch("reduced")
     onChangeReduced() {
         if (this.reduced) {
