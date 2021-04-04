@@ -161,11 +161,17 @@ export default class CartView extends Mixins(NavigationMixin){
             HistoryManager.setUrl("/cart")
         })
 
-        this.recalculate()
+        this.recalculate().catch(e => {
+            console.error(e)
+        })
     }
 
-    recalculate() {
+    async recalculate() {
         try {
+            // Reload groups
+            await OrganizationManager.reloadGroups()
+
+            // Revalidate
             this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
             this.errorBox = null
         } catch (e) {
