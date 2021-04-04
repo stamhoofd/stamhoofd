@@ -10,6 +10,14 @@
                 <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
 
+                    <p class="info-box email with-button selectable" v-for="invite of invites" :key="invite.id" @click="registerMember(invite.member)">
+                        Je hebt een uitnodiging gekregen om in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} op de wachtlijst, maar je kan de inschrijving afwerken.
+                        <span class="button text selected">
+                            <span>Inschrijven</span>
+                            <span class="icon arrow-right" />
+                        </span>
+                    </p>
+
                     <STList v-if="members.length > 0">
                         <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
                             <span slot="left" class="icon user" />
@@ -178,6 +186,19 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
         return []
     }
+    
+    get invites() {
+        return this.members.flatMap(member => {
+            return member.acceptedWaitingGroups.map(group => {
+                return {
+                    id: member.id+"-"+group.id,
+                    member,
+                    group
+                }
+            })
+            
+        })
+    }
 
     mounted() {
         HistoryManager.setUrl("/")
@@ -216,6 +237,12 @@ export default class OverviewView extends Mixins(NavigationMixin){
     editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberView, { member })
+        }).setDisplayStyle("popup"))
+    }
+
+    registerMember(member: MemberWithRegistrations) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberChooseGroupsView, { member })
         }).setDisplayStyle("popup"))
     }
 

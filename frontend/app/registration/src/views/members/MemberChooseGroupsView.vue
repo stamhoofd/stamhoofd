@@ -1,9 +1,8 @@
 <template>
     <div class="st-view">
         <STNavigationBar :title="member.name">
-            <template slot="left">
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
+            <BackButton slot="left" v-if="canPop" @click="pop" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         
         <main>
