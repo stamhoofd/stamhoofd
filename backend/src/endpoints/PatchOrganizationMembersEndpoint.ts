@@ -52,6 +52,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         const members: MemberWithRegistrations[] = []
         const groups = await Group.where({organizationId: user.organization.id})
+        const updateGroups = new Map<string, Group>()
 
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
@@ -79,7 +80,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
                         statusCode: 403
                     })
-                }   
+                }
+
+                // Update occupancy at the end of the call
+                updateGroups.set(group.id, group)
             }
 
 
@@ -180,6 +184,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (patchRegistration.groupId) {
                     group = groups.find(g => g.id == patchRegistration.groupId) ?? null
+                    if (group) {
+                        // We need to update group occupancy because we moved a member to it
+                        updateGroups.set(group.id, group)
+                    }
+                    const oldGroup = groups.find(g => g.id == registration.groupId) ?? null
+                    if (oldGroup) {
+                        // We need to update this group occupancy because we moved one member away from it
+                        updateGroups.set(oldGroup.id, oldGroup)
+                    }
                 } else {
                     group = groups.find(g => g.id == registration.groupId) ?? null
                 }
@@ -217,6 +230,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 // Check if we should create a placeholder payment?
                 await registration.save()
+
+                if (patchRegistration.cycle !== undefined || patchRegistration.waitingList !== undefined) {
+                    // We need to update occupancy (because cycle / waitlist change)
+                    updateGroups.set(group.id, group)
+                }
             }
 
             for (const deleteId of patch.registrations.getDeletes()) {
@@ -230,11 +248,39 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
                 await registration.delete()
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
+
+                const oldGroup = groups.find(g => g.id == registration.groupId) ?? null
+                if (oldGroup) {
+                    // We need to update this group occupancy because we moved one member away from it
+                    updateGroups.set(oldGroup.id, oldGroup)
+                }
             }
 
             // Add registrations
             for (const registrationStruct of patch.registrations.getPuts()) {
-                await this.addRegistration(user, member, registrationStruct.put)
+                const struct = registrationStruct.put
+                const group = groups.find(g => g.id === struct.groupId)
+                if (!group) {
+                    throw new SimpleError({
+                        code: "invalid_group",
+                        message: "Invalid group",
+                        human: "De groep waar je dit lid wilt toevoegen bestaat niet (meer)",
+                        statusCode: 404
+                    })
+                }
+                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                    throw new SimpleError({
+                        code: "permission_denied",
+                        message: "No permissions to create member in this group",
+                        human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
+                        statusCode: 403
+                    })
+                }
+
+                await this.addRegistration(user, member, struct)
+
+                // We need to update this group occupancy because we moved one member away from it
+                updateGroups.set(group.id, group)
             }
 
             // Link users
@@ -274,6 +320,22 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             await User.deleteForDeletedMember(member.id)
             await member.delete()
+
+            // Update occupancy of this member because we removed registrations
+            const groupIds = member.registrations.flatMap(r => r.groupId)
+            for (const id of groupIds) {
+                const group = groups.find(g => g.id == id) ?? null
+                if (group) {
+                    // We need to update this group occupancy because we moved one member away from it
+                    updateGroups.set(group.id, group)
+                }
+            }
+        }
+
+        // Loop all groups and update occupancy if needed
+        for (const group of updateGroups.values()) {
+            await group.updateOccupancy()
+            await group.save()
         }
 
         return new Response(members.map(m => m.getStructureWithRegistrations()));

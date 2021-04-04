@@ -68,6 +68,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update occupancies
         for (const group of groups) {
             await group.updateOccupancy()
+            // no need to save yet
+            // await group.save()
         }
 
         // Save the price that the client did calculate (to alert price changes before we continue)

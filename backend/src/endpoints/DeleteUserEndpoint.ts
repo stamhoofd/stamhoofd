@@ -46,19 +46,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
 
-        // Get registrations and groups
-        const members = await Member.getMembersWithRegistrationForUser(editUser)
-        const groupIds = members.flatMap(m => m.registrations.flatMap(r => r.groupId))
         await editUser.delete();
-
-        if (groupIds.length > 0) {
-            const groups = await Group.getByIDs(...groupIds)
-            if (groups.length > 0) {
-                for (const group of groups) {
-                    await group.updateOccupancy()
-                }
-            }
-        }
 
         return new Response(undefined);      
     }
