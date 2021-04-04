@@ -1,21 +1,22 @@
 <template>
     <div class="st-view mail-view">
-        <STNavigationBar title="Mail versturen">
+        <STNavigationBar title="E-mail versturen">
             <template #right>
                 <button class="button icon close gray" @click="dismiss" />
             </template>
         </STNavigationBar>
         <STNavigationTitle>
-            <span class="icon-spacer">Mail versturen</span>
+            <span class="icon-spacer">E-mail versturen</span>
         </STNavigationTitle>
 
         <main>
             <template v-if="emails.length == 0">
-                <p v-if="fullAccess" class="warning-box">
-                    Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
+                <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
+                    Stel eerst jouw e-mailadressen in
+                    <span class="button text inherit-color">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
-                    </button>
+                    </span>
                 </p>
                 <p v-else class="warning-box">
                     Een hoofdbeheerder van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
@@ -46,10 +47,21 @@
                     <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 </label>
             </STInputBox>
-            <MailEditor ref="editor" :has-first-name="hasFirstName" />
+            <MailEditor ref="editor" :has-first-name="hasFirstName">
+                <template slot="footer" v-if="addButton">
+                    <hr>
+                    <p><button class="button primary" type="button">Inschrijvingen beheren</button></p>
+                    <p class="style-description-small"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong>linda.voorbeeld@gmail.com</strong> of registreer je op <strong>patrick.voorbeeld@hotmail.com</strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>
+                </template>
+            </MailEditor>
+
+            <Checkbox v-model="addButton" v-if="members.length > 0">
+                Voeg knop toe voor inschrijvingen (aangeraden)
+                <span class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
+            </Checkbox>
 
             <p v-if="fileWarning" class="warning-box">
-                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.
+                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
             </p>
 
             <STList v-if="files.length > 0" title="Bijlages">
@@ -89,7 +101,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast, Checkbox } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -123,6 +135,7 @@ class TmpFile {
         LoadingButton,
         STList,
         STListItem,
+        Checkbox,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
@@ -134,6 +147,8 @@ export default class MailView extends Mixins(NavigationMixin) {
     otherRecipients: { firstName?: string; lastName?: string; email: string }[]
 
     sending = false
+
+    addButton = this.members.length > 0
 
     @Prop({ default: null })
     defaultSubject!: string | null
@@ -419,15 +434,23 @@ export default class MailView extends Mixins(NavigationMixin) {
             align-items: stretch;
             min-height: 200px;
 
-            & > .editor-content {
+            & > .editor-container {
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
 
-                & > .ProseMirror {
+                & > .editor-content {
                     flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+
+                    & > .ProseMirror {
+                        flex-grow: 1;
+                    }
                 }
             }
+
+            
         }
 
         .file-list-item {

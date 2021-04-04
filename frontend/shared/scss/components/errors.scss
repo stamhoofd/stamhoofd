@@ -97,29 +97,6 @@
             font-icon: url(@stamhoofd/assets/images/icons/email.svg);
         }
     }
-
-    &.selectable {
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        user-select: none;
-        cursor: pointer;
-
-        &:active {
-            opacity: 0.5;
-        }
-    }
-
-    &.with-button {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        > .button {
-            flex-shrink: 0;
-            margin-left: 15px;
-            @extend .only-icon-smartphone;
-        }
-    }
 }
 
 .success-box {
@@ -147,5 +124,31 @@
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
+    }
+}
+
+.error-box, .success-box, .info-box, .warning-box {
+    &.selectable {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        user-select: none;
+        cursor: pointer;
+
+        &:active {
+            opacity: 0.5;
+        }
+    }
+
+    &.with-button {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        > .button {
+            flex-shrink: 0;
+            padding-left: 15px;
+            margin-left: auto;
+            @extend .only-icon-smartphone;
+        }
     }
 }

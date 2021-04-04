@@ -240,6 +240,10 @@
             color: $color-primary;
         }
 
+        &.inherit-color {
+            color: inherit;
+        }
+
         > * {
             vertical-align: top;
         }

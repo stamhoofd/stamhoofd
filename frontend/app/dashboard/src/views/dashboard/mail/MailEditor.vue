@@ -42,7 +42,12 @@
                 <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
             </div>
         </editor-floating-menu>
-        <editor-content :editor="editor" class="editor-content" />
+        <div class="editor-container">
+            <editor-content :editor="editor" class="editor-content" />
+            <footer>
+                <slot name="footer" />
+            </footer>
+        </div>
     </div>
 </template>
 
@@ -125,7 +130,43 @@ export default class MailEditor extends Vue {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/components/inputs.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
+
+.editor .ProseMirror {
+    max-width: none;
+    padding: 15px 15px;
+    height: auto;
+    min-height: $input-height * 2;
+    line-height: normal;
+    outline: none;
+}
+
+.editor .editor-container {
+    @extend .input;
+    padding: 0;
+    height: auto;
+    min-height: $input-height * 2;
+    line-height: normal;
+    outline: none;
+
+    > footer {
+        padding: 0 15px 15px 15px;
+        user-select: none;
+        cursor: not-allowed;
+        color: $color-gray-dark;
+        opacity: 0.5;
+
+
+        p button {
+            margin-bottom: 5px;
+        }
+
+        hr {
+            @extend .style-hr;
+        }
+    }
+}
 
 .editor {
     position: relative;
@@ -234,7 +275,7 @@ export default class MailEditor extends Vue {
         }
     }
 
-    .ProseMirror {
+    .editor-container {
         p {
             margin: 5px 0;
         }
