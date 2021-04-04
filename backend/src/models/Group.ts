@@ -143,7 +143,7 @@ export class Group extends Model {
             return
         }
 
-        const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (registeredAt is not null or reservedUntil >= ?) and waitingList = 0`
+        const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (((registeredAt is not null or reservedUntil >= ?) and waitingList = 0) OR (waitingList = 1 AND canRegister = 1))`
         
         const [results] = await Database.select(query, [this.id, this.cycle, new Date()])
         const count = results[0]['']['c'];

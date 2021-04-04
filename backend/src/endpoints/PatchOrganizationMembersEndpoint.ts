@@ -231,7 +231,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Check if we should create a placeholder payment?
                 await registration.save()
 
-                if (patchRegistration.cycle !== undefined || patchRegistration.waitingList !== undefined) {
+                if (patchRegistration.cycle !== undefined || patchRegistration.waitingList !== undefined || patchRegistration.canRegister !== undefined) {
                     // We need to update occupancy (because cycle / waitlist change)
                     updateGroups.set(group.id, group)
                 }
