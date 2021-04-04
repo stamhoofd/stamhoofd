@@ -117,7 +117,7 @@ export class MemberWithRegistrations extends Member {
      * True if you cannot register because you reached the maximum of a group category
      */
     private hasReachedCategoryMaximum(group: Group, all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
-        return RegisterCartValidator.hasReachedCategoryMaximum(this, group, all, cart)
+        return RegisterCartValidator.hasReachedCategoryMaximum(this, group, this.allGroups, all, cart)
     }
 
     /**

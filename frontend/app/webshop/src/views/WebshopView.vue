@@ -59,13 +59,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast, GlobalEventBus } from "@stamhoofd/components"
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../classes/CheckoutManager';
-import { GlobalEventBus } from '../classes/EventBus';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStep, CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';

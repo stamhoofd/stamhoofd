@@ -1,5 +1,5 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed }">
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle }">
         <div>
             <slot name="left" />
         </div>
@@ -26,6 +26,12 @@ export default class STNavigationBar extends Vue {
 
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
+
+    /**
+     * Also show the title when not scrolled
+     */
+    @Prop({ default: false, type: Boolean })
+    showTitle!: boolean;
 
     @Prop({ default: false, type: Boolean })
     fixed!: boolean;
@@ -185,13 +191,20 @@ export default class STNavigationBar extends Vue {
         @extend .style-title-small;
     }
 
+    &.show-title {
+        > h1 {
+            opacity: 0.6;
+        }
+    }
+
+
     &.scrolled {
         box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
         > h1 {
             opacity: 1;
         }
     }
-
+    
     // Other helper styles (need to revalidate)
     .input {
         width: 220px;

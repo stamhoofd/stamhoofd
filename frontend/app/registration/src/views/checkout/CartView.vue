@@ -58,7 +58,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { ErrorBox, LoadingButton,StepperInput,Steps,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Group, RecordType, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
@@ -111,12 +111,20 @@ export default class CartView extends Mixins(NavigationMixin){
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
                 this.present(
-                    new ComponentWithProperties(NavigationController, { 
-                        root: new ComponentWithProperties(component, {})
-                    }).setDisplayStyle("popup")         
+                    new ComponentWithProperties(Steps, { 
+                        root: new ComponentWithProperties(component, {}),
+                        totalSteps: 2
+                    })       
                 );
             } else {
-                // todo
+                // Go to financial view
+                const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './PaymentSelectionView.vue')).default;
+                this.present(
+                    new ComponentWithProperties(Steps, { 
+                        root: new ComponentWithProperties(component, {}),
+                        totalSteps: 1
+                    })       
+                );
             }
 
             await Promise.resolve()

@@ -1,8 +1,8 @@
 <template>
     <div class="st-view boxed">
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
-            <BackButton slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss" />
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main v-if="needsPay">
@@ -64,7 +64,6 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     OrganizationManager = OrganizationManager
     CheckoutManager = CheckoutManager
-    step = 3
 
     loading = false
     errorBox: ErrorBox | null = null
@@ -92,7 +91,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     async goNext() {
-        if (this.loading || (this.selectedPaymentMethod === PaymentMethod.Unknown || !this.needsPay)) {
+        if (this.loading || (this.selectedPaymentMethod === PaymentMethod.Unknown && this.needsPay)) {
             return
         }
         const session = SessionManager.currentSession!
@@ -147,13 +146,6 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
             this.loading = false
         }
-    }
-
-    async shouldNavigateAway() {
-        if (await CenteredMessage.confirm("Ben je zeker dat je wilt annuleren?", "Inschrijvingen annuleren")) {
-            return true;
-        }
-        return false;
     }
 }
 </script>

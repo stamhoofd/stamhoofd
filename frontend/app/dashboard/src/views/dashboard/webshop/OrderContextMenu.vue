@@ -66,13 +66,13 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
                     path: "/webshop/"+this.webshop.id+"/orders/"+order.id,
                 })
             }
+            new Toast("De bestelling is verwijderd", "success").show()
+            await WebshopOrdersEventBus.sendEvent("deleted", this.orders)
         } catch (e) {
             Toast.fromError(e).show()
             return;
         }
 
-        WebshopOrdersEventBus.sendEvent("deleted", this.orders)
-        new Toast("De bestelling is verwijderd", "success").show()
     }
 }
 </script>

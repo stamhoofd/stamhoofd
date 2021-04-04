@@ -235,10 +235,11 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         WebshopOrdersEventBus.removeListener(this)
     }
 
-    onDeleteOrder() {
+    onDeleteOrder(): Promise<void> {
         this.nextQuery = WebshopOrdersQuery.create({})
         this.orders = []
         this.loadNextOrders()
+        return Promise.resolve()
     }
 
     get webshopUrl() {

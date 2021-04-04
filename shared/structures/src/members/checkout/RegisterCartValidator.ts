@@ -15,7 +15,7 @@ import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations
 export class RegisterCartValidator {
     static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
         // Already registered
-        if (member.registrations.find(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList)) {
+        if (member.registrations.find(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
             return {
                 closed: true,
                 waitingList: false,
@@ -25,7 +25,7 @@ export class RegisterCartValidator {
         }
 
         // Check all categories maximum limits
-        if (this.hasReachedCategoryMaximum(member, group, categories, cart)) {
+        if (this.hasReachedCategoryMaximum(member, group, groups, categories, cart)) {
             // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
             return {
                 closed: true,
@@ -91,7 +91,7 @@ export class RegisterCartValidator {
             if (reachedMaximum) {
                 // Check if we have a reserved spot
                 const now = new Date()
-                const reserved = member.registrations.find(r => r.groupId === group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null)
+                const reserved = member.registrations.find(r => r.groupId === group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null && r.cycle === group.cycle)
 
                 if (!reserved) {
                     const free = group.settings.maxMembers - group.settings.registeredMembers
@@ -156,12 +156,19 @@ export class RegisterCartValidator {
     /**
      * True if you cannot register because you reached the maximum of a group category
      */
-    static hasReachedCategoryMaximum(member: UnknownMemberWithRegistrations, group: Group, all: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
-        const parents = group.getParentCategories(all, false)
+    static hasReachedCategoryMaximum(member: UnknownMemberWithRegistrations, group: Group, groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
+        const parents = group.getParentCategories(categories, false)
 
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
-                const count = member.registrations.filter(r => r.registeredAt !== null && !r.waitingList && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)).length
+                const count = member.registrations.filter(r => {
+                    if (r.registeredAt !== null && !r.waitingList && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
+                        // Check cycle (only count current periods, not previous periods)
+                        const g = groups.find(gg => gg.id === r.groupId)
+                        return g && g.cycle === r.cycle
+                    }
+                    return false
+                }).length
 
                 const waiting = cart.filter(item => {
                     return item.memberId === member.id && parent.groupIds.includes(item.groupId) && item.groupId !== group.id
@@ -209,7 +216,7 @@ export class RegisterCartValidator {
             throw new SimpleError({
                 code: "invalid_registration",
                 message: "Registration not possible anymore",
-                human: "Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
+                human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
             })
         }
     }

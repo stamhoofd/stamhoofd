@@ -2,8 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar title="Financiële ondersteuning">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-
-            <button v-if="canDismiss" slot="right" class="button icon close" @click="dismiss"></button>
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main>
@@ -54,7 +53,6 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
 export default class FinancialSupportView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     CheckoutManager = CheckoutManager
-    step = 2
 
     reduced = false
     loading = false

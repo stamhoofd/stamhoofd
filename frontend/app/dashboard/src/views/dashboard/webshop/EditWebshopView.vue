@@ -38,13 +38,12 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
+import { BackButton, LoadingButton,SegmentedControl, STToolbar, GlobalEventBus } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { PermissionRole } from '@stamhoofd/structures';
 import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { GlobalEventBus } from '../../../classes/EventBus';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
 import EditWebshopPageView from './EditWebshopPageView.vue';
@@ -167,7 +166,7 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
                 new Toast("Webshop opgeslagen", "success green").show()
 
                 OrganizationManager.organization.webshops.push(WebshopPreview.create(this.webshop))
-                GlobalEventBus.sendEvent("new-webshop", this.webshop)
+                await GlobalEventBus.sendEvent("new-webshop", this.webshop)
             } else {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "PATCH",

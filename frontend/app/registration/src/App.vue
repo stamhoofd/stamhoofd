@@ -18,6 +18,7 @@ import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
+import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
 import TabBarController, { TabBarItem } from './views/overview/TabBarController.vue';
 
 async function getDefaultView() {
@@ -118,10 +119,10 @@ export default class App extends Vue {
                             })
                         )
                         CheckoutManager.watchTabBar = basket
-                        basket.badge = CheckoutManager.cart.count + ""
+                        basket.badge = CheckoutManager.cart.count > 0 ? (CheckoutManager.cart.count + "") : null
 
                         return new ComponentWithProperties(ModalStackComponent, {
-                            root: new ComponentWithProperties(TabBarController, { 
+                            root: new ComponentWithProperties(RegistrationTabBarController, { 
                                 items: [
                                     new TabBarItem(
                                         "Inschrijven",
