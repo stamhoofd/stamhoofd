@@ -7,6 +7,7 @@ interface Registration {
     cycle: number
     registeredAt: Date | null
     deactivatedAt: Date | null
+    reservedUntil: Date | null
 }
 /**
  * Represents both EncryptedMemberWithRegistrations and MemberWithRegistrations

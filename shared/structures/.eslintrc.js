@@ -53,7 +53,8 @@ module.exports = {
                 "@typescript-eslint/no-empty-interface": "off", // It is convenient to have placeholder interfaces
                 "@typescript-eslint/no-this-alias": "off", // No idea why we need this. This breaks code that is just fine. Prohibit the use of function() instead of this rule
                 "@typescript-eslint/unbound-method": "off", // Methods are automatically bound in vue, it would break removeEventListeners if we bound it every time unless we save every method in variables again...
-                "@typescript-eslint/explicit-module-boundary-types": "off"
+                "@typescript-eslint/explicit-module-boundary-types": "off",
+                "@typescript-eslint/restrict-plus-operands": "off" // why remove useful language features?
             },
         }
     ]

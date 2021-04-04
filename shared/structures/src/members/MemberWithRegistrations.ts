@@ -80,7 +80,7 @@ export class MemberWithRegistrations extends Member {
             const group = groups.find(g => g.id == registration.groupId)
 
             if (group) {
-                if (group.cycle == registration.cycle && registration.deactivatedAt === null) {
+                if (group.cycle == registration.cycle && registration.deactivatedAt === null && (registration.registeredAt !== null || registration.waitingList)) {
                     this.activeRegistrations.push(registration)
 
                     if (!registration.waitingList) {

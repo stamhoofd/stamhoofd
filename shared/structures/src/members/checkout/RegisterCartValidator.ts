@@ -19,7 +19,8 @@ export class RegisterCartValidator {
             return {
                 closed: true,
                 waitingList: false,
-                message: "Al ingeschreven"
+                message: "Al ingeschreven",
+                description: "Je kan "+member.firstName+" maar één keer inschrijven voor "+group.settings.name
             }
         }
 
@@ -88,29 +89,38 @@ export class RegisterCartValidator {
             const count = cart.filter(item => item.groupId === group.id && item.memberId !== member.id && !item.waitingList).length
             const reachedMaximum = group.settings.maxMembers <= group.settings.registeredMembers + count
             if (reachedMaximum) {
-                if (!group.settings.waitingListIfFull) {
-                    // Maximum reached without waiting list -> closed
-                    return {
-                        closed: true,
-                        waitingList: false,
-                        message: "Volzet"
-                    }
-                }
+                // Check if we have a reserved spot
+                const now = new Date()
+                const reserved = member.registrations.find(r => r.groupId === group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null)
 
-                // If this is already in the cart, no need to return 'waitingList: true'
-                const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
-                if (item && !item.waitingList) {
+                if (!reserved) {
+                    const free = group.settings.maxMembers - group.settings.registeredMembers
+                    if (!group.settings.waitingListIfFull) {
+                        // Maximum reached without waiting list -> closed
+                        return {
+                            closed: true,
+                            waitingList: false,
+                            message: "Volzet",
+                            description: free > 0 ? ("Er zijn nog maar " + free + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.")
+                        }
+                    }
+
+                    // If this is already in the cart, no need to return 'waitingList: true'
+                    const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
+                    if (item && !item.waitingList) {
+                        return {
+                            closed: false,
+                            waitingList: false
+                        }
+                    }
+
+                    // Still allow waiting list
                     return {
                         closed: false,
-                        waitingList: false
+                        waitingList: true,
+                        message: "Wachtlijst (volzet)",
+                        description: free > 0 ? ("Er zijn nog maar " + free + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
                     }
-                }
-
-                // Still allow waiting list
-                return {
-                    closed: false,
-                    waitingList: true,
-                    message: "Wachtlijst (volzet)"
                 }
             }
         }
@@ -134,7 +144,7 @@ export class RegisterCartValidator {
         // Check if no year was skipped
         for (const registration of member.registrations) {
             const group = groups.find(g => g.id === registration.groupId)
-            if (!registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt !== null && group && registration.cycle === group.cycle - 1) {
+            if (!registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && group && registration.cycle === group.cycle - 1) {
                 // This was the previous year
                 return true
             }
@@ -191,7 +201,7 @@ export class RegisterCartValidator {
                 code: "invalid_registration",
                 message: "Registration not possible anymore",
                 // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                human: "Je kan "+member.firstName+" niet meer inschrijven voor "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
+                human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" niet meer inschrijven voor "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
             })
         }
 
@@ -201,28 +211,6 @@ export class RegisterCartValidator {
                 message: "Registration not possible anymore",
                 human: "Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : '')
             })
-        }
-
-        // Check already in cart
-        if (previousItems.find(i => i.groupId === item.groupId && i.memberId === item.memberId)) {
-            throw new SimpleError({
-                code: "invalid_registration",
-                message: "Duplicate item",
-                human: "Je kan "+member.firstName+" maar één keer inschrijven voor "+group.settings.name
-            })
-        }
-
-        // Check maximum
-        if (group.settings.maxMembers !== null && !item.waitingList) {
-            const count = previousItems.filter(i => i.groupId === item.groupId && !i.waitingList).length
-            if (count >= group.settings.maxMembers - (group.settings.registeredMembers ?? 0)) {
-                throw new SimpleError({
-                    code: "invalid_registration",
-                    message: "Reached maximum members allowed",
-                    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                    human: "Er zijn nog maar " + (group.settings.maxMembers - (group.settings.registeredMembers ?? 0)) + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven."+(group.settings.waitingListIfFull ? " Je kan wel op de wachtlijst inschrijven." : "")
-                })
-            }
         }
     }
 }
