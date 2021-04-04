@@ -1,5 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
 
 import { Group } from '../models/Group';
 import { Registration } from '../models/Registration';
@@ -30,7 +31,7 @@ export class DeleteRegistrationEndpoint extends Endpoint<Params, Query, Body, Re
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang om deze registratie te verwijderen"
@@ -51,8 +52,19 @@ export class DeleteRegistrationEndpoint extends Endpoint<Params, Query, Body, Re
                 message: "Je hebt geen toegang om deze registratie te verwijderen"
             })
         }
+
+        if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "No permissions to remove registration from this group",
+                human: "Je hebt niet voldoende rechten om leden uit te schrijven van "+group.settings.name,
+                statusCode: 403
+            })
+        }   
         
         await registration.delete();
+        await group.updateOccupancy()
+
         return new Response(undefined);      
     }
 }
