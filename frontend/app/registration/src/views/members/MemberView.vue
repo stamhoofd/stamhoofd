@@ -39,10 +39,15 @@
                                         <span v-else class="icon gray clock" />
                                     </div>
                                 </figure>
-                                <template v-else slot="left">
-                                    <span v-if="!registration.waitingList" class="icon green success" />
-                                    <span v-else class="icon gray clock" />
-                                </template>
+                                <figure v-else slot="left" class="registration-image">
+                                    <figure>
+                                        <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
+                                    </figure>
+                                    <div>
+                                        <span v-if="!registration.waitingList" class="icon green success" />
+                                        <span v-else class="icon gray clock" />
+                                    </div>
+                                </figure>
                                 <h3 class="style-title-list">
                                     {{ getGroup(registration.groupId).settings.name }}
                                 </h3>
@@ -50,7 +55,7 @@
                                     Ingeschreven op {{ registration.registeredAt | dateTime }}
                                 </p>
                                 <p v-else class="style-description-small">
-                                    Op wachtlijst sinds {{ registration.registeredAt | dateTime }}
+                                    Op wachtlijst sinds {{ registration.createdAt | dateTime }}
                                 </p>
                             </STListItem>
                         </STList>
@@ -406,36 +411,4 @@ export default class MemberView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 @use "@stamhoofd/scss/components/member-details.scss";
-
-.member-view .registration-image {
-    position: relative;
-
-    img {
-        width: 60px;
-        height: 60px;
-        border-radius: $border-radius;
-        object-fit: cover;
-
-        @media (max-width: 350px) {
-            width: 40px;
-            height: 40px;
-        }
-    }
-
-    div {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        background: white;
-        border-radius: 40px;
-        line-height: 24px;
-        transform: translate(40%, 30%);
-        height: 23px; // alignment fix for centered icons
-
-        display: flex;
-        vertical-align: middle;
-        align-items: center;
-        justify-content: center;
-    }
-}
 </style>

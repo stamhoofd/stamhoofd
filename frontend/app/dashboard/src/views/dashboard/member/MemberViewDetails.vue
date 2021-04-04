@@ -19,19 +19,6 @@
                         <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
                     </template>
 
-                    <template v-if="member.groups.length > 0">
-                        <dt>Groep</dt>
-                        <dd class="hover-box">
-                            {{ member.groups.map(g => g.settings.name).join(", ") }}
-                            <button v-if="hasWrite" class="hover-show button icon gray sync" @click="editGroup()" />
-                        </dd>
-                    </template>
-
-                    <template v-if="member.waitingGroups.length > 0">
-                        <dt>Wachtlijst</dt>
-                        <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
-                    </template>
-
                     <template v-if="member.details.phone">
                         <dt>GSM-nummer</dt>
                         <dd>{{ member.details.phone }}</dd>
@@ -50,6 +37,49 @@
                         </dd>
                     </template>
                 </dl>
+            </div>
+
+            <div v-if="member.activeRegistrations.length > 0" class="container">
+                <hr>
+                <h2 class="style-with-button with-list">
+                    <div>Ingeschreven voor</div>
+                    <div>
+                        <button class="button text limit-space" @click="editGroup()">
+                            <span class="icon sync" />
+                            <span>Wijzig</span>
+                        </button>
+                    </div>
+                </h2>
+
+                <STList>
+                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
+                        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
+                            <img :src="imageSrc(registration)">
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <figure v-else slot="left" class="registration-image">
+                            <figure>
+                                <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
+                            </figure>
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <h3 class="style-title-list">
+                            {{ getGroup(registration.groupId).settings.name }}
+                        </h3>
+                        <p v-if="!registration.waitingList" class="style-description-small">
+                            Ingeschreven op {{ registration.registeredAt | dateTime }}
+                        </p>
+                        <p v-else class="style-description-small">
+                            Op wachtlijst sinds {{ registration.createdAt | dateTime }}
+                        </p>
+                    </STListItem>
+                </STList>
             </div>
 
             <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
@@ -248,7 +278,8 @@
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain } from "@stamhoofd/networking";
-import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
@@ -266,6 +297,9 @@ import RecordDescriptionView from './records/RecordDescriptionView.vue';
         STList
     },
     directives: { Tooltip },
+    filters: {
+        dateTime: Formatter.dateTime.bind(Formatter)
+    },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
@@ -279,6 +313,18 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+    }
+
+    getGroup(groupId: string) {
+        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
+    imageSrc(registration: Registration) {
+        const group = this.getGroup(registration.groupId)
+        if (!group) {
+            return null
+        }
+        return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
     get hasLatestKey() {
@@ -490,5 +536,4 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/components/member-details.scss";
-
 </style>

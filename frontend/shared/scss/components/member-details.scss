@@ -1,6 +1,57 @@
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
+.member-view-details .registration-image {
+    position: relative;
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius;
+        object-fit: cover;
+
+        @media (max-width: 350px) {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    figure {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius;
+        text-align: center;
+        background: $color-primary-background;
+        color: $color-primary;
+        text-transform: uppercase;
+        line-height: 60px;
+        font-size: 20px;
+        font-weight: 600;
+
+        > span {
+            opacity: 0.8;
+            vertical-align: middle;
+            margin-right: -3px; // visual correction
+        }
+    }
+
+    div {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: white;
+        border-radius: 40px;
+        line-height: 24px;
+        transform: translate(40%, 30%);
+        height: 23px; // alignment fix for centered icons
+
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 .member-view-details {
     padding: 10px 0;
     padding-bottom: 30px;
