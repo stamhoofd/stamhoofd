@@ -40,6 +40,10 @@
                 </STInputBox>
             </div>
 
+            <p v-if="fileWarning" class="warning-box">
+                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
+            </p>
+
             <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
                 <label slot="right" class="button text">
                     <span class="icon add" />
@@ -47,11 +51,25 @@
                     <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 </label>
             </STInputBox>
+            
             <MailEditor ref="editor" :has-first-name="hasFirstName">
-                <template slot="footer" v-if="addButton">
+                <div slot="footer" v-if="addButton" class="disabled" title="Knop voor inschrijvingen">
                     <hr>
                     <p><button class="button primary" type="button">Inschrijvingen beheren</button></p>
                     <p class="style-description-small"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong>linda.voorbeeld@gmail.com</strong> of registreer je op <strong>patrick.voorbeeld@hotmail.com</strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>
+                </div>
+                <template slot="footer" v-if="files.length > 0">
+                    <STList title="Bijlages">
+                        <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
+                            <span slot="left" class="icon file" />
+                            {{ file.name }}
+
+                            <template #right>
+                                <span>{{ file.size }}</span>
+                                <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
+                            </template>
+                        </STListItem>
+                    </STList>
                 </template>
             </MailEditor>
 
@@ -59,22 +77,6 @@
                 Voeg knop toe voor inschrijvingen (aangeraden)
                 <span class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
-
-            <p v-if="fileWarning" class="warning-box">
-                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
-            </p>
-
-            <STList v-if="files.length > 0" title="Bijlages">
-                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
-                    <span slot="left" class="icon file" />
-                    {{ file.name }}
-
-                    <template #right>
-                        <span>{{ file.size }}</span>
-                        <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
-                    </template>
-                </STListItem>
-            </STList>
         </main>
 
         <STToolbar>

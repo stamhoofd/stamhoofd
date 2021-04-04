@@ -152,17 +152,36 @@ export default class MailEditor extends Vue {
 
     > footer {
         padding: 0 15px 15px 15px;
-        user-select: none;
-        cursor: not-allowed;
-        color: $color-gray-dark;
-        opacity: 0.5;
+        --st-horizontal-padding: 15px;
+        
+        > div.disabled {
+            user-select: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+            color: $color-gray-dark;
 
+            > hr {
+                @extend .style-hr;
+            }
 
-        p button {
-            margin-bottom: 5px;
+            p {
+                margin: 5px 0;
+            }
+
+            strong {
+                font-weight: bold;
+            }
+
+            em {
+                font-style: italic;
+            }
+
+            p button {
+                margin-bottom: 5px;
+            }
         }
 
-        hr {
+        > hr {
             @extend .style-hr;
         }
     }
@@ -275,7 +294,7 @@ export default class MailEditor extends Vue {
         }
     }
 
-    .editor-container {
+    .editor-content {
         p {
             margin: 5px 0;
         }
