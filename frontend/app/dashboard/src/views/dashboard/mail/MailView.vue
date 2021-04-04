@@ -59,7 +59,8 @@
                     <p class="style-description-small"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong>linda.voorbeeld@gmail.com</strong> of registreer je op <strong>patrick.voorbeeld@hotmail.com</strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>
                 </div>
                 <template slot="footer" v-if="files.length > 0">
-                    <STList title="Bijlages">
+                    <hr>
+                    <STList>
                         <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
                             <span slot="left" class="icon file" />
                             {{ file.name }}
@@ -75,7 +76,7 @@
 
             <Checkbox v-model="addButton" v-if="members.length > 0">
                 Voeg knop toe voor inschrijvingen (aangeraden)
-                <span class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
+                <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
         </main>
 

@@ -183,6 +183,7 @@ export default class MailEditor extends Vue {
 
         > hr {
             @extend .style-hr;
+            margin-bottom: 10px;
         }
     }
 }
