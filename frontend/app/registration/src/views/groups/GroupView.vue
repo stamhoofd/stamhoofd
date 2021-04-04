@@ -70,6 +70,8 @@ import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } f
 import { Group, GroupGenderType, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import { OrganizationManager } from "../../../../dashboard/src/classes/OrganizationManager";
+import { CheckoutManager } from "../../classes/CheckoutManager";
 
 import { MemberManager } from "../../classes/MemberManager";
 import GroupTag from "../../components/GroupTag.vue"
@@ -168,37 +170,26 @@ export default class GroupView extends Mixins(NavigationMixin){
         return null;
     }
 
+    get canRegister() {
+        return !!this.members.find((m) => {
+            const r = m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+            return !r.closed && !r.waitingList
+        })
+    }
+
 
     get errorBox() {
         if (this.group.settings.registrationEndDate < this.now) {
             return "De inschrijvingen zijn afgelopen"
         }
 
-        if (this.group.settings.isFull) {
+        if (this.group.settings.isFull && !this.canRegister) {
+            // Check if still possible
             if (this.group.settings.waitingListIfFull) {
                 return "Helaas al volzet! Je kan enkel nog op de wachtlijst inschrijven."
             }
             return "Helaas al volzet!"
         }
-
-        /*
-            <span v-if="group.notYetOpen" class="style-tag error">Nog niet geopend</span>
-            <span v-else-if="group.closed" class="style-tag error">Gesloten</span>
-            <template v-else-if="group.settings.registeredMembers !== null && group.settings.maxMembers !== null">
-                <span v-if="group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">
-                    Nog {{ group.settings.maxMembers - group.settings.registeredMembers }} {{ group.settings.maxMembers - group.settings.registeredMembers != 1 ? 'plaatsen' : 'plaats' }}
-                </span>
-                <span v-else-if="waitingListIfFull" class="style-tag warn">
-                    Wachtlijst
-                </span>
-                <span v-else class="style-tag error">
-                    Volzet
-                </span>
-                <span v-if="preRegistrations && group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">Voorinschrijvingen</span>
-            </template>
-            <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
-            <span v-else-if="allWaitingList" class="style-tag error">Wachtlijst</span>
-        */
         return null;
     }
 

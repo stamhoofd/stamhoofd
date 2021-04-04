@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -82,6 +82,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
 
     goToBasket() {
         this.dismiss({ force: true })
+
+        if (CheckoutManager.cart.items.find(i => i.group.id === this.group.id)) {
+            new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(3000).show()
+        }
     }
 
     async addNewMember() {

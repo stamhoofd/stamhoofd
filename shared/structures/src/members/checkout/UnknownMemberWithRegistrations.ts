@@ -8,6 +8,7 @@ interface Registration {
     registeredAt: Date | null
     deactivatedAt: Date | null
     reservedUntil: Date | null
+    canRegister: boolean
 }
 /**
  * Represents both EncryptedMemberWithRegistrations and MemberWithRegistrations

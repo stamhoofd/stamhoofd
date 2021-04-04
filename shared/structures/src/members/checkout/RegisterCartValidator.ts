@@ -44,6 +44,17 @@ export class RegisterCartValidator {
             }
         }
 
+        // Check if we have an invite (doesn't matter if registrations are closed)
+        if (member.registrations.find(r => r.groupId === group.id && r.waitingList && r.canRegister && r.cycle === group.cycle)) {
+            // Max members doesn't matter (invites are counted into the occupancy)
+            return {
+                closed: false,
+                waitingList: false,
+                message: "Uitnodiging",
+                description: "Je bent uitgenodigd om "+member.firstName+" in te schrijven voor "+group.settings.name
+            }
+        }
+
         if (group.closed) {
             return {
                 closed: true,
@@ -106,13 +117,13 @@ export class RegisterCartValidator {
                     }
 
                     // If this is already in the cart, no need to return 'waitingList: true'
-                    const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
+                    /*const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
                     if (item && !item.waitingList) {
                         return {
                             closed: false,
-                            waitingList: false
+                            waitingList: false,
                         }
-                    }
+                    }*/
 
                     // Still allow waiting list
                     return {
@@ -120,6 +131,12 @@ export class RegisterCartValidator {
                         waitingList: true,
                         message: "Wachtlijst (volzet)",
                         description: free > 0 ? ("Er zijn nog maar " + free + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
+                    }
+                } else {
+                    return {
+                        closed: false,
+                        waitingList: false,
+                        message: "Tijdelijk gereserveerd"
                     }
                 }
             }
@@ -217,6 +234,14 @@ export class RegisterCartValidator {
                 code: "invalid_registration",
                 message: "Registration not possible anymore",
                 human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
+            })
+        }
+
+        if (item.waitingList && !canRegister.waitingList) {
+            throw new SimpleError({
+                code: "invalid_registration",
+                message: "Registration not possible anymore",
+                human: "Je hoeft "+member.firstName+" niet langer op de wachtlijst van "+group.settings.name+" in te schrijven. We hebben het uit je winkelmandje verwijderd, voeg het opnieuw toe zonder wachtlijst."
             })
         }
     }

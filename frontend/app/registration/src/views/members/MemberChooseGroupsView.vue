@@ -79,7 +79,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
             this.navigationController?.popToRoot({ force: true })
         }
         if (CheckoutManager.cart.items.find(i => i.member.id === this.member.id)) {
-            new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(2000).show()
+            new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(3000).show()
         }
         
     }
