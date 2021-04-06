@@ -2,7 +2,6 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRequest } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 
 import Email, { EmailBuilder } from '../email/Email';
 import { Token } from '../models/Token';

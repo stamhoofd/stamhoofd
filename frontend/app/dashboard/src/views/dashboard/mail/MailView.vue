@@ -19,7 +19,7 @@
                     </span>
                 </p>
                 <p v-else class="warning-box">
-                    Een hoofdbeheerder van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
+                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
                 </p>
             </template>
 
@@ -75,7 +75,7 @@
             </MailEditor>
 
             <Checkbox v-model="addButton" v-if="members.length > 0">
-                Voeg knop toe voor inschrijvingen (aangeraden)
+                Voeg knop toe voor om makkelijk in te loggen / account aan te maken (aangeraden)
                 <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
         </main>
@@ -368,7 +368,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             this.errorBox = null
             this.sending = true;
           
-          const toBase64 = file => new Promise<string>((resolve, reject) => {
+            const toBase64 = file => new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file)
                 reader.onload = () => resolve(new Buffer(reader.result as ArrayBuffer).toString("base64"));
@@ -393,7 +393,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 attachments
             })
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/email",
                 body: emailRequest,
@@ -401,7 +401,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             this.dismiss({ force: true })
             new Toast("Jouw e-mail is verstuurd", "success").show()
         } catch (e) {
-            console.error(e)
+            this.errorBox = new ErrorBox(e)
         }
         this.sending = false
     }
