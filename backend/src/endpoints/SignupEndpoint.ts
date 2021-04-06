@@ -87,13 +87,13 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // Don't send the code
                 sendCode = false
             } else {
-                // todo: set password here
                 // This is safe, because we are the first one. There is no password yet.
                 // If a hacker tries this, he won't be able to sign in, because he needs to
-                // verify the e-mail first
+                // verify the e-mail first (same as if the user didn't exist)
                 // If we didn't set the password, we would allow a different kind of attack:
-                // a hacker could send an e-mail to the user, right after the user registered (without verifying yet), when he had set a different password
-                // user clicks on it -> this sets his own password instead 
+                // a hacker could send an e-mail to the user (try to register again, seindgin a new email which would trigger a different password change), right after the user registered (without verifying yet), when he had set a different password
+                // user clicks on second e-mail -> this sets the hackers password instead 
+                user.verified = false
                 await user.changePassword(request.body)
                 await user.save()
             }

@@ -1,10 +1,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRequest } from "@stamhoofd/structures";
+import { EmailRequest, Replacement } from "@stamhoofd/structures";
 
 import Email, { EmailBuilder } from '../email/Email';
+import { PasswordToken } from '../models/PasswordToken';
 import { Token } from '../models/Token';
+import { User } from '../models/User';
 
 type Params = {};
 type Query = undefined;
@@ -136,6 +138,25 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const email = request.body
 
+        // Update recipients
+        for (const recipient of email.recipients) {
+             // Add signInUrl
+            let signInUrl = "https://"+user.organization.getHost()
+
+            if (recipient.userId) {
+                const recipientUser = await User.getByID(recipient.userId)
+                if (recipientUser && recipientUser.organizationId === user.organizationId && recipientUser.email === recipient.email) {
+                    // We can create a special token
+                    signInUrl = await PasswordToken.getPasswordRecoveryUrl(recipientUser.setRelation(User.organization, user.organization))
+                }
+            }
+
+            recipient.replacements.push(Replacement.create({
+                token: "signInUrl",
+                value: encodeURI(signInUrl)
+            }))
+        }
+
         // Create e-mail builder
         const builder: EmailBuilder = () => {
             const recipient = email.recipients.shift()
@@ -145,7 +166,6 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             let html = email.html
 
-            // Replacements (todo)
             for (const replacement of recipient.replacements) {
                 if (html) {
                     html = html.replace("{{"+replacement.token+"}}", replacement.value)
