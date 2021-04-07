@@ -42,7 +42,7 @@
                 <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
             </div>
         </editor-floating-menu>
-        <div class="editor-container">
+        <div ref="content" class="editor-container">
             <editor-content :editor="editor" class="editor-content" />
             <footer>
                 <slot name="footer" />
@@ -67,6 +67,7 @@ import {
 } from "tiptap-extensions";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 
 @Component({
@@ -97,6 +98,12 @@ export default class MailEditor extends Vue {
             content: this.hasFirstName ? '<p>Dag <span data-replace-type="firstName"></span>,</p>' : '',
         });
     })();
+
+    mounted() {
+        if (OrganizationManager.organization.meta.color) {
+            (this.$refs.content as HTMLElement).style.setProperty("--color-primary", OrganizationManager.organization.meta.color);
+        }
+    }
 
     beforeDestroy() {
         this.editor.destroy();
@@ -157,15 +164,18 @@ export default class MailEditor extends Vue {
         > div.disabled {
             user-select: none;
             cursor: not-allowed;
-            opacity: 0.7;
             color: $color-gray-dark;
+
+            .button {
+                pointer-events: none
+            }
 
             > hr {
                 @extend .style-hr;
             }
 
-            p {
-                margin: 5px 0;
+            .button-description {
+                margin: 10px 0;
             }
 
             strong {
@@ -174,10 +184,6 @@ export default class MailEditor extends Vue {
 
             em {
                 font-style: italic;
-            }
-
-            p button {
-                margin-bottom: 5px;
             }
         }
 

@@ -77,7 +77,9 @@
             </MailEditor>
 
             <Checkbox v-if="members.length > 0" v-model="addButton">
-                Voeg magische inlogknop toe (aangeraden)
+                <h3 class="style-title-list">
+                    Voeg magische inlogknop toe (aangeraden)
+                </h3>
                 <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
         </main>
@@ -93,6 +95,9 @@
                 }}
             </template>
             <template #right>
+                <button class="button secundary" @click="openPreview">
+                    Voorbeeld
+                </button>
                 <LoadingButton :loading="sending">
                     <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" @click="send">
                         Versturen
@@ -105,7 +110,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
@@ -117,6 +122,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
+import { EmailStyler } from './EmailStyler';
 
 class TmpFile {
     name: string;
@@ -330,7 +336,56 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     manageEmails() {
-        this.show(new ComponentWithProperties(EmailSettingsView, {}))
+        this.present(new ComponentWithProperties(NavigationController, { root : new ComponentWithProperties(EmailSettingsView)}).setDisplayStyle("popup"))
+    }
+
+    async getHTML() {
+        let base = (this.$refs.editor as any).editor!.getHTML();
+
+        // Append footer HTML if needed
+        if (this.addButton && this.$refs.footerButton) {
+            base += (this.$refs.footerButton as Element).innerHTML;
+        }
+        
+        return await EmailStyler.format(base, this.subject, OrganizationManager.organization)
+    }
+
+    existingWindow: Window | null
+
+    async openPreview() {
+        if (this.existingWindow) {
+            // Disable reuse in some browsers
+            this.existingWindow.close()
+        }
+        const newWindow = window.open("", "Voorbeeld"+Math.floor(Math.random()*9999999), "width=800,height=800,menubar=no,toolbar=no,location=no,resizable=yes");
+        if (!newWindow) {
+            return
+        }
+        var sY = screenY;
+        if (sY < 0) {
+            sY = 0;
+        }
+        var totalScreenWidth = (screenX + window.outerWidth + sY);
+        if (totalScreenWidth > screen.width) {
+            totalScreenWidth = totalScreenWidth / 2;
+        } else {
+            totalScreenWidth = 0;
+        }
+        let {html} = await this.getHTML()
+
+        // Replacements
+        const recipient = this.recipients[0]
+        if (recipient) {
+            for (const replacement of recipient.replacements) {
+                if (html) {
+                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                }
+            }
+        }
+
+        newWindow.document.write(html);
+
+        this.existingWindow = newWindow
     }
 
     async send() {
@@ -348,126 +403,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         try {
-            let styles = "p {margin: 0; padding: 0;} strong {font-weight: bold;} em {font-style: italic;} h1 {font-size: 30px; font-weight: bold; margin: 0; padding: 0} h2 {font-size: 20px; font-weight: bold; margin: 0; padding: 0} h3 {font-size: 16px; font-weight: bold; margin: 0; padding: 0} ol, ul {list-style-position: inside;}";
-            const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
-            styles += " hr {"+hrCSS+"}";
-            
-            /*
-                font-size: 18px;
-                font-weight: 600;
-                color: white;
-
-                padding: 0 27px;
-                background: linear-gradient(to right, $color-primary, $color-primary-destination);
-                text-align: center;
-                word-wrap: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                height: 42px;
-                align-items: center;
-
-                border-radius: $border-radius;
-                transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-                box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
-                touch-action: manipulation;
-                display: inline-flex;
-                justify-content: center;
-
-                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
-            */
-            const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 12px 27px; background: #0053ff; text-align: center; border-radius: 5px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
-            styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
-
-            const buttonDescriptionCSS = "margin: 5px 0; font-size: 14px; line-height: 1.4; font-weight: 500; color: #868686;"
-            styles += " .button-description { "+buttonDescriptionCSS+" } "
-
-            let html = (this.$refs.editor as any).editor!.getHTML();
-
-            // Append footer HTML if needed
-            if (this.addButton && this.$refs.footerButton) {
-                html += (this.$refs.footerButton as Element).innerHTML;
-            }
-
-            // Transform HTML into text + do replacements
-            const element = document.createElement("div")
-            element.innerHTML = html
-
-            const elements = element.querySelectorAll("span.replace-placeholder[data-replace-type]")
-            for (const el of elements) {
-                el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
-            }
-
-            // add force add padding and margin inline
-            const blocks = element.querySelectorAll("h1,h2,h3,p")
-            for (const el of blocks) {
-                (el as any).style.cssText = "margin: 0; padding: 0;"
-            }
-
-            // Force HR
-            const hrElements = element.querySelectorAll("hr")
-            for (const el of hrElements) {
-                (el as any).style.cssText = hrCSS
-            }
-
-            // Force button
-            const buttons = element.querySelectorAll(".button.primary")
-            for (const el of buttons) {
-                (el as any).style.cssText = buttonCSS
-                // Old e-mail client fix for buttons
-                el.insertAdjacentHTML("beforebegin", `<table width="100%" cellspacing="0" cellpadding="0">
-  <tr>
-      <td>
-          <table cellspacing="0" cellpadding="0">
-              <tr>
-                  <td style="border-radius: 5px;" bgcolor="#0053ff;">
-                    ${el.outerHTML}
-                  </td>
-              </tr>
-          </table>
-      </td>
-  </tr>
-</table>`);
-                el.parentElement!.removeChild(el)
-                
-            }
-
-            // Force button
-            const buttonDescriptionElements = element.querySelectorAll(".button-description")
-            for (const el of buttonDescriptionElements) {
-                (el as any).style.cssText = buttonDescriptionCSS
-            }
-            
-
-            // add empty paragraph <br>'s
-            const emptyP = element.querySelectorAll("p:empty")
-            for (const el of emptyP) {
-                el.appendChild(document.createElement("br"))
-            }
-
-            const cssDiv = document.createElement('style');
-            cssDiv.innerText = styles;
-
-            const escapeSubject = document.createElement("div")
-            escapeSubject.innerText = this.subject;
-
-            html = `<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>${escapeSubject.innerHTML}</title>
-    <style type="text/css">${cssDiv.innerHTML}</style>
-</head>
-
-<body>
-    ${element.innerHTML}
-</body>
-
-</html>`;
-            const text = element.textContent
+            const {text, html} = await this.getHTML()
 
             if (!text || text.length < 20) {
                 this.errorBox = new ErrorBox(new SimpleError({
@@ -564,6 +500,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                         flex-grow: 1;
                     }
                 }
+            }
+
+            + * {
+                margin-top: 10px;
             }
 
             

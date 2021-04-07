@@ -166,7 +166,7 @@
             </template>
             <template #right>
                 <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="openMail()">
-                    Mailen
+                    E-mailen
                 </button>
                 <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="allowMembers(false)">
                     Toelating intrekken
@@ -185,7 +185,7 @@
                     </button>
                     <LoadingButton :loading="actionLoading">
                         <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
-                            <span class="dropdown-text">Mailen</span>
+                            <span class="dropdown-text">E-mailen</span>
                             <div class="dropdown" @click.stop="openMailDropdown" />
                         </button>
                     </LoadingButton>
