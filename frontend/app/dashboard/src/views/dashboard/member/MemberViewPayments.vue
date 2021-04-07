@@ -8,11 +8,6 @@
 
                 <dl class="details-grid">
                     <dt>
-                        ID
-                    </dt>
-                    <dd>{{ payment.id }}</dd>
-
-                    <dt>
                         Inschrijvingen
                     </dt>
                     <dd>{{ paymentDescription(payment) }}</dd>
