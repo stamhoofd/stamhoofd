@@ -272,5 +272,9 @@ export default class MemberViewPayments extends Vue {
     > main > div {
         @extend .main-text-container;
     }
+
+    .details-grid {
+        margin-bottom: 15px;
+    }
 }
 </style>
