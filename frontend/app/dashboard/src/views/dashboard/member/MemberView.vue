@@ -16,16 +16,16 @@
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
-        <STNavigationTitle>
-            <span class="icon-spacer">{{ member.details.name }}</span>
-            <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
-            <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
-            <button class="button icon gray more" @click="showContextMenu" />
-        </STNavigationTitle>
-
-        <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
 
         <main>
+            <h1>
+                <span class="icon-spacer">{{ member.details.name }}</span>
+                <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
+                <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
+                <button class="button icon gray more" @click="showContextMenu" />
+            </h1>
+
+            <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
             <component :is="tab" :member="member" :family-manager="familyManager" />
         </main>
     </div>

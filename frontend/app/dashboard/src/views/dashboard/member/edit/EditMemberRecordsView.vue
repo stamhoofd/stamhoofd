@@ -4,7 +4,6 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="shouldAsk(RecordType.DataPermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions)">
-                <hr>
                 <h2>Privacy</h2>
 
                 <p class="info-box">

@@ -250,7 +250,7 @@
 }
 
 .main-text-container {
-    &, > .container {
+    &, .container {
         > h1:first-child {
             padding-bottom: 20px;
             @extend .style-title-1;

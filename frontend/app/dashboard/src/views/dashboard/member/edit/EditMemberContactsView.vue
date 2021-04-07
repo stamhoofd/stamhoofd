@@ -238,10 +238,6 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         .style-with-button {
             margin-bottom: 0;
             padding-bottom: 0;
-
-            &:first-child {
-                padding-top: 15px;
-            }
         }
     }
 </style>

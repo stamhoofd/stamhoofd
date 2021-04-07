@@ -53,7 +53,6 @@
 }
 
 .member-view-details {
-    padding: 10px 0;
     padding-bottom: 30px;
     display: grid;
     grid-template-columns: 60% 40%;
@@ -65,15 +64,11 @@
 
     > div,
     > div > div {
-        --st-horizontal-padding: 0;
+        --st-horizontal-padding: 0px;
         
         > h2 {
             @extend .style-title-2;
-            margin: 20px 0;
-
-            &.with-list {
-                margin-bottom: 10px;
-            }
+            padding-bottom: 15px;
         }
 
         > p {
@@ -83,12 +78,7 @@
         }
 
         > hr {
-            height: $border-width;
-            border: 0;
-            outline: 0;
-            width: 100%;
-            background: $color-gray-lighter;
-            border-radius: $border-width/2;
+            @extend .style-hr;
             margin: 30px 0;
         }
     }

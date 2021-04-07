@@ -2,19 +2,19 @@
     <div class="st-view edit-member-view">
         <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop"></button>
+            <button v-else slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
-        <STNavigationTitle v-if="member">
-            Wijzig gegevens van {{ member.details.firstName }}
-        </STNavigationTitle>
-        <STNavigationTitle v-else>
-            Nieuw lid toevoegen
-        </STNavigationTitle>
-
-        <SegmentedControl v-model="changeTab" :items="tabs" :labels="tabLabels"/>
-
+        
         <main>
-            <component :is="tab" v-model="memberDetails" :member="member" :family-manager="familyManager" ref="currentComponent"/>
+            <h1 v-if="member">
+                Wijzig gegevens van {{ member.details.firstName }}
+            </h1>
+            <h1 v-else>
+                Nieuw lid toevoegen
+            </h1>
+
+            <SegmentedControl v-model="changeTab" :items="tabs" :labels="tabLabels" />
+            <component :is="tab" ref="currentComponent" v-model="memberDetails" :member="member" :family-manager="familyManager" />
         </main>
 
         <STToolbar>
@@ -32,18 +32,18 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, ErrorBox } from "@stamhoofd/components";
+import { ErrorBox,STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, SegmentedControl, STToolbar, LoadingButton } from "@stamhoofd/components";
+import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
+import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { MemberWithRegistrations } from '@stamhoofd/structures';
-import EditMemberGeneralView from './EditMemberGeneralView.vue';
-import EditMemberContactsView from './EditMemberContactsView.vue';
 import { FamilyManager } from "../../../../classes/FamilyManager";
-import EditMemberRecordsView from './EditMemberRecordsView.vue';
-import EditMemberGroupView from './EditMemberGroupView.vue';
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import EditMemberContactsView from './EditMemberContactsView.vue';
+import EditMemberGeneralView from './EditMemberGeneralView.vue';
+import EditMemberGroupView from './EditMemberGroupView.vue';
+import EditMemberRecordsView from './EditMemberRecordsView.vue';
 
 @Component({
     components: {
@@ -152,7 +152,6 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        padding-top: 20px;
     }
 }
 </style>
