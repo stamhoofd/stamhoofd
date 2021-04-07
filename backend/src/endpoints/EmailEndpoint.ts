@@ -186,13 +186,14 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         Email.schedule(builder)
 
         // Also send a copy
+        const prefix = "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"
         Email.send({
             from,
             replyTo,
             to: sender.email,
             subject: "[KOPIE] "+email.subject,
             text: "Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"\n\n"+email.text ?? undefined,
-            html: "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"+email.html ?? undefined,
+            html: email.html?.replace("<body>", "<body>"+prefix) ?? undefined,
             attachments
         })
         return new Response(undefined);
