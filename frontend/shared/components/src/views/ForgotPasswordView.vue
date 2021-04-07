@@ -7,7 +7,7 @@
         <main>
             <h1>Wachtwoord vergeten</h1>
             <div class="warning-box">
-                Als je jouw wachtwoord vergeten bent kan je niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.
+                Als je jouw wachtwoord vergeten bent kan je tijdelijk niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.
             </div>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -45,7 +45,11 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class ForgotPasswordView extends Mixins(NavigationMixin){
     loading = false
-    email = ""
+
+    @Prop({ default: ""})
+    initialEmail!: string
+
+    email = this.initialEmail
     validator = new Validator()
     errorBox: ErrorBox | null = null
 

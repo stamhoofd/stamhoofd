@@ -25,13 +25,21 @@ $input-height: 44px;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-     &:hover {
+    &:hover {
         border-color: $color-primary-gray-light;
     }
 
     &:disabled {
         color: $color-gray;
         cursor: not-allowed;
+
+        // Safari fix color opacity
+        -webkit-text-fill-color: $color-gray;
+        opacity: 1; /* required on iOS */
+
+        &:hover {
+            border-color: $color-gray-light;
+        }
     }
 
     &:focus,

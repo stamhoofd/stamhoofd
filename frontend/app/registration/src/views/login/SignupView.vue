@@ -10,7 +10,10 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                <p v-if="lock" class="style-description-small">
+                    {{ lock }}
+                </p>
 
                 <div class="split-inputs">
                     <div>
@@ -49,9 +52,9 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, PasswordStrength } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
-import { Component, Mixins, Ref } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
 
@@ -70,7 +73,14 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 })
 export default class SignupView extends Mixins(NavigationMixin){
     loading = false;
-    email = ""
+    
+    @Prop({ default: ""})
+    initialEmail!: string
+
+    @Prop({ default: null})
+    lock!: string | null
+
+    email = this.initialEmail
     password = ""
     passwordRepeat = ""
     acceptPrivacy = false

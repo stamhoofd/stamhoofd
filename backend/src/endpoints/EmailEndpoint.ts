@@ -13,6 +13,54 @@ type Query = undefined;
 type Body = EmailRequest
 type ResponseBody = undefined;
 
+const matchHtmlRegExp = /["'&<>]/
+function escapeHtml (string) {
+  const str = '' + string
+  const match = matchHtmlRegExp.exec(str)
+
+  if (!match) {
+    return str
+  }
+
+  let escape
+  let html = ''
+  let index = 0
+  let lastIndex = 0
+
+  for (index = match.index; index < str.length; index++) {
+    switch (str.charCodeAt(index)) {
+      case 34: // "
+        escape = '&quot;'
+        break
+      case 38: // &
+        escape = '&amp;'
+        break
+      case 39: // '
+        escape = '&#39;'
+        break
+      case 60: // <
+        escape = '&lt;'
+        break
+      case 62: // >
+        escape = '&gt;'
+        break
+      default:
+        continue
+    }
+
+    if (lastIndex !== index) {
+      html += str.substring(lastIndex, index)
+    }
+
+    lastIndex = index + 1
+    html += escape
+  }
+
+  return lastIndex !== index
+    ? html + str.substring(lastIndex, index)
+    : html
+}
+
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
  */
@@ -140,20 +188,21 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Update recipients
         for (const recipient of email.recipients) {
-             // Add signInUrl
-            let signInUrl = "https://"+user.organization.getHost()
+            
+            // Default signInUrl
+            let signInUrl = "https://"+user.organization.getHost()+"/login?email="+encodeURIComponent(user.email)
 
             if (recipient.userId) {
                 const recipientUser = await User.getByID(recipient.userId)
                 if (recipientUser && recipientUser.organizationId === user.organizationId && recipientUser.email === recipient.email) {
                     // We can create a special token
-                    signInUrl = await PasswordToken.getPasswordRecoveryUrl(recipientUser.setRelation(User.organization, user.organization))
+                    signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser.setRelation(User.organization, user.organization))
                 }
             }
 
             recipient.replacements.push(Replacement.create({
                 token: "signInUrl",
-                value: encodeURI(signInUrl)
+                value: signInUrl
             }))
         }
 
@@ -168,7 +217,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                    html = html.replace("{{"+replacement.token+"}}", escapeHtml(replacement.value))
                 }
             }
 

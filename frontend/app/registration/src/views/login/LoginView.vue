@@ -6,9 +6,10 @@
         <main>
             <h1>Inloggen</h1>
                     
-            <STInputBox title="E-mailadres" class="max">
-                <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-            </STInputBox>
+            <EmailInput ref="emailInput" v-model="email" class="max" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <p v-if="lock" class="style-description-small">
+                {{ lock }}
+            </p>
 
             <STInputBox title="Wachtwoord" class="max">
                 <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
@@ -32,34 +33,12 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
-
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function() {
-        const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
-            clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if (Date.now() - lastRan >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
-        }
-    };
-};
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -68,49 +47,26 @@ const throttle = (func, limit) => {
         STFloatingFooter,
         STInputBox,
         LoadingButton,
-        OrganizationLogo
+        OrganizationLogo,
+        EmailInput
     }
 })
 export default class LoginView extends Mixins(NavigationMixin){
     loading = false;
-    email = ""
+
+    @Prop({ default: ""})
+    initialEmail!: string
+
+    @Prop({ default: null})
+    lock!: string | null
+
+    email = this.initialEmail
     password = ""
 
     session = SessionManager.currentSession!
 
-    mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        let clearPath = true
-
-        if (parts.length == 1 && parts[0] == 'reset-password') {
-            // tood: password reset view
-            this.present(new ComponentWithProperties(ForgotPasswordResetView, {}).setDisplayStyle("popup"));
-            clearPath = false
-        }
-
-        if (parts.length == 1 && parts[0] == 'verify-email') {
-            const queryString = new URL(window.location.href).searchParams;
-            const token = queryString.get('token')
-            const code = queryString.get('code')
-                
-            if (token && code) {
-                // tood: password reset view
-                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
-                LoginHelper.verifyEmail(this.session, code, token).then(() => {
-                    toast.hide()
-                    new Toast("E-mailadres is gevalideerd", "success green").show()
-                }).catch(e => {
-                    toast.hide()
-                    CenteredMessage.fromError(e).addCloseButton().show()
-                })
-            }
-        }
-
-        if (clearPath) {
-            HistoryManager.setUrl("/")   
-        }
-    }
+    errorBox: ErrorBox | null = null
+    validator = new Validator()
 
     get organization() {
         return OrganizationManager.organization
@@ -134,11 +90,17 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     gotoPasswordForgot() {
-        this.show(new ComponentWithProperties(ForgotPasswordView, {}))
+        this.show(new ComponentWithProperties(ForgotPasswordView, { initialEmail: this.email }))
     }
 
     async submit() {
         if (this.loading) {
+            return
+        }
+
+        const valid = await this.validator.validate()
+
+        if (!valid) {
             return
         }
 

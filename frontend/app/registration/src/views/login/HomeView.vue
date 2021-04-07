@@ -25,11 +25,11 @@
                             <p>Onderaan deze pagina vind je meer informatie over waar je zoal voor kan inschrijven.</p>
                             
                             <div class="button-box">
-                                <button class="button primary full" @click="login">
+                                <button class="button primary full" @click="login()">
                                     <span class="lock" />
                                     Inloggen
                                 </button>
-                                <button class="button secundary full" type="button" @click="createAccount">
+                                <button class="button secundary full" type="button" @click="createAccount()">
                                     Account aanmaken
                                 </button>
                             </div>
@@ -123,6 +123,22 @@ export default class HomeView extends Mixins(NavigationMixin){
             clearPath = false
         }
 
+        if (parts.length == 1 && parts[0] == 'login') {
+            clearPath = false
+
+            const queryString = new URL(window.location.href).searchParams;
+            const email = queryString.get('email')
+            const hasAccount = queryString.get('hasAccount')
+
+            if (email) {
+                if (hasAccount === null || hasAccount === "1") {
+                    this.login(false, email, "Je moet op dit account inloggen om jouw gegevens te kunnen wijzigen. Maak zeker geen nieuw aan.")
+                } else {
+                    this.createAccount(false, email, "Je kan jouw e-mailadres pas wijzigen nadat je een account hebt aangemaakt.")
+                }
+            }
+        }
+
         if (parts.length == 1 && parts[0] == 'verify-email') {
             const queryString = new URL(window.location.href).searchParams;
             const token = queryString.get('token')
@@ -142,7 +158,7 @@ export default class HomeView extends Mixins(NavigationMixin){
         }
 
         if (clearPath) {
-            HistoryManager.setUrl("/")   
+            HistoryManager.setUrl("/")
         }
 
         CenteredMessage.addListener(this, (centeredMessage) => {
@@ -183,48 +199,22 @@ export default class HomeView extends Mixins(NavigationMixin){
         this.present(new ComponentWithProperties(ForgotPasswordView, {}).setDisplayStyle("sheet"))
     }
 
-    login() {
+    login(animated = true, email = "", lock: null | string) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(LoginView, {})
-        }).setDisplayStyle("sheet")) 
+            root: new ComponentWithProperties(LoginView, {
+                initialEmail: email,
+                lock
+            })
+        }).setAnimated(animated).setDisplayStyle("sheet")) 
     }
 
-    createAccount() {
+    createAccount(animated = true, email = "", lock: null | string) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(SignupView, {})
-        }).setDisplayStyle("popup")) 
-    }
-
-    async submit() {
-        if (this.loading) {
-            return
-        }
-
-        if (this.email.length < 3 || this.password.length < 5) {
-            new CenteredMessage("Vul eerst iets in", "Je hebt geen correcte gegevens ingevuld", "error").addCloseButton().show()   
-            return
-        }
-
-        this.loading = true
-        
-        // Request the key constants
-        const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
-        try {
-            const result = await LoginHelper.login(this.session, this.email, this.password)
-
-            if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
-            }
-        } catch (e) {
-            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
-                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven. Gebruik het e-mailadres waar je al e-mails van ons op ontvangt.", "error").addCloseButton().show()           
-            } else {
-                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
-            }
-        } finally {
-            this.loading = false;
-            component.hide()
-        }
+            root: new ComponentWithProperties(SignupView, {
+                initialEmail: email,
+                lock
+            })
+        }).setAnimated(animated).setDisplayStyle("popup")) 
     }
 }
 </script>

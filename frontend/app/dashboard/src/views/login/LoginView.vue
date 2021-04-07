@@ -31,12 +31,10 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
+import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
