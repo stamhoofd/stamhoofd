@@ -1,11 +1,21 @@
 <template>
     <div class="view-payments">
         <main>
-            <div v-for="payment in payments">
-                <h2>Betaling</h2>
+            <Spinner v-if="loadingPayments" />
+            <div v-for="payment in payments" v-else :key="payment.id">
+                <h2>Afrekening</h2>
+
                 <dl class="details-grid">
+                    <dt>
+                        Inschrijvingen
+                    </dt>
+                    <dd>{{ paymentDescription(payment) }}</dd>
+
                     <dt>Bedrag</dt>
                     <dd>{{ payment.price | price }}</dd>
+
+                    <dt>Datum</dt>
+                    <dd>{{ payment.createdAt | date }}</dd>
 
                     <template v-if="payment.method == 'Transfer'">
                         <dt>Bankrekening</dt>
@@ -63,9 +73,9 @@
 
 <script lang="ts">
 import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, LoadingButton,STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EncryptedPaymentDetailed,MemberWithRegistrations, Payment, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
+import { EncryptedPaymentDetailed, MemberWithRegistrations, PaymentDetailed, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -76,7 +86,8 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 @Component({ 
     components: { 
         STToolbar,
-        LoadingButton
+        LoadingButton,
+        Spinner
     },
     filters: {
         price: Formatter.price,
@@ -91,18 +102,64 @@ export default class MemberViewPayments extends Vue {
     familyManager!: FamilyManager;
     
     loading = false
+    loadingPayments = true
+
+    payments: PaymentDetailed[] = []
 
     organization = OrganizationManager.organization
 
-    get payments() {
-        const map = new Map<string, Payment>()
+    mounted() {
+        this.reload().catch(e => {
+            console.error(e)
+        })
+    }
 
-        for (const registration of this.member.registrations) {
-            if (registration.payment && !map.has(registration.payment.id)) {
-                map.set(registration.payment.id, registration.payment)
-            }
+    paymentDescription(payment: PaymentDetailed) {
+        return payment.getRegistrationList()
+    }
+
+    async reload() {
+        this.loadingPayments = true
+        try {
+            const session = SessionManager.currentSession!
+            const response = await session.authenticatedServer.request({
+                method: "GET",
+                path: "/organization/members/"+this.member.id+"/payments",
+                decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+            })
+            await this.setPayments(response.data)
+        } catch (e) {
+            Toast.fromError(e).show()
         }
-        return [...map.values()]
+        this.loadingPayments = false
+    }
+
+    async setPayments(encryptedPayments: EncryptedPaymentDetailed[]) {
+        const organization = OrganizationManager.organization
+
+        // Decrypt data
+        const payments: PaymentDetailed[] = []
+        for (const encryptedPayment of encryptedPayments) {
+            // Create a detailed payment without registrations
+            const payment = PaymentDetailed.create({
+                ...encryptedPayment, 
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+            })
+
+            // Set payment reference
+            for (const registration of payment.registrations) {
+                registration.payment = payment
+            }
+
+            payments.push(payment)
+        }
+
+        // Sort
+        payments.sort((a, b) => {
+            return b.createdAt.getTime() - a.createdAt.getTime()
+        })
+
+        this.payments = payments
     }
 
     async markPaid() {
@@ -147,20 +204,17 @@ export default class MemberViewPayments extends Vue {
     updatePayments(payments: EncryptedPaymentDetailed[]) {
         for (const payment of payments) {
             // We loop all members of this family because they might have shared payments
-            for (const member of this.familyManager.members) {
-                for (const r of member.registrations) {
-                    const memberPayment = r.payment
-                    if (memberPayment && payment.id == memberPayment.id) {
-                        // Copy usefull data
-                        memberPayment.status = payment.status
-                        memberPayment.paidAt = payment.paidAt
+            for (const memberPayment of this.payments) {
+                if (payment.id == memberPayment.id) {
+                    // Copy usefull data
+                    memberPayment.status = payment.status
+                    memberPayment.paidAt = payment.paidAt
 
-                        memberPayment.transferDescription = payment.transferDescription
-                        memberPayment.price = payment.price
-                        memberPayment.method = payment.method
-                        memberPayment.updatedAt = payment.updatedAt
-                        memberPayment.createdAt = payment.createdAt
-                    }
+                    memberPayment.transferDescription = payment.transferDescription
+                    memberPayment.price = payment.price
+                    memberPayment.method = payment.method
+                    memberPayment.updatedAt = payment.updatedAt
+                    memberPayment.createdAt = payment.createdAt
                 }
             }
         }

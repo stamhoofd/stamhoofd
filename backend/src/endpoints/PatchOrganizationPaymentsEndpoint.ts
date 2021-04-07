@@ -52,7 +52,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
         }
 
 
-        const payments = await this.getPaymentsWithRegistrations(user.organizationId)
+        const payments = await PatchOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId)
         const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
 
         let groups: Group[] = []
@@ -114,20 +114,24 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
          return new Response(
             [...payments, ...orderPayments].map((p: any) => {
-                return EncryptedPaymentGeneral.create({
-                    id: p.id,
-                    method: p.method,
-                    status: p.status,
-                    price: p.price,
-                    transferDescription: p.transferDescription,
-                    paidAt: p.paidAt,
-                    createdAt: p.createdAt,
-                    updatedAt: p.updatedAt,
-                    registrations: p.registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
-                    order: p.order ? OrderStruct.create(Object.assign({...p.order}, { payment: null })) : null,
-                })
+                return PatchOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );
+    }
+
+    static getPaymentStructure(p: PaymentWithRegistrations | PaymentWithOrder) {
+        return EncryptedPaymentGeneral.create({
+            id: p.id,
+            method: p.method,
+            status: p.status,
+            price: p.price,
+            transferDescription: p.transferDescription,
+            paidAt: p.paidAt,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
+            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
+            order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null,
+        })
     }
 
     /**
@@ -165,15 +169,30 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
     }
 
     /**
+     * This needs to be here to prevent reference cycles (temporary)
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    async getPaymentsWithRegistrations(organizationId: string): Promise<PaymentWithRegistrations[]> {
+    static async getPaymentsWithRegistrations(organizationId: string, memberId: string | null = null): Promise<PaymentWithRegistrations[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()} from \`${Payment.table}\`\n`;
+        if (memberId) {
+            query += `JOIN \`${Registration.table}\` AS \`MemberCheckTable\` ON \`MemberCheckTable\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`MemberCheckTable\`.\`registeredAt\` is not null\n`
+        }
+
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        
+
         query += `JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+
         query += `where \`${Member.table}\`.\`organizationId\` = ?`
 
-        const [results] = await Database.select(query, [organizationId])
+        const params = [organizationId]
+
+        if (memberId) {
+            query += ` AND \`MemberCheckTable\`.\`${Member.registrations.foreignKey}\` = ?`
+            params.push(memberId)
+        }
+
+        const [results] = await Database.select(query, params)
         const payments: PaymentWithRegistrations[] = []
 
         // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.

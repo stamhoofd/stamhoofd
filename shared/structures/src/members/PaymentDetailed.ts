@@ -17,6 +17,10 @@ export class PaymentDetailed extends Payment {
         return Formatter.uniqueArray(this.registrations.map(r => r.member.details?.lastName ?? "Onbekend")).join(", ")
     }
 
+    getRegistrationList() {
+        return this.registrations.map(r => (r.member.details?.name ?? "Onbekend")+" voor "+r.group.settings.name).join(", ")
+    }
+
     matchQuery(query: string): boolean {
         const lowerQuery = query.toLowerCase();
         if (
