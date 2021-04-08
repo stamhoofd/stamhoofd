@@ -96,6 +96,7 @@ ${element.innerHTML}
 </body>
 
 </html>`;
+
         return {
             html,
             text: element.innerText

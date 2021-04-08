@@ -111,7 +111,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -339,11 +339,11 @@ export default class MailView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { root : new ComponentWithProperties(EmailSettingsView)}).setDisplayStyle("popup"))
     }
 
-    async getHTML() {
+    async getHTML(withButton: boolean | null = null) {
         let base = (this.$refs.editor as any).editor!.getHTML();
 
         // Append footer HTML if needed
-        if (this.addButton && this.$refs.footerButton) {
+        if ((withButton ?? this.addButton) && this.$refs.footerButton) {
             base += (this.$refs.footerButton as Element).innerHTML;
         }
         
@@ -455,11 +455,11 @@ export default class MailView extends Mixins(NavigationMixin) {
         this.sending = false
     }
 
-    shouldNavigateAway() {
-        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
-            return true;
+    async shouldNavigateAway() {
+        if ((await this.getHTML(false)).text.length <= "Dag {{firstName}},".length + 2 && this.subject.length < 2) {
+            return true
         }
-        return false;
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder te versturen?", "Niet versturen")
     }
 }
 </script>
