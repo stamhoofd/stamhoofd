@@ -139,7 +139,7 @@ export class MemberManagerBase {
     }
 
     /// Prepare a patch of updated members
-    async getEncryptedMembers(members: MemberWithRegistrations[], organization: Organization, createPersonalKey = true): Promise<AutoEncoderPatchType<KeychainedMembers>> {
+    async getEncryptedMembers(members: MemberWithRegistrations[], organization: Organization, createPersonalKey = true, replaceMemberPublicKey: string | null = null): Promise<AutoEncoderPatchType<KeychainedMembers>> {
         const patch = KeychainedMembers.patch({})
         const session = SessionManager.currentSession!
         const organizationPublicKey = organization.publicKey
@@ -158,7 +158,7 @@ export class MemberManagerBase {
                 doWeHaveOne = true
             }
 
-            // Search for a public key that we have
+            // Search for a public key that we have + add all other keys that we need to encrypt for
             // Sort details from new to old
             for (const encryptedDetails of member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))) {
                 if (encryptedDetails.forOrganization && (doWeHaveOne || createPersonalKey)) {
@@ -185,7 +185,16 @@ export class MemberManagerBase {
                     // Keep going, we might find one that we have access to
                     continue
                 }
-                keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
+
+                if (encryptedDetails.forOrganization || !replaceMemberPublicKey) {
+                    // Only add organization keys and only members keys if we are not replacing all the member keys
+                    keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
+                }
+            }
+
+            if (replaceMemberPublicKey) {
+                // Add this key in the encrypted details
+                keys.set(replaceMemberPublicKey, false)
             }
 
             if (createPersonalKey && !doWeHaveOne) {

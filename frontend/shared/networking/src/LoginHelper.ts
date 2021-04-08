@@ -759,7 +759,7 @@ export class LoginHelper {
         try {
             await session.authenticatedServer.request({
                 method: "PATCH",
-                path: "/user/"+session.user!.id,
+                path: "/user/"+patch.id,
                 body: patch,
                 decoder: User
             })
@@ -777,7 +777,9 @@ export class LoginHelper {
             throw e
         }
 
-        await session.updateData()
+        if (session.user!.id === patch.id) {
+            await session.updateData()
+        }
         return {}
     }
 

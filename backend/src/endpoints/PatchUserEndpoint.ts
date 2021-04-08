@@ -84,7 +84,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         await editUser.save();
 
 
-        if (request.body.requestKeys) {
+        if (request.body.requestKeys !== undefined) {
             // Update request keys of this organization
             await user.organization.updateRequestKeysCount()
         }
