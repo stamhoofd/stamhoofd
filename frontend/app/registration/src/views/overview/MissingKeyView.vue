@@ -1,15 +1,15 @@
 <template>
-    <div class="st-view background" id="missing-key-view">
-        <STNavigationBar title="Wachten op goedkeuring">
-        </STNavigationBar>
+    <div id="missing-key-view" class="st-view background">
+        <STNavigationBar title="Wachten op goedkeuring" />
 
         <main>
             <h1>
                 Wachten op goedkeuring
             </h1>
 
-            <p class="style-description">Doordat je een nieuw account hebt aangemaakt of doordat je jouw wachtwoord vergeten was, heb je tijdelijk geen toegang meer tot de encryptie-sleutel waarmee je jouw gegevens kan ontcijferen. Maar geen paniek, je kan nog gewoon inschrijven en eventueel zelf alle gegevens aanvullen. Als je even geduld hebt keuren we jouw account terug goed en krijg je terug toegang.</p>
-
+            <p class="style-description">
+                Doordat je een nieuw account hebt aangemaakt of doordat je jouw wachtwoord vergeten was, heb je tijdelijk geen toegang meer tot de encryptie-sleutel waarmee je jouw gegevens kan ontcijferen. Maar geen paniek, je kan nog gewoon inschrijven en eventueel zelf alle gegevens aanvullen. Als je even geduld hebt, keuren we jouw account terug goed en krijg je terug toegang.
+            </p>
         </main>
 
         <STToolbar>
@@ -24,7 +24,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STInputBox, STNavigationBar, STToolbar, LoadingButton } from "@stamhoofd/components";
+import { LoadingButton,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { LoginHelper, SessionManager } from "@stamhoofd/networking";
+import { User } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
@@ -36,6 +38,15 @@ import { Component, Mixins } from "vue-property-decorator";
     },
 })
 export default class MissingKeyView extends Mixins(NavigationMixin) {
-
+    mounted() {
+        if (!SessionManager.currentSession!.user!.requestKeys) {
+            LoginHelper.patchUser(SessionManager.currentSession!, User.patch({
+                id: SessionManager.currentSession!.user!.id,
+                requestKeys: true
+            })).catch(e => {
+                console.error(e)
+            })
+        }
+    }
 }
 </script>

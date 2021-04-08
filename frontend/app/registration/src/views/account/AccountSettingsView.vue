@@ -1,6 +1,6 @@
 <template>
     <div id="account-view" class="st-view">
-        <STNavigationBar title="Mijn account">
+        <STNavigationBar title="Mijn account" :class="{'only-tab-bar': !canPop}">
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 

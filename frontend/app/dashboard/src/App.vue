@@ -14,7 +14,6 @@ import { LoginHelper, NetworkManager, Session } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
-import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 export function asyncComponent(component: () => Promise<any>, properties = {}) {
@@ -39,12 +38,8 @@ export default class App extends Vue {
         root: new ComponentWithProperties(SplitViewController, {
             root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
         }),
-        loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: new ComponentWithProperties(OrganizationSelectionView, {}) 
-        }),
-        noPermissionsRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
-        }),
+        loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+        noPermissionsRoot: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
     });
 
     mounted() {

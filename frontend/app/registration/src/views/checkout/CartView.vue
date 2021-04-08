@@ -2,7 +2,7 @@
     <div class="st-view cart-view">
         <main class="limit-width">
             <section class="view">
-                <STNavigationBar :title="title">
+                <STNavigationBar :title="title" class="only-tab-bar">
                     <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
                 </STNavigationBar>
 

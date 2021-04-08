@@ -1,4 +1,4 @@
-import { GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
+import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
 
 import { Group } from '../models/Group'
 import { Organization } from '../models/Organization'
@@ -31,18 +31,25 @@ export class GroupBuilder {
         if (this.organization.meta.categories.length <= 1) {
             const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
 
-            const defaults = OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
+            const defaults = this.organization.meta.modules.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
 
-            this.organization.meta.categories.push(...defaults)
+            if (sortedGroupIds.length > 0 && defaults.length == 0) {
+                defaults.push(GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen",
+                        maximumRegistrations: 1
+                    })
+                }))
+            }
+            this.organization.meta.categories = [GroupCategory.create({ id: "root" }), ...defaults]
+            this.organization.meta.rootCategoryId = "root"
 
-            // Only assign categories that are at the top level to the root category
+             // Set category ID of the root category
             const filter = defaults.flatMap(d => d.categoryIds)
-            this.organization.meta.rootCategory?.categoryIds.push(...defaults.map(d => d.id).filter(id => !filter.includes(id)))
+            this.organization.meta.rootCategory!.categoryIds = defaults.map(d => d.id).filter(id => !filter.includes(id))
 
             if (defaults.length > 0) {
                 defaults[0].groupIds.push(...sortedGroupIds)
-            } else {
-                this.organization.meta.rootCategory!.groupIds.push(...sortedGroupIds)
             }
 
             await this.organization.save()

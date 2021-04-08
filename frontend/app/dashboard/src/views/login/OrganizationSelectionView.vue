@@ -1,27 +1,46 @@
 <template>
-    <div class="organization-selection-view padded-view">
-        <h1>Kies je vereniging</h1>
-        <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
-        <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+    <div class="st-view">
+        <STNavigationBar :large="true" :sticky="false">
+            <template slot="left">
+                <a id="logo" class="responsive" alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener" />
+            </template>
 
-        <Spinner v-if="loading" class="gray center" />
-        <template v-else>
-            <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
-                <h1>{{ organization.name }}</h1>
-                <p>{{ organization.address }}</p>
-                <p v-if="isSignedInFor(organization)">
-                    Ingelogd
-                </p>
-            </button>
-        </template>
+            <template slot="right">
+                <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
+                    <span class="icon external" />
+                    <span>Terug</span>
+                    <span class="hide-smartphone">naar website</span>
+                </a>
+                <button class="button primary" @click="gotoSignup">
+                    Aansluiten
+                </button>
+            </template>
+        </STNavigationBar>
+        <main class="limit-width">
+            <div class="organization-selection-view">
+                <h1>Inloggen</h1>
+                <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
+                <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+
+                <Spinner v-if="loading" class="gray center" />
+                <template v-else>
+                    <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
+                        <h1>{{ organization.name }}</h1>
+                        <p>{{ organization.address }}</p>
+                        <p v-if="isSignedInFor(organization)">
+                            Ingelogd
+                        </p>
+                    </button>
+                </template>
+            </div>
+        </main>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Toast } from '@stamhoofd/components';
-import Spinner from "@stamhoofd/components/src/Spinner.vue";
+import { Spinner,STNavigationBar,Toast } from '@stamhoofd/components';
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
@@ -54,7 +73,8 @@ const throttle = (func, limit) => {
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
     components: {
-        Spinner
+        Spinner,
+        STNavigationBar
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){
@@ -71,6 +91,15 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
         // update
         this.startUpdateResults();
+    }
+
+    gotoSignup() {
+        this.present(
+            new ComponentWithProperties(NavigationController, {
+                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
+            }).setDisplayStyle("popup")
+        )
+        plausible('openSignup');
     }
 
     mounted() {
@@ -166,10 +195,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     @use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
     .organization-selection-view {
-        padding: 20px;
-        padding: 20px var(--st-horizontal-padding, 20px);
-        padding-top: 100px;
-
         max-width: 500px;
         margin: 0 auto;
 
