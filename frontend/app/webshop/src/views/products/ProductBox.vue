@@ -122,7 +122,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
     transition: background-color 0.2s 0.1s;
 
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-    padding-left: var(--st-horizontal-padding, 15px);
 
     > .content > hr {
         border: 0;
@@ -171,6 +170,11 @@ export default class ProductBox extends Mixins(NavigationMixin){
         opacity: 0;
         transform: translateX(-4px);
         transition: opacity 0.2s, transform 0.2s;
+        margin-right: var(--st-horizontal-padding, 15px);
+
+        @media (min-width: 801px) {
+            margin-right: 0;
+        }
     }
 
     &.selected {
