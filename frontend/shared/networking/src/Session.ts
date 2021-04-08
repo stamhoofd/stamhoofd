@@ -202,6 +202,7 @@ export class Session implements RequestMiddleware {
     }
 
     async fetchUser(): Promise<MyUser> {
+        console.log("Fetching session user...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
@@ -217,6 +218,7 @@ export class Session implements RequestMiddleware {
     }
 
     async fetchOrganization(): Promise<Organization> {
+        console.log("Fetching session organization...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/organization",
@@ -231,6 +233,7 @@ export class Session implements RequestMiddleware {
     }
 
     async updateData() {
+        console.log("Session update data")
         try {
             await this.fetchOrganization()
             await this.fetchUser()
@@ -250,6 +253,7 @@ export class Session implements RequestMiddleware {
     }
 
     async updateKeys() {
+        console.log("Decrypting session keys...")
         if (!this.user) {
             throw new Error("Can't update keys if user is not set")
         }

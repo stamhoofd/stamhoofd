@@ -30,7 +30,9 @@ export class SessionManagerStatic {
         if (id) {
             const session = this.getSessionForOrganization(id)
             if (session && session.canGetCompleted()) {
-                this.setCurrentSession(session)
+                this.setCurrentSession(session).catch(e => {
+                    console.error(e)
+                })
             } else {
                 console.log("session can not get completed, no autosignin")
                 console.log(session)
@@ -105,6 +107,7 @@ export class SessionManagerStatic {
     }
 
     async setCurrentSession(session: Session) {
+        console.log("Changing current session")
         if (this.currentSession) {
             this.currentSession.removeListener(this)
         }

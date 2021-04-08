@@ -35,18 +35,10 @@ export default class AuthenticatedView extends Vue {
     hasToken = false
     showPermissionsRoot = false
 
-    mounted() {
-        this.changed();
+    created() {
+        // We need to check data already before loading any component!
+        this.changed()
         SessionManager.addListener(this, this.changed.bind(this));
-    }
-
-    activated() {
-        this.changed();
-        SessionManager.addListener(this, this.changed.bind(this));
-    }
-
-    deactivated() {
-        SessionManager.removeListener(this);
     }
 
     destroyed() {
@@ -63,8 +55,6 @@ export default class AuthenticatedView extends Vue {
             this.hasToken = SessionManager.currentSession?.hasToken() ?? false
             this.showPermissionsRoot = false
         }
-        
-        console.log("Authenticated view changed: "+this.loggedIn)
     }
 }
 </script>

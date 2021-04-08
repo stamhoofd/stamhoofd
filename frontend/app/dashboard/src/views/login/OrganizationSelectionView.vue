@@ -105,6 +105,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
@@ -119,6 +120,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     activated() {
+        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
     }
 
