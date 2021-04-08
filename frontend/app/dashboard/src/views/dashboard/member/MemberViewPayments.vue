@@ -41,6 +41,11 @@
                         <dd>Payconiq</dd>
                     </template>
 
+                    <template v-if="payment.method == 'Unknown'">
+                        <dt>Betaalmethode</dt>
+                        <dd>Onbekend</dd>
+                    </template>
+
                     <dt>Status</dt>
                     <dd v-if="payment.status == 'Succeeded'">
                         Betaald
