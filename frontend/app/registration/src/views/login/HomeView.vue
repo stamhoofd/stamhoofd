@@ -139,24 +139,6 @@ export default class HomeView extends Mixins(NavigationMixin){
             }
         }
 
-        if (parts.length == 1 && parts[0] == 'verify-email') {
-            const queryString = new URL(window.location.href).searchParams;
-            const token = queryString.get('token')
-            const code = queryString.get('code')
-                
-            if (token && code) {
-                // tood: password reset view
-                const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
-                LoginHelper.verifyEmail(this.session, code, token).then(() => {
-                    toast.hide()
-                    new Toast("E-mailadres is gevalideerd", "success green").show()
-                }).catch(e => {
-                    toast.hide()
-                    CenteredMessage.fromError(e).addCloseButton().show()
-                })
-            }
-        }
-
         if (clearPath) {
             HistoryManager.setUrl("/")
         }

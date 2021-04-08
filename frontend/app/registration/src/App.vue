@@ -8,8 +8,8 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
-import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
+import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -72,6 +72,27 @@ export default class App extends Vue {
             }
 
             await SessionManager.setCurrentSession(session)
+
+            const path = window.location.pathname;
+            const parts = path.substring(1).split("/");
+
+            if (parts.length == 1 && parts[0] == 'verify-email') {
+                const queryString = new URL(window.location.href).searchParams;
+                const token = queryString.get('token')
+                const code = queryString.get('code')
+                    
+                if (token && code) {
+                    // tood: password reset view
+                    const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
+                    LoginHelper.verifyEmail(session, code, token).then(() => {
+                        toast.hide()
+                        new Toast("E-mailadres is gevalideerd", "success green").show()
+                    }).catch(e => {
+                        toast.hide()
+                        CenteredMessage.fromError(e).addCloseButton().show()
+                    })
+                }
+            }
 
             return new ComponentWithProperties(AuthenticatedView, {
                 root: new ComponentWithProperties(PromiseView, {
