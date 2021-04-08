@@ -31,6 +31,7 @@
 </template>
 
 <script lang="ts">
+import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
@@ -91,7 +92,11 @@ export default class LoginView extends Mixins(NavigationMixin){
             console.error(e)
             this.loading = false;
 
-            new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven.", "error").addCloseButton().show()           
+            } else {
+                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+            }         
             return;
         } finally {
             component.hide()
