@@ -35,7 +35,7 @@
                     <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
                 </div>
                 <div>
-                    <span class="style-tag">2021</span>
+                    <span class="style-tag">Mei 2021</span>
                 </div>
             </label>
 

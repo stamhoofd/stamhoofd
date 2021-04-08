@@ -19,10 +19,16 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" @click="manageWhatsNew()">
+        <button class="menu-button button heading text" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
+        </button>
+
+        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+            <span class="icon key" />
+            <span>Verloren sleutels</span>
+            <span class="bubble">2</span>
         </button>
 
         <template v-if="enableMemberModule">
@@ -130,6 +136,7 @@ import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import CategoryView from "./groups/CategoryView.vue";
 import GroupMembersView from "./groups/GroupMembersView.vue";
+import KeysView from "./keys/KeysView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
@@ -251,11 +258,6 @@ export default class Menu extends Mixins(NavigationMixin) {
             localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
         }
 
-        if (this.whatsNewBadge.length > 0) {
-            // show popup
-            new Toast("Er zijn nieuwe functies!", "gift green").setHide(5*1000).show()
-        }
-
         if (!didSet) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
                 this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup").setAnimated(false))
@@ -336,6 +338,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
+    }
+
+    manageKeys(animated = true) {
+        this.currentlySelected = "keys"
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(KeysView) }).setAnimated(animated));
     }
 
     openCategory(category: GroupCategory, animated = true) {
@@ -526,19 +533,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     .bubble {
+        @extend .style-bubble;
+        
         margin-left: auto;
         flex-shrink: 0;
-        width: 20px;
-        height: 20px;
-        display: block;
-        background: $color-primary;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: bold;
-        text-align: center;
-        line-height: 20px;
-        vertical-align: middle;
-        color: $color-white;
+        
     }
     
     padding-left: var(--horizontal-padding, 30px);

@@ -375,7 +375,3 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 }
 
 </style>
-
-function buildManageGroupsComponent(organization: Organization) {
-  throw new Error('Function not implemented.');
-}

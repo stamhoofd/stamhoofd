@@ -2,13 +2,13 @@
     <div class="tab-bar-controller">
         <STNavigationBar :fixed="true" :large="true">
             <template slot="left">
-                <OrganizationLogo :organization="organization"/>
+                <OrganizationLogo :organization="organization" />
             </template>
             <template slot="right">
                 <button v-for="item in items" :key="item.component.key" class="button text" :class="{ selected: activeItem === item }" @click="selectItem(item)">
                     <span :class="'icon '+item.icon" />
                     <span>{{ item.name }}</span>
-                    <span class="bubble" v-if="item.badge">{{ item.badge }}</span>
+                    <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
                 </button>
             </template>
         </STNavigationBar>
@@ -19,7 +19,7 @@
             <button v-for="item in items" :key="item.component.key" class="button text small column" :class="{ selected: activeItem === item }" @click="selectItem(item)">
                 <span :class="'icon '+item.icon" />
                 <span>{{ item.name }}</span>
-                <span class="bubble" v-if="item.badge">{{ item.badge }}</span>
+                <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
             </button>
         </div>
     </div>
@@ -29,8 +29,9 @@
 <script lang="ts">
 import { ComponentWithProperties, FramedComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView,OrganizationLogo, STNavigationBar } from "@stamhoofd/components"
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { STNavigationBar, OrganizationLogo, CenteredMessage, CenteredMessageView } from "@stamhoofd/components"
+
 import { OrganizationManager } from "../../classes/OrganizationManager";
 
 export class TabBarItem {

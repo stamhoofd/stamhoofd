@@ -56,16 +56,19 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             id: user.id,
             email: user.email,
             publicKey: user.publicKey,
+            verified: user.verified,
+            requestKeys: user.requestKeys,
             publicAuthSignKey: user.publicAuthSignKey,
             authSignKeyConstants: user.authSignKeyConstants,
             authEncryptionKeyConstants: user.authEncryptionKeyConstants,
             encryptedPrivateKey: user.encryptedPrivateKey,
             permissions: user.permissions,
-            incomingInvites: loadedInvites.map(invite => TradedInvite.create(TradedInvite.create(Object.assign({}, invite, {
-                receiver: UserStruct.create(user),
-                sender: UserStruct.create(invite.sender),
-                organization: OrganizationSimple.create(token.user.organization)
-            })))
+            incomingInvites: loadedInvites.map(invite => TradedInvite.create(
+                TradedInvite.create(Object.assign({}, invite, {
+                    receiver: UserStruct.create(user),
+                    sender: UserStruct.create(invite.sender),
+                    organization: OrganizationSimple.create(token.user.organization)
+                })))
             )
         })
         return new Response(st);      

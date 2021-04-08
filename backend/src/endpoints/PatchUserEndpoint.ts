@@ -52,6 +52,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
+        editUser.requestKeys = request.body.requestKeys ?? editUser.requestKeys
+
         if (request.body.permissions) {
             if (!user.permissions || !user.permissions.hasFullAccess()) {
                 throw new SimpleError({
@@ -65,7 +67,6 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             } else {
                 editUser.permissions = request.body.permissions
             }
-            
         }
 
         if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.publicKey !== null && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {

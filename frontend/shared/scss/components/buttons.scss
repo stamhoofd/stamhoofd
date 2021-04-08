@@ -249,19 +249,7 @@
         }
 
         > .bubble {
-            background: $color-primary;
-            background: $color-error;
-            border-radius: 30px;
-            font-size: 13px;
-            color: $color-white;
-            display: inline-block;
-            padding: 0 4px;
-            height: 21px;
-            min-width: 21px;
-            box-sizing: border-box;
-            font-weight: bold;
-            line-height: 21px;
-            vertical-align: text-bottom;
+            @extend .style-bubble;
         }
 
         &.column {

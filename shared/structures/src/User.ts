@@ -1,4 +1,4 @@
-import { AutoEncoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { KeyConstants } from './KeyConstants';
@@ -23,26 +23,12 @@ export class User extends AutoEncoder {
 
     @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
     permissions: Permissions | null = null
-}
 
-/**
- * User that has never set a password
- */
-export class PlaceholderUser extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+    @field({ decoder: BooleanDecoder, version: 81 })
+    requestKeys = false
 
-    @field({ decoder: StringDecoder, nullable: true, version: 14 })
-    firstName: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true, version: 14 })
-    lastName: string | null = null;
-
-    @field({ decoder: EmailDecoder })
-    email: string;
-
-    @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
-    permissions: Permissions | null = null
+    @field({ decoder: BooleanDecoder, version: 81 })
+    verified = false
 }
 
 export class NewUser extends User {

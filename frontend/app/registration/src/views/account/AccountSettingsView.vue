@@ -15,7 +15,7 @@
                 
                     <STErrorsDefault :error-box="errorBox" />
 
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox" v-if="isAdmin">
+                    <STInputBox v-if="isAdmin" title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -31,22 +31,22 @@
                     <hr>
 
                     <p>
-                        <button class="button text" @click.prevent="openChangePassword" type="button">
-                            <span class="icon key"/>
+                        <button class="button text" type="button" @click.prevent="openChangePassword">
+                            <span class="icon key" />
                             <span>Wachtwoord wijzigen</span>
                         </button>
                     </p>
 
                     <p>
                         <a v-if="privacyUrl" class="button text" type="button" :href="privacyUrl" target="_blank">
-                            <span class="icon privacy"/>
+                            <span class="icon privacy" />
                             <span>Privacyvoorwaarden</span>
                         </a>
                     </p>
 
                     <p>
-                        <button class="button text" @click.prevent="logout" type="button">
-                            <span class="icon logout"/>
+                        <button class="button text" type="button" @click.prevent="logout">
+                            <span class="icon logout" />
                             <span>Uitloggen</span>
                         </button>
                     </p>
@@ -63,8 +63,6 @@
             </section>
             <PaymentsView class="gray-shadow view" />
         </main>
-
-        
     </div>
 </template>
 
@@ -72,10 +70,11 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator, ChangePasswordView, CenteredMessage } from "@stamhoofd/components";
+import { BackButton, CenteredMessage,ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
+
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import PaymentsView from "./PaymentsView.vue"
 
