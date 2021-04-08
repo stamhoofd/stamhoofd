@@ -82,7 +82,6 @@ export default class App extends Vue {
                 const code = queryString.get('code')
                     
                 if (token && code) {
-                    // tood: password reset view
                     const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                     LoginHelper.verifyEmail(session, code, token).then(() => {
                         toast.hide()

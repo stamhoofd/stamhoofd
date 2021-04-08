@@ -65,7 +65,7 @@
                 </main>
                 <main v-else>
                     <p v-if="members.length > 0" class="warning-box">
-                        Dit zijn alle beschikbare inschrijvingsgroepen. Je kan je momenteel nergens voor inschrijven, maar je kan eventueel wel een nieuw lid toevoegen.
+                        Je kan je momenteel nergens voor inschrijven, maar je kan eventueel wel een nieuw lid toevoegen.
                     </p>
                 </main>
                 <main>
