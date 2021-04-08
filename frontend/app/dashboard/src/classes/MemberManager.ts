@@ -106,26 +106,28 @@ export class MemberManagerStatic extends MemberManagerBase {
         return new PatchableArray()
     }
 
-    async getEncryptedMembersPatch(members: MemberWithRegistrations[]): Promise<PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>> {
+    /**
+     * Return a list of patches that is needed to create users that provide all parents and members access to the given members
+     * OR that removes access in some situations
+     */
+    getMembersAccessPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> {
         const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
-
         for (const member of members) {
+
             // Check if this user has missing users
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
             const managers = member.details.getManagerEmails()
             for(const email of managers) {
                 const user = member.users.find(u => u.email === email)
                 if (!user) {
-                    console.log("link email "+email)
+                    console.log("Linking email "+email)
                     missing.addPut(User.create({
                         email
                     }))
-                } else {
-                    console.log("already linked "+email)
                 }
             }
 
-            // Delete users that never created an account
+            // Delete users that never created an account and are not in managers
             for (const user of member.users) {
                 if (user.publicKey) {
                     continue
@@ -138,13 +140,34 @@ export class MemberManagerStatic extends MemberManagerBase {
                 }
             }
 
-            encryptedMembers.addPatch(
-                EncryptedMemberWithRegistrations.patch({
-                    id: member.id,
-                    users: missing
-                })
-            )
+            if (missing.changes.length > 0) {
+                encryptedMembers.addPatch(
+                    EncryptedMemberWithRegistrations.patch({
+                        id: member.id,
+                        users: missing
+                    })
+                )
+            }
         }
+
+        return encryptedMembers
+    }
+
+    /**
+     * Update the users that are connected to these members
+     */
+    async updateMembersAccess(members: MemberWithRegistrations[]) {
+        // Update the users that are connected to these members
+        const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
+
+        if (encryptedMembers.changes.length > 0) {
+            await this.patchMembers(encryptedMembers)
+        }
+    }   
+
+    async getEncryptedMembersPatch(members: MemberWithRegistrations[]): Promise<PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>> {
+        // Update the users that are connected to these members
+        const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
 
         // Aldo include encryption blobs
         const p = await this.getEncryptedMembers(members, OrganizationManager.organization, false)

@@ -68,7 +68,7 @@
                             {{ file.name }}
 
                             <template #right>
-                                <span>{{ file.size }}</span>
+                                <span>{{ file.size }}</span>
                                 <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
                             </template>
                         </STListItem>
@@ -76,12 +76,27 @@
                 </template>
             </MailEditor>
 
-            <Checkbox v-if="members.length > 0" v-model="addButton">
+            <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
+                E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> zelf sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
+                E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
                 <h3 class="style-title-list">
                     Voeg magische inlogknop toe (aangeraden)
                 </h3>
                 <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
+            <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
+                Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
+            </p>
         </main>
 
         <STToolbar>
@@ -118,7 +133,7 @@ import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
@@ -177,8 +192,23 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     files: TmpFile[] = []
 
+    includeGrownUpParents = false
+    includeMinorMembers = false
+
     deleteAttachment(index) {
         this.files.splice(index, 1)
+    }
+
+    get hasUnknownAge() {
+        return !!this.members.find(m => m.details.age === null)
+    }
+
+    get hasMinors() {
+        return !!this.members.find(m => (!m.details.age || m.details.age < 18) && !!m.details.email)
+    }
+
+    get hasGrownUpParents() {
+        return !!this.members.find(m => (!m.details.age || m.details.age >= 18) && !!m.details.parents.find(p => p.email))
     }
 
     get fullAccess() {
@@ -222,6 +252,17 @@ export default class MailView extends Mixins(NavigationMixin) {
         return !this.recipients.find(r => r.firstName == null)
     }
 
+    get hasAllUsers() {
+        return !this.recipients.find(r => r.userId === null)
+    }
+
+    @Watch('hasAllUsers')
+    onUpdateHasAllUsers(hasAllUsers: boolean) {
+        if (!hasAllUsers) {
+            this.addButton = false
+        }
+    }
+
     get recipients(): Recipient[] {
         const recipients: Map<string, Recipient> = new Map()
 
@@ -230,29 +271,31 @@ export default class MailView extends Mixins(NavigationMixin) {
                 continue
             }
 
-            for (const parent of member.details.parents) {
-                if (!parent.email) {
-                    continue;
-                }
+            if ((member.details.age !== null && member.details.age < 18) || this.includeGrownUpParents) {
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
 
-                if (recipients.has(parent.email) && recipients.get(parent.email)!.firstName) {
-                    continue
-                }
+                    if (recipients.has(parent.email) && recipients.get(parent.email)!.firstName) {
+                        continue
+                    }
 
-                recipients.set(parent.email, Recipient.create({
-                    firstName: parent.firstName,
-                    email: parent.email,
-                    replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: parent.firstName
-                        }),
-                        Replacement.create({
-                            token: "email",
-                            value: parent.email
-                        })
-                    ]
-                }))
+                    recipients.set(parent.email, Recipient.create({
+                        firstName: parent.firstName,
+                        email: parent.email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: parent.firstName
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: parent.email
+                            })
+                        ]
+                    }))
+                }
             }
 
             for (const user of member.users) {
@@ -266,6 +309,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                     recipient.userId = user.id
                     continue
                 }
+                // todo: skip parents and member if needed
 
                 recipients.set(user.email, Recipient.create({
                     firstName: user.firstName,
@@ -286,6 +330,12 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
 
             if (!member.details.email) {
+                continue;
+            }
+
+            if (!this.includeMinorMembers && (member.details.age == null || member.details.age < 18)) {
+                // remove member if it was included
+                recipients.delete(member.details.email)
                 continue;
             }
 
@@ -373,7 +423,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         } else {
             totalScreenWidth = 0;
         }
-        let {html} = await this.getHTML()
+        let { html } = await this.getHTML()
 
         // Replacements
         const recipient = this.recipients[0]
@@ -384,6 +434,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                 }
             }
         }
+
+        // Include recipients
+        const recipients = this.recipients.map(r => r.email).join(", ")
+        html = html.replace("<body>", "<body><p><strong>Aan (elk afzonderlijke e-mail):</strong> "+recipients+"</p><p><strong>Voorbeeld voor:</strong> "+encodeURI(recipient.email)+"</p><hr>")
 
         newWindow.document.write(html);
 

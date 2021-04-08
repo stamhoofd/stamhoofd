@@ -94,6 +94,8 @@
     }
 
     > input:disabled + div  {
+        cursor: not-allowed;
+
         > div:first-child {
             border: $border-width solid $color-gray-light;
             background: $color-white-shade;
