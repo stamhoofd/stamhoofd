@@ -96,4 +96,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed), version: 60 })
     roles: PermissionRoleDetailed[] = []
+
+    /**
+     * Amount of users that request keys (used to prevent another lookup/query on each load)
+     */
+    @field({ decoder: IntegerDecoder, version: 82 })
+    requestKeysCount = 0
 }

@@ -25,10 +25,10 @@
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
         </button>
 
-        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+        <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
             <span class="icon key" />
             <span>Gebruikers goedkeuren</span>
-            <span class="bubble">2</span>
+            <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
         </button>
 
         <template v-if="enableMemberModule">
