@@ -10,7 +10,7 @@
                     <span class="icon privacy" />
                     <span>Privacy</span>
                 </a>
-                <button class="primary button" @click="openCart">
+                <button class="primary button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cartCount }}</span>
                 </button>
@@ -59,7 +59,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast, GlobalEventBus } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -117,8 +117,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return CheckoutManager.cart.count
     }
 
-    openCart() {
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView, {}) }).setDisplayStyle("popup"))
+    openCart(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setAnimated(animated).setDisplayStyle("popup"))
     }
 
     get bannerImage() {
@@ -178,11 +178,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
         if (path.length == 2 && path[0] == 'order') {
             // tood: password reset view
             const orderId = path[1];
-            this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId }), false);
+            this.show(new ComponentWithProperties(OrderView, { orderId }).setAnimated(false))
         } else if (path.length == 1 && path[0] == 'payment') {
             this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server ,finishedHandler: (payment: Payment | null) => {
                 if (payment && payment.status == PaymentStatus.Succeeded) {
-                    this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), true, 1);
+                    this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
                 } else {
                     this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                     new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
@@ -201,7 +201,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         } else if (path.length == 1 && path[0] == 'cart') {
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
-            this.openCart()
+            this.openCart(false)
         } else {
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
         }
@@ -232,7 +232,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
         const comp = await Promise.all(components)
         if (comp.length == 0) {
-            this.openCart()
+            this.openCart(animated)
             return;
         }
         const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))

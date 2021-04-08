@@ -66,10 +66,12 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     }
 
     close() {
-        this.pop();
+        console.log("dismiss")
+        this.dismiss();
     }
 
     async shouldNavigateAway() {
+        console.log("should nav")
         if (await CenteredMessage.confirm("Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.", "Ik heb nog niet betaald")) {
             return true;
         }
@@ -94,13 +96,13 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
                 if (payment.status == PaymentStatus.Succeeded) {
                     this.finishedHandler(payment)
-                    this.dismiss()
+                    this.dismiss({ force: true })
                 }
 
                 if (payment.status == PaymentStatus.Failed) {
                     // todo: temporary message
                     this.finishedHandler(payment)
-                    this.dismiss()
+                    this.dismiss({ force: true })
                 }
             }).catch(e => {
                 // too: handle this
