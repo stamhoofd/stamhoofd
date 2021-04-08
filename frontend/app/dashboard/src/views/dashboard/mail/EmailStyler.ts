@@ -6,8 +6,6 @@ export class EmailStyler {
         const primaryColor = organization.meta.color ?? "#0053ff"
         const scss = ((await import("!!raw-loader!sass-loader!./email.scss")).default as string).replaceAll("#0053ff", primaryColor)
 
-        console.log(scss)
-
         let styles = scss;
             const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
             styles += " hr {"+hrCSS+"}";
