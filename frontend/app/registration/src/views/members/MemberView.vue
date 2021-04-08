@@ -14,7 +14,7 @@
             </h1>
 
             <p v-if="member.details.isRecovered" class="warning-box">
-                Een deel van de gegevens van dit lid zijn versleuteld (zie onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet nakijken, maar je ontvangt een mailtje zodra we jou manueel toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
+                Een deel van de gegevens van dit lid zijn versleuteld (zie uitleg onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet allemaal bekijken, maar je ontvangt een mailtje zodra we jou terug toegang hebben gegeven. Je kan nu ook gewoon alles opnieuw ingeven als je niet wilt wachten.
             </p>
 
             <div class="member-view-details">
@@ -63,7 +63,7 @@
                     </div>
 
 
-                    <div class="container">
+                    <div v-if="member.details.phone || member.details.email || member.details.address || member.details.birthDay || member.details.memberNumber" class="container">
                         <h2 class="style-with-button">
                             <div>Algemeen</div>
                             <div>
@@ -84,11 +84,6 @@
                                 <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
                             </template>
 
-                            <template v-if="member.waitingGroups.length > 0">
-                                <dt>Wachtlijst</dt>
-                                <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
-                            </template>
-
                             <template v-if="member.details.phone">
                                 <dt>GSM-nummer</dt>
                                 <dd>{{ member.details.phone }}</dd>
@@ -107,10 +102,10 @@
                                 </dd>
                             </template>
                         </dl>
+                        <hr>
                     </div>
 
                     <div v-if="parents.length > 0" class="container">
-                        <hr>
                         <h2 class="style-with-button">
                             <div>Ouders</div>
                             <div>
@@ -136,10 +131,10 @@
                                 </p>
                             </STListItem>
                         </STList>
+                        <hr>
                     </div>
 
                     <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index">
-                        <hr>
                         <h2 class="style-with-button">
                             <div>Noodcontact: {{ contact.title }}</div>
                             <div>
@@ -157,10 +152,10 @@
                             <dt>GSM-nummer</dt>
                             <dd>{{ contact.phone }}</dd>
                         </dl>
+                        <br>
                     </div>
 
                     <div v-if="member.details.doctor">
-                        <hr>
                         <h2 class="style-with-button">
                             <div>Huisarts</div>
                             <div>
@@ -182,12 +177,12 @@
                                 <dd>{{ member.details.doctor.phone }}</dd>
                             </template>
                         </dl>
+                        <hr>
                     </div>
 
-                    <hr>
-                    <h2>Hoe worden deze gegevens bewaard?</h2>
+                    <h2>Gegevens worden end-to-end versleuteld</h2>
 
-                    <p>Om de gegevens van onze leden te beschermen, worden alle gegevens (met uitzondering van de voornaam van het lid en de e-mailadressen) end-to-end versleuteld opgeslagen. We plaatsen ze dus in een digitale kluis, waar het computersysteem niet in kan. Normaal heb je toegang tot de digitale sleutel (dit gebeurt automatisch) van deze kluis, maar je kan deze kwijt geraken als: je jouw wachtwoord vergeet of een nieuw account aanmaakt. We kunnen deze sleutel terug met jou delen, op voorwaarde dat je een account hebt met een wachtwoord dat je kent. Dus zodra je een nieuw wachtwoord hebt gekozen, krijgen wij een melding en kunnen wij op een wiskundig veilige manier de sleutel bij jou brengen zonder dat het computersysteem deze kan lezen. Beetje ingewikkeld, maar op die manier zijn de gegevens van onze leden zo veilig mogelijk opgeslagen.</p>
+                    <p>Om de gegevens van onze leden te beschermen, worden alle gegevens (met uitzondering van de voornaam van het lid en de e-mailadressen) end-to-end versleuteld opgeslagen: we plaatsen ze in een digitale kluis waar het computersysteem niet in kan. Normaal heb je toegang tot de digitale sleutel (dit gebeurt automatisch) van deze kluis, maar je kan deze kwijt geraken als je jouw wachtwoord vergeet of een nieuw account aanmaakt. We kunnen deze sleutel terug met jou delen, maar dat gaat niet automatisch. Dus zodra je een nieuw wachtwoord hebt gekozen, krijgen wij een melding en kunnen wij op een wiskundig veilige manier de sleutel bij jou brengen zonder dat het computersysteem dit kan lezen. Allemaal erg ingewikkeld, maar op die manier worden de gegevens van onze leden zo veilig mogelijk opgeslagen.</p>
                 </div>
                 <div v-if="(!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords">
                     <template v-if="((!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
@@ -201,7 +196,7 @@
                                 />
                             </div>
                             <div>
-                                <button class="button text limit-space" @click="editRecords()">
+                                <button v-if="!member.details.isRecovered" class="button text limit-space" @click="editRecords()">
                                     <span class="icon edit" />
                                     <span>Bewerken</span>
                                 </button>
@@ -230,8 +225,10 @@
 
         <STToolbar>
             <button slot="right" class="secundary button" @click="fullCheck">
-                <span class="icon search" />
-                <span>Nakijken</span>
+                <span v-if="member.details.isRecovered" class="icon edit" />
+                <span v-else class="icon search" />
+                <span v-if="member.details.isRecovered">Opnieuw invullen</span>
+                <span v-else>Nakijken</span>
             </button>
             <button slot="right" class="primary button" @click="chooseGroups">
                 <span class="icon add" />
@@ -297,12 +294,12 @@ export default class MemberView extends Mixins(NavigationMixin){
             EditMemberStepType.Parents,
             EditMemberStepType.EmergencyContact,
             EditMemberStepType.Records,
-        ], async () => {
-            // todo: mark details as complete
+        ], false, async () => {
+            // todo: mark details as complete + update request keys
         })
     }
 
-    async openSteps(steps: EditMemberStepType[], callback?: () => Promise<void>) {
+    async openSteps(steps: EditMemberStepType[], force = true, callback?: () => Promise<void>) {
         const stepManager = new EditMemberStepsManager(
             steps, 
             this.member,
@@ -314,6 +311,7 @@ export default class MemberView extends Mixins(NavigationMixin){
                 return Promise.resolve()
             }
         )
+        stepManager.force = force
         const component = await stepManager.getFirstComponent()
 
         if (!component) {

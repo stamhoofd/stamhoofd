@@ -78,6 +78,9 @@ export class EditMemberStepsManager {
     editMember: MemberWithRegistrations | null = null
     isNew = true
 
+    // force to do all steps (and not skip them)
+    force = false
+
     /**
      * Text in the button on the last step
      */
@@ -165,7 +168,7 @@ export class EditMemberStepsManager {
         let next = step === undefined
         for (const s of steps) {
             if (next) {
-                if (steps.length == 1 || !s.shouldSkip(details)) {
+                if (this.force || !s.shouldSkip(details)) {
                     return s
                 }
 

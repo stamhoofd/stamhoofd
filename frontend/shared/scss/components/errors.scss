@@ -149,6 +149,10 @@
             padding-left: 15px;
             margin-left: auto;
             @extend .only-icon-smartphone;
+
+            &.text.button {
+                color: inherit;
+            }
         }
     }
 }

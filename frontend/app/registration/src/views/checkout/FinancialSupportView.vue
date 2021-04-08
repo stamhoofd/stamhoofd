@@ -66,6 +66,16 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
 
     mounted() {
         this.reduced = !!CheckoutManager.checkout.cart.items.find(i => i.reduced)
+
+        if (!this.reduced) {
+            for (const item of CheckoutManager.checkout.cart.items) {
+                const member = item.member
+                if (member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
+                    this.reduced = true;
+                    break;
+                }
+            }
+        }
     }
 
     @Watch("reduced")
@@ -95,10 +105,13 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 for (const item of CheckoutManager.checkout.cart.items) {
                     const member = item.member
                     if (!member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
-                        member.details.records.push(Record.create({
-                            type: RecordType.FinancialProblems
-                        }))
-                        needsSync = true;
+                        // Check if we are allowed to gather this information
+                        if (member.details.records.find(r => r.type == RecordType.DataPermissions)) {
+                            member.details.records.push(Record.create({
+                                type: RecordType.FinancialProblems
+                            }))
+                            needsSync = true;
+                        }
                     }
                     item.reduced = true
                 }

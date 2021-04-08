@@ -1,6 +1,11 @@
 <template>
     <div class="member-view-details">
         <div>
+            <p v-if="member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
+                {{ member.firstName }} is niet ingeschreven
+                <span class="button icon edit" />
+            </p>
+
             <div class="hover-box">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
