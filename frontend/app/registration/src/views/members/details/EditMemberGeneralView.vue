@@ -160,7 +160,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 }))
             }
 
-            if (this.age <= 18 || (!this.livesAtParents && this.age <= 27)) {
+            if (this.age <= 18 || this.livesAtParents) {
                 // remove address
                 this.address = null
             }

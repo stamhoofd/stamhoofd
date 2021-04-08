@@ -165,7 +165,7 @@ export class EditMemberStepsManager {
         let next = step === undefined
         for (const s of steps) {
             if (next) {
-                if (!s.shouldSkip(details)) {
+                if (steps.length == 1 || !s.shouldSkip(details)) {
                     return s
                 }
 
