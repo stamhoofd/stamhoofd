@@ -58,16 +58,19 @@ export class EditMemberStep {
             // Skip parents for > 18 and has address, or > 24 (no matter of address)
             case EditMemberStepType.Parents: 
                 details.parents = []
+                details.reviewTimes.markReviewed("parents")
                 break;
 
             // Skip emergency contacts if not asked by organization
             case EditMemberStepType.EmergencyContact: 
                 details.emergencyContacts = []
+                details.reviewTimes.markReviewed("emergencyContacts")
                 break;
 
             // Skip records if not asked by organization for this age
             case EditMemberStepType.Records: 
                 details.records = []
+                details.reviewTimes.markReviewed("records")
                 break;
         }
     }

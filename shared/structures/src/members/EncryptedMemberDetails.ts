@@ -80,6 +80,48 @@ export class MemberDetailsMeta extends AutoEncoder {
 
         this.reviewTimes.merge(other.reviewTimes)
     }
+
+    isAccurateFor(details: MemberDetails) {
+        const meta = MemberDetailsMeta.createFor(details)
+        return this.doesMatch(meta)
+    }
+
+    doesMatch(other: MemberDetailsMeta) {
+        if (this.hasMemberGeneral !== other.hasMemberGeneral) {
+            return false
+        }
+
+        if (this.hasParents !== other.hasParents) {
+            return false
+        }
+
+        if (this.hasEmergency !== other.hasEmergency) {
+            return false
+        }
+
+        if (this.hasRecords !== other.hasRecords) {
+            return false
+        }
+
+        if (this.isRecovered !== other.isRecovered) {
+            return false
+        }
+
+        for (const time of this.reviewTimes.times) {
+            const oTime = other.reviewTimes.getLastReview(time.name)
+            if (!oTime || oTime.getTime() != time.reviewedAt.getTime()) {
+                return false
+            }
+        }
+
+        for (const oTime of other.reviewTimes.times) {
+            const time = this.reviewTimes.getLastReview(oTime.name)
+            if (!time || time.getTime() != oTime.reviewedAt.getTime()) {
+                return false
+            }
+        }
+        return true
+    }
 }
 
 

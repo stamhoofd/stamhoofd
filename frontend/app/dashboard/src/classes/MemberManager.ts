@@ -213,17 +213,8 @@ export class MemberManagerStatic extends MemberManagerBase {
         return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
-    async patchMembersDetails(members: MemberWithRegistrations[]): Promise<MemberWithRegistrations | null> {
-        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization, false)
-
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patch.members,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
-        return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
+    async patchMembersDetails(members: MemberWithRegistrations[]) {
+        return await this.patchMembers(await this.getEncryptedMembersPatch(members))
     }
 
     async patchMembers(members: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>) {

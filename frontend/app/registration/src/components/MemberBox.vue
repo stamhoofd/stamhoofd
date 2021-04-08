@@ -138,31 +138,10 @@ export default class MemberBox extends Mixins(NavigationMixin){
         const steps: EditMemberStepType[] = []
 
         if (this.member.details.isRecovered) {
-            let meta: MemberDetailsMeta | undefined
+            let meta = this.member.getDetailsMeta()
+            
             // Only add the steps that are missing for the organization
             // Don't check for reviews (unless the records, which will be asked if it was never reviewed)
-
-            const newToOld = this.member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))
-            for (const encryptedDetails of newToOld) {
-                if (!encryptedDetails.meta.isRecovered && encryptedDetails.forOrganization) {
-                    // Organization still has full access to this member
-                    if (meta) {
-                        // We already had recovered data, so we have access to it. Merge the meta
-                        encryptedDetails.meta.merge(meta)
-                    }
-                    meta = encryptedDetails.meta
-                    break
-                } else {
-                    if (encryptedDetails.forOrganization) {
-                        // We have some recovered data
-                        if (meta) {
-                            // We already had recovered data, so we have access to it. Merge the meta
-                            encryptedDetails.meta.merge(meta)
-                        }
-                        meta = encryptedDetails.meta
-                    }
-                }
-            }
 
             if (!meta || !meta.hasMemberGeneral) {
                 steps.push(EditMemberStepType.Details)

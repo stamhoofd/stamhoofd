@@ -168,6 +168,8 @@ export class MemberWithRegistrations extends Member {
         this.activeRegistrations = member.activeRegistrations
         this.waitingGroups = member.waitingGroups
         this.acceptedWaitingGroups = member.acceptedWaitingGroups
+        this.encryptedDetails = member.encryptedDetails
+        this.allGroups = member.allGroups
         
         if (member.groups !== this.groups) {
             this.groups.splice(0, this.groups.length, ...member.groups)

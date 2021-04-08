@@ -5,7 +5,7 @@ import { ArrayDecoder,AutoEncoder, DateDecoder, field, StringDecoder } from "@si
  */
 export class ReviewTime extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    name: string
+    name: "records" | "parents" | "emergencyContacts" | "details"
 
     /**
      * Date that this section was reviewed

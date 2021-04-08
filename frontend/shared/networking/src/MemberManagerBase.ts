@@ -93,7 +93,16 @@ export class MemberManagerBase {
             }
         }
 
-        return Member.create({ ...member, details })
+
+        const mm = Member.create({ ...member, details })
+        const meta = mm.getDetailsMeta()
+
+        // Check if meta is wrong
+        if (!meta || !meta.isAccurateFor(details)) {
+            console.warn("Found inaccurate meta data!")
+        }
+
+        return mm
     }
 
     async decryptMembers(data: EncryptedMember[]) {
