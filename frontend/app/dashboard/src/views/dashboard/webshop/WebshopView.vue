@@ -137,7 +137,7 @@
                 </button>
                 <LoadingButton :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
-                        <span class="dropdown-text">Mailen</span>
+                        <span class="dropdown-text">E-mailen</span>
                         <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
                 </LoadingButton>
