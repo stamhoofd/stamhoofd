@@ -73,7 +73,7 @@
                     </div>
                 </div>
 
-                <div v-if="isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
+                <div v-if="false && isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
                     <hr>
                     <h2>Snel app openen</h2>
                     <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
