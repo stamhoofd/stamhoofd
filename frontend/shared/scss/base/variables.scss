@@ -26,7 +26,8 @@ $color-gray-light: #dcdcdc;
 $color-gray-lighter: #e7e7e7;
 
 $color-primary-lighter: #F7FAFF;
-$color-primary-light: #dfe9ff;
+$color-primary-light-original: #dfe9ff;
+$color-primary-light: var(--color-primary-light, $color-primary-light-original);
 
 $color-primary-background-original: #F0F5FF;
 $color-primary-background: var(--color-primary-background, $color-primary-background-original);

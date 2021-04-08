@@ -2,8 +2,8 @@
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto'
-import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, Version } from '@stamhoofd/structures'
+import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
 import { Sorter } from '@stamhoofd/utility';
 import { Vue } from "vue-property-decorator";
 
@@ -45,6 +45,19 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
 
         Vue.set(this, "members", s)
+
+        // Check if data is no longer recovered
+        const session = SessionManager.currentSession
+        const user = SessionManager.currentSession?.user
+        if (session && user) {
+            if (user.requestKeys && !s.find(m => m.details.isRecovered)) {
+                // Fully recovered!
+                await LoginHelper.patchUser(session, User.patch({
+                    id: user.id,
+                    requestKeys: false
+                }))
+            }
+        }
     }
 
     async loadMembers() {

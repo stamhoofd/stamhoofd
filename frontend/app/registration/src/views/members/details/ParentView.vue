@@ -1,7 +1,7 @@
 <template>
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Ouder">
-            <button slot="right" class="button icon gray close" @click="pop"></button>
+            <button slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -16,8 +16,10 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
-                        <select class="input" v-model="type">
-                            <option v-for="type in parentTypes" :key="type" :value="type">{{ parentTypeName(type) }}</option>
+                        <select v-model="type" class="input">
+                            <option v-for="type in parentTypes" :key="type" :value="type">
+                                {{ parentTypeName(type) }}
+                            </option>
                         </select>
                     </STInputBox>
 
@@ -32,32 +34,32 @@
                         </div>
                     </STInputBox>
 
-                    <PhoneInput title="GSM-nummer" v-model="phone" :validator="validator" placeholder="GSM-nummer van ouder" />
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Voor belangrijke mededelingen" />
+                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer van ouder" />
+                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
                 </div>
 
                 <div>
                     <STInputBox v-if="availableAddresses.length > 0" title="Kies een adres">
                         <STList>
                             <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
-                                <Radio v-model="address" slot="left" :value="_address"/>
+                                <Radio slot="left" v-model="address" :value="_address" />
                                 {{ _address.street }} {{ _address.number }}<br>
                                 {{ _address.postalCode }} {{ _address.city }}
-                                <button slot="right" class="button icon gray edit" @click.stop="doEditAddress(_address)"/>
+                                <button slot="right" class="button icon gray edit" @click.stop="doEditAddress(_address)" />
                             </STListItem>
                             <STListItem element-name="label" :selectable="true" class="left-center">
-                                <Radio v-model="address" slot="left" :value="customAddress"/>
+                                <Radio slot="left" v-model="address" :value="customAddress" />
                                 Een ander adres ingeven
                             </STListItem>
                         </STList>
                     </STInputBox>
-                    <AddressInput :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" v-if="editingAddress || address === customAddress" v-model="editAddress" :validator="validator" :required="false"/>
+                    <AddressInput v-if="editingAddress || address === customAddress" v-model="editAddress" :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" :validator="validator" :required="false" />
                 </div>
             </div>
         </main>
 
         <STToolbar>
-            <button  slot="right" class="button primary" @click="goNext">
+            <button slot="right" class="button primary" @click="goNext">
                 {{ !parent ? 'Toevoegen' : 'Opslaan' }}
             </button>
         </STToolbar>
@@ -67,9 +69,10 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, AddressInput, Radio, PhoneInput, Checkbox, Validator, STList, STListItem, EmailInput } from "@stamhoofd/components"
+import { AddressInput, Checkbox, EmailInput,ErrorBox, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({

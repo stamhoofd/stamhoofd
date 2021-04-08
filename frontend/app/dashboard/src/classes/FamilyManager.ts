@@ -33,8 +33,6 @@ export class FamilyManager {
     }
 
     async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
-        memberDetails.cleanData()
-
         const session = SessionManager.currentSession!
 
         // Add all the needed users that need to have access
@@ -116,10 +114,6 @@ export class FamilyManager {
             members.splice(ex, 1, member)
         } else {
             members.push(member)
-        }
-
-        for (const m of members) {
-            m.details?.cleanData()
         }
 
         // Search for duplicate addresses and duplicate parents

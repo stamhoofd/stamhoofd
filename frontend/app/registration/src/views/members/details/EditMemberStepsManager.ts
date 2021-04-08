@@ -88,6 +88,7 @@ export class EditMemberStepsManager {
 
     types: EditMemberStepType[]
     finishHandler: (component: NavigationMixin) => Promise<void>;
+    lastSaveHandler?: (details: MemberDetails) => Promise<void>;
 
     /**
      * Intialise a new step flow with all the given steps
@@ -213,6 +214,11 @@ export class EditMemberStepsManager {
             // Save details on complete
             saveHandler: async (details: MemberDetails, component: NavigationMixin): Promise<void> => {
                 const next = await this.getNextComponent(step.type, details)
+
+                if (!next && this.lastSaveHandler) {
+                    // Allow to still make changes to  the given details before saving it
+                    await this.lastSaveHandler(details)
+                }
 
                 // Save details AFTER determining the next component (because onSkip behaviour might update the details)
                 await this.saveDetails(details)

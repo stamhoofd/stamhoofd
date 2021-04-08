@@ -214,6 +214,9 @@ export class MemberManagerBase {
                 }
             }
 
+            // Clean the member details
+            member.details.cleanData()
+
             const memberPatch = EncryptedMember.patch({ id: member.id })
             memberPatch.firstName = member.details.firstName
 

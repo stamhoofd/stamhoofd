@@ -241,10 +241,12 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
-import { MemberWithRegistrations, Parent, Record,RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
+import { LoginHelper, SessionManager } from "@stamhoofd/networking";
+import { MemberDetails, MemberWithRegistrations, Parent, Record,RecordTypeHelper, RecordTypePriority, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import GroupTree from "../../components/GroupTree.vue";
 import { EditMemberStepsManager, EditMemberStepType } from "./details/EditMemberStepsManager";
@@ -294,31 +296,31 @@ export default class MemberView extends Mixins(NavigationMixin){
             EditMemberStepType.Parents,
             EditMemberStepType.EmergencyContact,
             EditMemberStepType.Records,
-        ], false, async () => {
-            // todo: mark details as complete + update request keys
+        ], false, async (details: MemberDetails) => {
+            // Do basic check if information is okay
+            if (details.lastName && details.isRecovered) {
+                details.isRecovered = false
+            }
+            
+            return Promise.resolve()
         })
     }
 
-    async openSteps(steps: EditMemberStepType[], force = true, callback?: () => Promise<void>) {
+    async openSteps(steps: EditMemberStepType[], force = true, lastSaveHandler?: (details: MemberDetails) => Promise<void>) {
         const stepManager = new EditMemberStepsManager(
             steps, 
             this.member,
             async (component: NavigationMixin) => {
                 component.dismiss({ force: true })
-                if (callback) {
-                    await callback()
-                }
                 return Promise.resolve()
             }
         )
         stepManager.force = force
+        stepManager.lastSaveHandler = lastSaveHandler
         const component = await stepManager.getFirstComponent()
 
         if (!component) {
             // Weird
-            if (callback) {
-                await callback()
-            }
         } else {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: component
@@ -338,18 +340,6 @@ export default class MemberView extends Mixins(NavigationMixin){
         this.show(new ComponentWithProperties(MemberChooseGroupsView, {
             member: this.member
         }))
-    }
-
-    editParent(parent: Parent) {
-        /*this.present(new ComponentWithProperties(ParentView, {
-            memberDetails: this.member.details,
-            parent,
-            handler: (parent: Parent, component: ParentView) => {
-                component.pop({ force: true })
-                // todo! SAVE HERE!
-                //this.checkNewParents()
-            }
-        }).setDisplayStyle("popup"))*/
     }
 
     imageSrc(registration: Registration) {

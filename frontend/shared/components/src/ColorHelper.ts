@@ -43,5 +43,11 @@ export class ColorHelper {
         s = 68
         const primaryGrayLight = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-primary-gray-light", primaryGrayLight)
+
+		// Modify s + l
+        l = 94
+        s = 100
+        const primaryLight = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-light", primaryLight)
     }
 }
