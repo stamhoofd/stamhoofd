@@ -59,6 +59,8 @@
             position: relative;
             flex-grow: 1;
 
+            --color-current-background-shade: #{$color-background-shade-darker};
+
             &:before {
                 content: "";
                 background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
@@ -100,6 +102,7 @@
                 --st-safe-area-top: 0px;
                 max-width: 800px;
                 background: $color-white;
+                --color-current-background-shade: #{$color-background-shade};
                 @include style-side-view-shadow();
                 border-radius: $border-radius;
                 margin: 20px auto;
@@ -131,11 +134,13 @@
     &.background {
         background: $color-white;
         --color-current-background: #{$color-white};
+        --color-current-background-shade: #{$color-background-shade};
     }
 
     &.shade {
         background: $color-background-shade;
         --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
     }
 }
 
