@@ -41,15 +41,21 @@
                             <tbody>
                                 <tr>
                                     <td>Bedrag</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">{{ payment.price | price }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">
+                                        {{ payment.price | price }}
+                                    </td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Begunstigde</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">{{ creditor }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">
+                                        {{ creditor }}
+                                    </td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td>Rekeningnummer</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">{{ iban }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">
+                                        {{ iban }}
+                                    </td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
                                     <td v-if="isStructured">
@@ -58,51 +64,79 @@
                                     <td v-else>
                                         Mededeling
                                     </td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">{{ transferDescription }}</td>
+                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">
+                                        {{ transferDescription }}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="only-smartphone container" v-if="isBelgium && payment.price > 0 && payment.status != 'Succeeded'">
+                <div v-if="isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
                     <hr>
-                    <h2>Openen met app</h2>
+                    <h2>Snel app openen</h2>
+                    <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
 
                     <STList>
-                        <STListItem elementName="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
+                        <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
                             <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-                            <h3 class="style-title-list">KBC Mobile</h3>
-                            <p class="style-description">Gegevens worden automatisch ingevuld</p>
+                            <h3 class="style-title-list">
+                                KBC Mobile
+                            </h3>
+                            <p class="style-description">
+                                Gegevens worden automatisch ingevuld
+                            </p>
                         </STListItem>
 
-                        <STListItem elementName="a" :href="'bepingib://'+qrMessage">
+                        <STListItem element-name="a" :href="'bepingib://'">
                             <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-                            <h3 class="style-title-list">ING Banking</h3>
-                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                            <h3 class="style-title-list">
+                                ING Banking
+                            </h3>
+                            <p class="style-description">
+                                Kopieer zelf manueel de gegevens bovenaan
+                            </p>
                         </STListItem>
 
-                        <STListItem elementName="a" :href="'BEPbelfius://'+qrMessage">
+                        <STListItem element-name="a" :href="'BEPbelfius://'">
                             <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
-                            <h3 class="style-title-list">Belfius Mobile</h3>
-                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                            <h3 class="style-title-list">
+                                Belfius Mobile
+                            </h3>
+                            <p class="style-description">
+                                Kopieer zelf manueel de gegevens bovenaan
+                            </p>
                         </STListItem>
 
-                        <STListItem elementName="a" :href="'easybanking://'+qrMessage">
+                        <STListItem element-name="a" :href="'easybanking://'">
                             <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
-                            <h3 class="style-title-list">Easy Banking App (BNP Paribas Fortis)</h3>
-                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                            <h3 class="style-title-list">
+                                Easy Banking App (BNP Paribas Fortis)
+                            </h3>
+                            <p class="style-description">
+                                Kopieer zelf manueel de gegevens bovenaan
+                            </p>
                         </STListItem>
 
-                        <STListItem elementName="a" :href="'BEPargenta://'+qrMessage">
+                        <STListItem element-name="a" :href="'BEPargenta://'">
                             <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
-                            <h3 class="style-title-list">Argenta-app</h3>
-                            <p class="style-description">Kopieer zelf manueel de gegevens bovenaan</p>
+                            <h3 class="style-title-list">
+                                Argenta-app
+                            </h3>
+                            <p class="style-description">
+                                Kopieer zelf manueel de gegevens bovenaan
+                            </p>
                         </STListItem>
 
-                        <STListItem elementName="a" :href="'HBApp://'+qrMessage">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-                            Hello Bank! app
+                        <STListItem element-name="a" :href="'HBApp://'">
+                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
+                            <h3 class="style-title-list">
+                                Hello Bank! app
+                            </h3>
+                            <p class="style-description">
+                                Kopieer zelf manueel de gegevens bovenaan
+                            </p>
                         </STListItem>
                     </STList>
 
@@ -125,7 +159,6 @@
                         Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
                     </p>              
                 </template>
-                
             </main>
 
             <STToolbar v-if="!isPopup">
@@ -202,6 +235,47 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     mounted() {
         this.generateQRCode().catch(e => console.error(e))
         this.setLeave()
+    }
+
+    getOS(): string {
+        var userAgent = navigator.userAgent || navigator.vendor;
+
+        if (/android/i.test(userAgent)) {
+            return "android";
+        }
+
+        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+            // Different sms protocol
+            return "macOS-old";
+        }
+
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return "iOS";
+        }
+
+        // iPad on iOS 13 detection
+        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+            return "macOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+            return "windows";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+            return "android";
+        }
+
+        return "unknown"
     }
 
     beforeDestroy() {

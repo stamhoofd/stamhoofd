@@ -12,7 +12,7 @@
                     <p>Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.</p>
 
                     <p v-if="cart.items.length == 0" class="info-box">
-                        Jouw inschrijvings-mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
+                        Jouw mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
                     </p>
                     <STErrorsDefault :error-box="errorBox" />
                 

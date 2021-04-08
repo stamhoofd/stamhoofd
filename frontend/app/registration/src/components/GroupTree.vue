@@ -88,6 +88,10 @@ export default class GroupTree extends Mixins(NavigationMixin){
     @media (max-width: 800px) {
         gap: 0;
         grid-template-columns: 1fr;
+
+        > * {
+            margin-bottom: 10px;
+        }
     }
 }
 
