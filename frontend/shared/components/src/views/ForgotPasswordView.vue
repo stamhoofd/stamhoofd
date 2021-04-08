@@ -7,7 +7,7 @@
         <main>
             <h1>Wachtwoord vergeten</h1>
             <div class="warning-box">
-                Als je jouw wachtwoord vergeten bent kan je tijdelijk niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt. Dat is niet echt een probleem, aangezien je die opnieuw kan ingeven.
+                Als je jouw wachtwoord vergeten bent kan je tijdelijk niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt tot we jou terug hebben goedgekeurd. Maar dat is niet echt een probleem, aangezien je ook alles opnieuw kan ingeven.
             </div>
 
             <STErrorsDefault :error-box="errorBox" />

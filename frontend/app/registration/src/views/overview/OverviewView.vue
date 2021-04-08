@@ -10,7 +10,7 @@
                 <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
 
-                    <p class="info-box email with-button selectable" v-for="invite of invites" :key="invite.id" @click="registerMember(invite.member)">
+                    <p v-for="invite of invites" :key="invite.id" class="info-box email with-button selectable" @click="registerMember(invite.member)">
                         Je hebt een uitnodiging gekregen om {{ invite.member.firstName }} in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} nog op de wachtlijst.
                         <span class="button text selected">
                             <span>Inschrijven</span>
@@ -77,10 +77,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, OrganizationLogo,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { Decoder } from "@simonbackx/simple-encoding";
+import { ComponentWithProperties,HistoryManager,ModalStackComponent,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, LoadingView, OrganizationLogo,PromiseView,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { MemberWithRegistrations, PaymentDetailed, PaymentMethod } from '@stamhoofd/structures';
+import { EncryptedPaymentDetailed, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -90,6 +91,7 @@ import GroupTree from '../../components/GroupTree.vue';
 import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
+import MissingKeyView from "./MissingKeyView.vue";
 
 @Component({
     components: {
@@ -196,7 +198,54 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl("/")
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
+        let setPath = true
+
+        if (parts.length == 1 && parts[0] == 'payment') {
+            setPath = false
+            const session = SessionManager.currentSession!
+            // tood: password reset view
+            const component = new ComponentWithProperties(NavigationController, { 
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        const PaymentPendingView = (await import(/* webpackChunkName: "Checkout" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
+                        return new ComponentWithProperties(PaymentPendingView, {
+                            server: session.authenticatedServer,
+                            paymentId: new URL(window.location.href).searchParams.get("id"),
+                            finishedHandler: async function(this: any, payment: Payment | null) {
+                                if (payment && payment.status == PaymentStatus.Succeeded) {
+                                    const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "../checkout/RegistrationSuccessView.vue")).default
+                                    const response = await session.authenticatedServer.request({
+                                        method: "GET",
+                                        path: "/payments/"+payment.id+"/registrations",
+                                        decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
+                                    })
+                                    const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
+                                    this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                                        registrations
+                                    }))
+                                } else {
+                                    HistoryManager.setUrl("/")
+                                    this.dismiss({ force: true })
+                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+            this.present(component.setAnimated(false))
+        }
+
+        if (setPath) {
+            HistoryManager.setUrl("/")
+        }
+
+        if (setPath && this.members.find(m => m.details.isRecovered)) {
+            // Show error message
+            this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
+        }
     }
 
     async addNewMember() {

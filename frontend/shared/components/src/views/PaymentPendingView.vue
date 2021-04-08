@@ -1,6 +1,7 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar title="Betaling"></STNavigationBar>
+        <div class="box">
             <main v-if="!payment || payment.status != 'Failed'">
                 <h1>Wachten op betaalbevestiging...</h1>
                 <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten.</p>

@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDec
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -627,6 +627,7 @@ export class LoginHelper {
 
         let userPrivateKey = session.getUserPrivateKey();
         let publicKey: string | undefined = undefined
+        let requestKeys = session.user!.requestKeys
         if (!userPrivateKey) {
             if (!force) {
                 throw new SimpleError({
@@ -637,11 +638,31 @@ export class LoginHelper {
             const userKeyPair = await Sodium.generateEncryptionKeyPair();
             userPrivateKey = userKeyPair.privateKey
             publicKey = userKeyPair.publicKey
+
+            // Check if this user has memebrs or was an administrator
+            if (session.user?.permissions ?? null !== null) {
+                requestKeys = true
+            } else {
+                try {
+                    const response = await session.authenticatedServer.request({
+                        method: "GET",
+                        path: "/members",
+                        decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+                    })
+                    if (response.data.data.length > 0) {
+                        // We'll lose access to these members data
+                        requestKeys = true
+                    }
+                } catch (e) {
+                    console.error(e)
+                }
+            }
         }
 
         const patch = NewUser.patch({
             id: session.user!.id,
             publicKey,
+            requestKeys: requestKeys ? true : undefined,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,

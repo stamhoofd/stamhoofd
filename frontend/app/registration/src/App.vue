@@ -78,39 +78,6 @@ export default class App extends Vue {
                     promise: async () => {
                         await MemberManager.loadMembers();
 
-                        const path = window.location.pathname;
-                        const parts = path.substring(1).split("/");
-
-                        if (parts.length == 1 && parts[0] == 'payment') {
-                            // tood: password reset view
-                            const PaymentPendingView = (await import(/* webpackChunkName: "Checkout" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
-                            return new ComponentWithProperties(ModalStackComponent, {
-                                root: new ComponentWithProperties(NavigationController, { 
-                                    root: new ComponentWithProperties(PaymentPendingView, {
-                                        server: SessionManager.currentSession!.authenticatedServer,
-                                        paymentId: new URL(window.location.href).searchParams.get("id"),
-                                        finishedHandler: async function(this: any, payment: Payment | null) {
-                                            if (payment && payment.status == PaymentStatus.Succeeded) {
-                                                const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "./views/checkout/RegistrationSuccessView.vue")).default
-                                                const response = await session.authenticatedServer.request({
-                                                    method: "GET",
-                                                    path: "/payments/"+payment.id+"/registrations",
-                                                    decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
-                                                })
-                                                const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
-                                                this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                                                    registrations
-                                                }))
-                                            } else {
-                                                this.navigationController.push(new ComponentWithProperties(await getDefaultView(), {}), true, 1, true)
-                                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                                            }
-                                        }
-                                    }),
-                                })
-                            })
-                        }
-
                         const basket = new TabBarItem(
                             "Mandje",
                             "basket",

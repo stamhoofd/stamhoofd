@@ -27,7 +27,7 @@
 
         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
             <span class="icon key" />
-            <span>Verloren sleutels</span>
+            <span>Gebruikers goedkeuren</span>
             <span class="bubble">2</span>
         </button>
 
