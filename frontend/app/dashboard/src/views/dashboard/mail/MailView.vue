@@ -135,6 +135,7 @@ import { EmailAttachment,EmailRequest, Group, MemberWithRegistrations, Recipient
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
+import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { EmailStyler } from './EmailStyler';
@@ -174,7 +175,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     sending = false
 
-    addButton = this.members.length > 0
+    addButton = this.members.length > 0 && this.hasAllUsers
 
     @Prop({ default: null })
     defaultSubject!: string | null
@@ -228,6 +229,20 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Update email id if created
         if (!this.emailId) {
             this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+        }
+    }
+
+    mounted() {
+        if (this.members.length > 0) {
+            // Check if all the parents + members already have access (and an account) when they should have access
+            MemberManager.updateMembersAccess(this.members).then(() => {
+                // We created some users, so we might check the button again
+                if (!this.addButton && this.hasAllUsers) {
+                    this.addButton = true
+                }
+            }).catch(e => {
+                Toast.fromError(e).show()
+            })
         }
     }
 

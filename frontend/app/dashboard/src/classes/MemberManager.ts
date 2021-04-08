@@ -161,7 +161,14 @@ export class MemberManagerStatic extends MemberManagerBase {
         const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
 
         if (encryptedMembers.changes.length > 0) {
-            await this.patchMembers(encryptedMembers)
+            const updated = await this.patchMembers(encryptedMembers)
+
+            for (const member of members) {
+                const updatedData = updated.find(m => m.id === member.id)
+                if (updatedData) {
+                    member.copyFrom(updatedData)
+                }
+            }
         }
     }   
 
