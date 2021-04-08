@@ -213,7 +213,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                         return new ComponentWithProperties(PaymentPendingView, {
                             server: session.authenticatedServer,
                             paymentId: new URL(window.location.href).searchParams.get("id"),
-                            finishedHandler: async function(this: any, payment: Payment | null) {
+                            finishedHandler: async function(this: NavigationMixin, payment: Payment | null) {
                                 if (payment && payment.status == PaymentStatus.Succeeded) {
                                     const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "../checkout/RegistrationSuccessView.vue")).default
                                     const response = await session.authenticatedServer.request({
@@ -222,9 +222,9 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                         decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                     })
                                     const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
-                                    this.show(new ComponentWithProperties(RegistrationSuccessView, {
+                                    this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
                                         registrations
-                                    }))
+                                    }), true, 1)
                                 } else {
                                     HistoryManager.setUrl("/")
                                     this.dismiss({ force: true })
