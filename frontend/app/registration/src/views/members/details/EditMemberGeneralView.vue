@@ -72,7 +72,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, BackButton } from "@stamhoofd/components"
+import { AddressInput, BackButton,BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, Gender, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
@@ -158,6 +158,11 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     code: "invalid_field",
                     message: "Birthday check failed",
                 }))
+            }
+
+            if (this.age <= 18 || (!this.livesAtParents && this.age <= 27)) {
+                // remove address
+                this.address = null
             }
 
             errors.throwIfNotEmpty()

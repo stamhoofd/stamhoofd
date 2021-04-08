@@ -18,7 +18,7 @@
         </STNavigationBar>
         <main class="limit-width">
             <div class="organization-selection-view">
-                <h1>Inloggen</h1>
+                <h1>Aangesloten verenigingen</h1>
                 <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
                 <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
 

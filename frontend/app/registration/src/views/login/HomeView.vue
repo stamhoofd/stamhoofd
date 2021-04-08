@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie op maat van {{ organization.name }}, door <strong>Stamhoofd</strong></a>
+                        <a href="https://www.stamhoofd.be" target="_blank" class="button text">Ledenadministratie door <strong>Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
