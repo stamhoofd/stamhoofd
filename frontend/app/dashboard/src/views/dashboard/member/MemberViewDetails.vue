@@ -1,9 +1,12 @@
 <template>
     <div class="member-view-details">
         <div>
-            <p v-if="member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
+            <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
                 {{ member.firstName }} is niet ingeschreven
                 <span class="button icon edit" />
+            </p>
+            <p v-else-if="member.activeRegistrations.length == 0" class="info-box">
+                {{ member.firstName }} is niet ingeschreven
             </p>
 
             <div class="hover-box">
@@ -235,6 +238,13 @@
                     {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
                 </p>
 
+                <p v-if="member.details.reviewTimes.getLastReview('records')" class="style-description-small">
+                    Laatst nagekeken op {{ member.details.reviewTimes.getLastReview("records") | dateTime }}
+                </p>
+                <p v-else class="style-description-small">
+                    Nog nooit nagekeken
+                </p>
+
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
@@ -339,6 +349,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     get hasWrite(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
         }
 
         for (const group of this.member.groups) {

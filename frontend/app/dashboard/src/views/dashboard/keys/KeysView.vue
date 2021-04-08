@@ -13,8 +13,8 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <STList>
-                <STListItem v-for="user in users" :key="user.id">
-                    <span slot="left" class="icon user" />
+                <STListItem v-for="user in users" :key="user.user.id" :selectable="true" element-name="label">
+                    <Checkbox slot="left" v-model="user.selected" />
 
                     <h2 class="style-title-list">
                         {{ user.user.email }} ({{ user.name }})
@@ -22,21 +22,29 @@
                     <p class="style-description">
                         Leden: {{ user.members.map(m => m.name).join(', ') }}
                     </p>
-
-                    <button slot="right" class="button text green" @click="acceptUser(user)">
-                        <span class="icon success green" />
-                        <span>Toegang geven</span>
-                    </button>
                 </STListItem>
             </STList>
         </main>
+
+        <STToolbar>
+            <template #left>
+                {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "gebruiker" : "gebruikers" }} geselecteerd
+            </template>
+            <template #right>
+                <LoadingButton :loading="loadingAccepting">
+                    <button class="button primary" :disabled="selectionCount == 0" @click="acceptSelected()">
+                        Toegang geven
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { LoginHelper, SessionManager } from "@stamhoofd/networking";
 import { EncryptedMemberWithRegistrations, MemberWithRegistrations, User } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -47,6 +55,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 class UserWithMembers {
     user: User
     members: MemberWithRegistrations[]
+    selected = false
 
     constructor(user: User, members: MemberWithRegistrations[]) {
         this.user = user
@@ -78,7 +87,8 @@ class UserWithMembers {
         LoadingButton,
         STErrorsDefault,
         STList,
-        STListItem
+        STListItem,
+        Checkbox
     }
 })
 export default class KeysView extends Mixins(NavigationMixin) {
@@ -86,6 +96,9 @@ export default class KeysView extends Mixins(NavigationMixin) {
 
     loading = false
     members: MemberWithRegistrations[] = []
+    users: UserWithMembers[] = []
+
+    loadingAccepting = false
 
     mounted() {
         this.reload().catch(e => {
@@ -102,13 +115,18 @@ export default class KeysView extends Mixins(NavigationMixin) {
                 decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
             })
             this.members = await MemberManager.decryptMembersWithRegistrations(response.data)
+            this.calculateUsers()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
     }
 
-    get users() {
+    get selectionCount() {
+        return this.users.reduce((c, u) => c + (u.selected ? 1 : 0), 0)
+    }
+
+    calculateUsers() {
         const users = new Map<string, UserWithMembers>()
         for (const member of this.members) {
             for (const u of member.users) {
@@ -122,27 +140,40 @@ export default class KeysView extends Mixins(NavigationMixin) {
                 }
             }
         }
-        return [...users.values()]
+        this.users = [...users.values()]
     }
 
-    async acceptUser(user: UserWithMembers) {
+    async acceptSelected() {
+        if (this.loadingAccepting) {
+            return
+        }
+        this.loadingAccepting = true
         try {
-            // Create a separate key for every member because different users might have access
-            for (const member of user.members) {
-                await MemberManager.createNewMemberKey([member])
+            for (const user of this.users) {
+                if (user.selected) {
+                    await this.acceptUser(user)
+                }
             }
-
-            // Update user
-            await LoginHelper.patchUser(SessionManager.currentSession!, User.patch({
-                id: user.user.id,
-                requestKeys: false
-            }))
-            OrganizationManager.organization.privateMeta!.requestKeysCount--
-            await this.reload()
-            new Toast("Alle gebruikers die verbonden zijn met deze leden hebben nu opnieuw toegang tot alle gegevens", "icon success green").show()
+            new Toast("Alle gebruikers die verbonden zijn met deze leden hebben nu opnieuw toegang tot alle gegevens", "success green").show()
         } catch (e) {
             CenteredMessage.fromError(e).show()
         }
+        this.loadingAccepting = false
+        await this.reload()
+    }
+
+    async acceptUser(user: UserWithMembers) {
+        // Create a separate key for every member because different users might have access
+        for (const member of user.members) {
+            await MemberManager.createNewMemberKey([member])
+        }
+
+        // Update user
+        await LoginHelper.patchUser(SessionManager.currentSession!, User.patch({
+            id: user.user.id,
+            requestKeys: false
+        }))
+        OrganizationManager.organization.privateMeta!.requestKeysCount--
     }
 }
 </script>

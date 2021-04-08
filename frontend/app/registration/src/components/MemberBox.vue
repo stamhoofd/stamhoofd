@@ -140,7 +140,7 @@ export default class MemberBox extends Mixins(NavigationMixin){
         if (this.member.details.isRecovered) {
             let meta: MemberDetailsMeta | undefined
             // Only add the steps that are missing for the organization
-            // Don't check for reviews
+            // Don't check for reviews (unless the records, which will be asked if it was never reviewed)
 
             const newToOld = this.member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))
             for (const encryptedDetails of newToOld) {

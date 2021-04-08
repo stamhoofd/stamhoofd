@@ -29,6 +29,9 @@ export class MemberDetailsMeta extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     hasEmergency = false
 
+    /**
+     * Only set to true when it has non-public ones
+     */
     @field({ decoder: BooleanDecoder })
     hasRecords = false
 
@@ -49,7 +52,7 @@ export class MemberDetailsMeta extends AutoEncoder {
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
             hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
             hasEmergency: details.emergencyContacts.length > 0,
-            hasRecords: details.records.length > 0,
+            hasRecords: details.records.filter(r => !RecordTypeHelper.isPublic(r.type)).length > 0,
             isRecovered: details.isRecovered,
             reviewTimes: details.reviewTimes
         })

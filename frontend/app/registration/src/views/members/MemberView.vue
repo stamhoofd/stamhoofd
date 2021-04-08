@@ -152,7 +152,7 @@
                             <dt>GSM-nummer</dt>
                             <dd>{{ contact.phone }}</dd>
                         </dl>
-                        <br>
+                        <hr>
                     </div>
 
                     <div v-if="member.details.doctor">
