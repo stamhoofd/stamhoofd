@@ -89,8 +89,7 @@ export class Session implements RequestMiddleware {
                 const key = localStorage.getItem('key-' + this.organizationId)
                 if (key) {
                     this.authEncryptionKey = key
-
-                    console.log('Successfully loaded token from storage')
+                    // console.log('Successfully loaded token from storage')
                 } else {
                     // Sign out
                     this.token = null
