@@ -98,8 +98,12 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     showDomainSettings = true
+
+    // Needed to make the current session (and user reactive)
+    session = SessionManager.currentSession!
     
     get user() {
+        console.log("user updated!")
         return User.create(SessionManager.currentSession!.user!)
     }
 
@@ -179,7 +183,6 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
                 this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken }).setDisplayStyle("sheet"))
             } else {
                 const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
-                toast.withOffset = true
                 toast.show()
             }
 
@@ -196,7 +199,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         if (!patchContainsChanges(this.userPatch, this.user, { version: Version })) {
             return true;
         }
-        if (await CenteredMessage.confirm("Ben je zeker dat je de instellingen wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {
+        if (await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {
             return true;
         }
         return false;
