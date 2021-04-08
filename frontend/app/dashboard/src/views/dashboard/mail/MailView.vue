@@ -378,8 +378,6 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
         }
 
-        console.log(recipients)
-
         return Array.from(recipients.values())
     }
 
