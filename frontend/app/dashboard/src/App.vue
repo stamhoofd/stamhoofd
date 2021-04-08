@@ -10,7 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
-import { LoginHelper, NetworkManager, Session } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -44,6 +44,9 @@ export default class App extends Vue {
 
     mounted() {
         HistoryManager.activate();
+        SessionManager.restoreLastSession().catch(e => {
+            console.error(e)
+        })
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);

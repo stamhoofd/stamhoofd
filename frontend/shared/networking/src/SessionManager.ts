@@ -25,14 +25,12 @@ export class SessionManagerStatic {
 
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
-    constructor() {
+    async restoreLastSession() {
         const id = this.getSessionStorage().lastOrganizationId
         if (id) {
             const session = this.getSessionForOrganization(id)
             if (session && session.canGetCompleted()) {
-                this.setCurrentSession(session).catch(e => {
-                    console.error(e)
-                })
+                await this.setCurrentSession(session)
             } else {
                 console.log("session can not get completed, no autosignin")
                 console.log(session)

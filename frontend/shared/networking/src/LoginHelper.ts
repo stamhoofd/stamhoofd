@@ -310,7 +310,7 @@ export class LoginHelper {
             session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
-                await session.updateData()
+                await session.updateData(true)
                 return true
             }
 
@@ -618,7 +618,7 @@ export class LoginHelper {
         })
 
         Keychain.addItem(item)
-        await session.updateData()
+        await session.updateData(true)
         await SessionManager.setCurrentSession(session)
     }
 
@@ -778,7 +778,7 @@ export class LoginHelper {
         }
 
         if (session.user!.id === patch.id) {
-            await session.updateData()
+            await session.updateData(true)
         }
         return {}
     }

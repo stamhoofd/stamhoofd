@@ -191,12 +191,7 @@ export class Session implements RequestMiddleware {
 
         // Start loading the user and encryption keys
         if (!preload) {
-            if (this.user) {
-                await this.fetchOrganization()
-                await this.updateKeys()
-            } else {
-                await this.updateData()
-            }
+            await this.updateData()
         }
     }
 
@@ -231,11 +226,16 @@ export class Session implements RequestMiddleware {
         return this.organization
     }
 
-    async updateData() {
+    async updateData(force = false) {
         console.log("Session update data")
         try {
-            await this.fetchOrganization()
-            await this.fetchUser()
+            if (force || !this.user) {
+                await this.fetchUser()
+            }
+
+            if (force || !this.organization || !this.user || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))) {
+                await this.fetchOrganization()
+            }
             await this.updateKeys()
         } catch (e) {
             this.temporaryLogout()
