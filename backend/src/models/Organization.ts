@@ -588,7 +588,19 @@ export class Organization extends Model {
             // Include name in form field
             if (sender.name) {
                 from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            }  else {
+                from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
             }
+
+            if (replyTo) {
+                if (sender.name) {
+                    replyTo = '"'+sender.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                }  else {
+                    replyTo = '"'+this.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                }
+            }
+        } else {
+            from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
         }
 
         return {
