@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 const { Resolver } = require('dns').promises;
 
@@ -570,10 +570,35 @@ export class Organization extends Model {
         return [...keys.values()]
     }
 
-    getDefaultEmail(): { from: string; replyTo: string | undefined } {
+    /**
+     * E-mail address when we receive replies for organization@stamhoofd.email.
+     * Note that this sould be private because it can contain personal e-mail addresses if the organization is not configured correctly
+     */
+    async getReplyEmails(): Promise<{ emails: string; private: boolean } | undefined> {
+        const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
+
+        if (sender) {
+            if (sender.name) {
+                return { emails: '"'+sender.name.replace("\"", "\\\"")+"\" <"+sender.email+">", private: false }
+            }  else {
+                return { emails: '"'+this.name.replace("\"", "\\\"")+"\" <"+sender.email+">", private: false }
+            }
+        }
+
+        const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
+        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+
+        if (filtered.length > 0) {
+            return { emails: filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", "), private: true }
+        }
+
+        return undefined
+    }
+
+    getDefaultEmail(): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
         let from = this.uri+"@stamhoofd.email";
-        const sender = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
+        const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
         let replyTo: string | undefined = undefined
 
         if (sender) {

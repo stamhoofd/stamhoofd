@@ -146,4 +146,13 @@ export class Formatter {
         const m = minutes - h*60
         return h+":"+(m+"").padStart(2, "0")
     }
+
+    static escapeHtml(unsafe: string): string {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 }

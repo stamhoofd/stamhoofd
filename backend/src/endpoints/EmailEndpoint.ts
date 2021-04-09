@@ -2,6 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRequest, Replacement } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import Email, { EmailBuilder } from '../email/Email';
 import { PasswordToken } from '../models/PasswordToken';
@@ -12,54 +13,6 @@ type Params = {};
 type Query = undefined;
 type Body = EmailRequest
 type ResponseBody = undefined;
-
-const matchHtmlRegExp = /["'&<>]/
-function escapeHtml (string) {
-  const str = '' + string
-  const match = matchHtmlRegExp.exec(str)
-
-  if (!match) {
-    return str
-  }
-
-  let escape
-  let html = ''
-  let index = 0
-  let lastIndex = 0
-
-  for (index = match.index; index < str.length; index++) {
-    switch (str.charCodeAt(index)) {
-      case 34: // "
-        escape = '&quot;'
-        break
-      case 38: // &
-        escape = '&amp;'
-        break
-      case 39: // '
-        escape = '&#39;'
-        break
-      case 60: // <
-        escape = '&lt;'
-        break
-      case 62: // >
-        escape = '&gt;'
-        break
-      default:
-        continue
-    }
-
-    if (lastIndex !== index) {
-      html += str.substring(lastIndex, index)
-    }
-
-    lastIndex = index + 1
-    html += escape
-  }
-
-  return lastIndex !== index
-    ? html + str.substring(lastIndex, index)
-    : html
-}
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -219,7 +172,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replace("{{"+replacement.token+"}}", escapeHtml(replacement.value))
+                    html = html.replace("{{"+replacement.token+"}}", Formatter.escapeHtml(replacement.value))
                 }
             }
 
