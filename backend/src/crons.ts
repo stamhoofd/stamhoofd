@@ -195,9 +195,6 @@ async function checkComplaints() {
 
                             const type: "abuse" | "auth-failure" | "fraud" | "not-spam" | "other" | "virus" = b.complaintFeedbackType
 
-                            console.log(type)
-
-                           
                             if (organization) {
                                 for (const recipient of b.complainedRecipients) {
                                     const email = recipient.emailAddress
