@@ -45,7 +45,7 @@
             </p>
 
             <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button" @click="showMissingFirstNames">
-                Niet elk e-mailadres heeft een gekoppelde naam (komt voor als een gebruiker zijn e-mailadres heeft gewijzigd zonder bijhorende lid of ouder aan te passen). Pas aan indien nodig. Daarom dat we geen automatische aanspreking kunnen genereren.
+                Niet elk e-mailadres heeft een gekoppelde naam
                 <span class="button text inherit-color">
                     Toon
                 </span>
@@ -334,33 +334,6 @@ export default class MailView extends Mixins(NavigationMixin) {
                 continue
             }
 
-            if ((member.details.age !== null && member.details.age < 18) || this.includeGrownUpParents) {
-                for (const parent of member.details.parents) {
-                    if (!parent.email) {
-                        continue;
-                    }
-
-                    if (recipients.has(parent.email) && recipients.get(parent.email)!.firstName) {
-                        continue
-                    }
-
-                    recipients.set(parent.email, Recipient.create({
-                        firstName: parent.firstName,
-                        email: parent.email,
-                        replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: parent.firstName
-                            }),
-                            Replacement.create({
-                                token: "email",
-                                value: parent.email
-                            })
-                        ]
-                    }))
-                }
-            }
-
             for (const user of member.users) {
                 if (!user.email) {
                     continue;
@@ -372,7 +345,6 @@ export default class MailView extends Mixins(NavigationMixin) {
                     recipient.userId = user.id
                     continue
                 }
-                // todo: skip parents and member if needed
 
                 recipients.set(user.email, Recipient.create({
                     firstName: user.firstName,
@@ -390,6 +362,45 @@ export default class MailView extends Mixins(NavigationMixin) {
                     // Create sign-in replacement 'signInUrl'
                     userId: user.id
                 }))
+            }
+
+            if ((member.details.age !== null && member.details.age < 18) || this.includeGrownUpParents) {
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
+
+                    const existing = recipients.get(parent.email)
+
+                    if (existing && existing.firstName) {
+                        continue
+                    }
+
+                    recipients.set(parent.email, Recipient.create({
+                        firstName: parent.firstName,
+                        email: parent.email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: parent.firstName
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: parent.email
+                            })
+                        ],
+                        userId: existing?.userId
+                    }))
+                }
+            } else {
+                // Remove parents if they are a user
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
+
+                    recipients.delete(parent.email)
+                }
             }
 
             if (!member.details.email) {
