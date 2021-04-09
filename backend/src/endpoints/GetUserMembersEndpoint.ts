@@ -22,6 +22,13 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const params = Endpoint.parseParameters(request.url, "/members", {});
 
         if (params) {
+            if (request.getVersion() < 71) {
+                throw new SimpleError({
+                    code: "not_supported",
+                    message: "This version is no longer supported",
+                    human: "Oops! Er is een nieuwe versie beschikbaar van de inschrijvingswebsite. Door grote wijzigingen moet je die verplicht gebruiken: herlaad de website en verwijder indien nodig de cache van jouw browser."
+                })
+            }
             return [true, params as Params];
         }
 

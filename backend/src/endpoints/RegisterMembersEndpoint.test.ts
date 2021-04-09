@@ -1,6 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedResponse, Payment, RegisterResponse } from '@stamhoofd/structures';
-import { group } from "console";
+import { RegisterResponse, WaitingListType } from '@stamhoofd/structures';
 
 import { GroupFactory } from '../factories/GroupFactory';
 import { MemberFactory } from '../factories/MemberFactory';
@@ -31,15 +30,19 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
-            members: members.map(m => {
-                return { 
-                    memberId: m.id,
-                    groupId: group.id,
-                    reduced: false,
-                    waitingList: false
-                }
-            }),
+        const r = Request.buildJson("POST", "/v82/members/register", organization.getApiHost(), 
+        {
+            cart: {
+                items: members.map(m => {
+                    return { 
+                        memberId: m.id,
+                        groupId: group.id,
+                        reduced: false,
+                        waitingList: false,
+                        calculatedPrice: 123
+                    }
+                })
+            },
             paymentMethod: "Transfer"
         });
         r.headers.authorization = "Bearer " + token.accessToken
@@ -67,20 +70,28 @@ describe("Endpoint.RegisterMembers", () => {
             delayReducedPrice: 5
          }).create()
 
+        // Enable waiting lists
+        group.settings.waitingListType = WaitingListType.All
+        await group.save()
+
         const user = await userFactory.create()
         const members = await new MemberFactory({ organization, user }).createMultiple(2)
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
-            members: members.map(m => {
-                return { 
-                    memberId: m.id,
-                    groupId: group.id,
-                    reduced: false,
-                    waitingList: true,
-                }
-            }),
+        const r = Request.buildJson("POST", "/v82/members/register", organization.getApiHost(), {
+            cart: {
+                items: members.map(m => {
+                    return { 
+                        memberId: m.id,
+                        groupId: group.id,
+                        reduced: false,
+                        waitingList: true,
+                        calculatedPrice: 0
+                    }
+                }),
+            },
+            
             paymentMethod: "Transfer"
         });
         r.headers.authorization = "Bearer " + token.accessToken
@@ -112,15 +123,18 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
-            members: members.map(m => {
-                return {
-                    memberId: m.id,
-                    groupId: group.id,
-                    reduced: true,
-                    waitingList: false
-                }
-            }),
+        const r = Request.buildJson("POST", "/v82/members/register", organization.getApiHost(), {
+            cart: {
+                items: members.map(m => {
+                    return {
+                        memberId: m.id,
+                        groupId: group.id,
+                        reduced: true,
+                        waitingList: false,
+                        calculatedPrice: 12
+                    }
+                })
+            },
             paymentMethod: "Transfer"
         });
         r.headers.authorization = "Bearer " + token.accessToken
@@ -153,15 +167,18 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
-            members: members.map(m => {
-                return {
-                    memberId: m.id,
-                    groupId: group.id,
-                    reduced: true,
-                    waitingList: false
-                }
-            }),
+        const r = Request.buildJson("POST", "/v82/members/register", organization.getApiHost(), {
+            cart: {
+                items: members.map(m => {
+                    return {
+                        memberId: m.id,
+                        groupId: group.id,
+                        reduced: true,
+                        waitingList: false,
+                        calculatedPrice: 5
+                    }
+                })
+            },
             paymentMethod: "Transfer"
         });
         r.headers.authorization = "Bearer " + token.accessToken
@@ -193,15 +210,18 @@ describe("Endpoint.RegisterMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v19/members/register", organization.getApiHost(), {
-            members: members.map(m => {
-                return {
-                    memberId: m.id,
-                    groupId: group.id,
-                    reduced: false,
-                    waitingList: false
-                }
-            }),
+        const r = Request.buildJson("POST", "/v82/members/register", organization.getApiHost(), {
+            cart: {
+                items: members.map(m => {
+                    return {
+                        memberId: m.id,
+                        groupId: group.id,
+                        reduced: false,
+                        waitingList: false,
+                        calculatedPrice: 10
+                    }
+                })
+            },
             paymentMethod: "Transfer"
         });
         r.headers.authorization = "Bearer " + token.accessToken

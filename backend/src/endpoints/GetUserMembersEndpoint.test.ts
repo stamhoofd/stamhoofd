@@ -28,7 +28,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -59,8 +59,7 @@ describe("Endpoint.GetUserMembers", () => {
                 })
             ).sort(Sorter.byID)
         )
-        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
-        throw new Error("Todo: update")
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.flatMap(m => m.encryptedDetails.filter(e => !e.forOrganization).map(e => e.publicKey)))
     });
 
     test("Request user without members", async () => {
@@ -71,7 +70,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v5/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -95,7 +94,7 @@ describe("Endpoint.GetUserMembers", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -106,8 +105,7 @@ describe("Endpoint.GetUserMembers", () => {
         expect(response.body.keychainItems).toHaveLength(1)
         expect(response.body.data[0]).toMatchObject(EncryptedMember.create(member))
         expect(response.body.data[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
-        //expect(response.body.keychainItems[0].publicKey).toEqual(member.publicKey)
-        throw new Error("Todo: update")
+        expect([response.body.keychainItems[0].publicKey]).toIncludeAllMembers(member.encryptedDetails.filter(e => !e.forOrganization).map(e => e.publicKey))
     });
 
     test("Request user members when signed in when no member is registered yet", async () => {
@@ -117,7 +115,7 @@ describe("Endpoint.GetUserMembers", () => {
         const members = await new MemberFactory({ user, userPrivateKey: userFactory.lastPrivateKey }).createMultiple(2)
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -149,8 +147,7 @@ describe("Endpoint.GetUserMembers", () => {
             ).sort(Sorter.byID)
         )
         
-        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeSameMembers(members.map(m => m.publicKey))
-        throw new Error("Todo: update")
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.flatMap(m => m.encryptedDetails.filter(e => !e.forOrganization).map(e => e.publicKey)))
     });
 
     test("Do not include keychain items of other users when no member is registered yet", async () => {
@@ -168,7 +165,7 @@ describe("Endpoint.GetUserMembers", () => {
         // Continue as normal
         const token = await Token.createToken(userB)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -206,7 +203,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
 
         await expect(endpoint.test(r)).rejects.toThrow(/missing/i)
     });
@@ -216,7 +213,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken + "d"
 
         await expect(endpoint.test(r)).rejects.toThrow(/invalid/i)
@@ -227,7 +224,7 @@ describe("Endpoint.GetUserMembers", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createExpiredToken(user)
 
-        const r = Request.buildJson("GET", "/v1/members", organization.getApiHost());
+        const r = Request.buildJson("GET", "/v82/members", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
         await expect(endpoint.test(r)).rejects.toThrow(/expired/i)

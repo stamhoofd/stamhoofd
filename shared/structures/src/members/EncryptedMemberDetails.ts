@@ -16,7 +16,10 @@ export class MemberDetailsMeta extends AutoEncoder {
 
     /// Date when this was last encrypted by someone who owned the private key (or when it was first encrypted by someone else)
     /// This is used to remove old keys
-    @field({ decoder: DateDecoder, version: 68, upgrade: function (this: MemberDetailsMeta) { return this.date } })
+    @field({ decoder: DateDecoder, version: 68, upgrade: function (this: MemberDetailsMeta) { 
+        throw new Error("Not supported in tests!")
+        return this.date;  
+    } })
     ownerDate: Date = new Date()
 
     // Keep track of the filled tracks

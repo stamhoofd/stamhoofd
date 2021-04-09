@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMember, KeychainedMembers, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
@@ -14,7 +14,7 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
     // Test endpoint
     const endpoint = new PatchUserMembersEndpoint();
 
-    test("Register a new member", async () => {
+    test("Create a new member", async () => {
         const organization = await new OrganizationFactory({}).create()
         const userFactory = new UserFactory({ organization })
         const user = await userFactory.create()
@@ -25,23 +25,15 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
 
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("POST", "/v20/members", organization.getApiHost(), {
-            members: {
-                changes: [
-                    members.map(m => { return {
-                            put: m
-                        }
-                    })
-                ]
-            },
-            keychainItems: {
-                changes: [
-                    keychainItems.map(m => { return {
-                            put: m
-                        }
-                    })
-                ]
-            }
+        const r = Request.buildJson("PATCH", "/v82/members", organization.getApiHost(), {
+            members: members.map(m => { return {
+                    put: m.encode({ version: 82 })
+                }
+            }),
+            keychainItems: keychainItems.map(m => { return {
+                    put: m.encode({ version: 82 })
+                }
+            })
         });
         r.headers.authorization = "Bearer " + token.accessToken
 
@@ -51,9 +43,9 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
+
         expect(response.body.data.map(m => Object.assign({}, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)).toEqual(members.map(m => Object.assign({ registrations: [], users: [UserStruct.create(user)] }, m, { updatedAt: undefined, createdAt: undefined })).sort(Sorter.byID)) // created user won't have any registrations
-        throw new Error("Not yet updated")
-        // expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.map(m => m.publicKey))
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.flatMap(m => m.encryptedDetails.filter(e => !e.forOrganization).map(e => e.publicKey)))
     });
 
     test("Create a new member and update a member", async () => {
@@ -69,22 +61,26 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
 
         const token = await Token.createToken(user)
 
-        const existingMemberEncrypted = EncryptedMember.create({
+        const existingMemberEncrypted = EncryptedMember.patch({
             id: existingMember.id,
             //encryptedForMember: members[0].encryptedForMember,
             //encryptedForOrganization: members[0].encryptedForOrganization,
             //publicKey: existingMember.publicKey,
             //organizationPublicKey: organization.publicKey,
-            firstName: existingMember.firstName
+            firstName: existingMember.firstName+"2"
         })
 
-        const r = Request.buildJson("POST", "/v20/members", organization.getApiHost(), {
-            addMembers: members,
-            updateMembers: [
-                existingMemberEncrypted
-            ],
-            keychainItems: keychainItems
-        });
+        const patch = KeychainedMembers.patch({})
+        for (const member of members) {
+            patch.members.addPut(member)
+        }
+
+        patch.members.addPatch(existingMemberEncrypted)
+
+        for (const keychainItem of keychainItems) {
+            patch.keychainItems.addPut(keychainItem)
+        }
+        const r = Request.buildJson("PATCH", "/v82/members", organization.getApiHost(), patch);
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await endpoint.test(r);
@@ -93,6 +89,8 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
 
         expect(response.body.data).toHaveLength(2)
         expect(response.body.keychainItems).toHaveLength(2)
+
+        existingMember.firstName = existingMemberEncrypted.firstName!
         expect(
             response.body.data.map(
                 m => 
@@ -103,7 +101,7 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
                 )
             .sort(Sorter.byID)
         ).toEqual(
-            [...members, existingMemberEncrypted].map(
+            [...members, EncryptedMember.create(existingMember)].map(
                 m => 
                 Object.assign({ 
                     registrations: [], 
@@ -115,8 +113,6 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
             ).sort(Sorter.byID)
         )
 
-        // tood here!
-        throw new Error("Not yet updated")
-        //expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers([...members, existingMemberEncrypted].map(m => m.publicKey))
+        expect(response.body.keychainItems.map(i => i.publicKey)).toIncludeAllMembers(members.flatMap(m => m.encryptedDetails.filter(e => !e.forOrganization).map(e => e.publicKey)))
     });
 });

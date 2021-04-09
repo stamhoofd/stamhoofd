@@ -243,7 +243,7 @@ export class RegisterCartValidator {
         if (!item.waitingList && canRegister.waitingList) {
             throw new SimpleError({
                 code: "invalid_registration",
-                message: "Registration not possible anymore",
+                message: "Registration not possible anymore, waiting list required",
                 human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
             })
         }
@@ -251,7 +251,7 @@ export class RegisterCartValidator {
         if (item.waitingList && !canRegister.waitingList) {
             throw new SimpleError({
                 code: "invalid_registration",
-                message: "Registration not possible anymore",
+                message: "Waiting list not possible",
                 human: "Je hoeft "+member.firstName+" niet langer op de wachtlijst van "+group.settings.name+" in te schrijven. We hebben het uit je winkelmandje verwijderd, voeg het opnieuw toe zonder wachtlijst."
             })
         }

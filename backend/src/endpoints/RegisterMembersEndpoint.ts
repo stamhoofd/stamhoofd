@@ -3,7 +3,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { IDRegisterCheckout, IDRegisterItem, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterItem, RegisterResponse, Version, WaitingListType } from "@stamhoofd/structures";
+import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Group } from '../models/Group';
@@ -33,6 +33,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const params = Endpoint.parseParameters(request.url, "/members/register", {});
 
         if (params) {
+            if (request.getVersion() < 71) {
+                throw new SimpleError({
+                    code: "not_supported",
+                    message: "This version is no longer supported",
+                    human: "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser."
+                })
+            }
             return [true, params as Params];
         }
         return [false];
