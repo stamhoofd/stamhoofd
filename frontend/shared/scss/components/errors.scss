@@ -11,6 +11,7 @@
     padding: 15px 15px 15px 50px;
     box-sizing: border-box;
     position: relative;
+    margin: 15px 0;
 
     @media (max-width: 450px) {
         font-size: 14px;
@@ -35,6 +36,10 @@
             opacity: 0.8;
         }
     }
+}
+
+.error-box-parent .error-box {
+    margin: 0;
 }
 
 .warning-box {
@@ -128,6 +133,10 @@
 }
 
 .error-box, .success-box, .info-box, .warning-box {
+    +.error-box, +.success-box, +.info-box, +.warning-box  {
+        margin-top: -10px;
+    }
+
     &.selectable {
         touch-action: manipulation;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);

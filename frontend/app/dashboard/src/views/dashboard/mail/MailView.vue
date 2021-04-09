@@ -44,13 +44,6 @@
                 We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
             </p>
 
-            <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button" @click="showMissingFirstNames">
-                Niet elk e-mailadres heeft een gekoppelde naam
-                <span class="button text inherit-color">
-                    Toon
-                </span>
-            </p>
-
             <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
                 <label slot="right" class="button text">
                     <span class="icon add" />
@@ -82,6 +75,27 @@
                     </STList>
                 </template>
             </MailEditor>
+
+            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height">
+                {{ hardBounces.length }} e-mailadressen zijn ongeldig. Deze worden uitgesloten.
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
+
+            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height">
+                {{ hardBounces.length }} e-mailadressen hebben eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
+
+            <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button limit-height" @click="showMissingFirstNames">
+                Niet elk e-mailadres heeft een gekoppelde naam
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
 
             <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
                 E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
@@ -131,6 +145,7 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
@@ -138,7 +153,7 @@ import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
@@ -204,8 +219,35 @@ export default class MailView extends Mixins(NavigationMixin) {
     includeGrownUpParents = false
     includeMinorMembers = false
 
+    checkingBounces = false
+    emailInformation: EmailInformation[] = []
+
     deleteAttachment(index) {
         this.files.splice(index, 1)
+    }
+
+    async checkBounces() {
+        if (this.checkingBounces) {
+            return
+        }
+        this.checkingBounces = true
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/email/check-bounces",
+                body: this.recipients.map(r => r.email),
+                decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+            })
+            this.emailInformation = response.data
+        } catch (e) {
+            console.error(e)
+        }
+        this.checkingBounces = false
+    }
+
+    get hardBounces() {
+        return this.emailInformation.filter(e => e.hardBounce).map(e => e.email)
     }
 
     get hasUnknownAge() {
@@ -252,6 +294,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                 Toast.fromError(e).show()
             })
         }
+
+        this.checkBounces().catch(e => {
+            console.error(e)
+        })
     }
 
     changedFile(event) {

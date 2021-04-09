@@ -83,7 +83,22 @@ export class EmailAddress extends Model {
         return n
     }
 
-     // Methods
+    // Methods
+    static async getByEmails(emails: string[], organizationId: string): Promise<EmailAddress[]> {
+        if (emails.length > 30) {
+            // Normally an organization will never have so much bounces, so we'll request all emails and filter in them
+            const all = await this.where({ organizationId })
+            return all.filter(e => emails.includes(e.email))
+        }
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` = ?`,
+            [emails, organizationId]
+        );
+
+        return this.fromRows(rows, this.table);
+    }
+
+    // Methods
     static async getByEmail(email: string, organizationId: string): Promise<EmailAddress | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` = ? AND \`organizationId\` = ? LIMIT 1`,

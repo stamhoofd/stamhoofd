@@ -1,4 +1,21 @@
-import { ArrayDecoder,AutoEncoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+
+export class EmailInformation extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    email: string
+
+    @field({ decoder: BooleanDecoder })
+    markedAsSpam = false;
+
+    @field({ decoder: BooleanDecoder })
+    hardBounce = false;
+
+    @field({ decoder: BooleanDecoder })
+    unsubscribedMarketing = false;
+
+    @field({ decoder: BooleanDecoder })
+    unsubscribedAll = false;
+}
 
 export class Replacement extends AutoEncoder {
     @field({ decoder: StringDecoder})
