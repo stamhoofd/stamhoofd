@@ -24,6 +24,17 @@ export class RegisterCartValidator {
             }
         }
 
+        // Check if it fits
+        if (member.details) {
+            if (!member.details.doesMatchGroup(group)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: member.details.getMatchingError(group)
+                }
+            }
+        }
+
         // Check all categories maximum limits
         if (this.hasReachedCategoryMaximum(member, group, groups, categories, cart)) {
             // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)

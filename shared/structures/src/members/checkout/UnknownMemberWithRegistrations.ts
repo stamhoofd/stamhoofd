@@ -1,3 +1,5 @@
+import { MemberDetails } from "../MemberDetails";
+
 /**
  * Represent both model and structures
  */
@@ -17,4 +19,9 @@ export interface UnknownMemberWithRegistrations {
     id: string
     registrations: Registration[]
     firstName: string
+
+    /**
+     * Only the decrypted version has details. Backend can't use this
+     */
+    details?: MemberDetails
 }

@@ -53,8 +53,8 @@
 
                 <div>
                     <AddressInput v-if="age >= 18 && !livesAtParents" v-model="address" title="Adres van dit lid" :validator="validator" />
-                    <EmailInput v-if="age >= 11" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="age >= 18" :validator="validator" />
-                    <PhoneInput v-if="age >= 11" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                    <EmailInput v-if="age >= 11 || email" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="age >= 18" :validator="validator" />
+                    <PhoneInput v-if="age >= 11 || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                 </div>
             </div>
         </main>

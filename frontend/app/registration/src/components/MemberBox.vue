@@ -37,7 +37,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
-import { MemberDetailsMeta, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
+import { AskRequirement, MemberDetailsMeta, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Group } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -164,12 +164,12 @@ export default class MemberBox extends Mixins(NavigationMixin){
                 steps.push(EditMemberStepType.Details)
             }
 
-            if (this.member.details.reviewTimes.isOutdated("parents", 60*1000*60*24*31*3)) {
+            if (this.member.details.reviewTimes.isOutdated("parents", 60*1000*60*24*31*3) || this.member.details.parents.length == 0) {
                 steps.push(EditMemberStepType.Parents)
             }
 
             if (!this.item.waitingList) {
-                if (this.member.details.reviewTimes.isOutdated("emergencyContacts", 60*1000*60*24*31*3)) {
+                if (this.member.details.reviewTimes.isOutdated("emergencyContacts", 60*1000*60*24*31*3) || (this.member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)) {
                     steps.push(EditMemberStepType.EmergencyContact)
                 }
 
