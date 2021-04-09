@@ -15,8 +15,6 @@ export default new Migration(async () => {
     for (const organization of organizations) {
         // Undo default root groups
         if (organization.meta.modules.useMembers) {
-            console.log(organization.name)
-
             const groups = await Group.where({ organizationId: organization.id })
             const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
 

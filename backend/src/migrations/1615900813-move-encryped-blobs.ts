@@ -38,7 +38,7 @@ export default new Migration(async () => {
 
         for (const member of members) {
             counter++;
-            if (counter%100 == 0) {
+            if (counter%1000 == 0) {
                 console.log(`Migrating member ${counter}...`)
             }
 
@@ -49,8 +49,6 @@ export default new Migration(async () => {
             if (!member.publicKey) {
                 throw new Error("publicKey not present")
             }
-
-            console.log("Patching "+member.id)
 
             if (member.encryptedForMember !== null) {
                 member.encryptedDetails.push(EncryptedMemberDetails.create({
