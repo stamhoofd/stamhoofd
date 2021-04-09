@@ -146,13 +146,21 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
     mounted() {
         if (this.initialRegisterCode) {
-            localStorage.setItem("savedRegisterCode", this.initialRegisterCode)
+            try {
+                localStorage.setItem("savedRegisterCode", this.initialRegisterCode)
+            } catch (e) {
+                console.error(e)
+            }
         }
 
         if (!this.initialRegisterCode) {
-            const saved = localStorage.getItem("savedRegisterCode")
-            if (saved !== null) {
-                this.registerCode = saved
+            try {
+                const saved = localStorage.getItem("savedRegisterCode")
+                if (saved !== null) {
+                    this.registerCode = saved
+                }
+            } catch (e) {
+                console.error(e)
             }
         }
 

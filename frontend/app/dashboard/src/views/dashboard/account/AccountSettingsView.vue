@@ -45,7 +45,7 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ChangePasswordView,Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ChangePasswordView,Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -156,11 +156,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    shouldNavigateAway() {
+    async shouldNavigateAway() {
         if (!patchContainsChanges(this.userPatch, this.user, { version: Version })) {
             return true;
         }
-        if (confirm("Ben je zeker dat je de instellingen wilt sluiten zonder op te slaan?")) {
+        if (await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {
             return true;
         }
         return false;

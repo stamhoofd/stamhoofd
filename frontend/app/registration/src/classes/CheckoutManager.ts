@@ -29,24 +29,29 @@ export class CheckoutManagerStatic {
     }
 
     loadCheckout(): RegisterCheckout {
-        const json = localStorage.getItem("checkout")
-        if (json) {
-            try {
+        try {
+            const json = localStorage.getItem("checkout")
+            if (json) {
                 const obj = JSON.parse(json)
                 const versionBox = new VersionBoxDecoder(IDRegisterCheckout as Decoder<IDRegisterCheckout>).decode(new ObjectData(obj, { version: Version }))
                 return versionBox.data.convert(OrganizationManager.organization, MemberManager.members ?? [])
-            } catch (e) {
-                console.error("Failed to load cart")
-                console.error(e)
             }
+        } catch (e) {
+            console.error("Failed to load cart")
+            console.error(e)
         }
         return new RegisterCheckout()
     }
 
     saveCheckout() {
-        const data = new VersionBox(this.checkout.convert()).encode({ version: Version })
-        const json = JSON.stringify(data)
-        localStorage.setItem("checkout", json)
+        try {
+            const data = new VersionBox(this.checkout.convert()).encode({ version: Version })
+            const json = JSON.stringify(data)
+            localStorage.setItem("checkout", json)
+        } catch (e) {
+            console.error("Failed to load cart")
+            console.error(e)
+        }
 
         if (this.watchTabBar) {
             this.watchTabBar.badge = this.cart.count === 0 ? "" : this.cart.count+""

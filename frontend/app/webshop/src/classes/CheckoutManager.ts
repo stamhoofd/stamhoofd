@@ -25,25 +25,29 @@ export class CheckoutManagerStatic {
     }
 
     loadCheckout() {
-        const json = localStorage.getItem(WebshopManager.webshop.id+"-checkout")
-        if (json) {
-            try {
+        try {
+            const json = localStorage.getItem(WebshopManager.webshop.id+"-checkout")
+            if (json) {
                 const obj = JSON.parse(json)
                 const versionBox = new VersionBoxDecoder(Checkout as Decoder<Checkout>).decode(new ObjectData(obj, { version: Version }))
                 return versionBox.data
-
-            } catch (e) {
-                console.error("Failed to load cart")
-                console.error(e)
             }
+        } catch (e) {
+            console.error("Failed to load cart")
+            console.error(e)
         }
         return new Checkout()
     }
 
     saveCheckout() {
-        const data = new VersionBox(this.checkout).encode({ version: Version })
-        const json = JSON.stringify(data)
-        localStorage.setItem(WebshopManager.webshop.id+"-checkout", json)
+        try {
+            const data = new VersionBox(this.checkout).encode({ version: Version })
+            const json = JSON.stringify(data)
+            localStorage.setItem(WebshopManager.webshop.id+"-checkout", json)
+        } catch (e) {
+            console.error("Failed to save cart")
+            console.error(e)
+        }
     }
 }
 

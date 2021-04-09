@@ -180,7 +180,11 @@ export class SessionManagerStatic {
     }
 
     saveSessionStorage(storage: SessionStorage) {
-        localStorage.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version })))
+        try {
+            localStorage.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version })))
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     getSessionStorage(): SessionStorage {
