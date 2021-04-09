@@ -2,7 +2,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import nodemailer from "nodemailer"
 import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
-const htmlToText = require('html-to-text');
+import htmlToText from 'html-to-text';
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
