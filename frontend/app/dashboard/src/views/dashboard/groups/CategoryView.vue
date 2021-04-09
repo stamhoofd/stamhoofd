@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view background">
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
@@ -50,8 +50,12 @@
                 </STList>
             </template>
 
-            <p v-if="categories.length == 0 && groups.length == 0 && canCreate" class="info-box">Deze inschrijvingscategorie is leeg, maak zelf inschrijvingsgroepen aan waarin leden kunnen inschrijven.</p>
-            <p v-else-if="categories.length == 0 && groups.length == 0" class="info-box">Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.</p>
+            <p v-if="categories.length == 0 && groups.length == 0 && canCreate" class="info-box">
+                Deze inschrijvingscategorie is leeg, maak zelf inschrijvingsgroepen aan waarin leden kunnen inschrijven.
+            </p>
+            <p v-else-if="categories.length == 0 && groups.length == 0" class="info-box">
+                Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.
+            </p>
 
             <p v-if="categories.length == 0 && canCreate">
                 <button class="button text" @click="createGroup">
@@ -65,10 +69,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -94,6 +98,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     category: GroupCategory
+
+    mounted() {
+        HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
+        document.title = "Stamhoofd - "+ this.category.settings.name
+    }
 
     get reactiveCategory() {
         const c = this.organization.meta.categories.find(c => c.id === this.category.id)

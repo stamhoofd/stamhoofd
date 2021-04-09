@@ -283,7 +283,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         } else {
             if (this.category) {
                 HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
-                document.title = "Stamhoofd - "+ Formatter.slug(this.category.settings.name) +" - Alle leden"
+                document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
             } else {
                 HistoryManager.setUrl("/groups/all")    
                 document.title = "Stamhoofd - Alle leden"

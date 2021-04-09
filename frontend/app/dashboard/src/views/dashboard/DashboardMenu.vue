@@ -125,7 +125,7 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -201,17 +201,26 @@ export default class Menu extends Mixins(NavigationMixin) {
             }
         }
 
-        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
-            if (parts[1] == "all") {
-                this.openAll(false)
-                didSet = true
-            } else {
-                for (const group of this.organization.groups) {
-                    if (parts[1] == Formatter.slug(group.settings.name)) {
-                        this.openGroup(group, false)
-                        didSet = true
-                        break;
+        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
+            for (const category of this.organization.meta.categories) {
+                if (parts[1] == Formatter.slug(category.settings.name)) {
+                    if (parts[2] && parts[2] == "all") {
+                        this.openCategoryMembers(category, false)
+                    } else {
+                        this.openCategory(category, false)
                     }
+                    didSet = true
+                    break;
+                }
+            }
+        }
+
+        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
+            for (const group of this.organization.groups) {
+                if (parts[1] == Formatter.slug(group.settings.name)) {
+                    this.openGroup(group, false)
+                    didSet = true
+                    break;
                 }
             }
         }
@@ -348,6 +357,14 @@ export default class Menu extends Mixins(NavigationMixin) {
     openCategory(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CategoryView, { category }) }).setAnimated(animated));
+    }
+
+    openCategoryMembers(category: GroupCategory, animated = true) {
+        this.currentlySelected = "category-"+category.id
+
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {
+            category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
+        }) }).setAnimated(animated));
     }
 
     openWebshop(webshop: WebshopPreview, animated = true) {
