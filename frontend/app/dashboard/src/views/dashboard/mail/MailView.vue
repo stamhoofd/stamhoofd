@@ -5,11 +5,10 @@
                 <button class="button icon close gray" @click="dismiss" />
             </template>
         </STNavigationBar>
-        <STNavigationTitle>
-            <span class="icon-spacer">E-mail versturen</span>
-        </STNavigationTitle>
 
         <main>
+            <h1>E-mail versturen</h1>
+
             <template v-if="emails.length == 0">
                 <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
                     Stel eerst jouw e-mailadressen in
@@ -76,15 +75,15 @@
                 </template>
             </MailEditor>
 
-            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height">
-                {{ hardBounces.length }} e-mailadressen zijn ongeldig. Deze worden uitgesloten.
+            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
+                {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
                 <span class="button text inherit-color">
                     Toon
                 </span>
             </p>
 
-            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height">
-                {{ hardBounces.length }} e-mailadressen hebben eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
+            <p v-if="spamComplaints.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openSpamComplaints">
+                {{ spamComplaints.length != 1 ? spamComplaints.length +' e-mailadressen hebben' : 'Eén e-mailadres heeft' }} eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
                 <span class="button text inherit-color">
                     Toon
                 </span>
@@ -250,6 +249,10 @@ export default class MailView extends Mixins(NavigationMixin) {
         return this.emailInformation.filter(e => e.hardBounce).map(e => e.email)
     }
 
+    get spamComplaints() {
+        return this.emailInformation.filter(e => e.markedAsSpam).map(e => e.email)
+    }
+
     get hasUnknownAge() {
         return !!this.members.find(m => m.details.age === null)
     }
@@ -330,6 +333,34 @@ export default class MailView extends Mixins(NavigationMixin) {
                 return {
                     email: m.email,
                     members: this.getEmailMemberNames(m.email).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openHardBounces() {
+        const missing = this.hardBounces
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Deze e-mailadressen zijn ongeldig",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via hallo@stamhoofd.be om de blokkering op te heffen.",
+            emails: missing.map((m) => {
+                return {
+                    email: m,
+                    members: this.getEmailMemberNames(m).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openSpamComplaints() {
+        const missing = this.spamComplaints
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Deze e-mailadressen hebben e-mails als spam gemarkeerd",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd door de ontvanger gemarkeerd als spam. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen.",
+            emails: missing.map((m) => {
+                return {
+                    email: m,
+                    members: this.getEmailMemberNames(m).join(", ")
                 }
             })
         }).setDisplayStyle("popup"))

@@ -87,7 +87,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
+                    <tr v-for="order in sortedOrders" :key="order.id" class="selectable" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
                         <td class="prefix" @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>

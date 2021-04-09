@@ -2,7 +2,7 @@
     <div id="import-members-auto-assigned-view" class="st-view background">
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" slot="right" @click="pop" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -28,8 +28,8 @@
                         </td>
                     </tr>
                 </tbody>
-</table>
-</main>
+            </table>
+        </main>
 
         <STToolbar>
             <template slot="right">
@@ -42,16 +42,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import {  NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { ImportError, ImportingMember } from '../../../../../classes/import/ImportingMember';
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 
 @Component({
     components: {

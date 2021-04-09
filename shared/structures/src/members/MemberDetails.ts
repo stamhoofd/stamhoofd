@@ -352,19 +352,36 @@ export class MemberDetails extends AutoEncoder {
      * Return all the e-mail addresses that should have access to this user
      */
     getManagerEmails(): string[] {
-        const emails: string[] = []
+        const emails = new Set<string>()
         if (this.email) {
-            emails.push(this.email)
+            emails.add(this.email)
         }
 
         if (this.age && (this.age < 18 || (this.age < 24 && !this.address))) {
             for (const parent of this.parents) {
                 if (parent.email) {
-                    emails.push(parent.email)
+                    emails.add(parent.email)
                 }
             }
         }
-        return emails
+        return [...emails]
+    }
+
+    /**
+     * Return all the e-mail addresses that should have access to this user
+     */
+    getAllEmails(): string[] {
+        const emails = new Set<string>()
+        if (this.email) {
+            emails.add(this.email)
+        }
+
+        for (const parent of this.parents) {
+            if (parent.email) {
+                emails.add(parent.email)
+            }
+        }
+        return [...emails]
     }
 
     /**

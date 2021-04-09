@@ -2,7 +2,7 @@
     <div id="missing-first-name-view" class="st-view background">
         <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -15,7 +15,10 @@
                         <th>
                             E-mailadres
                         </th>
-                        <th>Leden</th>
+                        <th v-if="hasMembers">
+                            Leden
+                        </th>
+                        <th v-else />
                     </tr>
                 </thead>
                 <tbody>
@@ -23,14 +26,13 @@
                         <td>
                             {{ email.email }}
                         </td>
-                        <td>
+                        <td v-if="hasMembers">
                             {{ email.members }}
                         </td>
+                        <td v-else />
                     </tr>
                 </tbody>
-
             </table>
-
         </main>
 
         <STToolbar>
@@ -64,6 +66,10 @@ export default class MissingFirstNameView extends Mixins(NavigationMixin) {
     
     @Prop({ required: true })
     emails: { email: string; members: string}[]
+
+    get hasMembers() {
+        return !!this.emails.find(e => e.members)
+    }
 
 }
 </script>

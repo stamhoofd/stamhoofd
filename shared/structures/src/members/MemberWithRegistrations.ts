@@ -109,6 +109,17 @@ export class MemberWithRegistrations extends Member {
         return this.paid ? "" : "Lidgeld nog niet betaald";
     }
 
+    getAllEmails(): string[] {
+        const emails = new Set<string>(this.details.getAllEmails())
+
+        for (const user of this.users) {
+            if (user.email) {
+                emails.add(user.email)
+            }
+        }
+        return [...emails]
+    }
+
     canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
         return RegisterCartValidator.canRegister(this, group, family, this.allGroups, categories, cart)
     }

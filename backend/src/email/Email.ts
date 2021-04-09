@@ -1,6 +1,7 @@
-import { String } from 'aws-sdk/clients/cloudhsm';
+import { DataValidator } from '@stamhoofd/utility';
 import nodemailer from "nodemailer"
 import Mail from 'nodemailer/lib/mailer';
+import { EmailAddress } from '../models/EmailAddress';
 const htmlToText = require('html-to-text');
 
 function sleep(ms: number) {
@@ -78,11 +79,98 @@ class Email {
             }
 
             this.sending = true;
-            this.doSend(next).finally(() => {
+            this.doSend(next).catch(e => {
+                console.error(e)
+            }).finally(() => {
                 this.sending = false
                 this.sendNextIfNeeded()
             })
         }
+    }
+
+    /**
+     * Get the raw email
+     */
+    parseEmail(emailStr: string): string[] {
+        let insideQuote = false
+        let escaped = false
+        let inAddr = false
+        let email = ""
+        let didFindAddr = false
+        let cleanedStr = ""
+
+        const addresses: string[] = []
+
+        function endAddress() {
+            let m: string
+            if (didFindAddr) {
+                m = email.trim()
+            } else {
+                m = cleanedStr.trim()
+            }
+            if (DataValidator.isEmailValid(m)) {
+                addresses.push(m)
+            }
+            didFindAddr = false
+            email = ""
+            inAddr = false
+            insideQuote = false
+            escaped = false
+            cleanedStr = ""
+        }
+
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
+        for (let index = 0; index < emailStr.length; index++) {
+            const shouldEscape = escaped
+            if (escaped) {
+                escaped = false
+            }
+            const character = emailStr[index];
+            if (insideQuote) {
+                if (character === "\\") {
+                    escaped = true
+                    continue
+                }
+            }
+
+            if (!shouldEscape) {
+                if (character === "\"") {
+                    if (insideQuote) {
+                        insideQuote = false
+                        continue
+                    }
+                    insideQuote = true
+                    continue
+                }
+
+                if (!insideQuote) {
+                    if (character === "<") {
+                        inAddr = true
+                        continue
+                    }
+
+                    if (character === ">") {
+                        inAddr = false
+                        didFindAddr = true
+                        continue
+                    }
+
+                    if (character === ",") {
+                        // End previous address
+                        endAddress()
+                        continue
+                    }
+                }
+            }
+
+            if (inAddr) {
+                email += character
+            }
+            cleanedStr += character
+        }
+
+        endAddress()
+        return addresses
     }
 
     private async doSend(data: EmailInterface) {
@@ -91,13 +179,38 @@ class Email {
             return;
         }
 
+        // Check if this email is not marked as spam
+        // Filter recipients if bounced or spam
+        const parsedEmails = this.parseEmail(data.to)
+        if (parsedEmails.length === 0) {
+            // Invalid string
+            console.warn("Invalid e-mail string: '"+data.to+"'. E-mail skipped")
+            return
+        }
+
+        // Check spam and bounces
+        const matches = await EmailAddress.filterSendTo(parsedEmails)
+
+        if (matches.length === 0) {
+            // Invalid string
+            console.warn("Filtered all emails due hard bounce or spam '"+data.to+"'. E-mail skipped")
+            return
+        }
+
+        let to = data.to
+
+        if (matches.length !== parsedEmails.length) {
+            // Rebuild to (names are removed for now)
+            to = matches.join(", ")
+        }
+
         this.setupIfNeeded();
 
         // send mail with defined transport object
         const mail: any = {
             from: data.from, // sender address
             replyTo: data.replyTo,
-            to: process.env.NODE_ENV === "production" ? data.to : "hallo@stamhoofd.be",
+            to: process.env.NODE_ENV === "production" ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text ?? "" // plain text body
         };

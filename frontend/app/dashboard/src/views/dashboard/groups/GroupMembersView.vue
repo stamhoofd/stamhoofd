@@ -94,7 +94,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
+                    <tr v-for="member in sortedMembers" :key="member.id" class="selectable" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
                         <td class="prefix" @click.stop="">
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>

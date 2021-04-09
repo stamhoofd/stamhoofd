@@ -112,4 +112,19 @@ export class EmailAddress extends Model {
         // Read member + address from first row
         return this.fromRow(rows[0][this.table]);
     }
+
+    // Methods
+    static async filterSendTo(emails: string[]): Promise<string[]> {
+        const [results] = await Database.select(
+            `SELECT email FROM ${this.table} WHERE \`email\` IN (?) AND (\`hardBounce\` = 1 OR \`markedAsSpam\` = 1)`,
+            [emails]
+        );
+
+        const remove = results.map(r => r[this.table]['email'])
+        if (remove.length == 0) {
+            return emails
+        }
+
+        return emails.filter(r => !remove.includes(r))
+    }
 }

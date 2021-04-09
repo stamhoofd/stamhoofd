@@ -34,7 +34,10 @@
 
                     <template v-if="member.details.email">
                         <dt>E-mailadres</dt>
-                        <dd>{{ member.details.email }}</dd>
+                        <dd>
+                            {{ member.details.email }}
+                            <span v-if="getInvalidEmailDescription(member.details.email)" v-tooltip="getInvalidEmailDescription(member.details.email)" class="icon warning yellow" />
+                        </dd>
                     </template>
 
                     <template v-if="member.details.address">
@@ -110,7 +113,10 @@
 
                     <template v-if="parent.email">
                         <dt>E-mailadres</dt>
-                        <dd>{{ parent.email }}</dd>
+                        <dd>
+                            {{ parent.email }}
+                            <span v-if="getInvalidEmailDescription(parent.email)" v-tooltip="getInvalidEmailDescription(parent.email)" class="icon warning yellow" />
+                        </dd>
                     </template>
 
                     <template v-if="parent.address">
@@ -261,6 +267,7 @@
                 </h2>
                 <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
                     <span>{{ user.email }}</span>
+                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                     <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" />
                 </p>
             </template>
@@ -275,7 +282,8 @@
                     />
                 </h2>
                 <p v-for="user in placeholderAccounts" :key="user.id" class="account">
-                    {{ user.email }}
+                    <span>{{ user.email }}</span>
+                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                 </p>
             </template>
 
@@ -290,10 +298,11 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { Keychain } from "@stamhoofd/networking";
-import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
+import { Keychain, SessionManager } from "@stamhoofd/networking";
+import { EmailInformation, EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -325,9 +334,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     loadingComplete = false
 
+    checkingBounces = false
+    emailInformation: EmailInformation[] = []
+
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+        this.checkBounces().catch(e => console.error(e))
     }
 
     getGroup(groupId: string) {
@@ -375,6 +388,44 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get shouldSkipRecords() {
         return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
+    }
+
+    getInvalidEmailDescription(email: string) {
+        const find = this.emailInformation.find(e => e.email === email)
+        if (!find) {
+            return null
+        }
+        if (find.markedAsSpam) {
+            return "Heeft e-mail als spam gemarkeerd"
+        }
+        if (find.hardBounce) {
+            return "Ongeldig e-mailadres"
+        }
+        return null
+    }
+
+    async checkBounces() {
+        if (this.checkingBounces) {
+            return
+        }
+        this.checkingBounces = true
+        const emails = this.member.getAllEmails()
+
+        if (emails.length > 0) {
+            try {
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/email/check-bounces",
+                    body: emails,
+                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+                })
+                this.emailInformation = response.data
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        this.checkingBounces = false
     }
 
     async markAsComplete() {
