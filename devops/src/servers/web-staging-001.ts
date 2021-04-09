@@ -21,9 +21,6 @@ const config: ServerConfig = {
             ...digitaloceanSpaces,
             ...mollieDevelopment
         }
-        
-        
-
     }, // If is also will serve the backend
     domains: {
         dashboard: "staging.stamhoofd.app",         // requires @. + www.

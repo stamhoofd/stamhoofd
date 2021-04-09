@@ -30,7 +30,8 @@ import GroupBox from "./GroupBox.vue"
         STListItem,
         LoadingView,
         Checkbox,
-        GroupBox
+        GroupBox,
+        GroupTree // this is required because in production vue can't resolve the name by itself
     },
     directives: {
         tooltip: TooltipDirective

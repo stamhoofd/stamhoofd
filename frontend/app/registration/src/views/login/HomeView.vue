@@ -61,38 +61,15 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ConfirmEmailView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components"
-import { LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
 import LoginView from './LoginView.vue';
 import SignupView from './SignupView.vue';
-
-const throttle = (func, limit) => {
-    let lastFunc;
-    let lastRan;
-    return function() {
-        const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
-            clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if (Date.now() - lastRan >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
-        }
-    };
-};
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
