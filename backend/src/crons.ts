@@ -45,6 +45,10 @@ async function checkDNS() {
 }
 
 async function checkReplies() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping replies checking")
+        return
+    }
     console.log("Checking replies from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
@@ -99,12 +103,17 @@ async function checkReplies() {
 }
 
 async function checkBounces() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping bounce checking")
+        return
+    }
     console.log("Checking bounces from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log("Received bounce message");
+            console.log(message);
 
             if (message.ReceiptHandle) {
                 if (process.env.NODE_ENV === "production") {
@@ -160,6 +169,11 @@ async function checkBounces() {
 }
 
 async function checkComplaints() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping complaints checking")
+        return
+    }
+
     console.log("Checking complaints from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue", MaxNumberOfMessages: 10 }).promise()
