@@ -23,6 +23,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import GroupBox from "./GroupBox.vue"
 
 @Component({
+    name: "GroupTree", // required for recursive component + minification of vue
     components: {
         STNavigationBar,
         STToolbar,
@@ -30,8 +31,7 @@ import GroupBox from "./GroupBox.vue"
         STListItem,
         LoadingView,
         Checkbox,
-        GroupBox,
-        GroupTree // this is required because in production vue can't resolve the name by itself
+        GroupBox
     },
     directives: {
         tooltip: TooltipDirective

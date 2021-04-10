@@ -18,12 +18,11 @@
         </STNavigationBar>
 
         <main class="limit-width">
-            <figure v-if="bannerImageSrc" class="webshop-banner">
-                <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
-            </figure>
-
             <section class="white-top view">
                 <main>
+                    <figure v-if="bannerImageSrc" class="webshop-banner">
+                        <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
+                    </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
                     <p v-text="webshop.meta.description" />
                 </main>
@@ -286,9 +285,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
         padding-bottom: 300 / 720 * 100%;
         background: $color-gray;
         border-radius: $border-radius;
-        margin-bottom: 40px;
-        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+        margin-bottom: 30px;
+        margin-top: -20px;
         position: relative;
+
+        @media (max-width: 801px) {
+            margin-bottom: 20px;
+        }
 
         img {
             position: absolute;
@@ -306,12 +309,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
     > main {
         @extend .main-text-container;
 
-        > h1 {
+        .white-top > main > h1 {
             @extend .style-huge-title-1;
             padding-bottom: 15px;
 
             + p {
-                 white-space: pre-wrap;
+                @extend .style-description;
+                white-space: pre-wrap;
             }
         }
 
