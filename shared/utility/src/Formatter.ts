@@ -155,4 +155,15 @@ export class Formatter {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+
+    static joinLast(array: (string | number)[], separator: string | undefined, lastSeparator: string | undefined): string {
+        const last = array.pop()
+        if (last === undefined) {
+            return ""
+        }
+        if (array.length == 0) {
+            return last+""
+        }
+        return array.join(separator)+lastSeparator+last
+    }
 }

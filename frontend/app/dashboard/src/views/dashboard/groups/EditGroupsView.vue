@@ -39,7 +39,7 @@ import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-nav
 import { BackButton, Checkbox, FemaleIcon, MaleIcon, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Logger } from '@stamhoofd/logger';
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
+import { Group, GroupGenderType,GroupPrivateSettings,GroupSettings, OrganizationPatch } from '@stamhoofd/structures';
 import { OrganizationGenderType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -79,7 +79,8 @@ export default class EditGroupsView extends Mixins(NavigationMixin) {
                 registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
-            })
+            }),
+            privateSettings: GroupPrivateSettings.create({})
         })
 
         const organizationPatch = OrganizationPatch.create({

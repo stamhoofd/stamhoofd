@@ -45,12 +45,10 @@
                         {{ group.settings.location }}
                     </template>
                 </STListItem>
-                <STListItem class="right-description">
+                <STListItem class="right-description wrap">
                     Wie?
 
-                    <template slot="right">
-                        {{ who }}
-                    </template>
+                    <div slot="right" v-text="who" />
                 </STListItem>
             </STList>
         </main>
@@ -70,9 +68,9 @@ import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } f
 import { Group, GroupGenderType, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { OrganizationManager } from "../../../../dashboard/src/classes/OrganizationManager";
 import { CheckoutManager } from "../../classes/CheckoutManager";
-
 import { MemberManager } from "../../classes/MemberManager";
 import GroupTag from "../../components/GroupTag.vue"
 import MemberBox from "../../components/MemberBox.vue"
@@ -195,6 +193,7 @@ export default class GroupView extends Mixins(NavigationMixin){
 
     get who() {
         let who = ""
+
         if (this.group.settings.minAge && this.group.settings.maxAge) {
             if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
                 if (this.group.settings.minAge >= 18) {
@@ -253,6 +252,16 @@ export default class GroupView extends Mixins(NavigationMixin){
                 who += "Vrouwen/Meisjes"
             }
         }
+
+        if (this.group.settings.requireGroupIds) {
+            const prefix = Formatter.joinLast(this.group.settings.requireGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            if (!who) {
+                who += prefix
+            } else {
+                who = prefix + "\n" + who
+            }
+        }
+
 
         if (!who) {
             return "Iedereen kan inschrijven"

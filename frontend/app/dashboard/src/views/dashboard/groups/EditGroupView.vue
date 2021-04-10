@@ -174,6 +174,38 @@
                     Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. Let er dus op dat die leden ook in Stamhoofd zijn ingeladen. Je kan leden van vorig jaar importeren via Excel en bij de importeer-instellingen aanduiden dat het gaat om leden van vorig jaar. Leden moeten wel inloggen met een e-mailadres dat verbonden is met een bestaand account. Daarom verstuur je best een e-mail naar alle leden met de magische knop waarmee ze automatisch met het juiste account inloggen (of registreren).
                 </p>
 
+                <template v-if="useActivities">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verplicht ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.requireGroupIds.length == 0" class="button text" @click="editRequireGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editRequireGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Geef leden enkel toegang om in te schrijven als ze al ingeschreven zijn voor één van de volgende inschrijvingsgroepen. Laat leeg als je ook nieuwe leden wil laten inschrijven.</p>
+
+                    <STList v-if="patchedGroup.settings.requireGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.requireGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removeRequireGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen verplichte andere inschrijvingen
+                    </p>
+                </template>
+
                 <hr>
                 <h2 class="style-with-button">
                     <div>Omslagfoto</div>
@@ -247,16 +279,16 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
 import { GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionRow from "../admins/GroupPermissionRow.vue"
 import EditGroupPriceBox from "./EditGroupPriceBox.vue"
+import SelectGroupsView from './SelectGroupsView.vue';
 
 @Component({
     components: {
@@ -280,7 +312,8 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         BackButton,
         STList,
         GroupPermissionRow,
-        UploadButton
+        UploadButton,
+        STListItem
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
@@ -340,6 +373,10 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
     }
 
+    get useActivities() {
+        return this.patchedOrganization.meta.modules.useActivities
+    }
+
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)
     }
@@ -354,6 +391,47 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     get roles() {
         return this.patchedOrganization.privateMeta?.roles ?? []
+    }
+
+    getGroupName(id: string) {
+        const group = this.patchedOrganization.groups.find(g => g.id === id)
+        if (!group) {
+            // Search deleted groups (in non patched one)
+            const deleted = OrganizationManager.organization.groups.find(g => g.id === id)
+            if (deleted) {
+                return deleted.settings.name +" (verwijderd)"
+            }
+            return "Verwijderde inschrijvingsgroep (verwijder dit best)"
+        }
+        return group.settings.name
+    }
+ 
+    editRequireGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.requireGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.requireGroupIds.includes(id)) {
+                        diff.requireGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.requireGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.requireGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removeRequireGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.requireGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
     }
 
     addOrganizationPatch(patch: AutoEncoderPatchType<Organization> ) {

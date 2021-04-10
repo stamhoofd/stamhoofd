@@ -84,6 +84,12 @@ a.st-list-item {
         }
     }
 
+    &.right-description.wrap {
+        > .main > div > .right {
+            white-space: pre-wrap;
+        }
+    }
+
     &.right-stack {
         .right {
             display: flex;

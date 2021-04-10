@@ -1,4 +1,5 @@
 import { SimpleError } from "@simonbackx/simple-errors"
+import { Formatter } from "@stamhoofd/utility"
 
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
@@ -31,6 +32,18 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: member.details.getMatchingError(group)
+                }
+            }
+        }
+
+        // Check if registrations are limited
+        if (group.settings.requireGroupIds) {
+            if (!member.registrations.find(r => group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Niet toegelaten",
+                    description: "Inschrijving bij "+Formatter.joinLast(group.settings.requireGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")+" is verplicht voor je kan inschrijven voor "+group.settings.name
                 }
             }
         }
