@@ -44,6 +44,13 @@
                 We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
             </p>
 
+            <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button" @click="showMissingFirstNames">
+                Niet elk e-mailadres heeft een gekoppelde naam (komt voor als een gebruiker zijn e-mailadres heeft gewijzigd zonder bijhorende lid of ouder aan te passen). Pas aan indien nodig. Daarom dat we geen automatische aanspreking kunnen genereren.
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
+
             <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
                 <label slot="right" class="button text">
                     <span class="icon add" />
@@ -139,6 +146,7 @@ import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import { EmailStyler } from './EmailStyler';
+import MissingFirstNameView from './MissingFirstNameView.vue';
 
 class TmpFile {
     name: string;
@@ -267,6 +275,20 @@ export default class MailView extends Mixins(NavigationMixin) {
         return !this.recipients.find(r => r.firstName == null)
     }
 
+    showMissingFirstNames() {
+        const missing = this.recipients.filter(r => r.firstName == null)
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Ontbrekende namen",
+            description: "Voor deze e-mailadressen konden we geen voornaam terugvinden. Kijk na of ze wel aanwezig zijn als ouder of lid in het systeem. Meestal komt dit voor omdat ze puur als gebruiker gekoppeld zijn, en die hebben geen namen. Om dit op te lossen kan je ofwel het e-mailadres wijzigen of het e-maialdres toevoegen bij één van de ouders of het lid zelf.",
+            emails: missing.map((m) => {
+                return {
+                    email: m.email,
+                    members: this.getEmailMemberNames(m.email).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
     get hasAllUsers() {
         return !this.recipients.find(r => r.userId === null)
     }
@@ -276,6 +298,32 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (!hasAllUsers) {
             this.addButton = false
         }
+    }
+
+    getEmailMemberNames(email: string) {
+        const names = new Set<string>()
+
+        for (const member of this.members) {
+            if (member.details.email === email) {
+                names.add(member.name)
+                continue;
+            }
+
+            for (const parent of member.details.parents) {
+                if (parent.email === email) {
+                    names.add(member.name)
+                    break;
+                }
+            }
+
+            for (const user of member.users) {
+                if (user.email === email) {
+                    names.add(member.name)
+                    break;
+                }
+            }
+        }
+        return [...names.values()]
     }
 
     get recipients(): Recipient[] {
