@@ -1,5 +1,5 @@
 <template>
-    <STList>
+    <STList class="payment-selection-list">
         <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
             <Radio slot="left" v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
             <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
@@ -135,26 +135,28 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-.payment-method-logo {
-    max-height: 30px;
+.payment-selection-list {
+    .payment-method-logo {
+        max-height: 30px;
 
-    &.bancontact {
-        max-height: 38px;
-        margin: -4px 0 !important; // Fix white borders in bancontact logo
+        &.bancontact {
+            max-height: 38px;
+            margin: -4px 0 !important; // Fix white borders in bancontact logo
+        }
     }
-}
 
-.payment-app-logo {
-    height: 35px;
-}
+    .payment-app-logo {
+        height: 35px;
+    }
 
-.payment-app-banner {
-    display: flex;
-    flex-direction: row;
-    padding-top: 10px;
+    .payment-app-banner {
+        display: flex;
+        flex-direction: row;
+        padding-top: 10px;
 
-    > * {
-        margin-right: 5px
+        > * {
+            margin-right: 5px
+        }
     }
 }
 
