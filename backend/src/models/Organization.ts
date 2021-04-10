@@ -532,6 +532,13 @@ export class Organization extends Model {
 
             }).promise()
             this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
+
+            // Disable email forwarding of bounces and complaints
+            // We handle this now with the configuration set
+            await sesv2.putEmailIdentityFeedbackAttributes({
+                EmailIdentity: this.privateMeta.mailDomain,
+                EmailForwardingEnabled: false
+            }).promise()
         }
 
         if (this.privateMeta.mailFromDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.privateMeta.mailFromDomain)))) {
