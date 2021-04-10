@@ -102,11 +102,12 @@ describe("ForwardHandler", () => {
             dkimVerdict: { status: 'PASS' },
             dmarcVerdict: { status: 'PASS' },
         })
+
         expect(options).toMatchObject({
-            to: user.email+", "+user2.email,
             subject: "Hello",
             replyTo: "someone@example.com"
         })
+        expect(options!.to).toBeOneOf([user.email+", "+user2.email, user2.email+", "+user.email])
         expect(options!.text).toContain("Content hier")
 
         // Check notice

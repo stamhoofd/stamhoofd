@@ -65,7 +65,7 @@ export class Server {
         await ssh.connect({
             host: this.config.ssh.ip,
             username: user ?? this.config.ssh.user,
-            privateKey: homedir+'/.ssh/id_rsa'
+            privateKey: homedir+'/.ssh/id_ed25519'
         })
         console.log("Connected.")
         return ssh
