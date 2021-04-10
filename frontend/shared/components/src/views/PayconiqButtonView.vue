@@ -19,7 +19,7 @@
                 <span>Het lukt niet</span>
             </button>
             <LoadingButton slot="right" :loading="payment && payment.status == 'Pending'">
-                <a :href="paymentUrl" class="button primary">
+                <a :href="paymentUrl" class="button primary open-app">
                     <span class="icon external" /><span>Open de app</span>
                 </a>
             </LoadingButton>
@@ -30,6 +30,7 @@
 <script lang="ts">
 import { STToolbar, LoadingButton, STNavigationBar, EmailInput, STErrorsDefault, CenteredMessage } from "@stamhoofd/components"
 import { Component, Prop } from "vue-property-decorator";
+import { CenteredMessageButton } from "../overlays/CenteredMessage";
 import PayconiqBannerView from "./PayconiqBannerView.vue";
 
 @Component({
@@ -88,7 +89,9 @@ export default class PayconiqButtonView extends PayconiqBannerView {
 
     helpMe() {
         if (this.getOS() == "iOS") {
-            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.")
+            .addCloseButton()
+            .show()
         } else {
             new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.").addCloseButton().show()
         }
@@ -102,6 +105,11 @@ export default class PayconiqButtonView extends PayconiqBannerView {
 
     .payment-app-logo {
         height: 40px;
+    }
+
+    .open-app {
+        // Prevent opening in a new tab -> breaks opening
+        -webkit-touch-callout: none;
     }
 }
 

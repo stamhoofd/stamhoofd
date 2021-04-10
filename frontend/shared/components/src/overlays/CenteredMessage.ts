@@ -4,6 +4,7 @@ export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unkn
 
 export class CenteredMessageButton {
     text: string
+    href?: string
     action: (() => Promise<any>) | null = null
     type: "destructive" | "secundary" | "primary"
     icon: string | null = null
@@ -13,11 +14,13 @@ export class CenteredMessageButton {
         action?: (() => Promise<any>);
         type?: "destructive" | "secundary" | "primary";
         icon?: string ;
+        href?: string
     }) {
         this.text = text
         this.action = settings?.action ?? null
         this.type = settings?.type ?? "primary"
         this.icon = settings?.icon ?? null
+        this.href = settings?.href
 
     }
 }
