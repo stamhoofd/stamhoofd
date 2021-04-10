@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization } from '../models/Organization';
 import SES from 'aws-sdk/clients/sesv2';
+import { sleep } from '../helpers/Sleep';
 
 async function setAWSConfigurationSet(this: Organization) {
         if (this.privateMeta.mailDomain === null) {
@@ -15,7 +16,7 @@ async function setAWSConfigurationSet(this: Organization) {
 
         if (process.env.NODE_ENV != "production") {
             // Temporary ignore this
-            //return;
+            return;
         }
 
         const sesv2 = new SES();
@@ -29,12 +30,19 @@ async function setAWSConfigurationSet(this: Organization) {
             if (existing.ConfigurationSetName !== "stamhoofd-domains") {
                 console.log("Updating configuration set name @"+this.id+" for "+this.privateMeta.mailDomain)
 
+                // Prevent rate limit hitting
+                sleep(200)
 
                 await sesv2.putEmailIdentityConfigurationSetAttributes({
                     EmailIdentity: this.privateMeta.mailDomain,
                     ConfigurationSetName: "stamhoofd-domains"
                 }).promise()
             }
+
+            // Prevent rate limit hitting
+            sleep(200)
+
+            console.log("Updating EmailForwardingEnabled @"+this.id+" for "+this.privateMeta.mailDomain)
 
             // Disable email forwarding of bounces and complaints
             // We handle this now with the configuration set
@@ -43,10 +51,13 @@ async function setAWSConfigurationSet(this: Organization) {
                 EmailForwardingEnabled: false
             }).promise()
         } catch (e) {
-            console.log("Missing identity @"+this.id+" for "+this.privateMeta.mailDomain)
+            console.error("Missing identity @"+this.id+" for "+this.privateMeta.mailDomain)
             console.error(e)
             // todo
         }
+
+        // Prevent rate limit hitting
+        sleep(300)
     }
     
 export default new Migration(async () => {

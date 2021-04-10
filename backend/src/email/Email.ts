@@ -4,10 +4,6 @@ import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export type EmailInterfaceBase = {
     to: string;
     replyTo?: string;
