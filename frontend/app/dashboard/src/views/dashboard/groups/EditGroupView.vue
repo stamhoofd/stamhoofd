@@ -174,7 +174,7 @@
                     Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. Let er dus op dat die leden ook in Stamhoofd zijn ingeladen. Je kan leden van vorig jaar importeren via Excel en bij de importeer-instellingen aanduiden dat het gaat om leden van vorig jaar. Leden moeten wel inloggen met een e-mailadres dat verbonden is met een bestaand account. Daarom verstuur je best een e-mail naar alle leden met de magische knop waarmee ze automatisch met het juiste account inloggen (of registreren).
                 </p>
 
-                <template v-if="useActivities">
+                <template v-if="useActivities || patchedGroup.settings.requireGroupIds.length > 0">
                     <hr>
                     <h2 class="style-with-button">
                         <div>Verplicht ingeschreven bij...</div>

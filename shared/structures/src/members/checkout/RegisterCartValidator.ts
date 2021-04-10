@@ -37,7 +37,7 @@ export class RegisterCartValidator {
         }
 
         // Check if registrations are limited
-        if (group.settings.requireGroupIds) {
+        if (group.settings.requireGroupIds.length > 0) {
             if (!member.registrations.find(r => group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
                 return {
                     closed: true,

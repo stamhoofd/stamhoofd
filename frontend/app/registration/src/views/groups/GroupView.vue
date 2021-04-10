@@ -253,7 +253,7 @@ export default class GroupView extends Mixins(NavigationMixin){
             }
         }
 
-        if (this.group.settings.requireGroupIds) {
+        if (this.group.settings.requireGroupIds.length > 0) {
             const prefix = Formatter.joinLast(this.group.settings.requireGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
             if (!who) {
                 who += prefix
