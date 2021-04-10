@@ -1,8 +1,8 @@
 <template>
-    <div class="st-view" id="settings-view">
+    <div id="settings-view" class="st-view">
         <STNavigationBar title="Instellingen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -12,7 +12,7 @@
         
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Domeinnaam" error-fields="mailDomain" :error-box="errorBox" >
+            <STInputBox title="Domeinnaam" error-fields="mailDomain" :error-box="errorBox">
                 <input
                     v-model="mailDomain"
                     class="input"
@@ -26,7 +26,7 @@
         <STToolbar>
             <template slot="right">
                 <button v-if="isAlreadySet" class="button secundary" @click="deleteMe">
-                    <span class="icon trash"/>
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <LoadingButton :loading="saving">
@@ -40,14 +40,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Organization, OrganizationDomains } from "@stamhoofd/structures"
+import { Component, Mixins } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 import DNSRecordsView from './DNSRecordsView.vue';
 
 @Component({
@@ -72,7 +73,6 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         const d = this.mailDomain;
         if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
             return false
-        } else {
         }
         return true
     }

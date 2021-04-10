@@ -75,10 +75,21 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 })
             }
 
-            organization.registerDomain = request.body.registerDomain?.toLowerCase() ?? null
-
+            organization.privateMeta.pendingRegisterDomain = request.body.registerDomain?.toLowerCase() ?? null
             organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
-            organization.privateMeta.mailDomain = null
+
+            // We don't keep the current register domain because we have no way to validate the old DNS-records
+            if (organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
+                organization.registerDomain = null
+            }
+
+            // We don't keep the current mail domain because we have no way to validate the old DNS-records
+            if (organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
+                organization.privateMeta.mailDomain = null
+            }
+
+            // Always temporary disable mail domain until validated
+            organization.privateMeta.mailDomainActive = false
 
             // Reset notification counters
             organization.serverMeta.DNSRecordWarningCount = 0
@@ -90,6 +101,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             if (organization.registerDomain === null && request.body.mailDomain !== null) {
                 // We set a custom domainname for webshops already
                 // This doesn't work atm
+                organization.privateMeta.mailFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.CNAME,
                     name: "stamhoofd." + organization.privateMeta.pendingMailDomain + ".",
@@ -97,6 +109,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }))
             } else if (organization.registerDomain !== null && request.body.mailDomain !== null) {
                 // CNAME domain: for SPF + MX + A record
+                organization.privateMeta.mailFromDomain = organization.registerDomain;
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.CNAME,
                     name: organization.registerDomain+".",

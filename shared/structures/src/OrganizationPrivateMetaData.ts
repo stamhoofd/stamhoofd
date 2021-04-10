@@ -57,10 +57,23 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     dnsRecords: DNSRecord[] = [];
 
     /**
+     * Register domain that is awaiting validation
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 84 })
+    pendingRegisterDomain: string | null = null
+
+    /**
      * Mail domain that is awaiting validation
      */
     @field({ decoder: StringDecoder, nullable: true, version: 6 })
     pendingMailDomain: string | null = null
+
+    /**
+     * The mail from domain that should be used (if validated).
+     * This domain should have the SPF record and MX records needed to handle bounces
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 84 })
+    mailFromDomain: string | null = null
 
     /**
      * Mail domain that is used to send e-mails. You can't set this directly, the server will set this value as soon as the domain has been validated.

@@ -176,7 +176,7 @@ export class Organization extends Model {
     }
 
     getHost(): string {
-        if (this.registerDomain) {
+        if (this.registerDomain && this.privateMeta.mailDomainActive) {
             return this.registerDomain;
         }
         return this.getDefaultHost()
@@ -261,6 +261,10 @@ export class Organization extends Model {
         resolver.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
 
         let allValid = true
+
+        // If all non-TXT records are valid, we can already setup the register domain
+        let hasAllNonTXT = true
+
         for (const record of organization.privateMeta.dnsRecords) {
             try {
                 switch (record.type) {
@@ -272,6 +276,7 @@ export class Organization extends Model {
                         if (addresses.length == 0) {
                             record.status = DNSRecordStatus.Pending
                             allValid = false
+                            hasAllNonTXT = false
 
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: "not_found",
@@ -281,6 +286,7 @@ export class Organization extends Model {
                         } else if (addresses.length > 1) {
                             record.status = DNSRecordStatus.Failed
                             allValid = false
+                            hasAllNonTXT = false
 
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: "too_many_fields",
@@ -293,6 +299,7 @@ export class Organization extends Model {
                             } else {
                                 record.status = DNSRecordStatus.Failed
                                 allValid = false
+                                hasAllNonTXT = false
 
                                 record.errors = new SimpleErrors(new SimpleError({
                                     code: "wrong_value",
@@ -357,6 +364,28 @@ export class Organization extends Model {
                     }))
                 }
                 allValid = false
+
+                if (record.type !== DNSRecordType.TXT) {
+                    hasAllNonTXT = false
+                }
+            }
+        }
+
+        if (hasAllNonTXT) {
+            // We can setup the register domain if needed
+            if (organization.privateMeta.pendingRegisterDomain !== null) {
+                organization.registerDomain = organization.privateMeta.pendingRegisterDomain
+                organization.privateMeta.pendingRegisterDomain = null;
+
+                console.log("Did set register domain for "+this.id+" to "+organization.registerDomain)
+            }
+        } else {
+            // Clear register domain
+            if (organization.registerDomain) {
+                organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain
+                organization.registerDomain = null
+
+                console.log("Cleared register domain for "+this.id+" because of invalid non txt records")
             }
         }
 
@@ -379,17 +408,12 @@ export class Organization extends Model {
 
             if (!wasActive && this.privateMeta.mailDomainActive) {
                 // Became valid -> send an e-mail to the organization admins
-                const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null } })
-
-                for (const user of users) {
-                    if (user.permissions && user.permissions.hasFullAccess()) {
-                        Email.sendInternal({
-                            to: user.email, 
-                            subject: "Jouw nieuwe domeinnaam is actief!", 
-                            text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. Leden kunnen dus inschrijven via " + organization.registerDomain + " en mails worden verstuurd vanaf iets@" + organization.privateMeta.mailDomain +". \n\nVeel succes!\n\nSimon van Stamhoofd"
-                        })
-                    }
-                }
+                const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
+                Email.sendInternal({
+                    to, 
+                    subject: "[Stamhoofd] Jullie domeinnaam is nu actief", 
+                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via hallo@stamhoofd.be\n\nVeel succes!\n\nSimon van Stamhoofd"
+                })
             }
         } else {
             // DNS settings gone broken
@@ -414,36 +438,13 @@ export class Organization extends Model {
                 await organization.save()
 
                 // Became invalid for longer than 2 hours -> send an e-mail to the organization admins
-                const users = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-                let found = false
-
                 if (process.env.NODE_ENV === "production") {
-                    for (const user of users) {
-                        if (user.permissions && user.permissions.hasFullAccess()) {
-                            found = true
-
-                            Email.sendInternal({
-                                to: user.email,
-                                subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                                text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam ongeldig zijn geworden. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam. Het zou ook kunnen dat jullie inschrijvingspagina niet meer bereikbaar is. Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen?\n\nBedankt!\n\nHet Stamhoofd team"
-                            })
-                        }
-                    }
-
-                    if (!found) {
-                        Email.sendInternal({
-                            to: "simon@stamhoofd.be",
-                            subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                            text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Kon geen contactgegevens vinden."
-                        })
-
-                    } else {
-                        Email.sendInternal({
-                            to: "simon@stamhoofd.be",
-                            subject: "Stamhoofd domeinnaam instellingen ongeldig",
-                            text: "Domeinnaam instelling ongeldig voor " + organization.name + ". Waarschuwing mail al verstuurd"
-                        })
-                    }
+                    const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
+                    Email.sendInternal({
+                        to,
+                        subject: "[Stamhoofd] Domeinnaam instellingen ongeldig"+(organization.serverMeta.DNSRecordWarningCount == 2 ? " (herinnering)" : ""),
+                        text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam niet geldig zijn. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam, maar maken we (tijdelijk) gebruik van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook jullie inschrijvingspagina is niet meer bereikbaar via jullie domeinnaam." : "")+" Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen -> personalisatie?\n\nBedankt!\n\nHet Stamhoofd team"
+                    })
                 }
             }
         }
@@ -510,13 +511,13 @@ export class Organization extends Model {
             this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
         }
 
-        if (this.registerDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.registerDomain)))) {
+        if (this.privateMeta.mailFromDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== this.privateMeta.mailFromDomain)))) {
             // Also set a from domain, to fix SPF
-            console.log("Setting mail from domain...")
+            console.log("Setting mail from domain: "+this.privateMeta.mailFromDomain+" for "+this.id)
             const params = {
                 EmailIdentity: this.privateMeta.mailDomain,
                 BehaviorOnMxFailure: "USE_DEFAULT_VALUE",
-                MailFromDomain: this.registerDomain,
+                MailFromDomain: this.privateMeta.mailFromDomain,
             };
             await sesv2.putEmailIdentityMailFromAttributes(params).promise();
         }
@@ -585,11 +586,24 @@ export class Organization extends Model {
             }
         }
 
+        const privateEmails = await this.getAdminToEmails()
+
+        if (privateEmails) {
+            return { emails: privateEmails, private: true }
+        }
+
+        return undefined
+    }
+
+    /**
+     * These email addresess are private
+     */
+    private async getAdminToEmails() {
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
         const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
 
         if (filtered.length > 0) {
-            return { emails: filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", "), private: true }
+            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
         }
 
         return undefined
