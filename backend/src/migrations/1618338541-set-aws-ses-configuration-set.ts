@@ -31,7 +31,7 @@ async function setAWSConfigurationSet(this: Organization) {
                 console.log("Updating configuration set name @"+this.id+" for "+this.privateMeta.mailDomain)
 
                 // Prevent rate limit hitting
-                sleep(200)
+                sleep(500)
 
                 await sesv2.putEmailIdentityConfigurationSetAttributes({
                     EmailIdentity: this.privateMeta.mailDomain,
@@ -40,7 +40,7 @@ async function setAWSConfigurationSet(this: Organization) {
             }
 
             // Prevent rate limit hitting
-            sleep(200)
+            sleep(500)
 
             console.log("Updating EmailForwardingEnabled @"+this.id+" for "+this.privateMeta.mailDomain)
 
@@ -57,7 +57,7 @@ async function setAWSConfigurationSet(this: Organization) {
         }
 
         // Prevent rate limit hitting
-        sleep(300)
+        sleep(500)
     }
     
 export default new Migration(async () => {

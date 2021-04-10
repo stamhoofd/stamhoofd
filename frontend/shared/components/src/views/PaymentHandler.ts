@@ -85,38 +85,27 @@ export class PaymentHandler {
         } else if (payment.method == PaymentMethod.Payconiq) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
                 const url = paymentUrl+"?returnUrl="+encodeURIComponent(returnUrl ? returnUrl : "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
-                const href = document.createElement("a")
-                href.href = url
                 
-                let t = new Date().getTime()
-
-                const listener = function() {
-                    if (document.hidden) {
-                        console.log("Detected hidden")
-                        // Payconiq app has opened
-                        t -= 3000
-                    }
-                };
-
-                document.addEventListener("visibilitychange", listener);
-                href.click();
-
-                window.setTimeout(() => {
-                    if (!document.hidden) {
-                        const t2 = new Date().getTime()
-
-                        if (t2 - t <= 3000) {
-                            const payconiqComponent = new ComponentWithProperties(PayconiqButtonView, { 
-                                paymentUrl: url
-                            })
-                            component.present(payconiqComponent);
-                            finishedHandler = () => {
-                                (payconiqComponent.componentInstance() as any)?.pop()
-                            }
+                // only on desktop
+                const buttonComponent = new ComponentWithProperties(PayconiqButtonView, { 
+                    paymentUrl: url, 
+                    server,
+                    initialPayment: payment,
+                    finishedHandler: (payment: Payment | null) => {
+                        if (finishedHandler) {
+                            // hide payconiq button view if needed
+                            finishedHandler()
+                        }
+                        if (payment && payment.status == PaymentStatus.Succeeded) {
+                            successHandler(payment)
+                        } else {
+                            failedHandler(payment)
                         }
                     }
-                    document.removeEventListener("visibilitychange", listener)
-                }, 200)
+                }).setDisplayStyle("sheet")
+                component.present(buttonComponent)
+                //this.loading = false;
+                return;
                 
             } else {
                 // only on desktop
@@ -140,24 +129,6 @@ export class PaymentHandler {
                 //this.loading = false;
                 return;
             }
-            
-            window.setTimeout(() => {
-                //this.loading = false
-                component.show(new ComponentWithProperties(PaymentPendingView, {
-                    paymentId: payment.id,
-                    finishedHandler: (payment: Payment) => {
-                        if (finishedHandler) {
-                            // hide payconiq button view if needed
-                            finishedHandler()
-                        }
-                        if (payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment)
-                        } else {
-                            failedHandler(payment)
-                        }
-                    }
-                }))
-            }, 2100)
         } else {
             if (paymentUrl) {
                 window.location.href = paymentUrl;

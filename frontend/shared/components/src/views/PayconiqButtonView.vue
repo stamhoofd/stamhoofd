@@ -11,19 +11,19 @@
         </main>
 
         <STToolbar>
-            <a slot="right" :href="paymentUrl" class="button primary">
-                <span class="icon external" /><span>Open de app</span>
-            </a>
+            <LoadingButton slot="right" :loading="payment && payment.status == 'Pending'">
+                <a :href="paymentUrl" class="button primary">
+                    <span class="icon external" /><span>Open de app</span>
+                </a>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STToolbar, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { SessionManager, Session } from '@stamhoofd/networking';
-import { ForgotPasswordRequest } from '@stamhoofd/structures';
+import { STToolbar, LoadingButton, STNavigationBar, EmailInput, STErrorsDefault } from "@stamhoofd/components"
+import { Component, Prop } from "vue-property-decorator";
+import PayconiqBannerView from "./PayconiqBannerView.vue";
 
 @Component({
     components: {
@@ -34,7 +34,7 @@ import { ForgotPasswordRequest } from '@stamhoofd/structures';
         STErrorsDefault
     }
 })
-export default class PayconiqButtonView extends Mixins(NavigationMixin){
+export default class PayconiqButtonView extends PayconiqBannerView {
     @Prop({})
     paymentUrl: string;
 
