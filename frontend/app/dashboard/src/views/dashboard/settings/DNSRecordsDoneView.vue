@@ -9,8 +9,8 @@
                 Gelukt! Jouw domeinnaam wordt binnenkort actief
             </h1>
         
-            <p class="st-list-description">Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{{ mailDomain }} verstuurd. Jouw inschrijvingspagina zal waarschijnlijk al iets sneller beschikbaar zijn op {{ registerDomain }}.</p>
-            
+            <p class="st-list-description" v-if="enableMemberModule">Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{{ mailDomain }} verstuurd. Jouw inschrijvingspagina zal waarschijnlijk al iets sneller beschikbaar zijn op {{ registerDomain }}.</p>
+            <p class="st-list-description" v-else>Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails automatisch vanaf @{{ mailDomain }} verstuurd.</p>
         </main>
 
         <STToolbar>
@@ -24,14 +24,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective, Tooltip } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, DNSRecord } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective } from "@stamhoofd/components";
+import { Component, Mixins } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 @Component({
     components: {
@@ -48,6 +44,14 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
     }
 })
 export default class DNSRecordsDoneView extends Mixins(NavigationMixin) {
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
+    }
+
     get registerDomain() {
         return OrganizationManager.organization.registerDomain ?? "?"
     }

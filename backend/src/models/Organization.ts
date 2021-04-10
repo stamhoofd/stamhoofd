@@ -120,8 +120,6 @@ export class Organization extends Model {
         const at = email.indexOf("@");
         const domain = email.substring(at+1)
 
-        console.log(domain)
-
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE privateMeta->"$.value.mailDomain" = ? LIMIT 1`,
             [domain]
@@ -176,7 +174,7 @@ export class Organization extends Model {
     }
 
     getHost(): string {
-        if (this.registerDomain && this.privateMeta.mailDomainActive) {
+        if (this.registerDomain) {
             return this.registerDomain;
         }
         return this.getDefaultHost()
@@ -458,6 +456,13 @@ export class Organization extends Model {
             return;
         }
 
+        // Protect specific domain names
+        if (["stamhoofd.be", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
+            console.error("Tried to validate AWS mail identity with protected domains @"+this.id)
+            this.privateMeta.mailDomainActive = false;
+            return
+        }
+
         if (process.env.NODE_ENV != "production") {
             // Temporary ignore this
             return;
@@ -474,9 +479,31 @@ export class Organization extends Model {
             }).promise()
             exists = true
 
-            console.log("AWS mail idenitiy exists already: just checking the verification status in AWS")
+            console.log("AWS mail idenitiy exists already: just checking the verification status in AWS @"+this.id)
+
+            if (existing.ConfigurationSetName !== "stamhoofd-domains") {
+                // Not allowed to use this identity
+                this.privateMeta.mailDomainActive = false;
+                console.error("Organization is not allowed to use email identity "+this.privateMeta.mailDomain+" @"+this.id+", got "+existing.ConfigurationSetName)
+                return;
+            }
 
             this.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
+
+            // todo: check result
+            if (existing.VerifiedForSendingStatus !== true) {
+                console.error("Not validated @"+this.id)
+            }
+            
+            if (existing.VerifiedForSendingStatus !== true && existing.DkimAttributes?.Status === "FAILED") {
+                console.error("AWS failed to verify DKIM records. Triggering a forced recheck @"+this.id)
+                await sesv2.deleteEmailIdentity({
+                    EmailIdentity: this.privateMeta.mailDomain
+                }).promise()
+
+                // Recreate it immediately
+                exists = false
+            }
         } catch (e) {
             console.error(e)
             // todo
@@ -487,6 +514,7 @@ export class Organization extends Model {
 
             const result = await sesv2.createEmailIdentity({
                 EmailIdentity: this.privateMeta.mailDomain,
+                ConfigurationSetName: "stamhoofd-domains",
                 DkimSigningAttributes: {
                     DomainSigningPrivateKey: this.serverMeta.privateDKIMKey!,
                     DomainSigningSelector: "stamhoofd"
@@ -503,11 +531,6 @@ export class Organization extends Model {
                 ]
 
             }).promise()
-
-            // todo: check result
-            if (result.VerifiedForSendingStatus !== true) {
-                console.error("Not validated :/")
-            }
             this.privateMeta.mailDomainActive = result.VerifiedForSendingStatus ?? false
         }
 

@@ -91,6 +91,11 @@ export default class DNSRecordBox extends Mixins(NavigationMixin) {
     border-radius: $border-radius;
     background: $color-white-shade;
 
+    &.success {
+        background: $color-success-background;
+        color: $color-success-dark;
+    }
+
     display: grid;
     grid-template-columns: 20% 80%;
     gap: 8px 0;

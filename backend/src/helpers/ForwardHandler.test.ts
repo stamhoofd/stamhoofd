@@ -3,9 +3,9 @@
 import { OrganizationEmail, PermissionLevel, Permissions } from "@stamhoofd/structures"
 import { OrganizationFactory } from "../factories/OrganizationFactory"
 import { UserFactory } from "../factories/UserFactory"
-import { BounceHandler } from "./BounceHandler"
+import { ForwardHandler } from "./ForwardHandler"
 
-describe("BounceHandler", () => {
+describe("ForwardHandler", () => {
     it("should send to default e-mail", async () => {
         const organization = await new OrganizationFactory({}).create()
         organization.privateMeta.emails.push(OrganizationEmail.create({
@@ -19,7 +19,7 @@ describe("BounceHandler", () => {
         }))
         await organization.save()
 
-        const options = await BounceHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -47,7 +47,7 @@ describe("BounceHandler", () => {
         }))
         await organization.save()
 
-        const options = await BounceHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -67,7 +67,7 @@ describe("BounceHandler", () => {
         const organization = await new OrganizationFactory({}).create()
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create()
 
-        const options = await BounceHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -94,7 +94,7 @@ describe("BounceHandler", () => {
         // Admin that should get ignored
         await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create()
 
-        const options = await BounceHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -119,7 +119,7 @@ describe("BounceHandler", () => {
         // Admin that should get ignored
         await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create()
 
-        const options = await BounceHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -142,7 +142,7 @@ describe("BounceHandler", () => {
         }))
         await organization.save()
 
-        const options = await BounceHandler.handle("From: bounces@amazonses.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: bounces@amazonses.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: [organization.uri + "@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
@@ -154,7 +154,7 @@ describe("BounceHandler", () => {
     })
 
     it("should not ignore aws bounce emails for own", async () => {
-        const options = await BounceHandler.handle("From: bounces@amazonses.com\nSubject: Hello\nTo: ksjdgsdgkjlsdg@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
+        const options = await ForwardHandler.handle("From: bounces@amazonses.com\nSubject: Hello\nTo: ksjdgsdgkjlsdg@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: ["ksjdgsdgkjlsdg@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },

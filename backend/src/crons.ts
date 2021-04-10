@@ -1,11 +1,10 @@
 import { Database } from '@simonbackx/simple-database';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
-import { simpleParser } from 'mailparser';
 
 import Email from './email/Email';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
-import { BounceHandler } from './helpers/BounceHandler';
+import { ForwardHandler } from './helpers/ForwardHandler';
 import { EmailAddress } from './models/EmailAddress';
 import { Group } from './models/Group';
 import { Organization } from './models/Organization';
@@ -83,7 +82,7 @@ async function checkReplies() {
                                 dmarcVerdict: { status: 'PASS' | string };
                             }
 
-                            const options = await BounceHandler.handle(content, receipt)
+                            const options = await ForwardHandler.handle(content, receipt)
                             if (options) {
                                 if (process.env.NODE_ENV === "production") {
                                     Email.send(options)

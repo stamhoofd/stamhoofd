@@ -155,7 +155,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
     
     get registerUrl() {
-        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
+        if (this.organization.registerDomain) {
             return "https://"+this.organization.registerDomain
         } 
 

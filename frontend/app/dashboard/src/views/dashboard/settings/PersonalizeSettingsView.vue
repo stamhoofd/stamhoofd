@@ -49,6 +49,11 @@
                 <p class="warning-box">
                     Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.
                 </p>
+
+                <p v-if="enableMemberModule && organization.registerDomain" class="info-box">
+                    Jouw domeinnaam voor inschrijvingen is wel al beschikbaar ({{ organization.registerDomain }})
+                </p>
+
                 <p class="st-list-description">
                     <button class="button secundary" @click="openRecords">
                         DNS-records instellen en verifiëren
@@ -62,10 +67,10 @@
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
                 <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 <p v-else class="st-list-description">
-                    Jouw e-mails kunnen worden verstuurd vanaf <strong>iets@{{ organization.privateMeta.mailDomain }}</strong>.
+                    Jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 
                 <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">

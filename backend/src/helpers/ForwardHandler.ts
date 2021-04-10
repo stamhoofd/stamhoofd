@@ -2,7 +2,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { simpleParser } from "mailparser";
 import { Organization } from "../models/Organization";
 
-export class BounceHandler {
+export class ForwardHandler {
     static async handle(content: any, receipt: {
             recipients: string[];
             spamVerdict: { status: 'PASS' | string };

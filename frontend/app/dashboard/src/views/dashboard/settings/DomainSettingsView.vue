@@ -9,6 +9,9 @@
             <h1>
                 Domeinnaam kiezen
             </h1>
+
+            <p class="success-box" v-if="isOk">Jouw domeinnaam is correct ingesteld</p>
+            <p class="warning-box" v-else>Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via hallo@stamhoofd.be als je hulp nodig hebt.</p>
         
             <STErrorsDefault :error-box="errorBox" />
 
@@ -21,6 +24,13 @@
                     @change="domainChanged"
                 >
             </STInputBox>
+            <p class="st-list-description" v-if="mailDomain && enableMemberModule">
+                Jouw inschrijvingspagina zal bereikbaar zijn op inschrijven.{{ mailDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
+            </p>
+            <p class="st-list-description" v-else-if="mailDomain">
+               Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
+            </p>
+            
         </main>
 
         <STToolbar>
@@ -75,6 +85,18 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             return false
         }
         return true
+    }
+
+    get isOk() {
+        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.privateMeta?.mailDomain !== null
+    } 
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
     }
 
     get isAlreadySet() {

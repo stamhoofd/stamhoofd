@@ -49,8 +49,9 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
         // check if changed
         if (
-            organization.registerDomain !== request.body.registerDomain  // changed register domain
-            || (organization.privateMeta.pendingMailDomain !== request.body.mailDomain && organization.privateMeta.mailDomain !== request.body.mailDomain)  // changed pending domain
+            (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) !== request.body.registerDomain  // changed register domain
+            || 
+            (organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain) !== request.body.mailDomain  // changed pending domain
         ) {
             console.log("Domains changed")
 
@@ -79,7 +80,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
 
             // We don't keep the current register domain because we have no way to validate the old DNS-records
-            if (organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
+            if (organization.registerDomain !== organization.privateMeta.pendingRegisterDomain) {
                 organization.registerDomain = null
             }
 
@@ -98,21 +99,18 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             // Generate new DNS-records
             organization.privateMeta.dnsRecords = []
 
-            if (organization.registerDomain === null && request.body.mailDomain !== null) {
-                // We set a custom domainname for webshops already
-                // This doesn't work atm
-                organization.privateMeta.mailFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
+            if (organization.privateMeta.pendingMailDomain !== null) {
+                if (organization.privateMeta.pendingRegisterDomain === null) {
+                    // We set a custom domainname for webshops already
+                    // This is not used at this moment
+                    organization.privateMeta.mailFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
+                } else {
+                    // CNAME domain: for SPF + MX + A record
+                    organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
+                }
                 organization.privateMeta.dnsRecords.push(DNSRecord.create({
                     type: DNSRecordType.CNAME,
-                    name: "stamhoofd." + organization.privateMeta.pendingMailDomain + ".",
-                    value: "domains." + process.env.HOSTNAME_REGISTRATION! + "."
-                }))
-            } else if (organization.registerDomain !== null && request.body.mailDomain !== null) {
-                // CNAME domain: for SPF + MX + A record
-                organization.privateMeta.mailFromDomain = organization.registerDomain;
-                organization.privateMeta.dnsRecords.push(DNSRecord.create({
-                    type: DNSRecordType.CNAME,
-                    name: organization.registerDomain+".",
+                    name: organization.privateMeta.mailFromDomain+".",
                     value: "domains."+process.env.HOSTNAME_REGISTRATION!+"."
                 }))
             }
