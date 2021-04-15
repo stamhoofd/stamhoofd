@@ -208,7 +208,7 @@ class Email {
             replyTo: data.replyTo,
             to: process.env.NODE_ENV === "production" ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
-            text: data.text ?? "" // plain text body
+            text: data.text, // plain text body
         };
 
         if (data.attachments) {
@@ -241,6 +241,7 @@ class Email {
             }
             console.error("Failed to send e-mail:")
             console.error(e);
+            console.error(mail);
         }
     }
 
