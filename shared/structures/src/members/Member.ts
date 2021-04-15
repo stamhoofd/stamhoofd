@@ -1,34 +1,11 @@
-import { AutoEncoder, BooleanDecoder,DateDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from "uuid";
+import { field } from '@simonbackx/simple-encoding';
 
+import { EncryptedMember } from './EncryptedMember';
 import { MemberDetails } from './MemberDetails';
 
-export class Member extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
-
-    @field({ decoder: StringDecoder, version: 20, upgrade: function(this: Member) {
-        return this.details?.firstName ?? "Onbekend"
-    } })
-    firstName = ""
-
-    @field({ decoder: MemberDetails, nullable: true })
-    details: MemberDetails | null
-
-    @field({ decoder: StringDecoder })
-    publicKey: string
-
-    @field({ decoder: StringDecoder, version: 35 })
-    organizationPublicKey: string
-
-    @field({ decoder: BooleanDecoder, version: 20 })
-    placeholder = false
-
-    @field({ decoder: DateDecoder, version: 31 })
-    createdAt: Date = new Date()
-
-    @field({ decoder: DateDecoder, version: 31 })
-    updatedAt: Date = new Date()
+export class Member extends EncryptedMember {
+    @field({ decoder: MemberDetails })
+    details: MemberDetails
 
     get name() {
         if (this.details) {
@@ -37,9 +14,8 @@ export class Member extends AutoEncoder {
         return this.firstName
     }
 
-
     static sorterByName(sortDirection = "ASC") {
-        return (a, b) => {
+        return (a: Member, b: Member) => {
             if (!a.details && !b.details) {
                 return 0
             }

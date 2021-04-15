@@ -2,6 +2,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
+import { DevOpsGuru } from 'aws-sdk';
 
 import { EmailVerificationCode } from '../models/EmailVerificationCode';
 import { Token } from '../models/Token';
@@ -42,7 +43,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id)
-        if (editUser?.organizationId != user.organizationId) {
+        if (editUser?.organizationId !== user.organizationId) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang om deze gebruiker te wijzigen"
@@ -51,6 +52,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
+
+        editUser.requestKeys = request.body.requestKeys ?? editUser.requestKeys
 
         if (request.body.permissions) {
             if (!user.permissions || !user.permissions.hasFullAccess()) {
@@ -65,7 +68,6 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             } else {
                 editUser.permissions = request.body.permissions
             }
-            
         }
 
         if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.publicKey !== null && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {
@@ -80,6 +82,12 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         await editUser.save();
+
+
+        if (request.body.requestKeys !== undefined) {
+            // Update request keys of this organization
+            await user.organization.updateRequestKeysCount()
+        }
 
         if (request.body.email && request.body.email !== editUser.email) {
             const fullUser = await User.getFull(user.id)
@@ -99,7 +107,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw new SimpleError({
                 code: "verify_email",
                 message: "Your email address needs verification",
-                human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd wordt het e-mailadres gewijzigd.",
+                human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
                 meta: SignupResponse.create({
                     token: code.token,
                     authEncryptionKeyConstants: fullUser.authEncryptionKeyConstants

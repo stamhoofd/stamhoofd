@@ -37,8 +37,8 @@
 
             <div>
                 <AddressInput v-if="(age >= 18 && !livesAtParents) || hasOldAddress" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
-                <EmailInput v-if="age >= 11" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="false" :validator="validator" />
-                <PhoneInput v-if="age >= 11" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                <EmailInput v-if="age >= 11 || email" v-model="email" title="E-mailadres van dit lid" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :required="false" :validator="validator" />
+                <PhoneInput v-if="age >= 11 || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
             </div>
         </div>
     </form>
@@ -125,13 +125,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 field: "firstName"
             }))
         }
-        if (this.lastName.length < 2) {
-            errors.addError(new SimpleError({
-                code: "invalid_field",
-                message: "Vul de achternaam in",
-                field: "lastName"
-            }))
-        }
 
         let valid = false
 
@@ -153,7 +146,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 memberDetails.gender = this.gender
                 memberDetails.phone = this.phone
                 memberDetails.birthDay = this.birthDay
-                memberDetails.email = this.age >= 18 ? this.email : null
+                memberDetails.email = this.email
                 memberDetails.address = this.livesAtParents ? null : this.address
 
                 this.$emit("change", memberDetails)
@@ -163,7 +156,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     lastName: this.lastName,
                     gender: this.gender,
                     phone: this.phone,
-                    email: this.age >= 18 ? this.email : null,
+                    email: this.email,
                     birthDay: this.birthDay,
                     address: this.livesAtParents ? null : this.address
                 })

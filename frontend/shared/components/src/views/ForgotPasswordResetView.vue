@@ -1,21 +1,29 @@
 <template>
     <form class="forgot-password-reset-view st-view" @submit.prevent="submit">
         <STNavigationBar title="Wachtwoord opnieuw instellen">
-            <button slot="right" class="button icon gray close" @click="pop" type="button"></button>
+            <button slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>Wachtwoord opnieuw instellen</h1>
 
             <p>Stel een nieuw wachtwoord in voor jouw account.</p>
 
-            <p class="error-box" v-if="hasPermissions">Opgelet! Als je je wachtwoord opnieuw instelt verlies je toegang tot alle data van je leden. Er is geen mogelijkheid om deze hierna nog te herstellen TENZIJ een andere beheerder van jouw vereniging nog toegang heeft tot zijn account. </p>
+            <p v-if="hasPermissions" class="error-box">
+                Opgelet! Als je je wachtwoord opnieuw instelt verlies je toegang tot alle data van je leden. Er is geen mogelijkheid om deze hierna nog te herstellen TENZIJ een andere beheerder van jouw vereniging nog toegang heeft tot zijn account.
+            </p>
+            <p v-else class="warning-box">
+                Hou er rekening mee dat we jouw account terug moeten goedkeuren als je jouw wachtwoord bent vergeten.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
+            
+            <EmailInput v-if="!loadingToken" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" disabled />
+            <p class="style-description-small">
+                Je kan jouw e-mailadres wijzigen na het inloggen.
+            </p>
 
-            <div class="split-inputs" v-if="!loadingToken">
+            <div v-if="!loadingToken" class="split-inputs">
                 <div>
-                    <EmailInput title="E-mailadres" v-model="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" disabled />
-
                     <STInputBox title="Kies een nieuw wachtwoord">
                         <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
@@ -25,7 +33,7 @@
                     </STInputBox>
                 </div>
                 <div>
-                    <div class="warning-box">Gebruik bij voorkeur een wachtwoordbeheerder of kies een sterk wachtwoord dat je kan onthouden.</div>
+                    <PasswordStrength v-model="password" />
                 </div>
             </div>
             <Spinner v-else />
@@ -43,14 +51,12 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationController,NavigationMixin, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NetworkManager, SessionManager, Session, LoginHelper } from '@stamhoofd/networking';
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { ChallengeResponseStruct,KeyConstants,NewUser, OrganizationSimple, Token, User, Version } from '@stamhoofd/structures';
-import { CenteredMessage, LoadingButton, STFloatingFooter, STInputBox, STNavigationBar, STErrorsDefault, ErrorBox, EmailInput, Validator, Checkbox, Toast, Spinner } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, PasswordStrength,Spinner,STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components"
+import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
+import { NewUser, Token } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -62,7 +68,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
         STErrorsDefault,
         EmailInput,
         Checkbox,
-        Spinner
+        Spinner,
+        PasswordStrength
     }
 })
 export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
@@ -143,7 +150,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
             return;
         }
 
-        const minChars = this.hasPermissions ? 14 : 8
+        const minChars = 8
 
         if (this.password.length < minChars) {
             this.errorBox = new ErrorBox(new SimpleError({

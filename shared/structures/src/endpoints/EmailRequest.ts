@@ -1,4 +1,21 @@
-import { ArrayDecoder,AutoEncoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+
+export class EmailInformation extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    email: string
+
+    @field({ decoder: BooleanDecoder })
+    markedAsSpam = false;
+
+    @field({ decoder: BooleanDecoder })
+    hardBounce = false;
+
+    @field({ decoder: BooleanDecoder })
+    unsubscribedMarketing = false;
+
+    @field({ decoder: BooleanDecoder })
+    unsubscribedAll = false;
+}
 
 export class Replacement extends AutoEncoder {
     @field({ decoder: StringDecoder})
@@ -17,6 +34,13 @@ export class Recipient extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = []
+
+    /**
+     * Set this to create a replacement called signInUrl, which will auto sign in/sign up the user
+     * Note: the e-mail is matched with the user id, if it doesn't match, the sign-in button will contain a simple (non smart) url
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 80 })
+    userId: string | null = null
 }
 
 export class EmailAttachment extends AutoEncoder {

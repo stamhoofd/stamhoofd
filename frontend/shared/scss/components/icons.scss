@@ -37,8 +37,16 @@
         font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
 
+    &.search:after {
+        font-icon: url('@stamhoofd/assets/images/icons/search.svg');
+    }
+
     &.help:after {
         font-icon: url('@stamhoofd/assets/images/icons/help.svg');
+    }
+
+    &.copy:after {
+        font-icon: url('@stamhoofd/assets/images/icons/copy.svg');
     }
 
     &.arrow-left:after {
@@ -117,6 +125,10 @@
         font-icon: url(@stamhoofd/assets/images/icons/success.svg);
     }
 
+    &.star:after {
+        font-icon: url(@stamhoofd/assets/images/icons/star.svg);
+    }
+
     &.error:after {
         font-icon: url(@stamhoofd/assets/images/icons/error.svg);
     }
@@ -135,6 +147,14 @@
 
     &.lock:after {
         font-icon: url(@stamhoofd/assets/images/icons/lock.svg);
+    }
+
+    &.key:after {
+        font-icon: url(@stamhoofd/assets/images/icons/key.svg);
+    }
+
+    &.key-lost:after {
+        font-icon: url(@stamhoofd/assets/images/icons/key-lost.svg);
     }
 
     &.lock-missing:after {

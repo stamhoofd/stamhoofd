@@ -1,5 +1,5 @@
 import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupPrivateSettings,GroupSettings } from '@stamhoofd/structures';
+import { GroupPrivateSettings, GroupSettings, Group as GroupStruct, Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member,MemberWithRegistrations } from './Member';
@@ -122,6 +122,37 @@ export class Group extends Model {
 
         return members
 
+    }
+
+    getStructure() {
+        return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
+    }
+
+    getPrivateStructure(permissions: Permissions) {
+        const struct = GroupStruct.create(this)
+        if (!struct.canViewMembers(permissions)) {
+            struct.privateSettings = null
+        }
+        return struct
+    }
+
+    async updateOccupancy() {
+        // todo: add some sort of semaphore here
+        if (!this.settings.maxMembers) {
+            this.settings.registeredMembers = null;
+            return
+        }
+
+        const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (((registeredAt is not null or reservedUntil >= ?) and waitingList = 0) OR (waitingList = 1 AND canRegister = 1))`
+        
+        const [results] = await Database.select(query, [this.id, this.cycle, new Date()])
+        const count = results[0]['']['c'];
+
+        if (Number.isInteger(count)) {
+            this.settings.registeredMembers = count
+        } else {
+            console.error("Unexpected result for occupancy", results)
+        }
     }
 
 }

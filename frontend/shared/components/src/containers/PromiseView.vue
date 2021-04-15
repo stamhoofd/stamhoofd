@@ -1,14 +1,14 @@
 <template>
-    <ComponentWithPropertiesInstance v-if="root" :component="root" :key="root.key" />
+    <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
     <LoadingView v-else />
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue, Mixins } from "vue-property-decorator";
+import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Logger } from '@stamhoofd/logger';
+import { Component, Mixins,Prop, Vue } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
-import { Logger } from '@stamhoofd/logger';
 
 @Component({
     components: {

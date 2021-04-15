@@ -42,7 +42,12 @@
                 <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
             </div>
         </editor-floating-menu>
-        <editor-content :editor="editor" class="editor-content" />
+        <div ref="content" class="editor-container">
+            <editor-content :editor="editor" class="editor-content" />
+            <footer>
+                <slot name="footer" />
+            </footer>
+        </div>
     </div>
 </template>
 
@@ -62,6 +67,7 @@ import {
 } from "tiptap-extensions";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 
 @Component({
@@ -92,6 +98,12 @@ export default class MailEditor extends Vue {
             content: this.hasFirstName ? '<p>Dag <span data-replace-type="firstName"></span>,</p>' : '',
         });
     })();
+
+    mounted() {
+        if (OrganizationManager.organization.meta.color) {
+            (this.$refs.content as HTMLElement).style.setProperty("--color-primary", OrganizationManager.organization.meta.color);
+        }
+    }
 
     beforeDestroy() {
         this.editor.destroy();
@@ -125,7 +137,62 @@ export default class MailEditor extends Vue {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/components/inputs.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
+
+.editor .ProseMirror {
+    max-width: none;
+    padding: 15px 15px;
+    height: auto;
+    min-height: $input-height * 2;
+    line-height: normal;
+    outline: none;
+}
+
+.editor .editor-container {
+    @extend .input;
+    padding: 0;
+    height: auto;
+    min-height: $input-height * 2;
+    line-height: normal;
+    outline: none;
+
+    > footer {
+        padding: 0 15px 15px 15px;
+        --st-horizontal-padding: 15px;
+        
+        > div.disabled {
+            user-select: none;
+            cursor: not-allowed;
+            color: $color-gray-dark;
+
+            .button {
+                pointer-events: none
+            }
+
+            > hr {
+                @extend .style-hr;
+            }
+
+            .button-description {
+                margin: 10px 0;
+            }
+
+            strong {
+                font-weight: bold;
+            }
+
+            em {
+                font-style: italic;
+            }
+        }
+
+        > hr {
+            @extend .style-hr;
+            margin-bottom: 10px;
+        }
+    }
+}
 
 .editor {
     position: relative;
@@ -234,7 +301,7 @@ export default class MailEditor extends Vue {
         }
     }
 
-    .ProseMirror {
+    .editor-content {
         p {
             margin: 5px 0;
         }

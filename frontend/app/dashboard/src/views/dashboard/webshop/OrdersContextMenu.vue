@@ -4,7 +4,7 @@
             SMS'en
         </ContextMenuItem>
         <ContextMenuItem @click="mail">
-            Mailen
+            E-mailen
         </ContextMenuItem>
         <ContextMenuLine />
         <ContextMenuItem @click="exportToExcel">

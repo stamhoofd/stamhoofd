@@ -6,24 +6,32 @@
 
         <main>
             <h1>Betaal met Payconiq by Bancontact</h1>
+            <p>Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile of ING Banking.</p>
 
-            <div class="payconiq-logo" />
+            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
+            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
         </main>
 
         <STToolbar>
-            <a slot="right" :href="paymentUrl" class="button primary">
-                <span class="icon external" /><span>Open de app</span>
-            </a>
+            <button slot="right" class="button secundary" @click="helpMe">
+                <span class="icon help" />
+                <span>Het lukt niet</span>
+            </button>
+            <LoadingButton slot="right" :loading="payment && payment.status == 'Pending'">
+                <a :href="paymentUrl" class="button primary open-app">
+                    <span class="icon external" /><span>Open de app</span>
+                </a>
+            </LoadingButton>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STToolbar, LoadingButton, STNavigationBar, EmailInput, Validator, ErrorBox, Toast, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { SessionManager, Session } from '@stamhoofd/networking';
-import { ForgotPasswordRequest } from '@stamhoofd/structures';
+import { STToolbar, LoadingButton, STNavigationBar, EmailInput, STErrorsDefault, CenteredMessage } from "@stamhoofd/components"
+import { Component, Prop } from "vue-property-decorator";
+import { CenteredMessageButton } from "../overlays/CenteredMessage";
+import PayconiqBannerView from "./PayconiqBannerView.vue";
 
 @Component({
     components: {
@@ -34,24 +42,76 @@ import { ForgotPasswordRequest } from '@stamhoofd/structures';
         STErrorsDefault
     }
 })
-export default class PayconiqButtonView extends Mixins(NavigationMixin){
+export default class PayconiqButtonView extends PayconiqBannerView {
     @Prop({})
     paymentUrl: string;
 
+    getOS(): string {
+        var userAgent = navigator.userAgent || navigator.vendor;
+
+        if (/android/i.test(userAgent)) {
+            return "android";
+        }
+
+        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+            // Different sms protocol
+            return "macOS-old";
+        }
+
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            return "iOS";
+        }
+
+        // iPad on iOS 13 detection
+        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+            return "macOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+            return "windows";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+            return "android";
+        }
+
+        return "unknown"
+    }
+
+    helpMe() {
+        if (this.getOS() == "iOS") {
+            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.")
+            .addCloseButton()
+            .show()
+        } else {
+            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.").addCloseButton().show()
+        }
+    }
 }
 </script>
 
 <style lang="scss">
-    .payconiq-button-view {
-        --color-primary: #FF4785;
+.payconiq-button-view {
+    --color-primary: #FF4785;
 
-        .payconiq-logo {
-            width: 150px;
-            height: 150px;
-            background: url(~@stamhoofd/assets/images/partners/payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png) no-repeat center center;
-            background-size: contain;
-        }
-
-       
+    .payment-app-logo {
+        height: 40px;
     }
+
+    .open-app {
+        // Prevent opening in a new tab -> breaks opening
+        -webkit-touch-callout: none;
+    }
+}
+
+
 </style>

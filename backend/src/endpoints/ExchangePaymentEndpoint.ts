@@ -110,6 +110,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                             for (const registration of registrations) {
                                 if (registration.registeredAt === null) {
                                     registration.registeredAt = new Date()
+                                    registration.reservedUntil = null
                                     await registration.save();
                                 }
                             }
@@ -145,6 +146,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         for (const registration of registrations) {
                             if (registration.registeredAt === null) {
                                 registration.registeredAt = new Date()
+                                registration.reservedUntil = null
                                 await registration.save();
                             }
                         }

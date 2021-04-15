@@ -24,7 +24,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { EmailInput, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, EmailInput, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar } from "@stamhoofd/components"
 import { Payment,PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -66,9 +66,16 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     }
 
     close() {
-        if (confirm("Probeer alleen opnieuw als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.")) {
-            this.pop();
+        console.log("dismiss")
+        this.dismiss();
+    }
+
+    async shouldNavigateAway() {
+        console.log("should nav")
+        if (await CenteredMessage.confirm("Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.", "Ik heb nog niet betaald")) {
+            return true;
         }
+        return false;
     }
 
     get price() {
@@ -89,13 +96,13 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
                 if (payment.status == PaymentStatus.Succeeded) {
                     this.finishedHandler(payment)
-                    this.dismiss()
+                    this.dismiss({ force: true })
                 }
 
                 if (payment.status == PaymentStatus.Failed) {
                     // todo: temporary message
                     this.finishedHandler(payment)
-                    this.dismiss()
+                    this.dismiss({ force: true })
                 }
             }).catch(e => {
                 // too: handle this
@@ -153,7 +160,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         .payconiq-logo {
             width: 150px;
             height: 150px;
-            background: url(~@stamhoofd/assets/images/partners/payconiq/payconiq_by_Bancontact-logo-app-pos-shadow.png) no-repeat center center;
+            background: url(~@stamhoofd/assets/images/partners/payconiq/app-shadow.svg) no-repeat center center;
             background-size: contain;
         }
 

@@ -87,7 +87,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="order in sortedOrders" :key="order.id" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
+                    <tr v-for="order in sortedOrders" :key="order.id" class="selectable" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
                         <td class="prefix" @click.stop="">
                             <Checkbox v-model="order.selected" />
                         </td>
@@ -137,7 +137,7 @@
                 </button>
                 <LoadingButton :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
-                        <span class="dropdown-text">Mailen</span>
+                        <span class="dropdown-text">E-mailen</span>
                         <div class="dropdown" @click.stop="openMailDropdown" />
                     </button>
                 </LoadingButton>
@@ -235,10 +235,11 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         WebshopOrdersEventBus.removeListener(this)
     }
 
-    onDeleteOrder() {
+    onDeleteOrder(): Promise<void> {
         this.nextQuery = WebshopOrdersQuery.create({})
         this.orders = []
         this.loadNextOrders()
+        return Promise.resolve()
     }
 
     get webshopUrl() {

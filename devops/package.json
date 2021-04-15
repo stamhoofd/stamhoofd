@@ -14,6 +14,7 @@
         "build:full": "rm -rf ./dist && yarn build",
         "install-server": "yarn build && node ./dist/scripts/install.js",
         "deploy": "yarn build && node ./dist/scripts/deploy.js",
-        "build-code": "yarn build && node ./dist/scripts/build.js"
+        "build-code": "yarn build && node ./dist/scripts/build.js",
+        "upgrade-server": "yarn build && node ./dist/scripts/upgrade.js"
     }
 }

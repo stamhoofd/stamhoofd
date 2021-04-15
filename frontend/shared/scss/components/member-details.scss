@@ -1,0 +1,150 @@
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/base/text-styles.scss';
+
+.member-view-details .registration-image {
+    position: relative;
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius;
+        object-fit: cover;
+
+        @media (max-width: 350px) {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    figure {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius;
+        text-align: center;
+        background: $color-primary-background;
+        color: $color-primary;
+        text-transform: uppercase;
+        line-height: 60px;
+        font-size: 20px;
+        font-weight: 600;
+
+        > span {
+            opacity: 0.8;
+            vertical-align: middle;
+            margin-right: -3px; // visual correction
+        }
+    }
+
+    div {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: white;
+        border-radius: 40px;
+        line-height: 24px;
+        transform: translate(40%, 30%);
+        height: 23px; // alignment fix for centered icons
+
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.member-view-details {
+    padding-bottom: 30px;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 20px;
+
+    @media (max-width: 700px) {
+        grid-template-columns: 100%;
+    }
+
+    > div,
+    > div > div {
+        --st-horizontal-padding: 0px;
+        
+        > h2 {
+            @extend .style-title-2;
+            padding-bottom: 15px;
+        }
+
+        > p {
+            &:not([class]) {
+                @extend .style-definition-description;
+            }
+        }
+
+        > hr {
+            @extend .style-hr;
+            margin: 30px 0;
+        }
+    }
+
+    .accounts-description {
+        @extend .style-definition-description;
+        margin-top: 15px;
+    }
+
+    .account {
+        @extend .style-definition-description;
+        margin-bottom: 5px;
+    }
+}
+
+.member-records {
+    li {
+        list-style: none;
+        padding: 0 10px;
+        background: $color-white-shade;
+        border-radius: $border-radius;
+        margin: 6px 0;
+        @extend .style-definition-description;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        vertical-align: middle;
+
+        &.High {
+            background: $color-error-background;
+            color: $color-error-dark;
+        }
+
+        &.Medium {
+            background: $color-warning-background;
+            color: $color-warning-dark;
+        }
+
+        .icon:first-child {
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .text {
+            padding: 11px 0;
+        }
+
+        &.more {
+            cursor: help;
+
+            .icon:last-child {
+                display: block;
+                flex-shrink: 0;
+                margin-left: auto;
+                padding-left: 5px;
+                transform: translate(0, 0);
+                opacity: 0.5;
+                transition: transform 0.2s, opacity 0.2s;
+            }
+
+            &:hover {
+                .icon:last-child {
+                    transform: translate(5px, 0);
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}

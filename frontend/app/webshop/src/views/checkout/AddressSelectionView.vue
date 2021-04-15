@@ -1,6 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1>Kies je leveringsadres</h1>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
@@ -38,18 +42,15 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, ValidatedAddress, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import { ComponentWithProperties,HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, AddressInput, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { ValidatedAddress } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -60,7 +61,8 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STListItem,
         LoadingButton,
         STErrorsDefault,
-        AddressInput
+        AddressInput,
+        BackButton
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),

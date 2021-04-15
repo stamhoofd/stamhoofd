@@ -41,8 +41,7 @@ describe("Endpoint.GetGroupMembers", () => {
         expect(response.body[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
         expect(response.body[0]).toMatchObject({
             id: members[0].id,
-            publicKey: members[0].publicKey,
-            encryptedForOrganization: members[0].encryptedForOrganization,
+            encryptedDetails: members[0].encryptedDetails
         })
     });
 
@@ -73,8 +72,7 @@ describe("Endpoint.GetGroupMembers", () => {
         expect(response.body[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
         expect(response.body[0]).toMatchObject({
             id: members[0].id,
-            publicKey: members[0].publicKey,
-            encryptedForOrganization: members[0].encryptedForOrganization,
+            encryptedDetails: members[0].encryptedDetails
         })
     });
 });

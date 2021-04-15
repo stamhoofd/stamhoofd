@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="checkbox" :class="{manual}">
-            <input type="checkbox" v-model="checkboxValue" :disabled="disabled" ref="checkbox">
+            <input ref="checkbox" v-model="checkboxValue" type="checkbox" :disabled="disabled">
             <div>
                 <div>
                     <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg">

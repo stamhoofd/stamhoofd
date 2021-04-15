@@ -1,6 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1>Kies je afhaalmethode</h1>
 
@@ -35,21 +39,16 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { CheckoutMethod, CheckoutMethodType, Group, KeychainedResponse, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { ComponentWithProperties,HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
+import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import AddressSelectionView from './AddressSelectionView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
-import TimeSelectionView from './TimeSelectionView.vue';
 
 @Component({
     components: {
@@ -59,7 +58,8 @@ import TimeSelectionView from './TimeSelectionView.vue';
         STListItem,
         Radio,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        BackButton
     },
     filters: {
         date: Formatter.dateWithDay.bind(Formatter),

@@ -1,5 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Group } from "../models/Group";
+import { Member } from "../models/Member";
 
 import { Token } from '../models/Token';
 import { User } from '../models/User';
@@ -43,7 +45,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 message: "Je hebt geen toegang om deze gebruiker te verwijderen"
             })
         }
-        
+
         await editUser.delete();
 
         return new Response(undefined);      

@@ -37,6 +37,13 @@ export class User extends Model {
     verified = false
 
     /**
+     * Set to true when the user forgot (and reset!) its password or when a new user is created in a family
+     * When this is true, the organization will be able to reprovide the user with new keys in the UI
+     */
+    @column({ type: "boolean" })
+    requestKeys = false
+
+    /**
      * Public key used for encryption
      */
     @column({ type: "string", nullable: true })

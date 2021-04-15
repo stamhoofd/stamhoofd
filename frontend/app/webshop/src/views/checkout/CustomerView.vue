@@ -1,6 +1,10 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1>Jouw gegevens</h1>
 
@@ -37,7 +41,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, BackButton } from "@stamhoofd/components"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -55,7 +59,8 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STErrorsDefault,
         STInputBox,
         EmailInput,
-        PhoneInput
+        PhoneInput,
+        BackButton
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -69,6 +74,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
     CheckoutManager = CheckoutManager
+    
 
     get checkoutMethod() {
         return CheckoutManager.checkout.checkoutMethod!

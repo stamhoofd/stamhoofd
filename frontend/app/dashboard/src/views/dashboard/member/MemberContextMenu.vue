@@ -7,12 +7,12 @@
 
         <template v-if="hasWrite">
             <ContextMenuItem @click="editMember">
-                Wijzig gegevens
+                Gegevens wijzigen
                 <span slot="right" class="icon edit" />
             </ContextMenuItem>
 
             <ContextMenuItem @click="changeGroup">
-                Wijzig groep
+                Inschrijvingen wijzigen
                 <span slot="right" class="icon sync" />
             </ContextMenuItem>
         </template>

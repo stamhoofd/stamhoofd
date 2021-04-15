@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 63
+export const Version = 84
 
 // General
 export * from "./src/addresses/Address"
@@ -38,7 +38,6 @@ export * from "./src/endpoints/ForgotPasswordRequest"
 export * from "./src/endpoints/GroupSizeResponse"
 export * from "./src/endpoints/OrganizationAdmins"
 export * from "./src/endpoints/OrganizationDomains"
-export * from "./src/endpoints/PatchMembers"
 export * from "./src/endpoints/RegisterMember"
 export * from "./src/endpoints/RegisterResponse"
 export * from "./src/endpoints/SignupResponse"
@@ -51,6 +50,7 @@ export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
 
 // Grouping
+export * from "./src/grouping/KeychainedMembers"
 export * from "./src/grouping/KeychainedResponse"
 export * from "./src/grouping/PaginatedResponse"
 
@@ -63,6 +63,7 @@ export * from "./src/Invite"
 export * from "./src/InviteUserDetails"
 export * from "./src/members/EmergencyContact"
 export * from "./src/members/EncryptedMember"
+export * from "./src/members/EncryptedMemberDetails"
 export * from "./src/members/EncryptedMemberWithRegistrations"
 export * from "./src/members/EncryptedPaymentDetailed"
 export * from "./src/members/Gender"
@@ -81,7 +82,13 @@ export * from "./src/members/Registration"
 export * from "./src/members/RegistrationPatch"
 export * from "./src/members/RegistrationWithEncryptedMember"
 export * from "./src/members/RegistrationWithMember"
+export * from "./src/members/ReviewTime"
 
+// Register checkout
+export * from "./src/members/checkout/RegisterCart"
+export * from "./src/members/checkout/RegisterCheckout"
+export * from "./src/members/checkout/RegisterItem"
+export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"

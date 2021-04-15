@@ -19,10 +19,16 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" @click="manageWhatsNew()">
+        <button class="menu-button button heading text" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
+        </button>
+
+        <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+            <span class="icon key" />
+            <span>Gebruikers goedkeuren</span>
+            <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
         </button>
 
         <template v-if="enableMemberModule">
@@ -119,7 +125,7 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -130,6 +136,7 @@ import SignupModulesView from "../signup/SignupModulesView.vue";
 import AccountSettingsView from './account/AccountSettingsView.vue';
 import CategoryView from "./groups/CategoryView.vue";
 import GroupMembersView from "./groups/GroupMembersView.vue";
+import KeysView from "./keys/KeysView.vue";
 import NoKeyView from './NoKeyView.vue';
 import PaymentsView from './payments/PaymentsView.vue';
 import SettingsView from './settings/SettingsView.vue';
@@ -148,7 +155,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
     
     get registerUrl() {
-        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
+        if (this.organization.registerDomain) {
             return "https://"+this.organization.registerDomain
         } 
 
@@ -194,17 +201,26 @@ export default class Menu extends Mixins(NavigationMixin) {
             }
         }
 
-        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
-            if (parts[1] == "all") {
-                this.openAll(false)
-                didSet = true
-            } else {
-                for (const group of this.organization.groups) {
-                    if (parts[1] == Formatter.slug(group.settings.name)) {
-                        this.openGroup(group, false)
-                        didSet = true
-                        break;
+        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
+            for (const category of this.organization.meta.categories) {
+                if (parts[1] == Formatter.slug(category.settings.name)) {
+                    if (parts[2] && parts[2] == "all") {
+                        this.openCategoryMembers(category, false)
+                    } else {
+                        this.openCategory(category, false)
                     }
+                    didSet = true
+                    break;
+                }
+            }
+        }
+
+        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
+            for (const group of this.organization.groups) {
+                if (parts[1] == Formatter.slug(group.settings.name)) {
+                    this.openGroup(group, false)
+                    didSet = true
+                    break;
                 }
             }
         }
@@ -251,11 +267,6 @@ export default class Menu extends Mixins(NavigationMixin) {
             localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
         }
 
-        if (this.whatsNewBadge.length > 0) {
-            // show popup
-            new Toast("Er zijn nieuwe functies!", "gift green").setHide(5*1000).show()
-        }
-
         if (!didSet) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
                 this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup").setAnimated(false))
@@ -284,7 +295,7 @@ export default class Menu extends Mixins(NavigationMixin) {
                 try {
                     const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
                     await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
-                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "lock green").setHide(15*1000).show()
+                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
                 } catch (e) {
                     console.error(e)
                     new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
@@ -314,7 +325,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             console.error(e)
 
             // Show warnign instead
-            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "lock-missing yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
                 this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
             })).show()
         }
@@ -338,9 +349,22 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
     }
 
+    manageKeys(animated = true) {
+        this.currentlySelected = "keys"
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(KeysView) }).setAnimated(animated));
+    }
+
     openCategory(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CategoryView, { category }) }).setAnimated(animated));
+    }
+
+    openCategoryMembers(category: GroupCategory, animated = true) {
+        this.currentlySelected = "category-"+category.id
+
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {
+            category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
+        }) }).setAnimated(animated));
     }
 
     openWebshop(webshop: WebshopPreview, animated = true) {
@@ -526,19 +550,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     .bubble {
+        @extend .style-bubble;
+        
         margin-left: auto;
         flex-shrink: 0;
-        width: 20px;
-        height: 20px;
-        display: block;
-        background: $color-primary;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: bold;
-        text-align: center;
-        line-height: 20px;
-        vertical-align: middle;
-        color: $color-white;
+        
     }
     
     padding-left: var(--horizontal-padding, 30px);

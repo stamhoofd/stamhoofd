@@ -43,7 +43,7 @@ export function buildManageGroupsComponent(organization: Organization) {
         if (full.categories.length === 0) {
 
             // Create a new one and open that one instead
-            const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategories(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined)
+            const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined)
             const category = defaultCategories[0] ?? GroupCategory.create({
                 settings: GroupCategorySettings.create({
                     name: "Leeftijdsgroepen",

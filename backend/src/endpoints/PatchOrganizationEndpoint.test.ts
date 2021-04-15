@@ -218,6 +218,8 @@ describe("Endpoint.PatchOrganization", () => {
                     name: "My crazy group name",
                     startDate: new Date(),
                     endDate: new Date(),
+                    registrationStartDate: new Date(),
+                    registrationEndDate: new Date(),
                     genderType: GroupGenderType.Mixed,
                 }),
                 privateSettings: GroupPrivateSettings.create({})
@@ -255,6 +257,8 @@ describe("Endpoint.PatchOrganization", () => {
                     name: "My crazy group name",
                     startDate: new Date(),
                     endDate: new Date(),
+                    registrationStartDate: new Date(),
+                    registrationEndDate: new Date(),
                     genderType: GroupGenderType.Mixed,
                 })
             })

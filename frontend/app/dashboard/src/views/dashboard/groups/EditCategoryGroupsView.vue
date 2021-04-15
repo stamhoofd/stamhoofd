@@ -35,12 +35,12 @@
                 </STInputBox>
 
                 <template v-if="enableActivities">
-                    <Checkbox v-model="limitRegistrations">
+                    <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
                         Een lid kan maar in één groep inschrijven
                     </Checkbox>
 
                     <Checkbox v-model="isHidden">
-                        Verberg deze categorie voor leden
+                        Toon deze categorie enkel voor beheerders
                     </Checkbox>
                 </template>
             </template>
@@ -116,7 +116,7 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditCategoryView from './EditCategoryView.vue';
@@ -370,9 +370,12 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 name: "",
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
+                registrationStartDate: this.organization.meta.defaultStartDate,
+                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
-            })
+            }),
+            privateSettings: GroupPrivateSettings.create({})
         })
         const meta = OrganizationMetaData.patch({})
 

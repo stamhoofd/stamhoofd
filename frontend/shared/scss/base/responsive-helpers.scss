@@ -16,6 +16,15 @@
     }
 }
 
+/**
+Only show if tabbar is visible
+*/
+.only-tab-bar {
+    @media (min-width: 701px) {
+        display: none;
+    }
+}
+
 .only-icon-smartphone {
     @media (max-width: 450px) {
         span:not(.icon) {

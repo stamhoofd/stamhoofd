@@ -20,11 +20,11 @@ export class Address extends AutoEncoder {
     @field({ decoder: CountryDecoder })
     country: Country;
 
-    toString() {
+    toString(): string {
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
     }
 
-    static createDefault() {
+    static createDefault(): Address {
         return Address.create({
             street: "",
             number: "",
@@ -37,7 +37,7 @@ export class Address extends AutoEncoder {
     /**
      * Call this to clean up capitals in all the available data
      */
-    cleanData() {
+    cleanData(): void {
         if (StringCompare.isFullCaps(this.street)) {
             this.street = Formatter.capitalizeWords(this.street.toLowerCase())
         }
@@ -50,7 +50,7 @@ export class Address extends AutoEncoder {
         this.street = this.street.trim()
     }
 
-    static createFromFields(addressLine1: string, postalCode: string, city: string, country: string) {
+    static createFromFields(addressLine1: string, postalCode: string, city: string, country: string): Address {
         const { street, number } = Address.splitAddressLine(addressLine1)
 
         if (postalCode.length == 0) {

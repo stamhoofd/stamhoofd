@@ -1,6 +1,6 @@
 require('dotenv').config()
 import { Column, Database } from "@simonbackx/simple-database";
-import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
+import { CORSPreflightEndpoint, EncodedResponse, Request, Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { Version } from '@stamhoofd/structures';
 
 import { crons } from './src/crons';
@@ -37,6 +37,7 @@ const start = async () => {
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
         "Access-Control-Max-Age": "86400"
     };
+
     routerServer.listen(parseInt(process.env.PORT ?? "9090"));
 
     const cronInterval = setInterval(crons, 5 * 60 * 1000);

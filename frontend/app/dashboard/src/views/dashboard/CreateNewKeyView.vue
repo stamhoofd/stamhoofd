@@ -33,18 +33,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, patchContainsChanges,PatchType } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, BirthYearInput, Checkbox, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Address, Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, User,Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import ChangePasswordView from './ChangePasswordView.vue';
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
+import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
     components: {

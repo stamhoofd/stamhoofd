@@ -1,23 +1,26 @@
 <template>
     <div class="toast-view-container">
-        <div class="toast-view" @click="clicked" :class="toast.icon">
-            <div class="progress" v-if="toast.progress !== null" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
-            <Spinner v-if="toast.icon == 'spinner'"/>
-            <span v-else-if="toast.icon" class="first icon" :class="toast.icon"/>
+        <div class="toast-view" :class="toast.icon" @click="clicked">
+            <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
+            <Spinner v-if="toast.icon == 'spinner'" />
+            <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>
-                <button class="button text" v-if="toast.button" @click.stop="clickedButton">{{ toast.button.text }}</button>
+                <button v-if="toast.button" class="button text" @click.stop="clickedButton">
+                    {{ toast.button.text }}
+                </button>
             </div>
-            <span class="icon arrow-right" v-if="toast.action"/>
+            <span v-if="toast.action" class="icon arrow-right" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin, FramedComponent } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Mixins } from "vue-property-decorator";
-import { Toast } from './Toast';
+import { ComponentWithProperties, FramedComponent,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import Spinner from '../Spinner.vue';
+import { Toast } from './Toast';
 
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view

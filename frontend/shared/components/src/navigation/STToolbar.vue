@@ -31,6 +31,7 @@ export default class STToolbar extends Vue {
 .st-toolbar {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
+    margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
     padding-top: var(--st-vertical-padding, 20px);
     bottom: 0;
     overflow: hidden;
@@ -42,7 +43,7 @@ export default class STToolbar extends Vue {
 
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+        padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 10px);
         background: $color-white;
         border-top: $border-width solid $color-white-shade;
         display: flex;

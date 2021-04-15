@@ -5,6 +5,7 @@ export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
 export { default as STErrorsDefault } from "./src/errors/STErrorsDefault.vue"
 export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/Validator"
+export * from "./src/EventBus"
 
 // Navigation
 export { default as BackButton } from "./src/navigation/BackButton.vue"
@@ -26,6 +27,7 @@ export { default as ToastView } from "./src/overlays/ToastView.vue"
 export { default as Tooltip } from "./src/overlays/Tooltip.vue"
 
 // Directives
+export { default as CopyableDirective } from "./src/directives/Copyable"
 export { default as TooltipDirective } from "./src/directives/Tooltip"
 
 // Cotnainers
@@ -38,6 +40,7 @@ export { default as STList } from "./src/layout/STList.vue"
 export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
+export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 
@@ -73,6 +76,7 @@ export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 
 // Shared views should be last
+export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"
 export { default as ConfirmEmailView } from "./src/views/ConfirmEmailView.vue"
 export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"
 export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vue"

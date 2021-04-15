@@ -16,16 +16,16 @@
                 <button class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
-        <STNavigationTitle>
-            <span class="icon-spacer">{{ member.details.name }}</span>
-            <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
-            <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
-            <button class="button icon gray more" @click="showContextMenu" />
-        </STNavigationTitle>
-
-        <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
 
         <main>
+            <h1>
+                <span class="icon-spacer">{{ member.details.name }}</span>
+                <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
+                <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
+                <button class="button icon gray more" @click="showContextMenu" />
+            </h1>
+
+            <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
             <component :is="tab" :member="member" :family-manager="familyManager" />
         </main>
     </div>
@@ -56,12 +56,11 @@ import MemberViewPayments from "./MemberViewPayments.vue";
     },
 })
 export default class MemberView extends Mixins(NavigationMixin) {
-    tabs = [MemberViewDetails, MemberViewPayments];
-    tab = this.tabs[0];
-    tabLabels = ["Gegevens", "Betaling"];
-
     @Prop()
     member!: MemberWithRegistrations;
+
+    @Prop({ default: null })
+    initialTab!: number | null
 
     @Prop({ default: null })
     group: Group | null;
@@ -71,6 +70,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     @Prop({ default: false })
     waitingList!: boolean
+
+    tabs = [MemberViewDetails, MemberViewPayments];
+    tab = this.tabs[this.payments.length > 0 ? (this.initialTab ?? 0) : 0];
+    tabLabels = ["Gegevens", "Betaling"];
 
     familyManager = new FamilyManager([this.member]);
 
@@ -102,6 +105,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
         return this.member.registrations.flatMap(r => r.payment ? [r.payment] : [])
     }
 
+    get tabIndex() {
+        return Math.max(0, this.tabs.findIndex(t => t === this.tab))
+    }
+
     goBack() {
         const member = this.getPreviousMember(this.member);
         if (!member) {
@@ -111,6 +118,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
+            initialTab: this.tabIndex,
 
             group: this.group,
             cycleOffset: this.cycleOffset,
@@ -128,6 +136,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             member: member,
             getNextMember: this.getNextMember,
             getPreviousMember: this.getPreviousMember,
+            initialTab: this.tabIndex,
 
             group: this.group,
             cycleOffset: this.cycleOffset,

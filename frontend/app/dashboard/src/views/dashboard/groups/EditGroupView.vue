@@ -44,22 +44,54 @@
                     />
                 </STInputBox>
 
-                <hr>
-                <h2>Inschrijven</h2>
-
                 <div class="split-inputs">
-                    <STInputBox title="Inschrijven start op" error-fields="settings.startDate" :error-box="errorBox">
+                    <STInputBox title="Startdatum" error-fields="settings.startDate" :error-box="errorBox">
                         <DateSelection v-model="startDate" />
                     </STInputBox>
-                    <TimeInput v-model="startDate" title="Vanaf" :validator="validator" /> 
+                    <TimeInput v-if="displayStartEndTime" v-model="startDate" title="Vanaf welk tijdstip" :validator="validator" /> 
                 </div>
                 
 
                 <div class="split-inputs">
-                    <STInputBox title="Inschrijven sluit op" error-fields="settings.endDate" :error-box="errorBox">
+                    <STInputBox title="Einddatum" error-fields="settings.endDate" :error-box="errorBox">
                         <DateSelection v-model="endDate" />
                     </STInputBox>
-                    <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
+                    <TimeInput v-if="displayStartEndTime" v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
+                </div>
+                <p class="st-list-description">
+                    De start- en einddatum is zichtbaar bij het inschrijven. Let op: dit is niet de datum waarop de inschrijvingen starten en eindigen, dat staat hieronder.
+                </p>
+
+                <Checkbox v-model="displayStartEndTime">
+                    Start- en eindtijdstip toevoegen
+                </Checkbox>
+
+                <STInputBox title="Locatie (optioneel)" error-fields="settings.location" :error-box="errorBox">
+                    <input
+                        v-model="location"
+                        class="input"
+                        type="text"
+                        placeholder="Optioneel"
+                        autocomplete=""
+                    >
+                </STInputBox>
+
+                <hr>
+                <h2>Inschrijven</h2>
+
+                <div class="split-inputs">
+                    <STInputBox title="Inschrijven start op" error-fields="settings.registrationStartDate" :error-box="errorBox">
+                        <DateSelection v-model="registrationStartDate" />
+                    </STInputBox>
+                    <TimeInput v-model="registrationStartDate" title="Vanaf" :validator="validator" /> 
+                </div>
+                
+
+                <div class="split-inputs">
+                    <STInputBox title="Inschrijven sluit op" error-fields="settings.registrationEndDate" :error-box="errorBox">
+                        <DateSelection v-model="registrationEndDate" />
+                    </STInputBox>
+                    <TimeInput v-model="registrationEndDate" title="Tot welk tijdstip" :validator="validator" />
                 </div>
                 <p class="st-list-description">
                     Als de inschrijvingen het hele jaar doorlopen, vul dan hier gewoon een datum in ergens op het einde van het jaar. Let op het jaartal.
@@ -67,15 +99,15 @@
       
                 <div class="split-inputs">
                     <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
-                        <AgeInput v-model="minAge" placeholder="Onbeperkt" :nullable="true" />
+                        <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
                     </STInputBox>
 
                     <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errorBox">
-                        <AgeInput v-model="maxAge" placeholder="Onbeperkt" :nullable="true" />
+                        <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
                     </STInputBox>
                 </div>
                 <p class="st-list-description">
-                    *De leeftijd die het lid zal worden in het jaar waarin de inschrijvingen starten. Ter referentie: leden uit het eerste leerjaar worden 6 jaar in september. Leden uit het eerste secundair worden 12 jaar in september.
+                    *De leeftijd van het lid op 31/12/{{ startYear }} (jaar startdatum). Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
                 </p>
 
                 <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
@@ -87,38 +119,128 @@
                 </STInputBox>
 
                 <hr>
-                <h2>Wachtlijst</h2>
-                <STInputBox error-fields="genderType" :error-box="errorBox" class="max">
+                <h2>Maximum aantal leden</h2>
+
+                <Checkbox v-model="enableMaxMembers">
+                    Limiteer maximum aantal ingeschreven leden
+                </Checkbox>
+
+                <Checkbox v-if="enableMaxMembers" v-model="waitingListIfFull">
+                    Wachtlijst als maximum is bereikt
+                </Checkbox>
+
+                <STInputBox v-if="enableMaxMembers" title="Maximaal aantal ingeschreven leden">
+                    <Slider v-model="maxMembers" :max="200" />
+                </STInputBox>
+
+                <p v-if="enableMaxMembers" class="style-description-small">
+                    Bij online betalingen wordt de plaats maximaal 30 minuten vrijgehouden als mensen op de betaalpagina zijn. Normaal kan de betaling daarna niet meer doorkomen. Door een trage verwerking van de bank of een storing bij de bank kan het zijn dat het langer dan 30 minuten duurt voor we een betaalbevestiging krijgen van de bank, dan kunnen we de betaling niet meer weigeren (beperking van bank). Het kan dus zijn dat in die uitzonderlijke situaties, het maximum aantal overschreven wordt. Je kan daarna eventueel zelf overgaan tot terugbetalen en uitschrijven. 
+                </p>
+
+
+                <hr>
+                <h2>Wachtlijst en voorinschrijvingen</h2>
+
+                <STInputBox error-fields="waitingListType" :error-box="errorBox" class="max">
                     <RadioGroup class="column">
                         <Radio v-model="waitingListType" value="None">
-                            Geen wachtlijst
-                        </Radio>
-                        <Radio v-model="waitingListType" value="PreRegistrations">
-                            Voorinschrijvingen <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven. Bij het openen van de inschrijvingen kan men blijven inschrijven tot het maximaal aantal leden bereikt is. Daarna sluiten de inschrijvingen.</span>
+                            Geen speciale regeling
                         </Radio>
                         <Radio v-model="waitingListType" value="ExistingMembersFirst">
-                            Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven. Van de nieuwe leden kies je zelf wie je doorlaat.</span>
+                            Alle nieuwe leden op wachtlijst<span class="radio-description">Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest komt op de wachtlijst.</span>
+                        </Radio>
+                        <Radio v-model="waitingListType" value="PreRegistrations">
+                            Voorinschrijvingen gebruiken <span class="radio-description">Bestaande leden kunnen al vroeger beginnen met inschrijven.</span>
                         </Radio>
                         <Radio v-model="waitingListType" value="All">
                             Iedereen op wachtlijst <span class="radio-description">Iedereen moet manueel worden goedgekeurd.</span>
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
-               
-                <STInputBox v-if="waitingListType != 'None'" title="Maximaal aantal ingeschreven leden">
-                    <Slider v-model="maxMembers" :max="200" />
-                </STInputBox>
 
                 <div v-if="waitingListType == 'PreRegistrations'" class="split-inputs">
-                    <STInputBox v-if="waitingListType == 'PreRegistrations'" title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
+                    <STInputBox title="Begindatum voorinschrijvingen" error-fields="settings.preRegistrationsDate" :error-box="errorBox">
                         <DateSelection v-model="preRegistrationsDate" />
                     </STInputBox>
                     
                     <TimeInput v-model="preRegistrationsDate" title="Vanaf" :validator="validator" /> 
                 </div>
+                
                 <Checkbox v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" v-model="priorityForFamily">
                     Naast bestaande leden ook voorrang geven aan broers/zussen
                 </Checkbox>
+
+                <p v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" class="info-box">
+                    Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. Let er dus op dat die leden ook in Stamhoofd zijn ingeladen. Je kan leden van vorig jaar importeren via Excel en bij de importeer-instellingen aanduiden dat het gaat om leden van vorig jaar. Leden moeten wel inloggen met een e-mailadres dat verbonden is met een bestaand account. Daarom verstuur je best een e-mail naar alle leden met de magische knop waarmee ze automatisch met het juiste account inloggen (of registreren).
+                </p>
+
+                <template v-if="useActivities || patchedGroup.settings.requireGroupIds.length > 0">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verplicht ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.requireGroupIds.length == 0" class="button text" @click="editRequireGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editRequireGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Geef leden enkel toegang om in te schrijven als ze al ingeschreven zijn voor één van de volgende inschrijvingsgroepen. Laat leeg als je ook nieuwe leden wil laten inschrijven.</p>
+
+                    <STList v-if="patchedGroup.settings.requireGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.requireGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removeRequireGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen verplichte andere inschrijvingen
+                    </p>
+                </template>
+
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Omslagfoto</div>
+                    <div>
+                        <button v-if="coverPhoto" class="button text" @click="coverPhoto = null">
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
+                        </button>
+                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hs" />
+                    </div>
+                </h2>
+
+                <p>Deze foto wordt getoond met een grootte van 1800 x 750 pixels, bovenaan de informatiepagina van deze groep.</p>
+
+                <figure v-if="coverPhotoSrc" class="cover-photo">
+                    <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
+                </figure>
+
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Vierkante foto</div>
+                    <div>
+                        <button v-if="squarePhoto" class="button text" @click="squarePhoto = null">
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
+                        </button>
+                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hsSquare" />
+                    </div>
+                </h2>
+
+                <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens up te loaden.</p>
+
+                <figure v-if="squarePhotoSrc" class="square-photo">
+                    <img :src="squarePhotoSrc">
+                </figure>
             </template>
             <template v-if="tab == 'payments'">
                 <STErrorsDefault :error-box="errorBox" />
@@ -134,7 +256,9 @@
                     <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
                 </STList>
 
-                <p class="info-box" v-else>Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.</p>
+                <p v-else class="info-box">
+                    Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.
+                </p>
             </template>
         </main>
 
@@ -155,15 +279,16 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Toast, Validator } from "@stamhoofd/components";
-import { GroupPrivateSettings, GroupSettingsPatch, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, Version } from '@stamhoofd/structures';
-import { Group, GroupGenderType, GroupPrices, GroupSettings, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
+import { GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionRow from "../admins/GroupPermissionRow.vue"
 import EditGroupPriceBox from "./EditGroupPriceBox.vue"
+import SelectGroupsView from './SelectGroupsView.vue';
 
 @Component({
     components: {
@@ -186,7 +311,9 @@ import EditGroupPriceBox from "./EditGroupPriceBox.vue"
         EditGroupPriceBox,
         BackButton,
         STList,
-        GroupPermissionRow
+        GroupPermissionRow,
+        UploadButton,
+        STListItem
     },
 })
 export default class EditGroupView extends Mixins(NavigationMixin) {
@@ -246,6 +373,10 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
     }
 
+    get useActivities() {
+        return this.patchedOrganization.meta.modules.useActivities
+    }
+
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)
     }
@@ -260,6 +391,47 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     get roles() {
         return this.patchedOrganization.privateMeta?.roles ?? []
+    }
+
+    getGroupName(id: string) {
+        const group = this.patchedOrganization.groups.find(g => g.id === id)
+        if (!group) {
+            // Search deleted groups (in non patched one)
+            const deleted = OrganizationManager.organization.groups.find(g => g.id === id)
+            if (deleted) {
+                return deleted.settings.name +" (verwijderd)"
+            }
+            return "Verwijderde inschrijvingsgroep (verwijder dit best)"
+        }
+        return group.settings.name
+    }
+ 
+    editRequireGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.requireGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.requireGroupIds.includes(id)) {
+                        diff.requireGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.requireGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.requireGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removeRequireGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.requireGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
     }
 
     addOrganizationPatch(patch: AutoEncoderPatchType<Organization> ) {
@@ -306,6 +478,33 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ name })
     }
 
+    get location() {
+        return this.patchedGroup.settings.location
+    }
+
+    set location(location: string) {
+        this.addSettingsPatch({ location })
+    }
+
+    get displayStartEndTime() {
+        return this.patchedGroup.settings.displayStartEndTime
+    }
+
+    set displayStartEndTime(displayStartEndTime: boolean) {
+        this.addSettingsPatch({ displayStartEndTime })
+
+        if (!displayStartEndTime) {
+            // Change dates
+            const start = new Date(this.startDate)
+            start.setHours(0, 0, 0, 0)
+            this.startDate = start
+
+            const end = new Date(this.endDate)
+            end.setHours(23, 59, 59, 0)
+            this.endDate = end
+        }
+    }
+
     get description() {
         return this.patchedGroup.settings.description
     }
@@ -322,12 +521,32 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ startDate })
     }
 
-    get endDate() {
+     get endDate() {
         return this.patchedGroup.settings.endDate
     }
 
     set endDate(endDate: Date) {
         this.addSettingsPatch({ endDate })
+    }
+
+    get startYear() {
+        return this.startDate.getFullYear()
+    }
+
+    get registrationStartDate() {
+        return this.patchedGroup.settings.registrationStartDate
+    }
+
+    set registrationStartDate(registrationStartDate: Date) {
+        this.addSettingsPatch({ registrationStartDate })
+    }
+
+    get registrationEndDate() {
+        return this.patchedGroup.settings.registrationEndDate
+    }
+
+    set registrationEndDate(registrationEndDate: Date) {
+        this.addSettingsPatch({ registrationEndDate })
     }
 
     get genderType() {
@@ -379,19 +598,13 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     set waitingListType(waitingListType: WaitingListType) {
-        if (waitingListType == WaitingListType.PreRegistrations) {
-            const preRegistrationsDate = new Date(this.startDate.getTime())
-            preRegistrationsDate.setDate(preRegistrationsDate.getDate() - 14)
-            this.addSettingsPatch({ preRegistrationsDate })
-        } else {
-            this.addSettingsPatch({ preRegistrationsDate: null })
-        }
-        if (waitingListType != WaitingListType.None) {
-            this.addSettingsPatch({ maxMembers: this.maxMembers ?? 50 })
-        } else {
-            this.addSettingsPatch({ maxMembers: null })
-        }
         this.addSettingsPatch({ waitingListType })
+
+        if (waitingListType === WaitingListType.PreRegistrations && this.preRegistrationsDate === null) {
+            const d = new Date(this.startDate)
+            d.setMonth(d.getMonth() - 1)
+            this.preRegistrationsDate = d
+        }
     }
 
     get preRegistrationsDate() {
@@ -400,6 +613,29 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     set preRegistrationsDate(preRegistrationsDate: Date | null) {
         this.addSettingsPatch({ preRegistrationsDate })
+    }
+
+    get waitingListIfFull() {
+        return this.patchedGroup.settings.waitingListIfFull
+    }
+
+    set waitingListIfFull(waitingListIfFull: boolean) {
+        this.addSettingsPatch({ waitingListIfFull })
+    }
+
+    get enableMaxMembers() {
+        return this.maxMembers !== null
+    }
+
+    set enableMaxMembers(enableMaxMembers: boolean) {
+        if (enableMaxMembers === this.enableMaxMembers) {
+            return
+        }
+        if (enableMaxMembers) {
+            this.maxMembers = 200
+        } else {
+            this.maxMembers = null
+        }
     }
 
     get maxMembers() {
@@ -493,28 +729,131 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
-        console.log(this.patchOrganization)
-        console.log(this.organization)
         return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        console.log("should navigate away")
         if (!this.isChanged()) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
+    // Cover picture
+    get coverPhoto() {
+        return this.patchedGroup.settings.coverPhoto
+    }
+
+    set coverPhoto(coverPhoto: Image | null) {
+        this.addSettingsPatch(GroupSettings.patch({
+            coverPhoto
+        }))
+    }
+
+     get hs() {
+        return [
+            ResolutionRequest.create({
+                width: 1600
+            }),
+            ResolutionRequest.create({
+                width: 800
+            }),
+            ResolutionRequest.create({
+                height: 250,
+                width: 250,
+                fit: ResolutionFit.Cover
+            })
+        ]
+    }
+
+    get coverPhotoResolution() {
+        const image = this.coverPhoto
+        if (!image) {
+            return null
+        }
+        return image.getResolutionForSize(800, 200)
+    }
+
+    get coverPhotoSrc() {
+        const image = this.coverPhoto
+        if (!image) {
+            return null
+        }
+        return this.coverPhotoResolution?.file.getPublicPath()
+    }
+    
+    get coverImageWidth() {
+        return this.coverPhotoResolution?.width
+    }
+
+    get coverImageHeight() {
+        return this.coverPhotoResolution?.height
+    }
+
+     // Cover picture
+    get squarePhoto() {
+        return this.patchedGroup.settings.squarePhoto
+    }
+
+    set squarePhoto(squarePhoto: Image | null) {
+        this.addSettingsPatch(GroupSettings.patch({
+            squarePhoto
+        }))
+    }
+
+     get hsSquare() {
+        return [
+            ResolutionRequest.create({
+                height: 250,
+                width: 250,
+                fit: ResolutionFit.Cover
+            })
+        ]
+    }
+
+    get squarePhotoSrc() {
+        const image = this.squarePhoto
+        if (!image) {
+            return null
+        }
+        return image.getResolutionForSize(250, 250).file.getPublicPath()
+    }
 
 }
 </script>
 
 <style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-edit-view {
-    
+    .cover-photo {
+        height: 0;
+        position: relative;
+        padding-bottom: 750/1800*100%;
+        background: $color-gray;
+        border-radius: $border-radius;
+        margin-top: 20px;
+
+        img {
+            border-radius: $border-radius;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+
+    .square-photo {
+        img {
+            height: 200px;
+            width: 200px;
+            border-radius: $border-radius;
+            object-fit: contain;
+        }
+    }
 
 }
 </style>

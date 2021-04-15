@@ -241,21 +241,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     async load(force = false) {
-        console.log("called load", force)
-        if (!force && this.organization.admins && this.organization.invites) {
-            this.loading = false
-            return
-        }
-
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/admins",
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
-        })
-
-        this.organization.admins = response.data.users
-        this.organization.invites = response.data.invites
+        await OrganizationManager.loadAdmins(force)
         this.loading = false
     }
 

@@ -17,10 +17,18 @@
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                     <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
 
-                    <h2 class="style-title-list">{{ parent.parent.firstName }} {{ parent.parent.lastName }}</h2>
-                    <p class="style-description-small" v-if="parent.parent.phone">{{ parent.parent.phone }}</p>
-                    <p class="style-description-small" v-if="parent.parent.email">{{ parent.parent.email }}</p>
-                    <p class="style-description-small" v-if="parent.parent.address">{{ parent.parent.address }}</p>
+                    <h2 class="style-title-list">
+                        {{ parent.parent.firstName }} {{ parent.parent.lastName }}
+                    </h2>
+                    <p v-if="parent.parent.phone" class="style-description-small">
+                        {{ parent.parent.phone }}
+                    </p>
+                    <p v-if="parent.parent.email" class="style-description-small">
+                        {{ parent.parent.email }}
+                    </p>
+                    <p v-if="parent.parent.address" class="style-description-small">
+                        {{ parent.parent.address }}
+                    </p>
 
                     <button slot="right" class="button text limit-space" @click.stop="editParent(parent.parent)">
                         <span class="icon edit" />
@@ -43,8 +51,12 @@
 
             <STList>
                 <STListItem v-for="contact in emergencyContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
-                    <h2 class="style-title-list">{{ contact.name }} ({{ contact.title }})</h2>
-                    <p class="style-description-small" v-if="contact.phone">{{ contact.phone }}</p>
+                    <h2 class="style-title-list">
+                        {{ contact.name }} ({{ contact.title }})
+                    </h2>
+                    <p v-if="contact.phone" class="style-description-small">
+                        {{ contact.phone }}
+                    </p>
 
                     <button slot="right" class="button text limit-space" @click.stop="editEmergencyContact()">
                         <span class="icon edit" />
@@ -57,21 +69,22 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Slider, STErrorsDefault, STInputBox, STToolbar, STList, STListItem, Checkbox, LoadingButton } from "@stamhoofd/components"
-import { MemberWithRegistrations, Version, EmergencyContact, Parent } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
-import { MemberDetails } from '@stamhoofd/structures';
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import EditMemberParentView from './EditMemberParentView.vue';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, ErrorBox, LoadingButton,Slider, STErrorsDefault, STInputBox, STList, STListItem, STToolbar } from "@stamhoofd/components"
+import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
+import { MemberDetails } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { FamilyManager } from '../../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';
+import EditMemberParentView from './EditMemberParentView.vue';
 
 class SelectableParent {
     selected = false
     parent: Parent
 
-    constructor(parent: Parent, selected: boolean = false) {
+    constructor(parent: Parent, selected = false) {
         this.selected = selected
         this.parent = parent
     }
@@ -225,10 +238,6 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         .style-with-button {
             margin-bottom: 0;
             padding-bottom: 0;
-
-            &:first-child {
-                padding-top: 15px;
-            }
         }
     }
 </style>

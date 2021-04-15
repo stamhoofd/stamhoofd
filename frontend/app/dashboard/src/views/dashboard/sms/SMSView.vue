@@ -10,8 +10,10 @@
         </STNavigationTitle>
 
         <main>
-            <div class="error-box" v-if="!isSupported">SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.</div>
-            <STInputBox title="Naar wie?" v-if="customers.length == 0">
+            <div v-if="!isSupported" class="error-box">
+                SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.
+            </div>
+            <STInputBox v-if="customers.length == 0" title="Naar wie?">
                 <select id="sms-who" v-model="smsFilter" class="input">
                     <option value="parents">
                         Enkel naar ouders
@@ -25,8 +27,8 @@
                 </select>
             </STInputBox>
 
-            <STInputBox title="Bericht" id="message-title" v-if="canUseBody" />
-            <textarea id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" v-if="canUseBody" />
+            <STInputBox v-if="canUseBody" id="message-title" title="Bericht" />
+            <textarea v-if="canUseBody" id="sms-text" v-model="message" class="input" placeholder="Typ hier je SMS-bericht" />
         </main>
 
         <STToolbar>
@@ -40,7 +42,7 @@
                 }}
             </template>
             <template #right>
-                <button class="button primary" @click="send" :disabled="!isSupported || phones.length == 0">
+                <button class="button primary" :disabled="!isSupported || phones.length == 0" @click="send">
                     Versturen
                 </button>
             </template>
@@ -50,12 +52,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle } from "@stamhoofd/components";
-import { STToolbar, STInputBox } from "@stamhoofd/components";
+import { CenteredMessage, STNavigationTitle } from "@stamhoofd/components";
+import { STInputBox,STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
-import { Component, Mixins,Prop } from "vue-property-decorator";
 import { Customer, MemberWithRegistrations } from '@stamhoofd/structures';
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -206,11 +208,11 @@ export default class SMSView extends Mixins(NavigationMixin) {
         window.location.href = url;
     }
 
-    shouldNavigateAway() {
-        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
-            return true;
+    async shouldNavigateAway() {
+        if (this.message.length == 0) {
+            return true
         }
-        return false;
+        return await CenteredMessage.confirm("Ben je zeker dat je dit scherm wilt sluiten?", "Sluiten")
     }
 }
 </script>

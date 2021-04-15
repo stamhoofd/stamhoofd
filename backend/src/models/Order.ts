@@ -147,15 +147,17 @@ export class Order extends Model {
             const webshop = this.webshop
             const organization = webshop.organization
             
-            const { from, replyTo }= organization.getDefaultEmail()
+            const { from, replyTo } = organization.getDefaultEmail()
            
             const customer = this.data.customer
+
+            const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
 
             // Also send a copy
             Email.send({
                 from,
                 replyTo,
-                to: this.data.customer.email,
+                to: toStr,
                 subject: "["+webshop.meta.name+"] Bestelling "+this.number,
                 text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. Je kan jouw bestelling nakijken via \n"+this.getUrl()+"\n\n"+organization.name,
             })

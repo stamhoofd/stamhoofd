@@ -1,9 +1,9 @@
 @use '../base/variables' as *;
 @use '../base/text-styles' as *;
 
-.view {
+.view, .st-view .box {
     > main {
-       @extend .main-text-container;
+        @extend .main-text-container;
     }
 }
 .st-view {
@@ -13,6 +13,113 @@
     min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+    padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) var(--st-horizontal-padding, 40px);
+    --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
+
+    > * {
+        // We fixed the safe area, no need to recorrect it again
+        --st-safe-area-top: 0px;
+    }
+
+    > main {
+
+        &.limit-width {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            --st-horizontal-padding: calc((100vw - 900px) / 2);
+            --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - 900px) / 2));
+
+            padding: 0 var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+            padding: 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px)) 0 calc(var(--st-horizontal-padding, 40px) - var(--st-view-horizontal-padding, 40px));
+        }
+
+        > .view {
+            margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
+            padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 15px);
+            flex-grow: 1;
+
+            display: flex;
+            flex-direction: column;
+
+            @media(min-width: 940px) {
+                > main {
+                    --st-horizontal-padding: 0px;
+                }
+            }
+        }
+
+        > .gray-shadow {
+            background: $color-background-shade;
+            margin-top: 0;
+            margin-bottom: calc(-1 * var(--st-vertical-padding, 20px));
+            margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
+            padding-bottom: calc(var(--st-safe-area-bottom, 0px) + var(--st-vertical-padding, 20px));
+            padding-top: calc(var(--st-vertical-padding, 20px) + 30px);
+            position: relative;
+            flex-grow: 1;
+
+            --color-current-background-shade: #{$color-background-shade-darker};
+
+            &:before {
+                content: "";
+                background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
+                height: 60px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+            }
+        }
+
+        > .white-top {
+            background: $color-background;
+            margin-bottom: 0;
+            flex-grow: 0;
+        }
+    }
+
+    &.boxed:not(.popup .st-view.boxed) {
+        @media (min-width: 801px) {
+            background: $color-background-shade;
+            --color-current-background: #{$color-background-shade};
+        }
+        width: 100%;
+    }
+
+    > .box {
+        display: flex;
+        flex-direction: column;
+
+        // the main extend has moved to .box general because CSS stops working (don't know why)
+
+        &:not(.popup .st-view > .box) {
+            @media (max-width: 800px) {
+                flex-grow: 1;
+            }
+
+            @media (min-width: 801px) {
+                --st-safe-area-top: 0px;
+                max-width: 800px;
+                background: $color-white;
+                --color-current-background-shade: #{$color-background-shade};
+                @include style-side-view-shadow();
+                border-radius: $border-radius;
+                margin: 20px auto;
+                min-height: auto;
+                width: 100%;
+                box-sizing: border-box;
+
+                padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+                
+                // With extra top padding safe area default to 20px
+                padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+            }
+        }
+    }
+
+    // Save padding if we make changes
+    --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
     .st-toolbar {
         margin-top: auto;
@@ -26,10 +133,24 @@
 
     &.background {
         background: $color-white;
+        --color-current-background: #{$color-white};
+        --color-current-background-shade: #{$color-background-shade};
+    }
+
+    &.shade {
+        background: $color-background-shade;
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
     }
 }
 
-
 .sheet .st-view {
     min-height: auto;
+}
+
+.popup .st-view {
+    > main.limit-width {
+        --st-horizontal-padding: var(--st-view-horizontal-padding);
+        padding: 0;
+    }
 }

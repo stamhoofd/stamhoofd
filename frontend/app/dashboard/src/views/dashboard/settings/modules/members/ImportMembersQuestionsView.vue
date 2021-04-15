@@ -233,7 +233,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get hasWaitingLists() {
-        return !!this.organization.groups.find(g => g.settings.waitingListType !== WaitingListType.None)
+        return !!this.organization.groups.find(g => g.hasWaitingList())
     }
     
     get automaticallyAssigned() {
@@ -517,7 +517,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
                 if (member.equal) {
                     // Merge data (this is an edge case)
-                    member.equal.details!.copyFrom(member.details)
+                    member.equal.details!.merge(member.details)
                     await family.patchAllMembersWith(member.equal)
 
                     if (member.equal.activeRegistrations.length === 0) {

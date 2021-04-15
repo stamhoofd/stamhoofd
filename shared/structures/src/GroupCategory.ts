@@ -169,7 +169,8 @@ export class GroupCategoryTree extends GroupCategory {
                         for (const cat of t.categories) {
                             // Clone reference
                             cat.settings = GroupCategorySettings.create(cat.settings)
-                            cat.settings.name = t.settings.name + " / " + cat.settings.name
+                            cat.settings.name = t.settings.name + " - " + cat.settings.name
+                            cat.settings.public = t.settings.public && cat.settings.public
                         }
                         // Concat here
                         return t.categories
@@ -190,5 +191,28 @@ export class GroupCategoryTree extends GroupCategory {
                 return []
             })
         })
+    }
+
+    /**
+     * Remove empty categories and non-public categories
+     * @param admin Whether not-public categories should be visible
+     */
+    filterForDisplay(admin = false): GroupCategoryTree {
+        const categories = this.categories.flatMap((category) => {
+            if (!admin && !category.settings.public) {
+                return []
+            }
+            const filtered = category.filterForDisplay(admin)
+            if (filtered.groups.length == 0 && filtered.categories.length == 0) {
+                return []
+            }
+            return [filtered]
+        })
+
+        return GroupCategoryTree.create(
+            Object.assign({}, this, {
+                categories
+            })
+        )
     }
 }

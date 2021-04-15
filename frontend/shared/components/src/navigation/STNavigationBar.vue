@@ -1,5 +1,5 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled: scrolled, sticky: sticky }">
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle }">
         <div>
             <slot name="left" />
         </div>
@@ -26,6 +26,18 @@ export default class STNavigationBar extends Vue {
 
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
+
+    /**
+     * Also show the title when not scrolled
+     */
+    @Prop({ default: false, type: Boolean })
+    showTitle!: boolean;
+
+    @Prop({ default: false, type: Boolean })
+    fixed!: boolean;
+
+    @Prop({ default: false, type: Boolean })
+    large!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
@@ -112,6 +124,17 @@ export default class STNavigationBar extends Vue {
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + 20px);
     padding: var(--st-safe-area-top, 0px) var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
     height: 60px;
+
+    &.large {
+        height: 80px;
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+        margin-bottom: 20px;
+        padding: var(--st-safe-area-top, 0px) 20px 0 20px;
+
+        @media (max-width: 450px) {
+            padding: var(--st-safe-area-top, 0px) 15px 0 15px;
+        }    
+    }
     -webkit-app-region: drag;
 
     &.sticky {
@@ -119,11 +142,20 @@ export default class STNavigationBar extends Vue {
         top: 0;
     }
 
+    &.fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+    }
+
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 10px;
     background: white;
+    background: var(--color-current-background, white);
     z-index: 11;
 
     > div {
@@ -164,13 +196,20 @@ export default class STNavigationBar extends Vue {
         @extend .style-title-small;
     }
 
+    &.show-title {
+        > h1 {
+            opacity: 0.6;
+        }
+    }
+
+
     &.scrolled {
         box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
         > h1 {
             opacity: 1;
         }
     }
-
+    
     // Other helper styles (need to revalidate)
     .input {
         width: 220px;

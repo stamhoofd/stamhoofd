@@ -1,12 +1,15 @@
+import { Database } from '@simonbackx/simple-database';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
-import { simpleParser } from 'mailparser';
 
 import Email from './email/Email';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
+import { ForwardHandler } from './helpers/ForwardHandler';
 import { EmailAddress } from './models/EmailAddress';
+import { Group } from './models/Group';
 import { Organization } from './models/Organization';
 import { Payment } from './models/Payment';
+import { Registration } from './models/Registration';
 
 let isRunningCrons = false
 
@@ -41,16 +44,11 @@ async function checkDNS() {
     
 }
 
-function escapeHtml(unsafe) {
-    return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
- }
-
 async function checkReplies() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping replies checking")
+        return
+    }
     console.log("Checking replies from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
@@ -88,61 +86,11 @@ async function checkReplies() {
                                 dmarcVerdict: { status: 'PASS' | string };
                             }
 
-                            if (receipt.spamVerdict.status != "PASS" || receipt.virusVerdict.status != "PASS" || !(receipt.spfVerdict.status == "PASS" || receipt.dkimVerdict.status == "PASS")) {
-                                console.error("Received spam or virus e-mail. Ignoring")
-                                continue;
-                            }
-
-                            const recipients = receipt.recipients
-                            const email: string | undefined = recipients[0]
-                            const organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined
-
-                            // Send a new e-mail
-                            const defaultEmail = organization?.privateMeta.emails.find(e => e.default)?.email ?? organization?.privateMeta.emails[0]?.email ?? "hallo@stamhoofd.be"
-                            console.log("Forward to "+defaultEmail)       
-                            
-                            const parsed = await simpleParser(content);
-                            const from = parsed.from?.value[0]?.address
-                            const extraDescription = from && from.endsWith("amazonses.com") ? "Er ging iets mis bij het versturen van een e-mail. Het e-mailadres is ongeldig of de ontvanger heeft de e-mail als spam gemarkeerd. Kijk na of dit lid een typefout heeft gemaakt in het e-mailadres en corrigeer dit zeker." : "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd. Normaal antwoorden gebruikers rechtstreeks naar het juiste e-mailadres maar enkele e-mail programma's ondersteunen deze standaard functionaliteit niet en sturen antwoorden altijd naar de verstuurder (en wij kunnen niet versturen vanaf jouw e-mailadres, tenzij je jouw domeinnaam instelt in Stamhoofd). Let op dat je zelf ook naar het juiste e-mailadres antwoordt ("+(from ?? "?")+").";
-
-                            let html: string | undefined = undefined
-
-                            if (parsed.html !== false) {
-                                // Search for body
-                                const body = parsed.html.toLowerCase().indexOf("<body")
-
-                                if (body != -1) {
-                                    const endTag = parsed.html.indexOf(">", body)
-                                    html = parsed.html.substring(0, endTag + 1) + "<p><i>"+escapeHtml(extraDescription)+"<br><br></i></p>"+parsed.html.substring(endTag + 1)
-                                } else {
-                                    html = "<p><i>"+escapeHtml(extraDescription)+"<br><br></i></p>"+parsed.html
+                            const options = await ForwardHandler.handle(content, receipt)
+                            if (options) {
+                                if (process.env.NODE_ENV === "production") {
+                                    Email.send(options)
                                 }
-                            }
-
-                            const options = {
-                                from: email ?? recipients[0] ?? "unknown@stamhoofd.be",
-                                to: defaultEmail,
-                                replyTo: parsed.from?.text,
-                                subject: parsed.subject ?? "Doorgestuurd bericht",
-                                text: parsed.text ? extraDescription + "\n\n" + parsed.text : undefined,
-                                html: html,
-                                attachments: parsed.attachments.flatMap(a => {
-                                    if (a.cid) {
-                                        // Already done inline in html
-                                        return []
-                                    }
-                                    return [{
-                                        filename: a.filename ?? "",
-                                        content: a.content.toString("utf-8"),
-                                        contentType: a.contentType
-                                    }]
-                                })
-                            }
-
-                            if (process.env.NODE_ENV === "production") {
-                                Email.send(options)
-                            } else {
-                                //console.log(options)
                             }
                         }
                     }
@@ -155,12 +103,17 @@ async function checkReplies() {
 }
 
 async function checkBounces() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping bounce checking")
+        return
+    }
     console.log("Checking bounces from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log("Received bounce message");
+            console.log(message);
 
             if (message.ReceiptHandle) {
                 if (process.env.NODE_ENV === "production") {
@@ -216,6 +169,11 @@ async function checkBounces() {
 }
 
 async function checkComplaints() {
+    if (process.env.NODE_ENV !== "production") {
+        console.log("Skippping complaints checking")
+        return
+    }
+
     console.log("Checking complaints from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue", MaxNumberOfMessages: 10 }).promise()
@@ -250,9 +208,6 @@ async function checkComplaints() {
 
                             const type: "abuse" | "auth-failure" | "fraud" | "not-spam" | "other" | "virus" = b.complaintFeedbackType
 
-                            console.log(type)
-
-                           
                             if (organization) {
                                 for (const recipient of b.complainedRecipients) {
                                     const email = recipient.emailAddress
@@ -316,6 +271,42 @@ async function checkPayments() {
     }
 }
 
+// Unreserve reserved registrations
+async function checkReservedUntil() {
+    console.log("Check reserved until...")
+    const registrations = await Registration.where({
+        reservedUntil: {
+            sign: "<",
+            value: new Date()
+        },
+    }, {
+        limit: 200
+    })
+
+    if (registrations.length === 0) {
+        return
+    }
+
+    // Clear reservedUntil
+    const q = `UPDATE ${Registration.table} SET reservedUntil = NULL where id IN (?) AND reservedUntil < ?`
+    await Database.update(q, [registrations.map(r => r.id), new Date()])
+
+    // Get groups
+    const groupIds = registrations.map(r => r.groupId)
+    const groups = await Group.where({
+        id: {
+            sign: "IN",
+            value: groupIds
+        }
+    })
+
+    // Update occupancy
+    for (const group of groups) {
+        await group.updateOccupancy()
+        await group.save()
+    }
+}
+
 // Schedule automatic paynl charges
 export const crons = () => {
     if (isRunningCrons) {
@@ -323,7 +314,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkComplaints().then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkReservedUntil().then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

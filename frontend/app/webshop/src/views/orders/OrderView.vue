@@ -1,7 +1,14 @@
 <template>
     <LoadingView v-if="!order" />
-    <div v-else class="boxed-view">
-        <div class="st-view order-view">
+    <div v-else class="st-view boxed order-view">
+        <STNavigationBar :large="true">
+            <OrganizationLogo slot="left" :organization="organization" />
+            <button slot="right" class="primary button" @click="pop">
+                Nieuwe bestelling
+            </button>
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1 v-if="success">
                     Jouw bestelling is geplaatst
@@ -166,8 +173,8 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod, Webshop } from '@stamhoofd/structures';
+import { BackButton,CenteredMessage,ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
+import { CartItem, Order, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -183,7 +190,9 @@ import { WebshopManager } from '../../classes/WebshopManager';
         Radio,
         LoadingButton,
         STErrorsDefault,
-        LoadingView
+        LoadingView,
+        BackButton,
+        OrganizationLogo
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -212,6 +221,10 @@ export default class OrderView extends Mixins(NavigationMixin){
     success: boolean
 
     order: Order | null = this.initialOrder
+
+    get organization() {
+        return WebshopManager.organization
+    }
 
     get canShare() {
         return !!navigator.share

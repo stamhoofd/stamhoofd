@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
-import { SessionManager } from '@stamhoofd/networking'
-import { Organization, OrganizationPatch } from '@stamhoofd/structures'
+import { LoginHelper, SessionManager } from '@stamhoofd/networking'
+import { Invite, Organization, OrganizationAdmins, OrganizationPatch, User } from '@stamhoofd/structures'
 
 /**
  * Convenient access to the organization of the current session
@@ -10,13 +10,14 @@ export class OrganizationManagerStatic {
         return SessionManager.currentSession!.organization!
     }
 
+    set organization(organization: Organization) {
+        SessionManager.currentSession!.setOrganization(organization)
+    }
+
     get user() {
         return SessionManager.currentSession!.user!
     }
 
-    set organization(organization: Organization) {
-        SessionManager.currentSession!.setOrganization(organization)
-    }
 
     getPatch() {
         return OrganizationPatch.create({
@@ -44,6 +45,17 @@ export class OrganizationManagerStatic {
         if (invites && !this.organization.invites && patch.invites) {
             this.organization.invites = patch.invites.applyTo(invites)
         }
+    }
+
+    async loadAdmins(force = false): Promise<OrganizationAdmins> {
+        if (!force && this.organization.admins && this.organization.invites) {
+            return this.organization as any
+        }
+
+        const loaded = await LoginHelper.loadAdmins()
+        this.organization.admins = loaded.users
+        this.organization.invites = loaded.invites
+        return this.organization as any
     }
 }
 

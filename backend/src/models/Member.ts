@@ -1,5 +1,6 @@
 import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMember, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { Group } from './Group';
 
@@ -36,33 +37,8 @@ export class Member extends Model {
     @column({ type: "string" })
     organizationId: string;
 
-    @column({ type: "string", nullable: true })
-    encryptedForOrganization: string | null = null;
-
-    @column({ type: "string", nullable: true })
-    encryptedForMember: string | null = null;
-
-    /**
-     * Set to true for members who did not confirm their membership.
-     * E.g. when the member is imported from last year. 
-     * 
-     * If a new member creates an account with the same firstName, lastName and birthDay, it will get merged (except the memberDetails).
-     * This merging behaviour happens in the dashboard in the front-end, not on the server.
-     */
-    @column({ type: "boolean" })
-    placeholder = false;
-
-    /**
-    * Public key used for encryption
-    */
-    @column({ type: "string" })
-    publicKey: string;
-
-    /**
-    * Public key used for encryption of the organization
-    */
-    @column({ type: "string" })
-    organizationPublicKey: string;
+    @column({ type: "json", decoder: new ArrayDecoder(EncryptedMemberDetails) })
+    encryptedDetails: EncryptedMemberDetails[] = []
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -143,7 +119,9 @@ export class Member extends Model {
         }
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
         
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        //query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+
         query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += Member.users.joinQuery(Member.table, User.table)+"\n"
@@ -218,13 +196,32 @@ export class Member extends Model {
         return await this.getAllWithRegistrations(...ids)
     }
 
+    /**
+     * Fetch all members that are linked to users that requested new keys
+     */
+    static async getMembersWithRegistrationForKeyRequests(organizationId: string): Promise<MemberWithRegistrations[]> {
+        let query = `SELECT l2.membersId as id from users u\n`;
+        query += `JOIN _members_users l2 on l2.usersId = u.id \n`
+        query += `where u.organizationId = ? AND u.requestKeys = 1 group by l2.membersId`
+
+        const [results] = await Database.select(query, [organizationId])
+        const ids: string[] = []
+        for (const row of results) {
+            ids.push(row["l2"]["id"])
+        }
+        return await this.getAllWithRegistrations(...ids)
+    }
+
      /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.users.linkTable}\`\n`;
         query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${Member.users.linkTable}\`.\`${Member.users.linkKeyA}\`\n`
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
+        
+        //query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+
         query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += `where \`${Member.users.linkTable}\`.\`${Member.users.linkKeyB}\` = ?`

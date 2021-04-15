@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, Invite, InviteKeychainItem,KeychainItem, KeyConstants, NewUser, Organization, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -310,7 +310,7 @@ export class LoginHelper {
             session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
-                await session.updateData()
+                await session.updateData(true)
                 return true
             }
 
@@ -558,9 +558,52 @@ export class LoginHelper {
         */
     }
 
+    static async shareKey(keyPair: { publicKey: string; privateKey: string; }, receiverId: string, receiverPulicKey: string): Promise<Invite> {
+        // Create an invite (automatic one)
+        const items = new VersionBox([InviteKeychainItem.create({
+            publicKey: keyPair.publicKey,
+            privateKey: keyPair.privateKey
+        })])
+
+        const invite = NewInvite.create({ 
+            userDetails: null,
+            permissions: null,
+            receiverId,
+            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), receiverPulicKey)
+        })
+
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "POST",
+            path: "/invite",
+            body: invite,
+            decoder: Invite as Decoder<Invite>
+        })
+        return response.data
+    }
+
+    static async loadAdmins(): Promise<OrganizationAdmins> {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/admins",
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+        })
+
+        return response.data
+    }
+
     static async changeOrganizationKey(session: Session) {
         const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
         const item = await session.createKeychainItem(organizationKeyPair)
+
+        // Send invites to all other administrators
+        // Before we change the key
+        const organization = await this.loadAdmins()
+        for (const admin of organization.users) {
+            if (admin.publicKey && admin.id !== SessionManager.currentSession!.user!.id) {
+                await this.shareKey(organizationKeyPair, admin.id, admin.publicKey)
+            }
+        }
 
         // Do netwowrk request to create organization
         await session.authenticatedServer.request({
@@ -575,7 +618,7 @@ export class LoginHelper {
         })
 
         Keychain.addItem(item)
-        await session.updateData()
+        await session.updateData(true)
         await SessionManager.setCurrentSession(session)
     }
 
@@ -584,6 +627,7 @@ export class LoginHelper {
 
         let userPrivateKey = session.getUserPrivateKey();
         let publicKey: string | undefined = undefined
+        let requestKeys = session.user!.requestKeys
         if (!userPrivateKey) {
             if (!force) {
                 throw new SimpleError({
@@ -594,11 +638,31 @@ export class LoginHelper {
             const userKeyPair = await Sodium.generateEncryptionKeyPair();
             userPrivateKey = userKeyPair.privateKey
             publicKey = userKeyPair.publicKey
+
+            // Check if this user has memebrs or was an administrator
+            if (session.user?.permissions ?? null !== null) {
+                requestKeys = true
+            } else {
+                try {
+                    const response = await session.authenticatedServer.request({
+                        method: "GET",
+                        path: "/members",
+                        decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+                    })
+                    if (response.data.data.length > 0) {
+                        // We'll lose access to these members data
+                        requestKeys = true
+                    }
+                } catch (e) {
+                    console.error(e)
+                }
+            }
         }
 
         const patch = NewUser.patch({
             id: session.user!.id,
             publicKey,
+            requestKeys: requestKeys ? true : undefined,
             publicAuthSignKey: keys.authSignKeyPair.publicKey,
             authSignKeyConstants: keys.authSignKeyConstants,
             authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
@@ -695,7 +759,7 @@ export class LoginHelper {
         try {
             await session.authenticatedServer.request({
                 method: "PATCH",
-                path: "/user/"+session.user!.id,
+                path: "/user/"+patch.id,
                 body: patch,
                 decoder: User
             })
@@ -713,7 +777,9 @@ export class LoginHelper {
             throw e
         }
 
-        await session.updateData()
+        if (session.user!.id === patch.id) {
+            await session.updateData(true)
+        }
         return {}
     }
 

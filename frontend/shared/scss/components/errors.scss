@@ -1,4 +1,5 @@
 @use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/responsive-helpers' as *;
 
 .error-box {
     background: $color-error-background;
@@ -10,6 +11,7 @@
     padding: 15px 15px 15px 50px;
     box-sizing: border-box;
     position: relative;
+    margin: 15px 0;
 
     @media (max-width: 450px) {
         font-size: 14px;
@@ -34,6 +36,10 @@
             opacity: 0.8;
         }
     }
+}
+
+.error-box-parent .error-box {
+    margin: 0;
 }
 
 .warning-box {
@@ -90,6 +96,12 @@
         top: 50%;
         transform: translate(0, -50%);
     }
+
+    &.email {
+        &::before {
+            font-icon: url(@stamhoofd/assets/images/icons/email.svg);
+        }
+    }
 }
 
 .success-box {
@@ -117,5 +129,39 @@
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
+    }
+}
+
+.error-box, .success-box, .info-box, .warning-box {
+    +.error-box, +.success-box, +.info-box, +.warning-box  {
+        margin-top: -10px;
+    }
+
+    &.selectable {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        user-select: none;
+        cursor: pointer;
+
+        &:active {
+            opacity: 0.5;
+        }
+    }
+
+    &.with-button {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        > .button {
+            flex-shrink: 0;
+            padding-left: 15px;
+            margin-left: auto;
+            @extend .only-icon-smartphone;
+
+            &.text.button {
+                color: inherit;
+            }
+        }
     }
 }

@@ -18,13 +18,17 @@
                 <Checkbox v-model="enableTransfers">
                     Overschrijvingen (gratis, maar zelf op te volgen)
                 </Checkbox>
+                <Checkbox v-if="!isBelgium" v-model="enableIDEAL">
+                    iDEAL (29 cent)
+                </Checkbox>
+
                 <Checkbox v-model="enablePayconiq">
                     Payconiq (20 cent)
                 </Checkbox>
                 <Checkbox v-model="enableBancontact">
                     Bancontact (31 cent)
                 </Checkbox>
-                <Checkbox v-model="enableIDEAL">
+                <Checkbox v-model="enableIDEAL" v-if="isBelgium">
                     iDEAL (29 cent)
                 </Checkbox>
 
@@ -90,12 +94,17 @@
             </STInputBox>
 
             <hr>
-            <h2>Bancontact &amp; iDEAL</h2>
+            <h2 v-if="isBelgium">Bancontact &amp; iDEAL</h2>
+            <h2 v-else>iDEAL &amp; Bancontact</h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description">
+                <p class="st-list-description" v-if="isBelgium">
                     Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
                 </p>
+                <p class="st-list-description" v-else>
+                    Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 29 cent voor een iDEAL betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
+                </p>
+                <p class="info-box" v-if="isBelgium">Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)</p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="linkMollie">
@@ -186,6 +195,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get isBelgium() {
+        return this.organization.address.country == "BE"
     }
 
     get enableMemberModule() {

@@ -47,7 +47,7 @@ export class Formatter {
     }
 
     /**
-     * maandag, 1 januari (2020). Year only in different year
+     * maandag, 1 januari (2020) om XX:XX. Year only in different year
      */
     static dateTimeWithDay(date: Date): string {
         return this.weekDay(date) +", "+this.dateTime(date)
@@ -88,7 +88,10 @@ export class Formatter {
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
-    static dateTime(date: Date): string {
+    static dateTime(date: Date, hideZero = false): string {
+        if (hideZero && this.time(date) == "0:00") {
+            return this.date(date)
+        }
         return this.date(date) + " om "+this.time(date)
     }
 
@@ -142,5 +145,25 @@ export class Formatter {
         const h = Math.floor(minutes/60)
         const m = minutes - h*60
         return h+":"+(m+"").padStart(2, "0")
+    }
+
+    static escapeHtml(unsafe: string): string {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    static joinLast(array: (string | number)[], separator: string | undefined, lastSeparator: string | undefined): string {
+        const last = array.pop()
+        if (last === undefined) {
+            return ""
+        }
+        if (array.length == 0) {
+            return last+""
+        }
+        return array.join(separator)+lastSeparator+last
     }
 }

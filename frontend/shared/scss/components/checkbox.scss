@@ -4,6 +4,8 @@
 .radio,
 .checkbox {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    touch-action: manipulation;
+    user-select: none;
 
     display: inline-block; // needed to not cover whole width, since that might cause accidental clicks
     cursor: pointer;
@@ -29,10 +31,14 @@
             border: $border-width solid $color-gray-light;
             background: transparent;
             box-sizing: border-box;
-            transition: background-color 0.2s, border-color 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+
+            &:active {
+                transform: scale(0.8, 0.8);
+            }
 
             svg > path {
                 stroke-dasharray: 30;
@@ -88,9 +94,15 @@
     }
 
     > input:disabled + div  {
+        cursor: not-allowed;
+
         > div:first-child {
             border: $border-width solid $color-gray-light;
             background: $color-white-shade;
+
+            &:active {
+                transform: none;
+            }
 
             svg > path {
                 stroke: $color-white-shade;

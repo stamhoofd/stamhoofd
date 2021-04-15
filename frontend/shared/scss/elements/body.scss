@@ -9,10 +9,13 @@
     --st-horizontal-padding: 40px;
     --st-vertical-padding: 40px;
     --st-safe-area-top: 0px;
+    --st-safe-area-top: env(safe-area-inset-top, 0px);
 
     --color-current-background: #{$color-white};
     --color-current-border: #{$color-border};
     --color-current-background-shade: #{$color-white-shade};
+    --st-safe-area-bottom: 0px;
+    --st-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
     @media (max-width: 800px) {
         --st-horizontal-padding: 20px;

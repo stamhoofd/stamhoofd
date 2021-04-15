@@ -1,0 +1,42 @@
+p {
+    margin: 0; 
+    padding: 0;
+} 
+strong {
+    font-weight: bold;
+} 
+
+em {
+    font-style: italic;
+} 
+
+h1 {
+    font-size: 30px; 
+    font-weight: bold; 
+    margin: 0; 
+    padding: 0
+} 
+
+h2 {
+    font-size: 20px; 
+    font-weight: bold; 
+    margin: 0; 
+    padding: 0;
+} 
+
+h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
+ol, ul {
+    list-style-position: inside;
+    padding-left: 20px;
+}
+
+body {
+    color: #000716;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}

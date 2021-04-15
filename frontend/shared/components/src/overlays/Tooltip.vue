@@ -1,7 +1,8 @@
 <template>
     <transition appear name="show">
-        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }">
-            {{ text }}
+        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }" :class="icon">
+            <span v-if="icon" :class="'icon '+icon" />
+            <span>{{ text }}</span>
         </div>
     </transition>
 </template>
@@ -16,6 +17,11 @@ export default class Tooltip extends Vue {
     })
     text!: string;
 
+    @Prop({
+        default: null,
+    })
+    icon!: string | null;
+    
     @Prop({
         default: 0,
     })
@@ -79,6 +85,26 @@ export default class Tooltip extends Vue {
     &.show-enter, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
         opacity: 0;
         transform: translate(0, 20px);
+    }
+
+    > .icon {
+        display: inline-block;
+        margin: -10px 5px -10px 0;
+        vertical-align: middle;
+    }
+
+    > span {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    &.green {
+        background-color: $color-success-background;
+        color: $color-success-dark;
+
+        .progress {
+            background: $color-success;
+        }
     }
 }
 </style>

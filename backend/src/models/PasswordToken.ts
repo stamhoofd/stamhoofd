@@ -117,4 +117,10 @@ export class PasswordToken extends Model {
 
         return host+"/reset-password"+(user.permissions ? "/"+encodeURIComponent(user.organization.id) : "")+"?token="+encodeURIComponent(token.token);
     }
+
+    static async getMagicSignInUrl(user: UserWithOrganization) {
+        // For now we don't add a token yet for security. We might add some sort of email validation thing later on
+        const host = "https://"+user.organization.getHost()
+        return Promise.resolve(host+"/login"+"?email="+encodeURIComponent(user.email)+"&hasAccount="+(user.hasAccount() ? 1 : 0));
+    }
 }

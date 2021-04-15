@@ -7,8 +7,7 @@ $input-height: 44px;
     max-width: 340px;
 }
 
-.input,
-.editor .ProseMirror {
+.input {
     @extend .style-input;
     @extend .style-input-shadow;
     color: $color-dark;
@@ -26,13 +25,21 @@ $input-height: 44px;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-     &:hover {
+    &:hover {
         border-color: $color-primary-gray-light;
     }
 
     &:disabled {
         color: $color-gray;
         cursor: not-allowed;
+
+        // Safari fix color opacity
+        -webkit-text-fill-color: $color-gray;
+        opacity: 1; /* required on iOS */
+
+        &:hover {
+            border-color: $color-gray-light;
+        }
     }
 
     &:focus,
@@ -77,15 +84,6 @@ textarea.input {
 
     height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 2;
     resize: none;
-}
-
-.editor .ProseMirror {
-    max-width: none;
-    padding: 10px 15px;
-    height: auto;
-    min-height: $input-height * 2;
-    line-height: normal;
-    outline: none;
 }
 
 .input-dropdown {

@@ -1,6 +1,13 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { AutoEncoder, BaseIdentifiable, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-export class KeychainItem extends AutoEncoder {
+export class KeychainItem extends AutoEncoder implements BaseIdentifiable<string> {
+    /**
+     * Should be unique (by database constraint)
+     */
+    getIdentifier(): string {
+        return this.publicKey
+    }
     /**
      * The public key associated with the encrypted private key
      */

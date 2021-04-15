@@ -1,11 +1,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRequest } from "@stamhoofd/structures";
+import { EmailRequest, Replacement } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import Email, { EmailBuilder } from '../email/Email';
+import { PasswordToken } from '../models/PasswordToken';
 import { Token } from '../models/Token';
+import { User } from '../models/User';
 
 type Params = {};
 type Query = undefined;
@@ -133,9 +135,31 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         // Include name in form field
         if (sender.name) {
             from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+        } else {
+            from = '"'+user.organization.name.replace("\"", "\\\"")+"\" <"+from+">" 
         }
 
         const email = request.body
+
+        // Update recipients
+        for (const recipient of email.recipients) {
+            
+            // Default signInUrl
+            let signInUrl = "https://"+user.organization.getHost()+"/login?email="+encodeURIComponent(user.email)
+
+            if (recipient.userId) {
+                const recipientUser = await User.getByID(recipient.userId)
+                if (recipientUser && recipientUser.organizationId === user.organizationId && recipientUser.email === recipient.email) {
+                    // We can create a special token
+                    signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser.setRelation(User.organization, user.organization))
+                }
+            }
+
+            recipient.replacements.push(Replacement.create({
+                token: "signInUrl",
+                value: signInUrl
+            }))
+        }
 
         // Create e-mail builder
         const builder: EmailBuilder = () => {
@@ -146,10 +170,9 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             let html = email.html
 
-            // Replacements (todo)
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                    html = html.replace("{{"+replacement.token+"}}", Formatter.escapeHtml(replacement.value))
                 }
             }
 
@@ -167,13 +190,14 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         Email.schedule(builder)
 
         // Also send a copy
+        const prefix = "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"
         Email.send({
             from,
             replyTo,
             to: sender.email,
             subject: "[KOPIE] "+email.subject,
             text: "Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"\n\n"+email.text ?? undefined,
-            html: "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"+email.html ?? undefined,
+            html: email.html?.replace("<body>", "<body>"+prefix) ?? undefined,
             attachments
         })
         return new Response(undefined);

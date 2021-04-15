@@ -13,7 +13,11 @@
                 <STErrorsDefault :error-box="errorBox" />
 
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <button class="button full" :class="button.type" @click="onClickButton(button)">
+                    <a v-if="button.href" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                        <span v-if="button.icon" class="icon" :class="button.icon" />
+                        <span>{{ button.text }}</span>
+                    </a>
+                    <button v-else class="button full" :class="button.type" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>

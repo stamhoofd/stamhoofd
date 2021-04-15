@@ -1,15 +1,13 @@
 import { Database } from '@simonbackx/simple-database';
-import { AutoEncoderPatchType,Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PermissionLevel, Permissions } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
 
 import { GroupBuilder } from '../helpers/GroupBuilder';
 import { Group } from '../models/Group';
 import { Invite } from '../models/Invite';
 import { PayconiqPayment } from '../models/PayconiqPayment';
-import { Payment } from '../models/Payment';
 import { Token } from '../models/Token';
 import { User } from '../models/User';
 import { Webshop } from '../models/Webshop';
@@ -263,6 +261,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 })
             }
 
+            await model.updateOccupancy()
             await model.save();
         }
 
@@ -296,6 +295,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
             }
             
+            await model.updateOccupancy()
             await model.save();
         }
 

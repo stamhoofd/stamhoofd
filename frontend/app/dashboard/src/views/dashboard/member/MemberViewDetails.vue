@@ -1,6 +1,14 @@
 <template>
     <div class="member-view-details">
         <div>
+            <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
+                {{ member.firstName }} is niet ingeschreven
+                <span class="button icon edit" />
+            </p>
+            <p v-else-if="member.activeRegistrations.length == 0" class="info-box">
+                {{ member.firstName }} is niet ingeschreven
+            </p>
+
             <div class="hover-box">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
@@ -19,19 +27,6 @@
                         <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
                     </template>
 
-                    <template v-if="member.groups.length > 0">
-                        <dt>Groep</dt>
-                        <dd class="hover-box">
-                            {{ member.groups.map(g => g.settings.name).join(", ") }}
-                            <button v-if="hasWrite" class="hover-show button icon gray sync" @click="editGroup()" />
-                        </dd>
-                    </template>
-
-                    <template v-if="member.waitingGroups.length > 0">
-                        <dt>Wachtlijst</dt>
-                        <dd>{{ member.waitingGroups.map(g => g.settings.name).join(", ") }}</dd>
-                    </template>
-
                     <template v-if="member.details.phone">
                         <dt>GSM-nummer</dt>
                         <dd>{{ member.details.phone }}</dd>
@@ -39,7 +34,10 @@
 
                     <template v-if="member.details.email">
                         <dt>E-mailadres</dt>
-                        <dd>{{ member.details.email }}</dd>
+                        <dd>
+                            {{ member.details.email }}
+                            <span v-if="getInvalidEmailDescription(member.details.email)" v-tooltip="getInvalidEmailDescription(member.details.email)" class="icon warning yellow" />
+                        </dd>
                     </template>
 
                     <template v-if="member.details.address">
@@ -50,6 +48,49 @@
                         </dd>
                     </template>
                 </dl>
+            </div>
+
+            <div v-if="member.activeRegistrations.length > 0" class="container">
+                <hr>
+                <h2 class="style-with-button with-list">
+                    <div>Ingeschreven voor</div>
+                    <div>
+                        <button class="button text limit-space" @click="editGroup()">
+                            <span class="icon sync" />
+                            <span>Wijzig</span>
+                        </button>
+                    </div>
+                </h2>
+
+                <STList>
+                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
+                        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
+                            <img :src="imageSrc(registration)">
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <figure v-else slot="left" class="registration-image">
+                            <figure>
+                                <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
+                            </figure>
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <h3 class="style-title-list">
+                            {{ getGroup(registration.groupId).settings.name }}
+                        </h3>
+                        <p v-if="!registration.waitingList" class="style-description-small">
+                            Ingeschreven op {{ registration.registeredAt | dateTime }}
+                        </p>
+                        <p v-else class="style-description-small">
+                            Op wachtlijst sinds {{ registration.createdAt | dateTime }}
+                        </p>
+                    </STListItem>
+                </STList>
             </div>
 
             <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
@@ -72,7 +113,10 @@
 
                     <template v-if="parent.email">
                         <dt>E-mailadres</dt>
-                        <dd>{{ parent.email }}</dd>
+                        <dd>
+                            {{ parent.email }}
+                            <span v-if="getInvalidEmailDescription(parent.email)" v-tooltip="getInvalidEmailDescription(parent.email)" class="icon warning yellow" />
+                        </dd>
                     </template>
 
                     <template v-if="parent.address">
@@ -149,10 +193,25 @@
                     </STListItem>
                 </STList>
             </div>
+
+            <div v-if="!member.details || member.details.isRecovered">
+                <hr>
+                <p v-if="!hasLatestKey" class="error-box">
+                    Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
+                </p>
+                <p v-else class="error-box">
+                    Een deel van de gegevens van dit lid is nog versleuteld met een oude sleutel die je niet hebt — en is dus onleesbaar voor jou. Je kan aan een hoofdbeheerder - die deze sleutel wel heeft - vragen om die ook met jou te delen (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven). Of je kan de gegevens terug aanvullen (of laten aanvullen) en de oude onbereikbare gegevens verwijderen om deze melding weg te halen.
+                </p>
+                <hr v-if="hasLatestKey">
+                <button v-if="hasLatestKey" class="button destructive" @click="markAsComplete">
+                    <span class="icon trash" />
+                    <span>Verwijder versleutelde gegevens</span>
+                </button>
+            </div>
         </div>
 
-        <div v-if="(member.details && !member.details.isPlaceholder) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && !member.details.isPlaceholder && !shouldSkipRecords)">
+        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0" class="hover-box">
+            <template v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -185,6 +244,13 @@
                     {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
                 </p>
 
+                <p v-if="member.details.reviewTimes.getLastReview('records')" class="style-description-small">
+                    Laatst nagekeken op {{ member.details.reviewTimes.getLastReview("records") | dateTime }}
+                </p>
+                <p v-else class="style-description-small">
+                    Nog nooit nagekeken
+                </p>
+
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
@@ -201,6 +267,7 @@
                 </h2>
                 <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
                     <span>{{ user.email }}</span>
+                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                     <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" />
                 </p>
             </template>
@@ -215,7 +282,8 @@
                     />
                 </h2>
                 <p v-for="user in placeholderAccounts" :key="user.id" class="account">
-                    {{ user.email }}
+                    <span>{{ user.email }}</span>
+                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                 </p>
             </template>
 
@@ -226,18 +294,16 @@
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
             </template>
         </div>
-        <div v-if="!member.details || member.details.isPlaceholder">
-            <p class="error-box">
-                Enkel de voornaam en enkele andere gegevens zijn beschikbaar omdat je geen toegang meer hebt tot de encryptiesleutel van de vereniging die door dit lid gebruikt werd. Vraag een hoofdbeheerder om jou terug toegang te geven (dat kan in beheerders > jouw naam > encryptiesleutels > toegang geven).
-            </p>
-        </div>
     </div>
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority } from '@stamhoofd/structures';
+import { CenteredMessage, ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { Keychain, SessionManager } from "@stamhoofd/networking";
+import { EmailInformation, EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
@@ -255,6 +321,9 @@ import RecordDescriptionView from './records/RecordDescriptionView.vue';
         STList
     },
     directives: { Tooltip },
+    filters: {
+        dateTime: Formatter.dateTime.bind(Formatter)
+    },
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
@@ -263,14 +332,41 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
     familyManager!: FamilyManager;
 
+    loadingComplete = false
+
+    checkingBounces = false
+    emailInformation: EmailInformation[] = []
+
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         (this as any).RecordTypeHelper = RecordTypeHelper;
+        this.checkBounces().catch(e => console.error(e))
+    }
+
+    getGroup(groupId: string) {
+        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
+    imageSrc(registration: Registration) {
+        const group = this.getGroup(registration.groupId)
+        if (!group) {
+            return null
+        }
+        return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
+    }
+
+    get hasLatestKey() {
+        return Keychain.hasItem(OrganizationManager.organization.publicKey)
     }
 
     get hasWrite(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
         }
 
         for (const group of this.member.groups) {
@@ -292,6 +388,64 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get shouldSkipRecords() {
         return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
+    }
+
+    getInvalidEmailDescription(email: string) {
+        const find = this.emailInformation.find(e => e.email === email)
+        if (!find) {
+            return null
+        }
+        if (find.markedAsSpam) {
+            return "Heeft e-mail als spam gemarkeerd"
+        }
+        if (find.hardBounce) {
+            return "Ongeldig e-mailadres"
+        }
+        return null
+    }
+
+    async checkBounces() {
+        if (this.checkingBounces) {
+            return
+        }
+        this.checkingBounces = true
+        const emails = this.member.getAllEmails()
+
+        if (emails.length > 0) {
+            try {
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/email/check-bounces",
+                    body: emails,
+                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+                })
+                this.emailInformation = response.data
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        this.checkingBounces = false
+    }
+
+    async markAsComplete() {
+        if (this.loadingComplete) {
+            return
+        }
+        if (!await CenteredMessage.confirm("Ben je zeker dat je alle onbereikbare gegevens wilt verwijderen?", "Ja, verwijderen")) {
+            return
+        }
+        this.loadingComplete = true
+        try {
+            // Mark this member as complete again
+            this.member.details.isRecovered = false
+            await this.familyManager.patchAllMembersWith(this.member)
+        } catch (e) {
+            // Reset
+            this.member.details.isRecovered = true
+            console.error(e)
+        }
+        this.loadingComplete = false
     }
 
     isOldEmail(email: string) {
@@ -452,109 +606,5 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
-
-.member-view-details {
-    padding: 10px 0;
-    padding-bottom: 30px;
-    display: grid;
-    grid-template-columns: 60% 40%;
-    gap: 20px;
-
-    @media (max-width: 700px) {
-        grid-template-columns: 100%;
-    }
-
-    > div,
-    > div > div {
-        --st-horizontal-padding: 0;
-        
-        > h2 {
-            @extend .style-title-2;
-            margin: 20px 0;
-        }
-
-        > p {
-            &:not([class]) {
-                @extend .style-definition-description;
-            }
-        }
-
-        > hr {
-            height: $border-width;
-            border: 0;
-            outline: 0;
-            width: 100%;
-            background: $color-gray-lighter;
-            border-radius: $border-width/2;
-            margin: 30px 0;
-        }
-    }
-
-    .accounts-description {
-        @extend .style-definition-description;
-        margin-top: 15px;
-    }
-
-    .account {
-        @extend .style-definition-description;
-        margin-bottom: 5px;
-    }
-}
-
-.member-records {
-    li {
-        list-style: none;
-        padding: 0 10px;
-        background: $color-white-shade;
-        border-radius: $border-radius;
-        margin: 6px 0;
-        @extend .style-definition-description;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        vertical-align: middle;
-
-        &.High {
-            background: $color-error-background;
-            color: $color-error-dark;
-        }
-
-        &.Medium {
-            background: $color-warning-background;
-            color: $color-warning-dark;
-        }
-
-        .icon:first-child {
-            margin-right: 5px;
-            flex-shrink: 0;
-        }
-
-        .text {
-            padding: 11px 0;
-        }
-
-        &.more {
-            cursor: help;
-
-            .icon:last-child {
-                display: block;
-                flex-shrink: 0;
-                margin-left: auto;
-                padding-left: 5px;
-                transform: translate(0, 0);
-                opacity: 0.5;
-                transition: transform 0.2s, opacity 0.2s;
-            }
-
-            &:hover {
-                .icon:last-child {
-                    transform: translate(5px, 0);
-                    opacity: 1;
-                }
-            }
-        }
-    }
-}
+@use "@stamhoofd/scss/components/member-details.scss";
 </style>

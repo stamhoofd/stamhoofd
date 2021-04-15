@@ -1,51 +1,17 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { OldRecord, Record } from './Record';
-import { OldRecordType, RecordType } from './RecordType';
+import { OldRecordType, RecordType, RecordTypeHelper } from './RecordType';
+import { ReviewTimes } from './ReviewTime';
 
-// Everything in this file is stored encrypted
-
-export class MemberExistingStatus extends AutoEncoder {
-    /**
-     * Whether this member is new or not
-     */
-    @field({ decoder: BooleanDecoder })
-    isNew: boolean
-
-    /**
-     * Whether this member has an existing brother/sister that was registered in the past year
-     */
-    @field({ decoder: BooleanDecoder })
-    hasFamily: boolean
-
-    @field({ decoder: DateDecoder })
-    lastChanged: Date = new Date()
-
-    isExpired() {
-        return this.lastChanged <= new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 14)
-    }
-}
-
-export class PreferredGroup extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    groupId: string
-
-    /**
-     * Cycle used, in order to invalidate old values
-     */
-    @field({ decoder: IntegerDecoder })
-    cycle: number
-
-    @field({ decoder: BooleanDecoder })
-    waitingList = false
-}
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -138,48 +104,39 @@ export class MemberDetails extends AutoEncoder {
     /**
      * Last time the records were reviewed
      */
-    @field({ decoder: DateDecoder, nullable: true, version: 20 })
-    lastReviewed: Date | null = null;
-
-    /**
-     * Contains the group that was selected during member creation or editing. Used to determine the group to register the member in.
-     * This can get cleared after registration, but is not needed since we keep track of the group cycle.
-     */
-    @field({ decoder: StringDecoder, version: 4, nullable: true, upgrade: () => null, field: "preferredGroupId" })
-    @field({ decoder: new ArrayDecoder(PreferredGroup), version: 17, upgrade: (preferredGroupId: string | null) => {
-        if (preferredGroupId === null) {
-            return []
+    @field({ decoder: DateDecoder, nullable: true, version: 20, field: "lastReviewed" })
+    @field({ decoder: ReviewTimes, version: 71, upgrade: (oldDate: Date | null) => {
+        const times = ReviewTimes.create({})
+        if (oldDate) {
+            times.markReviewed("records", oldDate)
+            times.markReviewed("parents", oldDate)
+            times.markReviewed("emergencyContacts", oldDate)
+            times.markReviewed("details", oldDate)
         }
-        return [
-            PreferredGroup.create({
-                groupId: preferredGroupId,
-                cycle: 0,
-                waitingList: false
-            })
-        ]
+        return times
     } })
-    preferredGroups: PreferredGroup[] = []
+    reviewTimes = ReviewTimes.create({})
 
     /**
-     * During registration, we sometimes need to know if it is an existing member, new member or a broter/sister of an existing member.
-     * We don't ask this information if it is not needed or when we can calculate it automatically based on the member history 
-     * (this behaviour is determined by the shouldKnowExisting method of Group)
-     * We also keep the date that this was asked, in order to invalidate the response in the future.
+     * Keep track whether this are recovered member details. Only set this back to false when:
+     * - The data is entered manually again (by member / parents)
+     * - Warning message is dismissed / removed in the dashboard by organization
      */
-    @field({ decoder: MemberExistingStatus, nullable: true, version: 18 })
-    existingStatus: MemberExistingStatus | null = null
+    @field({ decoder: BooleanDecoder, version: 69 })
+    isRecovered = false
 
     /**
-     * Set to true when this is automatically generated because we don't have the data
+     * @deprecated
      */
-    private _isPlaceholder = false
-
     get isPlaceholder() {
-        return this._isPlaceholder
+        return this.isRecovered
     }
 
+    /**
+     * @deprecated
+     */
     setPlaceholder() {
-        this._isPlaceholder = true
+        this.isRecovered = true
     }
 
     /**
@@ -289,6 +246,37 @@ export class MemberDetails extends AutoEncoder {
         return true
     }
 
+    getMatchingError(group: Group): string {
+        const age = this.ageForYear(group.settings.startDate.getFullYear())
+        if (group.settings.minAge || group.settings.maxAge) {
+            if (age) {
+                if (group.settings.minAge && age < group.settings.minAge) {
+                    return "Te jong"
+                }
+
+                if (group.settings.maxAge && age > group.settings.maxAge) {
+                    return "Te oud"
+                }
+            }
+        }
+
+        if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
+            if (age && age < 18) {
+                return "Enkel voor meisjes"
+            }
+            return "Enkel voor vrouwen"
+        }
+
+        if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
+            if (age && age < 18) {
+                return "Enkel voor jongens"
+            }
+            return "Enkel voor mannen"
+        }
+        
+        return "Kan niet inschrijven"
+    }
+
     getMatchingGroups(groups: Group[]) {
         return groups.filter(g => this.doesMatchGroup(g))
     }
@@ -307,6 +295,9 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
+    /**
+     * This will SET the parent
+     */
     updateParent(parent: Parent) {
         for (const [index, _parent] of this.parents.entries()) {
             if (_parent.id == parent.id) {
@@ -316,25 +307,87 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
+     * This will add or update the parent (possibily partially if not all data is present)
+     */
+    addParent(parent: Parent) {
+        for (const [index, _parent] of this.parents.entries()) {
+            if (_parent.id == parent.id) {
+                this.parents[index].merge(parent)
+                return
+            }
+            if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
+                this.parents[index].merge(parent)
+                return
+            }
+        }
+        this.parents.push(parent)
+    }
+
+    /**
+     * This will add or update the parent (possibily partially if not all data is present)
+     */
+    addRecord(record: Record) {
+        for (const [index, _record] of this.records.entries()) {
+            if (_record.type === record.type) {
+                this.records[index] = record
+                return
+            }
+        }
+        this.records.push(record)
+    }
+
+    removeRecord(type: RecordType) {
+        for (let index = this.records.length - 1; index >= 0; index--) {
+            const record = this.records[index];
+
+            if (record.type === type) {
+                this.records.splice(index, 1)
+                // Keep going to fix possible previous errors that caused duplicate types
+                // This is safe because we loop backwards
+            }
+        }
+    }
+
+    /**
      * Return all the e-mail addresses that should have access to this user
      */
     getManagerEmails(): string[] {
-        const emails: string[] = []
+        const emails = new Set<string>()
         if (this.email) {
-            emails.push(this.email)
+            emails.add(this.email)
         }
 
         if (this.age && (this.age < 18 || (this.age < 24 && !this.address))) {
             for (const parent of this.parents) {
                 if (parent.email) {
-                    emails.push(parent.email)
+                    emails.add(parent.email)
                 }
             }
         }
-        return emails
+        return [...emails]
     }
 
-    copyFrom(other: MemberDetails) {
+    /**
+     * Return all the e-mail addresses that should have access to this user
+     */
+    getAllEmails(): string[] {
+        const emails = new Set<string>()
+        if (this.email) {
+            emails.add(this.email)
+        }
+
+        for (const parent of this.parents) {
+            if (parent.email) {
+                emails.add(parent.email)
+            }
+        }
+        return [...emails]
+    }
+
+    /**
+     * Apply newer details without deleting data or replacing filled in data with empty data
+     */
+    merge(other: MemberDetails) {
         if (other.firstName.length > 0) {
             this.firstName = other.firstName
         }
@@ -350,7 +403,10 @@ export class MemberDetails extends AutoEncoder {
             this.birthDay = other.birthDay
         }
 
-        this.gender = other.gender
+        if (other.gender !== Gender.Other) {
+            // Always copy gender
+            this.gender = other.gender
+        }
 
         if (other.address) {
             if (this.address) {
@@ -369,15 +425,29 @@ export class MemberDetails extends AutoEncoder {
         }
 
         if (other.parents.length > 0) {
-            this.parents = other.parents
+            for (const parent of other.parents) {
+                // Will override existing parent if possible
+                this.addParent(parent)
+            }
         }
 
         if (other.emergencyContacts.length > 0) {
             this.emergencyContacts = other.emergencyContacts
         }
 
-        if (other.lastReviewed) {
-            this.lastReviewed = other.lastReviewed
+        this.reviewTimes.merge(other.reviewTimes)
+
+        for (const record of other.records) {
+            this.addRecord(record)
         }
+
+        // If some records are missing in the incoming blob AND if they are public, we need to delete them. Always.
+        // E.g. permissions
+        for (const recordType of Object.values(RecordType)) {
+            if (RecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
+                this.removeRecord(recordType)
+            }
+        }
+
     }
 }

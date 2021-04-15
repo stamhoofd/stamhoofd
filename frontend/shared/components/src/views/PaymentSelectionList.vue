@@ -1,5 +1,5 @@
 <template>
-    <STList>
+    <STList class="payment-selection-list">
         <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
             <Radio slot="left" v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
             <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
@@ -9,27 +9,24 @@
                 {{ getDescription(paymentMethod) }}
             </p>
 
-            <div v-if="paymentMethod == 'Payconiq' && selectedPaymentMethod == paymentMethod" class="payment-app-banner">
+            <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
             </div>
 
-            <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo">
+            <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
         </STListItem>
     </STList>
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { Organization, Payment, PaymentMethod, PaymentStatus, Record, RecordType, RegisterMember, RegisterMembers, RegisterResponse, SelectedGroup } from '@stamhoofd/structures';
+import { LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Organization, PaymentMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
 @Component({
@@ -59,7 +56,9 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     paymentMethods: PaymentMethod[]
 
     mounted() {
-        this.selectedPaymentMethod = this.sortedPaymentMethods[0] ?? null
+        if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
+            this.selectedPaymentMethod = this.sortedPaymentMethods[0] ?? null
+        }
     }
 
     get selectedPaymentMethod() {
@@ -75,13 +74,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         const r: PaymentMethod[] = []
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "NL") {
+            r.push(PaymentMethod.iDEAL)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "NL") {
-            r.push(PaymentMethod.iDEAL)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
@@ -102,7 +101,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Payconiq (aangeraden)"
+            case PaymentMethod.Payconiq: return "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.Bancontact: return "Bancontact"
             case PaymentMethod.iDEAL: return "iDEAL"
@@ -136,21 +135,28 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-.payment-method-logo {
-    max-height: 30px;
-}
+.payment-selection-list {
+    .payment-method-logo {
+        max-height: 30px;
 
-.payment-app-logo {
-    height: 30px;
-}
+        &.bancontact {
+            max-height: 38px;
+            margin: -4px 0 !important; // Fix white borders in bancontact logo
+        }
+    }
 
-.payment-app-banner {
-    display: flex;
-    flex-direction: row;
-    padding-top: 10px;
+    .payment-app-logo {
+        height: 35px;
+    }
 
-    > * {
-        margin-right: 15px
+    .payment-app-banner {
+        display: flex;
+        flex-direction: row;
+        padding-top: 10px;
+
+        > * {
+            margin-right: 5px
+        }
     }
 }
 

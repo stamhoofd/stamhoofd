@@ -1,24 +1,24 @@
 <template>
     <div class="st-view mail-view">
-        <STNavigationBar title="Mail versturen">
+        <STNavigationBar title="E-mail versturen">
             <template #right>
                 <button class="button icon close gray" @click="dismiss" />
             </template>
         </STNavigationBar>
-        <STNavigationTitle>
-            <span class="icon-spacer">Mail versturen</span>
-        </STNavigationTitle>
 
         <main>
+            <h1>E-mail versturen</h1>
+
             <template v-if="emails.length == 0">
-                <p v-if="fullAccess" class="warning-box">
-                    Stel eerst jouw e-mailadressen in: <button class="button text" @click="manageEmails">
+                <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
+                    Stel eerst jouw e-mailadressen in
+                    <span class="button text inherit-color">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
-                    </button>
+                    </span>
                 </p>
                 <p v-else class="warning-box">
-                    Een hoofdbeheerder van jouw vereniging moet eerst de e-mailadressen instellen voor je een e-mail kan versturen.
+                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
                 </p>
             </template>
 
@@ -39,6 +39,10 @@
                 </STInputBox>
             </div>
 
+            <p v-if="fileWarning" class="warning-box">
+                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
+            </p>
+
             <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
                 <label slot="right" class="button text">
                     <span class="icon add" />
@@ -46,23 +50,73 @@
                     <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 </label>
             </STInputBox>
-            <MailEditor ref="editor" :has-first-name="hasFirstName" />
+            
+            <MailEditor ref="editor" :has-first-name="hasFirstName">
+                <div v-if="addButton" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
+                    <hr>
+                    <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
+                    <p class="style-description-small button-description">
+                        <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
+                    </p>
+                </div>
+                <template v-if="files.length > 0" slot="footer">
+                    <hr>
+                    <STList>
+                        <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
+                            <span slot="left" class="icon file" />
+                            {{ file.name }}
 
-            <p v-if="fileWarning" class="warning-box">
-                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Zet de bestanden om in een PDF en stuur die door.
+                            <template #right>
+                                <span>{{ file.size }}</span>
+                                <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
+            </MailEditor>
+
+            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
+                {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
+                <span class="button text inherit-color">
+                    Toon
+                </span>
             </p>
 
-            <STList v-if="files.length > 0" title="Bijlages">
-                <STListItem v-for="(file, index) of files" :key="index" class="file-list-item right-description right-stack">
-                    <span slot="left" class="icon file" />
-                    {{ file.name }}
+            <p v-if="spamComplaints.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openSpamComplaints">
+                {{ spamComplaints.length != 1 ? spamComplaints.length +' e-mailadressen hebben' : 'Eén e-mailadres heeft' }} eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
 
-                    <template #right>
-                        <span>{{ file.size }}</span>
-                        <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
-                    </template>
-                </STListItem>
-            </STList>
+            <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button limit-height" @click="showMissingFirstNames">
+                Niet elk e-mailadres heeft een gekoppelde naam
+                <span class="button text inherit-color">
+                    Toon
+                </span>
+            </p>
+
+            <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
+                E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> zelf sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
+                E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
+                <h3 class="style-title-list">
+                    Voeg magische inlogknop toe (aangeraden)
+                </h3>
+                <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
+            </Checkbox>
+            <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
+                Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
+            </p>
         </main>
 
         <STToolbar>
@@ -76,6 +130,9 @@
                 }}
             </template>
             <template #right>
+                <button class="button secundary" @click="openPreview">
+                    Voorbeeld
+                </button>
                 <LoadingButton :loading="sending">
                     <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" @click="send">
                         Versturen
@@ -87,19 +144,23 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
+import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
+import { EmailStyler } from './EmailStyler';
+import MissingFirstNameView from './MissingFirstNameView.vue';
 
 class TmpFile {
     name: string;
@@ -123,6 +184,7 @@ class TmpFile {
         LoadingButton,
         STList,
         STListItem,
+        Checkbox,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
@@ -134,6 +196,8 @@ export default class MailView extends Mixins(NavigationMixin) {
     otherRecipients: { firstName?: string; lastName?: string; email: string }[]
 
     sending = false
+
+    addButton = this.members.length > 0 && this.hasAllUsers
 
     @Prop({ default: null })
     defaultSubject!: string | null
@@ -151,8 +215,54 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     files: TmpFile[] = []
 
+    includeGrownUpParents = false
+    includeMinorMembers = false
+
+    checkingBounces = false
+    emailInformation: EmailInformation[] = []
+
     deleteAttachment(index) {
         this.files.splice(index, 1)
+    }
+
+    async checkBounces() {
+        if (this.checkingBounces) {
+            return
+        }
+        this.checkingBounces = true
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/email/check-bounces",
+                body: this.recipients.map(r => r.email),
+                decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+            })
+            this.emailInformation = response.data
+        } catch (e) {
+            console.error(e)
+        }
+        this.checkingBounces = false
+    }
+
+    get hardBounces() {
+        return this.emailInformation.filter(e => e.hardBounce).map(e => e.email)
+    }
+
+    get spamComplaints() {
+        return this.emailInformation.filter(e => e.markedAsSpam).map(e => e.email)
+    }
+
+    get hasUnknownAge() {
+        return !!this.members.find(m => m.details.age === null)
+    }
+
+    get hasMinors() {
+        return !!this.members.find(m => (!m.details.age || m.details.age < 18) && !!m.details.email)
+    }
+
+    get hasGrownUpParents() {
+        return !!this.members.find(m => (!m.details.age || m.details.age >= 18) && !!m.details.parents.find(p => p.email))
     }
 
     get fullAccess() {
@@ -173,6 +283,24 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (!this.emailId) {
             this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
         }
+    }
+
+    mounted() {
+        if (this.members.length > 0) {
+            // Check if all the parents + members already have access (and an account) when they should have access
+            MemberManager.updateMembersAccess(this.members).then(() => {
+                // We created some users, so we might check the button again
+                if (!this.addButton && this.hasAllUsers) {
+                    this.addButton = true
+                }
+            }).catch(e => {
+                Toast.fromError(e).show()
+            })
+        }
+
+        this.checkBounces().catch(e => {
+            console.error(e)
+        })
     }
 
     changedFile(event) {
@@ -196,6 +324,85 @@ export default class MailView extends Mixins(NavigationMixin) {
         return !this.recipients.find(r => r.firstName == null)
     }
 
+    showMissingFirstNames() {
+        const missing = this.recipients.filter(r => r.firstName == null)
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Ontbrekende namen",
+            description: "Voor deze e-mailadressen konden we geen voornaam terugvinden. Kijk na of ze wel aanwezig zijn als ouder of lid in het systeem. Meestal komt dit voor omdat ze puur als gebruiker gekoppeld zijn, en die hebben geen namen. Om dit op te lossen kan je ofwel het e-mailadres wijzigen of het e-maialdres toevoegen bij één van de ouders of het lid zelf.",
+            emails: missing.map((m) => {
+                return {
+                    email: m.email,
+                    members: this.getEmailMemberNames(m.email).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openHardBounces() {
+        const missing = this.hardBounces
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Deze e-mailadressen zijn ongeldig",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via hallo@stamhoofd.be om de blokkering op te heffen.",
+            emails: missing.map((m) => {
+                return {
+                    email: m,
+                    members: this.getEmailMemberNames(m).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openSpamComplaints() {
+        const missing = this.spamComplaints
+        this.present(new ComponentWithProperties(MissingFirstNameView, {
+            title: "Deze e-mailadressen hebben e-mails als spam gemarkeerd",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd door de ontvanger gemarkeerd als spam. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen.",
+            emails: missing.map((m) => {
+                return {
+                    email: m,
+                    members: this.getEmailMemberNames(m).join(", ")
+                }
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    get hasAllUsers() {
+        return !this.recipients.find(r => r.userId === null)
+    }
+
+    @Watch('hasAllUsers')
+    onUpdateHasAllUsers(hasAllUsers: boolean) {
+        if (!hasAllUsers) {
+            this.addButton = false
+        }
+    }
+
+    getEmailMemberNames(email: string) {
+        const names = new Set<string>()
+
+        for (const member of this.members) {
+            if (member.details.email === email) {
+                names.add(member.name)
+                continue;
+            }
+
+            for (const parent of member.details.parents) {
+                if (parent.email === email) {
+                    names.add(member.name)
+                    break;
+                }
+            }
+
+            for (const user of member.users) {
+                if (user.email === email) {
+                    names.add(member.name)
+                    break;
+                }
+            }
+        }
+        return [...names.values()]
+    }
+
     get recipients(): Recipient[] {
         const recipients: Map<string, Recipient> = new Map()
 
@@ -204,33 +411,15 @@ export default class MailView extends Mixins(NavigationMixin) {
                 continue
             }
 
-            for (const parent of member.details.parents) {
-                if (!parent.email) {
-                    continue;
-                }
-
-                if (recipients.has(parent.email) && recipients.get(parent.email)!.firstName) {
-                    continue
-                }
-
-                recipients.set(parent.email, Recipient.create({
-                    firstName: parent.firstName,
-                    email: parent.email,
-                    replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: parent.firstName
-                        })
-                    ]
-                }))
-            }
-
             for (const user of member.users) {
                 if (!user.email) {
                     continue;
                 }
 
                 if (recipients.has(user.email)) {
+                    // Link user
+                    const recipient = recipients.get(user.email)!
+                    recipient.userId = user.id
                     continue
                 }
 
@@ -241,19 +430,71 @@ export default class MailView extends Mixins(NavigationMixin) {
                         Replacement.create({
                             token: "firstName",
                             value: user.firstName ?? ""
+                        }),
+                        Replacement.create({
+                            token: "email",
+                            value: user.email ?? ""
                         })
-                    ]
+                    ],
+                    // Create sign-in replacement 'signInUrl'
+                    userId: user.id
                 }))
+            }
+
+            if ((member.details.age !== null && member.details.age < 18) || this.includeGrownUpParents) {
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
+
+                    const existing = recipients.get(parent.email)
+
+                    if (existing && existing.firstName) {
+                        continue
+                    }
+
+                    recipients.set(parent.email, Recipient.create({
+                        firstName: parent.firstName,
+                        email: parent.email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: parent.firstName
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: parent.email
+                            })
+                        ],
+                        userId: existing?.userId
+                    }))
+                }
+            } else {
+                // Remove parents if they are a user
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
+
+                    recipients.delete(parent.email)
+                }
             }
 
             if (!member.details.email) {
                 continue;
             }
 
-            if (recipients.has(member.details.email)  && recipients.get(member.details.email)!.firstName) {
+            if (!this.includeMinorMembers && (member.details.age == null || member.details.age < 18)) {
+                // remove member if it was included
+                recipients.delete(member.details.email)
+                continue;
+            }
+
+            if (recipients.has(member.details.email) && recipients.get(member.details.email)!.firstName) {
                 continue
             }
 
+            const existing = recipients.get(member.details.email)
             recipients.set(member.details.email, Recipient.create({
                 firstName: member.details.firstName,
                 email: member.details.email,
@@ -261,8 +502,13 @@ export default class MailView extends Mixins(NavigationMixin) {
                     Replacement.create({
                         token: "firstName",
                         value: member.details.firstName
+                    }),
+                    Replacement.create({
+                        token: "email",
+                        value: member.details.email
                     })
-                ]
+                ],
+                userId: existing?.userId ?? null
             }))
         }
 
@@ -291,7 +537,60 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     manageEmails() {
-        this.show(new ComponentWithProperties(EmailSettingsView, {}))
+        this.present(new ComponentWithProperties(NavigationController, { root : new ComponentWithProperties(EmailSettingsView)}).setDisplayStyle("popup"))
+    }
+
+    async getHTML(withButton: boolean | null = null) {
+        let base = (this.$refs.editor as any).editor!.getHTML();
+
+        // Append footer HTML if needed
+        if ((withButton ?? this.addButton) && this.$refs.footerButton) {
+            base += (this.$refs.footerButton as Element).innerHTML;
+        }
+        
+        return await EmailStyler.format(base, this.subject, OrganizationManager.organization)
+    }
+
+    existingWindow: Window | null
+
+    async openPreview() {
+        if (this.existingWindow) {
+            // Disable reuse in some browsers
+            this.existingWindow.close()
+        }
+        const newWindow = window.open("", "Voorbeeld"+Math.floor(Math.random()*9999999), "width=800,height=800,menubar=no,toolbar=no,location=no,resizable=yes");
+        if (!newWindow) {
+            return
+        }
+        var sY = screenY;
+        if (sY < 0) {
+            sY = 0;
+        }
+        var totalScreenWidth = (screenX + window.outerWidth + sY);
+        if (totalScreenWidth > screen.width) {
+            totalScreenWidth = totalScreenWidth / 2;
+        } else {
+            totalScreenWidth = 0;
+        }
+        let { html } = await this.getHTML()
+
+        // Replacements
+        const recipient = this.recipients[0]
+        if (recipient) {
+            for (const replacement of recipient.replacements) {
+                if (html) {
+                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                }
+            }
+        }
+
+        // Include recipients
+        const recipients = this.recipients.map(r => r.email).join(", ")
+        html = html.replace("<body>", "<body><p><strong>Aan (elk afzonderlijke e-mail):</strong> "+recipients+"</p><p><strong>Voorbeeld voor:</strong> "+encodeURI(recipient.email)+"</p><hr>")
+
+        newWindow.document.write(html);
+
+        this.existingWindow = newWindow
     }
 
     async send() {
@@ -309,34 +608,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         try {
-            const styles = "p {margin: 0; padding: 0;}; strong {font-weight: bold;} em {font-style: italic;}; h1 {font-size: 30px; font-weight: bold; margin: 0; padding: 0}; h2 {font-size: 20px; font-weight: bold; margin: 0; padding: 0}; h3 {font-size: 16px; font-weight: bold; margin: 0; padding: 0}; ol, ul {list-style-position: inside;}";
-            let html = (this.$refs.editor as any).editor!.getHTML();
-
-            const element = document.createElement("div")
-            element.innerHTML = html
-
-            const elements = element.querySelectorAll("span.replace-placeholder[data-replace-type='firstName']")
-            for (const el of elements) {
-                el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
-            }
-
-            // add force add padding and margin inline
-            const blocks = element.querySelectorAll("h1,h2,h3,p")
-            for (const el of blocks) {
-                (el as any).style.cssText = "margin: 0; padding: 0;"
-            }
-
-            // add empty paragraph <br>'s
-            const emptyP = element.querySelectorAll("p:empty")
-            for (const el of emptyP) {
-                el.appendChild(document.createElement("br"))
-            }
-
-            const cssDiv = document.createElement('style');
-            cssDiv.innerText = styles;
-
-            html = "<style type=\"text/css\">"+cssDiv.innerHTML+"</style>"+element.innerHTML
-            const text = element.textContent
+            const {text, html} = await this.getHTML()
 
             if (!text || text.length < 20) {
                 this.errorBox = new ErrorBox(new SimpleError({
@@ -349,8 +621,8 @@ export default class MailView extends Mixins(NavigationMixin) {
 
             this.errorBox = null
             this.sending = true;
-          
-          const toBase64 = file => new Promise<string>((resolve, reject) => {
+
+            const toBase64 = file => new Promise<string>((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file)
                 reader.onload = () => resolve(new Buffer(reader.result as ArrayBuffer).toString("base64"));
@@ -375,7 +647,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 attachments
             })
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/email",
                 body: emailRequest,
@@ -383,16 +655,16 @@ export default class MailView extends Mixins(NavigationMixin) {
             this.dismiss({ force: true })
             new Toast("Jouw e-mail is verstuurd", "success").show()
         } catch (e) {
-            console.error(e)
+            this.errorBox = new ErrorBox(e)
         }
         this.sending = false
     }
 
-    shouldNavigateAway() {
-        if (confirm("Ben je zeker dat je dit venster wilt sluiten?")) {
-            return true;
+    async shouldNavigateAway() {
+        if ((await this.getHTML(false)).text.length <= "Dag {{firstName}},".length + 2 && this.subject.length < 2) {
+            return true
         }
-        return false;
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder te versturen?", "Niet versturen")
     }
 }
 </script>
@@ -419,15 +691,27 @@ export default class MailView extends Mixins(NavigationMixin) {
             align-items: stretch;
             min-height: 200px;
 
-            & > .editor-content {
+            & > .editor-container {
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
 
-                & > .ProseMirror {
+                & > .editor-content {
                     flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+
+                    & > .ProseMirror {
+                        flex-grow: 1;
+                    }
                 }
             }
+
+            + * {
+                margin-top: 10px;
+            }
+
+            
         }
 
         .file-list-item {

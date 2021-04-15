@@ -84,7 +84,8 @@
                 <Spinner v-if="loadingKeys" />
 
                 <STList>
-                    <STListItem v-for="key of availableKeys" :key="key.publicKey">
+                    <STListItem v-for="key in availableKeys" :key="key.publicKey">
+                        <span slot="left" class="icon key" />
                         <h2 class="style-title-list">
                             Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}
                         </h2>
@@ -133,7 +134,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
-import { Keychain,SessionManager } from '@stamhoofd/networking';
+import { Keychain,LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -275,7 +276,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             }))
             return
         }
-        console.log(item)
         let keyPair: {
             publicKey: string;
             privateKey: string;
@@ -299,30 +299,11 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return
         }
 
-        // Create an invite (automatic one)
-        const items = new VersionBox([InviteKeychainItem.create({
-            publicKey: keyPair.publicKey,
-            privateKey: keyPair.privateKey
-        })])
-
         this.saving = true
 
-        const invite = NewInvite.create({ 
-            userDetails: null,
-            permissions: null,
-            receiverId: this.editUser.id,
-            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), this.editUser.publicKey)
-        })
-
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "POST",
-                path: "/invite",
-                body: invite,
-                decoder: Invite as Decoder<Invite>
-            })
-
-            new Toast("Als "+this.editUser.firstName+" nu inlogt (voor "+Formatter.date(response.data.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
+            const invite = await LoginHelper.shareKey(keyPair, this.editUser.id, this.editUser.publicKey)
+            new Toast("Als "+this.editUser.firstName+" nu inlogt (voor "+Formatter.date(invite.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
             this.saving = false
         } catch (e) {
             console.error(e)

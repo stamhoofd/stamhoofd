@@ -51,15 +51,14 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, GlobalEventBus } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { GlobalEventBus } from '../../classes/EventBus';
 import { WebshopManager } from '../../classes/WebshopManager';
 import CartItemView from '../products/CartItemView.vue';
 
@@ -97,8 +96,13 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
          try {
-            await GlobalEventBus.sendEvent("checkout", "cart")
-            this.dismiss({ force: true })
+            const values = await GlobalEventBus.sendEvent("checkout", "cart")
+            if (values.length == 1 && values[0] !== undefined) {
+                console.log("push instead of dismiss")
+                this.show(new ComponentWithProperties(values[0], {}).setAnimated(true))
+            } else {
+                this.dismiss({ force: true })
+            }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

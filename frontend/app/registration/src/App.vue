@@ -7,22 +7,33 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
-import { NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../dashboard/src/classes/OrganizationManager';
+import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
-import LoginView from './views/login/LoginView.vue';
-import RegistrationSteps from './views/login/RegistrationSteps.vue';
+import HomeView from './views/login/HomeView.vue';
+import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
+import TabBarController, { TabBarItem } from './views/overview/TabBarController.vue';
 
 async function getDefaultView() {
-    if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
-        return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
-    }
-    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/RegistrationOverviewView.vue")).default;
+    //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
+    //    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
+    //}
+    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default;
+}
+
+async function getAccountView() {
+    return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/account/AccountSettingsView.vue")).default;
+}
+
+async function getCartView() {
+    return (await import(/* webpackChunkName: "CartView" */ "./views/checkout/CartView.vue")).default;
 }
 
 @Component({
@@ -62,55 +73,66 @@ export default class App extends Vue {
 
             await SessionManager.setCurrentSession(session)
 
+            const path = window.location.pathname;
+            const parts = path.substring(1).split("/");
+
+            if (parts.length == 1 && parts[0] == 'verify-email') {
+                const queryString = new URL(window.location.href).searchParams;
+                const token = queryString.get('token')
+                const code = queryString.get('code')
+                    
+                if (token && code) {
+                    const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
+                    LoginHelper.verifyEmail(session, code, token).then(() => {
+                        toast.hide()
+                        new Toast("E-mailadres is gevalideerd", "success green").show()
+                    }).catch(e => {
+                        toast.hide()
+                        CenteredMessage.fromError(e).addCloseButton().show()
+                    })
+                }
+            }
+
             return new ComponentWithProperties(AuthenticatedView, {
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
                         await MemberManager.loadMembers();
 
-                        const path = window.location.pathname;
-                        const parts = path.substring(1).split("/");
-
-                        if (parts.length == 1 && parts[0] == 'payment') {
-                            // tood: password reset view
-                            const PaymentPendingView = (await import(/* webpackChunkName: "PaymentPendingView" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
-                            return new ComponentWithProperties(ModalStackComponent, {
-                                root: new ComponentWithProperties(RegistrationSteps, { 
-                                    root: new ComponentWithProperties(PaymentPendingView, {
-                                        server: SessionManager.currentSession!.authenticatedServer,
-                                        paymentId: new URL(window.location.href).searchParams.get("id"),
-                                        finishedHandler: async function(this: any, payment: Payment | null) {
-                                            if (payment && payment.status == PaymentStatus.Succeeded) {
-                                                const RegistrationSuccessView = (await import(/* webpackChunkName: "PaymentPendingView" */ "./views/overview/RegistrationSuccessView.vue")).default
-                                                const response = await session.authenticatedServer.request({
-                                                    method: "GET",
-                                                    path: "/payments/"+payment.id+"/registrations",
-                                                    decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
-                                                })
-                                                const registrations = await MemberManager.getRegistrationsWithMember(response.data.registrations)
-                                                this.show(new ComponentWithProperties(RegistrationSuccessView, {
-                                                    registrations
-                                                }))
-                                            } else {
-                                                this.navigationController.push(new ComponentWithProperties(await getDefaultView(), {}), true, 1, true)
-                                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                                            }
-                                        }
-                                    }),
-                                })
+                        const basket = new TabBarItem(
+                            "Mandje",
+                            "basket",
+                            new ComponentWithProperties(NavigationController, { 
+                                root: new ComponentWithProperties(await getCartView(), {}),
                             })
-                        }
+                        )
+                        CheckoutManager.watchTabBar = basket
+                        basket.badge = CheckoutManager.cart.count > 0 ? (CheckoutManager.cart.count + "") : null
 
                         return new ComponentWithProperties(ModalStackComponent, {
-                            root: new ComponentWithProperties(RegistrationSteps, { 
-                                root: new ComponentWithProperties(await getDefaultView(), {}),
+                            root: new ComponentWithProperties(RegistrationTabBarController, { 
+                                items: [
+                                    new TabBarItem(
+                                        "Inschrijven",
+                                        "edit",
+                                        new ComponentWithProperties(NavigationController, { 
+                                            root: new ComponentWithProperties(await getDefaultView(), {}),
+                                        })
+                                    ),
+                                    new TabBarItem(
+                                        "Account",
+                                        "user",
+                                        new ComponentWithProperties(NavigationController, { 
+                                            root: new ComponentWithProperties(await getAccountView(), {}),
+                                        })
+                                    ),
+                                    basket
+                                ]
                             })
                         })
                     }
                 }),
                 loginRoot: new ComponentWithProperties(ModalStackComponent, {
-                    root: new ComponentWithProperties(RegistrationSteps, { 
-                        root: new ComponentWithProperties(LoginView, {}) 
-                    })
+                    root: new ComponentWithProperties(HomeView, {}) 
                 })
             });
         } catch (e) {

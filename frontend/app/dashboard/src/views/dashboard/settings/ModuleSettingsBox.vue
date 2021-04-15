@@ -28,14 +28,14 @@
         <h3>Verwacht in de toekomst</h3>
 
         <div class="module-box">
-            <label class="box disabled">
+            <label class="box disabled" :class="{ selected: enableActivities }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
                 <div>
                     <h2 class="style-title-list">Activiteiten</h2>
                     <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
                 </div>
                 <div>
-                    <span class="style-tag">2021</span>
+                    <span class="style-tag">Mei 2021</span>
                 </div>
             </label>
 
@@ -119,6 +119,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
+    get enableActivities() {
+        return this.organization.meta.modules.useActivities
+    }
+
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
@@ -126,7 +130,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     set enableMemberModule(enable: boolean) {
         if (!enable || this.organization.groups.length > 0) {
             this.organization.meta.modules.useMembers = enable
-            this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld")
+            this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").catch(e => console.error(e))
         } else {
             if (enable && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
                 // We have an automated flow for these organizations
@@ -138,7 +142,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").then(() => {
                     // Wait for the backend to fill in all the default categories and groups
                     this.manageGroups(true)
-                })
+                }).catch(e => console.error(e))
             }
             
         }
@@ -158,7 +162,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
 
     set enableWebshopModule(enable: boolean) {
         this.organization.meta.modules.useWebshops = enable
-        this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld")
+        this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld").catch(e => console.error(e))
     }
 
 }

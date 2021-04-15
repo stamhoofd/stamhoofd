@@ -51,7 +51,7 @@
             </h1>
             <span v-if="titleDescription" class="style-description title-description">{{ titleDescription }}</span>
 
-            <Spinner v-if="loading" class="center" />
+            <Spinner v-if="loading && sortedMembers.length == 0" class="center" />
             <table v-else class="data-table">
                 <thead>
                     <tr>
@@ -94,7 +94,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="member in sortedMembers" :key="member.id" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
+                    <tr v-for="member in sortedMembers" :key="member.id" class="selectable" @click="showMember(member)" @contextmenu.prevent="showMemberContextMenu($event, member.member)">
                         <td class="prefix" @click.stop="">
                             <Checkbox v-model="member.selected" @change="onChanged(member)" />
                         </td>
@@ -125,7 +125,7 @@
                             <p v-text="getMemberDescription(member.member)" />
                         </td>
                         <td>
-                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray lock-missing" />
+                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
@@ -166,7 +166,7 @@
             </template>
             <template #right>
                 <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="openMail()">
-                    Mailen
+                    E-mailen
                 </button>
                 <button v-if="waitingList" class="button secundary" :disabled="selectionCount == 0" @click="allowMembers(false)">
                     Toelating intrekken
@@ -185,7 +185,7 @@
                     </button>
                     <LoadingButton :loading="actionLoading">
                         <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
-                            <span class="dropdown-text">Mailen</span>
+                            <span class="dropdown-text">E-mailen</span>
                             <div class="dropdown" @click.stop="openMailDropdown" />
                         </button>
                     </LoadingButton>
@@ -200,7 +200,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
@@ -271,6 +271,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     actionLoading = false
     cachedWaitingList: boolean | null = null
 
+    checkingInaccurate = false
+
     mounted() {
         //this.reload();
 
@@ -281,13 +283,44 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         } else {
             if (this.category) {
                 HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
-                document.title = "Stamhoofd - "+ Formatter.slug(this.category.settings.name) +" - Alle leden"
+                document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
             } else {
                 HistoryManager.setUrl("/groups/all")    
                 document.title = "Stamhoofd - Alle leden"
             }
             
         }
+    }
+
+    async checkInaccurateMetaData() {
+        if (this.checkingInaccurate) {
+            return
+        }
+        this.checkingInaccurate = true
+        let toast: Toast | null = null
+        try {
+            const inaccurate: MemberWithRegistrations[] = []
+            for (const m of this.members) {
+                const member = m.member
+                const meta = member.getDetailsMeta()
+
+                // Check if meta is wrong
+                if (!member.details.isRecovered && (!meta || !meta.isAccurateFor(member.details))) {
+                    console.warn("Found inaccurate meta data!")
+                    inaccurate.push(member)
+                }
+            }
+            if (inaccurate.length > 0) {
+                toast = new Toast("Gegevens van leden updaten naar laatste versie...", "spinner").setHide(null).show()
+
+                // Patch member with new details
+                await MemberManager.patchMembersDetails(inaccurate)
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        toast?.hide()
+        this.checkingInaccurate = false
     }
 
     get canGoBack() {
@@ -407,14 +440,18 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.loading = true;
         MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset).then((members) => {
             this.members = members.map((member) => {
-                return new SelectableMember(member, !this.waitingList);
+                const selected = this.members.find(m => m.member.id === member.id)?.selected
+                return new SelectableMember(member, selected !== undefined ?  selected : !this.waitingList);
             }) ?? [];
+            this.checkInaccurateMetaData().catch(e => {
+                console.error(e)
+            })
         }).catch((e) => {
             console.error(e)
         }).finally(() => {
             this.loading = false
 
-            if (!this.waitingList && this.group && this.group.hasWaitingList) {
+            if (!this.waitingList && this.group && !this.group.hasWaitingList()) {
                 this.checkWaitingList()
             }
         })
@@ -437,7 +474,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.group) {
             return false;
         }
-        return this.group.settings.waitingListType == WaitingListType.All || this.group.settings.waitingListType == WaitingListType.ExistingMembersFirst
+        return this.group.hasWaitingList()
     }
 
     get title() {

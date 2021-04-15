@@ -10,11 +10,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
-import { LoginHelper, NetworkManager, Session } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
-import OrganizationSelectionSteps from './views/login/OrganizationSelectionSteps.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 export function asyncComponent(component: () => Promise<any>, properties = {}) {
@@ -39,16 +38,15 @@ export default class App extends Vue {
         root: new ComponentWithProperties(SplitViewController, {
             root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
         }),
-        loginRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: new ComponentWithProperties(OrganizationSelectionView, {}) 
-        }),
-        noPermissionsRoot: new ComponentWithProperties(OrganizationSelectionSteps, { 
-            root: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
-        }),
+        loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+        noPermissionsRoot: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
     });
 
     mounted() {
         HistoryManager.activate();
+        SessionManager.restoreLastSession().catch(e => {
+            console.error(e)
+        })
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);

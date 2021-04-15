@@ -78,38 +78,48 @@ export class Session implements RequestMiddleware {
 
     loadFromStorage() {
         // Check localstorage
-        const json = localStorage.getItem('token-' + this.organizationId)
-        if (json) {
-            try {
-                const parsed = JSON.parse(json)
-                this.token = new ManagedToken(Token.decode(new ObjectData(parsed, { version: Version })), () => {
-                    this.onTokenChanged()
-                })
+        try {
+            const json = localStorage.getItem('token-' + this.organizationId)
+            if (json) {
+                try {
+                    const parsed = JSON.parse(json)
+                    this.token = new ManagedToken(Token.decode(new ObjectData(parsed, { version: Version })), () => {
+                        this.onTokenChanged()
+                    })
 
-                const key = localStorage.getItem('key-' + this.organizationId)
-                if (key) {
-                    this.authEncryptionKey = key
-
-                    console.log('Successfully loaded token from storage')
-                } else {
-                    // Sign out
-                    this.token = null
+                    const key = localStorage.getItem('key-' + this.organizationId)
+                    if (key) {
+                        this.authEncryptionKey = key
+                        // console.log('Successfully loaded token from storage')
+                    } else {
+                        // Sign out
+                        this.token = null
+                    }
+                } catch (e) {
+                    console.error(e)
                 }
-            } catch (e) {
-                console.error(e)
             }
+        } catch (e) {
+            console.error("Localstorage error")
+            console.error(e)
         }
     }
 
     saveToStorage() {
-        // Save token to localStorage
-        if (this.token && this.authEncryptionKey) {
-            localStorage.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
-            localStorage.setItem('key-' + this.organizationId, this.authEncryptionKey)
-        } else {
-            localStorage.removeItem('token-' + this.organizationId)
-            localStorage.removeItem('key-' + this.organizationId)
+        try {
+            // Save token to localStorage
+            if (this.token && this.authEncryptionKey) {
+                localStorage.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
+                localStorage.setItem('key-' + this.organizationId, this.authEncryptionKey)
+            } else {
+                localStorage.removeItem('token-' + this.organizationId)
+                localStorage.removeItem('key-' + this.organizationId)
+            }
+        } catch (e) {
+            console.error("Localstorage error when saving session")
+            console.error(e)
         }
+        
         console.log('Saved token to storage')
     }
 
@@ -192,16 +202,12 @@ export class Session implements RequestMiddleware {
 
         // Start loading the user and encryption keys
         if (!preload) {
-            if (this.user) {
-                await this.fetchOrganization()
-                await this.updateKeys()
-            } else {
-                await this.updateData()
-            }
+            await this.updateData()
         }
     }
 
     async fetchUser(): Promise<MyUser> {
+        console.log("Fetching session user...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
@@ -217,6 +223,7 @@ export class Session implements RequestMiddleware {
     }
 
     async fetchOrganization(): Promise<Organization> {
+        console.log("Fetching session organization...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/organization",
@@ -230,10 +237,16 @@ export class Session implements RequestMiddleware {
         return this.organization
     }
 
-    async updateData() {
+    async updateData(force = false) {
+        console.log("Session update data")
         try {
-            await this.fetchOrganization()
-            await this.fetchUser()
+            if (force || !this.user) {
+                await this.fetchUser()
+            }
+
+            if (force || !this.organization || !this.user || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))) {
+                await this.fetchOrganization()
+            }
             await this.updateKeys()
         } catch (e) {
             this.temporaryLogout()
@@ -250,6 +263,7 @@ export class Session implements RequestMiddleware {
     }
 
     async updateKeys() {
+        console.log("Decrypting session keys...")
         if (!this.user) {
             throw new Error("Can't update keys if user is not set")
         }

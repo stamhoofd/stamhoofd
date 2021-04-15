@@ -34,7 +34,7 @@
             </div>
         </h2>
 
-        <p>De foto wordt getoond met een grootte van 720 x 300, maar we raden aan om een foto van minstens 1440 x 600 te uploaden.</p>
+        <p>De foto wordt getoond met een grootte van 900 x 375, maar we raden aan om een foto van minstens 1800 x 750 te uploaden.</p>
 
         <figure v-if="coverPhotoSrc" class="webshop-banner">
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">

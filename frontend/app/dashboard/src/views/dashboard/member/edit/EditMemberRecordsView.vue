@@ -4,7 +4,6 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="shouldAsk(RecordType.DataPermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions)">
-                <hr>
                 <h2>Privacy</h2>
 
                 <p class="info-box">
@@ -31,6 +30,12 @@
             </template>
 
             <template v-if="allowData">
+                <template v-if="shouldAsk(RecordType.FinancialProblems)">
+                    <hr>
+                    <h2>Kansarm gezin</h2>
+                    <RecordCheckbox v-model="records" :type="RecordType.FinancialProblems" />
+                </template>
+
                 <template v-if="shouldAsk(RecordType.FoodAllergies, RecordType.MedicineAllergies, RecordType.HayFever, RecordType.OtherAllergies)">
                     <hr>
                     <h2>Allergieën</h2>

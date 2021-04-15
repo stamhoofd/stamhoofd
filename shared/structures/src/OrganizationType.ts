@@ -176,6 +176,80 @@ export class OrganizationTypeHelper {
     }
 
     /**
+     * Return default group categories BEFORE the update with activities!
+     * @param type 
+     * @param umbrella 
+     */
+    static getDefaultGroupCategoriesWithoutActivities(type: OrganizationType, umbrella?: UmbrellaOrganization): GroupCategory[] {
+        if (type === OrganizationType.Youth) {
+            if (umbrella === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+                return [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Takken",
+                            maximumRegistrations: 1
+                        })
+                    })
+                ]
+            }
+
+            if (umbrella === UmbrellaOrganization.ChiroNationaal) {
+                return [
+                    GroupCategory.create({
+                        settings: GroupCategorySettings.create({
+                            name: "Afdelingen",
+                            maximumRegistrations: 1
+                        })
+                    })
+                ]
+            }
+
+
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen",
+                        maximumRegistrations: 1
+                    })
+                })
+            ]
+        }
+
+        if (type === OrganizationType.Dance) {
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Danslessen",
+                        maximumRegistrations: 1
+                    })
+                })
+            ]
+        }
+        
+        if (this.getCategory(type) == "Sport") {
+            return [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({
+                        name: "Leeftijdsgroepen",
+                        maximumRegistrations: 1
+                    })
+                }),
+            ]
+        }
+
+        // Feel free to add more customizations here
+        return [
+            // Always need one minimum
+             GroupCategory.create({
+                settings: GroupCategorySettings.create({
+                    name: "Leeftijdsgroepen",
+                    maximumRegistrations: 1
+                })
+            })
+        ]
+    }
+
+    /**
      * Return default group categories for a given type and umbrella (optional), without the root category
      * @param type 
      * @param umbrella 
@@ -186,7 +260,7 @@ export class OrganizationTypeHelper {
                 const activities = [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: "Weekends"
+                            name: "Weekends",
                         })
                     }),
                     GroupCategory.create({
@@ -199,7 +273,8 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: "Takken"
+                            name: "Takken",
+                            maximumRegistrations: 1
                         })
                     }),
                     GroupCategory.create({
@@ -229,7 +304,8 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: "Afdelingen"
+                            name: "Afdelingen",
+                            maximumRegistrations: 1
                         })
                     }),
                     GroupCategory.create({
@@ -259,7 +335,8 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: "Leeftijdsgroepen"
+                        name: "Leeftijdsgroepen",
+                        maximumRegistrations: 1
                     })
                 }),
                 GroupCategory.create({
@@ -291,7 +368,8 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: "Leeftijdsgroepen"
+                        name: "Leeftijdsgroepen",
+                        maximumRegistrations: 1
                     })
                 }),
                 GroupCategory.create({

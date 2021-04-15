@@ -1,127 +1,98 @@
 <template>
-    <div class="boxed-view">
-        <div v-if="waitingMembers.length > 0" class="st-view">
-            <main>
-                <h1>Leden op wachtlijst</h1>
-                <p>Deze leden staan nog op een wachtlijst. We houden je op de hoogte, dan kan je verdere informatie aanvullen en het lidgeld betalen.</p>
+    <div class="st-view">
+        <STNavigationBar :large="true" :sticky="false" class="only-tab-bar">
+            <template slot="left">
+                <OrganizationLogo :organization="organization" />
+            </template>
+        </STNavigationBar>
+        <main class="limit-width">
+            <section class="white-top view shade">
+                <main class="container">
+                    <h1>Leden bewerken en inschrijven</h1>
 
-                <STList>
-                    <STListItem v-for="member in waitingMembers" :key="member.id" class="right-stack">
-                        <span v-if="member.acceptedWaitingGroups.length == 0" slot="left" class="icon clock" />
-                        <span v-else slot="left" class="icon green success" />
+                    <p v-for="invite of invites" :key="invite.id" class="info-box email with-button selectable" @click="registerMember(invite.member)">
+                        Je hebt een uitnodiging gekregen om {{ invite.member.firstName }} in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} nog op de wachtlijst.
+                        <span class="button text selected">
+                            <span>Inschrijven</span>
+                            <span class="icon arrow-right" />
+                        </span>
+                    </p>
 
-                        <h2 class="payment-period">
-                            {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
-                        </h2>
-                        <p v-if="member.waitingGroups.length > 0" class="style-description-small">
-                            Op wachtlijst voor {{ member.waitingGroups.map(g => g.settings.name ).join(", ") }}
-                        </p>
-                        <p v-if="member.acceptedWaitingGroups.length > 0" class="style-description-small">
-                            Kan zich nu inschrijven voor {{ member.acceptedWaitingGroups.map(g => g.settings.name ).join(", ") }}
-                        </p>
+                    <STList v-if="members.length > 0">
+                        <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
+                            <span slot="left" class="icon user" />
 
-                        <template slot="right">
-                            <button v-if="member.acceptedWaitingGroups.length == 0" class="button text limit-space" @click.stop="editMember(member)">
-                                <span class="icon edit" />
-                                <span>Bewerken</span>
-                            </button>
-                            <button v-else class="button text limit-space" @click.stop="addNewMember">
-                                <span>Inschrijven</span>
-                                <span class="icon arrow-right" />
-                            </button>
-                        </template>
-                    </STListItem>
-                </STList>
-            </main>
-            <STToolbar v-if="registeredMembers.length == 0">
-                <button slot="right" class="primary button" @click="addNewMember">
-                    <span class="icon white left add" />
-                    <span>Lid inschrijven</span>
-                </button>
-            </STToolbar>
-        </div>
+                            <h2 class="payment-period">
+                                {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
+                            </h2>
+                            <p v-if="member.groups.length > 0" class="style-description-small">
+                                Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
+                            </p>
+                            <p v-else class="style-description-small">
+                                Nog niet ingeschreven
+                            </p>
 
-        <div v-if="registeredMembers.length > 0" class="st-view">
-            <main>
-                <h1>Ingeschreven leden</h1>
-                <p>Hier kan je inschrijvingen bewerken of nog iemand anders inschrijven.</p>
+                            <template slot="right">
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
 
-                <STList>
-                    <STListItem v-for="member in registeredMembers" :key="member.id" class="right-stack">
-                        <span slot="left" class="icon user" />
+                    <p v-else class="info-box">
+                        Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
+                    </p>
 
-                        <h2 class="payment-period">
-                            {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
-                        </h2>
-                        <p class="style-description-small">
-                            Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
-                        </p>
+                    <STToolbar :sticky="false">
+                        <button slot="right" class="button secundary full" @click="addNewMember">
+                            <span class="icon left add" />
+                            <span>Nieuw lid toevoegen</span>
+                        </button>
+                    </STToolbar>
+                </main>
+            </section>
 
-                        <template slot="right">
-                            <button class="button text limit-space" @click.stop="editMember(member)">
-                                <span class="icon edit" />
-                                <span>Bewerken</span>
-                            </button>
-                        </template>
-                    </STListItem>
-                </STList>
-            </main>
-            <STToolbar>
-                <button slot="right" class="primary button" @click="addNewMember">
-                    <span class="icon white left add" />
-                    <span>Lid inschrijven</span>
-                </button>
-            </STToolbar>
-        </div>
-
-        <div v-if="payments.length > 0" class="st-view payments-overview-view">
-            <main>
-                <h1>Afrekeningen</h1>
-                <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
-
-                <STList>
-                    <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
-                        <span slot="left" class="icon card" />
-
-                        <h2 class="style-title-list">
-                            {{ getPaymentPeriod(payment) }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ payment.getMemberNames() }}
-                        </p>
-                        <p v-if="payment.status == 'Succeeded'" class="style-description-small">
-                            {{ paymentMethodName(payment.method) }}
-                        </p>
-                        <p v-else class="style-description-small">
-                            Betaal via overschrijving
-                        </p>
-
-                        <template slot="right">
-                            {{ payment.price | price }}
-                            <span v-if="payment.status == 'Succeeded'" class="icon green success" />
-                            <span v-else class="icon arrow-right" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </main>
-        </div>
+            <section class="view gray-shadow">
+                <main v-if="!isEmpty">
+                    <h1>
+                        Suggesties
+                        <span class="icon star yellow" />
+                    </h1>
+                    <p>
+                        Kies een groep waarvoor je je wilt inschrijven of klik bovenaan op een lid dat je wilt inschrijven (dan zie je de suggesties).
+                    </p>
+                    <GroupTree :category="availableTree" :parent-level="0" />
+                    <hr>
+                </main>
+                <main v-else>
+                    <p v-if="members.length > 0" class="warning-box">
+                        Je kan je momenteel nergens voor inschrijven, maar je kan eventueel wel een nieuw lid toevoegen.
+                    </p>
+                </main>
+                <main>
+                    <GroupTree :category="fullTree" />
+                </main>
+            </section>
+        </main>
     </div>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
-import { Group, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
+import { Decoder } from "@simonbackx/simple-encoding";
+import { ComponentWithProperties,HistoryManager,ModalStackComponent,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, LoadingView, OrganizationLogo,PromiseView,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
+import { Sodium } from "@stamhoofd/crypto";
+import { LoginHelper, SessionManager } from "@stamhoofd/networking";
+import { EncryptedPaymentDetailed, Member, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Vue } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import MemberGeneralView from '../registration/MemberGeneralView.vue';
-import MemberGroupView from '../registration/MemberGroupView.vue';
-import FinancialProblemsView from './FinancialProblemsView.vue';
-import RegistrationOverviewView from './RegistrationOverviewView.vue';
+import GroupTree from '../../components/GroupTree.vue';
+import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
+import MemberView from "../members/MemberView.vue";
+import MissingKeyView from "./MissingKeyView.vue";
 
 @Component({
     components: {
@@ -130,7 +101,9 @@ import RegistrationOverviewView from './RegistrationOverviewView.vue';
         STList,
         STListItem,
         LoadingView,
-        Checkbox
+        Checkbox,
+        GroupTree,
+        OrganizationLogo
     },
     filters: {
         price: Formatter.price
@@ -149,63 +122,60 @@ export default class OverviewView extends Mixins(NavigationMixin){
         return this.members.filter(m => m.groups.length > 0)
     }
 
-    /**
-     * Return members that are currently registered in
-     */
-    get waitingMembers() {
-        if (!this.members) {
-            return []
-        }
-        return this.members.filter(m => m.waitingGroups.length > 0 || m.acceptedWaitingGroups.length > 0)
+    get organization() {
+        return OrganizationManager.organization
     }
 
-    getPaymentPeriod(payment: Payment) {
-        return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
+    get fullTree() {
+        return OrganizationManager.organization.categoryTree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
     }
 
-    paymentMethodName(method: PaymentMethod) {
-        switch (method) {
-            case PaymentMethod.Transfer: return "Betaald via overschrijving"
-            case PaymentMethod.Bancontact: return "Betaald via Bancontact"
-            case PaymentMethod.iDEAL: return "Betaald via iDEAL"
-            case PaymentMethod.Payconiq: return "Betaald via Payconiq by Bancontact"
+    get isEmpty() {
+        if (this.members.length == 0) {
+            return true
         }
-        return "Onbekende betaalmethode"
+        return (this.availableTree.categories.length == 0)
     }
 
-    get payments() {
-        if (!this.members) {
-            return []
-        }
+    get availableTree() {
+        const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)
+        // Filter the tree
 
-        const payments: Map<string, PaymentDetailed> = new Map()
-        const groups = OrganizationManager.organization.groups
-        for (const member of this.members) {
-            for (const registration of member.registrations) {
-                if (!registration.payment) {
-                    continue;
-                }
-                const existing = payments.get(registration.payment.id)
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                if (existing) {
-                    existing.registrations.push(reg)
-                } else {
-                    payments.set(registration.payment.id, PaymentDetailed.create(Object.assign({
-                        registrations: [reg]
-                    }, registration.payment)))
+        tree.groups = tree.groups.filter(g => {
+            for (const member of this.members) {
+                if (member.shouldShowGroup(g, OrganizationManager.organization.meta.categories)) {
+                    return true
                 }
             }
+            return false
+        })
+
+        for (const cat of tree.categories) {
+            cat.groups = cat.groups.filter(g => {
+                for (const member of this.members) {
+                    if (member.shouldShowGroup(g, OrganizationManager.organization.meta.categories)) {
+                        return true
+                    }
+                }
+                return false
+            })
         }
-        return Array.from(payments.values())
+
+        return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
+    }
+
+
+    get rootCategory() {
+        const tree = this.organization.categoryTree
+
+        return tree
+    }
+
+    logout() {
+        if (SessionManager.currentSession && SessionManager.currentSession.isComplete()) {
+            SessionManager.currentSession.logout()
+            return;
+        }
     }
 
     get members() {
@@ -214,21 +184,145 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
         return []
     }
-
-    mounted() {
-        HistoryManager.setUrl("/")
+    
+    get invites() {
+        return this.members.flatMap(member => {
+            return member.acceptedWaitingGroups.map(group => {
+                return {
+                    id: member.id+"-"+group.id,
+                    member,
+                    group
+                }
+            })
+            
+        })
     }
 
-    addNewMember() {
-        this.show(new ComponentWithProperties(RegistrationOverviewView, {}))
+    mounted() {
+        const path = window.location.pathname;
+        const parts = path.substring(1).split("/");
+        let setPath = true
+
+        if (parts.length == 1 && parts[0] == 'payment') {
+            setPath = false
+            const session = SessionManager.currentSession!
+            // tood: password reset view
+            const component = new ComponentWithProperties(NavigationController, { 
+                root: new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        const PaymentPendingView = (await import(/* webpackChunkName: "Checkout" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
+                        return new ComponentWithProperties(PaymentPendingView, {
+                            server: session.authenticatedServer,
+                            paymentId: new URL(window.location.href).searchParams.get("id"),
+                            finishedHandler: async function(this: NavigationMixin, payment: Payment | null) {
+                                if (payment && payment.status == PaymentStatus.Succeeded) {
+                                    const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "../checkout/RegistrationSuccessView.vue")).default
+                                    const response = await session.authenticatedServer.request({
+                                        method: "GET",
+                                        path: "/payments/"+payment.id+"/registrations",
+                                        decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
+                                    })
+                                    const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
+                                    this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
+                                        registrations
+                                    }), true, 1)
+                                } else {
+                                    HistoryManager.setUrl("/")
+                                    this.dismiss({ force: true })
+                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+            this.present(component.setAnimated(false))
+        }
+
+        if (setPath) {
+            HistoryManager.setUrl("/")
+        }
+
+        this.checkInvites().finally(() => {
+            if (setPath && this.members.find(m => m.details.isRecovered)) {
+                // Show error message
+                this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
+            }
+        })
+    }
+
+    async checkInvites() {
+        const user = SessionManager.currentSession!.user!
+        const privateKey = SessionManager.currentSession!.getUserPrivateKey()!
+        const publicKey = user.publicKey
+        
+        if (user.incomingInvites.length > 0) {
+            for (const invite of user.incomingInvites) {
+                try {
+                    const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
+                    await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
+
+                    if (invite.sender.permissions) {
+                        new Toast("We hebben jouw toegang goedgekeurd", "key green").setHide(15*1000).show()
+                    } else {
+                        new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
+                    }
+                } catch (e) {
+                    console.error(e)
+                    new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
+                }
+                
+                // Remove invite if succeeded
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/invite/"+encodeURIComponent(invite.key)+"/trade"
+                })
+            }
+
+            // Reload members
+            await MemberManager.loadMembers()
+        }
+    }
+
+    async addNewMember() {
+        // Only ask details + parents for new members
+        // We'll ask the other things when selecting the details
+        const stepManager = new EditMemberStepsManager(
+            [
+                EditMemberStepType.Details,
+                EditMemberStepType.Parents
+            ], 
+            undefined,
+            (component: NavigationMixin) => {
+                // when we are ready, show the 'choose group' view for this member
+                if (stepManager.editMember) {
+                    component.show(
+                        new ComponentWithProperties(MemberChooseGroupsView, { member: stepManager.editMember })
+                    )
+                } else {
+                    // uhm?
+                    // default to dismiss
+                    console.error("Missing edit member at the end of edit member flow")
+                    component.dismiss({ force: true })
+                }
+                return Promise.resolve()
+            }
+        )
+        const component = await stepManager.getFirstComponent()
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: component
+        }).setDisplayStyle("popup"))
     }
 
     editMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberGeneralView, {
-                initialMember: member,
-                editOnly: true
-            })
+            root: new ComponentWithProperties(MemberView, { member })
+        }).setDisplayStyle("popup"))
+    }
+
+    registerMember(member: MemberWithRegistrations) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberChooseGroupsView, { member })
         }).setDisplayStyle("popup"))
     }
 

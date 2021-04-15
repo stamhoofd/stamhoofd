@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD COLUMN `requestKeys` tinyint(1) NOT NULL DEFAULT '0' COMMENT '' AFTER `verified`;

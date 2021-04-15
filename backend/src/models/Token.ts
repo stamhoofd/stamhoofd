@@ -23,7 +23,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 
 export class Token extends Model {
     static table = "tokens";
-    static MAX_DEVICES = 5;
+    static MAX_DEVICES = 15;
 
     @column({ type: "string", foreignKey: Token.user })
     userId: string;
@@ -235,17 +235,22 @@ export class Token extends Model {
 
         // First search if we already have more than 5 tokens (we only allow up to 5 devices)
         // In case we already have a token for that deviceId, we'll delete it first.
-        const [
-            rows,
-        ] = await Database.delete(
-            `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`refreshTokenValidUntil\` DESC LIMIT ? OFFSET ?) x)`,
-            [user.id, this.MAX_DEVICES, this.MAX_DEVICES]
-        );
+        try {
+            const [
+                rows,
+            ] = await Database.delete(
+                `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`refreshTokenValidUntil\` DESC LIMIT ? OFFSET ?) x)`,
+                [user.id, this.MAX_DEVICES, this.MAX_DEVICES]
+            );
 
-        if (rows.affectedRows > 0) {
-            console.log(`Deleted ${rows.affectedRows} old tokens first`);
+            if (rows.affectedRows > 0) {
+                console.log(`Deleted ${rows.affectedRows} old tokens first`);
+            }
+        } catch (e) {
+            // This is not a crucial operation, so don't fail when there is a deadlock problem in the query
+            console.error(e)
         }
-
+        
         const token = new Token().setRelation(Token.user, user);
         token.accessTokenValidUntil = new Date();
         token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 3600 * 1000);

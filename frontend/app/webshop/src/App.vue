@@ -1,28 +1,26 @@
 <template>
     <div id="app">
-        <!--<ModalStackComponent id="app" ref="modalStack" :root="root" />-->
-        <ComponentWithPropertiesInstance :component="root" />
+        <!--<ComponentWithPropertiesInstance :component="root" />-->
+        <ModalStackComponent ref="modalStack" :root="root" />
         <ToastBox />
     </div>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager,ModalStackComponent } from "@simonbackx/vue-app-navigation";
-import { ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import { WebshopManager } from './classes/WebshopManager';
-import CheckoutSteps from './views/CheckoutSteps.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
-import OrderView from './views/orders/OrderView.vue';
 import WebshopView from './views/WebshopView.vue';
 
 @Component({
     components: {
-        ComponentWithPropertiesInstance,
+        ModalStackComponent,
         ToastBox
     },
 })
@@ -53,10 +51,8 @@ export default class App extends Vue {
                     ColorHelper.setColor(WebshopManager.organization.meta.color)
                 }
 
-                return new ComponentWithProperties(ModalStackComponent, {
-                    root: new ComponentWithProperties(CheckoutSteps, { 
-                        root: new ComponentWithProperties(WebshopView, {}) 
-                    })
+                return new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(WebshopView, {}) 
                 })
 
             } catch (e) {
@@ -67,6 +63,16 @@ export default class App extends Vue {
 
     mounted() {
         HistoryManager.activate();
+
+        CenteredMessage.addListener(this, async (centeredMessage) => {
+            console.log(this.$refs.modalStack);
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                console.error("modalStack ref not found!")
+                await this.$nextTick()
+            }
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+        })
     }
 		
 }

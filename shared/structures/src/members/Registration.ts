@@ -1,6 +1,8 @@
 import { AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { Group } from '../Group';
+import { GroupCategory } from '../GroupCategory';
 import { Payment } from './Payment';
 
 export class Registration extends AutoEncoder {
@@ -17,6 +19,10 @@ export class Registration extends AutoEncoder {
     /// Set registeredAt to null if the member is on the waiting list for now
     @field({ decoder: DateDecoder, nullable: true })
     registeredAt: Date | null = null
+
+    /// Keep spot for this member temporarily
+    @field({ decoder: DateDecoder, nullable: true })
+    reservedUntil: Date | null = null
 
     @field({ decoder: DateDecoder, nullable: true })
     deactivatedAt: Date | null = null

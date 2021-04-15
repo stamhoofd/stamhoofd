@@ -55,13 +55,8 @@
         }
 
         tr {
-            transition: background-color 0.15s;
-            cursor: pointer;
-            touch-action: manipulation;
-
             td {
                 border-top: $border-width-thin solid $color-white-shade;
-                transition: border-top-color 0.15s;
 
                 &.prefix:first-child {
                     border-top: 0;
@@ -80,14 +75,19 @@
                 }
             }
 
-            @media (hover: hover) {
-                &:hover {
-                    background-color: $color-primary-lighter;
+            &.selectable {
+                transition: background-color 0.15s;
+                cursor: pointer;
+                touch-action: manipulation;
+                @media (hover: hover) {
+                    &:hover {
+                        background-color: $color-primary-lighter;
+                    }
                 }
-            }
 
-            &:active {
-                background-color: $color-primary-light;
+                &:active {
+                    background-color: $color-primary-light;
+                }
             }
         }
     }
@@ -105,7 +105,6 @@
             }
 
             &:first-child {
-                padding: 0;
                 padding-left: 40px;
                 padding-left: var(--st-horizontal-padding, 40px);
             }
@@ -113,9 +112,10 @@
             &.prefix:first-child {
                 white-space: nowrap;
                 width: 1px;
+                padding: 0;
                 padding-left: 40px - 10px;
                 padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
-
+                
                 .checkbox {
                     margin: 0;
                     padding: 10px;
