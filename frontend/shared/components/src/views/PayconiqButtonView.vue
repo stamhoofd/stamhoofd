@@ -30,7 +30,6 @@
 <script lang="ts">
 import { STToolbar, LoadingButton, STNavigationBar, EmailInput, STErrorsDefault, CenteredMessage } from "@stamhoofd/components"
 import { Component, Prop } from "vue-property-decorator";
-import { CenteredMessageButton } from "../overlays/CenteredMessage";
 import PayconiqBannerView from "./PayconiqBannerView.vue";
 
 @Component({
