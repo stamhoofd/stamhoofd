@@ -28,7 +28,7 @@
                 <Checkbox v-model="enableBancontact">
                     Bancontact (31 cent)
                 </Checkbox>
-                <Checkbox v-model="enableIDEAL" v-if="isBelgium">
+                <Checkbox v-if="isBelgium" v-model="enableIDEAL">
                     iDEAL (29 cent)
                 </Checkbox>
 
@@ -81,7 +81,7 @@
             <hr>
             <h2>Payconiq activeren</h2>
             <p class="st-list-description">
-                Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. We bezorgen je dan de nodige contracten die we daarna aan Payconiq bezorgen. Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.
+                Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. Wij zorgen dan voor jouw aansluiting (dit moet via ons verlopen). Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.
             </p>
 
             <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
@@ -94,17 +94,23 @@
             </STInputBox>
 
             <hr>
-            <h2 v-if="isBelgium">Bancontact &amp; iDEAL</h2>
-            <h2 v-else>iDEAL &amp; Bancontact</h2>
+            <h2 v-if="isBelgium">
+                Bancontact &amp; iDEAL
+            </h2>
+            <h2 v-else>
+                iDEAL &amp; Bancontact
+            </h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description" v-if="isBelgium">
+                <p v-if="isBelgium" class="st-list-description">
                     Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
                 </p>
-                <p class="st-list-description" v-else>
+                <p v-else class="st-list-description">
                     Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 29 cent voor een iDEAL betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
                 </p>
-                <p class="info-box" v-if="isBelgium">Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)</p>
+                <p v-if="isBelgium" class="info-box">
+                    Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
+                </p>
 
                 <p class="st-list-description">
                     <button class="button text" @click="linkMollie">

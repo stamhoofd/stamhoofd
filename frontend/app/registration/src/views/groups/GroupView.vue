@@ -53,7 +53,7 @@
             </STList>
         </main>
 
-        <STToolbar v-if="registerButton && !closed">
+        <STToolbar v-if="isSignedIn && registerButton && !closed">
             <button slot="right" class="primary button" @click="chooseMembers">
                 <span class="icon add" />
                 <span>Inschrijven</span>
@@ -65,6 +65,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { SessionManager } from "@stamhoofd/networking";
 import { Group, GroupGenderType, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -99,9 +100,14 @@ export default class GroupView extends Mixins(NavigationMixin){
     registerButton!: boolean
 
     MemberManager = MemberManager
+    SessionManager = SessionManager
 
     get members() {
         return this.MemberManager.members ?? []
+    }
+
+    get isSignedIn() {
+        return SessionManager.currentSession && SessionManager.currentSession.isComplete()
     }
 
     get closed() {

@@ -1,7 +1,7 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar title="Betaal met Payconiq by Bancontact">
-            <button slot="right" class="button icon gray close" @click="dismiss" type="button"></button>
+        <STNavigationBar title="Payconiq by Bancontact">
+            <button slot="right" class="button icon gray close" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -28,9 +28,9 @@
 </template>
 
 <script lang="ts">
-import { STToolbar, LoadingButton, STNavigationBar, EmailInput, STErrorsDefault, CenteredMessage } from "@stamhoofd/components"
+import { CenteredMessage,EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Component, Prop } from "vue-property-decorator";
-import { CenteredMessageButton } from "../overlays/CenteredMessage";
+
 import PayconiqBannerView from "./PayconiqBannerView.vue";
 
 @Component({
@@ -85,6 +85,10 @@ export default class PayconiqButtonView extends PayconiqBannerView {
         }
 
         return "unknown"
+    }
+
+    get isIOS() {
+        return this.getOS() == "iOS"
     }
 
     helpMe() {
