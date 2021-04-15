@@ -3,6 +3,7 @@ import nodemailer from "nodemailer"
 import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
+import { sleep } from '../helpers/Sleep';
 
 export type EmailInterfaceBase = {
     to: string;
@@ -11,6 +12,7 @@ export type EmailInterfaceBase = {
     text?: string;
     html?: string;
     attachments?: { filename: string; path?: string; href?: string; content?: string; contentType?: string }[];
+    retryCount?: number;
 }
 
 export type EmailInterface = EmailInterfaceBase & {
@@ -242,6 +244,16 @@ class Email {
             console.error("Failed to send e-mail:")
             console.error(e);
             console.error(mail);
+
+            // Sleep one second to give servers some time to fix possible rate limits
+            await sleep(1000);
+
+            // Reschedule twice (at maximum) to fix temporary connection issues
+            data.retryCount = (data.retryCount ?? 0) + 1;
+
+            if (data.retryCount <= 2) {
+                this.send(data);
+            }
         }
     }
 
