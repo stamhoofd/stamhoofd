@@ -5,7 +5,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
                     <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
-                    <p class="style-description">Gratis</p>
+                    <p class="style-description">Dit zit in jouw pakket inbegrepen</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'members'" />
@@ -17,7 +17,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops</h2>
-                    <p class="style-description">Gratis tot 1 mei, daarna manueel overschakelen op betalende versie. Webshops blijven daarna (tijdelijk) actief.</p>
+                    <p class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
                     <Checkbox v-model="enableWebshopModule" />

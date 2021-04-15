@@ -99,10 +99,10 @@
                         <h2 class="style-title-list">
                             Inschrijvingsgroepen
                         </h2>
-                        <p class="style-description" v-if="enableActivities">
+                        <p v-if="enableActivities" class="style-description">
                             Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
                         </p>
-                        <p class="style-description" v-else>
+                        <p v-else class="style-description">
                             Leeftijdsgroepen aanmaken en beheren
                         </p>
 
@@ -143,8 +143,39 @@
             </template>
 
             <hr>
-            <h2>Kies de functies die je wilt activeren</h2>
-            <p>Binnenkort voeren we nieuwe prijzen in, maar hierbij blijven bepaalde onderdelen gratis voor bestaande gebruikers (als je dit leest ben je een bestaande gebruiker). <a class="inline-link" target="_blank" href="https://www.stamhoofd.be/release-notes/2021-02-16-toekomst-van-stamhoofd">Meer info op onze website.</a> We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+            <h2>Stamhoofd administratie</h2>
+
+            <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
+                    <h2 class="style-title-list">
+                        Pakketten en functies activeren
+                    </h2>
+                    <p class="style-description">
+                        Kies welke functies je in gebruik wilt nemen
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
+                    <h2 class="style-title-list">
+                        Facturen en betalingen
+                    </h2>
+                    <p class="style-description">
+                        Van jouw abonnement
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr>
+            <h2>Functies gratis uitproberen</h2>
+            <p>Je kan alle functies van Stamhoofd altijd gratis en zo lang je wilt uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om te testen, niet voor in het echt te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
             <ModuleSettingsBox />
         </main>
