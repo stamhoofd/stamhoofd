@@ -99,9 +99,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                         const apiKey = process.env.MOLLIE_API_KEY
                         if (apiKey) {
                             const mollieClient = createMollieClient({ apiKey });
-                            const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                testmode: process.env.NODE_ENV != 'production',
-                            })
+                            const mollieData = await mollieClient.payments.get(molliePayment.mollieId)
 
                             console.log(mollieData) // log to log files to check issues
 

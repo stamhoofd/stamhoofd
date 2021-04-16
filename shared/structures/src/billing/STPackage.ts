@@ -1,140 +1,9 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
+import { Address } from "../addresses/Address";
 
-/**
- * Package bundle that is chosen in the frontend and that is currently available
- */
-export enum STPackageBundle {
-    // Full members package
-    "Members" = "Members",
-
-    // Webshop package (max 10 webshops)
-    "Webshops" = "Webshops",
-
-    // One webshop package (max 1 webshop)
-    "SingleWebshop" = "SingleWebshop",
-
-    "TrialMembers" = "TrialMembers",
-    "TrialWebshops" = "TrialWebshops",
-}
-
-export class STPackageBundleHelper {
-    /**
-     * Create a new package for this type and return the pricing
-     */
-    static getCurrentPackage(bundle: STPackageBundle): STPackage {
-        switch (bundle) {
-            case STPackageBundle.Members: {
-                // 1 year valid
-                const renewAt = new Date()
-                renewAt.setFullYear(renewAt.getFullYear() + 1)
-
-                // Disable functions after 2 weeks
-                const disableAt = new Date(renewAt)
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                // Remove if not paid after 3 months
-                const removeAt = new Date(renewAt)
-                removeAt.setMonth(removeAt.getMonth() + 3)
-
-                return STPackage.create({
-                    renewAt,
-                    disableAt,
-                    removeAt,
-                    meta: STPackageMeta.create({
-                        type: STPackageType.Members,
-                        price: 50,
-                        amount: 59 * 2,
-                        pricingType: STPricingType.PerMember
-                    })
-                })
-            }
-
-            case STPackageBundle.Webshops: {
-                 // 1 year valid
-                const renewAt = new Date()
-                renewAt.setFullYear(renewAt.getFullYear() + 1)
-
-                // Disable functions after 2 weeks
-                const disableAt = new Date(renewAt)
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                // Remove if not paid after 3 months
-                const removeAt = new Date(renewAt)
-                removeAt.setMonth(removeAt.getMonth() + 3)
-
-                return STPackage.create({
-                    renewAt,
-                    disableAt,
-                    removeAt,
-                    meta: STPackageMeta.create({
-                        type: STPackageType.Webshops,
-                        price: 5900,
-                        amount: 1,
-                        pricingType: STPricingType.Fixed
-                    })
-                })
-            }
-
-            case STPackageBundle.SingleWebshop: {
-                // Disable functions after two months
-                const disableAt = new Date()
-                disableAt.setMonth(disableAt.getMonth() + 2)
-
-                return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: null, // 
-                    meta: STPackageMeta.create({
-                        type: STPackageType.SingleWebshop,
-                        price: 3900,
-                        amount: 1,
-                        pricingType: STPricingType.Fixed
-                    })
-                })
-            }
-
-            case STPackageBundle.TrialMembers: {
-                // Disable functions after two weeks, manual reenable required
-                const disableAt = new Date()
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: disableAt, // remove at the same time
-                    meta: STPackageMeta.create({
-                        type: STPackageType.TrialMembers,
-                        price: 0,
-                        amount: 0,
-                        pricingType: STPricingType.Fixed
-                    })
-                })
-            }
-
-            case STPackageBundle.TrialWebshops: {
-                // Disable functions after two weeks, manual reenable required
-                const disableAt = new Date()
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: disableAt, // remove at the same time
-                    meta: STPackageMeta.create({
-                        type: STPackageType.TrialWebshops,
-                        price: 0,
-                        amount: 0,
-                        pricingType: STPricingType.Fixed
-                    })
-                })
-            }
-        }
-
-        throw new Error("Package not available")
-    }
-}
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -174,6 +43,12 @@ export class STPackageTypeHelper {
 
 export enum STPricingType {
     "Fixed" = "Fixed", 
+
+    /**
+     * Package is renewable per year
+     * Package can get extended initially to a specific date
+     */
+    "PerYear" = "PerYear", 
 
     /**
      * Price is per member, per year
@@ -317,4 +192,28 @@ export class STPackageStatus extends AutoEncoder {
             }
         }
     }
+}
+
+export function calculateVATPercentage(address: Address, VATNumber: string | null) {
+    // Determine VAT rate
+    let VATRate = 0
+    if (address.country === "BE") {
+        VATRate = 21
+    } else {
+        if (VATNumber) {
+            VATRate = 0
+        } else {
+            // Apply VAT rate of the home country for consumers in the EU
+
+            if (address.country === "NL") {
+                VATRate = 21;
+            } else {
+                throw new SimpleError({
+                    code: "country_not_supported",
+                    message: "Non-business sales to your country are not yet supported. Please enter a valid VAT number.",
+                })
+            }
+        }
+    }
+    return VATRate
 }

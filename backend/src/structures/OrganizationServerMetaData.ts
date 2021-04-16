@@ -23,4 +23,7 @@ export class OrganizationServerMetaData extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, version: 37 })
     DNSRecordWarningCount = 0
+
+    @field({ decoder: StringDecoder, optional: true, version: 86 })
+    mollieCustomerId?: string
 }

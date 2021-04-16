@@ -75,13 +75,20 @@ export class STInvoice extends Model {
 
         for (const item of this.meta.items) {
             if (item.package) {
-                ids.add(item.id)
+                ids.add(item.package.id)
             }
         }
 
         if (ids.size > 0) {
-            return await STPackage.getByIDs(...ids)
+            const packages = await STPackage.getByIDs(...ids)
+
+            if (packages.length !== ids.size) {
+                console.warn("Invoice contains invalid package ids "+this.id)
+            }
+            return packages
         }
+
+        console.warn("No connected packages to invoice "+this.id)
 
         return []
     }
@@ -100,6 +107,7 @@ export class STInvoice extends Model {
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
         for (const pack of await this.getPackages()) {
+            console.log("Activating package "+pack.id)
 
             // We'll never have multiple invoices for the same package that are awaiting payments
             pack.meta.lastFailedPayment = null;

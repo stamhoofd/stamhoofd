@@ -115,4 +115,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, version: 82 })
     requestKeysCount = 0
+
+    @field({ decoder: StringDecoder, nullable: true, version: 86 })
+    VATNumber: string | null = null
 }

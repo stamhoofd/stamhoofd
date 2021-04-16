@@ -41,7 +41,7 @@ export class STInvoiceItem extends AutoEncoder {
     /**
      * Date the item was created/bought
      */
-    @field({ decoder: File, optional: true })
+    @field({ decoder: DateDecoder, optional: true })
     date?: Date
 
     // Convertable into STInvoiceItem (or the diffence if amount is increased)
@@ -74,7 +74,7 @@ export class STInvoiceItem extends AutoEncoder {
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.renewAt ? ("Van "+Formatter.date(now)+" tot "+Formatter.date(pack.renewAt)) : "",
+            description: pack.renewAt ? ("Van "+Formatter.date(now, true)+" tot "+Formatter.date(pack.renewAt, true)) : "",
             package: pack,
             date: now,
             unitPrice: unitPrice,
@@ -88,9 +88,9 @@ export class STInvoiceItem extends AutoEncoder {
 
 export class STInvoiceMeta extends AutoEncoder {
     /**
-     * Date the invoice was created. Only set if officially generated
+     * Date the invoice was created. 
      */
-    @field({ decoder: File, optional: true })
+    @field({ decoder: DateDecoder, optional: true })
     date?: Date
 
     /**
@@ -106,7 +106,7 @@ export class STInvoiceMeta extends AutoEncoder {
     VATPercentage = 21
 
     @field({ decoder: new ArrayDecoder(STInvoiceItem) })
-    items: STInvoiceItem[]
+    items: STInvoiceItem[] = []
 
     // Cached company information (in case it is changed)
     @field({ decoder: StringDecoder })

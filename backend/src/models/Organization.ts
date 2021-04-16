@@ -11,9 +11,9 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import Email from '../email/Email';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
+import { Member } from "./Member";
 import { User } from './User';
 import { Webshop } from './Webshop';
-import { Member } from "./Member";
 
 export class Organization extends Model {
     static table = "organizations";

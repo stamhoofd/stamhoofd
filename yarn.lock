@@ -1541,10 +1541,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.0.0.tgz#a2f197a167f2e59db5170e6fcee97a07d957646a"
   integrity sha512-bkV/q33nRYXf+pCssOUsOFZ4r3Ix8rl97YSpqdZo1i3GKMQ6+vlBsVJ5Ik6v3IOBPWeJo+vNpMh+pEJVu27fhQ==
 
-"@simonbackx/simple-endpoints@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.5.0.tgz#7084538cf66c7620654f08ea8edc8366e77c1878"
-  integrity sha512-pHbGwPasdJn2JNWf9W/5re63mp6inzP531gm2YGfDx1JOBB5PyeAgjWRdIuICl6WeH0VyQJmg1TjWXUO/jckpw==
+"@simonbackx/simple-endpoints@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.5.1.tgz#85520e4fbfe70058a5918dbe1ba0be43c41f8029"
+  integrity sha512-t7LtQR3dyLlLnxMDw6e8px2x6wW+XLHYBDN6WVDAtDJMV3GMfDaDq2QrC9laQlJ4GA4+Nfzz/GW3twHyucsDDw==
   dependencies:
     https "^1.0.0"
 

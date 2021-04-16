@@ -3,6 +3,7 @@ import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import AWS from 'aws-sdk';
 
 import Email from './email/Email';
+import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { ForwardHandler } from './helpers/ForwardHandler';
 import { EmailAddress } from './models/EmailAddress';
@@ -10,6 +11,7 @@ import { Group } from './models/Group';
 import { Organization } from './models/Organization';
 import { Payment } from './models/Payment';
 import { Registration } from './models/Registration';
+import { STInvoice } from './models/STInvoice';
 
 let isRunningCrons = false
 
@@ -262,11 +264,22 @@ async function checkPayments() {
     console.log("Checking pending payments: "+payments.length)
 
     for (const payment of payments) {
-        if (payment.organizationId) {
-            const organization = await Organization.getByID(payment.organizationId)
-            if (organization) {
-                await ExchangePaymentEndpoint.pollStatus(payment, organization)
+        try {
+            if (payment.organizationId) {
+                const organization = await Organization.getByID(payment.organizationId)
+                if (organization) {
+                    await ExchangePaymentEndpoint.pollStatus(payment, organization)
+                }
+            } else {
+                // Try stamhoofd payment
+                const invoices = await STInvoice.where({ paymentId: payment.id })
+                if (invoices.length === 1) {
+                    await ExchangeSTPaymentEndpoint.pollStatus(payment, invoices[0])
+                    continue
+                }
             }
+        } catch (e) {
+            console.error(e)
         }
     }
 }

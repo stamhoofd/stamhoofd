@@ -1,8 +1,8 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { PaymentMethod, PaymentStatus, STInvoice as STInvoiceStruct,STInvoiceItem,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, Version  } from "@stamhoofd/structures";
+import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoice as STInvoiceStruct,STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, Version  } from "@stamhoofd/structures";
 
 import { QueueHandler } from '../../helpers/QueueHandler';
 import { MolliePayment } from '../../models/MolliePayment';
@@ -24,6 +24,8 @@ class Body extends AutoEncoder {
 }
 
 export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = Body as Decoder<Body>
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
             return [false];
@@ -56,13 +58,21 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             const invoice = new STInvoice()
             invoice.organizationId = user.organizationId
-
+            
             const date = new Date()
+            invoice.meta = STInvoiceMeta.create({
+                date,
+                companyName: user.organization.name,
+                companyAddress: user.organization.address,
+                companyVATNumber: user.organization.privateMeta.VATNumber,
+                VATPercentage: calculateVATPercentage(user.organization.address, user.organization.privateMeta.VATNumber)
+            })
             
             // Save packages as models
             const models: STPackage[] = []
             for (const pack of packages) {
                 const model = new STPackage()
+                model.id = pack.id
                 model.meta = pack.meta
                 model.renewAt = pack.renewAt
                 model.removeAt = pack.removeAt
@@ -73,39 +83,15 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 model.organizationId = user.organizationId
 
                 // Add items to invoice
-                for (const item of pack.meta.items) {
-                    invoice.meta.items.push(
-                        STInvoiceItem.fromPackageItem(item, pack, 0, date)
-                    )
-                }
+                invoice.meta.items.push(
+                    STInvoiceItem.fromPackage(pack, 0, date)
+                )
 
                 await model.save()
                 models.push(model)
             }
 
             // Todo: apply credits
-
-            // Determine VAT rate
-            let VATRate = 0
-            if (invoice.meta.companyAddress.country === "BE") {
-                VATRate = 21
-            } else {
-                if (invoice.meta.companyVATNumber) {
-                    VATRate = 0
-                } else {
-                    // Apply VAT rate of the home country for consumers in the EU
-
-                    if (invoice.meta.companyAddress.country === "NL") {
-                        VATRate = 21;
-                    } else {
-                        throw new SimpleError({
-                            code: "country_not_supported",
-                            message: "Non-business sales to your country are not yet supported. Please enter a valid VAT number.",
-                        })
-                    }
-                }
-            }
-            invoice.meta.VATPercentage = VATRate
 
             // Calculate price
             let price = invoice.meta.priceWithVAT
@@ -153,18 +139,31 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     })
                 }
                 const mollieClient = createMollieClient({ apiKey });
+
+                if (!user.organization.serverMeta.mollieCustomerId) {
+                    const mollieCustomer = await mollieClient.customers.create({
+                        name: user.organization.name,
+                        email: user.email,
+                        metadata: {
+                            organizationId: user.organization.id,
+                            userId: user.id,
+                        }
+                    })
+                    user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
+                    await user.organization.save()
+                }
+
                 const molliePayment = await mollieClient.payments.create({
                     amount: {
                         currency: 'EUR',
                         value: (price / 100).toFixed(2)
                     },
                     method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
-                    testmode: process.env.NODE_ENV != 'production',
                     description,
-                    customerId: "todo",
+                    customerId: user.organization.serverMeta.mollieCustomerId,
                     sequenceType: SequenceType.first,
-                    redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/billing/payment?id='+encodeURIComponent(payment.id),
-                    webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                    redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
+                    webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                     metadata: {
                         invoiceId: invoice.id,
                         paymentId: payment.id,
