@@ -146,13 +146,13 @@
             <h2>Stamhoofd administratie</h2>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                     <h2 class="style-title-list">
-                        Pakketten en functies activeren
+                        Mijn pakketten
                     </h2>
                     <p class="style-description">
-                        Kies welke functies je in gebruik wilt nemen
+                        Wijzig je pakketten of activeer nieuwe functies
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
@@ -197,6 +197,7 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
+import PackageSettingsView from './PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
@@ -282,6 +283,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     openPayment(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    openPackages(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PackageSettingsView, {})
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
@@ -386,6 +393,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'records') {
             // Open mollie settings
             this.manageRecords(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'packages') {
+            this.openPackages(false)
         }
 
         this.loadAdmins().catch(e => {
