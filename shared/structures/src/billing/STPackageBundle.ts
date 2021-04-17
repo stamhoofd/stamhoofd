@@ -108,7 +108,8 @@ export class STPackageBundleHelper {
                         unitPrice: 50,
                         minimumAmount: 59*2,
                         allowRenew: true,
-                        pricingType: STPricingType.PerMember
+                        pricingType: STPricingType.PerMember,
+                        startDate: new Date()
                     })
                 })
             }
@@ -130,7 +131,8 @@ export class STPackageBundleHelper {
                         unitPrice: 5900,
                         minimumAmount: 1,
                         allowRenew: true,
-                        pricingType: STPricingType.PerYear
+                        pricingType: STPricingType.PerYear,
+                        startDate: new Date()
                     })
                 })
             }
@@ -151,7 +153,8 @@ export class STPackageBundleHelper {
                         unitPrice: 3900,
                         minimumAmount: 1,
                         allowRenew: false,
-                        pricingType: STPricingType.Fixed
+                        pricingType: STPricingType.Fixed,
+                        startDate: new Date()
                     })
                 })
             }
@@ -172,7 +175,8 @@ export class STPackageBundleHelper {
                         unitPrice: 0,
                         minimumAmount: 1,
                         allowRenew: false,
-                        pricingType: STPricingType.Fixed
+                        pricingType: STPricingType.Fixed,
+                        startDate: new Date()
                     })
                 })
             }
@@ -193,7 +197,8 @@ export class STPackageBundleHelper {
                         unitPrice: 0,
                         minimumAmount: 1,
                         allowRenew: false,
-                        pricingType: STPricingType.Fixed
+                        pricingType: STPricingType.Fixed,
+                        startDate: new Date()
                     })
                 })
             }

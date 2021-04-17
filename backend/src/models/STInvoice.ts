@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
+import { Payment as PaymentStruct,STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "../helpers/QueueHandler";
@@ -69,6 +69,16 @@ export class STInvoice extends Model {
 
     static organization = new ManyToOneRelation(Organization, "organization");
     static payment = new ManyToOneRelation(Payment, "payment");
+
+    async getStructure() {
+        let payment: Payment | undefined
+        if (this.paymentId) {
+            payment = await Payment.getByID(this.paymentId)
+        }
+        return STInvoiceStruct.create(Object.assign({}, this, {
+            payment: payment ? PaymentStruct.create(payment) : null
+        }))
+    }
 
     async getPackages(): Promise<STPackage[]> {
         const ids = new Set<string>()

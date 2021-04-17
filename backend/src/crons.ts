@@ -1,17 +1,20 @@
 import { Database } from '@simonbackx/simple-database';
-import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentStatus, STInvoiceMeta } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 
 import Email from './email/Email';
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { ForwardHandler } from './helpers/ForwardHandler';
+import { QueueHandler } from './helpers/QueueHandler';
 import { EmailAddress } from './models/EmailAddress';
 import { Group } from './models/Group';
 import { Organization } from './models/Organization';
 import { Payment } from './models/Payment';
 import { Registration } from './models/Registration';
 import { STInvoice } from './models/STInvoice';
+import { STPendingInvoice } from './models/STPendingInvoice';
 
 let isRunningCrons = false
 
@@ -320,6 +323,66 @@ async function checkReservedUntil() {
     }
 }
 
+
+let lastBillingCheck: Date | null = null
+let lastBillingId = ""
+async function checkBilling() {
+    console.log("Checking billing...")
+
+    // Wait for the next day before doing a new check
+    if (lastBillingCheck && Formatter.dateIso(lastBillingCheck) === Formatter.dateIso(new Date())) {
+        console.log("Billing check done for today")
+        return
+    }
+    
+    const organizations = await Organization.where({ id: { sign: '>', value: lastBillingId } }, {
+        limit: process.env.NODE_ENV === "development" ? 1000 : 10,
+        sort: ["id"]
+    })
+
+    if (organizations.length == 0) {
+        // Wait again until next day
+        lastBillingId = ""
+        lastBillingCheck = new Date()
+        return
+    }
+
+    for (const organization of organizations) {
+        console.log("Checking billing for "+organization.name)
+
+        try {
+            await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+                // Get the pending invoice if it exists
+                let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+
+                // Generate temporary pending invoice items for the current state without adding them IRL
+                const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+
+                if (notYetCreatedItems) {
+                    if (!pendingInvoice) {
+                        // Create one
+                        pendingInvoice = new STPendingInvoice()
+                        pendingInvoice.organizationId = organization.id
+                        pendingInvoice.meta = STInvoiceMeta.create({
+                            companyName: organization.name,
+                            companyAddress: organization.address,
+                            companyVATNumber: organization.privateMeta.VATNumber
+                        })
+                    }
+                    pendingInvoice.meta.items.push(...notYetCreatedItems)
+                    await pendingInvoice.save()
+                }
+            });
+        } catch (e) {
+            console.error(e)
+        }
+        
+    }
+
+    lastBillingId = organizations[organizations.length - 1].id
+    
+}
+
 // Schedule automatic paynl charges
 export const crons = () => {
     if (isRunningCrons) {
@@ -327,7 +390,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkReservedUntil().then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkBilling().then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

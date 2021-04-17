@@ -9,6 +9,11 @@
             <h1>
                 Mijn pakketten
             </h1>
+
+            <p>
+                Alle bedragen zijn excl. BTW, tenzij anders vermeld.
+            </p>
+            
             <STErrorsDefault :error-box="errorBox" />
 
             <Spinner v-if="loadingStatus" />

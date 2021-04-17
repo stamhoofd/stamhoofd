@@ -9,11 +9,15 @@
             <h1>
                 Facturen en betalingen
             </h1>
+
+            <p>
+                Alle bedragen zijn excl. BTW, tenzij anders vermeld.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
             <Spinner v-if="loadingStatus" />
             <template v-else>
-
                 <div class="split-inputs">
                     <div>
                         <STInputBox title="Openstaand bedrag">
@@ -21,10 +25,12 @@
                                 <span>
                                     {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
                                 </span>
-                                <span class="icon arrow-right" />
+                                <span v-if="status.pendingInvoice && status.pendingInvoice.meta.priceWithoutVAT > 0" class="icon arrow-right" />
                             </p>
                         </STInputBox>
-                        <p class="style-description-small">Dit bedrag zal bij jouw volgende afrekening aangerekend worden.</p>
+                        <p class="style-description-small">
+                            Dit bedrag zal bij jouw volgende afrekening aangerekend worden.
+                        </p>
                     </div>
 
                     <div>
@@ -33,15 +39,17 @@
                                 {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
                             </p>
                         </STInputBox>
-                        <p class="style-description-small">Jouw tegoed wordt automatisch in mindering gebracht op je volgende factuur.</p>
+                        <p class="style-description-small">
+                            Jouw tegoed wordt automatisch in mindering gebracht op je volgende factuur.
+                        </p>
                     </div>
-                </div>
+                </div>                
 
                 <hr>
                 <h2>Facturen</h2>
 
                 <STList v-if="status && status.invoices.length > 0">
-                    <STListItem v-for="invoice of status.invoices" :key="invoice.id" :selectable="true">
+                    <STListItem v-for="invoice of status.invoices" :key="invoice.id" :selectable="true" @click="downloadInvoice(invoice)">
                         <h3 class="style-title-list">
                             Factuur {{ invoice.number }}
                         </h3>
@@ -64,14 +72,14 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper } from "@stamhoofd/structures";
+import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
-import PackageConfirmView from "./PackageConfirmView.vue";
-import PackageDetailsView from "./PackageDetailsView.vue";
+import { IN } from "../../../../pdfkit.standalone";
+import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
 @Component({
     components: {
@@ -124,8 +132,25 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = false
     }
 
+    downloadInvoice(invoice: STInvoice) {
+        const url = invoice.meta.pdf?.getPublicPath()
+
+        if (url) {
+            const a = document.createElement("a");
+            a.href = url;
+            a.setAttribute("download", "Stamhoofd factuur " + (invoice.number ?? invoice.id) + (invoice.meta.date ? (" - "+Formatter.dateIso(invoice.meta.date)) : ""));
+            a.click();
+        } else {
+            this.present(new ComponentWithProperties(InvoiceDetailsView, { invoice }).setDisplayStyle("popup"))
+            new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via hallo@stamhoofd.be als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
+        }
+        
+    }
+
     openPendingInvoice() {
-        // todo
+        this.present(new ComponentWithProperties(InvoiceDetailsView, {
+            invoice: this.status?.pendingInvoice
+        }).setDisplayStyle("popup"))
     }
 }
 </script>

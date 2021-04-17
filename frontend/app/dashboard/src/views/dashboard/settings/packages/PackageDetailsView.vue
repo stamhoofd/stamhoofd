@@ -10,6 +10,10 @@
                 {{ pack.meta.name }}
             </h1>
 
+            <p>
+                Alle bedragen zijn excl. BTW, tenzij anders vermeld.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
             <STList v-if="pack.meta.pricingType === 'PerMember'">
@@ -35,6 +39,14 @@
                     <template slot="right">
                         {{ pack.meta.minimumAmount * pack.meta.unitPrice | price }} 
                         ({{ pack.meta.minimumAmount }} leden)
+                    </template>
+                </STListItem>
+
+                <STListItem>
+                    Vanaf
+
+                    <template slot="right">
+                        {{ pack.meta.startDate | date }}
                     </template>
                 </STListItem>
 

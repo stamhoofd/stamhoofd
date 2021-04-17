@@ -74,7 +74,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
         }
         
         return new Response( 
-            STInvoiceStruct.create(updatedInvoice)
+            await updatedInvoice.getStructure()
         );
     }
 
@@ -85,7 +85,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             // Get a new copy of the invoice (is required to prevent concurrenty bugs)
             const invoice = await STInvoice.getByID(_invoice.id)
             if (!invoice || invoice.paidAt !== null) {
-                return
+                return invoice
             }
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {    

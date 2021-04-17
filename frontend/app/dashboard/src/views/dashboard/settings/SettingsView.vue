@@ -198,6 +198,7 @@ import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
+import InvoicePaymentStatusView from './packages/InvoicePaymentStatusView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -360,6 +361,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        const params = new URL(window.location.href).searchParams
 
         document.title = "Stamhoofd - Instellingen"
 
@@ -408,6 +410,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'billing') {
             this.openBilling(false)
+        }
+
+        if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(InvoicePaymentStatusView, {
+                    paymentId: params.get("id")
+                })
+            }).setDisplayStyle("popup").setAnimated(false))
         }
 
         this.loadAdmins().catch(e => {

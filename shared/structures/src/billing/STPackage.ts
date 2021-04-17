@@ -104,6 +104,12 @@ export class STPackageMeta extends AutoEncoder {
     
     @field({ decoder: IntegerDecoder })
     paymentFailedCount = 0
+
+    /**
+     * Date when the package starts. Is is valid until validUntil
+     */
+    @field({ decoder: DateDecoder })
+    startDate: Date
 }
 
 /**
@@ -122,8 +128,10 @@ export class STPackage extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt = new Date()
 
-    /// validAt is null if the initial needed payment is missing. The package can be ignored
-    /// This is the case during a payment
+    /** 
+     * validAt is null if the initial needed payment is missing. The package can be ignore
+     * It contains the date when the package was validated and added correctly.
+     */
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
 

@@ -81,7 +81,7 @@ export class Registration extends Model {
      * Get the number of active members that are currently registered
      * This is used for billing
      */
-    static async getActiveMembers(organizationId: string) {
+    static async getActiveMembers(organizationId: string): Promise<number> {
         const query = `
         SELECT COUNT(DISTINCT \`${Registration.table}\`.memberId) as c FROM \`${Registration.table}\` 
         JOIN \`groups\` ON \`groups\`.id = \`${Registration.table}\`.groupId

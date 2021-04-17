@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
 import { File } from "../files/File";
+import { Payment } from "../members/Payment";
 import { STPackage, STPackageTypeHelper, STPricingType } from "./STPackage";
 
 export enum STInvoiceStatus {
@@ -50,35 +51,44 @@ export class STInvoiceItem extends AutoEncoder {
      * This will calculate the price to expand the package to the given amount.
      * If you want to renew a package, you need to create a new package first
      */
-    static fromPackage(pack: STPackage, amount = 1, date?: Date): STInvoiceItem {
+    static fromPackage(pack: STPackage, amount = 1, pendingAmount = 0,  date?: Date): STInvoiceItem {
         let unitPrice = pack.meta.unitPrice
 
         if (amount < pack.meta.minimumAmount) {
+            // Minimum should get applied first, because we might already have paid for the minimum (paid amount)
             amount = pack.meta.minimumAmount
+        }
+
+        amount -= pendingAmount
+        amount -= pack.meta.paidAmount
+        if (amount == 0) {
+            amount = 0
         }
 
         /// When pricing type is memebrs, the price is calculated per year.
         /// If a shorter period is remaining, we give a discount in order
         /// to no need to handle it more complicated
-        
-        let remainingMonths: number | undefined
         const now = date ?? new Date()
 
         if (pack.validUntil) {
-            // On average a month is 30.5 days in a leap year, so we use that to calculate the remaining months
-            // Note: the date that should get passed is the day of the beginning of the month when we check at the end of the month
+            const totalDays = Math.round((pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24))
+            const remainingDays = Math.round((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
-            // We first calculate the remaining days (rounded down), then the months (rounded)
-            let remainingMonths = Math.round(Math.floor((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) / 30.5)
+            /// First 3 months are full price
+            const paidDays = 30*3
 
-            if (remainingMonths >= 10) {
-                /// First 3 months are full price, without discounts
-                remainingMonths = Math.max(remainingMonths, 12)
+            if (remainingDays > totalDays) {
+                throw new Error("Remaining days is larger than total days")
             }
-        }
 
-        if (pack.meta.pricingType === STPricingType.PerMember && remainingMonths) {
-            unitPrice = Math.round(unitPrice * remainingMonths / 12)
+            if (totalDays > 366) {
+                // Extended
+                throw new Error("Period > 1 year not supported yet")
+            } else {
+                if (pack.meta.pricingType === STPricingType.PerMember) {
+                    unitPrice = Math.min(unitPrice, Math.round(unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)))
+                }
+            }
         }
 
         const item = STInvoiceItem.create({
@@ -87,8 +97,8 @@ export class STInvoiceItem extends AutoEncoder {
             package: pack,
             date: now,
             unitPrice: unitPrice,
-            amount: amount - pack.meta.paidAmount,
-            price: unitPrice * (amount - pack.meta.paidAmount)
+            amount: amount,
+            price: unitPrice * amount
         })
 
         return item
@@ -141,11 +151,14 @@ export class STInvoiceMeta extends AutoEncoder {
 }
 
 export class STInvoice extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    id: string
+    /**
+     * This ID is empty for a pending invoice
+     */
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    id: string | null = null
 
-    @field({ decoder: StringDecoder, nullable: true })
-    paymentId: string | null = null
+    @field({ decoder: Payment, nullable: true })
+    payment: Payment | null = null
 
     @field({ decoder: STInvoiceMeta })
     meta: STInvoiceMeta
@@ -154,7 +167,7 @@ export class STInvoice extends AutoEncoder {
      * If the number is null, no invoice is generated yet. Its still a WIP invoice (not an official one!)
      */
     @field({ decoder: IntegerDecoder, nullable: true })
-    number: number | null
+    number: number | null = null
 
     @field({ decoder: DateDecoder, nullable: true })
     createdAt: Date | null = null

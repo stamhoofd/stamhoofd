@@ -1,8 +1,10 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { STInvoiceMeta } from '@stamhoofd/structures';
+import { STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct,STPricingType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from './Organization';
+import { Registration } from "./Registration";
+import { STPackage } from "./STPackage";
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:
@@ -34,7 +36,7 @@ export class STPendingInvoice extends Model {
 
     /// We can only have one invoice at a time for the pending invoice items
     /// So until this invoice is marked as 'failed', we don't create new invoices for this pending invoice
-    @column({ type: "string"})
+    @column({ type: "string", nullable: true })
     invoiceId: string | null = null
 
     @column({
@@ -63,5 +65,40 @@ export class STPendingInvoice extends Model {
     static async getForOrganization(organizationId: string): Promise<STPendingInvoice | undefined> {
         const invoices = await STPendingInvoice.where({ organizationId })
         return invoices[0] ?? undefined
+    }
+
+    /**
+     * This method checks all the packages of the given organization and will return
+     * new invoice items that should get charged. You'll need to add them to 
+     * the pending invoice yourself (always in a queue!)
+     */
+    static async createItems(organizationId: string, pendingInvoice?: STPendingInvoice) {
+        const packages = await STPackage.getForOrganization(organizationId)
+
+        const today = new Date()
+
+        let membersCount: number | null = null
+        const pendingItems: STInvoiceItem[] = []
+
+        for (const pack of packages) {
+            if (pack.meta.startDate > today) {
+                continue
+            }
+            if (pack.meta.pricingType === STPricingType.PerMember && pack.validUntil && pack.validUntil >= today) {
+
+                if (membersCount === null) {
+                    membersCount = await Registration.getActiveMembers(organizationId)
+                }
+
+                // Calculate the items that are already pending and remove them
+                const pendingCount = pendingInvoice ? pendingInvoice.meta.items.reduce((c, item) => c + ((item.package && item.package.id === pack.id) ? item.amount : 0), 0) : 0
+                const item = STInvoiceItem.fromPackage(STPackageStruct.create(pack), membersCount, pendingCount, today)
+                if (item.price > 0) {
+                    pendingItems.push(item)
+                }
+            }
+        }
+
+        return pendingItems
     }
 }

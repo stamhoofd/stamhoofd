@@ -101,10 +101,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 // Add items to invoice
                 invoice.meta.items.push(
-                    STInvoiceItem.fromPackage(pack, amount, date)
+                    STInvoiceItem.fromPackage(pack, amount, 0, date)
                 )
 
-                await model.save()
+                if (!request.body.proForma) {
+                    await model.save()
+                }
                 models.push(model)
             }
 
@@ -118,11 +120,13 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 // also add the items that are in the pending queue
                 const pendingInvoice = await STPendingInvoice.getForOrganization(user.organizationId)
                 if (pendingInvoice && pendingInvoice.invoiceId === null) {
-                    // Already generate an ID for the invoice
-                    await invoice.save()
+                    if (!request.body.proForma) {
+                        // Already generate an ID for the invoice
+                        await invoice.save()
 
-                    pendingInvoice.invoiceId = invoice.id
-                    await pendingInvoice.save()
+                        pendingInvoice.invoiceId = invoice.id
+                        await pendingInvoice.save()
+                    }
 
                     // Add the items to our invoice
                     invoice.meta.items.push(...pendingInvoice.meta.items)
@@ -199,7 +203,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 return new Response(STInvoiceResponse.create({
                     paymentUrl: paymentUrl,
-                    invoice: STInvoiceStruct.create(invoice)
+                    invoice: await invoice.getStructure()
                 }));
             }
 
@@ -207,11 +211,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 // We don't save the invoice, just return it
                 return new Response(STInvoiceResponse.create({
                     paymentUrl: undefined,
-                    invoice: STInvoiceStruct.create(Object.assign({}, invoice, { id: uuidv4() }))
+                    invoice: await invoice.getStructure()
                 }));
             }
 
-            // No need to create the invoice, since it was free
+            // No need to save the invoice, since it was free
 
             // Validate all packages
             for (const model of models) {

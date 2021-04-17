@@ -1,6 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { STBillingStatus, STInvoice as STInvoiceStruct, STPackage as STPackageStruct } from "@stamhoofd/structures";
+import { calculateVATPercentage, STBillingStatus, STInvoice as STInvoiceStruct, STInvoiceMeta, STPackage as STPackageStruct } from "@stamhoofd/structures";
+import { v4 as uuidv4 } from "uuid";
 
 import { STInvoice } from "../../models/STInvoice";
 import { STPackage } from "../../models/STPackage";
@@ -47,12 +48,31 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         // Get the pending invoice if it exists
         const pendingInvoice = await STPendingInvoice.getForOrganization(user.organizationId)
 
-        // TODO: Generate temporary pending invoice items for the current state without adding them IRL
+        // Generate temporary pending invoice items for the current state without adding them IRL
+        const notYetCreatedItems = await STPendingInvoice.createItems(user.organizationId, pendingInvoice)
+        const pendingInvoiceStruct = pendingInvoice ? STInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STInvoiceStruct.create({
+            meta: STInvoiceMeta.create({
+                companyName: user.organization.name,
+                companyAddress: user.organization.address,
+                companyVATNumber: user.organization.privateMeta.VATNumber,
+                VATPercentage: calculateVATPercentage(user.organization.address, user.organization.privateMeta.VATNumber)
+            })
+        }) : null)
+        
+        if (notYetCreatedItems.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            pendingInvoiceStruct!.meta.items.push(...notYetCreatedItems)
+        }
+
+        const invoiceStructures: STInvoiceStruct[] = []
+        for (const invoice of invoices) {
+            invoiceStructures.push(await invoice.getStructure())
+        }
 
         return new Response(STBillingStatus.create({
             packages: packages.map(pack => STPackageStruct.create(pack)),
-            invoices: invoices.map(invoice => STInvoiceStruct.create(invoice)),
-            pendingInvoice: pendingInvoice ? STInvoiceStruct.create(pendingInvoice) : null
+            invoices: invoiceStructures,
+            pendingInvoice: pendingInvoiceStruct
         }));
     }
 }
