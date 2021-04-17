@@ -159,7 +159,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
                     <h2 class="style-title-list">
                         Facturen en betalingen
@@ -197,6 +197,7 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
+import BillingSettingsView from './packages/BillingSettingsView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -289,6 +290,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     openPackages(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PackageSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    openBilling(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(BillingSettingsView, {})
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
@@ -397,6 +404,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'packages') {
             this.openPackages(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'billing') {
+            this.openBilling(false)
         }
 
         this.loadAdmins().catch(e => {
