@@ -197,7 +197,7 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
-import PackageSettingsView from './PackageSettingsView.vue';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';

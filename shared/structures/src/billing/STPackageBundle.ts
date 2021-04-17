@@ -93,51 +93,43 @@ export class STPackageBundleHelper {
         switch (bundle) {
             case STPackageBundle.Members: {
                 // 1 year valid
-                const renewAt = new Date()
-                renewAt.setFullYear(renewAt.getFullYear() + 1)
+                const validUntil = new Date()
+                validUntil.setFullYear(validUntil.getFullYear() + 1)
 
-                // Disable functions after 2 weeks
-                const disableAt = new Date(renewAt)
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                // Remove if not paid after 3 months
-                const removeAt = new Date(renewAt)
+                // Remove (= not renewable) if not renewed after 3 months
+                const removeAt = new Date(validUntil)
                 removeAt.setMonth(removeAt.getMonth() + 3)
 
                 return STPackage.create({
-                    renewAt,
-                    disableAt,
+                    validUntil,
                     removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
-                        price: 50,
-                        amount: 59 * 2,
+                        unitPrice: 50,
+                        minimumAmount: 59*2,
+                        allowRenew: true,
                         pricingType: STPricingType.PerMember
                     })
                 })
             }
 
             case STPackageBundle.Webshops: {
-                 // 1 year valid
-                const renewAt = new Date()
-                renewAt.setFullYear(renewAt.getFullYear() + 1)
+                // 1 year valid
+                const validUntil = new Date()
+                validUntil.setFullYear(validUntil.getFullYear() + 1)
 
-                // Disable functions after 2 weeks
-                const disableAt = new Date(renewAt)
-                disableAt.setDate(disableAt.getDate() + 14)
-
-                // Remove if not paid after 3 months
-                const removeAt = new Date(renewAt)
+                // Remove (= not renewable) if not renewed after 3 months
+                const removeAt = new Date(validUntil)
                 removeAt.setMonth(removeAt.getMonth() + 3)
 
                 return STPackage.create({
-                    renewAt,
-                    disableAt,
+                    validUntil,
                     removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Webshops,
-                        price: 5900,
-                        amount: 1,
+                        unitPrice: 5900,
+                        minimumAmount: 1,
+                        allowRenew: true,
                         pricingType: STPricingType.PerYear
                     })
                 })
@@ -145,17 +137,20 @@ export class STPackageBundleHelper {
 
             case STPackageBundle.SingleWebshop: {
                 // Disable functions after two months
-                const disableAt = new Date()
-                disableAt.setMonth(disableAt.getMonth() + 2)
+                const validUntil = new Date()
+                validUntil.setMonth(validUntil.getMonth() + 2)
+
+                // Remove if not valid anymore
+                const removeAt = new Date(validUntil)
 
                 return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: null, // 
+                    validUntil,
+                    removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.SingleWebshop,
-                        price: 3900,
-                        amount: 1,
+                        unitPrice: 3900,
+                        minimumAmount: 1,
+                        allowRenew: false,
                         pricingType: STPricingType.Fixed
                     })
                 })
@@ -163,35 +158,41 @@ export class STPackageBundleHelper {
 
             case STPackageBundle.TrialMembers: {
                 // Disable functions after two weeks, manual reenable required
-                const disableAt = new Date()
-                disableAt.setDate(disableAt.getDate() + 14)
+                const validUntil = new Date()
+                validUntil.setDate(validUntil.getDate() + 14)
+
+                // Remove if not valid anymore
+                const removeAt = new Date(validUntil)
 
                 return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: disableAt, // remove at the same time
+                    validUntil,
+                    removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.TrialMembers,
-                        price: 0,
-                        amount: 0,
+                        unitPrice: 0,
+                        minimumAmount: 1,
+                        allowRenew: false,
                         pricingType: STPricingType.Fixed
                     })
                 })
             }
 
             case STPackageBundle.TrialWebshops: {
-                // Disable functions after two weeks, manual reenable required
-                const disableAt = new Date()
-                disableAt.setDate(disableAt.getDate() + 14)
+                 // Disable functions after two weeks, manual reenable required
+                const validUntil = new Date()
+                validUntil.setDate(validUntil.getDate() + 14)
+
+                // Remove if not valid anymore
+                const removeAt = new Date(validUntil)
 
                 return STPackage.create({
-                    renewAt: null, // No renew allowed / needed
-                    disableAt,
-                    removeAt: disableAt, // remove at the same time
+                    validUntil,
+                    removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.TrialWebshops,
-                        price: 0,
-                        amount: 0,
+                        unitPrice: 0,
+                        minimumAmount: 1,
+                        allowRenew: false,
                         pricingType: STPricingType.Fixed
                     })
                 })

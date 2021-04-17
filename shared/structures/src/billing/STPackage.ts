@@ -68,17 +68,33 @@ export class STPackageMeta extends AutoEncoder {
     pricingType = STPricingType.Fixed
 
     @field({ decoder: IntegerDecoder })
-    price = 0
+    unitPrice = 0
 
-    /// Contains the invoiced amount. Not the paid amount
+    /// Contains the (paid) invoiced amount
     @field({ decoder: IntegerDecoder })
-    amount = 1
+    paidAmount = 0
+
+    /// Contains the (paid) invoiced price. Used for statistics and reporting
+    @field({ decoder: IntegerDecoder })
+    paidPrice = 0
+
+    /**
+     * Minimum amount that will needs to get invoiced. Only used for first invoice
+     */
+    @field({ decoder: IntegerDecoder })
+    minimumAmount = 1
 
     /**
      * Only used if applicable
      */
     @field({ decoder: BooleanDecoder })
     autorenew = true
+
+    /**
+     * Only used if applicable
+     */
+    @field({ decoder: BooleanDecoder })
+    allowRenew = false
 
     /// If a top up is done, and the payment fails, set the date here
     /// + increase the payment failed count.
@@ -88,10 +104,6 @@ export class STPackageMeta extends AutoEncoder {
     
     @field({ decoder: IntegerDecoder })
     paymentFailedCount = 0
-
-    get totalPrice() {
-        return this.price * this.amount
-    }
 }
 
 /**
@@ -115,16 +127,8 @@ export class STPackage extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
 
-    /// After this date, show messages that a renew is required
-    // if null: no renew allowed
     @field({ decoder: DateDecoder, nullable: true })
-    renewAt: Date | null = null
-
-    /// Disable all features after this day
-    /// If this is set, a warning will be visible a couple of days before
-    /// If you don't want the warning, only use removeAt
-    @field({ decoder: DateDecoder, nullable: true })
-    disableAt: Date | null = null
+    validUntil: Date | null = null
 
     /// Disable / delete this package after this date (also no renew allowed). Can't keep using the currently saved pricing
     @field({ decoder: DateDecoder, nullable: true })
@@ -135,19 +139,9 @@ export class STPackage extends AutoEncoder {
     }
 }
 
-
-
 export class STPackageStatus extends AutoEncoder {
-    /// After this date, show messages that a renew is required, but keep module active
-    // if null: no renew allowed
     @field({ decoder: DateDecoder, nullable: true })
-    renewAt: Date | null = null
-
-    /// Disable all features after this day
-    /// If this is set, a warning will be visible a couple of days before
-    /// If you don't want the warning, only use removeAt
-    @field({ decoder: DateDecoder, nullable: true })
-    disableAt: Date | null = null
+    validUntil: Date | null = null
 
     /// Disable / delete this package after this date (also no renew allowed). Can't keep using the currently saved pricing
     @field({ decoder: DateDecoder, nullable: true })
@@ -160,7 +154,7 @@ export class STPackageStatus extends AutoEncoder {
             return false
         }
 
-        if (this.disableAt && this.disableAt < d) {
+        if (this.validUntil && this.validUntil < d) {
             return false
         }
 
@@ -168,19 +162,11 @@ export class STPackageStatus extends AutoEncoder {
     }
 
     merge(status: STPackageStatus) {
-        if (status.renewAt === null) {
-            this.renewAt = null
-        } else if (this.renewAt !== null) {
-            if (status.renewAt > this.renewAt) {
-                this.renewAt = status.renewAt
-            }
-        }
-
-        if (status.disableAt === null) {
-            this.disableAt = null
-        } else if (this.disableAt !== null) {
-            if (status.disableAt > this.disableAt) {
-                this.disableAt = status.disableAt
+        if (status.validUntil === null) {
+            this.validUntil = null
+        } else if (this.validUntil !== null) {
+            if (status.validUntil > this.validUntil) {
+                this.validUntil = status.validUntil
             }
         }
 

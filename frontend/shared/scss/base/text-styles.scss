@@ -133,6 +133,11 @@
     }
 }
 
+.style-description-block {
+    @extend .style-description;
+    padding-bottom: 20px;
+}
+
 .style-description-small {
     font-size: 14px;
     line-height: 1.4;
@@ -292,8 +297,7 @@
 
         > h2 + p {
             &:not([class]) {
-                @extend .style-description;
-                padding-bottom: 20px;
+                @extend .style-description-block;
             }
         }
 

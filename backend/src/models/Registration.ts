@@ -1,4 +1,4 @@
-import { column,ManyToOneRelation,Model } from '@simonbackx/simple-database';
+import { column,Database,ManyToOneRelation,Model } from '@simonbackx/simple-database';
 import { Payment as PaymentStructure, Registration as RegistrationStructure } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
@@ -75,5 +75,26 @@ export class Registration extends Model {
                 payment: this.payment ? PaymentStructure.create(this.payment) : null
             })
         )
+    }
+
+    /**
+     * Get the number of active members that are currently registered
+     * This is used for billing
+     */
+    static async getActiveMembers(organizationId: string) {
+        const query = `
+        SELECT COUNT(DISTINCT \`${Registration.table}\`.memberId) as c FROM \`${Registration.table}\` 
+        JOIN \`groups\` ON \`groups\`.id = \`${Registration.table}\`.groupId
+        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.waitingList = 0`
+        
+        const [results] = await Database.select(query, [organizationId])
+        const count = results[0]['']['c'];
+
+        if (Number.isInteger(count)) {
+           return count
+        } else {
+            console.error("Unexpected result for occupancy", results)
+            throw new Error("Query failed")
+        }
     }
 }

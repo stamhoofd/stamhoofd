@@ -47,6 +47,8 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         // Get the pending invoice if it exists
         const pendingInvoice = await STPendingInvoice.getForOrganization(user.organizationId)
 
+        // TODO: Generate temporary pending invoice items for the current state without adding them IRL
+
         return new Response(STBillingStatus.create({
             packages: packages.map(pack => STPackageStruct.create(pack)),
             invoices: invoices.map(invoice => STInvoiceStruct.create(invoice)),

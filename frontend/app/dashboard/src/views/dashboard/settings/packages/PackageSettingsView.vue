@@ -2,7 +2,7 @@
     <div class="st-view background">
         <STNavigationBar title="Mijn paketten">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -12,43 +12,60 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <Spinner v-if="loadingStatus" />
+            <template v-else>
+                <STList v-if="status && status.packages.length > 0">
+                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" @click="openPackageDetails(pack)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg">
 
-            <STList v-if="status && status.packages.length > 0">
-                <STListItem v-for="pack of status.packages" :key="pack.id">
-                    {{ pack.meta.name }}
-                </STListItem>
-            </STList>
+                        <h3 class="style-title-list">
+                            {{ pack.meta.name }}
+                        </h3>
+                        <p v-if="pack.validUntil" class="style-description">
+                            Geldig tot {{ pack.validUntil | date }}
+                        </p>
 
-            <p class="info-box" v-if="status && status.packages.length == 0">Je hebt momenteel nog geen pakketten geactiveerd</p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
 
-            <hr>
-            <h2>Nieuwe functies activeren</h2>
+                <p v-if="status && status.packages.length == 0" class="info-box">
+                    Je hebt momenteel nog geen pakketten geactiveerd
+                </p>
 
-            <p>Selecteer de functies die je wilt activeren en klik op 'afrekenen'. Meer info over alle pakketten kan je terugvinden op <a href="https://www.stamhoofd.be/pricing" class="inline-link">onze website</a>. Neem gerust contact op via hallo@stamhoofd.be als je bijkomende vragen zou hebben.</p>
+                <hr>
+                <h2>Nieuwe functies activeren</h2>
 
-            <STList>
-                <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
-                    <Checkbox v-model="pack.selected" slot="left" :disabled="!pack.canSelect(availablePackages)" />
-                    <h3 class="style-title-list">{{ pack.title }}</h3>
-                    <p class="style-description">{{ pack.description }}</p>
+                <p v-if="availablePackages.length === 0" class="info-box">
+                    Je hebt momenteel alle functies in gebruik. Geweldig! Meer info over alle pakketten kan je terugvinden op <a href="https://www.stamhoofd.be/pricing" class="inline-link">onze website</a>.
+                </p>
 
-                    <p slot="right" v-if="!pack.canSelect(availablePackages)" class="style-description">
-                        Niet combineerbaar
-                    </p>
-                    <p slot="right" v-else class="style-description">
-                        Vanaf {{ pack.package.meta.totalPrice | price}}
-                    </p>
-                </STListItem>
-            </STList>
+                <template v-else>
+                    <p>Selecteer de functies die je wilt activeren en klik op 'afrekenen'. Meer info over alle pakketten kan je terugvinden op <a href="https://www.stamhoofd.be/pricing" class="inline-link">onze website</a>. Neem gerust contact op via hallo@stamhoofd.be als je bijkomende vragen zou hebben.</p>
 
-            
+                    <STList>
+                        <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
+                            <Checkbox slot="left" v-model="pack.selected" :disabled="!pack.canSelect(availablePackages)" />
+                            <h3 class="style-title-list">
+                                {{ pack.title }}
+                            </h3>
+                            <p class="style-description">
+                                {{ pack.description }}
+                            </p>
+
+                            <p v-if="!pack.canSelect(availablePackages)" slot="right" class="style-description">
+                                Niet combineerbaar
+                            </p>
+                        </STListItem>
+                    </STList>
+                </template>
+            </template>
         </main>
 
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="checkout" :disabled="!hasSelected">
-                        Afrekenen
+                    <button class="button primary" :disabled="!hasSelected" @click="checkout">
+                        Doorgaan
                     </button>
                 </LoadingButton>
             </template>
@@ -59,12 +76,14 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox,LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, STList, STListItem, Spinner, Checkbox } from "@stamhoofd/components";
+import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
+
 import PackageConfirmView from "./PackageConfirmView.vue";
+import PackageDetailsView from "./PackageDetailsView.vue";
 
 export class SelectablePackage {
     package: STPackage
@@ -113,6 +132,7 @@ export class SelectablePackage {
     },
     filters: {
         price: Formatter.price,
+        date: Formatter.date.bind(Formatter)
     }
 })
 export default class PackageSettingsView extends Mixins(NavigationMixin) {
@@ -187,7 +207,13 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = false
     }
 
-    async checkout() {
+    openPackageDetails(pack: STPackage) {
+        this.show(new ComponentWithProperties(PackageDetailsView, {
+            pack
+        }))
+    }
+
+    checkout() {
         if (!this.hasSelected) {
             return
         }
@@ -197,7 +223,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         }))
     }
   
-    async shouldNavigateAway() {
+    shouldNavigateAway() {
         if (this.loading) {
             return false
         }

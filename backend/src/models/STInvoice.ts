@@ -105,13 +105,29 @@ export class STInvoice extends Model {
         this.paidAt = new Date()
         await this.assignNextNumber()
 
+        const packages = await this.getPackages()
+
+        // Increase paid amounts and paid prices
+        for (const item of this.meta.items) {
+            if (item.package) {
+                const pack = packages.find(p => p.id === item.package?.id)
+
+                if (pack) {
+                    // Increase paid amount
+                    pack.meta.paidPrice += item.price
+                    pack.meta.paidAmount += item.amount
+                }
+            }
+        }
+
         // Search for all packages and activate them if needed (might be possible that they are already validated)
-        for (const pack of await this.getPackages()) {
+        for (const pack of packages) {
             console.log("Activating package "+pack.id)
 
             // We'll never have multiple invoices for the same package that are awaiting payments
             pack.meta.lastFailedPayment = null;
             pack.meta.paymentFailedCount = 0;
+
             await pack.activate()
 
             // Activate doesn't save always, so save if needed:

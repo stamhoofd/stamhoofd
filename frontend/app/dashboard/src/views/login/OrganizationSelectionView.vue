@@ -55,20 +55,20 @@ const throttle = (func, limit) => {
         const context = this;
         // eslint-disable-next-line prefer-rest-params
         const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
+        if (lastRan) {
             clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if (Date.now() - lastRan >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
         }
+        lastRan = Date.now();
+            
+        lastFunc = setTimeout(function() {
+            if (Date.now() - lastRan >= limit) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            }
+        }, limit - (Date.now() - lastRan));
     };
 };
+
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({

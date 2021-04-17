@@ -44,23 +44,32 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: DateDecoder, optional: true })
     date?: Date
 
-    // Convertable into STInvoiceItem (or the diffence if amount is increased)
-    static fromPackage(pack: STPackage, alreadyInvoicedAmount = 0, date?: Date): STInvoiceItem {
-        let unitPrice = pack.meta.price
+    /** 
+     * Convertable into STInvoiceItem (or the diffence if amount is increased)
+     * Use this to calculate prices or create an invoice
+     * This will calculate the price to expand the package to the given amount.
+     * If you want to renew a package, you need to create a new package first
+     */
+    static fromPackage(pack: STPackage, amount = 1, date?: Date): STInvoiceItem {
+        let unitPrice = pack.meta.unitPrice
+
+        if (amount < pack.meta.minimumAmount) {
+            amount = pack.meta.minimumAmount
+        }
 
         /// When pricing type is memebrs, the price is calculated per year.
         /// If a shorter period is remaining, we give a discount in order
-        /// to no need to handle complicated cases
+        /// to no need to handle it more complicated
         
         let remainingMonths: number | undefined
         const now = date ?? new Date()
 
-        if (pack.renewAt) {
+        if (pack.validUntil) {
             // On average a month is 30.5 days in a leap year, so we use that to calculate the remaining months
             // Note: the date that should get passed is the day of the beginning of the month when we check at the end of the month
 
             // We first calculate the remaining days (rounded down), then the months (rounded)
-            let remainingMonths = Math.round(Math.floor((pack.renewAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) / 30.5)
+            let remainingMonths = Math.round(Math.floor((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) / 30.5)
 
             if (remainingMonths >= 10) {
                 /// First 3 months are full price, without discounts
@@ -74,12 +83,12 @@ export class STInvoiceItem extends AutoEncoder {
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.renewAt ? ("Van "+Formatter.date(now, true)+" tot "+Formatter.date(pack.renewAt, true)) : "",
+            description: pack.validUntil ? ("Van "+Formatter.date(now, true)+" tot "+Formatter.date(pack.validUntil, true)) : "",
             package: pack,
             date: now,
             unitPrice: unitPrice,
-            amount: pack.meta.amount - alreadyInvoicedAmount,
-            price: unitPrice * (pack.meta.amount - alreadyInvoicedAmount)
+            amount: amount - pack.meta.paidAmount,
+            price: unitPrice * (amount - pack.meta.paidAmount)
         })
 
         return item

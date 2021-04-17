@@ -47,10 +47,7 @@ export class STPackage extends Model {
     validAt: Date | null = null
 
     @column({ type: "datetime", nullable: true })
-    renewAt: Date | null = null
-
-    @column({ type: "datetime", nullable: true })
-    disableAt: Date | null = null
+    validUntil: Date | null = null
 
     @column({ type: "datetime", nullable: true })
     removeAt: Date | null = null

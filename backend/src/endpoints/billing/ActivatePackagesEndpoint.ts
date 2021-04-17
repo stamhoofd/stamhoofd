@@ -1,12 +1,14 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoice as STInvoiceStruct,STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, Version  } from "@stamhoofd/structures";
+import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoice as STInvoiceStruct,STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
+import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from '../../helpers/QueueHandler';
 import { MolliePayment } from '../../models/MolliePayment';
 import { Payment } from "../../models/Payment";
+import { Registration } from '../../models/Registration';
 import { STInvoice } from "../../models/STInvoice";
 import { STPackage } from "../../models/STPackage";
 import { STPendingInvoice } from '../../models/STPendingInvoice';
@@ -21,6 +23,9 @@ class Body extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod: PaymentMethod
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    proForma = false
 }
 
 export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -67,6 +72,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 companyVATNumber: user.organization.privateMeta.VATNumber,
                 VATPercentage: calculateVATPercentage(user.organization.address, user.organization.privateMeta.VATNumber)
             })
+
+            let membersCount: number | null = null
             
             // Save packages as models
             const models: STPackage[] = []
@@ -74,17 +81,27 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 const model = new STPackage()
                 model.id = pack.id
                 model.meta = pack.meta
-                model.renewAt = pack.renewAt
+                model.validUntil = pack.validUntil
                 model.removeAt = pack.removeAt
-                model.disableAt = pack.disableAt
 
                 // Not yet valid / active (ignored until valid)
                 model.validAt = null
                 model.organizationId = user.organizationId
 
+                // If type is 
+                let amount = 1
+
+                if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
+                    membersCount = await Registration.getActiveMembers(user.organizationId)
+                }
+
+                if (pack.meta.pricingType === STPricingType.PerMember) {
+                    amount = membersCount ?? 1
+                }
+
                 // Add items to invoice
                 invoice.meta.items.push(
-                    STInvoiceItem.fromPackage(pack, 0, date)
+                    STInvoiceItem.fromPackage(pack, amount, date)
                 )
 
                 await model.save()
@@ -113,7 +130,9 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 // Update price
                 price = invoice.meta.priceWithVAT
+            }
 
+            if (price > 0 && !request.body.proForma) {
                 // Create payment
                 const payment = new Payment()
                 payment.organizationId = null
@@ -184,6 +203,14 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 }));
             }
 
+            if (request.body.proForma) {
+                // We don't save the invoice, just return it
+                return new Response(STInvoiceResponse.create({
+                    paymentUrl: undefined,
+                    invoice: STInvoiceStruct.create(Object.assign({}, invoice, { id: uuidv4() }))
+                }));
+            }
+
             // No need to create the invoice, since it was free
 
             // Validate all packages
@@ -198,3 +225,4 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         });
     }
 }
+
