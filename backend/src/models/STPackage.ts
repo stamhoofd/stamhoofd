@@ -1,6 +1,8 @@
 import { column, Model } from "@simonbackx/simple-database";
-import { STPackageMeta } from '@stamhoofd/structures';
+import { STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+
+import { Organization } from "./Organization";
 
 export class STPackage extends Model {
     static table = "stamhoofd_packages";
@@ -56,6 +58,31 @@ export class STPackage extends Model {
         return await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
     }
 
+    static async updateOrganizationPackages(organizationId: string) {
+        console.log("Updating packages for organization "+organizationId)
+        const packages = await this.getForOrganization(organizationId)
+
+        const map = new Map<STPackageType, STPackageStatus>()
+        for (const pack of packages) {
+            const exist = map.get(pack.meta.type)
+            if (exist) {
+                exist.merge(pack.createStatus())
+            } else {
+                map.set(pack.meta.type, pack.createStatus())
+            }
+        }
+
+        const organization = await Organization.getByID(organizationId)
+        if (organization) {
+            organization.meta.packages.packages = map
+            await organization.save()
+
+            console.log(map)
+        } else {
+            console.error("Couldn't find organization when updating packages "+organizationId)
+        }
+    }
+
 
     async activate() {
         if (this.validAt !== null) {
@@ -65,5 +92,15 @@ export class STPackage extends Model {
         await this.save()
 
         // TODO: Update the organizations modules
+    }
+
+    createStatus(): STPackageStatus {
+        // Todo: if payment failed: temporary set valid until to 2 weeks after last/first failed payment
+
+        return STPackageStatus.create({
+            startDate: this.meta.startDate,
+            validUntil: this.validUntil,
+            removeAt: this.removeAt
+        })
     }
 }

@@ -141,13 +141,12 @@ export class STPackage extends AutoEncoder {
     /// Disable / delete this package after this date (also no renew allowed). Can't keep using the currently saved pricing
     @field({ decoder: DateDecoder, nullable: true })
     removeAt: Date | null = null
-
-    createStatus(): STPackageStatus {
-        return STPackageStatus.create(this)
-    }
 }
 
 export class STPackageStatus extends AutoEncoder {
+    @field({ decoder: DateDecoder })
+    startDate: Date
+
     @field({ decoder: DateDecoder, nullable: true })
     validUntil: Date | null = null
 
@@ -157,6 +156,10 @@ export class STPackageStatus extends AutoEncoder {
 
     get isActive() {
         const d = new Date()
+
+        if (this.startDate && this.startDate > d) {
+            return false
+        }
 
         if (this.removeAt && this.removeAt < d) {
             return false
@@ -170,6 +173,11 @@ export class STPackageStatus extends AutoEncoder {
     }
 
     merge(status: STPackageStatus) {
+        if (status.startDate < this.startDate) {
+            this.startDate = status.startDate
+            // Todo: fix behaviour with gaps if we allow that in the future
+        }
+
         if (status.validUntil === null) {
             this.validUntil = null
         } else if (this.validUntil !== null) {

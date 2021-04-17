@@ -676,4 +676,5 @@ export class Organization extends Model {
             from, replyTo
         }
     }
+
 }

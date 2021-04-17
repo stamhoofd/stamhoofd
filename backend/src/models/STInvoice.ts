@@ -166,9 +166,11 @@ export class STInvoice extends Model {
                 }
                 await pendingInvoice.save()
             }
+
+            // Force regeneration of organization meta data
+            await STPackage.updateOrganizationPackages(this.organizationId)
         }
         
-
         await this.generatePdf()
     }
 
@@ -222,6 +224,9 @@ export class STInvoice extends Model {
                 pendingInvoice.invoiceId = null
                 await pendingInvoice.save()
             }
+
+            // Force regeneration of organization meta data
+            await STPackage.updateOrganizationPackages(this.organizationId)
         }
     }
 }
