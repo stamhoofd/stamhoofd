@@ -1,13 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { PaymentMethod, PaymentStatus, STInvoiceMeta } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import AWS from 'aws-sdk';
-
 import { Email } from '@stamhoofd/email';
-import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
-import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
-import { ForwardHandler } from './helpers/ForwardHandler';
-import { QueueHandler } from '@stamhoofd/queues';
 import { EmailAddress } from '@stamhoofd/email';
 import { Group } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
@@ -15,6 +7,14 @@ import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
+import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import AWS from 'aws-sdk';
+
+import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
+import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
+import { ForwardHandler } from './helpers/ForwardHandler';
 
 let isRunningCrons = false
 
