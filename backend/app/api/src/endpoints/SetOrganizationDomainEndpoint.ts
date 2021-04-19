@@ -4,7 +4,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DNSRecord, DNSRecordType, Organization as OrganizationStruct,OrganizationDomains } from "@stamhoofd/structures";
 import NodeRSA from 'node-rsa';
 
-import { Token } from '../models/Token';
+import { Token } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

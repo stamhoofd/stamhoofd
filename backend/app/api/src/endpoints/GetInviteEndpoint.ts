@@ -2,10 +2,10 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Invite as InviteStruct, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
 
-import { Invite } from '../models/Invite';
-import { Organization } from '../models/Organization';
-import { Token, TokenWithUser } from '../models/Token';
-import { User } from '../models/User';
+import { Invite } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { Token, TokenWithUser } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = { key: string };
 type Query = undefined;
 type Body = undefined

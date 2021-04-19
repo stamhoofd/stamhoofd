@@ -6,14 +6,14 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { Group } from '../models/Group';
-import { Member, RegistrationWithMember } from '../models/Member';
-import { MolliePayment } from '../models/MolliePayment';
-import { MollieToken } from '../models/MollieToken';
-import { PayconiqPayment } from '../models/PayconiqPayment';
-import { Payment } from '../models/Payment';
-import { Registration } from '../models/Registration';
-import { Token } from '../models/Token';
+import { Group } from '@stamhoofd/models';
+import { Member, RegistrationWithMember } from '@stamhoofd/models';
+import { MolliePayment } from '@stamhoofd/models';
+import { MollieToken } from '@stamhoofd/models';
+import { PayconiqPayment } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Registration } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = IDRegisterCheckout

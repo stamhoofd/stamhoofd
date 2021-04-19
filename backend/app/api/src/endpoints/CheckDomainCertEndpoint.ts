@@ -2,8 +2,8 @@ import { AutoEncoder, Decoder,field, StringDecoder } from "@simonbackx/simple-en
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { Organization } from '../models/Organization';
-import { Webshop } from '../models/Webshop';
+import { Organization } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 type Params = {};
 
 class Query extends AutoEncoder {

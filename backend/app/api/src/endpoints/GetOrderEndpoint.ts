@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order as OrderStruct, Payment as PaymentStruct } from "@stamhoofd/structures";
 
-import { Order } from '../models/Order';
-import { Payment } from '../models/Payment';
+import { Order } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
 type Params = { id: string; orderId: string };
 type Query = undefined;
 type Body = undefined

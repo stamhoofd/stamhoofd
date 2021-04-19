@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group } from "../models/Group";
-import { Member } from "../models/Member";
+import { Group } from "@stamhoofd/models";
+import { Member } from "@stamhoofd/models";
 
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined

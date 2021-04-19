@@ -4,8 +4,8 @@ import { KeychainItem, OrganizationGenderType, SignupResponse } from '@stamhoofd
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { EmailVerificationCode } from "../models/EmailVerificationCode";
-import { Organization } from "../models/Organization";
+import { EmailVerificationCode } from "@stamhoofd/models";
+import { Organization } from "@stamhoofd/models";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 describe("Endpoint.CreateOrganization", () => {

@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { PermissionLevel, PrivateWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
-import { Token } from '../models/Token';
-import { Webshop } from '../models/Webshop';
+import { Token } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 
 type Params = { id: string };
 type Query = undefined;

@@ -3,7 +3,8 @@
     "workspaces": [
         "frontend/app/*",
         "frontend/shared/*",
-        "backend",
+        "backend/app/*",
+        "backend/shared/*",
         "shared/*",
         ".yalc/@*/*",
         ".yalc/*"

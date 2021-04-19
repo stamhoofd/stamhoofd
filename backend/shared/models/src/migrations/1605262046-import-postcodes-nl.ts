@@ -45,7 +45,7 @@ export default new Migration(async () => {
     }
 
     // We start by looping all provinces in the files
-    const folder = __dirname+"/../data/postcodes/nl"
+    const folder = __dirname+"/data/postcodes/nl"
     const provinces = (await fs.promises.readdir(folder, { withFileTypes: true }))
             .filter((dirent) => !dirent.isDirectory())
             .map((dirent) => {

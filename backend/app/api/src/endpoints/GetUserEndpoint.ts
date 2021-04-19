@@ -2,9 +2,9 @@ import { Database } from '@simonbackx/simple-database';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { MyUser, OrganizationSimple, TradedInvite, User as UserStruct } from '@stamhoofd/structures';
 
-import { Invite } from '../models/Invite';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Invite } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

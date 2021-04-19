@@ -1,0 +1,20 @@
+{
+    "name": "@stamhoofd/email",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "license": "UNLICENCED",
+    "sideEffects": false,
+    "files": [
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc -b && mkdir -p ./dist/migrations && cp ./src/migrations/*.sql ./dist/migrations",
+        "build:full": "rm -rf ./dist && yarn build"
+    },
+    "peerDependencies": {
+        "@simonbackx/simple-encoding": "^2.0.0",
+        "@simonbackx/simple-errors": "^1.2"
+    }
+}

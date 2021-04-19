@@ -2,17 +2,16 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType 
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoice as STInvoiceStruct,STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
+import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
 
-import { QueueHandler } from '../../helpers/QueueHandler';
-import { MolliePayment } from '../../models/MolliePayment';
-import { Payment } from "../../models/Payment";
-import { Registration } from '../../models/Registration';
-import { STInvoice } from "../../models/STInvoice";
-import { STPackage } from "../../models/STPackage";
-import { STPendingInvoice } from '../../models/STPendingInvoice';
-import { Token } from '../../models/Token';
+import { QueueHandler } from '@stamhoofd/queues';
+import { MolliePayment } from "@stamhoofd/models";
+import { Payment } from "@stamhoofd/models";
+import { Registration } from "@stamhoofd/models";
+import { STInvoice } from "@stamhoofd/models";
+import { STPackage } from "@stamhoofd/models";
+import { STPendingInvoice } from "@stamhoofd/models";
+import { Token } from "@stamhoofd/models";
 type Params = {};
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;

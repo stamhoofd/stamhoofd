@@ -3,8 +3,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationWithWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
-import { Organization } from '../models/Organization';
-import { Webshop } from '../models/Webshop';
+import { Organization } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 type Params = {};
 
 class Query extends AutoEncoder {

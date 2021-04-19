@@ -1,7 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization } from '../models/Organization';
 import SES from 'aws-sdk/clients/sesv2';
-import { sleep } from '../helpers/Sleep';
+import { sleep } from '@stamhoofd/utility';
 
 async function setAWSConfigurationSet(this: Organization) {
         if (this.privateMeta.mailDomain === null) {

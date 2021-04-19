@@ -3,18 +3,18 @@ import { PaymentMethod, PaymentStatus, STInvoiceMeta } from '@stamhoofd/structur
 import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 
-import Email from './email/Email';
+import { Email } from '@stamhoofd/email';
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { ForwardHandler } from './helpers/ForwardHandler';
-import { QueueHandler } from './helpers/QueueHandler';
-import { EmailAddress } from './models/EmailAddress';
-import { Group } from './models/Group';
-import { Organization } from './models/Organization';
-import { Payment } from './models/Payment';
-import { Registration } from './models/Registration';
-import { STInvoice } from './models/STInvoice';
-import { STPendingInvoice } from './models/STPendingInvoice';
+import { QueueHandler } from '@stamhoofd/queues';
+import { EmailAddress } from '@stamhoofd/email';
+import { Group } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Registration } from '@stamhoofd/models';
+import { STInvoice } from '@stamhoofd/models';
+import { STPendingInvoice } from '@stamhoofd/models';
 
 let isRunningCrons = false
 

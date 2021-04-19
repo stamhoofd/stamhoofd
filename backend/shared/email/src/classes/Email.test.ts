@@ -1,4 +1,4 @@
-import Email from "./Email"
+import { Email } from "./Email"
 
 describe("Email", () => {
     it("should parse e-mail strings correctly", () => {

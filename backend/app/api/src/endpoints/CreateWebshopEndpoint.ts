@@ -4,8 +4,8 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { Token } from '../models/Token';
-import { Webshop } from '../models/Webshop';
+import { Token } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 
 type Params = { };
 type Query = undefined;

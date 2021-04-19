@@ -3,7 +3,7 @@ import { KeyConstants, NewUser } from '@stamhoofd/structures';
 
 import { OrganizationFactory } from "../factories/OrganizationFactory";
 import { UserFactory } from '../factories/UserFactory';
-import { Organization } from "../models/Organization";
+import { Organization } from "./Organization";
 import { User } from "./User";
 
 describe("Model.User", () => {

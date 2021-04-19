@@ -8,7 +8,7 @@ import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
 
-import Email from '../email/Email';
+import { Email } from "@stamhoofd/email";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group } from './Group';
 import { Member } from "./Member";

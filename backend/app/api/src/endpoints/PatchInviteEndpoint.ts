@@ -3,9 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Invite as InviteStruct, InviteUserDetails,OrganizationSimple,Permissions,User as UserStruct } from "@stamhoofd/structures";
 
-import { Invite } from '../models/Invite';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Invite } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<InviteStruct>

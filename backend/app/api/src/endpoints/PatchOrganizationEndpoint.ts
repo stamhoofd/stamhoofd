@@ -5,12 +5,12 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 import { GroupBuilder } from '../helpers/GroupBuilder';
-import { Group } from '../models/Group';
-import { Invite } from '../models/Invite';
-import { PayconiqPayment } from '../models/PayconiqPayment';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
-import { Webshop } from '../models/Webshop';
+import { Group } from '@stamhoofd/models';
+import { Invite } from '@stamhoofd/models';
+import { PayconiqPayment } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

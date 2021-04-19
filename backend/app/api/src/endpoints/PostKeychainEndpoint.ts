@@ -2,8 +2,8 @@ import { ArrayDecoder,Decoder,PatchableArrayAutoEncoder } from "@simonbackx/simp
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { KeychainedResponse, KeychainItem as KeychainItemStruct, Organization as OrganizationStruct  } from "@stamhoofd/structures";
 
-import { KeychainItem } from '../models/KeychainItem';
-import { Token } from '../models/Token';
+import { KeychainItem } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = KeychainItemStruct[]

@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
-import { Group } from "../models/Group";
+import { Group } from "@stamhoofd/models";
 
-import { Member } from '../models/Member';
-import { Token } from '../models/Token';
+import { Member } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { PatchOrganizationPaymentsEndpoint } from "./PatchOrganizationPaymentsEndpoint";
 type Params = { id: string };
 type Query = undefined

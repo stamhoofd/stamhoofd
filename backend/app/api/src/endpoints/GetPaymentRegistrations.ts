@@ -2,12 +2,12 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
 
-import { Member } from '../models/Member';
-import { Organization } from '../models/Organization';
-import { Payment } from '../models/Payment';
-import { Registration } from '../models/Registration';
-import { Token } from '../models/Token';
-import { UserWithOrganization } from '../models/User';
+import { Member } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Registration } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { UserWithOrganization } from '@stamhoofd/models';
 type Params = {id: string};
 type Query = undefined
 type Body = undefined

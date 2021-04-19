@@ -2,7 +2,7 @@ import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { Payment as PaymentStruct,STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { QueueHandler } from "../helpers/QueueHandler";
+import { QueueHandler } from "@stamhoofd/queues";
 import { Organization } from './Organization';
 import { Payment } from "./Payment";
 import { STPackage } from "./STPackage";

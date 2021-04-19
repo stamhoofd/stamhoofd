@@ -3,10 +3,10 @@ import { KeyConstantsHelper,Sodium } from "@stamhoofd/crypto";
 import { ChallengeResponseStruct, Token as TokenStruct } from '@stamhoofd/structures';
 import MockDate from "mockdate";
 
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Challenge } from '../models/Challenge';
-import { User } from '../models/User';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Challenge } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint';
 
 describe("Endpoint.CreateToken", () => {

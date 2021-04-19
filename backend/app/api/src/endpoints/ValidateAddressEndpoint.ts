@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Address, ValidatedAddress } from "@stamhoofd/structures";
 
-import { PostalCode } from '../models/addresses/PostalCode';
+import { PostalCode } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

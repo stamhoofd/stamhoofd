@@ -1,8 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 
-import { Invite } from '../models/Invite';
-import { Token } from '../models/Token';
+import { Invite } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined;

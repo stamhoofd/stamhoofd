@@ -4,10 +4,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRequest, Replacement } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import Email, { EmailBuilder } from '../email/Email';
-import { PasswordToken } from '../models/PasswordToken';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Email, EmailBuilder } from '@stamhoofd/email';
+import { PasswordToken } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

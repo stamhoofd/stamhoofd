@@ -3,11 +3,11 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NewUser, SignupResponse } from "@stamhoofd/structures";
 
-import Email from '../email/Email';
-import { EmailVerificationCode } from '../models/EmailVerificationCode';
-import { Organization } from "../models/Organization";
-import { PasswordToken } from '../models/PasswordToken';
-import { User } from "../models/User";
+import { Email } from '@stamhoofd/email';
+import { EmailVerificationCode } from '@stamhoofd/models';
+import { Organization } from "@stamhoofd/models";
+import { PasswordToken } from '@stamhoofd/models';
+import { User } from "@stamhoofd/models";
 
 type Params = {};
 type Query = undefined;

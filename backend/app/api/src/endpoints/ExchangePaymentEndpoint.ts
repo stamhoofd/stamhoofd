@@ -4,13 +4,13 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { OrderStatus, Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
 
-import { Member } from '../models/Member';
-import { MolliePayment } from '../models/MolliePayment';
-import { MollieToken } from '../models/MollieToken';
-import { Order } from '../models/Order';
-import { Organization } from '../models/Organization';
-import { PayconiqPayment } from '../models/PayconiqPayment';
-import { Payment } from '../models/Payment';
+import { Member } from '@stamhoofd/models';
+import { MolliePayment } from '@stamhoofd/models';
+import { MollieToken } from '@stamhoofd/models';
+import { Order } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { PayconiqPayment } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
 type Params = {id: string};
 class Query extends AutoEncoder {

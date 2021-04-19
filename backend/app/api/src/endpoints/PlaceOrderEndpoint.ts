@@ -4,13 +4,13 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
-import { MolliePayment } from '../models/MolliePayment';
-import { MollieToken } from '../models/MollieToken';
-import { Order } from '../models/Order';
-import { Organization } from '../models/Organization';
-import { PayconiqPayment } from '../models/PayconiqPayment';
-import { Payment } from '../models/Payment';
-import { Webshop } from '../models/Webshop';
+import { MolliePayment } from '@stamhoofd/models';
+import { MollieToken } from '@stamhoofd/models';
+import { Order } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { PayconiqPayment } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData

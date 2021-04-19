@@ -2,9 +2,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { getPermissionLevelNumber, OrderStatus, PermissionLevel } from "@stamhoofd/structures";
 
-import { Order } from '../models/Order';
-import { Token } from '../models/Token';
-import { Webshop } from '../models/Webshop';
+import { Order } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 
 type Params = { id: string; orderId: string };
 type Query = undefined;

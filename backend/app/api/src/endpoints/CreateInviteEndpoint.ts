@@ -5,9 +5,9 @@ import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruc
 import basex from "base-x";
 import crypto from "crypto";
 
-import { Invite } from '../models/Invite';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Invite } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = NewInvite

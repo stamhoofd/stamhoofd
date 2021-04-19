@@ -3,8 +3,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { City as CityStruct, Country, Province as ProvinceStruct,SearchRegions } from "@stamhoofd/structures";
 import { StringCompare } from '@stamhoofd/utility';
 
-import { City } from '../models/addresses/City';
-import { Province } from '../models/addresses/Province';
+import { City } from '@stamhoofd/models';
+import { Province } from '@stamhoofd/models';
 
 type Params = {};
 class Query extends AutoEncoder {

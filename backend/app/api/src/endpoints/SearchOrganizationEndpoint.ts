@@ -2,7 +2,7 @@ import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-e
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { OrganizationSimple } from "@stamhoofd/structures"; 
 
-import { Organization } from "../models/Organization";
+import { Organization } from "@stamhoofd/models";
 
 type Params = {};
 

@@ -6,12 +6,12 @@ import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResp
 import { Formatter } from "@stamhoofd/utility";
 
 import { GroupBuilder } from '../helpers/GroupBuilder';
-import { EmailVerificationCode } from '../models/EmailVerificationCode';
-import { KeychainItem } from '../models/KeychainItem';
-import { Organization } from "../models/Organization";
-import { RegisterCode } from '../models/RegisterCode';
-import { Token } from '../models/Token';
-import { User } from "../models/User";
+import { EmailVerificationCode } from '@stamhoofd/models';
+import { KeychainItem } from '@stamhoofd/models';
+import { Organization } from "@stamhoofd/models";
+import { RegisterCode } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from "@stamhoofd/models";
 
 type Params = {};
 type Query = undefined;

@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GroupSizeResponse } from "@stamhoofd/structures";
 
-import { Group } from '../models/Group';
-import { Token } from '../models/Token';
+import { Group } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined

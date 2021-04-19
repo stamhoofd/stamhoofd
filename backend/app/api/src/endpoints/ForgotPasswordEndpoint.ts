@@ -1,16 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors'
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 import { Decoder } from '@simonbackx/simple-encoding';
 
-import Email from '../email/Email';
-import { Organization } from '../models/Organization';
-import { PasswordToken } from '../models/PasswordToken';
-import { User } from '../models/User';
+import { Email } from '@stamhoofd/email';
+import { Organization } from '@stamhoofd/models';
+import { PasswordToken } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Params = {};

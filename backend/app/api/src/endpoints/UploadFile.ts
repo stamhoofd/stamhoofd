@@ -14,8 +14,8 @@ type ResponseBody = File
 
 import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
 
-import { Image } from '../models/Image';
-import { Token } from '../models/Token';
+import { Image } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 
 interface FormidableFile {
   // The size of the uploaded file in bytes.

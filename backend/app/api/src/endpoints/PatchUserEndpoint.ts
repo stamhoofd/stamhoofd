@@ -4,9 +4,9 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
 import { DevOpsGuru } from 'aws-sdk';
 
-import { EmailVerificationCode } from '../models/EmailVerificationCode';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { EmailVerificationCode } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<NewUser>

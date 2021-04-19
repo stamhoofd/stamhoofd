@@ -2,7 +2,7 @@ import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-d
 import { OrderData, OrderStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import Email from '../email/Email';
+import { Email } from '@stamhoofd/email';
 import { Organization } from './Organization';
 import { Payment } from './Payment';
 import { Webshop } from './Webshop';

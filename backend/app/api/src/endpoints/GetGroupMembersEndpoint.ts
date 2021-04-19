@@ -3,9 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PermissionLevel } from "@stamhoofd/structures";
 
-import { Group } from "../models/Group";
-import { KeychainItem } from '../models/KeychainItem';
-import { Token } from '../models/Token';
+import { Group } from "@stamhoofd/models";
+import { KeychainItem } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 
 type Params = { id: string };
 class Query extends AutoEncoder {

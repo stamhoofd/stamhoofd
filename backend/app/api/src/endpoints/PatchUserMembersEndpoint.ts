@@ -3,9 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
 
-import { KeychainItem } from '../models/KeychainItem';
-import { Member } from '../models/Member';
-import { Token } from '../models/Token';
+import { KeychainItem } from '@stamhoofd/models';
+import { Member } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = AutoEncoderPatchType<KeychainedMembers>

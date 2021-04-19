@@ -1,11 +1,11 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { RegisterResponse, WaitingListType } from '@stamhoofd/structures';
 
-import { GroupFactory } from '../factories/GroupFactory';
-import { MemberFactory } from '../factories/MemberFactory';
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Token } from '../models/Token';
+import { GroupFactory } from '@stamhoofd/models';
+import { MemberFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 
 

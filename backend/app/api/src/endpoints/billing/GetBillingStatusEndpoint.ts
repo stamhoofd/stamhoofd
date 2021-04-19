@@ -1,12 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { calculateVATPercentage, STBillingStatus, STInvoice as STInvoiceStruct, STInvoiceMeta, STPackage as STPackageStruct } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
 
-import { STInvoice } from "../../models/STInvoice";
-import { STPackage } from "../../models/STPackage";
-import { STPendingInvoice } from '../../models/STPendingInvoice';
-import { Token } from '../../models/Token';
+import { STInvoice } from "@stamhoofd/models";
+import { STPackage } from "@stamhoofd/models";
+import { STPendingInvoice } from "@stamhoofd/models";
+import { Token } from "@stamhoofd/models";
 type Params = {};
 type Query = undefined;
 type ResponseBody = STBillingStatus;

@@ -1,6 +1,6 @@
 import { Database, Migration } from "@simonbackx/simple-database";
 
-import { User } from "../src/models/User";
+import { User } from "@stamhoofd/models";
 
 export default async () => {
     await Migration.runAll(__dirname + "/../src/migrations");

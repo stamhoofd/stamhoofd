@@ -3,7 +3,7 @@ import nodemailer from "nodemailer"
 import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
-import { sleep } from '../helpers/Sleep';
+import { sleep } from '@stamhoofd/utility';
 
 export type EmailInterfaceBase = {
     to: string;
@@ -22,7 +22,7 @@ export type EmailInterface = EmailInterfaceBase & {
 /// An email builder is called until it returns undefined. This allows to reduce memory usage for an e-mail with multiple recipients
 export type EmailBuilder = () => EmailInterface | undefined
 
-class Email {
+class EmailStatic {
     transporter: Mail;
     rps = 14
 
@@ -287,4 +287,4 @@ class Email {
     }
 }
 
-export default new Email();
+export const Email = new EmailStatic();

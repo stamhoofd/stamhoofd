@@ -3,8 +3,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailInformation } from '@stamhoofd/structures';
 
-import { EmailAddress } from '../models/EmailAddress';
-import { Token } from '../models/Token';
+import { EmailAddress } from '@stamhoofd/email';
+import { Token } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

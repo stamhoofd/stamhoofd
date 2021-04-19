@@ -1,10 +1,10 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeychainedResponse, Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
-import { GroupFactory } from '../factories/GroupFactory';
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Token } from '../models/Token';
+import { GroupFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { GetOrganizationEndpoint } from './GetOrganizationEndpoint';
 
 describe("Endpoint.GetOrganization", () => {

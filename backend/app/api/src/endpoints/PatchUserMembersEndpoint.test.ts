@@ -2,11 +2,11 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { EncryptedMember, KeychainedMembers, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
-import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
-import { MemberFactory } from '../factories/MemberFactory';
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Token } from '../models/Token';
+import { EncryptedMemberFactory } from '@stamhoofd/models';
+import { MemberFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 
 

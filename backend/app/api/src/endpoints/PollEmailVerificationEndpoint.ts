@@ -2,8 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { PollEmailVerificationRequest, PollEmailVerificationResponse } from "@stamhoofd/structures";
 
-import { EmailVerificationCode } from '../models/EmailVerificationCode';
-import { Organization } from "../models/Organization";
+import { EmailVerificationCode } from '@stamhoofd/models';
+import { Organization } from "@stamhoofd/models";
 
 type Params = {};
 type Query = undefined;

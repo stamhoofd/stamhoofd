@@ -1,6 +1,6 @@
 import { Formatter } from "@stamhoofd/utility";
 import { simpleParser } from "mailparser";
-import { Organization } from "../models/Organization";
+import { Organization } from "@stamhoofd/models";
 
 export class ForwardHandler {
     static async handle(content: any, receipt: {

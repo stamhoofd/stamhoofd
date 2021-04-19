@@ -24,7 +24,8 @@
         "vue"
     ],
     "eslint.workingDirectories": [
-        "./backend",
+        "./backend/app/*",
+        "./backend/shared/*",
         "./frontend",
         "./devops",
         "./shared/*"

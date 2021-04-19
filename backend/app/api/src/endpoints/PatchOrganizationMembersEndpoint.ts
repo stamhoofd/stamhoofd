@@ -4,14 +4,14 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct, getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
 
-import { EncryptedMemberFactory } from '../factories/EncryptedMemberFactory';
-import { Group } from '../models/Group';
-import { Member, MemberWithRegistrations } from '../models/Member';
-import { Organization } from '../models/Organization';
-import { Payment } from '../models/Payment';
-import { Registration, RegistrationWithPayment } from '../models/Registration';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { EncryptedMemberFactory } from '@stamhoofd/models';
+import { Group } from '@stamhoofd/models';
+import { Member, MemberWithRegistrations } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Registration, RegistrationWithPayment } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>

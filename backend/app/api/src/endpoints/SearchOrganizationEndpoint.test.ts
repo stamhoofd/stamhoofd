@@ -3,7 +3,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { OrganizationFactory } from '../factories/OrganizationFactory';
+import { OrganizationFactory } from '@stamhoofd/models';
 import { SearchOrganizationEndpoint } from "./SearchOrganizationEndpoint";
 
 describe("Endpoint.SearchOrganization", () => {

@@ -2,10 +2,10 @@ import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simp
 import { Request } from "@simonbackx/simple-endpoints";
 import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,PermissionRole,PermissionRoleDetailed,Permissions } from '@stamhoofd/structures';
 
-import { GroupFactory } from '../factories/GroupFactory';
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Token } from '../models/Token';
+import { GroupFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
 
 describe("Endpoint.PatchOrganization", () => {

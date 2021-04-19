@@ -1,8 +1,8 @@
 /* eslint-disable jest/expect-expect */
 
 import { OrganizationEmail, PermissionLevel, Permissions } from "@stamhoofd/structures"
-import { OrganizationFactory } from "../factories/OrganizationFactory"
-import { UserFactory } from "../factories/UserFactory"
+import { OrganizationFactory } from "@stamhoofd/models"
+import { UserFactory } from "@stamhoofd/models"
 import { ForwardHandler } from "./ForwardHandler"
 
 describe("ForwardHandler", () => {

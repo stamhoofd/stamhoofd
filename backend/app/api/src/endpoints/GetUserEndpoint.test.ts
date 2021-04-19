@@ -1,12 +1,9 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { KeyConstantsHelper,Sodium } from "@stamhoofd/crypto";
-import { ChallengeResponseStruct, NewUser,Token as TokenStruct } from '@stamhoofd/structures';
+import {  NewUser } from '@stamhoofd/structures';
 
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Challenge } from '../models/Challenge';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { GetUserEndpoint } from './GetUserEndpoint';
 
 

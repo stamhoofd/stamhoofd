@@ -4,8 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { ChangeOrganizationKeyRequest, CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures";
 
-import { KeychainItem } from '../models/KeychainItem';
-import { Token } from '../models/Token';
+import { KeychainItem } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

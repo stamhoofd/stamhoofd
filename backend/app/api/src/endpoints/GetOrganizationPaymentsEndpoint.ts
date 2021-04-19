@@ -3,11 +3,11 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EncryptedPaymentGeneral,Order as OrderStruct } from "@stamhoofd/structures";
 
-import { Member } from '../models/Member';
-import { Order } from '../models/Order';
-import { Payment } from '../models/Payment';
-import { Registration } from '../models/Registration';
-import { Token } from '../models/Token';
+import { Member } from '@stamhoofd/models';
+import { Order } from '@stamhoofd/models';
+import { Payment } from '@stamhoofd/models';
+import { Registration } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 type Params = {};
 type Query = undefined;
 type Body = undefined

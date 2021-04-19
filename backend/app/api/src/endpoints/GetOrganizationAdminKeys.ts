@@ -2,9 +2,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { KeychainedResponse, KeychainItem as KeychainItemStruct, OrganizationKeyUser } from "@stamhoofd/structures";
 
-import { KeychainItem } from '../models/KeychainItem';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { KeychainItem } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined

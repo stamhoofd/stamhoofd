@@ -5,7 +5,7 @@ import basex from "base-x";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
-import Email from "../email/Email";
+import { Email } from "@stamhoofd/email";
 import { Organization } from "./Organization";
 import { User, UserWithOrganization } from "./User";
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'

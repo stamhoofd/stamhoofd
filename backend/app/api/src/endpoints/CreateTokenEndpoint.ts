@@ -2,12 +2,12 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
-import { Challenge } from '../models/Challenge';
-import { EmailVerificationCode } from '../models/EmailVerificationCode';
-import { Organization } from '../models/Organization';
-import { PasswordToken } from '../models/PasswordToken';
-import { Token } from '../models/Token';
-import { User } from '../models/User';
+import { Challenge } from '@stamhoofd/models';
+import { EmailVerificationCode } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { PasswordToken } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 
 type Params = {};
 type Query = undefined;

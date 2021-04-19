@@ -4,10 +4,10 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { PaymentMethod,PaymentStatus, STInvoice as STInvoiceStruct } from "@stamhoofd/structures";
 
-import { QueueHandler } from '../../helpers/QueueHandler';
-import { MolliePayment } from '../../models/MolliePayment';
-import { Payment } from '../../models/Payment';
-import { STInvoice } from '../../models/STInvoice';
+import { QueueHandler } from '@stamhoofd/queues';
+import { MolliePayment } from "@stamhoofd/models";
+import { Payment } from "@stamhoofd/models";
+import { STInvoice } from "@stamhoofd/models";
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
