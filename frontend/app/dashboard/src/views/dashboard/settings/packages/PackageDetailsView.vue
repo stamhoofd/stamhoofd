@@ -68,6 +68,14 @@
                     </template>
                 </STListItem>
 
+                <STListItem>
+                    Vanaf
+
+                    <template slot="right">
+                        {{ pack.meta.startDate | date }}
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="pack.validUntil">
                     Geldig tot
 
@@ -83,6 +91,14 @@
 
                     <template slot="right">
                         {{ pack.meta.unitPrice | price }}
+                    </template>
+                </STListItem>
+
+                <STListItem>
+                    Vanaf
+
+                    <template slot="right">
+                        {{ pack.meta.startDate | date }}
                     </template>
                 </STListItem>
 

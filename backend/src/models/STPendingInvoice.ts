@@ -68,6 +68,33 @@ export class STPendingInvoice extends Model {
     }
 
     /**
+     * Always run this in the queue!
+     */
+    static async addItems(organization: Organization): Promise<STPendingInvoice | undefined> {
+        // Get the pending invoice if it exists
+        let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+
+        // Generate temporary pending invoice items for the current state without adding them IRL
+        const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+
+        if (notYetCreatedItems) {
+            if (!pendingInvoice) {
+                // Create one
+                pendingInvoice = new STPendingInvoice()
+                pendingInvoice.organizationId = organization.id
+                pendingInvoice.meta = STInvoiceMeta.create({
+                    companyName: organization.name,
+                    companyAddress: organization.address,
+                    companyVATNumber: organization.privateMeta.VATNumber
+                })
+            }
+            pendingInvoice.meta.items.push(...notYetCreatedItems)
+            await pendingInvoice.save()
+        }
+        return pendingInvoice
+    }
+
+    /**
      * This method checks all the packages of the given organization and will return
      * new invoice items that should get charged. You'll need to add them to 
      * the pending invoice yourself (always in a queue!)
@@ -75,7 +102,9 @@ export class STPendingInvoice extends Model {
     static async createItems(organizationId: string, pendingInvoice?: STPendingInvoice) {
         const packages = await STPackage.getForOrganization(organizationId)
 
+        // Always use midnight as a reference time (because this method should always return the same values if it called multiple times on the same day)
         const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
         let membersCount: number | null = null
         const pendingItems: STInvoiceItem[] = []

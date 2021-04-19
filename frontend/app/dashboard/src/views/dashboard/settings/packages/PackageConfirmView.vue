@@ -122,11 +122,11 @@
             </p>
 
             <p class="style-description-block">
-                Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zal er een nieuwe factuur opgemaakt worden en zal dat bedrag via een domiciliering van jullie rekening automatisch overgeschreven worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket.
+                Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliering afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
             </p>
 
             <p class="style-description-block">
-                Het kan zijn dat we de facturatie en het inhouden van een bedrag uitstellen omdat het bedrag te laag is. Dit doen we om de administratieve overlast voor iedereen te beperken. Je kan het aantal facturen ook beperken door op voorhand al je leden in Stamhoofd te importeren. Je kan op elk moment het openstaande bedrag raadplegen via de instellingen van Stamhoofd. Meer info hierover kan je terugvinden in <a href="https://www.stamhoofd.be/" target="_blank" class="inline-link">onze FAQ</a>
+                Het kan zijn dat we de facturatie en het inhouden van een bedrag uitstellen omdat het bedrag te laag is. Dit doen we om de administratieve overlast voor iedereen te beperken. Je kan het aantal facturen ook beperken door op voorhand al je leden in Stamhoofd te importeren (op die manier komen er later minder leden bij en blijft dat bedrag te laag om af te rekenen). Je kan op elk moment het openstaande bedrag raadplegen via de instellingen van Stamhoofd (bij facturen).
             </p>
 
             <Checkbox>Ik ga akkoord met de <a href="https://www.stamhoofd.be/" target="_blank" class="inline-link">algemene verkoopsvoorwaarden</a></Checkbox>

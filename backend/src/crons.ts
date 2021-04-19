@@ -352,26 +352,7 @@ async function checkBilling() {
 
         try {
             await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-                // Get the pending invoice if it exists
-                let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
-
-                // Generate temporary pending invoice items for the current state without adding them IRL
-                const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
-
-                if (notYetCreatedItems) {
-                    if (!pendingInvoice) {
-                        // Create one
-                        pendingInvoice = new STPendingInvoice()
-                        pendingInvoice.organizationId = organization.id
-                        pendingInvoice.meta = STInvoiceMeta.create({
-                            companyName: organization.name,
-                            companyAddress: organization.address,
-                            companyVATNumber: organization.privateMeta.VATNumber
-                        })
-                    }
-                    pendingInvoice.meta.items.push(...notYetCreatedItems)
-                    await pendingInvoice.save()
-                }
+                await STPendingInvoice.addItems(organization)
             });
         } catch (e) {
             console.error(e)
