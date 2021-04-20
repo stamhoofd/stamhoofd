@@ -13,5 +13,10 @@
         "build": "rm -rf ./dist/migrations && tsc -b && mkdir -p ./dist/migrations && cp ./src/migrations/*.sql ./dist/migrations && cp -R ./src/migrations/data ./dist/migrations",
         "build:full": "rm -rf ./dist && yarn build",
         "cp-migrations": "yarn build && cp ./dist/migrations/*"
+    },
+    "peerDependencies": {
+        "@stamhoofd/crypto": "*",
+        "@stamhoofd/email": "*",
+        "@stamhoofd/queues": "*"
     }
 }
