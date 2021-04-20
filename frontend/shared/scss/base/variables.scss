@@ -12,7 +12,11 @@ $color-dark: var(--color-dark, $color-dark-original);
 $color-primary-destination: var(--color-primary, #2700ff);
 
 $color-error: #FF1741;
-$color-error-border: #FFCAD3;
+
+
+$color-error-border-original: #FFCAD3;
+$color-error-border: var(--color-error-border, $color-error-border-original);
+
 $color-error-border-focus: $color-error;
 
 $color-success: #0CBB69;
@@ -47,8 +51,14 @@ $color-white-shade: var(--color-white-shade, $color-white-shade-original);
 $color-white-original: #ffffff;
 $color-white: var(--color-white, #ffffff);
 
-$color-background-original: #ffffff;
-$color-background: var(--color-background, #ffffff);
+// Used for segmented control
+$color-white-highlight: var(--color-white-highlight, #ffffff);
+
+// Used for interaction elements that need to remaing visible in dark mode
+$color-white-interaction: var(--color-white-interaction, #ffffff);
+
+//$color-background-original: #ffffff;
+$color-background: $color-white;//;var(--color-background, #ffffff);
 
 $color-error-background-original: #ffd6dd;
 $color-error-background: var(--color-error-background, $color-error-background-original);

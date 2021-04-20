@@ -101,7 +101,7 @@
             @media (min-width: 801px) {
                 --st-safe-area-top: 0px;
                 max-width: 800px;
-                background: $color-white;
+                background: $color-background;
                 --color-current-background-shade: #{$color-background-shade};
                 @include style-side-view-shadow();
                 border-radius: $border-radius;
@@ -132,8 +132,8 @@
     @extend .view;
 
     &.background {
-        background: $color-white;
-        --color-current-background: #{$color-white};
+        background: $color-background;
+        --color-current-background: #{$color-background};
         --color-current-background-shade: #{$color-background-shade};
     }
 

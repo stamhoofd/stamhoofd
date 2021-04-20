@@ -64,24 +64,20 @@ export class ColorHelper {
 
 	static darkTheme() {
 		// Helper to set the dark theme colors
-		const reference = 4;
+		const reference = 8;
 
 		// Difference between background colors and white
 
 		var { h, s, l } = hexToHSL(this.primaryColor?.substring(1) ?? "0053ff");
 		l = 8
 		s /= 4
-		document.documentElement.style.setProperty("--color-background", "hsl(" + h + "," + s + "%," + l + "%)");
+
+		const preferredS = s / 4
+		const preferredH = h
+		document.documentElement.style.setProperty("--color-white", "hsl(" + h + "," + s + "%," + l + "%)");
+
 		l = 4;
 		document.documentElement.style.setProperty("--color-white-shade", "hsl(" + h + "," + s + "%," + l + "%)");
-
-		
-		// Do color manipulation here
-        var { h, s, l } = hexToHSL("FFFFFF");
-		l = Math.min(100 - l + reference, 100);
-        const white = "hsl(" + h + "," + s + "%," + l + "%)";
-        document.documentElement.style.setProperty("--color-white", white)
-
 
 		// Do color manipulation here
 		document.documentElement.style.setProperty("--color-dark", "white");
@@ -90,31 +86,50 @@ export class ColorHelper {
         var { h, s, l } = hexToHSL("868686");
 		l = Math.min(100 - l + reference, 100);
         const gray = "hsl(" + h + "," + s + "%," + l + "%)";
+		s = preferredS
+		h = preferredH
         document.documentElement.style.setProperty("--color-gray", gray)
 
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("5E5E5E");
 		l = Math.min(100 - l + reference, 100);
+		s = preferredS
+		h = preferredH
         const darkGray = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-gray-dark", darkGray)
 
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("dcdcdc");
 		l = Math.min(100 - l + reference, 100);
+		s = preferredS
+		h = preferredH
         const grayLight = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-gray-light", grayLight)
 
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("e7e7e7");
 		l = Math.min(100 - l + reference, 100);
+		s = preferredS
+		h = preferredH
         const grayLighter = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-gray-lighter", grayLighter)
+
+		l += 12;
+		s = 0;
+		document.documentElement.style.setProperty("--color-white-highlight", "hsl(" + h + "," + s + "%," + l + "%)");
+
 
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("ffd6dd");
 		l = Math.min(100 - l + reference, 100);
         const errorBackground = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-error-background", errorBackground)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("FFCAD3");
+		l = Math.min(100 - l + reference, 100);
+        const errorBorder = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-error-border", errorBorder)
 
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("fff6d6");
@@ -129,7 +144,7 @@ export class ColorHelper {
         document.documentElement.style.setProperty("--color-warning-dark", warningDark)
 
 		// Do color manipulation here
-        var { h, s, l } = hexToHSL("634e00");
+        var { h, s, l } = hexToHSL("630012");
 		l = Math.min(100 - l + reference, 100);
         const errorDark = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-error-dark", errorDark)
