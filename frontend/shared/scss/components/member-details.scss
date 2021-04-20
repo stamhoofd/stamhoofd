@@ -39,7 +39,7 @@
         position: absolute;
         right: 0;
         bottom: 0;
-        background: white;
+        background: var(--color-white, white);
         border-radius: 40px;
         line-height: 24px;
         transform: translate(40%, 30%);

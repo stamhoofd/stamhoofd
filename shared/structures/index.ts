@@ -107,3 +107,6 @@ export * from "./src/billing/STBillingStatus"
 export * from "./src/billing/STInvoice"
 export * from "./src/billing/STPackage"
 export * from "./src/billing/STPackageBundle"
+
+// Admin
+export * from "./src/admin/Admin"

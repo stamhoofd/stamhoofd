@@ -148,6 +148,12 @@
     min-height: auto;
 }
 
+.popup, .sheet{
+    > div {
+        background: $color-white;
+    }
+}
+
 .popup .st-view {
     > main.limit-width {
         --st-horizontal-padding: var(--st-view-horizontal-padding);

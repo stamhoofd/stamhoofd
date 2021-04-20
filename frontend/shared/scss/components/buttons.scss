@@ -74,10 +74,26 @@
         }
 
         .dropdown {
-            border-left: $border-width solid rgba($color-white, 0.5);
-            background: url(~@stamhoofd/assets/images/icons/white/arrow-down-small.svg) no-repeat center center;
+            position: relative;
+
+            &:before {
+                left: -$border-width;
+                top: 0;
+                bottom: 0;
+                position: absolute;
+                content: "";
+                background: currentColor;
+                opacity: 0.5;
+                width: $border-width;
+            }
+            font-size: 24px;
+            &:after {
+                font-icon: url(@stamhoofd/assets/images/icons/arrow-down-small.svg);
+            }
+            //background: url(~@stamhoofd/assets/images/icons/white/arrow-down-small.svg) no-repeat center center;
             width: 40px;
             height: 42px;
+            line-height: 42px;
             align-self: stretch;
             margin-right: -27px;
             margin-left: 27px - $border-width;

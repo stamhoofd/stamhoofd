@@ -1,4 +1,6 @@
+/* eslint-disable no-var */
 function hexToHSL(hex) {
+  	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)!;
 	let r = parseInt(result[1], 16);
 	let g = parseInt(result[2], 16);
@@ -24,7 +26,10 @@ function hexToHSL(hex) {
 }
 
 export class ColorHelper {
+	static primaryColor: string | null;
+
     static setColor(color: string) {
+		this.primaryColor = color;
         document.documentElement.style.setProperty("--color-primary", color)
 
         // Do color manipulation here
@@ -49,5 +54,117 @@ export class ColorHelper {
         s = 100
         const primaryLight = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-primary-light", primaryLight)
+
+		// Modify s + l
+        l = 98
+        s = 100
+        const primaryLighter = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-lighter", primaryLighter)
     }
+
+	static darkTheme() {
+		// Helper to set the dark theme colors
+		const reference = 4;
+
+		// Difference between background colors and white
+
+		var { h, s, l } = hexToHSL(this.primaryColor?.substring(1) ?? "0053ff");
+		l = 8
+		s /= 4
+		document.documentElement.style.setProperty("--color-background", "hsl(" + h + "," + s + "%," + l + "%)");
+		l = 4;
+		document.documentElement.style.setProperty("--color-white-shade", "hsl(" + h + "," + s + "%," + l + "%)");
+
+		
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("FFFFFF");
+		l = Math.min(100 - l + reference, 100);
+        const white = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-white", white)
+
+
+		// Do color manipulation here
+		document.documentElement.style.setProperty("--color-dark", "white");
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("868686");
+		l = Math.min(100 - l + reference, 100);
+        const gray = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-gray", gray)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("5E5E5E");
+		l = Math.min(100 - l + reference, 100);
+        const darkGray = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-gray-dark", darkGray)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("dcdcdc");
+		l = Math.min(100 - l + reference, 100);
+        const grayLight = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-gray-light", grayLight)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("e7e7e7");
+		l = Math.min(100 - l + reference, 100);
+        const grayLighter = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-gray-lighter", grayLighter)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("ffd6dd");
+		l = Math.min(100 - l + reference, 100);
+        const errorBackground = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-error-background", errorBackground)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("fff6d6");
+		l = Math.min(100 - l + reference, 100);
+        const warningBackground = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-warning-background", warningBackground)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("634e00");
+		l = Math.min(100 - l + reference, 100);
+        const warningDark = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-warning-dark", warningDark)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL("634e00");
+		l = Math.min(100 - l + reference, 100);
+        const errorDark = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-error-dark", errorDark)
+
+		// Do color manipulation here
+        var { h, s, l } = hexToHSL(this.primaryColor?.substring(1) ?? "0053ff");
+        // Modify s + l
+        l = 100 - 97 + reference
+		s = 100
+		
+		console.log(h)
+        
+        const primaryBackground = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-background", primaryBackground)
+
+        // Modify s + l
+        l = 100 - 77 + reference
+        s = 68
+        const primaryGrayLight = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-gray-light", primaryGrayLight)
+
+		// Modify s + l
+        l = 100 - 94 + reference
+        s = 100
+        const primaryLight = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-light", primaryLight)
+
+		// Modify s + l
+        l = 100 - 98 + reference
+        s = 100
+        const primaryLighter = "hsl(" + h + "," + s + "%," + l + "%)";
+        document.documentElement.style.setProperty("--color-primary-lighter", primaryLighter)
+		
+
+	}
 }
+
+(window as any).ColorHelper = ColorHelper;

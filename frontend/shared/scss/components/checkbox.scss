@@ -43,6 +43,7 @@
             svg > path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
+                stroke: $color-white;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
 
@@ -66,7 +67,7 @@
                 content: "";
                 height: 20px - $border-width * 2;
                 width: 20px - $border-width * 2;
-                background: white;
+                background: $color-white;
                 border-radius: (20px - $border-width * 2)/2;
                 transition: transform 0.2s;
                 transform: scale(1, 1);

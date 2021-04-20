@@ -32,12 +32,20 @@ export class OrganizationPackages extends AutoEncoder {
         return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.TrialMembers)
     }
 
+    set useMembers(_: boolean) {
+        console.warn("Deprected set on useMembers")
+    }
+
     get isMembersTrial() {
         return !this.isActive(STPackageType.Members) && !this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
     }
 
     get useWebshops() {
         return this.webshopLimit > 0
+    }
+
+    set useWebshops(_: boolean) {
+        console.warn("Deprected set on useWebshops")
     }
     
     get webshopLimit() {
@@ -294,6 +302,10 @@ export class OrganizationMetaData extends AutoEncoder {
 
     get modules() {
         return this.packages
+    }
+
+    set modules(_: any) {
+        console.error("Deprecated set on modules")
     }
 
     @field({ decoder: OrganizationPackages, version: 85 })

@@ -168,7 +168,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             overflow: hidden;
             width: 250px;
             height: 250px;
-            background: white;
+            background: var(--color-white, white);
             border-radius: 5px;
             display: flex;
             align-items: center;

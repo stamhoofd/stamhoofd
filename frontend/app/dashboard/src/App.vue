@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
 import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
@@ -47,6 +47,7 @@ export default class App extends Vue {
         SessionManager.restoreLastSession().catch(e => {
             console.error(e)
         })
+        ColorHelper.darkTheme()
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);
