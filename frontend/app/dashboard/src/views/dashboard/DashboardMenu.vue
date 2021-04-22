@@ -1,7 +1,7 @@
 <template>
-    <div class="menu">
+    <div class="st-menu">
         <div class="padding-group">
-            <figure id="logo" />
+            <Logo />
             <button id="organization-switcher" @click="switchOrganization">
                 <span class="text">{{ organization.name }}</span>
             </button>
@@ -19,7 +19,7 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading text" @click="manageWhatsNew()">
+        <button class="menu-button button heading" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
@@ -122,7 +122,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Toast, ToastButton } from '@stamhoofd/components';
+import { CenteredMessage, Logo,Toast, ToastButton } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -144,7 +144,11 @@ import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vu
 import EditWebshopView from './webshop/EditWebshopView.vue';
 import WebshopView from './webshop/WebshopView.vue';
 
-@Component({})
+@Component({
+    components: {
+        Logo
+    }
+})
 export default class Menu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
@@ -440,150 +444,3 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style scoped lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-#organization-switcher {
-    margin-bottom: 15px;
-    padding-left: 40px;
-    display: flex;
-    align-items: center;
-    touch-action: manipulation;
-    user-select: none;
-    cursor: pointer;
-    @extend .style-interactive-small;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    transition: opacity 0.2s;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    box-sizing: border-box;
-   
-    > .text {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        max-width: auto;
-        min-width: none;
-    }
-
-    &:active {  
-        opacity: 0.4;
-        transition: none;
-    }
-
-    &::after {
-        content: "";
-        display: block;
-        width: 10px;
-        height: 10px;
-        margin-left: 5px;;
-        background: url("~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg") center center no-repeat;
-    }
-}
-
-.menu {
-    padding: 30px 0;
-
-    --horizontal-padding: 30px;
-}
-
-.input.search {
-    margin-bottom: 20px;
-}
-
-#logo {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.menu > .padding-group {
-    padding-left: var(--horizontal-padding, 30px);
-    padding-right: var(--horizontal-padding, 30px);
-}
-
-.menu hr {
-    height: $border-width;
-    border-radius: $border-width/2;
-    background: $color-gray-light;
-    border: 0;
-    outline: 0;
-    margin: 20px var(--horizontal-padding, 30px);
-}
-
-.menu-button {
-    display: flex;
-    flex-direction: row;
-    @extend .style-button-smaller;
-    color: $color-dark;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    box-sizing: border-box;
-    height: 45px;
-    transition: transform 0.2s, background-color 0.2s, color 0.2s;
-
-    text-overflow: ellipsis;
-    vertical-align: middle;
-    overflow: hidden;
-    white-space: nowrap;
-
-    
-
-    &, &:active, &:visited, &:link {
-        text-decoration: none;
-    }
-
-    > .icon {
-        padding-right: 10px;
-        flex-shrink: 0;
-    }
-
-    > span {
-         text-overflow: ellipsis;
-        vertical-align: middle;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    .bubble {
-        @extend .style-bubble;
-        
-        margin-left: auto;
-        flex-shrink: 0;
-        
-    }
-    
-    padding-left: var(--horizontal-padding, 30px);
-    padding-right: var(--horizontal-padding, 30px);
-
-    &.heading {
-        @extend .style-button-small;
-        color: $color-gray-dark;
-    }
-
-    &.selected {
-        background-color: $color-primary-light;
-        color: $color-primary;
-        font-weight: 600;
-    }
-
-    &.button {
-        cursor: pointer;
-
-        &:active {
-            background-color: $color-gray-lighter;
-        }
-    }
-
-    > button {
-        margin-left: auto;
-        color: $color-primary;
-
-       
-    }
-}
-</style>

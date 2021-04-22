@@ -252,6 +252,10 @@
     &.canceled:after {
         font-icon: url(@stamhoofd/assets/images/icons/canceled.svg);
     }
+
+    &.stats:after {
+        font-icon: url(@stamhoofd/assets/images/icons/stats.svg);
+    }
 }
 
 .android-icons {

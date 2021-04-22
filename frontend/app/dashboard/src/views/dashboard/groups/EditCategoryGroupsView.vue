@@ -67,7 +67,7 @@
                     <span>Nieuwe groep toevoegen</span>
                 </button>
             </p>
-            <p v-if="enableActivities">
+            <p v-if="enableActivities && groups.length == 0">
                 <button class="button text" @click="createCategory">
                     <span class="icon add" />
                     <span>Nieuwe categorie toevoegen</span>

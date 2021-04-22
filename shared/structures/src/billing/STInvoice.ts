@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../addresses/Address";
 import { File } from "../files/File";
 import { Payment } from "../members/Payment";
+import { OrganizationSimple } from "../OrganizationSimple";
 import { STPackage, STPackageTypeHelper, STPricingType } from "./STPackage";
 
 export enum STInvoiceStatus {
@@ -177,6 +178,11 @@ export class STInvoice extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     paidAt: Date | null = null
+}
+
+export class STInvoicePrivate extends STInvoice {
+    @field({ decoder: OrganizationSimple, optional: true })
+    organization?: OrganizationSimple
 }
 
 export class STInvoiceResponse extends AutoEncoder {

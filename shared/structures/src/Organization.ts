@@ -28,7 +28,7 @@ export class OrganizationKeyUser extends OrganizationKey {
 }
 
 export class Organization extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
     /**
