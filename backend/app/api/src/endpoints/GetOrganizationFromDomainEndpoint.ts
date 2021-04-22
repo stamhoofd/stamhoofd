@@ -5,7 +5,7 @@ import { Organization as OrganizationStruct } from "@stamhoofd/structures";
 
 import { Organization } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-type Params = {};
+type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
     @field({ decoder: StringDecoder })

@@ -10,9 +10,6 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 
 import { Email } from "@stamhoofd/email";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { Group } from './Group';
-import { Member } from "./Member";
-import { User } from './User';
 import { Webshop } from './Webshop';
 
 export class Organization extends Model {
@@ -197,6 +194,7 @@ export class Organization extends Model {
     }
 
     async getStructure(): Promise<OrganizationStruct> {
+        const Group = (await import("./Group")).Group
         const groups = await Group.where({organizationId: this.id})
 
         const struct = OrganizationStruct.create({
@@ -221,6 +219,7 @@ export class Organization extends Model {
     }
 
     async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {
+        const Group = (await import("./Group")).Group
         const groups = await Group.where({ organizationId: this.id })
         const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
         return OrganizationStruct.create({
@@ -553,22 +552,10 @@ export class Organization extends Model {
         }
     }
 
-    async updateRequestKeysCount() {
-        const query = `select count(*) as c from \`${User.table}\` where organizationId = ? AND requestKeys = 1 AND verified = 1 AND publicKey is not null`
-        
-        const [results] = await Database.select(query, [this.id])
-        const count = results[0]['']['c'];
-
-        if (Number.isInteger(count)) {
-            this.privateMeta.requestKeysCount = count
-            await this.save()
-        } else {
-            console.error("Unexpected result for updateRequestKeysCount", results)
-        }
-    }
 
     async getKeyHistory(): Promise<OrganizationKey[]> {
         // Todo: we need some performance improvements here, or save the key history separately
+        const Member = (await import('./Member')).Member;
         const members = await Member.where({
             organizationId: this.id
         })
@@ -629,6 +616,8 @@ export class Organization extends Model {
      * These email addresess are private
      */
     private async getAdminToEmails() {
+        // Circular reference fix
+        const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
         const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
 
@@ -637,6 +626,22 @@ export class Organization extends Model {
         }
 
         return undefined
+    }
+
+    async updateRequestKeysCount() {
+        // Circular reference fix
+        const User = (await import('./User')).User;
+        const query = `select count(*) as c from \`${User.table}\` where organizationId = ? AND requestKeys = 1 AND verified = 1 AND publicKey is not null`
+        
+        const [results] = await Database.select(query, [this.id])
+        const count = results[0]['']['c'];
+
+        if (Number.isInteger(count)) {
+            this.privateMeta.requestKeysCount = count
+            await this.save()
+        } else {
+            console.error("Unexpected result for updateRequestKeysCount", results)
+        }
     }
 
     getDefaultEmail(): { from: string; replyTo: string | undefined } {

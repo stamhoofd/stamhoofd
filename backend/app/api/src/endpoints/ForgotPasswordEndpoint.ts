@@ -1,15 +1,13 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { ForgotPasswordRequest } from '@stamhoofd/structures';
-
 import { Decoder } from '@simonbackx/simple-encoding';
-
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { Email } from '@stamhoofd/email';
 import { Organization } from '@stamhoofd/models';
 import { PasswordToken } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = ForgotPasswordRequest;
 type ResponseBody = undefined;

@@ -302,4 +302,5 @@ export class User extends Model {
         }
         return this.permissions ? await organization.getPrivateStructure(this.permissions) : await organization.getStructure()
     }
+
 }

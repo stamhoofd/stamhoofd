@@ -1,11 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
+import { PostalCode } from '@stamhoofd/models';
 import { Address, ValidatedAddress } from "@stamhoofd/structures";
 
-import { PostalCode } from '@stamhoofd/models';
-
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = Address
 type ResponseBody = ValidatedAddress;

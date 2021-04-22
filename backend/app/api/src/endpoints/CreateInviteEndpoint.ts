@@ -1,14 +1,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
-import basex from "base-x";
-import crypto from "crypto";
-
 import { Invite } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-type Params = {};
+import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
+import basex from "base-x";
+import crypto from "crypto";
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = NewInvite
 type ResponseBody = InviteStruct

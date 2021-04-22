@@ -1,12 +1,11 @@
 import { AutoEncoder, Decoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors'
-import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
-
 import { MollieToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
 
-type Params = {};
+type Params = Record<string, never>;
 type Body = undefined
 type Query = undefined
 type ResponseBody = OrganizationStruct

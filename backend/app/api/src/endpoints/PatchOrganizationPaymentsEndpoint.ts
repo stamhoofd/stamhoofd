@@ -2,15 +2,14 @@ import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simpl
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Order as OrderStruct, PaymentPatch, PaymentStatus } from "@stamhoofd/structures";
 import { Group } from '@stamhoofd/models';
-
 import { Member } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-type Params = {};
+import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Order as OrderStruct, PaymentPatch, PaymentStatus } from "@stamhoofd/structures";
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = PaymentPatch[]
 type ResponseBody = EncryptedPaymentDetailed[]

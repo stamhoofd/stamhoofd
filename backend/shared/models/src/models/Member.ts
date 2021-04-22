@@ -2,7 +2,6 @@ import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRe
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
-import { Group } from './Group';
 
 import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
@@ -282,7 +281,7 @@ export class Member extends Model {
         })
     }
 
-    hasReadAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false) {
+    hasReadAccess(this: MemberWithRegistrations, user: User, groups: import('./Group').Group[], needAll = false) {
         if (!user.permissions) {
             return false
         }
@@ -311,7 +310,7 @@ export class Member extends Model {
         return true
     }
 
-    async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: Group[], needAll = false, checkFamily = false) {
+    async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
         if (!user.permissions) {
             return false
         }
@@ -355,7 +354,7 @@ export class Member extends Model {
     }
 
     /// This is defined here instead of registrations to prevent reference cycles...
-    static haveRegistrationsWriteAccess(registrations: RegistrationWithMember[], user: User, groups: Group[], needAll = false) {
+    static haveRegistrationsWriteAccess(registrations: RegistrationWithMember[], user: User, groups: import('./Group').Group[], needAll = false) {
         if (!user.permissions) {
             return false
         }

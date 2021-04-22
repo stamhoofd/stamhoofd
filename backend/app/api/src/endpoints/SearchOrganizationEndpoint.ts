@@ -1,10 +1,9 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
+import { Organization } from "@stamhoofd/models";
 import { OrganizationSimple } from "@stamhoofd/structures"; 
 
-import { Organization } from "@stamhoofd/models";
-
-type Params = {};
+type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
     @field({ decoder: StringDecoder })

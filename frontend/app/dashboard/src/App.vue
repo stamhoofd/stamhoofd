@@ -47,7 +47,7 @@ export default class App extends Vue {
         SessionManager.restoreLastSession().catch(e => {
             console.error(e)
         })
-        //ColorHelper.darkTheme()
+        ColorHelper.darkTheme()
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);

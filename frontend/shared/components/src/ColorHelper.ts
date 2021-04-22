@@ -122,6 +122,7 @@ export class ColorHelper {
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("ffd6dd");
 		l = Math.min(100 - l + reference, 100);
+		s /= 2
         const errorBackground = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-error-background", errorBackground)
 
@@ -134,6 +135,7 @@ export class ColorHelper {
 		// Do color manipulation here
         var { h, s, l } = hexToHSL("fff6d6");
 		l = Math.min(100 - l + reference, 100);
+		s /= 2
         const warningBackground = "hsl(" + h + "," + s + "%," + l + "%)";
         document.documentElement.style.setProperty("--color-warning-background", warningBackground)
 
@@ -154,6 +156,7 @@ export class ColorHelper {
         // Modify s + l
         l = 100 - 97 + reference
 		s = 100
+		s /= 2
 		
 		console.log(h)
         

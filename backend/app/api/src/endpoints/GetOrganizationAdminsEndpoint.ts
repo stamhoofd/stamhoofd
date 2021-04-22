@@ -1,11 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Invite as InviteStruct, OrganizationAdmins, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
-
 import { Invite } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-type Params = {};
+import { Invite as InviteStruct, OrganizationAdmins, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
 type ResponseBody = OrganizationAdmins

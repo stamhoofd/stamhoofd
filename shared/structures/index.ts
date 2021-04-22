@@ -47,6 +47,7 @@ export * from "./src/endpoints/tokens/CreateTokenStruct"
 export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
+export * from "./src/endpoints/tokens/PasswordGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
 
 // Grouping

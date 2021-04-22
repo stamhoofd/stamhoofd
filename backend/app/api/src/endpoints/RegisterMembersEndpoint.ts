@@ -3,9 +3,6 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
-
 import { Group } from '@stamhoofd/models';
 import { Member, RegistrationWithMember } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
@@ -14,7 +11,9 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-type Params = {};
+import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
 type ResponseBody = RegisterResponse

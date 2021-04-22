@@ -7,6 +7,18 @@ import { Payment } from './Payment';
 import { Registration, RegistrationWithPayment } from './Registration';
 import { User } from './User';
 
+if (Member === undefined) {
+    throw new Error("Import Member is undefined")
+}
+if (User === undefined) {
+    throw new Error("Import User is undefined")
+}
+if (Payment === undefined) {
+    throw new Error("Import Payment is undefined")
+}
+if (Registration === undefined) {
+    throw new Error("Import Registration is undefined")
+}
 export class Group extends Model {
     static table = "groups";
 

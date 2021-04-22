@@ -1,12 +1,11 @@
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailInformation } from '@stamhoofd/structures';
-
 import { EmailAddress } from '@stamhoofd/email';
 import { Token } from '@stamhoofd/models';
+import { EmailInformation } from '@stamhoofd/structures';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = string[]
 type ResponseBody = EmailInformation[];

@@ -6,11 +6,11 @@ import { Organization } from '@stamhoofd/models';
 import { PasswordToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
+import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordGrantStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
-type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct;
+type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct;
 type ResponseBody = ChallengeResponseStruct | TokenStruct;
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -183,8 +183,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         default: {
             // t should always be 'never' so we get no compiler error when this compiles
             // if you get a compiler error here, you missed a possible value for grantType
-            const t: never = request.body;
-            throw new Error("Type " + t + " not supported");
+            throw new Error("Grant type " + request.body.grantType + " not supported");
         }
         }
         

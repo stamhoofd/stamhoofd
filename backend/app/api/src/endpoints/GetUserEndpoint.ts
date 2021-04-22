@@ -1,12 +1,11 @@
 import { Database } from '@simonbackx/simple-database';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { MyUser, OrganizationSimple, TradedInvite, User as UserStruct } from '@stamhoofd/structures';
-
 import { Invite } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { MyUser, OrganizationSimple, TradedInvite, User as UserStruct } from '@stamhoofd/structures';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
 type ResponseBody = MyUser;

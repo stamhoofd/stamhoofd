@@ -6,7 +6,7 @@ import NodeRSA from 'node-rsa';
 
 import { Token } from '@stamhoofd/models';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = OrganizationDomains;
 type ResponseBody = OrganizationStruct

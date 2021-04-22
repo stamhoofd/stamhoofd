@@ -5,13 +5,12 @@ import { Image as ImageStruct, ResolutionRequest,Version } from '@stamhoofd/stru
 import formidable from 'formidable';
 import { promises as fs } from "fs";
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = {};
 type Body = undefined
 type ResponseBody = ImageStruct
 
 import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
-
 import { Image } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 

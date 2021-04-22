@@ -2,18 +2,18 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse, Token as TokenStruct } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-
-import { GroupBuilder } from '../helpers/GroupBuilder';
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { KeychainItem } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
 import { RegisterCode } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from "@stamhoofd/models";
+import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse, Token as TokenStruct } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
-type Params = {};
+import { GroupBuilder } from '../helpers/GroupBuilder';
+
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = CreateOrganization;
 type ResponseBody = SignupResponse;

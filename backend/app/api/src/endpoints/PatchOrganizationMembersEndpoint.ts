@@ -12,7 +12,7 @@ import { Payment } from '@stamhoofd/models';
 import { Registration, RegistrationWithPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
 type ResponseBody = EncryptedMemberWithRegistrations[]

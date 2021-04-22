@@ -7,13 +7,12 @@ import formidable from 'formidable';
 import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = {};
 type Body = undefined
 type ResponseBody = File
 
 import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
-
 import { Image } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 

@@ -12,7 +12,7 @@ import { STInvoice } from "@stamhoofd/models";
 import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
 

@@ -1,11 +1,10 @@
 import { AutoEncoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { OrganizationWithWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
-
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-type Params = {};
+import { OrganizationWithWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
+type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
     @field({ decoder: StringDecoder })

@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { RegisterCode } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
 type ResponseBody = string;

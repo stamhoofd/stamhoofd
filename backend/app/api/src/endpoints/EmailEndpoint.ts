@@ -1,15 +1,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRequest, Replacement } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
-
 import { Email, EmailBuilder } from '@stamhoofd/email';
 import { PasswordToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { EmailRequest, Replacement } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = EmailRequest
 type ResponseBody = undefined;

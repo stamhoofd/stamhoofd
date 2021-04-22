@@ -1,11 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { PollEmailVerificationRequest, PollEmailVerificationResponse } from "@stamhoofd/structures";
-
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
+import { PollEmailVerificationRequest, PollEmailVerificationResponse } from "@stamhoofd/structures";
 
-type Params = {};
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = PollEmailVerificationRequest;
 type ResponseBody = PollEmailVerificationResponse;

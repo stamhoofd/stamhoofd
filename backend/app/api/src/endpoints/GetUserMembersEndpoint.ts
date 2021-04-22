@@ -1,11 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
-
 import { KeychainItem } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-type Params = {};
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
 type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>;
