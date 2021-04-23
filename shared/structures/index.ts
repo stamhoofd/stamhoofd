@@ -111,3 +111,5 @@ export * from "./src/billing/STPackageBundle"
 
 // Admin
 export * from "./src/admin/Admin"
+
+export * from "./src/Graph"

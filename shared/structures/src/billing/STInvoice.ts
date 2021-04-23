@@ -185,6 +185,29 @@ export class STInvoicePrivate extends STInvoice {
     organization?: OrganizationSimple
 }
 
+export class STPendingInvoice extends STInvoice {
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    id: string | null = null
+
+    @field({ decoder: STInvoiceMeta })
+    meta: STInvoiceMeta
+
+    @field({ decoder: STInvoice, nullable: true })
+    invoice: STInvoice | null = null
+
+    @field({ decoder: DateDecoder, nullable: true })
+    createdAt: Date | null = null
+
+    @field({ decoder: DateDecoder, nullable: true })
+    updatedAt: Date | null = null
+}
+
+export class STPendingInvoicePrivate extends STPendingInvoice {
+    @field({ decoder: OrganizationSimple, optional: true })
+    organization?: OrganizationSimple
+}
+
+
 export class STInvoiceResponse extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
     paymentUrl?: string

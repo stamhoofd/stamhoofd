@@ -1548,10 +1548,10 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
-"@simonbackx/simple-database@^1.13.0":
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.13.0.tgz#c137bcc8a8b5df04a2fff5293659c2bb447d55d0"
-  integrity sha512-0FxzI7yn2gKrCuhEQXZCdIOWj+1tYFuQCLnfZZRsMRXPbpBesELxPrnTeIcrHgK7FfBrLnuM5x2vYwd2lvZikw==
+"@simonbackx/simple-database@^1.13.1":
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.13.1.tgz#fe6222d8a16d778e12d4f5bcea9432f3f45f509c"
+  integrity sha512-9T9NYTviiE2Jx64/yTlVa2WvEBUkcgvrnEvVbhbzumCmAvFg0HklLoTgzDm72T/XqM8EKtJ6JTgMfWuTEAVuoA==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -3278,6 +3278,11 @@ chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+
+chart.js@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-3.1.1.tgz#2cdbda7fccea532313332fe822f0cae268f24cf3"
+  integrity sha512-ghNJersc9VD9MECwa5bL8gqvCkndW6RSCicdEHL9lIriNtXwKawlSmwo+u6KNXLYT2+f24GdFPBoynKW3ke4MQ==
 
 check-types@^8.0.3:
   version "8.0.3"
