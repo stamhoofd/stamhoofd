@@ -161,7 +161,8 @@ export class STPackage extends Model {
         return STPackageStatus.create({
             startDate: this.meta.startDate,
             validUntil: this.validUntil,
-            removeAt: this.removeAt
+            removeAt: this.removeAt,
+            firstFailedPayment: this.meta.firstFailedPayment
         })
     }
 }

@@ -185,7 +185,7 @@ export class STInvoicePrivate extends STInvoice {
     organization?: OrganizationSimple
 }
 
-export class STPendingInvoice extends STInvoice {
+export class STPendingInvoice extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     id: string | null = null
 

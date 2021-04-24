@@ -2,12 +2,11 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { PaymentMethod,PaymentStatus, STInvoice as STInvoiceStruct } from "@stamhoofd/structures";
-
-import { QueueHandler } from '@stamhoofd/queues';
 import { MolliePayment } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { STInvoice } from "@stamhoofd/models";
+import { QueueHandler } from '@stamhoofd/queues';
+import { PaymentMethod,PaymentStatus, STInvoice as STInvoiceStruct } from "@stamhoofd/structures";
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
@@ -90,7 +89,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {    
 
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.Transfer) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {

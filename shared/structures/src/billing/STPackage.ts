@@ -217,8 +217,8 @@ export class STPackageStatus extends AutoEncoder {
         }
 
         if (this.firstFailedPayment !== null) {
-            const expire = new Date()
-            expire.setDate(expire.getDate() - 28)
+            const expire = this.firstFailedPayment
+            expire.setDate(expire.getDate() + 28)
             dates.push(expire)
         }
 

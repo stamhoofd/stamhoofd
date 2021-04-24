@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { calculateVATPercentage, Payment as PaymentStruct,STBillingStatus,STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct } from '@stamhoofd/structures';
+import { calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -69,6 +69,22 @@ export class STInvoice extends Model {
 
     static organization = new ManyToOneRelation(Organization, "organization");
     static payment = new ManyToOneRelation(Payment, "payment");
+
+    static createFor(organization: Organization): STInvoice {
+        const invoice = new STInvoice()
+        invoice.organizationId = organization.id
+        
+        const date = new Date()
+        invoice.meta = STInvoiceMeta.create({
+            date,
+            companyName: organization.name,
+            companyAddress: organization.address,
+            companyVATNumber: organization.privateMeta.VATNumber,
+            VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
+        })
+
+        return invoice
+    }
 
     async getStructure() {
         let payment: Payment | undefined
@@ -209,10 +225,13 @@ export class STInvoice extends Model {
      * WARNGING: only call this method in the correct queue!
      */
     async markFailed() {
+        console.log("Mark invoice as failed", this.id)
         // TODO: add concurrency check to prevent race conditions when polling the status
         // Search for packages and mark failed payment attempt if they are already activated
 
         for (const pack of await this.getPackages()) {
+            console.log("Marking package with failed payment "+pack.id)
+
             pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
             pack.meta.paymentFailedCount++;
             await pack.save()
@@ -243,7 +262,7 @@ export class STInvoice extends Model {
 
         // Generate temporary pending invoice items for the current state without adding them IRL
         const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
-        const pendingInvoiceStruct = pendingInvoice ? STInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STInvoiceStruct.create({
+        const pendingInvoiceStruct = pendingInvoice ? STPendingInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STPendingInvoiceStruct.create({
             meta: STInvoiceMeta.create({
                 companyName: organization.name,
                 companyAddress: organization.address,
@@ -255,6 +274,13 @@ export class STInvoice extends Model {
         if (notYetCreatedItems.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             pendingInvoiceStruct!.meta.items.push(...notYetCreatedItems)
+        }
+
+        if (pendingInvoice?.invoiceId && pendingInvoiceStruct) {
+            const invoice = await STInvoice.getByID(pendingInvoice?.invoiceId)
+            if (invoice) {
+                pendingInvoiceStruct.invoice = await invoice.getStructure()
+            }
         }
 
         const invoiceStructures: STInvoiceStruct[] = []

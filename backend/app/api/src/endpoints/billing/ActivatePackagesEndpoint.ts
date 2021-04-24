@@ -62,17 +62,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             // Create packages
             const packages = request.body.bundles.map(bundle => STPackageBundleHelper.getCurrentPackage(bundle))
 
-            const invoice = new STInvoice()
-            invoice.organizationId = user.organizationId
-            
-            const date = new Date()
-            invoice.meta = STInvoiceMeta.create({
-                date,
-                companyName: user.organization.name,
-                companyAddress: user.organization.address,
-                companyVATNumber: user.organization.privateMeta.VATNumber,
-                VATPercentage: calculateVATPercentage(user.organization.address, user.organization.privateMeta.VATNumber)
-            })
+            const invoice = STInvoice.createFor(user.organization)
+            const date = invoice.meta.date!
 
             let membersCount: number | null = null
             

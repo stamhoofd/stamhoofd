@@ -1,6 +1,6 @@
 <template>
     <div>
-        <p v-if="isPaymentFailed" class="error-box selectable with-button">
+        <p v-if="isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
             Jouw betaling via domiciliëring is mislukt. Breng de betaling in orde voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
             <button class="button text">
@@ -60,6 +60,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import BillingSettingsView from "./BillingSettingsView.vue";
 import PackageSettingsView from "./PackageSettingsView.vue";
 
 @Component({
@@ -202,6 +203,16 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PackageSettingsView)
+        }).setDisplayStyle("popup"))
+    }
+
+    openBilling() {
+        if (!SessionManager.currentSession!.user!.permissions?.hasFullAccess()) {
+            new CenteredMessage("Enkel voor hoofdbeheerders", "Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.").addCloseButton().show()
+            return
+        }
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(BillingSettingsView)
         }).setDisplayStyle("popup"))
     }
 

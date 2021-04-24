@@ -25,15 +25,12 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingButton,LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { Payment, PaymentStatus, STInvoice } from '@stamhoofd/structures';
+import { PaymentStatus, STInvoice } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import InvoiceDetailsView from './InvoiceDetailsView.vue';
 import PackageSettingsView from './PackageSettingsView.vue';
 
 @Component({

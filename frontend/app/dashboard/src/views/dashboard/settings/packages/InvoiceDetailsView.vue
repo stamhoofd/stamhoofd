@@ -19,6 +19,10 @@
                 Dit is geen officiële factuur. Download de PDF zodra die beschikbaar is.
             </p>
 
+            <p v-if="invoice.invoice" class="info-box">
+                Een (deel) van de betaling van deze proforma factuur is in behandeling. Dit kan tot 3 werkdagen duren. Je kan in tussentijd zelf niet de betaling in orde brengen (om dubbele betaling te voorkomen). Gestart op: {{ invoice.invoice.createdAt | dateTime }}
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
             <STList>
@@ -72,11 +76,13 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { STInvoice } from "@stamhoofd/structures";
+import { STInvoice, STPendingInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import InvoicePaymentStatusView from "./InvoicePaymentStatusView.vue";
 
 @Component({
     components: {
@@ -90,12 +96,13 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     },
     filters: {
         price: Formatter.price,
-        date: Formatter.date.bind(Formatter)
+        date: Formatter.date.bind(Formatter),
+        dateTime: Formatter.dateTime.bind(Formatter)
     }
 })
 export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    invoice: STInvoice
+    invoice: STInvoice | STPendingInvoice
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
