@@ -38,7 +38,7 @@
                     <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                         <span class="icon group" />
                         <span>{{ category.settings.name }}</span>
-                        <span class="icon error red right-icon" v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat de activiteiten module niet geactiveerd is'"/>
+                        <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat de activiteiten module niet geactiveerd is'" class="icon error red right-icon" />
                     </button>
 
                     <button
@@ -99,14 +99,14 @@
                 <span>Instellingen</span>
             </button>
 
-            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(false)">
+            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
                 <span class="icon sync" />
                 <span>Groepsadministratie</span>
             </button>
         </div>
         <hr v-if="fullAccess || canManagePayments">
         <div class="">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(false)">
+            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
                 <span class="icon user" />
                 <span>Mijn account</span>
             </button>
