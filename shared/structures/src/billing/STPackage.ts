@@ -100,7 +100,7 @@ export class STPackageMeta extends AutoEncoder {
     /// + increase the payment failed count.
     /// After x days this will disable all functions if it keeps failing
     @field({ decoder: DateDecoder, nullable: true })
-    lastFailedPayment: Date | null = null
+    firstFailedPayment: Date | null = null
     
     @field({ decoder: IntegerDecoder })
     paymentFailedCount = 0
@@ -110,6 +110,9 @@ export class STPackageMeta extends AutoEncoder {
      */
     @field({ decoder: DateDecoder })
     startDate: Date
+
+    @field({ decoder: BooleanDecoder })
+    canDeactivate = false
 }
 
 /**
@@ -154,6 +157,9 @@ export class STPackageStatus extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     removeAt: Date | null = null
 
+    @field({ decoder: DateDecoder, nullable: true })
+    firstFailedPayment: Date | null = null
+
     get isActive() {
         const d = new Date()
 
@@ -169,7 +175,37 @@ export class STPackageStatus extends AutoEncoder {
             return false
         }
 
+        // Deactivate module if payment failed, and not reactivated after 4 weeks
+        const expire = new Date()
+        expire.setDate(expire.getDate() - 28)
+        if (this.firstFailedPayment && this.firstFailedPayment < expire) {
+            return false
+        }
+
         return true
+    }
+
+    get deactivateDate(): Date | null {
+        const dates: Date[] = []
+        if (this.removeAt !== null) {
+            dates.push(this.removeAt)
+        }
+
+        if (this.validUntil !== null) {
+            dates.push(this.validUntil)
+        }
+
+        if (this.firstFailedPayment !== null) {
+            const expire = new Date()
+            expire.setDate(expire.getDate() - 28)
+            dates.push(expire)
+        }
+
+        if (dates.length == 0) {
+            return null
+        }
+
+        return new Date(Math.min(...dates.map(d => d.getTime())))
     }
 
     merge(status: STPackageStatus) {
@@ -191,6 +227,14 @@ export class STPackageStatus extends AutoEncoder {
         } else if (this.removeAt !== null) {
             if (status.removeAt > this.removeAt) {
                 this.removeAt = status.removeAt
+            }
+        }
+
+        if (this.firstFailedPayment === null) {
+            this.firstFailedPayment = status.firstFailedPayment
+        } else if (status.firstFailedPayment !== null) {
+            if (status.firstFailedPayment < this.firstFailedPayment) {
+                this.firstFailedPayment = status.firstFailedPayment
             }
         }
     }

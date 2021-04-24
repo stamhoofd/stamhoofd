@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { Payment as PaymentStruct,STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
+import { calculateVATPercentage, Payment as PaymentStruct,STBillingStatus,STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -135,7 +135,7 @@ export class STInvoice extends Model {
             console.log("Activating package "+pack.id)
 
             // We'll never have multiple invoices for the same package that are awaiting payments
-            pack.meta.lastFailedPayment = null;
+            pack.meta.firstFailedPayment = null;
             pack.meta.paymentFailedCount = 0;
 
             await pack.activate()
@@ -213,7 +213,7 @@ export class STInvoice extends Model {
         // Search for packages and mark failed payment attempt if they are already activated
 
         for (const pack of await this.getPackages()) {
-            pack.meta.lastFailedPayment = new Date()
+            pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
             pack.meta.paymentFailedCount++;
             await pack.save()
         }
@@ -228,5 +228,44 @@ export class STInvoice extends Model {
             // Force regeneration of organization meta data
             await STPackage.updateOrganizationPackages(this.organizationId)
         }
+    }
+
+
+    static async getBillingStatus(organization: Organization): Promise<STBillingStatus> {
+        // Get all packages
+        const packages = await STPackage.getForOrganization(organization.id)
+
+        // GEt all invoices
+        const invoices = await STInvoice.where({ organizationId: organization.id, number: { sign: "!=", value: null }})
+
+        // Get the pending invoice if it exists
+        const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+
+        // Generate temporary pending invoice items for the current state without adding them IRL
+        const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+        const pendingInvoiceStruct = pendingInvoice ? STInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STInvoiceStruct.create({
+            meta: STInvoiceMeta.create({
+                companyName: organization.name,
+                companyAddress: organization.address,
+                companyVATNumber: organization.privateMeta.VATNumber,
+                VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
+            })
+        }) : null)
+        
+        if (notYetCreatedItems.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            pendingInvoiceStruct!.meta.items.push(...notYetCreatedItems)
+        }
+
+        const invoiceStructures: STInvoiceStruct[] = []
+        for (const invoice of invoices) {
+            invoiceStructures.push(await invoice.getStructure())
+        }
+
+        return STBillingStatus.create({
+            packages: packages.map(pack => STPackageStruct.create(pack)),
+            invoices: invoiceStructures,
+            pendingInvoice: pendingInvoiceStruct
+        });
     }
 }

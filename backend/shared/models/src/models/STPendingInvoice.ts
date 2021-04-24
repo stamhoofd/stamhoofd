@@ -106,14 +106,17 @@ export class STPendingInvoice extends Model {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
+        // But use now as reference for activation detection
+        const now = new Date()
+
         let membersCount: number | null = null
         const pendingItems: STInvoiceItem[] = []
 
         for (const pack of packages) {
-            if (pack.meta.startDate > today) {
+            if (pack.meta.startDate > now) {
                 continue
             }
-            if (pack.meta.pricingType === STPricingType.PerMember && pack.validUntil && pack.validUntil >= today) {
+            if (pack.meta.pricingType === STPricingType.PerMember && (pack.validUntil === null || pack.validUntil >= today)) {
 
                 if (membersCount === null) {
                     membersCount = await Registration.getActiveMembers(organizationId)
@@ -122,6 +125,15 @@ export class STPendingInvoice extends Model {
                 // Calculate the items that are already pending and remove them
                 const pendingCount = pendingInvoice ? pendingInvoice.meta.items.reduce((c, item) => c + ((item.package && item.package.id === pack.id) ? item.amount : 0), 0) : 0
                 const item = STInvoiceItem.fromPackage(STPackageStruct.create(pack), membersCount, pendingCount, today)
+                if (item.price > 0) {
+                    pendingItems.push(item)
+                }
+            } else if ((pack.validUntil === null || pack.validUntil >= today) && pack.meta.paidAmount < pack.meta.minimumAmount) {
+
+                // Check if paid amount matches at least one
+                const pendingCount = pendingInvoice ? pendingInvoice.meta.items.reduce((c, item) => c + ((item.package && item.package.id === pack.id) ? item.amount : 0), 0) : 0
+                const item = STInvoiceItem.fromPackage(STPackageStruct.create(pack), 0, pendingCount, today)
+                console.log(item)
                 if (item.price > 0) {
                     pendingItems.push(item)
                 }

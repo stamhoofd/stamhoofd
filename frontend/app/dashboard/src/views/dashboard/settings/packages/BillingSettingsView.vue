@@ -78,6 +78,7 @@ import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { IN } from "../../../../pdfkit.standalone";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
@@ -119,12 +120,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/billing/status",
-                decoder: STBillingStatus as Decoder<STBillingStatus>
-            })
-            this.status = response.data
+            this.status = await OrganizationManager.loadBillingStatus()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

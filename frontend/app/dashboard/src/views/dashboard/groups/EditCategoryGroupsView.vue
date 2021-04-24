@@ -15,6 +15,7 @@
             <h1>
                 {{ title }}
             </h1>
+            
             <p v-if="isRoot && enableActivities">
                 Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen kan onderverdelen. Zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
                 Jouw leden krijgen dan alle mogelijke (openbare) inschrijvingsgroepen te zien op jouw inschrijvingspagina.

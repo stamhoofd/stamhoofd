@@ -9,6 +9,8 @@
                 Instellingen
             </h1>
 
+            <BillingWarningBox />
+
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
@@ -175,7 +177,7 @@
 
             <hr>
             <h2>Functies gratis uitproberen</h2>
-            <p>Je kan alle functies van Stamhoofd altijd gratis en zo lang je wilt uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om te testen, niet voor in het echt te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+            <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
             <ModuleSettingsBox />
         </main>
@@ -203,6 +205,7 @@ import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
+import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 @Component({
     components: {
@@ -220,7 +223,8 @@ import PrivacySettingsView from './PrivacySettingsView.vue';
         FileInput,
         STList,
         STListItem,
-        ModuleSettingsBox
+        ModuleSettingsBox,
+        BillingWarningBox
     },
     directives: {
         tooltip: TooltipDirective

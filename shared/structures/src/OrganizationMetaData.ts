@@ -40,6 +40,10 @@ export class OrganizationPackages extends AutoEncoder {
         return !this.isActive(STPackageType.Members) && !this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
     }
 
+    get isWebshopsTrial() {
+        return !this.isActive(STPackageType.Webshops) && !this.isActive(STPackageType.SingleWebshop) && this.isActive(STPackageType.TrialWebshops)
+    }
+
     get useWebshops() {
         return this.webshopLimit > 0
     }
@@ -53,13 +57,14 @@ export class OrganizationPackages extends AutoEncoder {
             return 10
         }
 
-        if (this.isActive(STPackageType.TrialWebshops)) {
-            return 10
-        }
-
         if (this.isActive(STPackageType.SingleWebshop)) {
             return 1
         }
+
+        if (this.isActive(STPackageType.TrialWebshops)) {
+            return 10
+        }
+        
         return 0
     }
 
@@ -308,7 +313,7 @@ export class OrganizationMetaData extends AutoEncoder {
         console.error("Deprecated set on modules")
     }
 
-    @field({ decoder: OrganizationPackages, version: 85 })
+    @field({ decoder: OrganizationPackages, version: 87 })
     packages = OrganizationPackages.create({})
     
     @field({ decoder: new EnumDecoder(UmbrellaOrganization), nullable: true })

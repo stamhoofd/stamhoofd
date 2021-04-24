@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 86
+export const Version = 87
 
 // General
 export * from "./src/addresses/Address"
@@ -44,10 +44,10 @@ export * from "./src/endpoints/SignupResponse"
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
 export * from "./src/endpoints/tokens/ChallengeResponseStruct"
 export * from "./src/endpoints/tokens/CreateTokenStruct"
+export * from "./src/endpoints/tokens/PasswordGrantStruct"
 export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
-export * from "./src/endpoints/tokens/PasswordGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
 
 // Grouping
@@ -111,5 +111,6 @@ export * from "./src/billing/STPackageBundle"
 
 // Admin
 export * from "./src/admin/Admin"
-
+export * from "./src/admin/OrganizationSummary"
 export * from "./src/Graph"
+

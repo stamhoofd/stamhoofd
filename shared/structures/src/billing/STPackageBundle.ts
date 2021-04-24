@@ -31,7 +31,7 @@ export class STPackageBundleHelper {
         switch(bundle) {
             case STPackageBundle.Members: return "€ 0,5 per jaar, per lid. Minimum € 59 per jaar (minder leden kan uiteraard)"
             case STPackageBundle.Webshops: return "€ 59 per jaar"
-            case STPackageBundle.SingleWebshop: return "€ 39 per jaar"
+            case STPackageBundle.SingleWebshop: return "Eénmalig € 39"
         }
         return "?"
     }
@@ -109,7 +109,7 @@ export class STPackageBundleHelper {
                         minimumAmount: 59*2,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
-                        startDate: new Date()
+                        startDate: new Date(),
                     })
                 })
             }
@@ -176,7 +176,8 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date()
+                        startDate: new Date(),
+                        canDeactivate: true
                     })
                 })
             }
@@ -198,7 +199,8 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date()
+                        startDate: new Date(),
+                        canDeactivate: true
                     })
                 })
             }

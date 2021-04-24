@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, GlobalEventBus } from '@stamhoofd/components';
+import { CenteredMessage,ErrorBox, GlobalEventBus, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
@@ -92,6 +92,11 @@ export default class CartView extends Mixins(NavigationMixin){
         if (this.loading) {
             return
         }
+
+        if (WebshopManager.organization.meta.packages.isWebshopsTrial) {
+            new CenteredMessage("Dit is een demo", "De bestelling die je gaat plaatsen is enkel om te testen.").addCloseButton("Ik begrijp het").show()
+        }
+        
         this.loading = true
         this.errorBox = null
 

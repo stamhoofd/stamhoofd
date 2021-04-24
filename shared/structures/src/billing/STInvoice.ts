@@ -62,7 +62,7 @@ export class STInvoiceItem extends AutoEncoder {
 
         amount -= pendingAmount
         amount -= pack.meta.paidAmount
-        if (amount == 0) {
+        if (amount <= 0) {
             amount = 0
         }
 
@@ -71,15 +71,15 @@ export class STInvoiceItem extends AutoEncoder {
         /// to no need to handle it more complicated
         const now = date ?? new Date()
 
-        if (pack.validUntil) {
+        if (pack.validUntil && pack.meta.pricingType !== STPricingType.Fixed) {
             const totalDays = Math.round((pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24))
-            const remainingDays = Math.round((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+            let remainingDays = Math.round((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
             /// First 3 months are full price
             const paidDays = 30*3
 
             if (remainingDays > totalDays) {
-                throw new Error("Remaining days is larger than total days")
+                remainingDays = totalDays
             }
 
             if (totalDays > 366) {

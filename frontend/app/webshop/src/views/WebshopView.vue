@@ -25,6 +25,10 @@
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
                     <p v-text="webshop.meta.description" />
+
+                    <p v-if="isTrial" class="error-box">
+                        Dit is een demo webshop. Plaats hier geen echte bestellingen.
+                    </p>
                 </main>
             </section>
             <section class="gray-shadow view">
@@ -134,6 +138,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get bannerImageSrc() {
         return this.bannerImage?.file.getPublicPath()
+    }
+
+    get isTrial() {
+        return this.organization.meta.packages.isWebshopsTrial
     }
 
     get closed() {

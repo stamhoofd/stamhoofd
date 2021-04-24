@@ -134,7 +134,7 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     get rootCategory() {
-        return this.organization.categoryTree.filterForDisplay(false)
+        return this.organization.categoryTree.filterForDisplay(false, this.organization.meta.packages.useActivities)
     }
 
     get privacyUrl() {

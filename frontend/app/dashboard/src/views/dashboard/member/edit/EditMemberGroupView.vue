@@ -157,7 +157,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     }
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true)
+        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true, OrganizationManager.organization.meta.packages.useActivities)
     }
 
     getSelectedGroupForCategory(category: GroupCategoryTree): Group | null {

@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { LoginHelper, SessionManager } from '@stamhoofd/networking'
-import { Invite, Organization, OrganizationAdmins, OrganizationPatch, User } from '@stamhoofd/structures'
+import { Invite, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus, User } from '@stamhoofd/structures'
 
 /**
  * Convenient access to the organization of the current session
@@ -56,6 +56,14 @@ export class OrganizationManagerStatic {
         this.organization.admins = loaded.users
         this.organization.invites = loaded.invites
         return this.organization as any
+    }
+
+    async loadBillingStatus() {
+        return (await SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/billing/status",
+            decoder: STBillingStatus as Decoder<STBillingStatus>
+        })).data
     }
 }
 

@@ -38,6 +38,7 @@
                     <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                         <span class="icon group" />
                         <span>{{ category.settings.name }}</span>
+                        <span class="icon error red right-icon" v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat de activiteiten module niet geactiveerd is'"/>
                     </button>
 
                     <button
@@ -122,7 +123,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo,Toast, ToastButton } from '@stamhoofd/components';
+import { CenteredMessage, Logo,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -147,6 +148,9 @@ import WebshopView from './webshop/WebshopView.vue';
 @Component({
     components: {
         Logo
+    },
+    directives: {
+        tooltip: TooltipDirective
     }
 })
 export default class Menu extends Mixins(NavigationMixin) {
@@ -441,6 +445,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     get enableWebshopModule() {
         return this.organization.meta.modules.useWebshops
+    }
+
+    isCategoryDeactivated(category: GroupCategoryTree) {
+        return this.organization.isCategoryDeactivated(category)
     }
 }
 </script>

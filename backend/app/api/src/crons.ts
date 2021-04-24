@@ -323,8 +323,8 @@ async function checkReservedUntil() {
     }
 }
 
-
-let lastBillingCheck: Date | null = null
+// Wait for midnight before checking billing
+let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""
 async function checkBilling() {
     console.log("Checking billing...")
@@ -336,7 +336,7 @@ async function checkBilling() {
     }
     
     const organizations = await Organization.where({ id: { sign: '>', value: lastBillingId } }, {
-        limit: process.env.NODE_ENV === "development" ? 1000 : 10,
+        limit: process.env.NODE_ENV === "development" ? 10 : 10,
         sort: ["id"]
     })
 

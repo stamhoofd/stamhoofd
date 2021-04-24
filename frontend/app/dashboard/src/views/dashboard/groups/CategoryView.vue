@@ -14,6 +14,10 @@
             <h1>
                 {{ title }}
             </h1>
+
+            <p class="error-box" v-if="organization.isCategoryDeactivated(category)">
+                Deze categorie is niet zichtbaar voor leden omdat de activiteiten module niet is geactiveerd. Er kan dan maar één categorie in gebruik zijn. Via instellingen kan je de activiteitenmodule activeren.
+            </p>
           
             <STErrorsDefault :error-box="errorBox" />
 

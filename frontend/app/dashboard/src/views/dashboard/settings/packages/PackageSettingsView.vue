@@ -87,6 +87,7 @@ import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper } fr
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import PackageConfirmView from "./PackageConfirmView.vue";
 import PackageDetailsView from "./PackageDetailsView.vue";
 
@@ -199,12 +200,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/billing/status",
-                decoder: STBillingStatus as Decoder<STBillingStatus>
-            })
-            this.status = response.data
+            this.status = await OrganizationManager.loadBillingStatus()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

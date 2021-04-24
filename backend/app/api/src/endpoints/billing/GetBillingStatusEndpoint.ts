@@ -1,11 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage, STBillingStatus, STInvoice as STInvoiceStruct, STInvoiceMeta, STPackage as STPackageStruct } from "@stamhoofd/structures";
-
 import { STInvoice } from "@stamhoofd/models";
-import { STPackage } from "@stamhoofd/models";
-import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
+import { STBillingStatus  } from "@stamhoofd/structures";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STBillingStatus;
@@ -38,40 +36,6 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
             })
         }
 
-        // Get all packages
-        const packages = await STPackage.getForOrganization(user.organizationId)
-
-        // GEt all invoices
-        const invoices = await STInvoice.where({ organizationId: user.organizationId, number: { sign: "!=", value: null }})
-
-        // Get the pending invoice if it exists
-        const pendingInvoice = await STPendingInvoice.getForOrganization(user.organizationId)
-
-        // Generate temporary pending invoice items for the current state without adding them IRL
-        const notYetCreatedItems = await STPendingInvoice.createItems(user.organizationId, pendingInvoice)
-        const pendingInvoiceStruct = pendingInvoice ? STInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STInvoiceStruct.create({
-            meta: STInvoiceMeta.create({
-                companyName: user.organization.name,
-                companyAddress: user.organization.address,
-                companyVATNumber: user.organization.privateMeta.VATNumber,
-                VATPercentage: calculateVATPercentage(user.organization.address, user.organization.privateMeta.VATNumber)
-            })
-        }) : null)
-        
-        if (notYetCreatedItems.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            pendingInvoiceStruct!.meta.items.push(...notYetCreatedItems)
-        }
-
-        const invoiceStructures: STInvoiceStruct[] = []
-        for (const invoice of invoices) {
-            invoiceStructures.push(await invoice.getStructure())
-        }
-
-        return new Response(STBillingStatus.create({
-            packages: packages.map(pack => STPackageStruct.create(pack)),
-            invoices: invoiceStructures,
-            pendingInvoice: pendingInvoiceStruct
-        }));
+        return new Response(await STInvoice.getBillingStatus(user.organization));
     }
 }

@@ -1,15 +1,29 @@
 <template>
     <div class="module-settings-box">
         <div class="module-box">
-            <label class="box" :class="{ selected: enableMemberModule }">
+            <label v-if="!hasLegacy" class="box" :class="{ selected: enableMemberModule }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
                     <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
-                    <p class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-if="enableMemberModule && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'members'" />
-                    <Checkbox v-else v-model="enableMemberModule" />
+                    <Checkbox v-else v-model="enableMemberModule" :disabled="enableMemberModule && !isMembersTrial"/>
+                </div>
+            </label>
+
+            <label v-else class="box" :class="{ selected: enableActivities }">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
+                <div>
+                    <h2 class="style-title-list">Activiteiten</h2>
+                    <p v-if="enableActivities && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-else class="style-description">Probeer gratis uit</p>
+                </div>
+                <div>
+                    <Spinner v-if="loadingModule == 'members'" />
+                    <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial"/>
                 </div>
             </label>
 
@@ -17,10 +31,11 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops</h2>
-                    <p class="style-description">Probeer gratis uit</p>
+                    <p v-if="enableWebshopModule && !isWebshopsTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
-                    <Checkbox v-model="enableWebshopModule" />
+                    <Checkbox v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
                 </div>
             </label>
         </div>
@@ -28,14 +43,14 @@
         <h3>Verwacht in de toekomst</h3>
 
         <div class="module-box">
-            <label class="box disabled" :class="{ selected: enableActivities }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
+            <label class="box disabled">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg"></div>
                 <div>
-                    <h2 class="style-title-list">Activiteiten</h2>
-                    <p class="style-description">Maak activiteiten aan en laat leden inschrijven</p>
+                    <h2 class="style-title-list">Ticketverkoop</h2>
+                    <p class="style-description">Verkoop tickets via je webshop en scan ze zonder internet</p>
                 </div>
                 <div>
-                    <span class="style-tag">Mei 2021</span>
+                    <span class="style-tag">2021</span>
                 </div>
             </label>
 
@@ -44,17 +59,6 @@
                 <div>
                     <h2 class="style-title-list">Bouw zelf je website</h2>
                     <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
-                </div>
-                <div>
-                    <span class="style-tag">2021</span>
-                </div>
-            </label>
-
-            <label class="box disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Ticketverkoop</h2>
-                    <p class="style-description">Verkoop en scan tickets met je smartphone</p>
                 </div>
                 <div>
                     <span class="style-tag">2021</span>
@@ -76,10 +80,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Spinner, Toast } from "@stamhoofd/components";
-import { OrganizationMetaData, OrganizationModules, OrganizationPatch, UmbrellaOrganization } from "@stamhoofd/structures"
+import { SessionManager } from '@stamhoofd/networking';
+import { OrganizationMetaData, OrganizationModules, OrganizationPatch, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -93,42 +98,41 @@ import MembersStructureSetupView from './modules/members/MembersStructureSetupVi
     }
 })
 export default class ModuleSettingsView extends Mixins(NavigationMixin) {
-    loadingModule: string | null = null
+    loadingModule: STPackageType | null = null
+    OrganizationManager = OrganizationManager
 
     get organization() {
         return OrganizationManager.organization
     }
 
-    async patchModule(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationModules>>, message: string) {
-        if (patch.useMembers !== undefined) {
-            this.loadingModule = "members"
-        }
-        try {
-            await OrganizationManager.patch(OrganizationPatch.create({
-                id: this.organization.id,
-                meta: OrganizationMetaData.patch({
-                    modules: OrganizationModules.patch(patch)
-                })
-            }))
-            new Toast(message, "success green").show()
-            this.loadingModule = null
-        } catch (e) {
-            CenteredMessage.fromError(e).show()
-            this.loadingModule = null
-            throw e
-        }
+
+
+    manageGroups(animated = true) {
+        const component = buildManageGroupsComponent(this.organization)
+            
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: component
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
-    get enableActivities() {
-        return this.organization.meta.modules.useActivities
+    get isMembersTrial() {
+        return this.organization.meta.packages.isMembersTrial || (this.organization.meta.packages.isActive(STPackageType.LegacyMembers) && !this.organization.meta.packages.isActive(STPackageType.Members) && this.organization.meta.packages.isActive(STPackageType.TrialMembers))
+    }
+
+    get isWebshopsTrial() {
+        return this.organization.meta.packages.isWebshopsTrial
+    }
+
+    get hasLegacy() {
+        return this.organization.meta.packages.isActive(STPackageType.LegacyMembers)
     }
 
     get enableMemberModule() {
-        return this.organization.meta.modules.useMembers
+        return this.organization.meta.packages.useMembers
     }
 
     set enableMemberModule(enable: boolean) {
-        if (!enable || this.organization.groups.length > 0) {
+        /*if (!enable || this.organization.groups.length > 0) {
             this.organization.meta.modules.useMembers = enable
             this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").catch(e => console.error(e))
         } else {
@@ -145,24 +149,100 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 }).catch(e => console.error(e))
             }
             
+        }*/
+
+        if (enable && !this.enableMemberModule) {
+            this.checkout(STPackageBundle.TrialMembers, "De ledenadministratie module is nu actief").catch(console.error)
+        } else {
+            if (!enable && this.enableMemberModule) {
+                this.deactivate(STPackageType.TrialMembers, "De ledenadministratie module is nu uitgeschakeld").catch(console.error)
+            }
         }
     }
 
-    manageGroups(animated = true) {
-        const component = buildManageGroupsComponent(this.organization)
-            
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: component
-        }).setDisplayStyle("popup").setAnimated(animated))
+    get enableActivities() {
+        return this.organization.meta.modules.useActivities
+    }
+
+    set enableActivities(enable: boolean) {
+        if (!this.organization.meta.packages.useMembers) {
+            return
+        }
+        if (enable && !this.enableActivities) {
+            this.checkout(STPackageBundle.TrialMembers, "De activiteiten module is nu actief").catch(console.error)
+        } else {
+            if (!enable && this.enableActivities) {
+                this.deactivate(STPackageType.TrialMembers, "De activiteiten module is nu uitgeschakeld").catch(console.error)
+            }
+        }
     }
 
     get enableWebshopModule() {
-        return this.organization.meta.modules.useWebshops
+        return this.organization.meta.packages.useWebshops
     }
 
     set enableWebshopModule(enable: boolean) {
-        this.organization.meta.modules.useWebshops = enable
-        this.patchModule({ useWebshops: enable }, enable ? "De webshop module is nu actief" : "De webshop module is nu uitgeschakeld").catch(e => console.error(e))
+        //this.organization.meta.modules.useWebshops = enable
+
+        if (enable && !this.enableWebshopModule) {
+            this.checkout(STPackageBundle.TrialWebshops, "De webshop module is nu actief").catch(console.error)
+        } else {
+            if (!enable && this.enableWebshopModule) {
+                this.deactivate(STPackageType.TrialWebshops, "De webshop module is nu uitgeschakeld").catch(console.error)
+            }
+        }
+
+    }
+
+    async checkout(bundle: STPackageBundle, message: string) {
+        if (this.loadingModule) {
+            return
+        }
+        this.loadingModule = bundle as any as STPackageType
+
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/billing/activate-packages",
+                body: {
+                    bundles: [bundle],
+                    paymentMethod: PaymentMethod.Unknown
+                },
+                decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
+            })
+            await SessionManager.currentSession!.fetchOrganization()
+            new Toast(message, "success green").show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
+        this.loadingModule = null
+    }
+
+    async deactivate(type: STPackageType, message: string) {
+        if (this.loadingModule) {
+            return
+        }
+        this.loadingModule = type
+
+        try {
+            const status = await OrganizationManager.loadBillingStatus()
+            const packages = status.packages
+            const pack = packages.find(p => p.meta.type === type)
+
+            if (pack) {
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/billing/deactivate-package/"+pack.id,
+                })
+                await SessionManager.currentSession!.fetchOrganization()
+                new Toast(message, "success green").show()
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
+        this.loadingModule = null
     }
 
 }

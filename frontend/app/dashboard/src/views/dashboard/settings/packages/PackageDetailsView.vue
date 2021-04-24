@@ -57,6 +57,14 @@
                         {{ pack.validUntil | date }}
                     </template>
                 </STListItem>
+
+                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                    Vervalt op
+
+                    <template slot="right">
+                        {{ pack.removeAt | date }}
+                    </template>
+                </STListItem>
             </STList>
 
             <STList v-else-if="pack.meta.pricingType === 'PerYear'">
@@ -81,6 +89,14 @@
 
                     <template slot="right">
                         {{ pack.validUntil | date }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                    Vervalt op
+
+                    <template slot="right">
+                        {{ pack.removeAt | date }}
                     </template>
                 </STListItem>
             </STList>
@@ -109,12 +125,20 @@
                         {{ pack.validUntil | date }}
                     </template>
                 </STListItem>
+
+                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                    Vervalt op
+
+                    <template slot="right">
+                        {{ pack.removeAt | date }}
+                    </template>
+                </STListItem>
             </STList>
         </main>
 
         <STToolbar>
             <template slot="right">
-                <LoadingButton :loading="loading">
+                <LoadingButton v-if="pack.meta.canRenew" :loading="loading">
                     <button class="button primary">
                         Verlengen
                     </button>
@@ -185,6 +209,10 @@ export default class PackageDetailsView extends Mixins(NavigationMixin) {
 
 
         this.loading = false
+    }
+
+    get isValid() {
+        return this.pack.validUntil === null || this.pack.validUntil > new Date()
     }
   
     shouldNavigateAway() {

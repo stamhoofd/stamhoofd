@@ -2,9 +2,6 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType 
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
-
-import { QueueHandler } from '@stamhoofd/queues';
 import { MolliePayment } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { Registration } from "@stamhoofd/models";
@@ -12,6 +9,8 @@ import { STInvoice } from "@stamhoofd/models";
 import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
+import { QueueHandler } from '@stamhoofd/queues';
+import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
@@ -222,6 +221,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 await model.activate()
             }
 
+            await STPackage.updateOrganizationPackages(user.organizationId)
             return new Response(STInvoiceResponse.create({
                 paymentUrl: undefined,
                 invoice: undefined

@@ -127,7 +127,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     get fullTree() {
-        return OrganizationManager.organization.categoryTree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
+        return OrganizationManager.organization.categoryTree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null, this.organization.meta.packages.useActivities)
     }
 
     get isEmpty() {
@@ -161,14 +161,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
             })
         }
 
-        return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null)
-    }
-
-
-    get rootCategory() {
-        const tree = this.organization.categoryTree
-
-        return tree
+        return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null, this.organization.meta.packages.useActivities)
     }
 
     logout() {

@@ -109,6 +109,10 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
         }
     }
 
+    shouldNavigateAway() {
+        return this.payment && this.payment.status === 'Failed'
+    }
+
 }
 </script>
 

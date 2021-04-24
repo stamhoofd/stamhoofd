@@ -76,7 +76,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true)
+        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true, true)
     }
 
     getSelectedGroup(group: Group): boolean {
