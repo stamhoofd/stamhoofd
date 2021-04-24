@@ -2,7 +2,8 @@
     "editor.formatOnSave": false,
     "javascript.format.enable": false,
     "search.exclude": {
-        "**/dist": true
+        "**/dist": true,
+        "**/node_modules": true
     },
     "eslint.options": {
         "extensions": [
@@ -32,5 +33,6 @@
     ],
     "vetur.format.defaultFormatter.html": "none",
     "vetur.format.defaultFormatter.js": "none",
-    "vetur.format.defaultFormatter.ts": "none"
+    "vetur.format.defaultFormatter.ts": "none",
+    "search.useIgnoreFiles": false
 }
