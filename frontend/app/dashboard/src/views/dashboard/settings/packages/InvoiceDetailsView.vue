@@ -72,6 +72,14 @@
                 </STList>
             </div>
         </main>
+
+        <STToolbar v-if="!invoice.number">
+            <template slot="right">
+                <button class="button primary" :disabled="invoice.invoice" @click="charge">
+                    Afrekenen
+                </button>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
@@ -83,6 +91,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import InvoicePaymentStatusView from "./InvoicePaymentStatusView.vue";
+import PackageConfirmView from "./PackageConfirmView.vue";
 
 @Component({
     components: {
@@ -106,6 +115,10 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
+
+    charge() {
+        this.show(new ComponentWithProperties(PackageConfirmView))
+    }
 }
 </script>
 

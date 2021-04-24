@@ -115,15 +115,20 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     get paymentFailedDeactivateDate() {
+        let d: Date | null = null
         for (const [type, pack] of this.organization.meta.packages.packages) {
             if (!this.packageTypeList.includes(type)) {
                 continue
             }
-            if (pack.firstFailedPayment !== null) {
-                return pack.deactivateDate
+            if (pack.deactivateDate === null || pack.firstFailedPayment === null) {
+                continue
             }
+            if (d && d < pack.deactivateDate) {
+                continue
+            }
+            d = pack.deactivateDate
         }
-        return null
+        return d
     }
 
     get isPaymentFailed() {

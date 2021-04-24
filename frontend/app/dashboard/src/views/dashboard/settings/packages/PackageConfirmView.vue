@@ -255,6 +255,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     bundles: this.selectedPackages.map(p => p.bundle),
                     renewPackageIds: this.renewPackages.map(p => p.id),
                     paymentMethod: this.selectedPaymentMethod,
+                    includePending: true,
                     proForma: true
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
@@ -349,6 +350,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 body: {
                     bundles: this.selectedPackages.map(p => p.bundle),
                     renewPackageIds: this.renewPackages.map(p => p.id),
+                    includePending: true,
                     paymentMethod: this.selectedPaymentMethod
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>

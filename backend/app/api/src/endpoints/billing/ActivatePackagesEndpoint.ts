@@ -22,6 +22,9 @@ class Body extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
     renewPackageIds: string[] = []
 
+    @field({ decoder: BooleanDecoder, optional: true })
+    includePending = false
+
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod: PaymentMethod
 
@@ -146,7 +149,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             // Calculate price
             let price = invoice.meta.priceWithVAT
-            if (price > 0) {
+            if (price > 0 || request.body.includePending) {
                 
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue

@@ -71,7 +71,7 @@
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
@@ -144,8 +144,10 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     openPendingInvoice() {
-        this.present(new ComponentWithProperties(InvoiceDetailsView, {
-            invoice: this.status?.pendingInvoice
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(InvoiceDetailsView, {
+                invoice: this.status?.pendingInvoice
+            })
         }).setDisplayStyle("popup"))
     }
 }
