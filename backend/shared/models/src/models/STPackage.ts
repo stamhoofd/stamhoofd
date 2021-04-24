@@ -1,6 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+import { GroupBuilder } from "../helpers/GroupBuilder";
 
 import { Organization } from "./Organization";
 
@@ -74,9 +75,15 @@ export class STPackage extends Model {
 
         const organization = await Organization.getByID(organizationId)
         if (organization) {
+            const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities
             organization.meta.packages.packages = map
-            await organization.save()
 
+            await organization.save()
+            if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
+                console.log("Building groups and categories for "+organization.id)
+                const builder = new GroupBuilder(organization)
+                await builder.build()
+            }
             console.log(map)
         } else {
             console.error("Couldn't find organization when updating packages "+organizationId)

@@ -1,8 +1,8 @@
-import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
 
-import { Group } from '@stamhoofd/models'
-import { Organization } from '@stamhoofd/models'
+import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
 import { Group as GroupStruct } from "@stamhoofd/structures";
+import { Group } from '../models/Group';
+import { Organization } from '../models/Organization';
 
 export class GroupBuilder {
     organization: Organization
@@ -26,12 +26,11 @@ export class GroupBuilder {
         // Reload
         const groups = await Group.where({ organizationId: this.organization.id })
         
-
         // Setup default root groups
-        if (this.organization.meta.categories.length <= 1) {
+        if (this.organization.meta.categories.length <= 2) {
             const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
 
-            const defaults = this.organization.meta.modules.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
+            const defaults = this.organization.meta.packages.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined)
 
             if (sortedGroupIds.length > 0 && defaults.length == 0) {
                 defaults.push(GroupCategory.create({

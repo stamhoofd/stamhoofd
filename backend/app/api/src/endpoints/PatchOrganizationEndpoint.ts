@@ -10,8 +10,6 @@ import { User } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
-import { GroupBuilder } from '../helpers/GroupBuilder';
-
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = AutoEncoderPatchType<OrganizationStruct>;
@@ -143,8 +141,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.meta) {
-                const didUseMembers = organization.meta.modules.useMembers
+                const savedPackages = organization.meta.packages
                 organization.meta.patchOrPut(request.body.meta)
+                organization.meta.packages = savedPackages
 
                 // check payconiq + mollie
                 if (!organization.privateMeta.payconiqApiKey) {
@@ -169,13 +168,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         })
                     }
                 }
-
-                if (!didUseMembers && organization.meta.modules.useMembers) {
-                    const builder = new GroupBuilder(organization)
-                    await builder.build()
-                }
             }
-
 
             // Save the organization
             await organization.save()

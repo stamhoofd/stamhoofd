@@ -38,3 +38,5 @@ export * from "./factories/ParentFactory"
 export * from "./factories/RecordFactory"
 export * from "./factories/RegistrationFactory"
 export * from "./factories/UserFactory"
+
+export * from "./helpers/GroupBuilder"

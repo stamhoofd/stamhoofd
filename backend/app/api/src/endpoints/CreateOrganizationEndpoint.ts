@@ -6,12 +6,10 @@ import { EmailVerificationCode } from '@stamhoofd/models';
 import { KeychainItem } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
 import { RegisterCode } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
 import { User } from "@stamhoofd/models";
-import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse, Token as TokenStruct } from "@stamhoofd/structures";
+import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
-import { GroupBuilder } from '../helpers/GroupBuilder';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -171,11 +169,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             keychainItem.publicKey = item.publicKey
 
             await keychainItem.save()
-        }
-
-        if (organization.meta.modules.useMembers) {
-            const builder = new GroupBuilder(organization)
-            await builder.build()
         }
 
         const code = await EmailVerificationCode.createFor(user, user.email)

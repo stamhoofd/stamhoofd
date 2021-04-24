@@ -167,7 +167,7 @@
                         Facturen en betalingen
                     </h2>
                     <p class="style-description">
-                        Van jouw abonnement
+                        Van jouw pakketten
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
@@ -200,12 +200,12 @@ import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
+import BillingWarningBox from './packages/BillingWarningBox.vue';
 import InvoicePaymentStatusView from './packages/InvoicePaymentStatusView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
-import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 @Component({
     components: {

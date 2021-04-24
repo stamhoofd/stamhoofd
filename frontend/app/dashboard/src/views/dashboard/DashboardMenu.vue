@@ -38,7 +38,7 @@
                     <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                         <span class="icon group" />
                         <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat de activiteiten module niet geactiveerd is'" class="icon error red right-icon" />
+                        <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
                     </button>
 
                     <button

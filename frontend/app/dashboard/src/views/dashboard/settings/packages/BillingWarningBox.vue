@@ -9,7 +9,7 @@
         </p>
 
         <p v-if="!shouldFilter('webshops') && isNearing(webshopDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            Jouw webshops worden automatisch uitgeschakeld vanaf {{ webshopDeactivateDate | dateTime }}. Verleng jouw abonnement om de webshop module langer in gebruik te houden.
+            Jouw webshops worden automatisch uitgeschakeld vanaf {{ webshopDeactivateDate | dateTime }}. Verleng jouw pakket om de webshop module langer in gebruik te houden.
 
             <button class="button text">
                 Verlengen
@@ -33,7 +33,7 @@
         </p>
 
         <p v-if="!shouldFilter('members') && isNearing(membersDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw abonnement om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
+            De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
 
             <button class="button text">
                 Verlengen
@@ -41,7 +41,7 @@
         </p>
 
         <p v-if="!shouldFilter('members') && isNearing(membersActivitiesDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            De functionaliteiten voor inschrijven voor activiteiten wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw abonnement om de nieuwe functies te kunnen blijven gebruiken.
+            De functionaliteiten voor inschrijven voor activiteiten wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om de nieuwe functies te kunnen blijven gebruiken.
 
             <button class="button text">
                 Verlengen

@@ -10,7 +10,7 @@
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'members'" />
-                    <Checkbox v-else v-model="enableMemberModule" :disabled="enableMemberModule && !isMembersTrial"/>
+                    <Checkbox v-else v-model="enableMemberModule" :disabled="enableMemberModule && !isMembersTrial" />
                 </div>
             </label>
 
@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'members'" />
-                    <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial"/>
+                    <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial" />
                 </div>
             </label>
 
@@ -152,10 +152,20 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }*/
 
         if (enable && !this.enableMemberModule) {
-            this.checkout(STPackageBundle.TrialMembers, "De ledenadministratie module is nu actief").catch(console.error)
+            if (this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+                // We have an automated flow for these organizations
+                this.present(new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(MembersStructureSetupView, {})
+                }).setDisplayStyle("popup"))
+            } else {
+                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten").then(() => {
+                    // Wait for the backend to fill in all the default categories and groups
+                    this.manageGroups(true)
+                }).catch(e => console.error(e))
+            }
         } else {
             if (!enable && this.enableMemberModule) {
-                this.deactivate(STPackageType.TrialMembers, "De ledenadministratie module is nu uitgeschakeld").catch(console.error)
+                this.deactivate(STPackageType.TrialMembers, "Het testen van de ledenadministratie is uitgeschakeld").catch(console.error)
             }
         }
     }
@@ -169,10 +179,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             return
         }
         if (enable && !this.enableActivities) {
-            this.checkout(STPackageBundle.TrialMembers, "De activiteiten module is nu actief").catch(console.error)
+            this.checkout(STPackageBundle.TrialMembers, "Je kan nu activiteiten uittesten").catch(console.error)
         } else {
             if (!enable && this.enableActivities) {
-                this.deactivate(STPackageType.TrialMembers, "De activiteiten module is nu uitgeschakeld").catch(console.error)
+                this.deactivate(STPackageType.TrialMembers, "Het testen van activiteiten is uitgeschakeld").catch(console.error)
             }
         }
     }
@@ -185,10 +195,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         //this.organization.meta.modules.useWebshops = enable
 
         if (enable && !this.enableWebshopModule) {
-            this.checkout(STPackageBundle.TrialWebshops, "De webshop module is nu actief").catch(console.error)
+            this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").catch(console.error)
         } else {
             if (!enable && this.enableWebshopModule) {
-                this.deactivate(STPackageType.TrialWebshops, "De webshop module is nu uitgeschakeld").catch(console.error)
+                this.deactivate(STPackageType.TrialWebshops, "Het testen van webshops is uitgeschakeld").catch(console.error)
             }
         }
 
