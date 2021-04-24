@@ -136,8 +136,14 @@
             </STList>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="pack.meta.canDeactivate || pack.shouldHintRenew()">
             <template slot="right">
+                <LoadingButton v-if="pack.meta.canDeactivate" :loading="deactivating">
+                    <button class="button secundary" @click="deactivate">
+                        Stopzetten
+                    </button>
+                </LoadingButton>
+
                 <LoadingButton v-if="pack.shouldHintRenew()" :loading="loading">
                     <button class="button primary" @click="extend">
                         Verlengen
@@ -150,7 +156,8 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { STPackage } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -181,11 +188,36 @@ export default class PackageDetailsView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     loading = false
+    deactivating = false
 
     extend() {
         this.show(new ComponentWithProperties(PackageConfirmView, {
             renewPackages: [this.pack]
         }))
+    }
+
+    async deactivate() {
+        if (this.deactivating) {
+            return
+        }
+
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit wilt stopzetten?", "Meteen stopzetten")) {
+            return
+        }
+        this.deactivating = true
+
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/billing/deactivate-package/"+this.pack.id,
+            })
+            await SessionManager.currentSession!.fetchOrganization()
+            this.pop({ force: true })
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
+        this.deactivating = false
     }
 
     get isValid() {
