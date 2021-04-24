@@ -19,7 +19,7 @@
             <Spinner v-if="loadingStatus" />
             <template v-else>
                 <STList v-if="status && status.packages.length > 0">
-                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" @click="openPackageDetails(pack)">
+                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg">
 
                         <h3 class="style-title-list">
@@ -29,6 +29,9 @@
                             Geldig tot {{ pack.validUntil | date }}
                         </p>
 
+                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray">
+                            Verleng nu
+                        </button>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
                 </STList>
@@ -93,7 +96,10 @@ import PackageDetailsView from "./PackageDetailsView.vue";
 
 export class SelectablePackage {
     package: STPackage
+
+    // In case of a renewal, bundle can be empty
     bundle: STPackageBundle
+
     selected = false
 
     constructor(pack: STPackage, bundle: STPackageBundle) {

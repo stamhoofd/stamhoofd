@@ -1,4 +1,5 @@
 import { column, Model } from "@simonbackx/simple-database";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { GroupBuilder } from "../helpers/GroupBuilder";
@@ -56,7 +57,10 @@ export class STPackage extends Model {
     removeAt: Date | null = null
 
     static async getForOrganization(organizationId: string) {
-        return await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
+        const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
+        const pack2 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: null })
+
+        return [...pack1, ...pack2]
     }
 
     static async updateOrganizationPackages(organizationId: string) {
@@ -98,7 +102,57 @@ export class STPackage extends Model {
         this.validAt = new Date()
         await this.save()
 
-        // TODO: Update the organizations modules
+        if (this.meta.didRenewId) {
+            const pack = await STPackage.getByID(this.meta.didRenewId)
+            if (pack && pack.organizationId === this.organizationId) {
+                await pack.deactivate()
+            }
+        }
+    }
+
+    async deactivate() {
+        if (this.removeAt !== null && this.removeAt <= new Date()) {
+            return
+        }
+        this.removeAt = new Date()
+        await this.save()
+    }
+
+    /**
+     * Create a renewed package, but not yet saved!
+     */
+    createRenewed(): STPackage {
+        if (!this.meta.allowRenew) {
+            throw new SimpleError({
+                code: "not_allowed",
+                message: "Not allowed",
+                human: "Je kan dit pakket niet verlengen"
+            })
+        }
+
+        const pack = new STPackage()
+        pack.id = uuidv4()
+        pack.meta = this.meta
+
+        // Not yet valid / active (ignored until valid)
+        pack.validAt = null
+        pack.organizationId = this.organizationId
+
+        pack.meta.startDate = new Date(Math.max(new Date().getTime(), pack.validUntil?.getTime() ?? 0))
+        pack.meta.paidAmount = 0
+        pack.meta.paidPrice = 0
+        pack.meta.firstFailedPayment = null
+        pack.meta.didRenewId = this.id
+        
+        // Duration for renewals is always a year ATM
+        pack.validUntil = new Date(pack.meta.startDate)
+        pack.validUntil.setFullYear(pack.validUntil.getFullYear() + 1)
+
+        // Remove (= not renewable) if not renewed after 3 months
+        pack.removeAt = new Date(pack.validUntil)
+        pack.removeAt.setMonth(pack.removeAt.getMonth() + 3)
+
+        return pack
     }
 
     createStatus(): STPackageStatus {

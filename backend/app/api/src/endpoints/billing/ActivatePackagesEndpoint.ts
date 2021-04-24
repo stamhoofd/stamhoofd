@@ -1,5 +1,5 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { MolliePayment } from "@stamhoofd/models";
@@ -10,14 +10,17 @@ import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
+import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
 
 class Body extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(STPackageBundle)) })
-    bundles: STPackageBundle[]
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(STPackageBundle)), optional: true })
+    bundles: STPackageBundle[] = []
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    renewPackageIds: string[] = []
 
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod: PaymentMethod
@@ -106,6 +109,46 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     await model.save()
                 }
                 models.push(model)
+            }
+
+            // Add renewals
+            if (request.body.renewPackageIds.length > 0) {
+                const currentPackages = await STPackage.getForOrganization(user.organizationId)
+
+                for (const id of request.body.renewPackageIds) {
+                    const pack = currentPackages.find(c => c.id === id)
+                    if (!pack) {
+                        throw new SimpleError({
+                            code: "not_found",
+                            message: "Package not found",
+                            human: "Het pakket dat je wil verlengen kan je helaas niet meer verlengen"
+                        })
+                    }
+
+                    // Renew
+                    const model = pack.createRenewed()
+
+                    // If type is 
+                    let amount = 1
+
+                    if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
+                        membersCount = await Registration.getActiveMembers(user.organizationId)
+                    }
+
+                    if (pack.meta.pricingType === STPricingType.PerMember) {
+                        amount = membersCount ?? 1
+                    }
+
+                    // Add items to invoice
+                    invoice.meta.items.push(
+                        STInvoiceItem.fromPackage(STPackageStruct.create(model), amount, 0, date)
+                    )
+
+                    if (!request.body.proForma) {
+                        await model.save()
+                    }
+                    models.push(model)
+                }
             }
 
             // Todo: apply credits

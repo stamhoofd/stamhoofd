@@ -155,7 +155,7 @@ import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-en
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, User } from "@stamhoofd/structures";
+import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -204,8 +204,11 @@ const throttle = (func, limit) => {
     }
 })
 export default class PackageConfirmView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+    @Prop({ default: () => [] })
     selectedPackages: SelectablePackage[]
+
+    @Prop({ default: () => [] })
+    renewPackages: STPackage[]
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
@@ -250,6 +253,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 path: "/billing/activate-packages",
                 body: {
                     bundles: this.selectedPackages.map(p => p.bundle),
+                    renewPackageIds: this.renewPackages.map(p => p.id),
                     paymentMethod: this.selectedPaymentMethod,
                     proForma: true
                 },
@@ -344,6 +348,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 path: "/billing/activate-packages",
                 body: {
                     bundles: this.selectedPackages.map(p => p.bundle),
+                    renewPackageIds: this.renewPackages.map(p => p.id),
                     paymentMethod: this.selectedPaymentMethod
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>

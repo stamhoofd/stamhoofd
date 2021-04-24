@@ -61,6 +61,12 @@ export class STPackageMeta extends AutoEncoder {
         return STPackageTypeHelper.getName(this.type)
     }
 
+    /**
+     * ID of the package that was renewed (if it was renewed)
+     */
+    @field({ decoder: StringDecoder, optional: true })
+    didRenewId?: string
+
     @field({ decoder: new EnumDecoder(STPackageType) })
     type: STPackageType
 
@@ -144,6 +150,21 @@ export class STPackage extends AutoEncoder {
     /// Disable / delete this package after this date (also no renew allowed). Can't keep using the currently saved pricing
     @field({ decoder: DateDecoder, nullable: true })
     removeAt: Date | null = null
+
+    shouldHintRenew() {
+        if (!this.meta.allowRenew || this.validUntil === null) {
+            return false
+        }
+
+        // Allow renew 1 month in advance
+        const now = new Date()
+        now.setDate(now.getDate() - 30)
+
+        if (this.validUntil > now) {
+            return true
+        }
+        return false
+    }
 }
 
 export class STPackageStatus extends AutoEncoder {

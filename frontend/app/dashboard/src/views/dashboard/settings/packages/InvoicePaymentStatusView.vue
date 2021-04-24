@@ -78,7 +78,6 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
         this.dismiss({ force: true })
     }
 
-
     poll() {
         this.timer = null;
         const paymentId = this.paymentId;
@@ -92,8 +91,12 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
                 this.invoice = invoice
 
                 this.pollCount++;
-                if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                if (this.payment && this.payment.status == PaymentStatus.Succeeded) {
                     this.onSuccess()
+                    return;
+                }
+
+                if (this.payment && this.payment.status == PaymentStatus.Failed) {
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));

@@ -58,7 +58,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Vervalt op
 
                     <template slot="right">
@@ -92,7 +92,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Vervalt op
 
                     <template slot="right">
@@ -126,7 +126,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="pack.removeAt && pack.meta.canRenew && !isValid">
+                <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Vervalt op
 
                     <template slot="right">
@@ -138,8 +138,8 @@
 
         <STToolbar>
             <template slot="right">
-                <LoadingButton v-if="pack.meta.canRenew" :loading="loading">
-                    <button class="button primary">
+                <LoadingButton v-if="pack.shouldHintRenew()" :loading="loading">
+                    <button class="button primary" @click="extend">
                         Verlengen
                     </button>
                 </LoadingButton>
@@ -149,11 +149,13 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { STPackage } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import PackageConfirmView from "./PackageConfirmView.vue";
 
 @Component({
     components: {
@@ -180,35 +182,10 @@ export default class PackageDetailsView extends Mixins(NavigationMixin) {
 
     loading = false
 
-
-    async extend() {
-        if (this.loading) {
-            return
-        }
-        this.loading = true
-
-        try {
-            await Promise.resolve()
-            /*const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "POST",
-                path: "/billing/activate-packages",
-                body: {
-                    bundles: this.selectedPackages.map(p => p.bundle),
-                    paymentMethod: this.selectedPaymentMethod
-                },
-                decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
-            })
-            if (response.data.paymentUrl) {
-                window.location.href = response.data.paymentUrl;
-            } else {
-                // Go to invoice page
-            }*/
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-        }
-
-
-        this.loading = false
+    extend() {
+        this.show(new ComponentWithProperties(PackageConfirmView, {
+            renewPackages: [this.pack]
+        }))
     }
 
     get isValid() {
