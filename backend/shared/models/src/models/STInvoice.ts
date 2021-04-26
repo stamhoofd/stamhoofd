@@ -7,6 +7,7 @@ import { Organization } from './Organization';
 import { Payment } from "./Payment";
 import { STPackage } from "./STPackage";
 import { STPendingInvoice } from "./STPendingInvoice";
+import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 
 
 export class STInvoice extends Model {
@@ -218,7 +219,8 @@ export class STInvoice extends Model {
     }
 
     async generatePdf() {
-        // todo
+        const builder = new InvoiceBuilder(this)
+        this.meta.pdf = await builder.build()
     }
 
     /**

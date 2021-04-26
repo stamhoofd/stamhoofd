@@ -2,21 +2,27 @@
     "name": "@stamhoofd/models",
     "version": "1.0.0",
     "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/src/index.js",
+    "types": "./dist/src/index.d.ts",
     "license": "UNLICENCED",
     "sideEffects": false,
     "files": [
         "src"
     ],
     "scripts": {
-        "build": "rm -rf ./dist/migrations && tsc -b && mkdir -p ./dist/migrations && cp ./src/migrations/*.sql ./dist/migrations && cp -R ./src/migrations/data ./dist/migrations",
+        "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/assets && tsc -b && mkdir -p ./dist/src/migrations && cp ./src/migrations/*.sql ./dist/src/migrations && cp -R ./src/migrations/data ./dist/src/migrations && cp -R ./src/assets ./dist/src/assets",
         "build:full": "rm -rf ./dist && yarn build",
-        "cp-migrations": "yarn build && cp ./dist/migrations/*"
+        "test": "yarn build:full && jest"
     },
     "peerDependencies": {
         "@stamhoofd/crypto": "*",
         "@stamhoofd/email": "*",
         "@stamhoofd/queues": "*"
+    },
+    "dependencies": {
+        "pdfkit": "^0.12.1"
+    },
+    "devDependencies": {
+        "@types/pdfkit": "^0.11.0"
     }
 }
