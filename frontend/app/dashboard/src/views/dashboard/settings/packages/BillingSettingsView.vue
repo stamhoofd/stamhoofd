@@ -134,6 +134,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         if (url) {
             const a = document.createElement("a");
             a.href = url;
+            a.target = "_blank"
             a.setAttribute("download", "Stamhoofd factuur " + (invoice.number ?? invoice.id) + (invoice.meta.date ? (" - "+Formatter.dateIso(invoice.meta.date)) : ""));
             a.click();
         } else {
