@@ -221,6 +221,7 @@ export class STInvoice extends Model {
     async generatePdf() {
         const builder = new InvoiceBuilder(this)
         this.meta.pdf = await builder.build()
+        await this.save()
     }
 
     /**
