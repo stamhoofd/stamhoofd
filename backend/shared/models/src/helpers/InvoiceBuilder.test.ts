@@ -10,7 +10,8 @@ describe("InvoiceBuilder", () => {
         invoice.number = 124
         invoice.meta = STInvoiceMeta.create({
             date: new Date(),
-            companyName: "Vereniging Test",
+            companyName: "De Testers VZW",
+            companyContact: "Jane Doe",
             companyAddress: await new AddressFactory({}).create(),
             companyVATNumber: "BE123412341234"
         })

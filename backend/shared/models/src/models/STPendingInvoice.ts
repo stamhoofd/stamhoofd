@@ -1,6 +1,6 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct,STPricingType, Version } from '@stamhoofd/structures';
+import { calculateVATPercentage, PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct,STPricingType, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
 
@@ -89,8 +89,10 @@ export class STPendingInvoice extends Model {
                 pendingInvoice.organizationId = organization.id
                 pendingInvoice.meta = STInvoiceMeta.create({
                     companyName: organization.name,
+                    companyContact: organization.privateMeta.billingContact ?? "",
                     companyAddress: organization.address,
-                    companyVATNumber: organization.privateMeta.VATNumber
+                    companyVATNumber: organization.privateMeta.VATNumber,
+                    VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
                 })
             }
             pendingInvoice.meta.items.push(...notYetCreatedItems)
@@ -191,7 +193,7 @@ export class STPendingInvoice extends Model {
          // Create payment
         const payment = new Payment()
         payment.organizationId = null
-        payment.method = PaymentMethod.Transfer
+        payment.method = PaymentMethod.DirectDebit
         payment.status = PaymentStatus.Created
         payment.price = price
         payment.paidAt = null

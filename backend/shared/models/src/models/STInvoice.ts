@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
+import { calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -79,6 +79,7 @@ export class STInvoice extends Model {
         invoice.meta = STInvoiceMeta.create({
             date,
             companyName: organization.name,
+            companyContact: organization.privateMeta.billingContact ?? "",
             companyAddress: organization.address,
             companyVATNumber: organization.privateMeta.VATNumber,
             VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
@@ -268,6 +269,7 @@ export class STInvoice extends Model {
         const pendingInvoiceStruct = pendingInvoice ? STPendingInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STPendingInvoiceStruct.create({
             meta: STInvoiceMeta.create({
                 companyName: organization.name,
+                companyContact: organization.privateMeta.billingContact ?? "",
                 companyAddress: organization.address,
                 companyVATNumber: organization.privateMeta.VATNumber,
                 VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)

@@ -132,6 +132,9 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: StringDecoder })
     companyName: string
 
+    @field({ decoder: StringDecoder })
+    companyContact: string
+
     @field({ decoder: Address })
     companyAddress: Address
 

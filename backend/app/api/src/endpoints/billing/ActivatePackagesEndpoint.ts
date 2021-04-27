@@ -1,5 +1,5 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { MolliePayment } from "@stamhoofd/models";
@@ -10,7 +10,7 @@ import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { calculateVATPercentage,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceMeta,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, Version  } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
@@ -30,6 +30,12 @@ class Body extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, optional: true })
     proForma = false
+
+    @field({ decoder: OrganizationPatch, optional: true })
+    organizationPatch?: AutoEncoderPatchType<OrganizationStruct>
+
+    @field({ decoder: UserStruct.patchType(), optional: true })
+    userPatch?: AutoEncoderPatchType<UserStruct>
 }
 
 export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -59,6 +65,37 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 message: "You don't have permissions for this endpoint",
                 statusCode: 403
             })
+        }
+
+        // Apply patches if needed
+        if (request.body.userPatch) {
+            user.firstName = request.body.userPatch.firstName ?? user.firstName
+            user.lastName = request.body.userPatch.lastName ?? user.lastName
+
+            if (!request.body.proForma) {
+                await user.save()
+            }
+        }
+
+        // Apply patches if needed
+        if (user.firstName && user.lastName) {
+            user.organization.privateMeta.billingContact = user.firstName + " " + user.lastName
+        }
+
+        if (request.body.organizationPatch) {
+            if (request.body.organizationPatch.address) {
+                user.organization.address.patchOrPut(request.body.organizationPatch.address)
+            }
+
+            if (request.body.organizationPatch.privateMeta?.VATNumber !== undefined) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                user.organization.privateMeta.VATNumber = request.body.organizationPatch.privateMeta!.VATNumber
+            }
+
+            user.organization.name = request.body.organizationPatch.name ?? user.organization.name
+        }
+        if (!request.body.proForma) {
+            await user.organization.save()
         }
 
         return await QueueHandler.schedule("billing/invoices-"+user.organizationId, async () => {

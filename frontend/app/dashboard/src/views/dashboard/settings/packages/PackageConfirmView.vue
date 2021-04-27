@@ -33,17 +33,9 @@
                 </div>
 
                 <div>
-                    <STInputBox title="BTW-nummer" error-fields="VATNumber" :error-box="errorBox">
-                        <input
-                            v-model="VATNumber"
-                            class="input"
-                            type="url"
-                            autocomplete="vat number"
-                            placeholder="Optioneel"
-                        >
-                    </STInputBox>
+                    <VATNumberInput title="BTW-nummer" v-model="VATNumber" placeholder="Optioneel" :validator="validator" :required="false" />
                     <p class="style-description-small">
-                        Vul zeker jouw BTW-nummer in als je die hebt (dan krijg je de BTW terug via je BTW-aangifte). Laat leeg als je een vrijstelling hebt. Vul geen foute nummers in.
+                        Vul alleen een BTW-nummer in als je die hebt (dan krijg je de BTW terug via je BTW-aangifte)
                     </p>
 
                     <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -114,22 +106,28 @@
             </template>
 
 
-            <hr>
-            <h2>Wijzigingen aantal leden en domiciliering</h2>
-            
-            <p>
-                Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld:
-            </p>
+            <template v-if="hasPerMember">
+                <hr>
+                <h2>Wijzigingen aantal leden en domiciliëring/automatische incasso</h2>
+                
+                <p>
+                    Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld:
+                </p>
 
-            <p class="style-description-block">
-                Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliering afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
-            </p>
+                <p class="style-description-block">
+                    Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliëring/automatische incasso afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
+                </p>
 
-            <p class="style-description-block">
-                Het kan zijn dat we de facturatie en het inhouden van een bedrag uitstellen omdat het bedrag te laag is. Dit doen we om de administratieve overlast voor iedereen te beperken. Je kan het aantal facturen ook beperken door op voorhand al je leden in Stamhoofd te importeren (op die manier komen er later minder leden bij en blijft dat bedrag te laag om af te rekenen). Je kan op elk moment het openstaande bedrag raadplegen via de instellingen van Stamhoofd (bij facturen).
-            </p>
+                <p class="style-description-block">
+                    Het kan zijn dat we de facturatie en het inhouden van een bedrag uitstellen omdat het bedrag te laag is. Dit doen we om de administratieve overlast voor iedereen te beperken. Je kan het aantal facturen ook beperken door op voorhand al je leden in Stamhoofd te importeren (op die manier komen er later minder leden bij en blijft dat bedrag te laag om af te rekenen). Je kan op elk moment het openstaande bedrag raadplegen via de instellingen van Stamhoofd (bij facturen).
+                </p>
+            </template>
+            <template v-else>
+                <hr>
+                <h2>Algemene voorwaarden</h2>
+            </template>
 
-            <Checkbox>Ik ga akkoord met de <a href="https://www.stamhoofd.be/" target="_blank" class="inline-link">algemene verkoopsvoorwaarden</a></Checkbox>
+            <Checkbox v-model="terms">Ik ga akkoord met de <a href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank" class="inline-link">algemene voorwaarden</a></Checkbox>
 
             <hr>
 
@@ -152,10 +150,11 @@
 
 <script lang="ts">
 import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, User } from "@stamhoofd/structures";
+import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -197,7 +196,8 @@ const throttle = (func, limit) => {
         Checkbox,
         PaymentSelectionList,
         AddressInput,
-        Spinner
+        Spinner,
+        VATNumberInput
     },
     filters: {
         price: Formatter.price,
@@ -217,6 +217,8 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     loadingProForma = true
     loadingProFormaCount = 0
 
+    terms = false
+
     proFormaInvoice: STInvoice | null = null
 
     selectedPaymentMethod: PaymentMethod = PaymentMethod.Unknown
@@ -232,8 +234,11 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         // Use counter to ignore older requests
         this.loadingProFormaCount++;
 
-        console.log(this.throttledReload)
         this.throttledReload();
+    }
+
+    get hasPerMember() {
+        return !!this.selectedPackages.find(p => p.package.meta.pricingType === STPricingType.PerMember) || !!this.renewPackages.find(p => p.meta.pricingType === STPricingType.PerMember)
     }
 
     mounted() {
@@ -256,7 +261,9 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     renewPackageIds: this.renewPackages.map(p => p.id),
                     paymentMethod: this.selectedPaymentMethod,
                     includePending: true,
-                    proForma: true
+                    proForma: true,
+                    organizationPatch: this.organizationPatch.encode({ version: Version }),
+                    userPatch: this.userPatch.encode({ version: Version })
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })
@@ -314,8 +321,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     set address(address: Address) {
-        this.$set(this.organizationPatch, "address", address)
-        this.throttledLoadProForma()
+        if (this.address.toString() !== address.toString()) {
+            this.$set(this.organizationPatch, "address", address)
+            this.throttledLoadProForma()
+        }
     }
 
     get VATNumber() {
@@ -323,14 +332,15 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     set VATNumber(VATNumber: string | null) {
-        this.organizationPatch = this.organizationPatch.patch(Organization.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                VATNumber: VATNumber ? VATNumber : null
-            })
-        }))
+        if (this.VATNumber !== VATNumber) {
+            this.organizationPatch = this.organizationPatch.patch(Organization.patch({
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    VATNumber: VATNumber ? VATNumber : null
+                })
+            }))
 
-        // Todo: not yet saved: so backend needs to know the pending patches first
-        this.throttledLoadProForma()
+            this.throttledLoadProForma()
+        }
     }
 
     get paymentMethods() {
@@ -344,6 +354,19 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         this.loading = true
 
         try {
+            if (!await this.validator.validate()) {
+                this.loading = false
+                return
+            }
+
+            if (!this.terms) {
+                throw new SimpleError({
+                    code: "terms_required",
+                    message: "The terms should be accepted",
+                    human: "Je moet de algemene voorwaarden accepteren voor je een pakket kan activeren",
+                    field: "terms"
+                })
+            }
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/billing/activate-packages",
@@ -351,7 +374,9 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     bundles: this.selectedPackages.map(p => p.bundle),
                     renewPackageIds: this.renewPackages.map(p => p.id),
                     includePending: true,
-                    paymentMethod: this.selectedPaymentMethod
+                    paymentMethod: this.selectedPaymentMethod,
+                    organizationPatch: this.organizationPatch.encode({ version: Version }),
+                    userPatch: this.userPatch.encode({ version: Version })
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })
@@ -363,7 +388,6 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
-
 
         this.loading = false
     }

@@ -1,6 +1,6 @@
 <template>
-    <STInputBox :title="title" error-fields="iban" :error-box="errorBox">
-        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
+    <STInputBox :title="title" error-fields="VATNumber" :error-box="errorBox">
+        <input v-model="VATNumberRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 
@@ -21,7 +21,7 @@ export default class IBANInput extends Vue {
     @Prop({ default: null }) 
     validator: Validator | null
     
-    ibanRaw = "";
+    VATNumberRaw = "";
     valid = true;
 
     @Prop({ default: null })
@@ -30,10 +30,10 @@ export default class IBANInput extends Vue {
     @Prop({ default: true })
     required!: boolean
 
-    @Prop({ default: "Bv. BE71 6316 1793 1969" })
+    @Prop({ default: "Vul jouw BTW-nummer hier in" })
     placeholder!: string
 
-    @Prop({ default: "email" })
+    @Prop({ default: "vat number" })
     autocomplete!: string
 
     errorBox: ErrorBox | null = null
@@ -43,7 +43,7 @@ export default class IBANInput extends Vue {
         if (val === null) {
             return
         }
-        this.ibanRaw = val
+        this.VATNumberRaw = val
     }
 
     mounted() {
@@ -53,7 +53,7 @@ export default class IBANInput extends Vue {
             })
         }
 
-        this.ibanRaw = this.value ?? ""
+        this.VATNumberRaw = this.value ?? ""
     }
 
     destroyed() {
@@ -63,38 +63,31 @@ export default class IBANInput extends Vue {
     }
 
     async validate() {
-        this.ibanRaw = this.ibanRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
+        this.VATNumberRaw = this.VATNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
-        if (!this.required && this.ibanRaw.length == 0) {
+        if (!this.required && this.VATNumberRaw.length == 0) {
             this.errorBox = null
             this.$emit("input", null)
             return true
         }
 
-        const ibantools = await import(/* webpackChunkName: "ibantools" */ 'ibantools');
-        const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
-       
+        const jsvat = await import(/* webpackChunkName: "jsvat" */ 'jsvat');
+        const result = jsvat.checkVAT(this.VATNumberRaw, [jsvat.belgium, jsvat.netherlands]);
         
-        if (!ibantools.isValidIBAN(iban)) {
+        if (!result.isValid) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
-                "field": "iban"
+                "message": "Ongeldig BTW-nummer: "+this.VATNumberRaw,
+                "field": "VATNumber"
             }))
             return false
 
         } else {
-            this.ibanRaw = ibantools.friendlyFormatIBAN(iban)
-            this.$emit("input", this.ibanRaw)
+            this.VATNumberRaw = result.value ?? this.VATNumberRaw
+            this.$emit("input", this.VATNumberRaw)
             this.errorBox = null
             return true
         }
     }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-
-</style>
