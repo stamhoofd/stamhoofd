@@ -1,10 +1,11 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { File, STInvoiceItem } from "@stamhoofd/structures";
+import { File, PaymentMethod, PaymentMethodHelper, STInvoiceItem } from "@stamhoofd/structures";
 import PDFDocument from 'pdfkit';
 import { v4 as uuidv4 } from "uuid";
 import AWS from 'aws-sdk';
 import { STInvoice } from "../models/STInvoice";
 import { Formatter } from "@stamhoofd/utility";
+import { Payment } from "../models/Payment";
 
 // 1 mm
 const MM = 2.834666666666667
@@ -29,6 +30,7 @@ const NORMAL_START_Y = PAGE_MARGIN;
 
 export class InvoiceBuilder {
     invoice: STInvoice
+    payment: Payment | null = null
     document: PDFKit.PDFDocument
 
     private remainingItems: STInvoiceItem[]
@@ -52,6 +54,7 @@ export class InvoiceBuilder {
             })
         }
 
+        this.payment = (this.invoice.paymentId ? await Payment.getByID(this.invoice.paymentId) : null) ?? null
         
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             try {
@@ -389,21 +392,22 @@ export class InvoiceBuilder {
 
         y = this.document.y - 12
         this.document.fillColor(COLOR_GRAY_DARK)
-        this.document.translate(PAGE_MARGIN, y).path("M1.83691 4.39455C0.42209 6.04518 0.67106 8.20419 1.5693 9.24111C2.22727 8.2989 3.15346 7.54189 4.0855 6.78009C5.34645 5.74946 6.61812 4.71007 7.25085 3.19149C6.97654 4.83737 6.01424 5.92035 5.01992 7.03937C4.60105 7.51076 4.17651 7.98856 3.79531 8.51752C3.69684 8.60684 3.60336 8.69528 3.51692 8.78172C2.52065 9.77798 1.95631 11.086 1.58233 11.9835C1.45455 12.2902 1.59957 12.6424 1.90625 12.7702C2.21292 12.8979 2.56512 12.7529 2.6929 12.4462C3.00855 11.6887 3.4012 10.7978 3.99293 10.0538C8.76439 10.3184 10.0653 5.37356 8.15325 0.183655C7.03892 1.61637 5.87387 2.08317 4.73863 2.53802C3.72892 2.94257 2.7428 3.33768 1.83691 4.39455Z").fill('even-odd')
+        this.document.translate(PAGE_MARGIN, y).path("M1.8594 4C0.595975 5.474 0.729268 7.37477 1.45864 8.41559C2.31277 6.33064 4.20525 5.17695 5.74309 4.23946L5.74309 4.23945C5.98821 4.09003 6.22431 3.9461 6.44576 3.80476C6.29794 4.07881 6.10193 4.34476 5.85783 4.62373C5.54762 4.97826 5.19162 5.32114 4.77911 5.71844L4.7791 5.71845L4.77909 5.71846C4.54683 5.94216 4.29666 6.18311 4.02667 6.4531C3.20963 7.27014 2.8908 8.16945 2.6362 8.96962C2.61563 9.03426 2.59553 9.09797 2.57571 9.1608L2.57566 9.16096C2.34459 9.89334 2.15129 10.506 1.6988 11.0716C1.50165 11.3181 1.54161 11.6777 1.78804 11.8748C2.03448 12.072 2.39408 12.032 2.59122 11.7856C3.18387 11.0448 3.43836 10.2317 3.65991 9.5238C3.677 9.4692 3.69389 9.41523 3.71072 9.36197C8.40391 9.76158 9.7017 5.00056 7.85939 0C6.80087 1.36096 5.69417 1.80438 4.61579 2.23645C3.65665 2.62074 2.71992 2.99606 1.8594 4Z").fill('even-odd')
         
         this.document.translate(-PAGE_MARGIN, -y)
-        const hh = this.document.heightOfString("Denk aan de natuur. Druk deze factuur niet af.", { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
-        this.document.text("Denk aan de natuur. Druk deze factuur niet af.", PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
+        const hh = this.document.heightOfString("Hou deze factuur bij voorkeur digitaal bij", { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
+        this.document.text("Hou deze factuur bij voorkeur digitaal bij", PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
 
-        y -= 10*MM
-        this.document.fillColor(COLOR_PRIMARY)
-        this.document.translate(PAGE_MARGIN, y).path("M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z").fill('even-odd')
-        
-        this.document.translate(-PAGE_MARGIN, -y)
-        const payText = "Deze factuur werd al betaald via "+"?"
-        const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2  })
-        this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left' })
-
+        if (this.payment && this.payment.method) {
+            y -= 10*MM
+            this.document.fillColor(COLOR_PRIMARY)
+            this.document.translate(PAGE_MARGIN, y).path("M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z").fill('even-odd')
+            
+            this.document.translate(-PAGE_MARGIN, -y)
+            const payText = "Deze factuur werd al betaald via "+PaymentMethodHelper.getName(this.payment.method)
+            const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2  })
+            this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left' })
+        }
     }
 
     drawPageFooter() {

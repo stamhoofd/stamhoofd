@@ -1,5 +1,6 @@
-import { Address, STInvoiceItem, STInvoiceMeta } from "@stamhoofd/structures";
+import { Address, PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta } from "@stamhoofd/structures";
 import { AddressFactory } from "../factories/AddressFactory";
+import { Payment } from "../models/Payment";
 import { STInvoice } from "../models/STInvoice";
 import { InvoiceBuilder } from "./InvoiceBuilder";
 
@@ -13,6 +14,13 @@ describe("InvoiceBuilder", () => {
             companyAddress: await new AddressFactory({}).create(),
             companyVATNumber: "BE123412341234"
         })
+
+        const payment = new Payment()
+        payment.method = PaymentMethod.Bancontact
+        payment.status = PaymentStatus.Succeeded
+        payment.price = 123
+        await payment.save()
+        invoice.paymentId = payment.id
 
         for (let index = 0; index < 100; index++) {
             const amount = Math.floor(Math.random()*999) + 1
