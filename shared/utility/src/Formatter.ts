@@ -15,6 +15,10 @@ export class Formatter {
         return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
     }
 
+    static fileSlug(name: string): string {
+        return this.removeAccents(name).replace(/[^A-Za-z0-9]+/g, " ").trim()
+    }
+
     /**
      * 1 = january
      */
