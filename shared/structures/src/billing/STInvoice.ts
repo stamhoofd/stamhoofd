@@ -88,7 +88,7 @@ export class STInvoiceItem extends AutoEncoder {
 
             if (totalDays > 366) {
                 // Extended
-                throw new Error("Period > 1 year not supported yet")
+                throw new Error("Period > 1 year not supported yet: "+totalDays)
             } else {
                 if (pack.meta.pricingType === STPricingType.PerMember) {
                     unitPrice = Math.min(unitPrice, Math.round(unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)))

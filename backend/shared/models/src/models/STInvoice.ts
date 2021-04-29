@@ -266,7 +266,12 @@ export class STInvoice extends Model {
         const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
 
         // Generate temporary pending invoice items for the current state without adding them IRL
-        const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+        let notYetCreatedItems: STInvoiceItem[] = []
+        try {
+            notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+        } catch (e) {
+            console.error(e)
+        }
         const pendingInvoiceStruct = pendingInvoice ? STPendingInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STPendingInvoiceStruct.create({
             meta: STInvoiceMeta.create({
                 companyName: organization.name,
