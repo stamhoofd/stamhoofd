@@ -69,7 +69,11 @@ export class STInvoiceItem extends AutoEncoder {
         /// When pricing type is memebrs, the price is calculated per year.
         /// If a shorter period is remaining, we give a discount in order
         /// to no need to handle it more complicated
-        const now = date ?? new Date()
+        let now = date ?? new Date()
+        if (now < pack.meta.startDate) {
+            // When creating a new package, we sometimes buy it for the future, so use that date instead of now
+            now = pack.meta.startDate
+        }
 
         if (pack.validUntil && pack.meta.pricingType !== STPricingType.Fixed) {
             const totalDays = Math.round((pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -94,7 +98,7 @@ export class STInvoiceItem extends AutoEncoder {
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.validUntil ? ("Van "+Formatter.date(now, true)+" tot "+Formatter.date(pack.validUntil, true)) : "",
+            description: pack.validUntil ? ("Van "+Formatter.date(pack.meta.startDate, true)+" tot "+Formatter.date(pack.validUntil, true)) : ("Vanaf "+Formatter.date(pack.meta.startDate, true)),
             package: pack,
             date: now,
             unitPrice: unitPrice,

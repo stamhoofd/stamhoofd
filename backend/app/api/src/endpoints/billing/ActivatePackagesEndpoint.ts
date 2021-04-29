@@ -99,9 +99,26 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         return await QueueHandler.schedule("billing/invoices-"+user.organizationId, async () => {
-            // Create packages
-            const packages = request.body.bundles.map(bundle => STPackageBundleHelper.getCurrentPackage(bundle))
+            const currentPackages = await STPackage.getForOrganization(user.organization.id)
 
+            // Create packages
+            const packages: STPackageStruct[] = [];
+            for (const bundle of request.body.bundles ){
+                // Renew after currently running packages
+                let date = new Date()
+
+                // Do we have a collision?
+                for (const currentPack of currentPackages) {
+                    if (currentPack.validUntil !== null && !STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
+                        const end = currentPack.validUntil
+                        if (end > date) {
+                            date = end
+                        }
+                    }
+                }
+                packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date))
+            }
+            
             const invoice = STInvoice.createFor(user.organization)
             const date = invoice.meta.date!
 

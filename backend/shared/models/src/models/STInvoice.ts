@@ -8,6 +8,7 @@ import { Payment } from "./Payment";
 import { STPackage } from "./STPackage";
 import { STPendingInvoice } from "./STPendingInvoice";
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
+import { Sorter } from "@stamhoofd/utility";
 
 
 export class STInvoice extends Model {
@@ -287,6 +288,7 @@ export class STInvoice extends Model {
                 pendingInvoiceStruct.invoice = await invoice.getStructure()
             }
         }
+        invoices.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
 
         const invoiceStructures: STInvoiceStruct[] = []
         for (const invoice of invoices) {

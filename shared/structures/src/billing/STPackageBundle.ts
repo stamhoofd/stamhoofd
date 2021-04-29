@@ -89,11 +89,11 @@ export class STPackageBundleHelper {
     /**
      * Create a new package for this type and return the pricing
      */
-    static getCurrentPackage(bundle: STPackageBundle): STPackage {
+    static getCurrentPackage(bundle: STPackageBundle, date: Date): STPackage {
         switch (bundle) {
             case STPackageBundle.Members: {
                 // 1 year valid
-                const validUntil = new Date()
+                const validUntil = new Date(date)
                 validUntil.setFullYear(validUntil.getFullYear() + 1)
 
                 // Remove (= not renewable) if not renewed after 3 months
@@ -109,14 +109,14 @@ export class STPackageBundleHelper {
                         minimumAmount: 59*2,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
-                        startDate: new Date(),
+                        startDate: new Date(date),
                     })
                 })
             }
 
             case STPackageBundle.Webshops: {
                 // 1 year valid
-                const validUntil = new Date()
+                const validUntil = new Date(date)
                 validUntil.setFullYear(validUntil.getFullYear() + 1)
 
                 // Remove (= not renewable) if not renewed after 3 months
@@ -132,14 +132,14 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: true,
                         pricingType: STPricingType.PerYear,
-                        startDate: new Date()
+                        startDate: new Date(date)
                     })
                 })
             }
 
             case STPackageBundle.SingleWebshop: {
                 // Disable functions after two months
-                const validUntil = new Date()
+                const validUntil = new Date(date)
                 validUntil.setMonth(validUntil.getMonth() + 2)
 
                 // Remove if not valid anymore
@@ -154,14 +154,14 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date()
+                        startDate: new Date(date)
                     })
                 })
             }
 
             case STPackageBundle.TrialMembers: {
                 // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date()
+                const validUntil = new Date(date)
                 validUntil.setDate(validUntil.getDate() + 14)
 
                 // Remove if not valid anymore
@@ -176,7 +176,7 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date(),
+                        startDate: new Date(date),
                         canDeactivate: true
                     })
                 })
@@ -184,7 +184,7 @@ export class STPackageBundleHelper {
 
             case STPackageBundle.TrialWebshops: {
                  // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date()
+                const validUntil = new Date(date)
                 validUntil.setDate(validUntil.getDate() + 14)
 
                 // Remove if not valid anymore
@@ -199,7 +199,7 @@ export class STPackageBundleHelper {
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date(),
+                        startDate: new Date(date),
                         canDeactivate: true
                     })
                 })

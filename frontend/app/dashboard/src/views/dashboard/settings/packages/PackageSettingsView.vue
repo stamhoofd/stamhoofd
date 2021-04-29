@@ -175,6 +175,8 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
 
     updatePackages() {
         const packages: SelectablePackage[] = []
+        const limit = new Date()
+        limit.setDate(limit.getDate() + 14)
         for (const bundle of Object.values(STPackageBundle)) {
             if (!STPackageBundleHelper.isPublic(bundle)) {
                 continue
@@ -182,7 +184,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
 
             let isCombineable = true
             for (const p of this.status!.packages) {
-                if (!STPackageBundleHelper.isCombineable(bundle, p)) {
+                if (!STPackageBundleHelper.isCombineable(bundle, p) && (p.validUntil === null || p.validUntil > limit)) {
                     isCombineable = false
                     break;
                 }
@@ -193,7 +195,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
             }
 
             try {
-                const pack = STPackageBundleHelper.getCurrentPackage(bundle)
+                const pack = STPackageBundleHelper.getCurrentPackage(bundle, new Date())
                 packages.push(new SelectablePackage(pack, bundle))
             } catch (e) {
                 console.error(e)
