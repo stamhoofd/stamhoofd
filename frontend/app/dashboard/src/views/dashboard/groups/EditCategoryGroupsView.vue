@@ -62,7 +62,7 @@
                 </STList>
             </template>
 
-            <p v-if="categories.length == 0">
+            <p v-if="categories.length == 0 && !isRoot">
                 <button class="button text" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
