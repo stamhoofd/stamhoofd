@@ -35,8 +35,9 @@
 
                     <div>
                         <STInputBox title="Jouw tegoed">
-                            <p class="style-price-big">
-                                {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
+                            <p class="button style-price-big" @click="showCreditsHistory">
+                                <span>{{ balance | price }}</span>
+                                <span v-if="status.credits.length > 0" class="icon arrow-right" />
                             </p>
                         </STInputBox>
                         <p class="style-description-small">
@@ -80,6 +81,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { IN } from "../../../../pdfkit.standalone";
+import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
 @Component({
@@ -128,6 +130,16 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = false
     }
 
+    get balance() {
+        return this.status?.credits.slice().reverse().reduce((t, c) => {
+            const l = t + c.change
+            if (l < 0) {
+                return 0
+            }
+            return l
+        }, 0) ?? 0
+    }
+
     downloadInvoice(invoice: STInvoice) {
         const url = invoice.meta.pdf?.getPublicPath()
 
@@ -142,6 +154,14 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
             new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via hallo@stamhoofd.be als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
         }
         
+    }
+
+    showCreditsHistory() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(CreditsView, {
+                status: this.status
+            })
+        }).setDisplayStyle("popup"))
     }
 
     openPendingInvoice() {

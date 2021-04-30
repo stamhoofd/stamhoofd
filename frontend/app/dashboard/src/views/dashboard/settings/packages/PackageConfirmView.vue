@@ -33,7 +33,7 @@
                 </div>
 
                 <div>
-                    <VATNumberInput title="BTW-nummer" v-model="VATNumber" placeholder="Optioneel" :validator="validator" :required="false" />
+                    <VATNumberInput v-model="VATNumber" title="BTW-nummer" placeholder="Optioneel" :validator="validator" :required="false" />
                     <p class="style-description-small">
                         Vul alleen een BTW-nummer in als je die hebt (dan krijg je de BTW terug via je BTW-aangifte)
                     </p>
@@ -127,7 +127,9 @@
                 <h2>Algemene voorwaarden</h2>
             </template>
 
-            <Checkbox v-model="terms">Ik ga akkoord met de <a href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank" class="inline-link">algemene voorwaarden</a></Checkbox>
+            <Checkbox v-model="terms">
+                Ik ga akkoord met de <a href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank" class="inline-link">algemene voorwaarden</a>
+            </Checkbox>
 
             <hr>
 
@@ -151,15 +153,15 @@
 <script lang="ts">
 import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import { SelectablePackage } from "./PackageSettingsView.vue";
+import PackageSettingsView, { SelectablePackage } from "./PackageSettingsView.vue";
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -383,7 +385,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
             if (response.data.paymentUrl) {
                 window.location.href = response.data.paymentUrl;
             } else {
-                // Go to invoice page
+                // Reload organization
+                SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
+                new CenteredMessage("Gelukt", "Het pakket wordt meteen geactiveerd").addCloseButton().show()
+                this.navigationController!.push(new ComponentWithProperties(PackageSettingsView), true, this.navigationController!.components.length, true)
             }
         } catch (e) {
             this.errorBox = new ErrorBox(e)

@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
+import { STCredit } from "./STCredit";
 
 import { STInvoice, STPendingInvoice } from "./STInvoice";
 import { STPackage } from "./STPackage";
@@ -12,4 +13,7 @@ export class STBillingStatus extends AutoEncoder {
 
     @field({ decoder: STPendingInvoice, nullable: true })
     pendingInvoice: STPendingInvoice | null
+
+    @field({ decoder: new ArrayDecoder(STCredit) })
+    credits: STCredit[]
 }

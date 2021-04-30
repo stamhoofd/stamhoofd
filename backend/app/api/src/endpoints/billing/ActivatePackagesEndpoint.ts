@@ -2,7 +2,7 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType 
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { MolliePayment } from "@stamhoofd/models";
+import { MolliePayment, STCredit } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { Registration } from "@stamhoofd/models";
 import { STInvoice } from "@stamhoofd/models";
@@ -199,11 +199,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
             }
 
-            // Todo: apply credits
-
             // Calculate price
-            let price = invoice.meta.priceWithVAT
-            if (price > 0 || request.body.includePending) {
+            if (invoice.meta.priceWithVAT > 0 || request.body.includePending) {
                 
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue
@@ -221,12 +218,18 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     // Add the items to our invoice
                     invoice.meta.items.push(...pendingInvoice.meta.items)
                 }
-
-                // Update price
-                price = invoice.meta.priceWithVAT
             }
 
-            if (price > 0 && !request.body.proForma) {
+            // Apply credits
+            await STCredit.applyCredits(user.organization.id, invoice, request.body.proForma)
+            
+            const price = invoice.meta.priceWithVAT
+
+            if (price < 0) {
+                throw new Error("Unexpected negative price")
+            }
+
+            if (!request.body.proForma) {
                 // Create payment
                 const payment = new Payment()
                 payment.organizationId = null
@@ -242,6 +245,14 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 await invoice.save()
 
                 const description = "Stamhoofd - "+invoice.id
+
+                if (price == 0) {
+                    await invoice.markPaid()
+                    return new Response(STInvoiceResponse.create({
+                        paymentUrl: undefined,
+                        invoice: await invoice.getStructure()
+                    }));
+                }
                     
                 // Mollie payment is required
                 const apiKey = process.env.MOLLIE_API_KEY
@@ -297,25 +308,10 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 }));
             }
 
-            if (request.body.proForma) {
-                // We don't save the invoice, just return it
-                return new Response(STInvoiceResponse.create({
-                    paymentUrl: undefined,
-                    invoice: await invoice.getStructure()
-                }));
-            }
-
-            // No need to save the invoice, since it was free
-
-            // Validate all packages
-            for (const model of models) {
-                await model.activate()
-            }
-
-            await STPackage.updateOrganizationPackages(user.organizationId)
+            // We don't save the invoice, just return it
             return new Response(STInvoiceResponse.create({
                 paymentUrl: undefined,
-                invoice: undefined
+                invoice: await invoice.getStructure()
             }));
         });
     }

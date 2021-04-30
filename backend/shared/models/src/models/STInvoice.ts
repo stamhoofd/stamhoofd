@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User } from '@stamhoofd/structures';
+import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -9,6 +9,7 @@ import { STPackage } from "./STPackage";
 import { STPendingInvoice } from "./STPendingInvoice";
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 import { Sorter } from "@stamhoofd/utility";
+import { STCredit } from "./STCredit";
 
 
 export class STInvoice extends Model {
@@ -29,6 +30,13 @@ export class STInvoice extends Model {
      */
     @column({ foreignKey: STInvoice.organization, type: "string", nullable: true })
     organizationId: string | null;
+
+    /**
+     * An associated STCredit, that was used to remove credits from the user's credits.
+     * If the invoice is marked as failed, we need to delete this one
+     */
+    @column({ type: "string", nullable: true })
+    creditId: string | null = null
 
     /**
      * Note: always create a new invoice for failed payments. We never create an actual invoice until we received the payment
@@ -132,7 +140,21 @@ export class STInvoice extends Model {
         }
 
         this.paidAt = new Date()
-        await this.assignNextNumber()
+
+        if (this.meta.priceWithoutVAT > 0) {
+            // Only assign a number if it was an non empty invoice
+            await this.assignNextNumber()
+        }
+
+        if (this.creditId !== null) {
+            const credit = await STCredit.getByID(this.creditId)
+            if (credit) {
+                // This credit was used to pay this invoice (partially)
+                credit.description = this.number !== null ? "Factuur "+this.number : "Betaling "+this.id
+                credit.expireAt = null;
+                await credit.save()
+            }
+        }
 
         const packages = await this.getPackages()
 
@@ -190,7 +212,9 @@ export class STInvoice extends Model {
             await STPackage.updateOrganizationPackages(this.organizationId)
         }
         
-        await this.generatePdf()
+        if (this.number !== null) {
+            await this.generatePdf()
+        }
     }
 
     async assignNextNumber() {
@@ -252,6 +276,15 @@ export class STInvoice extends Model {
             // Force regeneration of organization meta data
             await STPackage.updateOrganizationPackages(this.organizationId)
         }
+
+        if (this.creditId !== null) {
+            const credit = await STCredit.getByID(this.creditId)
+            if (credit && (credit.expireAt === null || credit.expireAt > new Date())) {
+                // Expire usage (do not delete to keep the relation for debugging and recovery)
+                credit.expireAt = new Date(new Date().getTime() - 1000);
+                await credit.save()
+            }
+        }
     }
 
 
@@ -300,10 +333,13 @@ export class STInvoice extends Model {
             invoiceStructures.push(await invoice.getStructure())
         }
 
+        const credits = await STCredit.getForOrganization(organization.id)
+
         return STBillingStatus.create({
             packages: packages.map(pack => STPackageStruct.create(pack)),
             invoices: invoiceStructures,
-            pendingInvoice: pendingInvoiceStruct
+            pendingInvoice: pendingInvoiceStruct,
+            credits: credits.map(c => STCreditStruct.create(c))
         });
     }
 }

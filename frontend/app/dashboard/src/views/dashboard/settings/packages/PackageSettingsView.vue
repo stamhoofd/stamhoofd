@@ -149,7 +149,9 @@ export class SelectablePackage {
     },
     filters: {
         price: Formatter.price,
-        date: Formatter.date.bind(Formatter)
+        date: (date: Date) => {
+            return Formatter.date(date, true)
+        }
     }
 })
 export default class PackageSettingsView extends Mixins(NavigationMixin) {

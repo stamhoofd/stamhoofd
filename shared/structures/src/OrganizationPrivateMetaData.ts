@@ -91,6 +91,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     emails: OrganizationEmail[] = [];
 
     /**
+     * @deprecated
      * Credits in cents
      */
     @field({ decoder: new ArrayDecoder(CreditItem), version: 23 })
