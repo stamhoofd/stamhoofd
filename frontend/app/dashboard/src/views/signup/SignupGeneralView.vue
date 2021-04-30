@@ -8,7 +8,7 @@
             <h1>
                 Nieuwe vereniging aansluiten bij Stamhoofd
             </h1>
-            <p>Een account maken duurt niet lang en is gratis. Je kiest zelf welke functies je gebruikt.</p>
+            <p>Met een account kan je alle functies eerst gratis uitproberen zolang je nodig hebt.</p>
 
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
