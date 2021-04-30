@@ -88,7 +88,6 @@ export class STPackage extends Model {
                 const builder = new GroupBuilder(organization)
                 await builder.build()
             }
-            console.log(map)
         } else {
             console.error("Couldn't find organization when updating packages "+organizationId)
         }

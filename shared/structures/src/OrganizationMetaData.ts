@@ -40,6 +40,10 @@ export class OrganizationPackages extends AutoEncoder {
         return !this.isActive(STPackageType.Members) && !this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
     }
 
+    get isActivitiesTrial() {
+        return !this.isActive(STPackageType.Members) && this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
+    }
+
     get isWebshopsTrial() {
         return !this.isActive(STPackageType.Webshops) && !this.isActive(STPackageType.SingleWebshop) && this.isActive(STPackageType.TrialWebshops)
     }

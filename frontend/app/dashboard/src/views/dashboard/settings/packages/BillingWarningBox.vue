@@ -32,6 +32,14 @@
             </button>
         </p>
 
+        <p v-if="!shouldFilter('members') && isActivitiesTrial" class="warning-box selectable with-button" @click="openPackages">
+            Je test momenteel inschrijvingen voor activiteiten. Activeer het 'ledenadministratie' pakket als je beslist om deze functie in gebruik te nemen.
+
+            <button class="button text">
+                Activeren
+            </button>
+        </p>
+
         <p v-if="!shouldFilter('members') && isNearing(membersDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
 
@@ -91,6 +99,10 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
 
     get isMembersTrial() {
         return this.organization.meta.packages.isMembersTrial
+    }
+
+    get isActivitiesTrial() {
+        return this.organization.meta.packages.isActivitiesTrial
     }
 
     get packageTypeList() {
