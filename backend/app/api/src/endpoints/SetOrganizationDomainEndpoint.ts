@@ -1,10 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Token } from '@stamhoofd/models';
 import { DNSRecord, DNSRecordType, Organization as OrganizationStruct,OrganizationDomains } from "@stamhoofd/structures";
 import NodeRSA from 'node-rsa';
-
-import { Token } from '@stamhoofd/models';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -80,12 +79,12 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
 
             // We don't keep the current register domain because we have no way to validate the old DNS-records
-            if (organization.registerDomain !== organization.privateMeta.pendingRegisterDomain) {
+            if (organization.privateMeta.pendingRegisterDomain === null || organization.registerDomain !== organization.privateMeta.pendingRegisterDomain) {
                 organization.registerDomain = null
             }
 
             // We don't keep the current mail domain because we have no way to validate the old DNS-records
-            if (organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
+            if (organization.privateMeta.pendingMailDomain === null || organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
                 organization.privateMeta.mailDomain = null
             }
 
