@@ -165,6 +165,9 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     openPendingInvoice() {
+        if (!this.status?.pendingInvoice) {
+            return
+        }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(InvoiceDetailsView, {
                 invoice: this.status?.pendingInvoice

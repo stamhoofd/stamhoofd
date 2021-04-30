@@ -89,7 +89,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {    
 
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.Transfer) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.DirectDebit) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {

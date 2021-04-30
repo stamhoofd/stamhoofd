@@ -180,7 +180,7 @@ export class STPendingInvoice extends Model {
         // Step 1: create the invoice
         const invoice = STInvoice.createFor(organization)
 
-        invoice.meta.items = pendingInvoice.meta.items
+        invoice.meta.items = pendingInvoice.meta.items.slice() // make a copy (needed to prevent mutating pending invoice and invoice at the same time)
 
         if (invoice.meta.priceWithVAT == 0) {
             throw new SimpleError({
@@ -209,6 +209,10 @@ export class STPendingInvoice extends Model {
         const description = "Stamhoofd - "+invoice.id
 
         if (price <= 0) {
+            // Needs to happen before markPaid! (because the pending invoice will get modified)
+            pendingInvoice.invoiceId = invoice.id
+            await pendingInvoice.save()
+
             await invoice.markPaid()
         } else {
             // Mollie payment is required
@@ -244,10 +248,10 @@ export class STPendingInvoice extends Model {
             dbPayment.paymentId = payment.id
             dbPayment.mollieId = molliePayment.id
             await dbPayment.save();
+
+            // Only if all went okay
+            pendingInvoice.invoiceId = invoice.id
+            await pendingInvoice.save()
         }
-                    
-        // Only if all went okay
-        pendingInvoice.invoiceId = invoice.id
-        await pendingInvoice.save()
     }
 }
