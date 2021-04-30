@@ -84,7 +84,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             }
 
             // We don't keep the current mail domain because we have no way to validate the old DNS-records
-            if (organization.privateMeta.pendingMailDomain === null || organization.registerDomain !== organization.privateMeta.pendingMailDomain) {
+            if (organization.privateMeta.pendingMailDomain === null || organization.privateMeta.mailDomain !== organization.privateMeta.pendingMailDomain) {
                 organization.privateMeta.mailDomain = null
             }
 
