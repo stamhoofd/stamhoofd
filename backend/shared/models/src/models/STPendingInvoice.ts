@@ -10,6 +10,7 @@ import { Registration } from "./Registration";
 import { STInvoice } from "./STInvoice";
 import { STPackage } from "./STPackage";
 import { MolliePayment } from "./MolliePayment";
+import { STCredit } from "./STCredit";
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:
@@ -181,14 +182,17 @@ export class STPendingInvoice extends Model {
 
         invoice.meta.items = pendingInvoice.meta.items
 
-        let price = invoice.meta.priceWithVAT
-        if (price == 0) {
+        if (invoice.meta.priceWithVAT == 0) {
             throw new SimpleError({
                 code: "no_pending_invoice",
                 message: "No pending invoice",
                 human: "Je kan op dit moment niet afrekenen omdat er geen openstaand bedrag is."
             })
         }
+
+        await STCredit.applyCredits(organization.id, invoice, false)
+
+        const price = invoice.meta.priceWithVAT
         
          // Create payment
         const payment = new Payment()
@@ -203,42 +207,46 @@ export class STPendingInvoice extends Model {
         await invoice.save()
 
         const description = "Stamhoofd - "+invoice.id
-                    
-        // Mollie payment is required
-        const apiKey = process.env.MOLLIE_API_KEY
-        if (!apiKey) {
-            throw new SimpleError({
-                code: "",
-                message: "Betalingen zijn tijdelijk onbeschikbaar"
-            })
-        }
-        const mollieClient = createMollieClient({ apiKey });
 
-        const molliePayment = await mollieClient.payments.create({
-            amount: {
-                currency: 'EUR',
-                value: (price / 100).toFixed(2)
-            },
-            method: molliePaymentMethod.directdebit,
-            description,
-            customerId: organization.serverMeta.mollieCustomerId,
-            sequenceType: SequenceType.recurring,
-            redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
-            webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-            metadata: {
-                invoiceId: invoice.id,
-                paymentId: payment.id,
+        if (price <= 0) {
+            await invoice.markPaid()
+        } else {
+            // Mollie payment is required
+            const apiKey = process.env.MOLLIE_API_KEY
+            if (!apiKey) {
+                throw new SimpleError({
+                    code: "",
+                    message: "Betalingen zijn tijdelijk onbeschikbaar"
+                })
             }
-        });
-        console.log(molliePayment)
+            const mollieClient = createMollieClient({ apiKey });
 
-        // Save payment
-        const dbPayment = new MolliePayment()
-        dbPayment.paymentId = payment.id
-        dbPayment.mollieId = molliePayment.id
-        await dbPayment.save();
+            const molliePayment = await mollieClient.payments.create({
+                amount: {
+                    currency: 'EUR',
+                    value: (price / 100).toFixed(2)
+                },
+                method: molliePaymentMethod.directdebit,
+                description,
+                customerId: organization.serverMeta.mollieCustomerId,
+                sequenceType: SequenceType.recurring,
+                redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
+                webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                metadata: {
+                    invoiceId: invoice.id,
+                    paymentId: payment.id,
+                }
+            });
+            console.log(molliePayment)
 
-        // Only if everhting went okay
+            // Save payment
+            const dbPayment = new MolliePayment()
+            dbPayment.paymentId = payment.id
+            dbPayment.mollieId = molliePayment.id
+            await dbPayment.save();
+        }
+                    
+        // Only if all went okay
         pendingInvoice.invoiceId = invoice.id
         await pendingInvoice.save()
     }
