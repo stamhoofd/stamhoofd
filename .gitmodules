@@ -5,3 +5,7 @@ url = dummy_string_to_satisfy_vscode
 [submodule "stamhoofd-admin-frontend"]
 path = frontend/app/admin
 url = dummy_string_to_satisfy_vscode
+
+[submodule "stamhoofd-devops"]
+path = devops
+url = dummy_string_to_satisfy_vscode
