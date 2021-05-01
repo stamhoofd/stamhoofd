@@ -29,6 +29,7 @@
         "frontend/*.d.ts", 
         "shared/**/*.ts",
         "backend/**/*.ts",
+        "*.d.ts",
     ],
     "exclude": [
         "node_modules"

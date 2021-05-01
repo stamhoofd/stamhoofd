@@ -123,7 +123,7 @@ export default class SegmentedControl extends Vue {
             }
 
             &::after {
-                //background: white;
+                //background: var(--color-white, white);
                 content: attr(data-text);
                 position: absolute;
                 left: 10px;
@@ -178,7 +178,7 @@ export default class SegmentedControl extends Vue {
             left: 0;
             top: 0;
             bottom: 0;
-            background: white;
+            background: $color-white-highlight;
             border-radius: 4px;
             transition: left 0.25s;
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);

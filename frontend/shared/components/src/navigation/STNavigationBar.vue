@@ -154,7 +154,7 @@ export default class STNavigationBar extends Vue {
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 10px;
-    background: white;
+    background: var(--color-white, white);
     background: var(--color-current-background, white);
     z-index: 11;
 

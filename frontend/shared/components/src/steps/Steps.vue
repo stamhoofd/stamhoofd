@@ -63,7 +63,7 @@ export default class Steps extends Vue {
     }
 
     async shouldNavigateAway() {
-        if (await CenteredMessage.confirm("Ben je zeker dat je wilt annuleren?", "Annuleren")) {
+        if (await CenteredMessage.confirm("Ben je zeker dat je wilt teruggaan?", "Teruggaan")) {
             return true;
         }
         return false;

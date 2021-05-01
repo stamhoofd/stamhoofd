@@ -80,7 +80,7 @@ export class Organization extends AutoEncoder {
                 })
             }
 
-            if (!this.meta.modules.useActivities && tree.categories.length > 1) {
+            if (!this.meta.packages.useActivities && tree.categories.length > 1) {
                 tree.categories = [tree.categories[0]]
             }
             return tree
@@ -134,6 +134,10 @@ export class Organization extends AutoEncoder {
                 })
             }
 
+            if (!this.meta.packages.useActivities && tree.categories.length > 1) {
+                tree.categories = [tree.categories[0]]
+            }
+
             return tree
         }
 
@@ -142,6 +146,16 @@ export class Organization extends AutoEncoder {
         return GroupCategoryTree.create({ })
     }
 
+    isCategoryDeactivated(category: GroupCategoryTree) {
+        if (this.meta.packages.useActivities) {
+            return false
+        }
+        const cleanedTree = this.getCategoryTreeWithDepth(1).filterForDisplay(true, this.meta.packages.useActivities)
+        if (cleanedTree.categories.find( c => c.id === category.id)) {
+            return false
+        }
+        return true
+    }
 
     /**
      * Only set for users with full access to the organization

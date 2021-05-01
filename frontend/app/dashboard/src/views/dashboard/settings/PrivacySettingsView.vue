@@ -2,7 +2,7 @@
     <div class="st-view background">
         <STNavigationBar title="Privacy">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -10,18 +10,18 @@
                 Privacy
             </h1>
             <p>
-                Om in orde te zijn met de GDPR-wetgeving moet je jouw privacyvoorwaarden instellen.
+                Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Waar staan jouw privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
+            <STInputBox title="Waar staan jullie privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-model="selectedPrivacyType" value="none">
                         Geen
                     </Radio>
                     <Radio v-model="selectedPrivacyType" value="website">
-                        Op jouw website
+                        Op onze website
                     </Radio>
                     <Radio v-model="selectedPrivacyType" value="file">
                         Zelf PDF-bestand aanleveren

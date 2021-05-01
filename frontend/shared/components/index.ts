@@ -46,6 +46,7 @@ export { default as Steps } from "./src/steps/Steps.vue"
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
+export { default as Logo } from "./src/icons/Logo.vue"
 export { default as MaleIcon } from "./src/icons/MaleIcon.vue"
 
 // Inputs (last, because they use other components from this library)
@@ -74,6 +75,7 @@ export { default as STInputBox } from "./src/inputs/STInputBox.vue"
 export { default as TimeInput } from "./src/inputs/TimeInput.vue"
 export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
+export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
 
 // Shared views should be last
 export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"

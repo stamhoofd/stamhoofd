@@ -11,6 +11,34 @@
                             "match": [
                                 {
                                     "host": [
+                                        "api.admin.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:9991"
+                                        }
+                                    ],
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "x-real-ip": [
+                                                    "{http.request.remote}"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
                                         "api.stamhoofd.dev",
                                         "*.api.stamhoofd.dev"
                                     ]
@@ -116,6 +144,90 @@
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8080"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "admin.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "match": [
+                                                {
+                                                    "not": [
+                                                        {
+                                                            "path": [
+                                                                "*.js",
+                                                                "*.css",
+                                                                "*.png",
+                                                                "*.svg",
+                                                                "*.ttf",
+                                                                "*.woff",
+                                                                "*.woff2"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "no-cache"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        },
+                                        {
+                                            "match": [
+                                                {
+                                                    "path": [
+                                                        "*.js",
+                                                        "*.css",
+                                                        "*.png",
+                                                        "*.svg",
+                                                        "*.ttf",
+                                                        "*.woff",
+                                                        "*.woff2"
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "max-age=2592000"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        }
+                                    ]
+                                },
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8083"
                                         }
                                     ]
                                 }
@@ -414,6 +526,7 @@
                             "*.shop.stamhoofd.dev",
                             "stamhoofd.app",
                             "*.api.stamhoofd.dev",
+                            "api.admin.stamhoofd.dev",
                             "login.sgv.stamhoofd.dev",
                             "groepsadmin.sgv.stamhoofd.dev"
                         ],

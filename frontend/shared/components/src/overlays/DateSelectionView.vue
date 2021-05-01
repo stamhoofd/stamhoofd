@@ -98,10 +98,8 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     updateMonthTitle() {
-        this.monthTitle = Formatter.month(this.currentMonth.getMonth() + 1)
-        if (this.currentMonth.getFullYear() != new Date().getFullYear()) {
-            this.monthTitle += " "+this.currentMonth.getFullYear()
-        }
+        this.monthTitle = Formatter.capitalizeFirstLetter(Formatter.month(this.currentMonth.getMonth() + 1))
+        this.monthTitle += " "+this.currentMonth.getFullYear()
     }
 
     nextMonth() {
@@ -118,10 +116,54 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         this.weeks = this.generateDays()
     }
 
+    nextYear() {
+        this.currentMonth.setFullYear(this.currentMonth.getFullYear() + 1)
+        this.updateMonthTitle();
+        this.weeks = this.generateDays()
+    }
+
+    previousYear() {
+        this.currentMonth.setFullYear(this.currentMonth.getFullYear() - 1)
+        this.updateMonthTitle();
+        this.weeks = this.generateDays()
+    }
+
     onSelect(day) {
         day.selected = true;
         this.setDate(day.value)
         this.pop();
+    }
+
+    activated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        const key = event.key || event.keyCode;
+
+        if (key === "ArrowLeft") {
+            this.previousMonth();
+            event.preventDefault();
+        } else if (key === "ArrowRight") {
+            this.nextMonth();
+            event.preventDefault();
+        } else if (key === "ArrowUp" || key === "PageUp") {
+            this.nextYear();
+            event.preventDefault();
+        } else if (key === "ArrowDown" || key === "PageDown") {
+            this.previousYear();
+            event.preventDefault();
+        }
     }
 
 }

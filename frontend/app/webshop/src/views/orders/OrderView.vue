@@ -174,7 +174,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod } from '@stamhoofd/structures';
+import { CartItem, Order, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -239,13 +239,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Payconiq"
-            case PaymentMethod.Transfer: return "Via overschrijving"
-            case PaymentMethod.Bancontact: return "Bancontact"
-            case PaymentMethod.iDEAL: return "iDEAL"
-            case PaymentMethod.Unknown: return "?"
-        }
+        return PaymentMethodHelper.getName(paymentMethod)
     }
 
     openTransferView() {

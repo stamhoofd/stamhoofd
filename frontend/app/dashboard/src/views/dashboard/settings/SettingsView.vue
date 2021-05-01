@@ -9,6 +9,8 @@
                 Instellingen
             </h1>
 
+            <BillingWarningBox />
+
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
@@ -99,10 +101,10 @@
                         <h2 class="style-title-list">
                             Inschrijvingsgroepen
                         </h2>
-                        <p class="style-description" v-if="enableActivities">
+                        <p v-if="enableActivities" class="style-description">
                             Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
                         </p>
-                        <p class="style-description" v-else>
+                        <p v-else class="style-description">
                             Leeftijdsgroepen aanmaken en beheren
                         </p>
 
@@ -143,8 +145,39 @@
             </template>
 
             <hr>
-            <h2>Kies de functies die je wilt activeren</h2>
-            <p>Binnenkort voeren we nieuwe prijzen in, maar hierbij blijven bepaalde onderdelen gratis voor bestaande gebruikers (als je dit leest ben je een bestaande gebruiker). <a class="inline-link" target="_blank" href="https://www.stamhoofd.be/release-notes/2021-02-16-toekomst-van-stamhoofd">Meer info op onze website.</a> We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+            <h2>Stamhoofd administratie</h2>
+
+            <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
+                    <h2 class="style-title-list">
+                        Mijn pakketten
+                    </h2>
+                    <p class="style-description">
+                        Wijzig je pakketten of activeer nieuwe functies
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
+                    <h2 class="style-title-list">
+                        Facturen en betalingen
+                    </h2>
+                    <p class="style-description">
+                        Van jouw pakketten
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr>
+            <h2>Functies gratis uitproberen</h2>
+            <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
             <ModuleSettingsBox />
         </main>
@@ -166,6 +199,10 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
+import BillingSettingsView from './packages/BillingSettingsView.vue';
+import BillingWarningBox from './packages/BillingWarningBox.vue';
+import InvoicePaymentStatusView from './packages/InvoicePaymentStatusView.vue';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
@@ -186,7 +223,8 @@ import PrivacySettingsView from './PrivacySettingsView.vue';
         FileInput,
         STList,
         STListItem,
-        ModuleSettingsBox
+        ModuleSettingsBox,
+        BillingWarningBox
     },
     directives: {
         tooltip: TooltipDirective
@@ -254,6 +292,18 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
+    openPackages(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PackageSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    openBilling(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(BillingSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
     manageGroups(animated = true) {
         const component = buildManageGroupsComponent(this.organization)
             
@@ -315,6 +365,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        const params = new URL(window.location.href).searchParams
 
         document.title = "Stamhoofd - Instellingen"
 
@@ -355,6 +406,22 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'records') {
             // Open mollie settings
             this.manageRecords(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'packages') {
+            this.openPackages(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'billing') {
+            this.openBilling(false)
+        }
+
+        if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(InvoicePaymentStatusView, {
+                    paymentId: params.get("id")
+                })
+            }).setDisplayStyle("popup").setAnimated(false))
         }
 
         this.loadAdmins().catch(e => {

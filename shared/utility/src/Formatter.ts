@@ -15,6 +15,10 @@ export class Formatter {
         return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
     }
 
+    static fileSlug(name: string): string {
+        return this.removeAccents(name).replace(/[^A-Za-z0-9]+/g, " ").trim()
+    }
+
     /**
      * 1 = january
      */
@@ -31,12 +35,12 @@ export class Formatter {
     }
 
     /**
-     * 1 januari (2020). Year only in different year
+     * 1 januari (2020). Year only in different year if withYear is null (default)
      */
-    static date(date: Date): string {
+    static date(date: Date, withYear: boolean | null = null): string {
         const currentYear = new Date().getFullYear()
         const year = date.getFullYear()
-        return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year ? (" "+year) : "")
+        return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year || withYear === true ? (" "+year) : "")
     }
 
     /**
@@ -101,14 +105,14 @@ export class Formatter {
             currency: "EUR",
         }).format(Math.abs(value) / 100);
 
-        return formatted.replace(new RegExp("EUR", "ig"), '€');
+        return (value < 0 ? "- " : "")+formatted.replace(new RegExp("EUR", "ig"), '€');
     }
 
     static priceChange(value: number): string {
         if (value >= 0) {
             return "+ "+this.price(value)
         }
-        return "- "+this.price(-value)
+        return this.price(value)
     }
 
     static capitalizeFirstLetter(string: string) {

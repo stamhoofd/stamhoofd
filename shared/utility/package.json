@@ -1,7 +1,6 @@
 {
     "name": "@stamhoofd/utility",
     "version": "1.0.0",
-    "private": true,
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
@@ -24,7 +23,6 @@
         "colors": "^1.4.0",
         "eslint": "^6.8.0",
         "eslint-plugin-jest": "^23.8.2",
-        "eslint-plugin-simple-import-sort": "^5.0.2",
         "ts-node": "^8.6.2",
         "typescript": "^3.8.3"
     },

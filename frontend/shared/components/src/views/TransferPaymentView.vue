@@ -404,7 +404,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             position: absolute;
             top: 0;
             transform: translate(-50%, -50%);
-            background: white;
+            background: var(--color-white, white);
             text-align: center;
             left: 50%;
             max-width: 90%;
@@ -422,7 +422,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             position: absolute;
             bottom: 0;
             transform: translate(-50%, 50%);
-            background: white;
+            background: var(--color-white, white);
             text-align: center;
             left: 50%;
             max-width: 90%;

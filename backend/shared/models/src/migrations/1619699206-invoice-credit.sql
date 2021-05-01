@@ -1,0 +1,1 @@
+ALTER TABLE `stamhoofd_invoices` ADD COLUMN `creditId` varchar(36) NULL COMMENT '' AFTER `organizationId`;

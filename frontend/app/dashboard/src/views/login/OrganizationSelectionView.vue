@@ -2,7 +2,9 @@
     <div class="st-view">
         <STNavigationBar :large="true" :sticky="false">
             <template slot="left">
-                <a id="logo" class="responsive" alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener" />
+                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                    <Logo class="responsive" />
+                </a>
             </template>
 
             <template slot="right">
@@ -40,7 +42,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Spinner,STNavigationBar,Toast } from '@stamhoofd/components';
+import { Logo,Spinner,STNavigationBar,Toast } from '@stamhoofd/components';
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
@@ -55,26 +57,27 @@ const throttle = (func, limit) => {
         const context = this;
         // eslint-disable-next-line prefer-rest-params
         const args = arguments;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
+        if (lastRan) {
             clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if (Date.now() - lastRan >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
         }
+        lastRan = Date.now();
+            
+        lastFunc = setTimeout(function() {
+            if (Date.now() - lastRan >= limit) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            }
+        }, limit - (Date.now() - lastRan));
     };
 };
+
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
     components: {
         Spinner,
-        STNavigationBar
+        STNavigationBar,
+        Logo
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){

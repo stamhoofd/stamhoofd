@@ -15,6 +15,7 @@
             <h1>
                 {{ title }}
             </h1>
+            
             <p v-if="isRoot && enableActivities">
                 Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen kan onderverdelen. Zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
                 Jouw leden krijgen dan alle mogelijke (openbare) inschrijvingsgroepen te zien op jouw inschrijvingspagina.
@@ -61,13 +62,13 @@
                 </STList>
             </template>
 
-            <p v-if="categories.length == 0">
+            <p v-if="categories.length == 0 && !isRoot">
                 <button class="button text" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
                 </button>
             </p>
-            <p v-if="enableActivities">
+            <p v-if="enableActivities && groups.length == 0">
                 <button class="button text" @click="createCategory">
                     <span class="icon add" />
                     <span>Nieuwe categorie toevoegen</span>

@@ -12,7 +12,7 @@ $input-height: 44px;
     @extend .style-input-shadow;
     color: $color-dark;
     border: $border-width solid $color-gray-light;
-    background: white;
+    background: var(--color-white, white);
     border-radius: $border-radius;
     padding: 5px 15px;
     height: $input-height;
@@ -88,7 +88,7 @@ textarea.input {
 
 .input-dropdown {
     // Add a background arrow to our selection field.
-    background: $color-background url(~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
+    background: transparent url(~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
 
     // Increase the right padding just a little.
     padding-right: 35px;

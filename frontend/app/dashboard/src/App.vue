@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
 import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
@@ -47,6 +47,7 @@ export default class App extends Vue {
         SessionManager.restoreLastSession().catch(e => {
             console.error(e)
         })
+        //ColorHelper.darkTheme()
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);
@@ -60,11 +61,12 @@ export default class App extends Vue {
 
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        const queryString = new URL(window.location.href).searchParams;
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
-            // tood: password reset view
             const session = new Session(parts[1]);
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session }).setDisplayStyle("popup").setAnimated(false));
+            const token = queryString.get('token');
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false));
         }
 
         if (parts.length == 2 && parts[0] == 'verify-email') {

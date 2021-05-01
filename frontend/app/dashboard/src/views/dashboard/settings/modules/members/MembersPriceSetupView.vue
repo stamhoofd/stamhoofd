@@ -32,7 +32,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, GroupCategory, GroupCategorySettings, GroupCategoryTree, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, File, GroupCategory, GroupCategorySettings, GroupCategoryTree, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, STPackageBundle, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -86,6 +86,18 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
         this.addMetaPatch({ defaultPrices: patch })
     }
 
+    async checkout(bundle: STPackageBundle) {
+        await SessionManager.currentSession!.authenticatedServer.request({
+            method: "POST",
+            path: "/billing/activate-packages",
+            body: {
+                bundles: [bundle],
+                paymentMethod: PaymentMethod.Unknown
+            }
+        })
+        await SessionManager.currentSession!.fetchOrganization()
+    }
+
     async save() {
         if (this.saving) {
             return;
@@ -110,20 +122,16 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            this.addMetaPatch({ modules: OrganizationModules.patch({ useMembers: true })})
             await OrganizationManager.patch(this.organizationPatch)
+            await this.checkout(STPackageBundle.TrialMembers)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
-            new Toast('De ledenadministratie module is nu actief', "success green").show()
+            new Toast('Je kan nu de ledenadministratie uittesten', "success green").show()
             this.manageGroups(true)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-    }
-
-    get enableActivities() {
-        return this.organization.meta.modules.useActivities
     }
 
     manageGroups(animated = true) {

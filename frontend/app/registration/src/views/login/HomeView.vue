@@ -93,17 +93,16 @@ export default class HomeView extends Mixins(NavigationMixin){
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
         let clearPath = true
+        const queryString = new URL(window.location.href).searchParams;
 
         if (parts.length == 1 && parts[0] == 'reset-password') {
-            // tood: password reset view
-            this.present(new ComponentWithProperties(ForgotPasswordResetView, {}).setDisplayStyle("popup"));
+            const token = queryString.get('token');
+            this.present(new ComponentWithProperties(ForgotPasswordResetView, { token }).setDisplayStyle("popup"));
             clearPath = false
         }
 
         if (parts.length == 1 && parts[0] == 'login') {
             clearPath = false
-
-            const queryString = new URL(window.location.href).searchParams;
             const email = queryString.get('email')
             const hasAccount = queryString.get('hasAccount')
 
@@ -134,7 +133,7 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     get rootCategory() {
-        return this.organization.categoryTree.filterForDisplay(false)
+        return this.organization.categoryTree.filterForDisplay(false, this.organization.meta.packages.useActivities)
     }
 
     get privacyUrl() {

@@ -133,6 +133,11 @@
     }
 }
 
+.style-description-block {
+    @extend .style-description;
+    padding-bottom: 20px;
+}
+
 .style-description-small {
     font-size: 14px;
     line-height: 1.4;
@@ -142,6 +147,13 @@
     @media (max-width: 400px) {
         font-size: 12px;
     }
+}
+
+.style-price-big {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: $color-primary;
 }
 
 .style-interactive-small {
@@ -292,8 +304,7 @@
 
         > h2 + p {
             &:not([class]) {
-                @extend .style-description;
-                padding-bottom: 20px;
+                @extend .style-description-block;
             }
         }
 

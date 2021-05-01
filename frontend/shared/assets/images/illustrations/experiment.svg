@@ -1,0 +1,21 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M26.3412 18.4592L25.5 17.1507L24.6588 18.4592L20.1633 25.4522L13.2774 35.7812C11.5052 38.4394 13.4108 42 16.6056 42H34.3944C37.5892 42 39.4948 38.4394 37.7227 35.7812L30.8367 25.4522L26.3412 18.4592Z" fill="#DCDCDC" stroke="#DCDCDC" stroke-width="2"/>
+<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="13" y="26" width="25" height="15">
+<path d="M21 26H30L36.8906 36.3359C38.2197 38.3296 36.7905 41 34.3944 41H16.6056C14.2095 41 12.7803 38.3296 14.1094 36.3359L21 26Z" fill="#DCDCDC"/>
+</mask>
+<g mask="url(#mask0)">
+<path d="M40.0001 35.5001C25.5 38.0001 30.4999 27.9999 13 29.5C-4.49992 31.0001 6.75578 44 6.75578 44H41.7558C41.7558 44 54.5001 33 40.0001 35.5001Z" fill="#003EBD"/>
+<path d="M13 31.5C26.0001 40.0001 25.4999 25 37.9999 28.5C50.5 32 41.9999 44 41.9999 44H6.99995C6.99995 44 -6.10352e-05 22.9999 13 31.5Z" fill="#0053FF"/>
+</g>
+<rect x="19" y="9" width="13" height="4" rx="2" fill="#DCDCDC"/>
+<rect x="21" y="9" width="9" height="18" fill="#DCDCDC"/>
+<path d="M21 15H25C25.5523 15 26 15.4477 26 16V16C26 16.5523 25.5523 17 25 17H21V15Z" fill="#868686"/>
+<path d="M21 19H25C25.5523 19 26 19.4477 26 20V20C26 20.5523 25.5523 21 25 21H21V19Z" fill="#868686"/>
+<circle opacity="0.15" cx="30" cy="34" r="1" fill="white"/>
+<circle opacity="0.15" cx="27" cy="37" r="1" fill="white"/>
+<circle opacity="0.25" cx="23.5" cy="27.5" r="1.5" fill="#0053FF"/>
+<circle opacity="0.15" cx="27" cy="18" r="1" fill="#0053FF"/>
+<circle opacity="0.25" cx="27" cy="25" r="1" fill="#0053FF"/>
+<circle opacity="0.15" cx="20.5" cy="31.5" r="0.5" fill="white"/>
+<circle opacity="0.15" cx="17.5" cy="36.5" r="1.5" fill="white"/>
+</svg>

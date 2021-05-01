@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 84
+export const Version = 89
 
 // General
 export * from "./src/addresses/Address"
@@ -44,6 +44,7 @@ export * from "./src/endpoints/SignupResponse"
 export * from "./src/endpoints/tokens/ChallengeGrantStruct"
 export * from "./src/endpoints/tokens/ChallengeResponseStruct"
 export * from "./src/endpoints/tokens/CreateTokenStruct"
+export * from "./src/endpoints/tokens/PasswordGrantStruct"
 export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
@@ -101,3 +102,16 @@ export * from "./src/webshops/Product"
 export * from "./src/webshops/TransferSettings"
 export * from "./src/webshops/Webshop"
 export * from "./src/webshops/WebshopMetaData"
+
+// billing
+export * from "./src/billing/STBillingStatus"
+export * from "./src/billing/STCredit"
+export * from "./src/billing/STInvoice"
+export * from "./src/billing/STPackage"
+export * from "./src/billing/STPackageBundle"
+
+// Admin
+export * from "./src/admin/Admin"
+export * from "./src/admin/OrganizationSummary"
+export * from "./src/Graph"
+

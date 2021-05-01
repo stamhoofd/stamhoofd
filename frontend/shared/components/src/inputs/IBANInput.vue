@@ -81,7 +81,6 @@ export default class IBANInput extends Vue {
                 "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
                 "field": "iban"
             }))
-            this.$emit("input", null)
             return false
 
         } else {

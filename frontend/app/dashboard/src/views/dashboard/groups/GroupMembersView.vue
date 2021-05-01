@@ -51,6 +51,8 @@
             </h1>
             <span v-if="titleDescription" class="style-description title-description">{{ titleDescription }}</span>
 
+            <BillingWarningBox filter-types="members" />
+
             <Spinner v-if="loading && sortedMembers.length == 0" class="center" />
             <table v-else class="data-table">
                 <thead>
@@ -217,6 +219,7 @@ import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
 import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
+import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditGroupView from "./EditGroupView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 
@@ -239,7 +242,8 @@ class SelectableMember {
         BackButton,
         Spinner,
         LoadingButton,
-        SegmentedControl
+        SegmentedControl,
+        BillingWarningBox
     },
     directives: { Tooltip },
 })

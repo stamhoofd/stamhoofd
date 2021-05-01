@@ -116,7 +116,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     @extend .style-input-shadow;
     border: $border-width solid $color-gray-light;
     color: $color-gray;
-    background: white;
+    background: var(--color-white, white);
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 60px;

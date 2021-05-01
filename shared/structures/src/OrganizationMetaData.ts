@@ -1,5 +1,6 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { STPackageStatus, STPackageType } from './billing/STPackage';
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupCategory } from './GroupCategory';
@@ -12,6 +13,77 @@ import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
 
+export class OrganizationPackages extends AutoEncoder {
+    @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
+    packages = new Map<STPackageType, STPackageStatus>()
+
+    isActive(type: STPackageType) {
+        const status = this.packages.get(type)
+        if (!status) {
+            return false
+        }
+        if (!status.isActive) {
+            return false
+        }
+        return true
+    }
+    
+    get useMembers() {
+        return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.TrialMembers)
+    }
+
+    set useMembers(_: boolean) {
+        console.warn("Deprected set on useMembers")
+    }
+
+    get isMembersTrial() {
+        return !this.isActive(STPackageType.Members) && !this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
+    }
+
+    get isActivitiesTrial() {
+        return !this.isActive(STPackageType.Members) && this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers)
+    }
+
+    get isWebshopsTrial() {
+        return !this.isActive(STPackageType.Webshops) && !this.isActive(STPackageType.SingleWebshop) && this.isActive(STPackageType.TrialWebshops)
+    }
+
+    get useWebshops() {
+        return this.webshopLimit > 0
+    }
+
+    set useWebshops(_: boolean) {
+        console.warn("Deprected set on useWebshops")
+    }
+    
+    get webshopLimit() {
+        if (this.isActive(STPackageType.Webshops)) {
+            return 10
+        }
+
+        if (this.isActive(STPackageType.SingleWebshop)) {
+            return 1
+        }
+
+        if (this.isActive(STPackageType.TrialWebshops)) {
+            return 10
+        }
+        
+        return 0
+    }
+
+    get disableActivities() {
+        return !this.useActivities
+    }
+
+    get useActivities(): boolean {
+        return this.isActive(STPackageType.Members) || this.isActive(STPackageType.TrialMembers)
+    }
+}
+
+/**
+ * @deprecated
+ */
 export class OrganizationModules extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     useMembers = false
@@ -23,7 +95,7 @@ export class OrganizationModules extends AutoEncoder {
      * We use inverse property here because this can only be used in combination with useMembers == true
      */
     @field({ decoder: BooleanDecoder, version: 63 })
-    disableActivities = true
+    disableActivities = false
 
     get useActivities(): boolean {
         return this.useMembers && !this.disableActivities
@@ -231,9 +303,23 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type: OrganizationType;
 
-    @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }) })
-    modules = OrganizationModules.create({})
+    /**
+     * @deprecated Only used for migrations
+     */
+    @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }), field: "modules" })
+    modulesOld = OrganizationModules.create({})
 
+    get modules() {
+        return this.packages
+    }
+
+    set modules(_: any) {
+        console.error("Deprecated set on modules")
+    }
+
+    @field({ decoder: OrganizationPackages, version: 87 })
+    packages = OrganizationPackages.create({})
+    
     @field({ decoder: new EnumDecoder(UmbrellaOrganization), nullable: true })
     umbrellaOrganization: UmbrellaOrganization | null = null;
 

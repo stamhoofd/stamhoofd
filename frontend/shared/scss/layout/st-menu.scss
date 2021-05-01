@@ -1,0 +1,142 @@
+@use '../base/variables' as *;
+@use '../base/text-styles' as *;
+
+.st-menu {
+    padding: 30px 0;
+    --horizontal-padding: 30px;
+
+    #organization-switcher {
+        margin-bottom: 15px;
+        padding-left: 40px;
+        display: flex;
+        align-items: center;
+        touch-action: manipulation;
+        user-select: none;
+        cursor: pointer;
+        @extend .style-interactive-small;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        transition: opacity 0.2s;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        box-sizing: border-box;
+    
+        > .text {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: auto;
+            min-width: none;
+        }
+
+        &:active {  
+            opacity: 0.4;
+            transition: none;
+        }
+
+        &::after {
+            content: "";
+            display: block;
+            width: 10px;
+            height: 10px;
+            margin-left: 5px;;
+            background: url("~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg") center center no-repeat;
+        }
+    }
+
+    .input.search {
+        margin-bottom: 20px;
+    }
+
+    #logo {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+     > .padding-group {
+        padding-left: var(--horizontal-padding, 30px);
+        padding-right: var(--horizontal-padding, 30px);
+    }
+
+    hr {
+        height: $border-width;
+        border-radius: $border-width/2;
+        background: $color-gray-light;
+        border: 0;
+        outline: 0;
+        margin: 20px var(--horizontal-padding, 30px);
+    }
+
+    .menu-button {
+        display: flex;
+        flex-direction: row;
+        @extend .style-button-smaller;
+        color: $color-dark;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        box-sizing: border-box;
+        height: 45px;
+        transition: transform 0.2s, background-color 0.2s, color 0.2s;
+
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        overflow: hidden;
+        white-space: nowrap;
+        padding-left: var(--horizontal-padding, 30px);
+        padding-right: var(--horizontal-padding, 30px);
+
+        &, &:active, &:visited, &:link {
+            text-decoration: none;
+        }
+
+        > .icon {
+            padding-right: 10px;
+            flex-shrink: 0;
+        }
+
+        > span {
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .bubble {
+            @extend .style-bubble;
+            
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .right-icon {
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        &.heading {
+            @extend .style-button-small;
+            color: $color-gray-dark;
+        }
+
+        &.selected {
+            background-color: $color-primary-light;
+            color: $color-primary;
+            font-weight: 600;
+        }
+
+        &.button {
+            cursor: pointer;
+
+            &:active {
+                background-color: $color-gray-lighter;
+            }
+        }
+
+        > button {
+            margin-left: auto;
+            color: $color-primary;
+        }
+    }
+}

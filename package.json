@@ -3,7 +3,8 @@
     "workspaces": [
         "frontend/app/*",
         "frontend/shared/*",
-        "backend",
+        "backend/app/*",
+        "backend/shared/*",
         "shared/*",
         ".yalc/@*/*",
         ".yalc/*"
@@ -19,22 +20,26 @@
         "upgrade:internal": "yarn upgrade --scope simonbackx",
         "caddy:development": "export $(cat .env | xargs) && caddy run --resume",
         "caddy:development:config": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.json",
-        "caddy:development:config-watch": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json"
+        "caddy:development:config-watch": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
+        "get-version": "node -e 'process.stdout.write(require(\"./package.json\").version);'",
+        "version": "yarn workspaces run -s version --no-git-tag-version --new-version \"$npm_package_version\" 2>&1 >/dev/null",
+        "ptest": "yarn workspaces run -s publish --tag dev"
     },
     "dependencies": {
         "@babel/runtime": "^7.10.5",
         "@sentry/browser": "^6.0.1",
         "@sentry/integrations": "^6.0.1",
-        "@simonbackx/simple-encoding": "^2.0.0",
+        "@simonbackx/simple-encoding": "^2.1.1",
         "@simonbackx/simple-errors": "^1.2",
         "@simonbackx/simple-networking": "~1.4.0",
-        "@simonbackx/vue-app-navigation": "^1.9.0",
+        "@simonbackx/vue-app-navigation": "^1.12.0",
         "@zxcvbn-ts/core": "^0.2.0",
         "@zxcvbn-ts/language-common": "^0.1.1",
         "@zxcvbn-ts/language-nl-be": "^0.2.0",
         "core-js": "^3.8.3",
         "crypto-browserify": "^3.12.0",
         "favicons-webpack-plugin": "^5.0.0-alpha.5",
+        "jsvat": "^2.5.2",
         "libphonenumber-js": "^1.9.8",
         "path-browserify": "^1.0.1",
         "qrcode": "^1.4.4",
@@ -93,5 +98,6 @@
         "prosemirror-model": "1.9.1",
         "**/axios": "^0.21.1",
         "elliptic": "^6.5.4"
-    }
+    },
+    "version": "1.0.0"
 }
