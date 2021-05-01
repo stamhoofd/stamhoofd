@@ -11,6 +11,10 @@ export default new Migration(async () => {
         return;
     }
 
+    // This migration is not needed any longer on newer servers
+    console.log("Skipped")
+
+    /*
     const organizations = await Organization.all();
 
     for (const organization of organizations) {
@@ -52,7 +56,7 @@ export default new Migration(async () => {
                 await user.save()
             }
         }        
-    }
+    } */
 });
 
 

@@ -11,11 +11,44 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    /**
+     * Not writeable
+     */
+    @field({ decoder: StringDecoder, version: 89 })
+    uri = ""
+
+    @field({ decoder: StringDecoder, nullable: true, version: 89 })
+    domain: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 89 })
+    domainUri: string | null = null;
+
     @field({ decoder: WebshopMetaData })
     meta = WebshopMetaData.create({})
 
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
     privateMeta = WebshopPrivateMetaData.create({})
+
+    getUrl(organization: Organization): string {
+        if (this.domain) {
+            return this.domain+this.getUrlSuffix()
+        }
+
+        return organization.uri+"."+process.env.HOSTNAME_WEBSHOP+this.getUrlSuffix()
+    }
+
+     getUrlSuffix(): string {
+        if (this.domain) {
+            if (!this.domainUri) {
+                return ""
+            }
+            return "/"+this.domainUri
+        }
+        if (!this.uri) {
+            return ""
+        }
+        return "/"+this.uri
+    }
 }
 
 export class Webshop extends AutoEncoder {
