@@ -5,6 +5,7 @@
         "dist",
         "../registration",
         "../dashboard",
+        "../admin",
     ],
     "compilerOptions": {
         "resolveJsonModule": true
