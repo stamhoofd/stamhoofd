@@ -14,6 +14,8 @@
         <hr>
         <h2>Betaalmethodes</h2>
 
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" href="https://stamhoofd.be/docs/online-betalen" target="_blank">deze pagina</a>.</p>
+
         <Checkbox v-model="enableTransfers">
             Overschrijvingen (gratis, maar zelf op te volgen)
         </Checkbox>
@@ -111,7 +113,7 @@
             </button>
         </p>
 
-        <div class="container" v-if="roles.length > 0">
+        <div v-if="roles.length > 0" class="container">
             <hr>
             <h2>Toegangsbeheer</h2>
             <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
@@ -132,9 +134,9 @@ import { AnyCheckoutMethod, CheckoutMethod, Organization, PaymentMethod, Private
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
 import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
-import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
 
 @Component({
     components: {
