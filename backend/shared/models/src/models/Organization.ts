@@ -631,7 +631,7 @@ export class Organization extends Model {
     async updateRequestKeysCount() {
         // Circular reference fix
         const User = (await import('./User')).User;
-        const query = `select count(*) as c from \`${User.table}\` where organizationId = ? AND requestKeys = 1 AND verified = 1 AND publicKey is not null`
+        const query = `select count(*) as c from \`${User.table}\` where organizationId = ? AND requestKeys = 1 AND publicKey is not null`
         
         const [results] = await Database.select(query, [this.id])
         const count = results[0]['']['c'];
