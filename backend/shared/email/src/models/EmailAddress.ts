@@ -43,8 +43,8 @@ export class EmailAddress extends Model {
     @column({ type: "boolean" })
     unsubscribedAll = false;
 
-    @column({ type: "string" })
-    token: string;
+    @column({ type: "string", nullable: true })
+    token: string | null;
 
     /**
      * createdAt behaves more like createdAt for Challenge. Since every save is considered to have a new challenge
