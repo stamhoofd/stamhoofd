@@ -17,6 +17,27 @@ export class ProductPrice extends AutoEncoder {
     price = 0;
 }
 
+export enum InputFieldType {
+    Text = "Text",
+    LongText = "LongText",
+    Phone = "Phone"
+}
+
+export class InputField extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: new EnumDecoder(InputFieldType) })
+    type = InputFieldType.Text
+
+    @field({ decoder: StringDecoder })
+    title = ""
+
+    @field({ decoder: StringDecoder })
+    autocomplete = ""
+}
+
+
 export class Option extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -29,6 +50,16 @@ export class Option extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     price = 0;
+
+    /**
+     * When this option is selected, optionally add one extra input field without a title (title is ignored here)
+     */
+    @field({ decoder: InputField, version: 91 })
+    inputField: InputField | null = null
+}
+
+export enum OptionMenuType {
+    ChooseOne = "ChooseOne"
 }
 
 export class OptionMenu extends AutoEncoder {
