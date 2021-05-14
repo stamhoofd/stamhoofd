@@ -502,7 +502,6 @@ function createOrUpdateAddress(address: Address, adressen: any, index: number): 
 function addressToSGV(address: Address): any {
     const { number, bus } = splitStreetNumber(address.number)
 
-
     return {
         straat: trim(address.street),
         bus: trim(bus),
