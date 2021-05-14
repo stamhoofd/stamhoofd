@@ -18,13 +18,12 @@
         "@types/libsodium-wrappers": "^0.7.7",
         "@types/mailparser": "^2.7.4",
         "@types/node": "^14.0.26",
-        "colors": "^1.4.0",
-        "ts-node": "^8.6.2"
+        "colors": "^1.4.0"
     },
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
-        "@simonbackx/simple-database": "^1.13.1",
-        "@simonbackx/simple-endpoints": "^1.5.1",
+        "@simonbackx/simple-database": "^1.14.2",
+        "@simonbackx/simple-endpoints": "^1.7.2",
         "@types/mysql": "^2.15.9",
         "@typescript-eslint/eslint-plugin": "^2.28.0",
         "@typescript-eslint/parser": "^2.28.0",
