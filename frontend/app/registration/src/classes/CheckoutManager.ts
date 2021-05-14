@@ -1,9 +1,9 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { IDRegisterCheckout, RegisterCheckout, Version } from '@stamhoofd/structures'
 
-import { TabBarItem } from '../views/overview/TabBarController.vue';
 import { MemberManager } from './MemberManager'
 import { OrganizationManager } from './OrganizationManager'
+import { TabBarItem } from './TabBarItem';
 
 /**
  * Convenient access to the organization of the current session

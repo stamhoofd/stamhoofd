@@ -35,7 +35,7 @@ module.exports = merge(common, {
                 extractComments: false,
                 terserOptions: {
                     ecma: "2015",
-                    safari10: true,
+                    safari10: false,
                     sourceMap: true,
                     output: {
                         comments: false,
