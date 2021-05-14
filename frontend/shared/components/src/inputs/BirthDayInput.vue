@@ -51,7 +51,7 @@ export default class BirthDayInput extends Vue {
     required!: boolean
 
     @Prop({ default: null})
-    value: Date | null
+    value!: Date | null
 
     /**
      * Assign a validator if you want to offload the validation to components
