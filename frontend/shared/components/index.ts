@@ -47,6 +47,7 @@ export { default as Steps } from "./src/steps/Steps.vue"
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
 export { default as Logo } from "./src/icons/Logo.vue"
+export { default as LogoPride } from "./src/icons/LogoPride.vue"
 export { default as MaleIcon } from "./src/icons/MaleIcon.vue"
 
 // Inputs (last, because they use other components from this library)
