@@ -15,6 +15,11 @@
                     <dt>Bedrag</dt>
                     <dd>{{ payment.price | price }}</dd>
 
+                    <template v-if="payment.freeContribution > 0">
+                        <dt>Vrije bijdrage</dt>
+                        <dd>{{ payment.freeContribution | price }} (inbegrepen in bedrag)</dd>
+                    </template>
+
                     <dt>Datum</dt>
                     <dd>{{ payment.createdAt | date }}</dd>
 

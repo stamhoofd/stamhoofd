@@ -98,7 +98,7 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
 
     mounted() {
         // Clear cart
-        CheckoutManager.cart.items = []
+        CheckoutManager.cart.clear()
         CheckoutManager.saveCart()
 
         // Switch to register tab

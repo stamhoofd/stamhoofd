@@ -21,6 +21,11 @@ export class RegisterCart {
     items: RegisterItem[] = []
     freeContribution = 0
 
+    clear() {
+        this.items = []
+        this.freeContribution = 0
+    }
+
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),

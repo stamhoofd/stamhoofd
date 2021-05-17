@@ -170,6 +170,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice
+            payment.freeContribution = request.body.cart.freeContribution
 
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted

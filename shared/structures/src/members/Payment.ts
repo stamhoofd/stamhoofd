@@ -18,6 +18,9 @@ export class Payment extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     price: number
 
+    @field({ decoder: IntegerDecoder, nullable: true, version: 92 })
+    freeContribution: number | null = null
+
     // Transfer description if paid via transfer
     @field({ decoder: StringDecoder, nullable: true })
     transferDescription: string | null = null

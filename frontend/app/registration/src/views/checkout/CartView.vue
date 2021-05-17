@@ -39,7 +39,7 @@
                             </figure>
                         </STListItem>
 
-                        <STListItem v-if="cart.freeContribution > 0">
+                        <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
                             <h3 class="style-title-list">
                                 + Vrije bijdrage van {{ cart.freeContribution | price }}. Bedankt!
                             </h3>

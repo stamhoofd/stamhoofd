@@ -124,6 +124,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             method: p.method,
             status: p.status,
             price: p.price,
+            freeContribution: p.freeContribution,
             transferDescription: p.transferDescription,
             paidAt: p.paidAt,
             createdAt: p.createdAt,

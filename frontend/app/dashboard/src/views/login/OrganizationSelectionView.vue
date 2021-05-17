@@ -3,7 +3,7 @@
         <STNavigationBar :large="true" :sticky="false">
             <template slot="left">
                 <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
-                    <LogoPride class="responsive" />
+                    <Logo class="responsive" />
                 </a>
             </template>
 
@@ -42,7 +42,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LogoPride,Spinner,STNavigationBar,Toast } from '@stamhoofd/components';
+import { Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
@@ -77,7 +77,7 @@ const throttle = (func, limit) => {
     components: {
         Spinner,
         STNavigationBar,
-        LogoPride
+        Logo
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){

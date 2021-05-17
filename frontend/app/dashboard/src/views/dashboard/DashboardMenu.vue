@@ -1,7 +1,7 @@
 <template>
     <div class="st-menu">
         <div class="padding-group">
-            <LogoPride />
+            <Logo />
             <button id="organization-switcher" @click="switchOrganization">
                 <span class="text">{{ organization.name }}</span>
             </button>
@@ -123,7 +123,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LogoPride, Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, Logo, Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -147,7 +147,7 @@ import WebshopView from './webshop/WebshopView.vue';
 
 @Component({
     components: {
-        LogoPride
+        Logo
     },
     directives: {
         tooltip: TooltipDirective
