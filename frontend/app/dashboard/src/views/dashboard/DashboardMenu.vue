@@ -48,7 +48,7 @@
                         :class="{ selected: currentlySelected == 'group-'+group.id }"
                         @click="openGroup(group)"
                     >
-                        {{ group.settings.name }}
+                        <span>{{ group.settings.name }}</span>
                     </button>
 
                     <button
@@ -58,7 +58,7 @@
                         :class="{ selected: currentlySelected == 'category-'+c.id }"
                         @click="openCategory(c)"
                     >
-                        {{ c.settings.name }}
+                        <span>{{ c.settings.name }}</span>
                     </button>
                 </div>
             </div>
