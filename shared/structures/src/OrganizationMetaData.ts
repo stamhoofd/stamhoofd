@@ -108,10 +108,21 @@ export enum AskRequirement {
     Required = "Required"
 }
 
+export class FreeContributionSettings extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    description = ""
+
+    @field({ decoder: new ArrayDecoder(IntegerDecoder) })
+    amounts: number[] = [500, 1500, 3000]
+}
+
 export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)), upgrade: () => [], version: 55 })
     enabledRecords: RecordType[] = []
+
+    @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
+    freeContribution: FreeContributionSettings | null = null
 
     /**
      * true: required

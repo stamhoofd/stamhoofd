@@ -131,6 +131,10 @@
     @media (max-width: 400px) {
         font-size: 14px;
     }
+
+    &.pre-wrap {
+        white-space: pre-wrap;
+    }
 }
 
 .style-description-block {
