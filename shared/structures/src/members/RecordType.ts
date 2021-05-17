@@ -18,8 +18,10 @@ export enum RecordType {
 
     // Medicines
     MedicinePermissions = "MedicinePermissions",
+    TetanusVaccine = "TetanusVaccine",
 
     // Health, hygiene and sleep
+    CovidHighRisk = "CovidHighRisk",
     HayFever = "HayFever",
     Asthma = "Asthma",
     BedWaters = "BedWaters",
@@ -111,6 +113,7 @@ export class RecordTypeHelper {
             case RecordType.DataPermissions:
             case RecordType.PicturePermissions:
             case RecordType.MedicinePermissions:
+            case RecordType.TetanusVaccine:
             // Group picturs is not inverted -> we show a warning if there is only permissions for group pictures
                 return true;
          
@@ -150,6 +153,8 @@ export class RecordTypeHelper {
             case RecordType.FoodAllergies:
                 return "Voeding & dieet";
 
+            case RecordType.CovidHighRisk:
+            case RecordType.TetanusVaccine:
             case RecordType.Asthma:
             case RecordType.Epilepsy:
             case RecordType.HeartDisease:
@@ -184,6 +189,7 @@ export class RecordTypeHelper {
             case RecordType.Diet:
                 return "Dieet";
 
+            case RecordType.CovidHighRisk:
             case RecordType.Asthma:
             case RecordType.Epilepsy:
             case RecordType.HeartDisease:
@@ -230,6 +236,11 @@ export class RecordTypeHelper {
             case RecordType.Diet:
                 return "Speciaal dieet";
 
+            case RecordType.TetanusVaccine:
+                return "Geen tetanusvaccinatie";
+
+            case RecordType.CovidHighRisk:
+                return "Hoog-risicogroep voor coronavirus";
             case RecordType.Asthma:
                 return "Astma";
             case RecordType.BedWaters:
@@ -276,6 +287,9 @@ export class RecordTypeHelper {
 
             case RecordType.Medicines:
                 return "Dagelijks, wekelijks...";
+
+            case RecordType.TetanusVaccine:
+                return "In de afgelopen 10 jaar";
 
             case RecordType.OtherAllergies:
                 return "Zoals verf, insecten...";
@@ -382,6 +396,10 @@ export class RecordTypeHelper {
             case RecordType.Kosher:
                 return RecordTypePriority.Low;
             case RecordType.Diet:
+                return RecordTypePriority.Low;
+            case RecordType.CovidHighRisk:
+                return RecordTypePriority.Medium;
+            case RecordType.TetanusVaccine:
                 return RecordTypePriority.Low;
             case RecordType.Asthma:
                 return RecordTypePriority.Medium;

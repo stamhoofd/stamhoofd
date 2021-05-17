@@ -197,7 +197,7 @@ export class MemberDetails extends AutoEncoder {
 
         const date = new Date(this.birthDay);
         const options = { year: "numeric", month: "long", day: "numeric" };
-        return date.toLocaleDateString("nl-BE", options);
+        return date.toLocaleDateString("nl-BE", options as any);
     }
 
     matchQuery(query: string): boolean {

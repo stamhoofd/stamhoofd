@@ -90,6 +90,14 @@
             <hr>
             <h2>Gezondheid, hygiëne &amp; slapen</h2>
 
+            <Checkbox :checked="getBooleanType(RecordType.CovidHighRisk)" @change="setBooleanType(RecordType.CovidHighRisk, $event)">
+                Hoge riscogroep voor coronavirus
+            </Checkbox>
+
+            <Checkbox :checked="getBooleanType(RecordType.TetanusVaccine)" @change="setBooleanType(RecordType.TetanusVaccine, $event)">
+                Tetanusvaccinatie
+            </Checkbox>
+
             <Checkbox :checked="getBooleanType(RecordType.Asthma)" @change="setBooleanType(RecordType.Asthma, $event)">
                 Astma
             </Checkbox>
@@ -170,7 +178,6 @@
             <Checkbox :checked="getBooleanType(RecordType.Other)" @change="setBooleanType(RecordType.Other, $event)">
                 Vrij veld voor andere opmerkingen
             </Checkbox>
-            
 
             <hr>
             <h2>Contactgegevens vragen van...</h2>
