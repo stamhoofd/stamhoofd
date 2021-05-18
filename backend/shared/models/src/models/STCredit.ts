@@ -86,7 +86,6 @@ export class STCredit extends Model {
                 name: "Gebruikt tegoed",
                 unitPrice: -applyValue,
                 amount: 1,
-                price: -applyValue,
                 date: new Date()
             }))
 

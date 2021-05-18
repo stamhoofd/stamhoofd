@@ -44,10 +44,7 @@ export class StreetColumnMatcher extends SharedMatcher implements ColumnMatcher 
 
     apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
         if (!cell) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Deze cel is leeg"
-            })
+            return
         }
         
         // Check if string value

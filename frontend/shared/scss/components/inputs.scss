@@ -112,6 +112,10 @@ select.input {
     flex-direction: row;
     @extend .input-spacing;
 
+    &.max {
+        max-width: none;
+    }
+
     & > * {
         flex-grow: 1;
         margin: 0 5px;
