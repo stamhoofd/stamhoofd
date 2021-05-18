@@ -1,6 +1,5 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Address, Parent, ParentType } from "@stamhoofd/structures";
-import { DataValidator, Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
 import { ColumnMatcher } from "../ColumnMatcher";
@@ -19,6 +18,12 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
+
+        for (const word of this.negativeMatch) {
+            if (cleaned.includes(word)) {
+                return false
+            }
+        }
         
         const possibleMatch = ["huisnummer", "street number", "huis"]
 

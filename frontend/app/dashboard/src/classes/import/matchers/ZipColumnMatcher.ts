@@ -22,6 +22,12 @@ export class ZipColumnMatcher extends SharedMatcher implements ColumnMatcher {
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
+
+        for (const word of this.negativeMatch) {
+            if (cleaned.includes(word)) {
+                return false
+            }
+        }
         
         const possibleMatch = ["postcode", "zip", "postal"]
 
