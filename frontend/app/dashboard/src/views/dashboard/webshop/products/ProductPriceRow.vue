@@ -1,22 +1,23 @@
 <template>
-    <STListItem :selectable="true" @click="editPrice()" class="right-description right-stack no-margin">
+    <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editPrice()">
         {{ productPrice.name }}
         <template slot="right">
             {{ productPrice.price | price }}
-            <button class="button icon arrow-up gray" @click.stop="moveUp"/>
-            <button class="button icon arrow-down gray" @click.stop="moveDown"/>
-            <span  class="icon arrow-right-small gray"/>
+            <button class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STListItem } from "@stamhoofd/components";
-import { PrivateWebshop, Product, ProductPrice } from "@stamhoofd/structures"
+import { Product, ProductPrice } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditProductPriceView from './EditProductPriceView.vue';
 
 @Component({
@@ -35,7 +36,7 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
     product: Product
 
     editPrice() {
-        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.product, productPrice: this.productPrice, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.product, productPrice: this.productPrice, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             this.$emit("patch", patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

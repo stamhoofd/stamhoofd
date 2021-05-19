@@ -176,6 +176,9 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     product!: Product
 
     @Prop({ required: true })
+    isNew!: boolean
+
+    @Prop({ required: true })
     webshop: PrivateWebshop
 
     patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id })
@@ -188,10 +191,6 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
-    }
-
-    get isNew() {
-        return this.product.name.length == 0
     }
 
     get name() {
@@ -339,13 +338,15 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     addOptionMenu() {
-        const optionMenu = OptionMenu.create({})
+        const optionMenu = OptionMenu.create({
+            name: "Naamloos"
+        })
         optionMenu.options[0].name = "Naamloos"
 
         const p = Product.patch({ id: this.product.id })
         p.optionMenus.addPut(optionMenu)
         
-        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             // Merge both patches
             this.patchProduct = this.patchProduct.patch(p).patch(patch)
 
@@ -358,7 +359,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         const p = Product.patch({ id: this.product.id })
         p.prices.addPut(price)
         
-        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             // Merge both patches
             this.patchProduct = this.patchProduct.patch(p).patch(patch)
 

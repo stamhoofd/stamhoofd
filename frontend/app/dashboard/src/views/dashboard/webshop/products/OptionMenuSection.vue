@@ -52,7 +52,7 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
         const p = OptionMenu.patch({ id: this.optionMenu.id })
         p.options.addPut(option)
         
-        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.optionMenu.patch(p), option, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.optionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
             // Merge both patches
             const product = Product.patch({ id: this.product.id })
             product.optionMenus.addPatch(p.patch(patch))
@@ -63,7 +63,7 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
     }
 
     editOptionMenu() {
-        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.product, optionMenu: this.optionMenu, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.product, optionMenu: this.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             this.$emit("patch", patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

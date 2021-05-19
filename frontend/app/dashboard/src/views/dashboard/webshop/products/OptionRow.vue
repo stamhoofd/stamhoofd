@@ -1,30 +1,33 @@
 <template>
-    <STListItem :selectable="true" @click="editOption()" class="right-description right-stack no-margin">
-        
-        <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true"/>
-        <Checkbox v-else slot="left" :disabled="true"/>
+    <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editOption()">
+        <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true" />
+        <Checkbox v-else slot="left" :disabled="true" />
 
-        <h2 class="style-title-list">{{ option.name }}</h2>
-        <p class="style-description" v-if="false">Standaard geselecteerd - inbegrepen in prijs</p>
+        <h2 class="style-title-list">
+            {{ option.name }}
+        </h2>
+        <p v-if="false" class="style-description">
+            Standaard geselecteerd - inbegrepen in prijs
+        </p>
 
         <template slot="right">
             {{ option.price | priceChange }}
-            <button class="button icon arrow-up gray" @click.stop="moveUp"/>
-            <button class="button icon arrow-down gray" @click.stop="moveDown"/>
-            <span  class="icon arrow-right-small gray"/>
+            <button class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem, Checkbox, Radio } from "@stamhoofd/components";
-import { Option, OptionMenu, PrivateWebshop, Product, ProductPrice } from "@stamhoofd/structures"
+import { Checkbox, Radio,STListItem } from "@stamhoofd/components";
+import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditOptionView from './EditOptionView.vue';
-import EditProductPriceView from './EditProductPriceView.vue';
 
 @Component({
     components: {
@@ -58,7 +61,7 @@ export default class OptionRow extends Mixins(NavigationMixin) {
     }
 
     editOption() {
-        this.present(new ComponentWithProperties(EditOptionView, { option: this.option, optionMenu: this.optionMenu, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        this.present(new ComponentWithProperties(EditOptionView, { option: this.option, optionMenu: this.optionMenu, isNew: false,  saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
             this.$emit("patch", patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
