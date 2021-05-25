@@ -108,8 +108,6 @@ export class Checkout extends AutoEncoder {
                 human: "Helaas! Je bent te laat. De bestellingen zijn gesloten.",
             })
         }
-
-        this.validateAnswers(webshop)
     }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {

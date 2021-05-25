@@ -29,7 +29,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -142,7 +142,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             
         } catch (e) {
             console.error(e)
-            this.errorBox = new ErrorBox(e)
+            
 
             let error = e
 
@@ -151,14 +151,22 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             }
 
             if (isSimpleErrors(error)) {
-                if (error.containsFieldThatStartsWith("cart")) {
+                if (error.hasFieldThatStartsWith("cart")) {
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
                     
                     this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView, {})}).setDisplayStyle("popup"))
                     this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                } else if (error.hasFieldThatStartsWith("fieldAnswers")) {
+                    // A cart error: force a reload and go back to the cart.
+                    await WebshopManager.reload()
+                    this.pop({ force: true })
+                    Toast.fromError(e).show()
                 }
+
+
             }
+            this.errorBox = new ErrorBox(e)
 
             
         }
