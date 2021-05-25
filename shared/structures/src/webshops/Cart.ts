@@ -56,16 +56,37 @@ export class CartItem extends AutoEncoder {
         return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".");
     }
 
-    get unitPrice(): number {
+    /**
+     * Return total amount of same product in the given cart. Always includes the current item, even when it isn't in the cart. Doesn't count it twice
+     */
+    getTotalAmount(cart: Cart) {
+        return cart.items.reduce((c, item) => {
+            if (item.product.id !== this.product.id) {
+                return c
+            }
+
+            if (item.id === this.id) {
+                return c
+            }
+            return c + item.amount
+        }, 0) + this.amount
+    }
+
+    getUnitPrice(cart: Cart): number {
+        const amount = this.getTotalAmount(cart)
         let price = this.productPrice.price
+
+        if (this.productPrice.discountPrice !== null && amount >= this.productPrice.discountAmount) {
+            price = this.productPrice.discountPrice
+        }
         for (const option of this.options) {
             price += option.option.price
         }
         return Math.max(0, price)
     }
 
-    get price(): number {
-        return this.unitPrice * this.amount
+    getPrice(cart: Cart): number {
+        return this.getUnitPrice(cart) * this.amount
     }
 
     get description(): string {
@@ -200,7 +221,7 @@ export class Cart extends AutoEncoder {
     }
 
     get price() {
-        return this.items.reduce((c, item) => c + item.price, 0)
+        return this.items.reduce((c, item) => c + item.getPrice(this), 0)
     }
 
     get count() {

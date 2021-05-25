@@ -2,7 +2,7 @@
     <div class="container">
         <hr>
         <h2 class="style-with-button">
-            <div>{{ optionMenu.name }}</div>
+            <div>{{ optionMenu.name || 'Naamloos' }}</div>
             <div>
                 <button class="button text" @click="editOptionMenu">
                     <span class="icon edit" />

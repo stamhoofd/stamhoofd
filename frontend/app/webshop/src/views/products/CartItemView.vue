@@ -1,7 +1,7 @@
 <template>
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
-            <span slot="left" class="style-tag">{{ cartItem.unitPrice | price }}</span>
+            <span slot="left" class="style-tag">{{ cartItem.getUnitPrice(cart) | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
@@ -21,7 +21,13 @@
                 <STList>
                     <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="no-border right-description" :selectable="true" element-name="label">
                         <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
-                        {{ price.name }}
+                        <h4 class="style-title-list">
+                            {{ price.name || 'Naamloos' }}
+                        </h4>
+
+                        <p v-if="price.discountPrice" class="style-description-small">
+                            {{ price.discountPrice | price }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
+                        </p>
 
                         <template slot="right">
                             {{ price.price | price }}
@@ -34,6 +40,10 @@
             <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" />
 
             <h2>Aantal</h2>
+
+            <p v-if="remainingReduced > 0" class="info-box">
+                Bestel {{ cartItem.productPrice.discountAmount }} {{ cartItem.productPrice.discountAmount == 1 ? 'stuk' : 'stuks' }}, en betaal maar {{ discountPrice | price }} per stuk!
+            </p>
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
@@ -91,6 +101,10 @@ export default class CartItemView extends Mixins(NavigationMixin){
     @Prop({ default: null })
     oldItem: CartItem | null
 
+    get cart() {
+        return CheckoutManager.cart
+    }
+
     addToCart() {
         if (this.oldItem) {
             CheckoutManager.cart.removeItem(this.oldItem)
@@ -113,6 +127,17 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     get product() {
         return this.cartItem.product
+    }
+
+    get remainingReduced() {
+        if (this.cartItem.productPrice.discountPrice === null) {
+            return 0
+        }
+        return this.cartItem.productPrice.discountAmount - this.count
+    }
+
+    get discountPrice() {
+        return this.cartItem.productPrice.discountPrice ?? 0
     }
 
     get count() {

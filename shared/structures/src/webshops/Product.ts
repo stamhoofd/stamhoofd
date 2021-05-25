@@ -15,6 +15,14 @@ export class ProductPrice extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     price = 0;
+
+    // Optional: different price if you reach a given amount of pieces (options and prices shouldn't be the same)
+    @field({ decoder: IntegerDecoder, nullable: true, version: 93 })
+    discountPrice: number | null = null;
+
+    // Only used if discountPrice is not null
+    @field({ decoder: IntegerDecoder, version: 93 })
+    discountAmount = 2
 }
 
 export class Option extends AutoEncoder {

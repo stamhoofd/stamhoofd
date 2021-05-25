@@ -22,7 +22,7 @@
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.unitPrice | price }}
+                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(cart) | price }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" @click="deleteItem(cartItem)" />

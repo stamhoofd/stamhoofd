@@ -27,7 +27,7 @@
                     <p v-text="webshop.meta.description" />
 
                     <p v-if="isTrial" class="error-box">
-                        Dit is een demo webshop. Plaats hier geen echte bestellingen.
+                        Dit is een demo webshop
                     </p>
                 </main>
             </section>

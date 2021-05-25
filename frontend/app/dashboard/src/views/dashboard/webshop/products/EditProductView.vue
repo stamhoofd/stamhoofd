@@ -15,7 +15,7 @@
                 Artikel toevoegen
             </h1>
             <h1 v-else>
-                {{ name }} bewerken
+                {{ name || 'Artikel' }} bewerken
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
@@ -51,10 +51,8 @@
                 </div>
             </h2>
             <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
-            
-            <STInputBox v-if="patchedProduct.prices.length == 1" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" placeholder="Gratis" />
-            </STInputBox>
+
+            <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
             <STList v-else>
                 <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
@@ -146,6 +144,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue"
+import ProductPriceBox from "./ProductPriceBox.vue"
 import ProductPriceRow from "./ProductPriceRow.vue"
 
 @Component({
@@ -165,7 +164,8 @@ import ProductPriceRow from "./ProductPriceRow.vue"
         UploadButton,
         ProductPriceRow,
         STList,
-        OptionMenuSection
+        OptionMenuSection,
+        ProductPriceBox
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {

@@ -51,6 +51,15 @@ export default class PriceInput extends Vue {
     @Prop({ default: "" })
     placeholder!: string
 
+    @Watch('value')
+    onRealValueChanged(val: number, old: number) {
+        if (old === val) {
+            return
+        }
+        this.internalValue = this.constrain(val);
+        this.clean();
+    }
+
     get internalValue() {
         return this.value
     }

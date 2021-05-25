@@ -15,7 +15,7 @@
                 Categorie toevoegen
             </h1>
             <h1 v-else>
-                {{ name }} bewerken
+                {{ name || 'Categorie' }} bewerken
             </h1>
           
             <STErrorsDefault :error-box="errorBox" />

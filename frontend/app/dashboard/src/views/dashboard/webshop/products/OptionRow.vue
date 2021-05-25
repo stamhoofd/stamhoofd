@@ -4,7 +4,7 @@
         <Checkbox v-else slot="left" :disabled="true" />
 
         <h2 class="style-title-list">
-            {{ option.name }}
+            {{ option.name || 'Naamloos' }}
         </h2>
         <p v-if="false" class="style-description">
             Standaard geselecteerd - inbegrepen in prijs

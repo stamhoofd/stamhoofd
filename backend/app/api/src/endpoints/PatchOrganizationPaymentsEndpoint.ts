@@ -2,13 +2,13 @@ import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simpl
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group } from '@stamhoofd/models';
+import { Group, Webshop } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Order as OrderStruct, PaymentPatch, PaymentStatus } from "@stamhoofd/structures";
+import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, Order as OrderStruct, PaymentPatch, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PaymentPatch[]
@@ -55,40 +55,52 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
         const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
 
         let groups: Group[] = []
+        let webshops: Webshop[] = []
         if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
             groups = await Group.where({organizationId: user.organization.id})
+        }
+
+        if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
+            webshops = await Webshop.where({organizationId: user.organization.id})
         }
 
         // Modify payments
         for (const patch of request.body) {
             const pay = payments.find(p => p.id == patch.id)
+            const orderPay = orderPayments.find(p => p.id == patch.id)
+            const model = pay ?? orderPay
 
-            if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
-                if (!pay) {
-                    throw new SimpleError({
-                        code: "payment_not_found",
-                        message: "Payment with id "+patch.id+" does not exist",
-                        human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
-                    })
-                }
-                // Check permissions if not full permissions or paymetn permissions
-                const registrations = pay.registrations
-                if (!Member.haveRegistrationsWriteAccess(registrations, user, groups, true)) {
-                    throw new SimpleError({
-                        code: "payment_not_found",
-                        message: "Payment with id "+patch.id+" does not exist",
-                        human: "Je hebt geen toegang om deze betaling te wijzigen. Vraag het aan een hoofdbeheerder of beheerder met rechten voor het financieel beheer."
-                    })
-                }
-            }
-
-            const model = pay ?? orderPayments.find(p => p.id == patch.id)
             if (!model) {
                 throw new SimpleError({
                     code: "payment_not_found",
-                    message: "Payment with id "+patch.id+" does not exist"
+                    message: "Payment with id "+patch.id+" does not exist",
+                    human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
                 })
             }
+
+            if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
+                if (!pay) {
+                    const webshop = webshops.find(w => w.id === orderPay?.order.webshopId)
+                    if (!orderPay || !webshop || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                        throw new SimpleError({
+                            code: "payment_not_found",
+                            message: "Payment with id "+patch.id+" does not exist",
+                            human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
+                        })
+                    }
+                } else {
+                    // Check permissions if not full permissions or paymetn permissions
+                    const registrations = pay.registrations
+                    if (!Member.haveRegistrationsWriteAccess(registrations, user, groups, true)) {
+                        throw new SimpleError({
+                            code: "payment_not_found",
+                            message: "Payment with id "+patch.id+" does not exist",
+                            human: "Je hebt geen toegang om deze betaling te wijzigen. Vraag het aan een hoofdbeheerder of beheerder met rechten voor het financieel beheer."
+                        })
+                    }
+                }
+            }
+
             if (patch.status) {
                 if (model.status != PaymentStatus.Succeeded && model.paidAt === null && patch.status == PaymentStatus.Succeeded) {
                     model.paidAt = new Date()

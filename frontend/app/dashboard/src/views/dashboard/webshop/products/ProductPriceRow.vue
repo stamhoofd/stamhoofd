@@ -1,7 +1,10 @@
 <template>
     <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editPrice()">
-        {{ productPrice.name }}
+        {{ productPrice.name || 'Naamloos' }}
         <template slot="right">
+            <template v-if="productPrice.discountPrice">
+                {{ productPrice.discountPrice | price }} /
+            </template>
             {{ productPrice.price | price }}
             <button class="button icon arrow-up gray" @click.stop="moveUp" />
             <button class="button icon arrow-down gray" @click.stop="moveDown" />

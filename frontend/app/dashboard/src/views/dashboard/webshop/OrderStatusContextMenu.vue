@@ -1,7 +1,7 @@
 <template>
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="markAs(OrderStatus.Created)">
-            Te verwerken
+            Nieuw
         </ContextMenuItem>
         <ContextMenuItem @click="markAs(OrderStatus.Prepared)">
             Verwerkt
@@ -21,11 +21,10 @@ import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-a
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, MemberWithRegistrations, Order, OrderStatus, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../mail/MailView.vue";
-import SMSView from "../sms/SMSView.vue";
 
 @Component({
     components: {
