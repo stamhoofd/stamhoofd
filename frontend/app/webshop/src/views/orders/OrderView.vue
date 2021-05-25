@@ -43,6 +43,13 @@
                             <span v-else class="icon help" />
                         </template>
                     </STListItem>
+                    <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
+                        {{ a.field.name }}
+
+                        <template slot="right">
+                            {{ a.answer || "/" }}
+                        </template>
+                    </STListItem>
                     <STListItem v-if="order.validAt" class="right-description">
                         Geplaatst op
                         <template slot="right">

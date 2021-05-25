@@ -2,8 +2,6 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
-
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
@@ -11,6 +9,7 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData

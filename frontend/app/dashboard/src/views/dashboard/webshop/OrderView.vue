@@ -35,6 +35,13 @@
                         <p>{{ order.data.customer.email }}</p>
                     </template>
                 </STListItem>
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
+                    {{ a.field.name }}
+
+                    <template slot="right">
+                        {{ a.answer || "/" }}
+                    </template>
+                </STListItem>
                 <STListItem v-if="order.payment" class="right-description right-stack">
                     Betaalmethode
 

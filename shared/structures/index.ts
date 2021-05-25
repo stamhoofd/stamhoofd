@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 93
+export const Version = 95
 
 // General
 export * from "./src/addresses/Address"
@@ -101,6 +101,7 @@ export * from "./src/webshops/Order"
 export * from "./src/webshops/Product"
 export * from "./src/webshops/TransferSettings"
 export * from "./src/webshops/Webshop"
+export * from "./src/webshops/WebshopField"
 export * from "./src/webshops/WebshopMetaData"
 
 // billing

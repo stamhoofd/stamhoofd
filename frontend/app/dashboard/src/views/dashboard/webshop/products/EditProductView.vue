@@ -119,6 +119,12 @@
             <p v-if="useStock" class="style-description">
                 Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
             </p>
+
+            <hr>
+            <h2>Open vragen</h2>
+            <p>Je kan zelf nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+
+            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
         </main>
 
         <STToolbar>
@@ -135,12 +141,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopField } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue"
@@ -165,7 +172,8 @@ import ProductPriceRow from "./ProductPriceRow.vue"
         ProductPriceRow,
         STList,
         OptionMenuSection,
-        ProductPriceBox
+        ProductPriceBox,
+        WebshopFieldsBox
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -191,6 +199,16 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
+    }
+
+    get fields() {
+        return this.patchedProduct.customFields
+    }
+
+    addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+        this.addPatch(Product.patch({
+            customFields: patch
+        }))
     }
 
     get name() {

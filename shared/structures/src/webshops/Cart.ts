@@ -1,8 +1,10 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
 import { Webshop } from './Webshop';
+import { WebshopFieldAnswer } from './WebshopField';
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -22,6 +24,9 @@ export class CartItem extends AutoEncoder {
     
     @field({ decoder: new ArrayDecoder(CartItemOption) })
     options: CartItemOption[] = []
+
+    @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
+    fieldAnswers: WebshopFieldAnswer[] = []
 
     @field({ decoder: IntegerDecoder })
     amount = 1;
@@ -53,7 +58,7 @@ export class CartItem extends AutoEncoder {
      * Unique identifier to check if two cart items are the same
      */
     get id(): string {
-        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".");
+        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".")+"."+this.fieldAnswers.map(a => a.field.id+"-"+Formatter.slug(a.answer)).join(".");
     }
 
     /**
@@ -97,11 +102,44 @@ export class CartItem extends AutoEncoder {
         for (const option of this.options) {
             descriptions.push(option.option.name)
         }
+
+        for (const a of this.fieldAnswers) {
+            if (!a.answer) {
+                continue
+            }
+            descriptions.push(a.field.name+": "+a.answer)
+        }
         return descriptions.join("\n")
     }
 
     duplicate(version: number) {
         return CartItem.decode(new ObjectData(this.encode({ version }), { version }))
+    }
+
+    validateAnswers() {
+        const newAnswers: WebshopFieldAnswer[] = []
+        for (const field of this.product.customFields) {
+            const answer = this.fieldAnswers.find(a => a.field.id === field.id)
+
+            try {
+                if (!answer) {
+                    const a = WebshopFieldAnswer.create({ field, answer: "" })
+                    a.validate()
+                    newAnswers.push(a)
+                } else {
+                    answer.field = field
+                    answer.validate()
+                    newAnswers.push(answer)
+                }
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace("fieldAnswers."+field.id)
+                }
+                throw e
+            }
+            
+        }
+        this.fieldAnswers = newAnswers
     }
 
     /**
@@ -190,7 +228,7 @@ export class CartItem extends AutoEncoder {
             })
         }
 
-        
+        this.validateAnswers()
     }
 
 }
