@@ -290,7 +290,6 @@ export class OrdersExcelExport {
             /* if the particular row did not contain data for the column, the cell will not be generated */
             if(!worksheet[ref]) continue;
             worksheet[ref].s = { alignment: { wrapText: true } }
-            console.error(worksheet[ref])
         }
     }
 
