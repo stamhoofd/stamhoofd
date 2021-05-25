@@ -2,8 +2,6 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { OrderStatus, Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
-
 import { Member } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
@@ -11,6 +9,8 @@ import { Order } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
+import { OrderStatus, Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
+
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
 type Params = {id: string};
 class Query extends AutoEncoder {
@@ -116,7 +116,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                             }
 
                             if (order) {
-                                await order.markValid()
+                                await order.markValid(payment)
                             }
 
                             await payment.save();
@@ -152,7 +152,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         }
 
                         if (order) {
-                            await order.markValid()
+                            await order.markValid(payment)
                         }
 
                         await payment.save();

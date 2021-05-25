@@ -60,7 +60,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (totalPrice == 0) {
             // Reserve stock for 15 minutes
             await order.updateStock()
-            await order.markValid()
+            await order.markValid(null)
             
             await order.save()
         } else {
@@ -81,7 +81,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.paymentId = payment.id
             order.setRelation(Order.payment, payment)
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
-                await order.markValid()
+                await order.markValid(payment)
             }
 
             // Reserve stock for 15 minutes
