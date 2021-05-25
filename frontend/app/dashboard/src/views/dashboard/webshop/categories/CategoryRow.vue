@@ -1,6 +1,6 @@
 <template>
     <STListItem :selectable="true" @click="editCategory()">
-        {{ category.name }}
+        {{ category.name || 'Naamloos' }}
 
         <template slot="right">
             <button class="button icon arrow-up gray" @click.stop="moveUp" />
