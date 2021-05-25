@@ -70,8 +70,14 @@
                     </button>
                 </div>
             </h2>
-            <p>Je kan bij dit artikel nog extra vragen stellen waaruit men kan kiezen. Per menu kan je kiezen of men één of meerdere (of geen) antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
-           
+            <p>Je kan bij dit artikel nog een keuzemenu toevoegen waarbij men geen, één of meerdere antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
+
+            <hr>
+            <h2>Open vragen</h2>
+            <p>Je kan ook nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+
+            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+
             <hr>
             <h2 class="style-with-button">
                 <div>Foto</div>
@@ -119,12 +125,6 @@
             <p v-if="useStock" class="style-description">
                 Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
             </p>
-
-            <hr>
-            <h2>Open vragen</h2>
-            <p>Je kan zelf nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
-
-            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
         </main>
 
         <STToolbar>
