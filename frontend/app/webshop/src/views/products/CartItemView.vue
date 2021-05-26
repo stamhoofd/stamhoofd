@@ -44,7 +44,7 @@
             <h2>Aantal</h2>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                Bestel {{ cartItem.productPrice.discountAmount }} {{ cartItem.productPrice.discountAmount == 1 ? 'stuk' : 'stuks' }}, en betaal maar {{ discountPrice | price }} per stuk!
+                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
             </p>
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
