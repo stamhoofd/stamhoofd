@@ -91,6 +91,10 @@ export class EmailAddress extends Model {
             return all.filter(e => emails.includes(e.email))
         }
 
+        if (emails.length == 0) {
+            return []
+        }
+
         if (organizationId === null) {
             const [rows] = await Database.select(
                 `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` is NULL`,
