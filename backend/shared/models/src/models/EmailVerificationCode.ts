@@ -122,6 +122,18 @@ export class EmailVerificationCode extends Model {
     async generateCode() {
         this.code = ((await randomInt(Math.pow(10, EmailVerificationCode.CODE_LENGTH)))+"").padStart(EmailVerificationCode.CODE_LENGTH, "0")
         this.token = bs58.encode(await randomBytes(100)).toLowerCase();
+
+        // Increase generatedCount if we changed the code
+        if (this.tries > 0) {
+            // For statistics (how many did they try and had to resend the email)
+            this.generatedCount++;
+        }
+
+        // Reset the real tries
+        this.tries = 0
+
+        // Expire in 3 hours
+        this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3)
     }
 
     getEmailVerificationUrl(user: UserWithOrganization) {
@@ -298,26 +310,26 @@ export class EmailVerificationCode extends Model {
         if (verificationCodes.length == 0) {
             verificationCode = new EmailVerificationCode()
             verificationCode.organizationId = user.organizationId
+            await verificationCode.generateCode()
+
+            // Reset the real tries
+            verificationCode.tries = 0
+
+            // Expire in 3 hours
+            verificationCode.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3)
         } else {
             verificationCode = verificationCodes[0]
+
+            if (verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
+                // Expired: also update the token
+                await verificationCode.generateCode()
+            }
         }
-
-        // Change the code every time
-        await verificationCode.generateCode()
-
-        // Increase generatedCount if we changed the code
-        if (verificationCode.tries > 0) {
-            // For statistics (how many did they try and had to resend the email)
-            verificationCode.generatedCount++;
-        }
-
-        // Reset the real tries
-        verificationCode.tries = 0
+        
         verificationCode.email = email
         verificationCode.userId = user.id
 
-        // Expire in 3 hours
-        verificationCode.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3)
+
 
         await verificationCode.save()
         

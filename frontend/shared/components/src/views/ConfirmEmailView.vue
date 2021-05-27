@@ -67,8 +67,19 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     session!: Session
 
+    timer: any = null
+
     mounted() {
-        setTimeout(this.poll.bind(this), 10000)
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+        this.timer = setTimeout(this.poll.bind(this), 10000)
+    }
+
+    destroyed() {
+        if (this.timer) {
+            console.log("Stopped e-mail polling")
+            clearTimeout(this.timer)
+            this.timer = null
+        }
     }
 
     async poll() {
@@ -93,7 +104,8 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
             // Stop after 12 minutes
             return
         }
-        setTimeout(this.poll.bind(this), Math.max(this.pollCount*1000, 5*1000))
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+        this.timer = setTimeout(this.poll.bind(this), Math.max(this.pollCount*1000, 5*1000))
     }
 
     async submit() {
