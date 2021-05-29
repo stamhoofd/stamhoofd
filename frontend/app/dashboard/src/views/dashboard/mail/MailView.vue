@@ -258,11 +258,12 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get hasMinors() {
-        return !!this.members.find(m => (!m.details.age || m.details.age < 18) && !!m.details.email)
+        return !![...this.allRecipients.values()].find(r => r.type === "minor")
     }
 
     get hasGrownUpParents() {
-        return !!this.members.find(m => (!m.details.age || m.details.age >= 18) && !!m.details.parents.find(p => p.email))
+        console.log(this.allRecipients)
+        return !![...this.allRecipients.values()].find(r => r.type === "grownUpParent")
     }
 
     get fullAccess() {
@@ -403,29 +404,34 @@ export default class MailView extends Mixins(NavigationMixin) {
         return [...names.values()]
     }
 
-    get recipients(): Recipient[] {
+    // Unfiltered
+    get allRecipients(): Map<string, Recipient> {
         const recipients: Map<string, Recipient> = new Map()
 
         for (const member of this.members) {
-            if (!member.details) {
-                continue
-            }
+            const isMinor = (member.details.age == null || member.details.age < 18 || (member.details.age < 24 && !member.details.address && !member.details.email))
 
             for (const user of member.users) {
                 if (!user.email) {
                     continue;
                 }
 
-                if (recipients.has(user.email)) {
+                const email = user.email.toLowerCase()
+                const existing = recipients.get(email)
+
+                if (existing) {
                     // Link user
-                    const recipient = recipients.get(user.email)!
-                    recipient.userId = user.id
+                    existing.userId = user.id
+
+                    if (!existing.firstName && user.firstName) {
+                        existing.firstName = user.firstName
+                    }
                     continue
                 }
 
-                recipients.set(user.email, Recipient.create({
+                recipients.set(email, Recipient.create({
                     firstName: user.firstName,
-                    email: user.email,
+                    email,
                     replacements: [
                         Replacement.create({
                             token: "firstName",
@@ -433,100 +439,143 @@ export default class MailView extends Mixins(NavigationMixin) {
                         }),
                         Replacement.create({
                             token: "email",
-                            value: user.email ?? ""
+                            value: email
                         })
                     ],
                     // Create sign-in replacement 'signInUrl'
-                    userId: user.id
+                    userId: user.id,
+                    type: "user"
+                }))
+            }
+        
+            for (const parent of member.details.parents) {
+                if (!parent.email) {
+                    continue;
+                }
+
+                const existing = recipients.get(parent.email.toLowerCase())
+                let type = isMinor ? 'minorParent' : 'grownUpParent'
+
+                if (existing && existing.type === "minorParent") {
+                    // If this was a minor parent, keep it as a minor parent
+                    type = "minorParent"
+                }
+
+                if (existing && existing.firstName) {
+                    // Mark this e-mail for deletion
+
+                    if (existing.type === "user" || (type == "minorParent" && existing.type == "grownUpParent")) {
+                        existing.type = type
+                    }
+                    continue
+                }
+
+                recipients.set(parent.email.toLowerCase(), Recipient.create({
+                    firstName: parent.firstName,
+                    email: parent.email.toLowerCase(),
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: parent.firstName
+                        }),
+                        Replacement.create({
+                            token: "email",
+                            value: parent.email.toLowerCase()
+                        })
+                    ],
+                    userId: existing?.userId,
+                    type
                 }))
             }
 
-            if ((member.details.age !== null && member.details.age < 18) || this.includeGrownUpParents) {
-                for (const parent of member.details.parents) {
-                    if (!parent.email) {
-                        continue;
-                    }
-
-                    const existing = recipients.get(parent.email)
-
+            if (member.details.email) {
+                // Create a loop for convenience (to allow break/contniue)
+                for (const email of [member.details.email.toLowerCase()]) {
+                    const existing = recipients.get(email)
+                    const type = isMinor ? 'minor' : 'grownUp'
                     if (existing && existing.firstName) {
+                        if (existing.type !== "user" && isMinor) {
+                            // This is a duplicate email address that was also added to the member.
+                            // Keep this as a parent email address
+                            continue
+                        }
+
+                        // Mark this e-mail as a member's one
+                        existing.type = type
+
                         continue
                     }
-
-                    recipients.set(parent.email, Recipient.create({
-                        firstName: parent.firstName,
-                        email: parent.email,
-                        replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: parent.firstName
-                            }),
-                            Replacement.create({
-                                token: "email",
-                                value: parent.email
-                            })
-                        ],
-                        userId: existing?.userId
+                    recipients.set(
+                        email, 
+                        Recipient.create({
+                            firstName: member.details.firstName,
+                            email,
+                            replacements: [
+                                Replacement.create({
+                                    token: "firstName",
+                                    value: member.details.firstName
+                                }),
+                                Replacement.create({
+                                    token: "email",
+                                    value: email
+                                })
+                            ],
+                            userId: existing?.userId ?? null,
+                            type
                     }))
                 }
-            } else {
-                // Remove parents if they are a user
-                for (const parent of member.details.parents) {
-                    if (!parent.email) {
-                        continue;
-                    }
-
-                    recipients.delete(parent.email)
-                }
             }
-
-            if (!member.details.email) {
-                continue;
-            }
-
-            if (!this.includeMinorMembers && (member.details.age == null || member.details.age < 18)) {
-                // remove member if it was included
-                recipients.delete(member.details.email)
-                continue;
-            }
-
-            if (recipients.has(member.details.email) && recipients.get(member.details.email)!.firstName) {
-                continue
-            }
-
-            const existing = recipients.get(member.details.email)
-            recipients.set(member.details.email, Recipient.create({
-                firstName: member.details.firstName,
-                email: member.details.email,
-                replacements: [
-                    Replacement.create({
-                        token: "firstName",
-                        value: member.details.firstName
-                    }),
-                    Replacement.create({
-                        token: "email",
-                        value: member.details.email
-                    })
-                ],
-                userId: existing?.userId ?? null
-            }))
         }
-
+      
         for (const recipient of this.otherRecipients) {
-            if (recipients.has(recipient.email) && recipients.get(recipient.email)!.firstName) {
+            const email = recipient.email.toLowerCase()
+            const existing = recipients.get(email)
+
+            if (existing && existing.firstName) {
                 continue
             }
 
-            recipients.set(recipient.email, Recipient.create({
+            recipients.set(email, Recipient.create({
                 firstName: recipient.firstName,
-                email: recipient.email,
+                email,
                 replacements: [
                     Replacement.create({
                         token: "firstName",
                         value: recipient.firstName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "email",
+                        value: email
                     })
-                ]
+                ],
+                userId: existing?.userId ?? null,
+                type: existing?.type ?? null
             }))
+        }
+
+        return recipients
+    }
+
+    get recipients(): Recipient[] {
+        const recipients: Map<string, Recipient> = new Map(this.allRecipients)
+
+        // Only at the end, remove minor / parents
+        if (!this.includeGrownUpParents) {
+            // Remove parents
+            for (const [email, recipient] of recipients) {
+                if (recipient.type == "grownUpParent") {
+                    recipients.delete(email)
+                }
+            }
+        }
+
+        if (!this.includeMinorMembers) {
+            // Remove minor members
+            for (const [email, recipient] of recipients) {
+                if (recipient.type == "minor") {
+                    recipients.delete(email)
+                }
+            }
         }
 
         return Array.from(recipients.values())
