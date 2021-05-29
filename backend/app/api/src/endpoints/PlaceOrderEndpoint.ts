@@ -2,8 +2,6 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
-
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
@@ -11,6 +9,7 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
@@ -61,7 +60,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (totalPrice == 0) {
             // Reserve stock for 15 minutes
             await order.updateStock()
-            await order.markValid()
+            await order.markValid(null)
             
             await order.save()
         } else {
@@ -82,7 +81,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.paymentId = payment.id
             order.setRelation(Order.payment, payment)
             if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
-                await order.markValid()
+                await order.markValid(payment)
             }
 
             // Reserve stock for 15 minutes

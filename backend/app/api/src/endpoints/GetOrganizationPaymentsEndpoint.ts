@@ -60,6 +60,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
                     method: p.method,
                     status: p.status,
                     price: p.price,
+                    freeContribution: p.freeContribution,
                     transferDescription: p.transferDescription,
                     paidAt: p.paidAt,
                     createdAt: p.createdAt,

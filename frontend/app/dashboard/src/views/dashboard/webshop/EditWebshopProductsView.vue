@@ -5,45 +5,44 @@
         <template v-if="webshop.categories.length > 0">
             <h2>Categorieën</h2>
             <STList>
-                <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)"/>
+                <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
             </STList>
         </template>
 
         <template v-else-if="webshop.products.length > 0">
             <h2>Artikels</h2>
             <STList>
-                <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)"/>
+                <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
         </template>
         
         <p>
             <button class="button text" @click="addCategory">
-                <span class="icon add"/>
+                <span class="icon add" />
                 <span>Categorie toevoegen</span>
             </button>
         </p>
 
         <p v-if="webshop.categories.length == 0">
             <button class="button text" @click="addProduct">
-                <span class="icon add"/>
+                <span class="icon add" />
                 <span>Artikel toevoegen</span>
             </button>
         </p>
-       
     </main>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem,TooltipDirective as Tooltip, STInputBox, STErrorsDefault, Validator } from "@stamhoofd/components";
+import { ErrorBox, STErrorsDefault, STInputBox, STList, STListItem,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { Category, PrivateWebshop, Product } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import CategoryRow from './categories/CategoryRow.vue';
+import EditCategoryView from './categories/EditCategoryView.vue';
 import EditProductView from './products/EditProductView.vue';
 import ProductRow from './products/ProductRow.vue';
-import EditCategoryView from './categories/EditCategoryView.vue';
-import CategoryRow from './categories/CategoryRow.vue';
 
 @Component({
     components: {
@@ -67,7 +66,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const product = Product.create({})
         const p = PrivateWebshop.patch({})
         p.products.addPut(product)
-        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
             this.$emit("patch", p.patch(patch))
 
@@ -86,7 +85,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const p = PrivateWebshop.patch({})
         p.categories.addPut(category)
 
-        this.present(new ComponentWithProperties(EditCategoryView, { category, webshop: this.webshop.patch(p), saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        this.present(new ComponentWithProperties(EditCategoryView, { category, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
             this.$emit("patch", p.patch(patch))
         }}).setDisplayStyle("popup"))

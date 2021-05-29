@@ -25,8 +25,17 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     userId: string | null = null;
 
+    /**
+     * Total price
+     */
     @column({ type: "integer" })
     price: number;
+
+    /**
+     * Included in the total price
+     */
+    @column({ type: "integer", nullable: true })
+    freeContribution: number | null = null;
 
     @column({ type: "string", nullable: true })
     transferDescription: string | null = null;

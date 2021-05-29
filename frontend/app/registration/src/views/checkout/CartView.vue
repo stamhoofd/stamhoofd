@@ -15,7 +15,7 @@
                         Jouw mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
                     </p>
                     <STErrorsDefault :error-box="errorBox" />
-                
+
                     <STList>
                         <STListItem v-for="item in cart.items" :key="item.id" class="cart-item-row" :selectable="true" @click="openGroup(item.group)">
                             <h3>
@@ -37,6 +37,15 @@
                             <figure v-if="imageSrc(item)" slot="right">
                                 <img :src="imageSrc(item)">
                             </figure>
+                        </STListItem>
+
+                        <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
+                            <h3 class="style-title-list">
+                                + Vrije bijdrage van {{ cart.freeContribution | price }}. Bedankt!
+                            </h3>
+                            <p class="style-description-small">
+                                Je kan dit in één van de volgende stappen wijzigen
+                            </p>
                         </STListItem>
                     </STList>
                 </main>
@@ -110,6 +119,15 @@ export default class CartView extends Mixins(NavigationMixin){
             if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
+                this.present(
+                    new ComponentWithProperties(Steps, { 
+                        root: new ComponentWithProperties(component, {}),
+                        totalSteps: OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null ? 3 : 2
+                    })       
+                );
+            } else if(OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
+                // Go to financial view
+                const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FreeContributionView.vue')).default;
                 this.present(
                     new ComponentWithProperties(Steps, { 
                         root: new ComponentWithProperties(component, {}),

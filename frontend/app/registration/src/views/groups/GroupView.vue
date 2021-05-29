@@ -220,35 +220,35 @@ export default class GroupView extends Mixins(NavigationMixin){
         } else if (this.group.settings.minAge) {
             if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
                 if (this.group.settings.minAge >= 18) {
-                    who += "Mannen geboren in of na"
-                } else {
-                    who += "Jongens geboren in of na"
-                }
-            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                if (this.group.settings.minAge >= 18) {
-                    who += "Vrouwen geboren in of na"
-                } else {
-                    who += "Meisjes geboren in of na"
-                }
-            } else {
-                who += "Geboren in of na"
-            }
-            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
-        } else if (this.group.settings.maxAge) {
-            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
-                if (this.group.settings.maxAge > 18) {
                     who += "Mannen geboren in of voor"
                 } else {
                     who += "Jongens geboren in of voor"
                 }
             } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                if (this.group.settings.maxAge > 18) {
+                if (this.group.settings.minAge >= 18) {
                     who += "Vrouwen geboren in of voor"
                 } else {
                     who += "Meisjes geboren in of voor"
                 }
             } else {
                 who += "Geboren in of voor"
+            }
+            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
+        } else if (this.group.settings.maxAge) {
+            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
+                if (this.group.settings.maxAge > 18) {
+                    who += "Mannen geboren in of na"
+                } else {
+                    who += "Jongens geboren in of na"
+                }
+            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
+                if (this.group.settings.maxAge > 18) {
+                    who += "Vrouwen geboren in of na"
+                } else {
+                    who += "Meisjes geboren in of na"
+                }
+            } else {
+                who += "Geboren in of na"
             }
             who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.maxAge);
         } else {

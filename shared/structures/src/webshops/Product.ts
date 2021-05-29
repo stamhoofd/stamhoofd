@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerD
 import { v4 as uuidv4 } from "uuid";
 
 import { Image } from '../files/Image';
+import { WebshopField } from './WebshopField';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -15,6 +16,14 @@ export class ProductPrice extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     price = 0;
+
+    // Optional: different price if you reach a given amount of pieces (options and prices shouldn't be the same)
+    @field({ decoder: IntegerDecoder, nullable: true, version: 93 })
+    discountPrice: number | null = null;
+
+    // Only used if discountPrice is not null
+    @field({ decoder: IntegerDecoder, version: 93 })
+    discountAmount = 2
 }
 
 export class Option extends AutoEncoder {
@@ -68,6 +77,9 @@ export class Product extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Image) })
     images: Image[] = []
+
+    @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
+    customFields: WebshopField[] = []
 
     @field({ decoder: new EnumDecoder(ProductType) })
     type = ProductType.Product

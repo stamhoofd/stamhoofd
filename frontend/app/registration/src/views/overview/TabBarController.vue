@@ -33,20 +33,7 @@ import { CenteredMessage, CenteredMessageView,OrganizationLogo, STNavigationBar 
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../classes/OrganizationManager";
-
-export class TabBarItem {
-    name = ""
-    icon = ""
-    badge: string | null = ""
-    component: ComponentWithProperties
-    savedScrollPosition: null | number = null
-
-    constructor(name: string, icon: string, component: ComponentWithProperties) {
-        this.name = name
-        this.icon = icon
-        this.component = component
-    }
-}
+import { TabBarItem } from "../../classes/TabBarItem";
 
 @Component({
     components: {
@@ -55,7 +42,7 @@ export class TabBarItem {
         OrganizationLogo
     }
 })
-export default class TabBarController extends Mixins(NavigationMixin){
+export default class TabBarController extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     items!: TabBarItem[]
 
@@ -87,7 +74,7 @@ export default class TabBarController extends Mixins(NavigationMixin){
                 if (navigationController && navigationController instanceof NavigationController) {
                     if (navigationController.components.length > 1) {
                         // try to pop
-                        navigationController.pop()
+                        navigationController.pop().catch(console.error)
                     }
                 }
             }

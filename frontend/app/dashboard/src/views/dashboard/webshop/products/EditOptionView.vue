@@ -2,8 +2,8 @@
     <div class="st-view option-edit-view">
         <STNavigationBar :title="isNew ? 'Keuze toevoegen' : name+' bewerken'">
             <template slot="right">
-                <button class="button text" v-if="!isNew && !isSingle" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew && !isSingle" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -51,7 +51,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator, CenteredMessage, PriceInput } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, PriceInput,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Option, OptionMenu, Organization, PrivateWebshop, Product, ProductPrice, Version, WaitingListType, Webshop } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -71,6 +71,9 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     optionMenu: OptionMenu
+
+    @Prop({ required: true })
+    isNew!: boolean
 
     @Prop({ required: true })
     option: Option
@@ -93,10 +96,6 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
             return c
         }
         return this.option
-    }
-
-    get isNew() {
-        return this.option.name.length == 0
     }
 
     get name() {

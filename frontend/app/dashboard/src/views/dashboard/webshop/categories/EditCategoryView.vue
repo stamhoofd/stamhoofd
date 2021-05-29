@@ -2,8 +2,8 @@
     <div class="st-view product-edit-view">
         <STNavigationBar :title="isNew ? 'Categorie toevoegen' : name+' bewerken'">
             <template slot="right">
-                <button class="button text" v-if="!isNew" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -15,7 +15,7 @@
                 Categorie toevoegen
             </h1>
             <h1 v-else>
-                {{ name }} bewerken
+                {{ name || 'Categorie' }} bewerken
             </h1>
           
             <STErrorsDefault :error-box="errorBox" />
@@ -33,12 +33,12 @@
             <hr>
             <h2>Artikels</h2>
             <STList>
-                <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)"/>
+                <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
 
             <p>
                 <button class="button text" @click="addProduct">
-                    <span class="icon add"/>
+                    <span class="icon add" />
                     <span>Artikel toevoegen</span>
                 </button>
             </p>
@@ -58,11 +58,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator, CenteredMessage } from "@stamhoofd/components";
-import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, Version, WaitingListType, Webshop } from "@stamhoofd/structures"
+import { CenteredMessage,ErrorBox, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { Category, PrivateWebshop, Product, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditProductView from '../products/EditProductView.vue';
 import ProductRow from "../products/ProductRow.vue"
 
@@ -82,6 +83,9 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     category: Category
+
+    @Prop({ required: true })
+    isNew!: boolean
 
     @Prop({ required: true })
     webshop: PrivateWebshop
@@ -116,10 +120,6 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         })
     }
 
-    get isNew() {
-        return this.category.name.length == 0
-    }
-
     get name() {
         return this.patchedCategory.name
     }
@@ -137,7 +137,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         cp.productIds.addPut(product.id)
         p.categories.addPatch(cp)
         
-        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
             this.addPatch(p.patch(patch))
 

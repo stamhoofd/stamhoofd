@@ -41,6 +41,10 @@ export class Recipient extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 80 })
     userId: string | null = null
+
+    /// For reference and filtering
+    @field({ decoder: StringDecoder, nullable: true, version: 96 })
+    type: string | null = null
 }
 
 export class EmailAttachment extends AutoEncoder {

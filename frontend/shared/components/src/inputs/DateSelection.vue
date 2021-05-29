@@ -33,7 +33,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             setDate: (value: Date) => {
                 const d = new Date(value.getTime())
                 d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)
-                this.$emit("input", value)
+                this.$emit("input", d)
             }
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));

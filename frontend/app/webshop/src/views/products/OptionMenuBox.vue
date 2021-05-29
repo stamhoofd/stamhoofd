@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <h2>{{ optionMenu.name }}</h2>
+        <h2>{{ optionMenu.name || 'Maak een keuze' }}</h2>
         <STList>
             <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-description" :selectable="true" element-name="label">
                 <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" />
                 <Checkbox v-else slot="left" :checked="isOptionSelected(option)" @change="selectOption(option, $event)" />
 
-                {{ option.name }}
+                {{ option.name || 'Naamloos' }}
 
                 <template v-if="option.price != 0" slot="right">
                     {{ option.price | priceChange }}

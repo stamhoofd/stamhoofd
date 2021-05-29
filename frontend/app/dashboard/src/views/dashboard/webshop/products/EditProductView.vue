@@ -15,7 +15,7 @@
                 Artikel toevoegen
             </h1>
             <h1 v-else>
-                {{ name }} bewerken
+                {{ name || 'Artikel' }} bewerken
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
@@ -51,10 +51,8 @@
                 </div>
             </h2>
             <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
-            
-            <STInputBox v-if="patchedProduct.prices.length == 1" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" placeholder="Gratis" />
-            </STInputBox>
+
+            <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
             <STList v-else>
                 <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
@@ -72,8 +70,14 @@
                     </button>
                 </div>
             </h2>
-            <p>Je kan bij dit artikel nog extra vragen stellen waaruit men kan kiezen. Per menu kan je kiezen of men één of meerdere (of geen) antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
-           
+            <p>Je kan bij dit artikel nog een keuzemenu toevoegen waarbij men geen, één of meerdere antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
+
+            <hr>
+            <h2>Open vragen</h2>
+            <p>Je kan ook nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+
+            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+
             <hr>
             <h2 class="style-with-button">
                 <div>Foto</div>
@@ -137,15 +141,17 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopField } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue"
+import ProductPriceBox from "./ProductPriceBox.vue"
 import ProductPriceRow from "./ProductPriceRow.vue"
 
 @Component({
@@ -165,7 +171,9 @@ import ProductPriceRow from "./ProductPriceRow.vue"
         UploadButton,
         ProductPriceRow,
         STList,
-        OptionMenuSection
+        OptionMenuSection,
+        ProductPriceBox,
+        WebshopFieldsBox
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -174,6 +182,9 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     product!: Product
+
+    @Prop({ required: true })
+    isNew!: boolean
 
     @Prop({ required: true })
     webshop: PrivateWebshop
@@ -190,8 +201,14 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         return this.product.patch(this.patchProduct)
     }
 
-    get isNew() {
-        return this.product.name.length == 0
+    get fields() {
+        return this.patchedProduct.customFields
+    }
+
+    addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+        this.addPatch(Product.patch({
+            customFields: patch
+        }))
     }
 
     get name() {
@@ -339,13 +356,15 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     addOptionMenu() {
-        const optionMenu = OptionMenu.create({})
+        const optionMenu = OptionMenu.create({
+            name: "Naamloos"
+        })
         optionMenu.options[0].name = "Naamloos"
 
         const p = Product.patch({ id: this.product.id })
         p.optionMenus.addPut(optionMenu)
         
-        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.patchedProduct.patch(p), optionMenu, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             // Merge both patches
             this.patchProduct = this.patchProduct.patch(p).patch(patch)
 
@@ -358,7 +377,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         const p = Product.patch({ id: this.product.id })
         p.prices.addPut(price)
         
-        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+        this.present(new ComponentWithProperties(EditProductPriceView, { product: this.patchedProduct.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             // Merge both patches
             this.patchProduct = this.patchProduct.patch(p).patch(patch)
 

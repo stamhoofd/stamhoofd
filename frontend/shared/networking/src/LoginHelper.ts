@@ -69,10 +69,7 @@ export class LoginHelper {
     }
 
     static getTemporaryKey(token: string): StoredKeys | null {
-        const exists = this.AWAITING_KEYS.get(token)
-        if (exists) {
-            return exists
-        }
+        // Never get awaiting keys from memory, because a different tab might have already changed it
         const stored = localStorage.getItem("AWAITING_KEYS")
         if (!stored) {
             return null
@@ -294,7 +291,7 @@ export class LoginHelper {
     static async pollEmail(session: Session, token: string): Promise<boolean> {
         const savedKeys = this.getTemporaryKey(token)
         if (!savedKeys) {
-            return false
+            return true
         }
         const response = await session.server.request({
             method: "POST",
@@ -314,8 +311,20 @@ export class LoginHelper {
                 return true
             }
 
+            const savedKeys = this.getTemporaryKey(token)
+            if (!savedKeys) {
+                return true
+            }
+
             // Try to login with stored key
-            await this.login(session, savedKeys.email, savedKeys)
+            try {
+                console.log("Trying to login with a saved key...")
+                await this.login(session, savedKeys.email, savedKeys)
+            } catch (e) {
+                // If it fails: just dismiss. The token is invalid
+                console.error(e)
+                return true
+            }
             return true
         }
         return false
@@ -356,7 +365,6 @@ export class LoginHelper {
         }
         this.deleteTemporaryKey(token)
         session.clearKeys()
-        
         
         try {
             session.preventComplete = true
@@ -443,6 +451,9 @@ export class LoginHelper {
                     const meta = SignupResponse.decode(new ObjectData(error.meta, { version: Version }))
 
                     const encryptionKey = await this.createEncryptionKey(password, meta.authEncryptionKeyConstants)
+
+                    // Clear existing tokens (stop current polling)
+                    this.clearAwaitingKeys()
                     this.addTemporaryKey(meta.token, StoredKeys.create({
                         email,
                         authEncryptionKey: encryptionKey,
@@ -460,6 +471,7 @@ export class LoginHelper {
 
         // No need to keep awaiting keys now
         this.clearAwaitingKeys()
+
 
         // Clear session first
         // needed to make sure we don't use old keys now
@@ -536,6 +548,7 @@ export class LoginHelper {
         })
 
         // Save encryption key until verified
+        this.clearAwaitingKeys()
         this.addTemporaryKey(response.data.token, StoredKeys.create({
             email,
             authEncryptionKey: keys.authEncryptionSecretKey,
@@ -813,6 +826,7 @@ export class LoginHelper {
         }
 
         // Save encryption key until verified
+        this.clearAwaitingKeys()
         this.addTemporaryKey(response.data.token, StoredKeys.create({
             email,
             authEncryptionKey: keys.authEncryptionSecretKey,

@@ -2,11 +2,16 @@
     <div>
         <Checkbox v-model="enabled">
             {{ checkboxText }}
-            <p class="style-description-small" v-if="hint">{{ hint }}</p>
+            <p v-if="hint" class="style-description-small">
+                {{ hint }}
+            </p>
         </Checkbox>
         <div v-if="enabled && (comments || placeholder)" class="textarea-container">
-            <textarea v-model="description" class="input" :placeholder="descriptionPlaceholder" />
-            <p class="info-box" v-if="comment">{{ comment }}</p>
+            <input v-if="small" v-model="description" class="input" :placeholder="descriptionPlaceholder">
+            <textarea v-else v-model="description" class="input" :placeholder="descriptionPlaceholder" />
+            <p v-if="comment" class="info-box">
+                {{ comment }}
+            </p>
         </div>
     </div>
 </template>
@@ -48,6 +53,9 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
 
     @Prop({ required: false, default: null })
     placeholder!: string | null
+
+    @Prop({ default: false })
+    small!: boolean
 
     @Prop({ required: true })
     records!: Record[]

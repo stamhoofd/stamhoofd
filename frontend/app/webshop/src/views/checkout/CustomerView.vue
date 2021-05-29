@@ -24,6 +24,8 @@
                 <EmailInput v-model="email" title="Jouw e-mailadres" :validator="validator" placeholder="Voor bevestingsemail" />
 
                 <PhoneInput v-model="phone" title="Jouw GSM-nummer" :validator="validator" placeholder="Voor dringende info" />
+
+                <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
             </main>
 
             <STToolbar>
@@ -41,12 +43,13 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, BackButton } from "@stamhoofd/components"
+import { BackButton,EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
+import FieldBox from "../products/FieldBox.vue"
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -60,7 +63,8 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
         STInputBox,
         EmailInput,
         PhoneInput,
-        BackButton
+        BackButton,
+        FieldBox
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -78,6 +82,10 @@ export default class CustomerView extends Mixins(NavigationMixin){
 
     get checkoutMethod() {
         return CheckoutManager.checkout.checkoutMethod!
+    }
+
+    get fields() {
+        return this.webshop.meta.customFields
     }
 
     get webshop() {
@@ -130,6 +138,8 @@ export default class CustomerView extends Mixins(NavigationMixin){
         }
         this.loading = true
         this.errorBox = null
+
+        // Clear old open fields
 
         try {
            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Customer, true)

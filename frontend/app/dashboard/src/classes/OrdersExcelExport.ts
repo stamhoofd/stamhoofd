@@ -1,4 +1,4 @@
-import { CheckoutMethodType, Order, OrderStatusHelper, PaymentMethod } from '@stamhoofd/structures';
+import { CheckoutMethodType, Order, OrderStatusHelper, PaymentMethod, WebshopField } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -10,6 +10,18 @@ export class OrdersExcelExport {
     static createOrderLines(orders: Order[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = true
+
+        const answerColumns = new Map<string, number>()
+        const answerNames: string[] = []
+
+        for (const order of orders) {
+            for (const a of order.data.fieldAnswers) {
+                if (!answerColumns.has(a.field.id)) {
+                    answerColumns.set(a.field.id, answerColumns.size)
+                    answerNames.push(a.field.name)
+                }
+            }
+        }
         
         // Columns
         const wsData = [
@@ -18,6 +30,7 @@ export class OrdersExcelExport {
                 "Naam",
                 "E-mail",
                 "GSM-nummer",
+                ...answerNames,
                 "Aantal",
                 "Product (terugloop aanzetten!)",
             ],
@@ -25,12 +38,22 @@ export class OrdersExcelExport {
 
         for (const order of orders) {
             for (const [index, item] of order.data.cart.items.entries()) {
+                const answers = answerNames.map(a => "")
+
+                for (const a of order.data.fieldAnswers) {
+                    const index = answerColumns.get(a.field.id)
+                    if (index !== undefined) {
+                        answers[index] = a.answer
+                    }
+                }
+
                 const showDetails = index == 0 || repeat
                 wsData.push([
                     showDetails ? `${order.number}` : "",
                     showDetails ? order.data.customer.name : "",
                     showDetails ? order.data.customer.email : "",
                     showDetails ? order.data.customer.phone : "",
+                    ...answers,
                     `${item.amount}`,
                     `${item.product.name}${item.description ? "\r\n"+item.description : ""}`,
                 ]);
@@ -39,7 +62,8 @@ export class OrdersExcelExport {
 
         this.deleteEmptyColumns(wsData)
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
+        this.wrapColumn(5 + answerNames.length, ws)
 
         // Set column width
         ws['!cols'] = []
@@ -70,6 +94,18 @@ export class OrdersExcelExport {
     static createOrders(orders: Order[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = false
+
+        const answerColumns = new Map<string, number>()
+        const answerNames: string[] = []
+
+        for (const order of orders) {
+            for (const a of order.data.fieldAnswers) {
+                if (!answerColumns.has(a.field.id)) {
+                    answerColumns.set(a.field.id, answerColumns.size)
+                    answerNames.push(a.field.name)
+                }
+            }
+        }
         
         // Columns
         const wsData: (string | number)[][] = [
@@ -78,6 +114,7 @@ export class OrdersExcelExport {
                 "Naam",
                 "E-mail",
                 "GSM-nummer",
+                ...answerNames,
                 "Afhaalmethode",
                 "Leveringsadres / afhaallocatie",
                 "Datum",
@@ -101,11 +138,21 @@ export class OrdersExcelExport {
                 address = order.data.address?.toString() ?? "??"
             }
 
+            const answers = answerNames.map(a => "")
+
+            for (const a of order.data.fieldAnswers) {
+                const index = answerColumns.get(a.field.id)
+                if (index !== undefined) {
+                    answers[index] = a.answer
+                }
+            }
+
             wsData.push([
                 `${order.number}`,
                 order.data.customer.name,
                 order.data.customer.email,
                 order.data.customer.phone,
+                ...answers,
                 checkoutType,
                 address,
                 order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
@@ -120,7 +167,7 @@ export class OrdersExcelExport {
 
         this.deleteEmptyColumns(wsData)
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
         this.formatColumn(wsData[0].length - 4, "€0.00", ws)
         this.formatColumn(wsData[0].length - 5, "€0.00", ws)
 
@@ -232,6 +279,17 @@ export class OrdersExcelExport {
             if(worksheet[ref].t != 'n') continue;
             /* assign the `.z` number format */
             worksheet[ref].z = fmt;
+        }
+    }
+
+    static wrapColumn(colNum: number, worksheet: any) {
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
+            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
+            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
+            /* if the particular row did not contain data for the column, the cell will not be generated */
+            if(!worksheet[ref]) continue;
+            worksheet[ref].s = { alignment: { wrapText: true } }
         }
     }
 

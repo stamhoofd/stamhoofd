@@ -332,8 +332,21 @@ export class Organization extends Model {
                                 human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
                             }))
                         } else {
-                            if (records[0].join("").trim() === record.value.trim()) {
-                                record.status = DNSRecordStatus.Valid
+                            const val = records[0].join("").trim()
+                            if (val === record.value.trim()) {
+                                if (records[0].length > 1 && val.length <= 255) {
+                                    // Split was not needed and is not supported by SES
+                                    record.status = DNSRecordStatus.Failed
+                                    allValid = false
+
+                                    record.errors = new SimpleErrors(new SimpleError({
+                                        code: "wrong_value",
+                                        message: "",
+                                        human: "De waarde komt overeen maar is op één of andere manier opgesplitst in meerdere stukken, terwijl dat niet nodig is. Dit wordt niet ondersteund door onze e-mailprovider. Contacteer ons als je de oorzaak niet kan achterhalen."
+                                    }))
+                                } else {
+                                    record.status = DNSRecordStatus.Valid
+                                }
                             } else {
                                 record.status = DNSRecordStatus.Failed
                                 allValid = false
@@ -631,7 +644,7 @@ export class Organization extends Model {
     async updateRequestKeysCount() {
         // Circular reference fix
         const User = (await import('./User')).User;
-        const query = `select count(*) as c from \`${User.table}\` where organizationId = ? AND requestKeys = 1 AND verified = 1 AND publicKey is not null`
+        const query = `select count(distinct \`${User.table}\`.id) as c from \`${User.table}\` join _members_users on _members_users.usersId = \`${User.table}\`.id where \`${User.table}\`.organizationId = ? AND \`${User.table}\`.requestKeys = 1 AND \`${User.table}\`.publicKey is not null AND \`${User.table}\`.permissions is null`
         
         const [results] = await Database.select(query, [this.id])
         const count = results[0]['']['c'];

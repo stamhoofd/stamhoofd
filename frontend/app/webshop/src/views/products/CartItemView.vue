@@ -1,7 +1,7 @@
 <template>
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
-            <span slot="left" class="style-tag">{{ cartItem.unitPrice | price }}</span>
+            <span slot="left" class="style-tag">{{ cartItem.getUnitPrice(cart) | price }}</span>
             <button slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
@@ -12,16 +12,20 @@
                     <img :src="imageSrc">
                 </div>
             </figure>
-            <p class="description">
-                {{ cartItem.product.description }}
-            </p>
-            <hr>
+            <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
+            <hr v-if="cartItem.product.description || imageSrc">
 
             <div v-if="cartItem.product.prices.length > 1" class="container">
                 <STList>
                     <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="no-border right-description" :selectable="true" element-name="label">
                         <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
-                        {{ price.name }}
+                        <h4 class="style-title-list">
+                            {{ price.name || 'Naamloos' }}
+                        </h4>
+
+                        <p v-if="price.discountPrice" class="style-description-small">
+                            {{ price.discountPrice | price }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
+                        </p>
 
                         <template slot="right">
                             {{ price.price | price }}
@@ -33,7 +37,15 @@
 
             <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" />
 
+            <STErrorsDefault :error-box="errorBox" />
+
+            <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errorBox" />
+
             <h2>Aantal</h2>
+
+            <p v-if="remainingReduced > 0" class="info-box">
+                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
+            </p>
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
@@ -59,13 +71,15 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { NumberInput,Radio,StepperInput,STList, STListItem,STNavigationBar, STToolbar, Toast} from '@stamhoofd/components';
+import { ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
+import { WebshopManager } from '../../classes/WebshopManager';
+import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 
 @Component({
@@ -77,7 +91,9 @@ import OptionMenuBox from './OptionMenuBox.vue';
         Radio,
         NumberInput,
         OptionMenuBox,
-        StepperInput
+        StepperInput,
+        FieldBox,
+        STErrorsDefault
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -91,7 +107,20 @@ export default class CartItemView extends Mixins(NavigationMixin){
     @Prop({ default: null })
     oldItem: CartItem | null
 
+    errorBox: ErrorBox | null = null
+
+    get cart() {
+        return CheckoutManager.cart
+    }
+
     addToCart() {
+        try {
+            this.cartItem.validate(WebshopManager.webshop)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+            return
+        }
+
         if (this.oldItem) {
             CheckoutManager.cart.removeItem(this.oldItem)
             new Toast(this.cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
@@ -113,6 +142,17 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     get product() {
         return this.cartItem.product
+    }
+
+    get remainingReduced() {
+        if (this.cartItem.productPrice.discountPrice === null) {
+            return 0
+        }
+        return this.cartItem.productPrice.discountAmount - this.count
+    }
+
+    get discountPrice() {
+        return this.cartItem.productPrice.discountPrice ?? 0
     }
 
     get count() {
@@ -173,6 +213,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
     .description {
         @extend .style-description;
         padding-top: 15px;
+        white-space: pre-wrap;
     }
 }
 

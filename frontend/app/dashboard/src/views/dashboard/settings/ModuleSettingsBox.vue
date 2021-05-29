@@ -9,7 +9,7 @@
                     <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
-                    <Spinner v-if="loadingModule == 'members'" />
+                    <Spinner v-if="loadingModule == 'TrialMembers'" />
                     <Checkbox v-else v-model="enableMemberModule" :disabled="enableMemberModule && !isMembersTrial" />
                 </div>
             </label>
@@ -22,7 +22,7 @@
                     <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
-                    <Spinner v-if="loadingModule == 'members'" />
+                    <Spinner v-if="loadingModule == 'TrialMembers'" />
                     <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial" />
                 </div>
             </label>
@@ -35,7 +35,8 @@
                     <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
                 <div>
-                    <Checkbox v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
+                    <Spinner v-if="loadingModule == 'TrialWebshops'" />
+                    <Checkbox v-else v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
                 </div>
             </label>
         </div>

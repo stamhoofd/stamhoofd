@@ -1,8 +1,10 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
 import { Webshop } from './Webshop';
+import { WebshopFieldAnswer } from './WebshopField';
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -22,6 +24,9 @@ export class CartItem extends AutoEncoder {
     
     @field({ decoder: new ArrayDecoder(CartItemOption) })
     options: CartItemOption[] = []
+
+    @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
+    fieldAnswers: WebshopFieldAnswer[] = []
 
     @field({ decoder: IntegerDecoder })
     amount = 1;
@@ -53,19 +58,40 @@ export class CartItem extends AutoEncoder {
      * Unique identifier to check if two cart items are the same
      */
     get id(): string {
-        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".");
+        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".")+"."+this.fieldAnswers.map(a => a.field.id+"-"+Formatter.slug(a.answer)).join(".");
     }
 
-    get unitPrice(): number {
+    /**
+     * Return total amount of same product in the given cart. Always includes the current item, even when it isn't in the cart. Doesn't count it twice
+     */
+    getTotalAmount(cart: Cart) {
+        return cart.items.reduce((c, item) => {
+            if (item.product.id !== this.product.id) {
+                return c
+            }
+
+            if (item.id === this.id) {
+                return c
+            }
+            return c + item.amount
+        }, 0) + this.amount
+    }
+
+    getUnitPrice(cart: Cart): number {
+        const amount = this.getTotalAmount(cart)
         let price = this.productPrice.price
+
+        if (this.productPrice.discountPrice !== null && amount >= this.productPrice.discountAmount) {
+            price = this.productPrice.discountPrice
+        }
         for (const option of this.options) {
             price += option.option.price
         }
         return Math.max(0, price)
     }
 
-    get price(): number {
-        return this.unitPrice * this.amount
+    getPrice(cart: Cart): number {
+        return this.getUnitPrice(cart) * this.amount
     }
 
     get description(): string {
@@ -76,11 +102,44 @@ export class CartItem extends AutoEncoder {
         for (const option of this.options) {
             descriptions.push(option.option.name)
         }
+
+        for (const a of this.fieldAnswers) {
+            if (!a.answer) {
+                continue
+            }
+            descriptions.push(a.field.name+": "+a.answer)
+        }
         return descriptions.join("\n")
     }
 
     duplicate(version: number) {
         return CartItem.decode(new ObjectData(this.encode({ version }), { version }))
+    }
+
+    validateAnswers() {
+        const newAnswers: WebshopFieldAnswer[] = []
+        for (const field of this.product.customFields) {
+            const answer = this.fieldAnswers.find(a => a.field.id === field.id)
+
+            try {
+                if (!answer) {
+                    const a = WebshopFieldAnswer.create({ field, answer: "" })
+                    a.validate()
+                    newAnswers.push(a)
+                } else {
+                    answer.field = field
+                    answer.validate()
+                    newAnswers.push(answer)
+                }
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace("fieldAnswers."+field.id)
+                }
+                throw e
+            }
+            
+        }
+        this.fieldAnswers = newAnswers
     }
 
     /**
@@ -169,7 +228,7 @@ export class CartItem extends AutoEncoder {
             })
         }
 
-        
+        this.validateAnswers()
     }
 
 }
@@ -200,7 +259,7 @@ export class Cart extends AutoEncoder {
     }
 
     get price() {
-        return this.items.reduce((c, item) => c + item.price, 0)
+        return this.items.reduce((c, item) => c + item.getPrice(this), 0)
     }
 
     get count() {

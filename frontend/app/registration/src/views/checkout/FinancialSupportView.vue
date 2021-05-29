@@ -39,6 +39,7 @@ import { Component, Mixins, Watch } from "vue-property-decorator";
 import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from "../../classes/OrganizationManager";
+import FreeContributionView from "./FreeContributionView.vue";
 import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
@@ -84,6 +85,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
             for (const item of CheckoutManager.checkout.cart.items) {
                 item.reduced = true
             }
+            CheckoutManager.cart.freeContribution = 0
         } else {
             for (const item of CheckoutManager.checkout.cart.items) {
                 item.reduced = false
@@ -134,7 +136,13 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
             }
             
             this.loading = false
-            this.show(new ComponentWithProperties(PaymentSelectionView, {}))
+
+            // todo: check if free contribution is enabled
+            if (!this.reduced && OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
+                this.show(new ComponentWithProperties(FreeContributionView, {}))
+            } else {
+                this.show(new ComponentWithProperties(PaymentSelectionView, {}))
+            }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

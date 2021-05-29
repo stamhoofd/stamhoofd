@@ -5,6 +5,7 @@
         "dist",
         "../dashboard",
         "../webshop",
+        "../admin",
     ],
     "compilerOptions": {
         "resolveJsonModule": true

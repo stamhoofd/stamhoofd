@@ -22,6 +22,12 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
+
+        for (const word of this.negativeMatch) {
+            if (cleaned.includes(word)) {
+                return false
+            }
+        }
         
         const possibleMatch = ["gemeente"]
 

@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData, OrderStatus } from '@stamhoofd/structures';
+import { OrderData, OrderStatus, PaymentMethod } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -132,7 +132,7 @@ export class Order extends Model {
         }
     }
 
-    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }) {
+    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null) {
         const wasValid = this.validAt !== null
 
         if (wasValid) {
@@ -159,7 +159,9 @@ export class Order extends Model {
                 replyTo,
                 to: toStr,
                 subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. Je kan jouw bestelling nakijken via \n"+this.getUrl()+"\n\n"+organization.name,
+                text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                    ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
+                +" \n"+this.getUrl()+"\n\n"+organization.name,
             })
         }
     }

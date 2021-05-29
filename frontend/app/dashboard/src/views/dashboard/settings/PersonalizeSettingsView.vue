@@ -45,6 +45,9 @@
             <hr>
             <h2>Domeinnaam</h2>
 
+            <p>Alle informatie over domeinnaamen vind je op <a class="inline-link" href="https://stamhoofd.be/docs/domeinnaam-koppelen" target="_blank">deze pagina</a>.</p>
+
+
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
                 <p class="warning-box">
                     Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.

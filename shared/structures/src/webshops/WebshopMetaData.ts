@@ -11,6 +11,7 @@ import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { TransferSettings } from './TransferSettings';
+import { WebshopField } from './WebshopField';
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -190,6 +191,12 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null
+
+    @field({ decoder: BooleanDecoder, version: 94 })
+    allowComments = false
+
+    @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
+    customFields: WebshopField[] = []
 
     @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
     checkoutMethods: CheckoutMethod[] = []

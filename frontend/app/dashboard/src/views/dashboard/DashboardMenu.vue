@@ -48,7 +48,7 @@
                         :class="{ selected: currentlySelected == 'group-'+group.id }"
                         @click="openGroup(group)"
                     >
-                        {{ group.settings.name }}
+                        <span>{{ group.settings.name }}</span>
                     </button>
 
                     <button
@@ -58,7 +58,7 @@
                         :class="{ selected: currentlySelected == 'category-'+c.id }"
                         @click="openCategory(c)"
                     >
-                        {{ c.settings.name }}
+                        <span>{{ c.settings.name }}</span>
                     </button>
                 </div>
             </div>
@@ -123,7 +123,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, Logo, Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';

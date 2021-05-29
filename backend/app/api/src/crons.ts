@@ -138,7 +138,7 @@ async function checkBounces() {
                     if (bounce.Message) {
                         const message = JSON.parse(bounce.Message)
 
-                        if (message.notificationType && message.notificationType == "Bounce" && message.bounce) {
+                        if (message.bounce) {
                             const b = message.bounce
                             // Block all receivers that generate a permanent bounce
                             const type = b.bounceType
@@ -163,10 +163,18 @@ async function checkBounces() {
 
                             }
                             console.log("For domain "+source)
+                        } else {
+                            console.log("'bounce' field missing in bounce message")
                         }
+                    } else {
+                        console.log("'Message' field missing in bounce message")
                     }
+                } else {
+                    console.log("Message Body missing in bounce")
                 }
             } catch (e) {
+                console.log("Bounce message processing failed:")
+                console.error("Bounce message processing failed:")
                 console.error(e)
             }
         }
@@ -206,7 +214,7 @@ async function checkComplaints() {
                     if (complaint.Message) {
                         const message = JSON.parse(complaint.Message)
 
-                        if (message.notificationType && message.notificationType == "Complaint" && message.complaint) {
+                        if (message.complaint) {
                             const b = message.complaint
                             const source = message.mail.source
                             const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
@@ -235,10 +243,16 @@ async function checkComplaints() {
                                     })
                                 }
                             }
+                        } else {
+                            console.log("Missing complaint field")
                         }
+                    }  else {
+                        console.log("Missing message field in complaint")
                     }
                 }
             } catch (e) {
+                console.log("Complain message processing failed:")
+                console.error("Complain message processing failed:")
                 console.error(e)
             }
         }

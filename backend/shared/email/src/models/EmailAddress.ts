@@ -24,8 +24,8 @@ export class EmailAddress extends Model {
     })
     id!: string;
 
-    @column({ type: "string" })
-    organizationId: string;
+    @column({ type: "string", nullable: true })
+    organizationId: string | null = null;
 
     // Columns
     @column({ type: "string" })
@@ -43,8 +43,8 @@ export class EmailAddress extends Model {
     @column({ type: "boolean" })
     unsubscribedAll = false;
 
-    @column({ type: "string" })
-    token: string;
+    @column({ type: "string", nullable: true })
+    token: string | null;
 
     /**
      * createdAt behaves more like createdAt for Challenge. Since every save is considered to have a new challenge
@@ -67,7 +67,7 @@ export class EmailAddress extends Model {
     })
     updatedAt: Date
 
-    static async getOrCreate(email: string, organizationId: string): Promise<EmailAddress> {
+    static async getOrCreate(email: string, organizationId: string | null): Promise<EmailAddress> {
         const existing = await this.getByEmail(email, organizationId)
         if (existing) {
             return existing
@@ -84,12 +84,26 @@ export class EmailAddress extends Model {
     }
 
     // Methods
-    static async getByEmails(emails: string[], organizationId: string): Promise<EmailAddress[]> {
+    static async getByEmails(emails: string[], organizationId: string | null): Promise<EmailAddress[]> {
         if (emails.length > 30) {
             // Normally an organization will never have so much bounces, so we'll request all emails and filter in them
             const all = await this.where({ organizationId })
             return all.filter(e => emails.includes(e.email))
         }
+
+        if (emails.length == 0) {
+            return []
+        }
+
+        if (organizationId === null) {
+            const [rows] = await Database.select(
+                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` is NULL`,
+                [emails]
+            );
+
+            return this.fromRows(rows, this.table);
+        }
+
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` = ?`,
             [emails, organizationId]
@@ -99,18 +113,8 @@ export class EmailAddress extends Model {
     }
 
     // Methods
-    static async getByEmail(email: string, organizationId: string): Promise<EmailAddress | undefined> {
-        const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` = ? AND \`organizationId\` = ? LIMIT 1`,
-            [email, organizationId]
-        );
-
-        if (rows.length == 0) {
-            return undefined;
-        }
-
-        // Read member + address from first row
-        return this.fromRow(rows[0][this.table]);
+    static async getByEmail(email: string, organizationId: string | null): Promise<EmailAddress | undefined> {
+        return (await this.where({ email, organizationId }, { limit: 1 }))[0] ?? undefined
     }
 
     // Methods

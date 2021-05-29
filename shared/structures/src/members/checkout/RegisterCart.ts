@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from "@simonbackx/simple-encoding"
 import { SimpleErrors } from "@simonbackx/simple-errors"
 
 import { Group } from "../../Group"
@@ -19,17 +19,24 @@ import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations
  */
 export class RegisterCart {
     items: RegisterItem[] = []
+    freeContribution = 0
+
+    clear() {
+        this.items = []
+        this.freeContribution = 0
+    }
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
-            items: this.items.map(i => i.convert())
+            items: this.items.map(i => i.convert()),
+            freeContribution: this.freeContribution
         })
     }
 
     get price(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0)
+        }, 0) + this.freeContribution
     }
 
     get count(): number {
@@ -98,10 +105,13 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
     items: IDRegisterItem[] = []
 
+    @field({ decoder: IntegerDecoder, version: 91 })
+    freeContribution = 0
+
     get price(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0)
+        }, 0) + this.freeContribution
     }
 
     convert(organization: Organization, members: MemberWithRegistrations[]): RegisterCart {
@@ -113,6 +123,7 @@ export class IDRegisterCart extends AutoEncoder {
             }
             return []
         })
+        cart.freeContribution = this.freeContribution
 
         return cart
     }

@@ -31,8 +31,9 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     unitPrice = 0
 
-    @field({ decoder: IntegerDecoder })
-    price = 0
+    get price(): number {
+        return this.unitPrice * this.amount
+    }
 
     /** 
      * All data of the original package that is linked to this item
@@ -102,8 +103,7 @@ export class STInvoiceItem extends AutoEncoder {
             package: pack,
             date: now,
             unitPrice: unitPrice,
-            amount: amount,
-            price: unitPrice * amount
+            amount: amount
         })
 
         return item
@@ -162,8 +162,8 @@ export class STInvoice extends AutoEncoder {
     /**
      * This ID is empty for a pending invoice
      */
-    @field({ decoder: StringDecoder, nullable: true, optional: true })
-    id: string | null = null
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string
 
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null = null

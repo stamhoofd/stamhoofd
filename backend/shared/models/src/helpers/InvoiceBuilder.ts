@@ -1,5 +1,5 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { File, PaymentMethod, PaymentMethodHelper, STInvoiceItem } from "@stamhoofd/structures";
+import { File, PaymentMethod, PaymentMethodHelper, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 import PDFDocument from 'pdfkit';
 import { v4 as uuidv4 } from "uuid";
 import AWS from 'aws-sdk';
@@ -144,7 +144,7 @@ export class InvoiceBuilder {
         this.document.moveDown()
         const savedY = this.document.y
         this.document.text("Vervaldatum", logoX * MM, savedY, { align: 'left' })
-        this.document.text(Formatter.date(this.invoice.meta.date!, true), 43 * MM, savedY, { align: 'left' })
+        this.document.text(Formatter.date((this.payment && this.payment.status === PaymentStatus.Succeeded) ? this.invoice.meta.date! : new Date(this.invoice.meta.date!.getTime() + 1000 * 60 * 60 * 24 * 30), true), 43 * MM, savedY, { align: 'left' })
 
         // Write Codawood BV
         const x = 120
@@ -399,14 +399,31 @@ export class InvoiceBuilder {
         this.document.text("Hou deze factuur bij voorkeur digitaal bij", PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
 
         if (this.payment && this.payment.method) {
-            y -= 10*MM
-            this.document.fillColor(COLOR_PRIMARY)
-            this.document.translate(PAGE_MARGIN, y).path("M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z").fill('even-odd')
+            if (this.payment.status === PaymentStatus.Succeeded) {
+                y -= 10*MM
+                this.document.fillColor(COLOR_PRIMARY)
+                this.document.translate(PAGE_MARGIN, y).path("M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z").fill('even-odd')
+                
+                this.document.translate(-PAGE_MARGIN, -y)
+                const payText = "Deze factuur werd al betaald via "+PaymentMethodHelper.getName(this.payment.method)
+                const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2  })
+                this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left' })
+            } else if (this.payment.method === PaymentMethod.Transfer) {
+                y -= 10*MM
+
+                const payText = "Over te schrijven op BE93 7330 5887 3067\nMet mededeling "+this.payment.transferDescription
+                const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM  })
+
+                y += 12/2 - h/2
+
+                this.document.fillColor(COLOR_PRIMARY)
+                this.document.translate(PAGE_MARGIN, y).path("M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z").fill('even-odd')
+                
+                this.document.translate(-PAGE_MARGIN, -y)
+                
+                this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM })
+            }
             
-            this.document.translate(-PAGE_MARGIN, -y)
-            const payText = "Deze factuur werd al betaald via "+PaymentMethodHelper.getName(this.payment.method)
-            const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2  })
-            this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left' })
         }
     }
 

@@ -1,27 +1,34 @@
 <template>
     <STListItem :selectable="true" @click="editProduct()">
         <template slot="left">
-            <img v-if="imageSrc" :src="imageSrc" class="product-row-image" />
+            <img v-if="imageSrc" :src="imageSrc" class="product-row-image">
         </template>
         
-        <h2 class="style-title-list">{{ product.name }}</h2>
-        <p class="style-description" v-if="!product.enabled">Tijdelijk niet beschikbaar</p>
-        <p class="style-description" v-else-if="product.isSoldOut">Uitverkocht</p>
+        <h2 class="style-title-list">
+            {{ product.name }}
+        </h2>
+        <p v-if="!product.enabled" class="style-description">
+            Tijdelijk niet beschikbaar
+        </p>
+        <p v-else-if="product.isSoldOut" class="style-description">
+            Uitverkocht
+        </p>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp"/>
-            <button class="button icon arrow-down gray" @click.stop="moveDown"/>
-            <span  class="icon arrow-right-small gray"/>
+            <button class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STListItem } from "@stamhoofd/components";
 import { PrivateWebshop, Product } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditProductView from './EditProductView.vue';
 
 @Component({
@@ -41,7 +48,7 @@ export default class ProductRow extends Mixins(NavigationMixin) {
     }
 
     editProduct() {
-        this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             this.$emit("patch", patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

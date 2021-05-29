@@ -14,6 +14,8 @@
         <hr>
         <h2>Betaalmethodes</h2>
 
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" href="https://stamhoofd.be/docs/online-betalen" target="_blank">deze pagina</a>.</p>
+
         <Checkbox v-model="enableTransfers">
             Overschrijvingen (gratis, maar zelf op te volgen)
         </Checkbox>
@@ -111,7 +113,13 @@
             </button>
         </p>
 
-        <div class="container" v-if="roles.length > 0">
+        <hr>
+        <h2>Open vragen</h2>
+        <p>Je kan zelf nog open vragen stellen (bv. 'naam lid') op bestelniveau (je kan dat ook doen per artikel, maar daarvoor moet je het artikel bewerken). Kies dus verstandig of je het bij een artikel ofwel op bestelniveau toevoegt! Op bestelniveau wordt het maar één keer gevraagd voor de volledige bestelling.</p>
+
+        <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+
+        <div v-if="roles.length > 0" class="container">
             <hr>
             <h2>Toegangsbeheer</h2>
             <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
@@ -124,17 +132,19 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { AnyCheckoutMethod, CheckoutMethod, Organization, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { WebshopField } from '@stamhoofd/structures';
+import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
+import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
 import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
-import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
 
 @Component({
     components: {
@@ -148,7 +158,8 @@ import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
         TimeInput,
         RadioGroup,
         Radio,
-        WebshopRolePermissionRow
+        WebshopRolePermissionRow,
+        WebshopFieldsBox
     },
     directives: { Tooltip },
 })
@@ -172,7 +183,19 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         return this.organization.privateMeta?.roles ?? []
     }
 
-    addPatch(patch: AutoEncoderPatchType<Organization>) {
+    get fields() {
+        return this.webshop.meta.customFields
+    }
+
+    addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
+        this.$emit("patch", PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                customFields: patch
+            })
+        }))
+    }
+
+    addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
         this.$emit("patch", patch)
     }
 

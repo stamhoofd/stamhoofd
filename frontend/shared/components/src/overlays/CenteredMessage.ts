@@ -95,9 +95,9 @@ export class CenteredMessage {
         return this
     }
 
-    static confirm(text: string, confirmText: string): Promise<boolean> {
+    static confirm(text: string, confirmText: string, description = ""): Promise<boolean> {
         return new Promise((resolve) => {
-            new CenteredMessage(text).addButton(new CenteredMessageButton(confirmText, {
+            new CenteredMessage(text, description).addButton(new CenteredMessageButton(confirmText, {
                 action: () => {
                     resolve(true)
                     return Promise.resolve()

@@ -33,7 +33,9 @@
             <Checkbox v-model="multipleChoice">
                 Meerkeuze
             </Checkbox>
-            <p class="style-description">Bij meerkeuze kan men geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).</p>
+            <p class="style-description">
+                Bij meerkeuze kan men geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
+            </p>
 
             <hr>
             <h2 class="style-with-button">
@@ -66,11 +68,10 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Option, OptionMenu, Product, ProductPrice, Version } from "@stamhoofd/structures"
+import { Option, OptionMenu, Product, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import EditOptionView from './EditOptionView.vue';
 
-import EditProductPriceView from './EditProductPriceView.vue';
+import EditOptionView from './EditOptionView.vue';
 import OptionMenuOptions from "./OptionMenuOptions.vue"
 
 @Component({
@@ -100,6 +101,9 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
     product!: Product
 
     @Prop({ required: true })
+    isNew!: boolean
+
+    @Prop({ required: true })
     optionMenu: OptionMenu
 
     patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id })
@@ -120,10 +124,6 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
             return c
         }
         return this.optionMenu
-    }
-
-    get isNew() {
-        return this.optionMenu.name.length == 0
     }
 
     get name() {
@@ -157,7 +157,7 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
         const p = OptionMenu.patch({ id: this.optionMenu.id })
         p.options.addPut(option)
         
-        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.patchedOptionMenu.patch(p), option, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
+        this.present(new ComponentWithProperties(EditOptionView, { optionMenu: this.patchedOptionMenu.patch(p), option, isNew: true, saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
             // Merge both patches
             this.addOptionMenuPatch(p.patch(patch))
 

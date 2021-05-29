@@ -37,7 +37,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: "invalid_code",
                 message: "This code is invalid",
-                human: "Deze code is ongeldig of vervallen. Probeer om opnieuw in te loggen om een nieuwe code te versturen",
+                human: "Deze code is ongeldig of vervallen.",
                 statusCode: 400
             })
         }
@@ -48,7 +48,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: "invalid_code",
                 message: "This code is invalid",
-                human: "Deze code is ongeldig of vervallen. Probeer om opnieuw in te loggen om een nieuwe code te versturen",
+                human: "Deze code is ongeldig of vervallen.",
                 statusCode: 400
             })
         }

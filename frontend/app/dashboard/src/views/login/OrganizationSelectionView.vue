@@ -42,7 +42,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo,Spinner,STNavigationBar,Toast } from '@stamhoofd/components';
+import { Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";

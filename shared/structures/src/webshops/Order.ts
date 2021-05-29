@@ -14,7 +14,7 @@ export enum OrderStatus {
 export class OrderStatusHelper {
     static getName(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Created: return "Te verwerken"
+            case OrderStatus.Created: return "Nieuw"
             case OrderStatus.Prepared: return "Verwerkt"
             case OrderStatus.Completed: return "Voltooid"
             case OrderStatus.Canceled: return "Geannuleerd"

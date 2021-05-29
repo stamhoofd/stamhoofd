@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 
 import { ValidatedAddress } from '../addresses/Address';
@@ -7,6 +7,7 @@ import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
 import { Webshop } from './Webshop';
+import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
 
 export class Checkout extends AutoEncoder {
@@ -22,11 +23,11 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: ValidatedAddress, nullable: true })
     address: ValidatedAddress | null = null
 
-    /**
-     * Only needed for delivery
-     */
     @field({ decoder: Customer, version: 40 })
     customer: Customer = Customer.create({})
+
+    @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
+    fieldAnswers: WebshopFieldAnswer[] = []
 
     @field({ decoder: Cart })
     cart: Cart = Cart.create({})
@@ -53,6 +54,32 @@ export class Checkout extends AutoEncoder {
 
     get totalPrice() {
         return this.cart.price + this.deliveryPrice
+    }
+
+    validateAnswers(webshop: Webshop) {
+        const newAnswers: WebshopFieldAnswer[] = []
+        for (const field of webshop.meta.customFields) {
+            const answer = this.fieldAnswers.find(a => a.field.id === field.id)
+
+            try {
+                if (!answer) {
+                    const a = WebshopFieldAnswer.create({ field, answer: "" })
+                    a.validate()
+                    newAnswers.push(a)
+                } else {
+                    answer.field = field
+                    answer.validate()
+                    newAnswers.push(answer)
+                }
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace("fieldAnswers."+field.id)
+                }
+                throw e
+            }
+            
+        }
+        this.fieldAnswers = newAnswers
     }
 
     validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData) {
@@ -227,6 +254,8 @@ export class Checkout extends AutoEncoder {
                 field: "customer.email"
             })
         }
+
+        this.validateAnswers(webshop)
     }
 
     validatePayment(webshop: Webshop, organizationMeta: OrganizationMetaData) {

@@ -30,24 +30,21 @@ describe("InvoiceBuilder", () => {
                 name: "Dit is een voorbeeld",
                 description: "Met wat extra tekst eronder",
                 amount,
-                unitPrice,
-                price: unitPrice * amount,
+                unitPrice
             }))
         }
 
         invoice.meta.items.push(STInvoiceItem.create({
             name: "Iets zonder beschrijving",
             amount: 1,
-            unitPrice: 5900,
-            price: 5900,
+            unitPrice: 5900
         }))
 
         invoice.meta.items.push(STInvoiceItem.create({
             name: "Iets lang met meerdere lijnen. Zowel in de titel als in de beschrijving, dat zou ook altijd moeten werken...",
             description: "Iets lang met meerdere lijnen. Zowel in de titel als in de beschrijving, dat zou ook altijd moeten werken...",
             amount: 1,
-            unitPrice: 5900,
-            price: 5900,
+            unitPrice: 5900
         }))
 
         const builder = new InvoiceBuilder(invoice)

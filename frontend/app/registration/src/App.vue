@@ -10,16 +10,15 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
-import { EncryptedPaymentDetailed, Organization, Payment, PaymentStatus } from '@stamhoofd/structures';
+import { Organization } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../dashboard/src/classes/OrganizationManager';
 import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
-import TabBarController, { TabBarItem } from './views/overview/TabBarController.vue';
+import { TabBarItem } from "./classes/TabBarItem"
 
 async function getDefaultView() {
     //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {

@@ -22,7 +22,7 @@
                 </p>
 
                 <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
-                    Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt.
+                    Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.
                 </p>
 
                 <STList>
@@ -41,6 +41,13 @@
 
                             <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                             <span v-else class="icon help" />
+                        </template>
+                    </STListItem>
+                    <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
+                        {{ a.field.name }}
+
+                        <template slot="right">
+                            {{ a.answer || "/" }}
                         </template>
                     </STListItem>
                     <STListItem v-if="order.validAt" class="right-description">
@@ -147,7 +154,7 @@
 
                         <footer>
                             <p class="price">
-                                {{ cartItem.amount }} x {{ cartItem.unitPrice | price }}
+                                {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
                             </p>
                         </footer>
 
@@ -158,11 +165,15 @@
                 </STList>
             </main>
 
-            <STToolbar v-if="canShare">
+            <STToolbar v-if="canShare || order.payment.status != 'Succeeded'">
                 <template slot="right">
-                    <button class="button primary" @click="share">
+                    <button v-if="canShare" class="button secundary" @click="share">
                         <span class="icon share" />
                         <span>Delen</span>
+                    </button>
+                    <button v-if="order.payment.status != 'Succeeded'" class="button primary" @click="openTransferView">
+                        <span class="icon card" />
+                        <span>Betaalinstructies</span>
                     </button>
                 </template>
             </STToolbar>
@@ -239,7 +250,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getName(paymentMethod)
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
     }
 
     openTransferView() {

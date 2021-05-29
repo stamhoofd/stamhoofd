@@ -1,0 +1,1 @@
+ALTER TABLE `payments` ADD COLUMN `freeContribution` int NULL COMMENT '';

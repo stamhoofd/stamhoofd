@@ -1,13 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
-
 import { Member } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { UserWithOrganization } from '@stamhoofd/models';
+import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
 type Params = {id: string};
 type Query = undefined
 type Body = undefined
@@ -64,6 +63,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 method: payment.method,
                 status: payment.status,
                 price: payment.price,
+                freeContribution: payment.freeContribution,
                 transferDescription: payment.transferDescription,
                 paidAt: payment.paidAt,
                 createdAt: payment.createdAt,

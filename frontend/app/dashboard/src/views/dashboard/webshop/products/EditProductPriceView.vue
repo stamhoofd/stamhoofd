@@ -1,9 +1,9 @@
 <template>
-    <div class="st-view product-price-edit-view">
-        <STNavigationBar :title="isNew ? 'Prijskeuze toevoegen' : name+' bewerken'">
+    <div class="st-view product-price-box">
+        <STNavigationBar :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'">
             <template slot="right">
-                <button class="button text" v-if="!isNew && !isSingle" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew && !isSingle" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -15,24 +15,12 @@
                 Prijskeuze toevoegen
             </h1>
             <h1 v-else>
-                {{ name }} bewerken
+                {{ productPrice.name || 'Prijs' }} bewerken
             </h1>
           
             <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze keuze"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" placeholder="Gratis" />
-            </STInputBox>
+            
+            <ProductPriceBox :product-price="patchedProductPrice" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
         </main>
 
         <STToolbar>
@@ -49,11 +37,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator, CenteredMessage, PriceInput } from "@stamhoofd/components";
-import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, ProductPrice, Version, WaitingListType, Webshop } from "@stamhoofd/structures"
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, ErrorBox, NumberInput,PriceInput,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { Product, ProductPrice, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import ProductPriceBox from "./ProductPriceBox.vue"
 
 @Component({
     components: {
@@ -62,7 +52,10 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         STInputBox,
         STErrorsDefault,
         PriceInput,
-        STList
+        STList,
+        Checkbox,
+        NumberInput,
+        ProductPriceBox
     },
 })
 export default class EditProductPriceView extends Mixins(NavigationMixin) {
@@ -71,6 +64,9 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     productPrice: ProductPrice
+
+    @Prop({ required: true })
+    isNew!: boolean
 
     @Prop({ required: true })
     product: Product
@@ -93,32 +89,6 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
             return c
         }
         return this.productPrice
-    }
-
-    get isNew() {
-        return this.productPrice.name.length == 0
-    }
-
-    get name() {
-        return this.patchedProductPrice.name
-    }
-
-    set name(name: string) {
-        this.addPricePatch(ProductPrice.patch({ name }))
-    }
-
-    get price() {
-        return this.patchedProductPrice.price
-    }
-
-    set price(price: number) {
-        this.addPricePatch(ProductPrice.patch({ price }))
-    }
-
-    addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
-        const p = Product.patch({})
-        p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: this.productPrice.id })))
-        this.addPatch(p)
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {
@@ -162,9 +132,3 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
     
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

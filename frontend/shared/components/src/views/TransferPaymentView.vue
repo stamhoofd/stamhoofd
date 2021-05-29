@@ -352,9 +352,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     helpMe() {
         if (this.type === "order") {
-            new CenteredMessage("Het lukt niet", "Herlaad de pagina zeker niet, en probeer vooral niet opnieuw, want jouw bestelling is al geplaatst. Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
         } else {
-            new CenteredMessage("Het lukt niet", "Herlaad de pagina zeker niet, en probeer vooral niet opnieuw, want jouw inschrijving is al in orde. Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
         }
     }
 

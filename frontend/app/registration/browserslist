@@ -1,7 +1,6 @@
 > 0.5% in BE
 last 2 versions
-safari >= 9
-iOS >= 9.0
-not IE <= 10
-ie 11
+safari >= 10
+iOS >= 10
+not IE 11
 not dead

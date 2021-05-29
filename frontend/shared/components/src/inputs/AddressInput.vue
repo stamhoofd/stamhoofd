@@ -148,7 +148,10 @@ export default class AddressInput extends Vue {
                     }
                 }, 200);
             }
-            this.$emit("input", null)
+
+            if (!this.required) {
+                this.$emit("input", null)
+            }
             return false
         }
     }

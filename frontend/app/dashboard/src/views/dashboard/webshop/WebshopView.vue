@@ -159,7 +159,7 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -432,6 +432,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
                 initialOrder: order.order,
+                webshop: this.webshop,
                 getNextOrder: this.getNextOrder,
                 getPreviousOrder: this.getPreviousOrder,
             })

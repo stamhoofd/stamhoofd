@@ -69,6 +69,35 @@ export default class App extends Vue {
             (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false));
         }
 
+        if (parts.length == 1 && parts[0] == 'unsubscribe') {
+            const id = queryString.get('id')
+            const token = queryString.get('token')
+
+            const toast = new Toast("Bezig met uitschrijven...", "spinner").setHide(null).show()
+
+            try {
+                NetworkManager.server.request({
+                    method: "POST",
+                    path: "/email/manage",
+                    body: {
+                        id,
+                        token,
+                        unsubscribedMarketing: true
+                    }
+                }).then(() => {
+                    toast.hide()
+                    new Toast("Je bent uitgeschreven!", "success green").setHide(10 * 1000).show()
+                }).catch(e => {
+                    console.error(e)
+                    toast.hide()
+                    Toast.fromError(e).show()
+                })
+            } catch (e) {
+                console.error(e)
+                toast.hide()
+            }
+        }
+
         if (parts.length == 2 && parts[0] == 'verify-email') {
             const queryString = new URL(window.location.href).searchParams;
             const token = queryString.get('token')

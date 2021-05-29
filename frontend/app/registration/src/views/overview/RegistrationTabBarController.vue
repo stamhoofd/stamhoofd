@@ -1,11 +1,12 @@
 
 <script lang="ts">
 import { GlobalEventBus } from "@stamhoofd/components";
-import { Component } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
+
 import TabBarController from "./TabBarController.vue";
 
-@Component({})
-export default class RegistrationTabBarController extends TabBarController {
+@Component
+export default class RegistrationTabBarController extends Mixins(TabBarController) {
     mounted() {
         GlobalEventBus.addListener(this, "checkout-complete", this.onCheckoutComplete)
     }

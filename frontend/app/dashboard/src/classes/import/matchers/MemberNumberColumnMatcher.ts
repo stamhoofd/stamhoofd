@@ -35,10 +35,7 @@ export class MemberNumberColumnMatcher implements ColumnMatcher {
 
     apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
         if (!cell) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Deze cel is leeg"
-            })
+            return
         }
         
         const value = ((cell.w ?? cell.v)+"").trim()

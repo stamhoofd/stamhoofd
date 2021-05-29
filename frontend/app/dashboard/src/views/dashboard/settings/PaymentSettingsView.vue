@@ -9,10 +9,13 @@
             <h1>
                 Betaalmethodes
             </h1>
+
+            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" href="https://stamhoofd.be/docs/online-betalen" target="_blank">deze pagina</a>.</p>
         
             <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="enableMemberModule">
+                <hr>
                 <h2>Betaalmethodes voor inschrijvingen</h2>
 
                 <Checkbox v-model="enableTransfers">

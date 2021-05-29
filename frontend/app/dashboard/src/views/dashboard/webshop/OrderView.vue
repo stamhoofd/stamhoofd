@@ -35,14 +35,28 @@
                         <p>{{ order.data.customer.email }}</p>
                     </template>
                 </STListItem>
-                <STListItem v-if="order.payment" class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
+                    {{ a.field.name }}
+
+                    <template slot="right">
+                        {{ a.answer || "/" }}
+                    </template>
+                </STListItem>
+                <STListItem v-if="order.payment" class="right-description right-stack">
                     Betaalmethode
 
                     <template slot="right">
                         {{ getName(order.payment.method) }}
 
                         <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
-                        <span v-else class="icon help" />
+                        <span v-else class="icon clock" />
+                    </template>
+                </STListItem>
+                <STListItem v-if="order.payment && order.payment.method == 'Transfer'" class="right-description right-stack">
+                    Mededeling
+
+                    <template slot="right">
+                        {{ order.payment.transferDescription }}
                     </template>
                 </STListItem>
                 <STListItem v-if="order.validAt" class="right-description">
@@ -137,7 +151,7 @@
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.unitPrice | price }}
+                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
                         </p>
                     </footer>
 
@@ -147,16 +161,30 @@
                 </STListItem>
             </STList>
         </main>
+
+        <STToolbar v-if="hasWrite && order.payment && order.payment.method == 'Transfer'">
+            <LoadingButton slot="right" :loading="loadingPayment">
+                <button v-if="order.payment.status == 'Succeeded' && order.payment.paidAt" class="button secundary" @click="markNotPaid(order.payment)">
+                    Toch niet betaald
+                </button>
+                <button v-else class="button primary" @click="markPaid(order.payment)">
+                    Markeer als betaald
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod, PaymentMethodHelper, Webshop } from '@stamhoofd/structures';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { SessionManager } from "@stamhoofd/networking";
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateWebshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
     components: {
@@ -180,6 +208,7 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
 })
 export default class OrderView extends Mixins(NavigationMixin){
     loading = false
+    loadingPayment = false
     errorBox: ErrorBox | null = null
 
     @Prop({ default: null })
@@ -187,6 +216,9 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     @Prop({ default: null })
     initialOrder!: Order | null
+
+    @Prop({ required: true })
+    webshop!: PrivateWebshop
 
     @Prop({ default: false })
     success: boolean
@@ -212,6 +244,18 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
         return !!this.getPreviousOrder(this.order);
     }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? []) || p.hasFullAccess()) {
+            return true
+        }
+        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
 
     goBack() {
         const order = this.getPreviousOrder(this.order!);
@@ -240,7 +284,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getName(paymentMethod)
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
     }
 
     activated() {
@@ -275,6 +319,84 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     imageSrc(cartItem: CartItem) {
         return cartItem.product.images[0]?.getPathForSize(100, 100)
+    }
+
+    async markPaid(payment: Payment) {
+        if (this.loadingPayment) {
+            return;
+        }
+
+        const data: AutoEncoderPatchType<Payment>[] = []
+        if (payment.status != PaymentStatus.Succeeded) {
+            data.push(Payment.patch({
+                id: payment.id,
+                status: PaymentStatus.Succeeded
+            }))
+        }
+
+        if (data.length > 0) {
+            if (!await CenteredMessage.confirm("Ben je zeker?", "Markeer als betaald", "Tip: je kan dit ook via het menu 'Overschrijvingen' doen voor meerdere overschrijvingen in één keer, dat spaart je wat werk uit.")) {
+                return;
+            }
+            this.loadingPayment = true
+            const session = SessionManager.currentSession!
+
+            try {
+                const response = await session.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: data,
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                })
+                const p = response.data.find(pp => pp.id === payment.id)
+                if (p) {
+                    payment.set(p)
+                }
+            } catch (e) {
+                Toast.fromError(e).show()
+            }
+            this.loadingPayment = false
+            
+        }
+    }
+
+    async markNotPaid(payment: Payment) {
+        if (this.loadingPayment) {
+            return;
+        }
+
+        const data: AutoEncoderPatchType<Payment>[] = []
+        if (payment.status == PaymentStatus.Succeeded) {
+            data.push(Payment.patch({
+                id: payment.id,
+                status: PaymentStatus.Created
+            }))
+        }
+
+        if (data.length > 0) {
+            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling niet uitgevoerd is?", "Niet betaald")) {
+                return;
+            }
+            this.loadingPayment = true
+            const session = SessionManager.currentSession!
+
+            try {
+                const response = await session.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: data,
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                })
+                const p = response.data.find(pp => pp.id === payment.id)
+                if (p) {
+                    payment.set(p)
+                }
+            } catch (e) {
+                Toast.fromError(e).show()
+            }
+            this.loadingPayment = false
+            
+        }
     }
 }
 </script>

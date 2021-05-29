@@ -19,6 +19,12 @@ export class StreetWithNumberColumnMatcher extends SharedMatcher implements Colu
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
+
+        for (const word of this.negativeMatch) {
+            if (cleaned.includes(word)) {
+                return false
+            }
+        }
         
         const possibleMatch = ["straat"]
 

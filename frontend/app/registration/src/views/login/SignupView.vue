@@ -175,7 +175,8 @@ export default class SignupView extends Mixins(NavigationMixin){
 
     mounted() {
         setTimeout(() => {
-            this.emailInput.focus()
+            // Needed the any here because typescript is getting mad only in production mode
+            (this.emailInput as any).focus()
         }, 300);
     }
 }
