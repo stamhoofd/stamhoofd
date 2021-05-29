@@ -262,7 +262,6 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get hasGrownUpParents() {
-        console.log(this.allRecipients)
         return !![...this.allRecipients.values()].find(r => r.type === "grownUpParent")
     }
 
