@@ -248,6 +248,9 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 })
                 await SessionManager.currentSession!.fetchOrganization()
                 new Toast(message, "success green").show()
+            } else {
+                // Update out of date
+                await SessionManager.currentSession!.fetchOrganization()
             }
         } catch (e) {
             Toast.fromError(e).show()

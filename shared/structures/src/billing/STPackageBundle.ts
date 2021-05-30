@@ -45,6 +45,21 @@ export class STPackageBundleHelper {
         return false
     }
 
+    /**
+     * If you buy a package that is not combineable with an existing one, should it throw an error?
+     */
+    static isStackable(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch(bundle) {
+            case STPackageBundle.TrialMembers: {
+                return false
+            }
+            case STPackageBundle.TrialWebshops: {
+                return false
+            }
+        }
+        return true
+    }
+
     static isCombineable(bundle: STPackageBundle, pack: STPackage): boolean {
         switch(bundle) {
             case STPackageBundle.Members: {
@@ -69,14 +84,14 @@ export class STPackageBundleHelper {
                 return true
             }
             case STPackageBundle.TrialMembers: {
-                if (pack.meta.type === STPackageType.Members) {
+                if (pack.meta.type === STPackageType.Members || pack.meta.type === STPackageType.TrialMembers) {
                     // Already bought
                     return false
                 }
                 return true
             }
             case STPackageBundle.TrialWebshops: {
-                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
+                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops || pack.meta.type === STPackageType.TrialWebshops) {
                     // Already bought
                     return false
                 }

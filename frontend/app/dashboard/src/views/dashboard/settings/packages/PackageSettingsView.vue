@@ -11,7 +11,7 @@
             </h1>
 
             <p>
-                Alle bedragen zijn excl. BTW, tenzij anders vermeld.
+                Onderaan kan je nieuwe pakketten activeren. Alle bedragen zijn excl. BTW, tenzij anders vermeld.
             </p>
             
             <STErrorsDefault :error-box="errorBox" />
@@ -20,7 +20,7 @@
             <template v-else>
                 <STList v-if="status && status.packages.length > 0">
                     <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
-                        <img slot="left" :src="getPackageIcon(pack)" v-if="getPackageIcon(pack)">
+                        <img v-if="getPackageIcon(pack)" slot="left" :src="getPackageIcon(pack)">
 
                         <h3 class="style-title-list">
                             {{ pack.meta.name }}
@@ -84,6 +84,11 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import cartIcon from "@stamhoofd/assets/images/illustrations/cart.svg"
+import experimentIcon from "@stamhoofd/assets/images/illustrations/experiment.svg"
+import flagIcon from "@stamhoofd/assets/images/illustrations/flag.svg"
+import groupIcon from "@stamhoofd/assets/images/illustrations/group.svg"
+import singleCartIcon from "@stamhoofd/assets/images/illustrations/single-cart.svg"
 import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
@@ -93,11 +98,6 @@ import { Component, Mixins, Watch } from "vue-property-decorator";
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import PackageConfirmView from "./PackageConfirmView.vue";
 import PackageDetailsView from "./PackageDetailsView.vue";
-import singleCartIcon from "@stamhoofd/assets/images/illustrations/single-cart.svg"
-import groupIcon from "@stamhoofd/assets/images/illustrations/group.svg"
-import flagIcon from "@stamhoofd/assets/images/illustrations/flag.svg"
-import experimentIcon from "@stamhoofd/assets/images/illustrations/experiment.svg"
-import cartIcon from "@stamhoofd/assets/images/illustrations/cart.svg"
 
 export class SelectablePackage {
     package: STPackage

@@ -106,15 +106,33 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             for (const bundle of request.body.bundles) {
                 // Renew after currently running packages
                 let date = new Date()
-
+                
+                let skip = false
                 // Do we have a collision?
                 for (const currentPack of currentPackages) {
-                    if (currentPack.validUntil !== null && !STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
-                        const end = currentPack.validUntil
-                        if (end > date) {
-                            date = end
+                    if (!STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
+                        if (!STPackageBundleHelper.isStackable(bundle, STPackageStruct.create(currentPack))) {
+                            // WE skip silently
+                            console.error("Tried to activate non combineable, non stackable packages...")
+                            skip = true
+                            continue
+                            /*throw new SimpleError({
+                                code: "not_combineable",
+                                message: "Het pakket dat je wilt activeren is al actief of is niet combineerbaar. Herlaad de pagina, mogelijk zie je een verouderde weergave van jouw geactiveerde pakketten."
+                            })*/
                         }
+                        if (currentPack.validUntil !== null) {
+                            const end = currentPack.validUntil
+                            if (end > date) {
+                                date = end
+                            }
+                        }
+                        
                     }
+                }
+
+                if (skip) {
+                    continue
                 }
                 packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date))
             }
