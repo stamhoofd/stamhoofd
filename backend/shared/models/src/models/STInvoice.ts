@@ -256,14 +256,17 @@ export class STInvoice extends Model {
     async markFailed(payment: Payment) {
         console.log("Mark invoice as failed", this.id)
 
+        const packages = await this.getPackages()
+
         if (payment.method === PaymentMethod.DirectDebit) {
             // Only mark failed payments for background payments
-            for (const pack of await this.getPackages()) {
+            for (const pack of packages) {
                 console.log("Marking package with failed payment "+pack.id)
 
                 pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
                 pack.meta.paymentFailedCount++;
                 await pack.save()
+
             }
         }
         
@@ -272,6 +275,20 @@ export class STInvoice extends Model {
             const pendingInvoice = await STPendingInvoice.getForOrganization(this.organizationId)
             if (pendingInvoice && pendingInvoice.invoiceId === this.id) {
                 pendingInvoice.invoiceId = null
+
+                // Also update the packages in the pending invoice itself
+                for (const item of pendingInvoice.meta.items) {
+                    const pack = item.package
+                    if (pack) {
+                        const pp = packages.find(p => p.id === pack.id)
+                        if (pp) {
+                            console.log("Updated package "+pp.id+" in pending invoice")
+                            // Update reference to include new failed counts
+                            item.package = STPackageStruct.create(pp)
+                        }
+                    }
+                }
+
                 await pendingInvoice.save()
             }
 
