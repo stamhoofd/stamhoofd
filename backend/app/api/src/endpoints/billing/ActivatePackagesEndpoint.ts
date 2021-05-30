@@ -1,7 +1,7 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { MolliePayment, STCredit } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { Registration } from "@stamhoofd/models";
@@ -103,7 +103,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             // Create packages
             const packages: STPackageStruct[] = [];
-            for (const bundle of request.body.bundles ){
+            for (const bundle of request.body.bundles) {
                 // Renew after currently running packages
                 let date = new Date()
 
@@ -253,59 +253,74 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         invoice: await invoice.getStructure()
                     }));
                 }
-                    
-                // Mollie payment is required
-                const apiKey = process.env.MOLLIE_API_KEY
-                if (!apiKey) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "Betalingen zijn tijdelijk onbeschikbaar"
-                    })
-                }
-                const mollieClient = createMollieClient({ apiKey });
 
-                if (!user.organization.serverMeta.mollieCustomerId) {
-                    const mollieCustomer = await mollieClient.customers.create({
-                        name: user.organization.name,
-                        email: user.email,
-                        metadata: {
-                            organizationId: user.organization.id,
-                            userId: user.id,
-                        }
-                    })
-                    user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
-                    await user.organization.save()
-                }
-
-                const molliePayment = await mollieClient.payments.create({
-                    amount: {
-                        currency: 'EUR',
-                        value: (price / 100).toFixed(2)
-                    },
-                    method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
-                    description,
-                    customerId: user.organization.serverMeta.mollieCustomerId,
-                    sequenceType: SequenceType.first,
-                    redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
-                    webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-                    metadata: {
-                        invoiceId: invoice.id,
-                        paymentId: payment.id,
+                try {
+                    // Mollie payment is required
+                    const apiKey = process.env.MOLLIE_API_KEY
+                    if (!apiKey) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Betalingen zijn tijdelijk onbeschikbaar"
+                        })
                     }
-                });
-                console.log(molliePayment)
-                const paymentUrl = molliePayment.getCheckoutUrl() ?? undefined
+                    const mollieClient = createMollieClient({ apiKey });
 
-                // Save payment
-                const dbPayment = new MolliePayment()
-                dbPayment.paymentId = payment.id
-                dbPayment.mollieId = molliePayment.id
-                await dbPayment.save();
+                    if (!user.organization.serverMeta.mollieCustomerId) {
+                        const mollieCustomer = await mollieClient.customers.create({
+                            name: user.organization.name,
+                            email: user.email,
+                            metadata: {
+                                organizationId: user.organization.id,
+                                userId: user.id,
+                            }
+                        })
+                        user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
+                        await user.organization.save()
+                    }
 
-                return new Response(STInvoiceResponse.create({
-                    paymentUrl: paymentUrl,
-                    invoice: await invoice.getStructure()
-                }));
+                    const molliePayment = await mollieClient.payments.create({
+                        amount: {
+                            currency: 'EUR',
+                            value: (price / 100).toFixed(2)
+                        },
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
+                        description,
+                        customerId: user.organization.serverMeta.mollieCustomerId,
+                        sequenceType: SequenceType.first,
+                        redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
+                        webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                        metadata: {
+                            invoiceId: invoice.id,
+                            paymentId: payment.id,
+                        }
+                    });
+                    console.log(molliePayment)
+                    const paymentUrl = molliePayment.getCheckoutUrl() ?? undefined
+
+                    // Save payment
+                    const dbPayment = new MolliePayment()
+                    dbPayment.paymentId = payment.id
+                    dbPayment.mollieId = molliePayment.id
+                    await dbPayment.save();
+
+                    return new Response(STInvoiceResponse.create({
+                        paymentUrl: paymentUrl,
+                        invoice: await invoice.getStructure()
+                    }));
+                } catch (e) {
+                    console.error(e)
+                    payment.status = PaymentStatus.Failed
+                    await payment.save()
+                    await invoice.markFailed(payment)
+
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        throw e
+                    }
+                    throw new SimpleError({
+                        code: "payment_failed",
+                        message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen (hallo@stamhoofd.be)"
+                    })
+                }
             }
 
             // We don't save the invoice, just return it

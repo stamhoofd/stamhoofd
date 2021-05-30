@@ -34,8 +34,8 @@ export class STPendingInvoice extends Model {
     })
     id!: string;
 
-    @column({ foreignKey: STPendingInvoice.organization, type: "string" })
-    organizationId: string;
+    @column({ foreignKey: STPendingInvoice.organization, type: "string", nullable: true })
+    organizationId: string | null;
     
     @column({ type: "json", decoder: STInvoiceMeta })
     meta: STInvoiceMeta

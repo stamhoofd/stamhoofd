@@ -105,13 +105,13 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                             if (mollieData.status == "paid") {
                                 payment.status = PaymentStatus.Succeeded
                                 payment.paidAt = new Date()
-                                await invoice.markPaid()
-
                                 await payment.save();
+
+                                await invoice.markPaid()
                             } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
-                                await invoice.markFailed()
                                 payment.status = PaymentStatus.Failed
                                 await payment.save();
+                                await invoice.markFailed(payment)
                             }
                         } else {
                             console.error("Mollie api key is missing for Stamhoofd payments! "+payment.id)

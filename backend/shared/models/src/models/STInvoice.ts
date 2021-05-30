@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User } from '@stamhoofd/structures';
+import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User, PaymentMethod } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -253,18 +253,20 @@ export class STInvoice extends Model {
     /**
      * WARNGING: only call this method in the correct queue!
      */
-    async markFailed() {
+    async markFailed(payment: Payment) {
         console.log("Mark invoice as failed", this.id)
-        // TODO: add concurrency check to prevent race conditions when polling the status
-        // Search for packages and mark failed payment attempt if they are already activated
 
-        for (const pack of await this.getPackages()) {
-            console.log("Marking package with failed payment "+pack.id)
+        if (payment.method === PaymentMethod.DirectDebit) {
+            // Only mark failed payments for background payments
+            for (const pack of await this.getPackages()) {
+                console.log("Marking package with failed payment "+pack.id)
 
-            pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
-            pack.meta.paymentFailedCount++;
-            await pack.save()
+                pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
+                pack.meta.paymentFailedCount++;
+                await pack.save()
+            }
         }
+        
 
         if (this.organizationId) {
             const pendingInvoice = await STPendingInvoice.getForOrganization(this.organizationId)

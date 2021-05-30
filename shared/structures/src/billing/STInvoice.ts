@@ -54,7 +54,7 @@ export class STInvoiceItem extends AutoEncoder {
      * If you want to renew a package, you need to create a new package first
      */
     static fromPackage(pack: STPackage, amount = 1, pendingAmount = 0,  date?: Date): STInvoiceItem {
-        let unitPrice = pack.meta.unitPrice
+        let unitPrice = Math.round(pack.meta.unitPrice)
 
         if (amount < pack.meta.minimumAmount) {
             // Minimum should get applied first, because we might already have paid for the minimum (paid amount)
@@ -88,18 +88,20 @@ export class STInvoiceItem extends AutoEncoder {
             }
 
             if (totalDays > 366) {
-                // Extended
-                throw new Error("Period > 1 year not supported yet: "+totalDays)
+                // Increase unit price
+                unitPrice = unitPrice * (totalDays/365)
+            }
+
+            if (pack.meta.pricingType === STPricingType.PerMember) {
+                unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)))
             } else {
-                if (pack.meta.pricingType === STPricingType.PerMember) {
-                    unitPrice = Math.min(unitPrice, Math.round(unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)))
-                }
+                unitPrice = Math.round(unitPrice)
             }
         }
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.validUntil ? ("Van "+Formatter.date(pack.meta.startDate, true)+" tot "+Formatter.date(pack.validUntil, true)) : ("Vanaf "+Formatter.date(pack.meta.startDate, true)),
+            description: pack.validUntil ? ("Van "+Formatter.date(now, true)+" tot "+Formatter.date(pack.validUntil, true)) : ("Vanaf "+Formatter.date(pack.meta.startDate, true)),
             package: pack,
             date: now,
             unitPrice: unitPrice,

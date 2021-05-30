@@ -1,7 +1,7 @@
 <template>
     <div>
         <p v-if="isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
-            Jouw betaling via domiciliëring is mislukt. Breng de betaling in orde voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
+            Jouw betaling via domiciliëring is mislukt. Breng de betaling zelf in orde via 'Facturen en betalingen' voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
             <button class="button text">
                 Nakijken
