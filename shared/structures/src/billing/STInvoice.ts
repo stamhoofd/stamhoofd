@@ -110,6 +110,48 @@ export class STInvoiceItem extends AutoEncoder {
 
         return item
     }
+
+    canMerge(other: STInvoiceItem): boolean {
+        if (!other.package || !this.package) {
+            return false
+        }
+        if (other.package.id === this.package.id && this.name === other.name) {
+            if (this.unitPrice === other.unitPrice && this.description === other.description) {
+                return true
+            }
+        }
+        return false
+    }
+
+    merge(other: STInvoiceItem): void {
+        this.amount += other.amount
+
+        // Other package will be more up to date
+        this.package = other.package
+    }
+
+    /// Only compress an invoice when it is marked as paid and for a pending invoice when it doesn't has an invoice
+    /// Else you'll lose the ID's!
+    static compress(items: STInvoiceItem[]) {
+        const copy = items.slice()
+
+        for (let index = 0; index < copy.length; index++) {
+            // Create a copy to prevent changing the original one
+            const item = STInvoiceItem.create(copy[index]);
+            copy[index] = item
+
+            // Loop further (in reverse order to be able to delete items)
+            for (let j = copy.length - 1; j > index; j--) {
+                const other = copy[j]
+                if (item.canMerge(other)) {
+                    // Delete other
+                    item.merge(other)
+                    copy.splice(j, 1)
+                }
+            }
+        }
+        return copy
+    } 
 }
 
 export class STInvoiceMeta extends AutoEncoder {

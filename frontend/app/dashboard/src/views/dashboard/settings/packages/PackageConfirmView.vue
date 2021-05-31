@@ -231,6 +231,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     throttledReload = throttle(this.loadProForma, 1000)
 
     throttledLoadProForma() {
+        if (this.loading) {
+            // Skip
+            return
+        }
         this.loadingProForma = true
 
         // Use counter to ignore older requests
@@ -392,6 +396,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
             }
         } catch (e) {
             this.errorBox = new ErrorBox(e)
+            this.loading = false
+
+            // Reload if something changed
+            this.throttledLoadProForma()
         }
 
         this.loading = false

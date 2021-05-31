@@ -97,6 +97,12 @@ export class STPendingInvoice extends Model {
                 })
             }
             pendingInvoice.meta.items.push(...notYetCreatedItems)
+
+            // Can we compress
+            if (pendingInvoice.invoiceId === null) {
+                console.log("Compressing pending invoice items "+pendingInvoice.id)
+                pendingInvoice.meta.items = STInvoiceItem.compress(pendingInvoice.meta.items)
+            }
             await pendingInvoice.save()
         }
         return pendingInvoice

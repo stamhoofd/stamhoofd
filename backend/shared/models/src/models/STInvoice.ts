@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User, PaymentMethod } from '@stamhoofd/structures';
+import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User, PaymentMethod, STPackageType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
@@ -183,6 +183,32 @@ export class STInvoice extends Model {
 
             // Activate doesn't save always, so save if needed:
             await pack.save()
+
+            // Deactivate demo packages
+            const remove: STPackageType[] = []
+            if (pack.meta.type === STPackageType.Members) {
+                // Remove demo
+                remove.push(STPackageType.TrialMembers)
+            }
+
+            if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
+                // Remove demo
+                remove.push(STPackageType.TrialWebshops)
+            }
+
+            if (remove.length > 0 && this.organizationId) {
+                // Get all packages
+                const all = await STPackage.getForOrganization(this.organizationId)
+                for (const pack of all) {
+                    if (remove.includes(pack.meta.type)) {
+                        console.log("Disabling demo package "+pack.id+" because package is bought.")
+                        // Stop
+                        pack.removeAt = new Date()
+                        pack.removeAt.setTime(pack.removeAt.getTime() - 1000)
+                        await pack.save()
+                    }
+                }
+            }
         }
 
         // If needed: remove the invoice items from the pending invoice
@@ -337,7 +363,11 @@ export class STInvoice extends Model {
         if (notYetCreatedItems.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             pendingInvoiceStruct!.meta.items.push(...notYetCreatedItems)
+           
         }
+
+        // Compress
+        pendingInvoiceStruct!.meta.items = STInvoiceItem.compress(pendingInvoiceStruct!.meta.items)
 
         if (pendingInvoice?.invoiceId && pendingInvoiceStruct) {
             const invoice = await STInvoice.getByID(pendingInvoice?.invoiceId)
