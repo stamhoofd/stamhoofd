@@ -7,6 +7,7 @@ import { sleep } from '@stamhoofd/utility';
 
 export type EmailInterfaceBase = {
     to: string;
+    bcc?: string;
     replyTo?: string;
     subject: string;
     text?: string;
@@ -207,6 +208,7 @@ class EmailStatic {
         // send mail with defined transport object
         const mail: any = {
             from: data.from, // sender address
+            bcc: (process.env.NODE_ENV === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
             to: process.env.NODE_ENV === "production" ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line

@@ -11,6 +11,9 @@ import { STInvoice } from "./STInvoice";
 import { STPackage } from "./STPackage";
 import { MolliePayment } from "./MolliePayment";
 import { STCredit } from "./STCredit";
+import { Email } from "@stamhoofd/email";
+import { Formatter } from "@stamhoofd/utility";
+import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:
@@ -258,6 +261,29 @@ export class STPendingInvoice extends Model {
             // Only if all went okay
             pendingInvoice.invoiceId = invoice.id
             await pendingInvoice.save()
+
+            const invoicingTo = await organization.getInvoicingToEmails()
+
+            if (invoicingTo) {
+                // Generate a temporary PDF file
+                const builder = new InvoiceBuilder(invoice)
+                const pdf = await builder.build()
+
+                // Send the e-mail
+                Email.sendInternal({
+                    to: invoicingTo,
+                    bcc: "simon@stamhoofd.be",
+                    subject: "[Stamhoofd] Pro-forma factuur voor "+organization.name,
+                    text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. Aangezien er nieuwe leden zijn ingeschreven, hebben jullie een openstaand bedrag van "+Formatter.price(price)+" in Stamhoofd (zie bijlage). Zoals eerder aangegeven zal dit via domiciliëring worden aangerekend (op dezelfde bankrekening waarmee de vorige betaling is gedaan). Hiervoor hoeven jullie dus niets te doen. Kijk eventueel na of er voldoende geld op jullie rekening staat. De betaling zal één van de komende drie werkdagen plaatsvinden. Jullie ontvangen daarna ook een definitieve factuur. Je kan in Stamhoofd altijd het openstaande bedrag nakijken bij Instellingen > Facturen en betalingen. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                    attachments: [
+                        {
+                            filename: "pro-forma-factuur.pdf",
+                            href: pdf.getPublicPath(),
+                            contentType: "application/pdf"
+                        }
+                    ]
+                })
+            }
         }
     }
 }

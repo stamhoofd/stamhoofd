@@ -641,6 +641,22 @@ export class Organization extends Model {
         return undefined
     }
 
+    /**
+     * These email addresess are private
+     */
+    async getInvoicingToEmails() {
+        // Circular reference fix
+        const User = (await import('./User')).User;
+        const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
+        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+
+        if (filtered.length > 0) {
+            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
+        }
+
+        return undefined
+    }
+
     async updateRequestKeysCount() {
         // Circular reference fix
         const User = (await import('./User')).User;

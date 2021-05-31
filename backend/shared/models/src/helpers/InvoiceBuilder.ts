@@ -127,24 +127,29 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_DARK);
         this.document.font('Metropolis-SemiBold')
 
-        this.document.text("Factuur", logoX * MM, this.posY * MM, { align: 'left' })
-
-        this.document.fillColor(COLOR_PRIMARY);
-        this.document.text(this.invoice.number! + "", 43 * MM, this.posY * MM, { align: 'left' })
-
+        if (this.invoice.number) {
+            this.document.text("Factuur", logoX * MM, this.posY * MM, { align: 'left' })
+            this.document.fillColor(COLOR_PRIMARY);
+            this.document.text(this.invoice.number! + "", 43 * MM, this.posY * MM, { align: 'left' })
+        } else {
+            this.document.text("Pro-forma factuur", logoX * MM, this.posY * MM, { align: 'left' })
+        }
 
         this.posY = 53
         this.document.fontSize(3 * MM);
         this.document.fillColor(COLOR_GRAY_DARK);
         this.document.font('Metropolis-Medium')
+        const date = (this.invoice.paidAt ?? this.invoice.meta.date!)
 
         this.document.text("Datum", logoX * MM, this.posY * MM, { align: 'left' })
-        this.document.text(Formatter.date(this.invoice.meta.date!, true), 43 * MM, this.posY * MM, { align: 'left' })
+        this.document.text(Formatter.date(date, true), 43 * MM, this.posY * MM, { align: 'left' })
 
-        this.document.moveDown()
-        const savedY = this.document.y
-        this.document.text("Vervaldatum", logoX * MM, savedY, { align: 'left' })
-        this.document.text(Formatter.date((this.payment && this.payment.status === PaymentStatus.Succeeded) ? this.invoice.meta.date! : new Date(this.invoice.meta.date!.getTime() + 1000 * 60 * 60 * 24 * 30), true), 43 * MM, savedY, { align: 'left' })
+        if (this.invoice.number) {
+            this.document.moveDown()
+            const savedY = this.document.y
+            this.document.text("Vervaldatum", logoX * MM, savedY, { align: 'left' })
+            this.document.text(Formatter.date((this.payment && this.payment.status === PaymentStatus.Succeeded) ? date : new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30), true), 43 * MM, savedY, { align: 'left' })
+        }
 
         // Write Codawood BV
         const x = 120
@@ -168,7 +173,7 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_DARK);
         this.document.font('Metropolis-SemiBold')
 
-        this.document.text("Factuur voor", x * MM, this.document.y + 10*MM, { align: 'left' })
+        this.document.text(this.invoice.number ? "Factuur voor" : "Voor", x * MM, this.document.y + 10*MM, { align: 'left' })
 
         this.document.fontSize(3 * MM);
         this.document.fillColor(COLOR_GRAY_DARK);
@@ -394,9 +399,13 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_GRAY_DARK)
         this.document.translate(PAGE_MARGIN, y).path("M3.67327 2.52862C1.50134 4.01571 1.21296 6.95436 2.11388 8.30055C4.78725 6.67111 6.69703 5.33679 8.70409 3.72095C8.46387 4.06251 8.14127 4.46052 7.74941 4.90029C7.12008 5.60656 6.34856 6.38067 5.54204 7.14116C3.92626 8.66473 2.20363 10.1022 1.26444 10.7931C0.967076 11.0118 0.903352 11.4303 1.12211 11.7276C1.34087 12.025 1.75928 12.0887 2.05665 11.87C2.70394 11.3938 3.67804 10.6022 4.73273 9.68002C9.48876 10.8971 12.1197 6.08032 11.5772 0.148376C9.9992 0.814142 8.7907 0.987292 7.69217 1.14468C6.34654 1.33748 5.16591 1.50664 3.67327 2.52862Z").fill('even-odd')
         
+        let text = "Hou deze factuur bij voorkeur digitaal bij"
+        if (!this.invoice.number) {
+            text = "Druk dit document niet af. Dit is nog geen officiële factuur"
+        }
         this.document.translate(-PAGE_MARGIN, -y)
-        const hh = this.document.heightOfString("Hou deze factuur bij voorkeur digitaal bij", { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
-        this.document.text("Hou deze factuur bij voorkeur digitaal bij", PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
+        const hh = this.document.heightOfString(text, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 })
+        this.document.text(text, PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
 
         if (this.payment && this.payment.method) {
             if (this.payment.status === PaymentStatus.Succeeded) {
@@ -422,6 +431,20 @@ export class InvoiceBuilder {
                 this.document.translate(-PAGE_MARGIN, -y)
                 
                 this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM })
+            }  else if (this.payment.method === PaymentMethod.DirectDebit) {
+                y -= 10*MM
+
+                const payText = "De betaling gebeurt automatisch via domiciliëring"
+                const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM  })
+
+                y += 12/2 - h/2
+
+                this.document.fillColor(COLOR_PRIMARY)
+                this.document.translate(PAGE_MARGIN, y).path("M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z").fill('even-odd')
+                
+                this.document.translate(-PAGE_MARGIN, -y)
+                
+                this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2 + 0.5*MM, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM })
             }
             
         }

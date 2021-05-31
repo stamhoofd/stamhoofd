@@ -10,6 +10,7 @@ import { STPendingInvoice } from "./STPendingInvoice";
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 import { Sorter } from "@stamhoofd/utility";
 import { STCredit } from "./STCredit";
+import { Email } from "@stamhoofd/email";
 
 
 export class STInvoice extends Model {
@@ -241,6 +242,30 @@ export class STInvoice extends Model {
         if (this.number !== null) {
             await this.generatePdf()
         }
+
+        if (this.organizationId && this.meta.pdf && this.number !== null) {
+            const organization = await Organization.getByID(this.organizationId)
+            if (organization) {
+                const invoicingTo = await organization.getInvoicingToEmails()
+
+                if (invoicingTo) {
+                    // Send the e-mail
+                    Email.sendInternal({
+                        to: invoicingTo,
+                        bcc: "simon@stamhoofd.be",
+                        subject: "[Stamhoofd] Jouw factuur voor "+organization.name,
+                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie de factuur van jullie aankoop. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        attachments: [
+                            {
+                                filename: "factuur-"+this.number+".pdf",
+                                href: this.meta.pdf.getPublicPath(),
+                                contentType: "application/pdf"
+                            }
+                        ]
+                    })
+                }
+            }
+        }
     }
 
     async assignNextNumber() {
@@ -328,6 +353,23 @@ export class STInvoice extends Model {
                 // Expire usage (do not delete to keep the relation for debugging and recovery)
                 credit.expireAt = new Date(new Date().getTime() - 1000);
                 await credit.save()
+            }
+        }
+
+        if (this.organizationId && payment.method === PaymentMethod.DirectDebit) {
+            const organization = await Organization.getByID(this.organizationId)
+            if (organization) {
+                const invoicingTo = await organization.getInvoicingToEmails()
+
+                if (invoicingTo) {
+                    // Send the e-mail
+                    Email.sendInternal({
+                        to: invoicingTo,
+                        bcc: "simon@stamhoofd.be",
+                        subject: "[Stamhoofd] Betaling mislukt voor "+organization.name,
+                        text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                    })
+                }
             }
         }
     }
