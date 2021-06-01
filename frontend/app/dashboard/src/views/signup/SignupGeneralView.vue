@@ -10,6 +10,10 @@
             </h1>
             <p>Met een account kan je alle functies eerst gratis uitproberen zolang je nodig hebt.</p>
 
+            <p v-if="registerCode" class="success-box gift">
+                Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
@@ -29,16 +33,6 @@
                     <p class="style-description-small">
                         Geen adres? Vul dan een adres in dat in de buurt ligt
                     </p>
-
-                    <STInputBox v-if="false" title="Doorverwijzingscode" error-fields="registerCode" :error-box="errorBox">
-                        <input
-                            v-model="registerCode"
-                            class="input"
-                            type="text"
-                            placeholder="Optioneel"
-                            autocomplete="off"
-                        >
-                    </STInputBox>
                 </div>
 
                 <div>
@@ -56,7 +50,7 @@
                         </select>
                     </STInputBox>
                     <p class="style-description-small">
-                        Hiermee stellen we automatisch al enkele instellingen goed.
+                        Hiermee stellen we automatisch al enkele instellingen goed in.
                     </p>
 
                     <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
@@ -105,7 +99,7 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
@@ -135,8 +129,8 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     address: Address | null = null
     acquisitionTypes: AcquisitionType[] = []
 
-    @Prop({ default: "" })
-    initialRegisterCode!: string;
+    @Prop({ default: null })
+    initialRegisterCode!: { code: string; organization: string } | null;
 
     registerCode = this.initialRegisterCode
     loading = false
@@ -147,27 +141,47 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     mounted() {
         if (this.initialRegisterCode) {
             try {
-                localStorage.setItem("savedRegisterCode", this.initialRegisterCode)
+                localStorage.setItem("savedRegisterCode", JSON.stringify(this.initialRegisterCode))
+                localStorage.setItem("savedRegisterCodeDate", new Date().getTime()+"")
             } catch (e) {
                 console.error(e)
             }
+            //HistoryManager.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
         }
+        HistoryManager.setUrl("/aansluiten")   
 
         if (!this.initialRegisterCode) {
             try {
                 const saved = localStorage.getItem("savedRegisterCode")
-                if (saved !== null) {
-                    this.registerCode = saved
+                const dString = localStorage.getItem("savedRegisterCodeDate")
+                if (saved !== null && dString !== null) {
+                    const d = parseInt(dString)
+                    if (!isNaN(d) && d > new Date().getTime() - 7 * 24 * 60 * 60 * 1000) {
+                        const parsed = JSON.parse(saved)
+                        if (parsed.code && parsed.organization) {
+                            this.registerCode = JSON.parse(saved)
+                        }
+                    } else {
+                        // Expired or invalid
+                        localStorage.removeItem("savedRegisterCode")
+                        localStorage.removeItem("savedRegisterCodeDate")
+                    }
+                } else {
+                    localStorage.removeItem("savedRegisterCode")
+                    localStorage.removeItem("savedRegisterCodeDate")
                 }
             } catch (e) {
                 console.error(e)
             }
         }
 
-        if (this.registerCode.length > 0) {
-            HistoryManager.setUrl("/aansluiten/"+encodeURIComponent(this.registerCode))
-        } else {
-            HistoryManager.setUrl("/aansluiten")   
+        if (this.registerCode) {
+            this.validateCode().catch(e => {
+                this.errorBox = new ErrorBox(e)
+                this.registerCode = null
+                localStorage.removeItem("savedRegisterCode")
+                localStorage.removeItem("savedRegisterCodeDate")
+            })
         }
     }
 
@@ -175,7 +189,33 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         return AcquisitionType
     }
 
+    async validateCode() {
+        // Check register code
+        if (this.registerCode) {
+            try {
+                await NetworkManager.server.request({
+                    method: "GET",
+                    path: "/register-code/"+encodeURIComponent(this.registerCode.code.toUpperCase()),
+                })
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    if (e.hasCode("invalid_code")) {
+                        throw new SimpleError({
+                            code: "invalid_code",
+                            message: "De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.",
+                            field: "registerCode"
+                        })
+                    }
+                }
+                throw e
+            }
+        }
+    }
+
     async goNext() {
+        if (this.loading) {
+            return
+        }
         
         try {
             if (this.name.length == 0) {
@@ -220,17 +260,12 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             }
 
             // Check register code
-            if (this.registerCode.length > 0) {
-                try {
-                    const response = await NetworkManager.server.request({
-                        method: "GET",
-                        path: "/register-code/"+encodeURIComponent(this.registerCode.toUpperCase()),
-                    })
-                } catch (e) {
-                    this.errorBox = new ErrorBox(e)
-                    this.loading = false;
-                    return;
-                }
+            try {
+                await this.validateCode()
+            } catch (e) {
+                this.errorBox = new ErrorBox(e)
+                this.loading = false;
+                return;
             }
 
             const defaultStartDate = new Date()

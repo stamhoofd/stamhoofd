@@ -9,7 +9,16 @@
                 Instellingen
             </h1>
 
+            <p class="success-box gift selectable with-button" @click="openReferrals">
+                Verdien tot 100 euro tegoed per vereniging die je aanbrengt. Kijk hier hoe je die kan verzilveren.
+
+                <button class="button text">
+                    Meedoen
+                </button>
+            </p>
+
             <BillingWarningBox />
+
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
@@ -206,6 +215,7 @@ import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
+import ReferralView from './ReferralView.vue';
 
 @Component({
     components: {
@@ -254,6 +264,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         })
         this.admins = response.data.users
         this.invites = response.data.invites
+    }
+
+    openReferrals(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ReferralView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
     openGeneral(animated = true) {
@@ -414,6 +430,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'billing') {
             this.openBilling(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'referrals') {
+            this.openReferrals(false)
         }
 
         if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {

@@ -26,6 +26,10 @@
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
+            <button class="button secundary full" type="button" @click="help">
+                <span class="help icon" />
+                <span>Geen account?</span>
+            </button>
         </STFloatingFooter>
     </form>
 </template>
@@ -62,6 +66,10 @@ export default class LoginView extends Mixins(NavigationMixin){
         // Search for the session
         this.session = SessionManager.getSessionForOrganization(this.organization.id) ?? new Session(this.organization.id)
         this.email = this.session.user?.email ?? ""
+    }
+
+    help() {
+        new CenteredMessage("Geen account", "Vraag aan een beheerder om jou een uitnodiging te sturen. Alleen zo kan je een account aanmaken.").addCloseButton("Sluiten").show()
     }
 
     gotoPasswordForgot() {

@@ -83,7 +83,8 @@ export class Webshop extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 

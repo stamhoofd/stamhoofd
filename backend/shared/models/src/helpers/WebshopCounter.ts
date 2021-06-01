@@ -1,14 +1,6 @@
-import { column, Database,Model } from "@simonbackx/simple-database";
+import { Database } from "@simonbackx/simple-database";
 
-export class WebshopCounter extends Model {
-    static table = "webshop_counters";
-
-    @column({ primary: true, type: "string" })
-    webshopId!: string;
-
-    @column({ type: "integer" })
-    nextNumber: number;
-
+export class WebshopCounter  {
     static numberCache: Map<string, { nextNumber: number; lastSync: Date; guardPromise?: Promise<any> }> = new Map()
 
     static async getNextNumber(webshopId: string): Promise<number> {

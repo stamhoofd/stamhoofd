@@ -11,6 +11,7 @@ import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 import { Sorter } from "@stamhoofd/utility";
 import { STCredit } from "./STCredit";
 import { Email } from "@stamhoofd/email";
+import { UsedRegisterCode } from "./UsedRegisterCode";
 
 
 export class STInvoice extends Model {
@@ -74,7 +75,8 @@ export class STInvoice extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 
@@ -239,7 +241,7 @@ export class STInvoice extends Model {
             await STPackage.updateOrganizationPackages(this.organizationId)
         }
         
-        if (this.number !== null) {
+        if (this.number !== null && !this.meta.pdf) {
             await this.generatePdf()
         }
 
@@ -264,6 +266,18 @@ export class STInvoice extends Model {
                         ]
                     })
                 }
+            }
+        }
+
+        // Reward if we have an open register code
+        if (this.meta.priceWithVAT >= 100 && this.organizationId) {
+            // We spend some money
+            const code = await UsedRegisterCode.getFor(this.organizationId)
+            if (code && !code.creditId) {
+                console.log("Rewarding code "+code.id+" for payment")
+
+                // Deze code werd nog niet beloond
+                await code.reward()
             }
         }
     }

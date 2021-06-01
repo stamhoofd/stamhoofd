@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { EmailVerificationCode } from '@stamhoofd/models';
+import { EmailVerificationCode, STCredit, UsedRegisterCode } from '@stamhoofd/models';
 import { KeychainItem } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
 import { RegisterCode } from '@stamhoofd/models';
@@ -91,6 +91,11 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
          // First create the organization
         // todo: add some duplicate validation
         const organization = new Organization();
+        organization.id = request.body.organization.id;
+
+        // Delay save until after organization is saved, but do validations before the organization is saved
+        let credit: STCredit | undefined = undefined
+        let usedCode: UsedRegisterCode | undefined = undefined
 
         if (request.body.registerCode !== null && request.body.registerCode.length > 0) {
             const code = await RegisterCode.getByID(request.body.registerCode)
@@ -103,29 +108,31 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 });
             }
 
-            if (code.organizationId) {
-                const otherOrganization = await Organization.getByID(code.organizationId)
-                if (otherOrganization) {
-                    otherOrganization.privateMeta.credits.push(CreditItem.create({
-                        description: "Ingevuld door "+request.body.organization.name,
-                        change: 0
-                    }))
-                    await otherOrganization.save()
-                }
+            const otherOrganization = code.organizationId ? await Organization.getByID(code.organizationId) : undefined
+
+            if (code.value > 0 && otherOrganization) {
+                // Create initial credit
+                credit = new STCredit()
+                credit.organizationId = organization.id
+                credit.change = code.value
+                credit.description = otherOrganization ? ("Tegoed gekregen van "+otherOrganization.name) : code.description
+
+                // Expire in one year (will get extended for every purchase or activation)
+                credit.expireAt = new Date()
+                credit.expireAt.setFullYear(credit.expireAt.getFullYear() + 1)
+                credit.expireAt.setMilliseconds(0)
+
+                // Save later
             }
 
-            organization.serverMeta.usedRegisterCode = code.code
+            // Save that we used this code (so we can reward the other organization)
+            usedCode = new UsedRegisterCode()
+            usedCode.organizationId = organization.id
+            usedCode.code = code.code
 
-            if (code.value > 0) {
-                organization.privateMeta.credits.push(CreditItem.create({
-                    description: code.description,
-                    change: code.value
-                }))
-            }
+            // Save later
         }
 
-       
-        organization.id = request.body.organization.id;
         organization.name = request.body.organization.name;
         organization.publicKey = request.body.organization.publicKey;
         organization.uri = uri;
@@ -143,7 +150,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 500
             });
         }
-
 
         const user = await User.register(
             organization,
@@ -169,6 +175,14 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             keychainItem.publicKey = item.publicKey
 
             await keychainItem.save()
+        }
+
+        if (credit) {
+            await credit.save()
+        }
+
+        if (usedCode) {
+            await usedCode.save()
         }
 
         const code = await EmailVerificationCode.createFor(user, user.email)

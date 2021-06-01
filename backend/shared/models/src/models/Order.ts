@@ -6,7 +6,7 @@ import { Email } from '@stamhoofd/email';
 import { Organization } from './Organization';
 import { Payment } from './Payment';
 import { Webshop } from './Webshop';
-import { WebshopCounter } from './WebshopCounter';
+import { WebshopCounter } from '../helpers/WebshopCounter';
 
 
 export class Order extends Model {
@@ -52,7 +52,8 @@ export class Order extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 
@@ -161,7 +162,7 @@ export class Order extends Model {
                 subject: "["+webshop.meta.name+"] Bestelling "+this.number,
                 text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
                     ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
-                +" \n"+this.getUrl()+"\n\n"+organization.name,
+                +" \n"+this.getUrl()+"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
             })
         }
     }

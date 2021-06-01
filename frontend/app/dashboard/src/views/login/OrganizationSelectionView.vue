@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view shade">
         <STNavigationBar :large="true" :sticky="false">
             <template slot="left">
                 <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
@@ -8,11 +8,6 @@
             </template>
 
             <template slot="right">
-                <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
-                    <span class="icon external" />
-                    <span>Terug</span>
-                    <span class="hide-smartphone">naar website</span>
-                </a>
                 <button class="button primary" @click="gotoSignup">
                     Aansluiten
                 </button>
@@ -20,8 +15,12 @@
         </STNavigationBar>
         <main class="limit-width">
             <div class="organization-selection-view">
-                <h1>Aangesloten verenigingen</h1>
-                <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om jouw vereniging aan te sluiten.</p>
+                <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
+                    <span class="icon arrow-left" />
+                    <span>Stamhoofd website</span>
+                </a>
+                <h1>Kies jouw vereniging</h1>
+                <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.</p>
                 <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
 
                 <Spinner v-if="loading" class="gray center" />
@@ -29,11 +28,24 @@
                     <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
                         <h1>{{ organization.name }}</h1>
                         <p>{{ organization.address }}</p>
-                        <p v-if="isSignedInFor(organization)">
-                            Ingelogd
-                        </p>
+                        <span v-if="isSignedInFor(organization)" class="icon success floating" />
+                        <span v-else class="icon arrow-right-small floating" />
                     </button>
                 </template>
+
+                <p v-if="!loading && filteredResults.length == 0 && query" class="info-box">
+                    Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.
+                </p>
+
+                <button class="button text full" @click="help">
+                    <span class="icon help" />
+                    <span>Mijn vereniging staat er niet tussen</span>
+                </button>
+
+                <button class="button text full" @click="gotoSignup">
+                    <span class="icon add" />
+                    <span>Nieuwe vereniging aansluiten</span>
+                </button>
             </div>
         </main>
     </div>
@@ -42,7 +54,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
@@ -96,6 +108,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         this.startUpdateResults();
     }
 
+    help() {
+        new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+    }
+
     gotoSignup() {
         this.present(
             new ComponentWithProperties(NavigationController, {
@@ -108,14 +124,22 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+        const queryString = new URL(window.location.href).searchParams;
+
         console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
 
-            const registerCode = parts[1] ?? "";
+            const code = queryString.get("code")
+            const organization = queryString.get("org")
             this.present(new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { initialRegisterCode: registerCode })
+                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                    initialRegisterCode: code && organization ? {
+                        code,
+                        organization
+                    } : null
+                })
             }).setDisplayStyle("popup").setAnimated(false))
         }
 
@@ -203,11 +227,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         max-width: 500px;
         margin: 0 auto;
 
-        @media (max-height: 800px) {
+        @media (min-height: 800px) {
             padding-top: 40px;
-        }
-        @media (max-height: 600px) {
-            padding-top: 20px;
         }
 
         > h1 {
@@ -215,7 +236,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             padding-bottom: 10px;
         }
 
-        > p {
+        > p:not([class]) {
             @extend .style-description;
             padding-bottom: 20px;
         }
@@ -230,36 +251,55 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
         > .search-result {
             @extend .style-input-shadow;
-            background: $color-white url('~@stamhoofd/assets/images/icons/gray/arrow-right-small.svg') right 10px center no-repeat;
+            background: $color-white;
             border: $border-width solid $color-gray-light;
             padding: 20px 20px;
             border-radius: $border-radius;
             margin: 10px 0;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
             display: block;
             width: 100%;
             text-align: left;
+            position: relative;
 
             > h1 {
-                @extend .style-title-3;
-                padding-bottom: 2px;
+                @extend .style-title-list;
+                line-height: 1.2;
+            }
+
+            > .icon.floating {
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translate(0, -50%);
+                color: $color-gray;
+                transition: color 0.2s;
             }
 
             > p {
-                @extend .style-description;
+                @extend .style-description-small;
             }
 
             &:hover {
                 border-color: $color-primary-gray-light;
+                background-color: $color-primary-background;
+
+                > .icon.floating {
+                    color: $color-primary;
+                }
             }
 
 
             &:active {
                 transform: scale(0.95, 0.95);
                 border-color: $color-primary;
+
+                > .icon.floating {
+                    color: $color-primary;
+                }
             }
         }
     }

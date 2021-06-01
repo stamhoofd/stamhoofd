@@ -96,12 +96,6 @@
         top: 50%;
         transform: translate(0, -50%);
     }
-
-    &.email {
-        &::before {
-            font-icon: url(@stamhoofd/assets/images/icons/email.svg);
-        }
-    }
 }
 
 .success-box {
@@ -133,6 +127,18 @@
 }
 
 .error-box, .success-box, .info-box, .warning-box {
+    &.email {
+        &::before {
+            font-icon: url(@stamhoofd/assets/images/icons/email.svg);
+        }
+    }
+
+    &.gift {
+        &::before {
+            font-icon: url(@stamhoofd/assets/images/icons/gift.svg);
+        }
+    }
+
     +.error-box, +.success-box, +.info-box, +.warning-box  {
         margin-top: -10px;
     }

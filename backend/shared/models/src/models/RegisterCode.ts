@@ -17,7 +17,7 @@ async function randomBytes(size: number): Promise<Buffer> {
 }
 
 export class RegisterCode extends Model {
-    static table = "registerCodes";
+    static table = "register_codes";
 
     @column({ type: "string", primary: true })
     code: string;
@@ -48,7 +48,8 @@ export class RegisterCode extends Model {
             const date = new Date()
             date.setMilliseconds(0)
             return date
-        }
+        },
+        skipUpdate: true
     })
     updatedAt: Date
 

@@ -1,13 +1,13 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-
-import { RegisterCode } from '@stamhoofd/models';
+import { Organization, RegisterCode, STCredit, UsedRegisterCode } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { RegisterCodeStatus, UsedRegisterCode as UsedRegisterCodeStruct } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = string;
+type ResponseBody = RegisterCodeStatus;
 
 export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
@@ -36,24 +36,32 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        const code = await RegisterCode.where({ organizationId: user.organizationId })
+        const codes = await RegisterCode.where({ organizationId: user.organizationId })
+        let code = codes[0]
 
-        if (code.length > 0) {
-            const r = new Response(code[0].code);   
-            r.headers["Content-Type"] = "text/plain"
-            return r;
+        if (codes.length == 0) {
+            code = new RegisterCode()
+            code.organizationId = user.organizationId
+            code.description = "Doorverwezen door "+user.organization.name
+            code.value = 2500
+            await code.generateCode()
+            await code.save()
         }
 
-        const c = new RegisterCode()
-        c.organizationId = user.organizationId
-        c.description = "Doorverwezen door "+user.organization.name
-        await c.generateCode()
+        const usedCodes = await UsedRegisterCode.getUsed(code.code)
+        const allOrganizations = await Organization.getByIDs(...usedCodes.flatMap(u => u.organizationId ? [u.organizationId] : []))
+        const allCredits = await STCredit.getByIDs(...usedCodes.flatMap(u => u.creditId ? [u.creditId] : []))
 
-        c.value = 10*100
-        await c.save()
-
-        const r = new Response(c.code);  
-        r.headers["Content-Type"] = "text/plain" 
-        return r;
+        return new Response(RegisterCodeStatus.create({
+            code: code.code,
+            usedCodes: usedCodes.map(c => {
+                return UsedRegisterCodeStruct.create({ 
+                    id: c.id,
+                    organizationName: allOrganizations.find(o => o.id === c.organizationId)?.name ?? "Onbekend",
+                    createdAt: c.createdAt,
+                    creditValue: (c.creditId ? allCredits.find(credit => credit.id === c.creditId)?.change : null) ?? null
+                })
+            })
+        }))
     }
 }
