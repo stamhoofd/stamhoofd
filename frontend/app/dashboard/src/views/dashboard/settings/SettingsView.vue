@@ -11,7 +11,7 @@
 
             <BillingWarningBox />
 
-            <p class="info-box gift selectable with-button" @click="openReferrals(true)">
+            <p v-if="false" class="info-box gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
                 <button class="button text">
@@ -182,7 +182,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
+                <STListItem v-if="false" :selectable="true" class="left-center" @click="openReferrals(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                     <h2 class="style-title-list">
                         Verdien tegoed door Stamhoofd te promoten
