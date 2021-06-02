@@ -113,12 +113,22 @@
                             <p v-if="!group" class="style-description-small">
                                 {{ member.member.groups.map(g => g.settings.name ).join(", ") }}
                             </p>
-                            <p v-if="member.member.details && !member.member.details.isPlaceholder" class="style-description-small only-smartphone">
-                                {{ member.member.details.age }} jaar
+                            <p v-if="member.member.details && !member.member.details.isRecovered" class="style-description-small only-smartphone">
+                                <template v-if="member.member.details.age !== null">
+                                    {{ member.member.details.age }} jaar
+                                </template>
+                                <template v-else>
+                                    /
+                                </template>
                             </p>
                         </td>
-                        <td v-if="member.member.details && !member.member.details.isPlaceholder" class="minor hide-smartphone">
-                            {{ member.member.details.age }} jaar
+                        <td v-if="member.member.details && !member.member.details.isRecovered" class="minor hide-smartphone">
+                            <template v-if="member.member.details.age !== null">
+                                {{ member.member.details.age }} jaar
+                            </template>
+                            <template v-else>
+                                /
+                            </template>
                         </td>
                         <td v-else class="minor hide-smartphone">
                             /
@@ -127,7 +137,7 @@
                             <p v-text="getMemberDescription(member.member)" />
                         </td>
                         <td>
-                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
+                            <button v-if="!member.member.details || member.member.details.isRecovered" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>

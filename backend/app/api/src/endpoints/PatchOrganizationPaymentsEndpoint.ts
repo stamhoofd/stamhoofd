@@ -8,11 +8,11 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, Order as OrderStruct, PaymentPatch, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
+import { EncryptedPaymentGeneral, getPermissionLevelNumber, Order as OrderStruct, PaymentPatch, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PaymentPatch[]
-type ResponseBody = EncryptedPaymentDetailed[]
+type ResponseBody = EncryptedPaymentGeneral[]
 
 type RegistrationWithMember = Registration & { member: Member}
 type PaymentWithRegistrations = Payment & { registrations: RegistrationWithMember[] }
@@ -130,7 +130,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
         );
     }
 
-    static getPaymentStructure(p: PaymentWithRegistrations | PaymentWithOrder) {
+    static getPaymentStructure(p: PaymentWithRegistrations | PaymentWithOrder): EncryptedPaymentGeneral {
         return EncryptedPaymentGeneral.create({
             id: p.id,
             method: p.method,

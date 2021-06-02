@@ -167,6 +167,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (payRegistrations.length > 0) {
             const payment = new Payment()
             payment.userId = user.id
+            payment.organizationId = user.organizationId
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice

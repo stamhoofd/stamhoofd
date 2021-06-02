@@ -2,92 +2,103 @@
     <div class="view-payments">
         <main>
             <Spinner v-if="loadingPayments" />
-            <div v-for="(payment, index) in payments" v-else :key="payment.id" class="container">
-                <hr v-if="index > 0">
-                <h2>Afrekening</h2>
+            <template v-else>
+                <div v-for="(payment, index) in payments" :key="payment.id" class="container">
+                    <hr v-if="index > 0">
+                    <h2>Afrekening</h2>
 
-                <dl class="details-grid">
-                    <dt>
-                        Inschrijvingen
-                    </dt>
-                    <dd>{{ paymentDescription(payment) }}</dd>
+                    <dl class="details-grid">
+                        <dt>
+                            Inschrijvingen
+                        </dt>
+                        <dd>{{ paymentDescription(payment) }}</dd>
 
-                    <dt>Bedrag</dt>
-                    <dd>{{ payment.price | price }}</dd>
+                        <dt>Bedrag</dt>
+                        <dd>{{ payment.price | price }}</dd>
 
-                    <template v-if="payment.freeContribution > 0">
-                        <dt>Vrije bijdrage</dt>
-                        <dd>{{ payment.freeContribution | price }} (inbegrepen in bedrag)</dd>
-                    </template>
+                        <template v-if="payment.freeContribution > 0">
+                            <dt>Vrije bijdrage</dt>
+                            <dd>{{ payment.freeContribution | price }} (inbegrepen in bedrag)</dd>
+                        </template>
 
-                    <dt>Datum</dt>
-                    <dd>{{ payment.createdAt | date }}</dd>
+                        <dt>Datum</dt>
+                        <dd>{{ payment.createdAt | date }}</dd>
 
-                    <template v-if="payment.method == 'Transfer'">
-                        <dt>Bankrekening</dt>
-                        <dd>{{ organization.meta.transferSettings.iban }}</dd>
+                        <template v-if="payment.method == 'Transfer'">
+                            <dt>Bankrekening</dt>
+                            <dd>{{ organization.meta.transferSettings.iban }}</dd>
 
-                        <dt>Mededeling</dt>
-                        <dd>{{ payment.transferDescription }}</dd>
-                    </template>
+                            <dt>Mededeling</dt>
+                            <dd>{{ payment.transferDescription }}</dd>
+                        </template>
 
-                    <template v-if="payment.method == 'Bancontact'">
-                        <dt>Betaald via </dt>
-                        <dd>Bancontact</dd>
-                    </template>
+                        <template v-if="payment.method == 'Bancontact'">
+                            <dt>Betaald via </dt>
+                            <dd>Bancontact</dd>
+                        </template>
 
-                    <template v-if="payment.method == 'iDEAL'">
-                        <dt>Betaald via </dt>
-                        <dd>iDEAL</dd>
-                    </template>
+                        <template v-if="payment.method == 'iDEAL'">
+                            <dt>Betaald via </dt>
+                            <dd>iDEAL</dd>
+                        </template>
 
-                    <template v-if="payment.method == 'Payconiq'">
-                        <dt>Betaald via </dt>
-                        <dd>Payconiq</dd>
-                    </template>
+                        <template v-if="payment.method == 'Payconiq'">
+                            <dt>Betaald via </dt>
+                            <dd>Payconiq</dd>
+                        </template>
 
-                    <template v-if="payment.method == 'Unknown'">
-                        <dt>Betaalmethode</dt>
-                        <dd>Onbekend</dd>
-                    </template>
+                        <template v-if="payment.method == 'Unknown'">
+                            <dt>Betaalmethode</dt>
+                            <dd>Onbekend</dd>
+                        </template>
 
-                    <dt>Status</dt>
-                    <dd v-if="payment.status == 'Succeeded'">
-                        Betaald
-                    </dd>
-                    <dd v-else>
-                        Nog niet betaald
-                    </dd>
-                </dl>
+                        <dt>Status</dt>
+                        <dd v-if="payment.status == 'Succeeded'">
+                            Betaald
+                        </dd>
+                        <dd v-else>
+                            Nog niet betaald
+                        </dd>
+                    </dl>
 
-                <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
-                    Betaald op {{ payment.paidAt | date }}
+                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
+                        Betaald op {{ payment.paidAt | date }}
+                    </p>
+
+                    <LoadingButton :loading="loading">
+                        <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
+                            Toch niet betaald
+                        </button>
+                        <button v-else class="button primary" @click="markPaid(payment)">
+                            Markeer als betaald
+                        </button>
+                    </LoadingButton>
+                </div>
+                <p v-if="payments.length == 0" class="info-box">
+                    Er zijn nog geen betalingen aangemaakt voor dit lid. Hiermee kan je bijhouden dat er nog een bepaald bedrag verschuldigd is voor een inschrijving.
                 </p>
-
-                <LoadingButton :loading="loading">
-                    <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
-                        Toch niet betaald
-                    </button>
-                    <button v-else class="button primary" @click="markPaid(payment)">
-                        Markeer als betaald
-                    </button>
-                </LoadingButton>
-            </div>
+                <button v-if="hasRegistrationsWithoutPayments" class="button text" @click="addPayment">
+                    <span class="icon add" />
+                    <span>Afrekening aanmaken</span>
+                </button>
+            </template>
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EncryptedPaymentDetailed, MemberWithRegistrations, PaymentDetailed, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
+import { CreatePaymentGeneral, EncryptedPaymentDetailed, MemberWithRegistrations, PaymentDetailed, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins, Prop,Vue } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import EditPaymentView from '../payments/EditPaymentView.vue';
 
 @Component({ 
     components: { 
@@ -100,7 +111,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         date: Formatter.dateTime.bind(Formatter)
     }
 })
-export default class MemberViewPayments extends Vue {
+export default class MemberViewPayments extends Mixins(NavigationMixin) {
     @Prop()
     member!: MemberWithRegistrations;
 
@@ -122,6 +133,20 @@ export default class MemberViewPayments extends Vue {
 
     paymentDescription(payment: PaymentDetailed) {
         return payment.getRegistrationList()
+    }
+
+    get hasRegistrationsWithoutPayments() {
+        return !!this.member.registrations.find(r => r.payment === null)
+    }
+
+    addPayment() {
+        this.present(new ComponentWithProperties(EditPaymentView, { 
+            payment: CreatePaymentGeneral.create({
+                registrationIds: this.member.registrations.filter(r => r.payment === null).map(r => r.id),
+                price: 0,
+            }),
+            isNew: true
+        }).setDisplayStyle("popup"))
     }
 
     async reload() {

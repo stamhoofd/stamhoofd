@@ -31,6 +31,8 @@
             <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
         </button>
 
+        <hr v-if="whatsNewBadge || enableMemberModule || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
+
         <template v-if="enableMemberModule">
             <div v-for="category in tree.categories">
                 <div>

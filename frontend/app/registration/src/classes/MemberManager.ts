@@ -92,7 +92,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         patch.members.addPut(encryptedMember)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
-        const members = (this.members ?? []).filter(m => !m.details.isPlaceholder)
+        const members = (this.members ?? []).filter(m => !m.details.isRecovered)
         patch.patch(await this.getEncryptedMembers(members, OrganizationManager.organization, true))
 
         // Send the request
