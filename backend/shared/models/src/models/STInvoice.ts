@@ -422,7 +422,7 @@ export class STInvoice extends Model {
 
         if (pendingInvoiceStruct) {
             // Compress
-            pendingInvoiceStruct!.meta.items = STInvoiceItem.compress(pendingInvoiceStruct!.meta.items)
+            pendingInvoiceStruct.meta.items = STInvoiceItem.compress(pendingInvoiceStruct.meta.items)
         }
 
      
