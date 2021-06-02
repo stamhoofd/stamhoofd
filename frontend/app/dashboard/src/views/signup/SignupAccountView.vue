@@ -80,17 +80,12 @@
 </template>
 
 <script lang="ts">
-import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from "@simonbackx/simple-networking";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto"
-import { Keychain, LoginHelper,NetworkManager, Session, SessionManager } from "@stamhoofd/networking"
-import { CreateOrganization,KeychainItem,KeyConstants, NewUser, Organization,Token, Version } from '@stamhoofd/structures';
+import { LoginHelper, Session } from "@stamhoofd/networking"
+import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import SignupModulesView from './SignupModulesView.vue';
 
 @Component({
     components: {
@@ -110,7 +105,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
     organization: Organization
 
     @Prop({required: true})
-    registerCode: string | null;
+    registerCode: { code: string; organization: string } | null;
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
@@ -208,7 +203,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             plausible('signupKeys');
             try {
 
-                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode)
+                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
                 plausible('signup');
 
                 this.loading = false;

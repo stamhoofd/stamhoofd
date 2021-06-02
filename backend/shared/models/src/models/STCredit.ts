@@ -83,26 +83,29 @@ export class STCredit extends Model {
         const balance = await STCredit.getBalance(organizationId)
         if (balance > 0) {
             const applyValue = Math.min(invoice.meta.priceWithoutVAT, balance)
-            invoice.meta.items.push(STInvoiceItem.create({
-                name: "Gebruikt tegoed",
-                unitPrice: -applyValue,
-                amount: 1,
-                date: new Date()
-            }))
 
-            if (!dryRun) {
-                const credit = new STCredit()
-                credit.organizationId = organizationId
-                credit.change = -applyValue
-                credit.description = "Tijdelijk vrijgehouden voor lopende betaling"
+            if (applyValue > 0) {
+                invoice.meta.items.push(STInvoiceItem.create({
+                    name: "Gebruikt tegoed",
+                    unitPrice: -applyValue,
+                    amount: 1,
+                    date: new Date()
+                }))
 
-                // Reserve for one week (direct debit can take a while)
-                credit.expireAt = new Date()
-                credit.expireAt.setDate(credit.expireAt.getDate() + 7)
-                credit.expireAt.setMilliseconds(0)
+                if (!dryRun) {
+                    const credit = new STCredit()
+                    credit.organizationId = organizationId
+                    credit.change = -applyValue
+                    credit.description = "Tijdelijk vrijgehouden voor lopende betaling"
 
-                await credit.save()
-                invoice.creditId = credit.id
+                    // Reserve for one week (direct debit can take a while)
+                    credit.expireAt = new Date()
+                    credit.expireAt.setDate(credit.expireAt.getDate() + 7)
+                    credit.expireAt.setMilliseconds(0)
+
+                    await credit.save()
+                    invoice.creditId = credit.id
+                }
             }
         }
     }

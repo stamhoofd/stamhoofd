@@ -274,7 +274,7 @@ export class STPendingInvoice extends Model {
                 Email.sendInternal({
                     to: invoicingTo,
                     bcc: "simon@stamhoofd.be",
-                    subject: "[Stamhoofd] Pro-forma factuur voor "+organization.name,
+                    subject: "Pro-forma factuur voor "+organization.name,
                     text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. Aangezien er nieuwe leden zijn ingeschreven, hebben jullie een openstaand bedrag van "+Formatter.price(price)+" in Stamhoofd (zie bijlage). Zoals eerder aangegeven zal dit via domiciliëring worden aangerekend (op dezelfde bankrekening waarmee de vorige betaling is gedaan). Hiervoor hoeven jullie dus niets te doen. Kijk eventueel na of er voldoende geld op jullie rekening staat. De betaling zal één van de komende drie werkdagen plaatsvinden. Jullie ontvangen daarna ook een definitieve factuur. Je kan in Stamhoofd altijd het openstaande bedrag nakijken bij Instellingen > Facturen en betalingen. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                     attachments: [
                         {

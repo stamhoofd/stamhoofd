@@ -47,7 +47,7 @@
     display: inline-block;  
 
     &.responsive {
-        @media (max-width: 600px) {
+        @media (max-width: 400px) {
             svg:first-child {
                 display: none;
             }

@@ -9,16 +9,15 @@
                 Instellingen
             </h1>
 
-            <p class="success-box gift selectable with-button" @click="openReferrals">
-                Verdien tot 100 euro tegoed per vereniging die je aanbrengt. Kijk hier hoe je die kan verzilveren.
+            <BillingWarningBox />
+
+            <p class="info-box gift selectable with-button" @click="openReferrals(true)">
+                Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
                 <button class="button text">
                     Meedoen
                 </button>
             </p>
-
-            <BillingWarningBox />
-
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
@@ -176,7 +175,20 @@
                         Facturen en betalingen
                     </h2>
                     <p class="style-description">
-                        Van jouw pakketten
+                        Download jouw facturen en bekijk jouw tegoed
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                    <h2 class="style-title-list">
+                        Verdien tegoed door Stamhoofd te promoten
+                    </h2>
+                    <p class="style-description">
+                        Geef 25 euro en krijg tot 100 euro per vereniging
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />

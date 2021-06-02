@@ -9,6 +9,10 @@
     white-space: nowrap;
     display: inline;
 
+    &.light-gray {
+        color: $color-gray-light;
+    }
+
     &.gray {
         color: $color-gray-dark;
     }
@@ -131,6 +135,10 @@
 
     &.star:after {
         font-icon: url(@stamhoofd/assets/images/icons/star.svg);
+    }
+
+    &.star-line:after {
+        font-icon: url(@stamhoofd/assets/images/icons/star-line.svg);
     }
 
     &.error:after {
@@ -259,6 +267,10 @@
 
     &.stats:after {
         font-icon: url(@stamhoofd/assets/images/icons/stats.svg);
+    }
+
+    &.qr-code:after {
+        font-icon: url(@stamhoofd/assets/images/icons/qr-code.svg);
     }
 }
 

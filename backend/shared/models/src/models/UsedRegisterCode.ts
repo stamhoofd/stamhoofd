@@ -1,4 +1,6 @@
 import { column, Model } from "@simonbackx/simple-database";
+import { Email } from "@stamhoofd/email";
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Organization } from "./Organization";
 import { RegisterCode } from "./RegisterCode";
@@ -75,12 +77,18 @@ export class UsedRegisterCode extends Model {
             return
         }
 
+        const receivingOrganization = await Organization.getByID(code.organizationId)
+        if (!receivingOrganization) {
+            console.error("Couldn't find receiving organization with id "+code.organizationId+" for used register code "+this.id)
+            return
+        }
+
         const usedCount = await UsedRegisterCode.getUsedCount(this.code) + 1
 
         const credit = new STCredit()
-        credit.organizationId = credit.organizationId = code.organizationId
+        credit.organizationId = code.organizationId
         credit.change = Math.min(100 * 100, usedCount * 10 * 100)
-        credit.description = organization.name+", die je had doorverwezen, gebruikt nu Stamhoofd! 🙌"
+        credit.description = organization.name+" doorverwezen 🙌"
 
         // Expire in one year (will get extended for every purchase or activation)
         credit.expireAt = new Date()
@@ -90,6 +98,27 @@ export class UsedRegisterCode extends Model {
         await credit.save()
         this.creditId = credit.id
         await this.save()
+
+        const admins = await receivingOrganization.getAdminToEmails()
+        if (admins) {
+            // Delay email until everything is validated and saved
+            Email.sendInternal({
+                to: admins,
+                bcc: "simon@stamhoofd.be",
+                subject: "Je hebt "+Formatter.price(credit.change)+" tegoed ontvangen 💰",
+                text: "Dag "+receivingOrganization.name+",\n\nGeweldig nieuws! "+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst 15 euro uitgegeven. Daardoor ontvangen jullie "+Formatter.price(credit.change)+" tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). "
+                + (credit.change <= 90*100 ? ("Bij de volgende vereniging ontvangen jullie nog meer: "+Formatter.price(credit.change + 10*100)+". ") : "")
+                + (credit.change <= 80*100 ? ("En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt 🎁 ") : "")
+                + "Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
+            })
+        }
+    }
+
+    static async getAll(code: string) {
+        const used = await UsedRegisterCode.where({ 
+            code
+        })
+        return used
     }
 
     static async getUsed(code: string) {

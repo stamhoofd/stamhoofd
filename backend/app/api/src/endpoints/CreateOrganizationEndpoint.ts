@@ -2,6 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
+import { Email, EmailInterfaceBase } from '@stamhoofd/email';
 import { EmailVerificationCode, STCredit, UsedRegisterCode } from '@stamhoofd/models';
 import { KeychainItem } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
@@ -47,7 +48,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: "invalid_field",
                 message: "Field is too short",
-                human: "Kijk de naam van je organisatie na, deze is te kort",
+                human: "Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.",
                 field: "organization.name"
             })
         }
@@ -92,10 +93,12 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         // todo: add some duplicate validation
         const organization = new Organization();
         organization.id = request.body.organization.id;
+        organization.name = request.body.organization.name;
 
         // Delay save until after organization is saved, but do validations before the organization is saved
         let credit: STCredit | undefined = undefined
         let usedCode: UsedRegisterCode | undefined = undefined
+        const delayEmails: EmailInterfaceBase[] = []
 
         if (request.body.registerCode !== null && request.body.registerCode.length > 0) {
             const code = await RegisterCode.getByID(request.body.registerCode)
@@ -125,6 +128,19 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 // Save later
             }
 
+            if (otherOrganization) {
+                const admins = await otherOrganization.getAdminToEmails()
+                if (admins) {
+                    // Delay email until everything is validated and saved
+                    delayEmails.push({
+                        to: admins,
+                        bcc: "simon@stamhoofd.be",
+                        subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
+                        text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 15 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
+                    })
+                }
+            }
+
             // Save that we used this code (so we can reward the other organization)
             usedCode = new UsedRegisterCode()
             usedCode.organizationId = organization.id
@@ -133,7 +149,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             // Save later
         }
 
-        organization.name = request.body.organization.name;
         organization.publicKey = request.body.organization.publicKey;
         organization.uri = uri;
         organization.meta = request.body.organization.meta
@@ -187,6 +202,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         const code = await EmailVerificationCode.createFor(user, user.email)
         code.send(user)
+
+        for (const email of delayEmails) {
+            Email.sendInternal(email)
+        }
 
         return new Response(SignupResponse.create({
             token: code.token,

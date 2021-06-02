@@ -19,7 +19,7 @@
             <span>Jouw inschrijvingspagina</span>
         </a>
 
-        <button class="menu-button button heading" @click="manageWhatsNew()">
+        <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
             <span class="icon gift" />
             <span>Wat is er nieuw?</span>
             <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
@@ -33,7 +33,6 @@
 
         <template v-if="enableMemberModule">
             <div v-for="category in tree.categories">
-                <hr>
                 <div>
                     <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                         <span class="icon group" />
@@ -61,10 +60,10 @@
                         <span>{{ c.settings.name }}</span>
                     </button>
                 </div>
+                <hr>
             </div>
         </template>
     
-        <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
         <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
             <button class="menu-button heading">
@@ -86,8 +85,8 @@
                 {{ webshop.meta.name }}
             </button>
         </div>
+        <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
-        <hr>
         <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
             <span class="icon card" />
             <span>Overschrijvingen</span>

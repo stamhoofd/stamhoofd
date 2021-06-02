@@ -1,4 +1,5 @@
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
+import { Toast } from '@stamhoofd/components';
 import { Version } from '@stamhoofd/structures';
 
 export function sleep(ms: number) {
@@ -6,7 +7,7 @@ export function sleep(ms: number) {
 }
 
 export class NetworkManagerStatic implements RequestMiddleware {
-    displayedErrorMessage = false
+    networkErrorToast: Toast | null = null
 
     /**
      * Normal, non authenticated requests
@@ -27,9 +28,8 @@ export class NetworkManagerStatic implements RequestMiddleware {
         console.error("network error", error)
         await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 7000));
 
-        if ((request as any).retryCount > 1 && !this.displayedErrorMessage) {
-            this.displayedErrorMessage = true;
-            // todo: present error message
+        if ((request as any).retryCount > 1 && !this.networkErrorToast) {
+            this.networkErrorToast = new Toast("Bezig met verbinden met internet...", "spinner").setHide(null).show()
         }
         return Promise.resolve(true);
     }
@@ -42,8 +42,10 @@ export class NetworkManagerStatic implements RequestMiddleware {
     }
 
     onNetworkResponse(request: Request<any>, response: XMLHttpRequest) {
-        // todo: hide network error message
-        this.displayedErrorMessage = false;
+        if (this.networkErrorToast) {
+            this.networkErrorToast.hide()
+        }
+        this.networkErrorToast = null;
     }
 }
 

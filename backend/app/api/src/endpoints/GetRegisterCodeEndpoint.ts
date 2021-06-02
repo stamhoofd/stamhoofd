@@ -48,7 +48,7 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
             await code.save()
         }
 
-        const usedCodes = await UsedRegisterCode.getUsed(code.code)
+        const usedCodes = await UsedRegisterCode.getAll(code.code)
         const allOrganizations = await Organization.getByIDs(...usedCodes.flatMap(u => u.organizationId ? [u.organizationId] : []))
         const allCredits = await STCredit.getByIDs(...usedCodes.flatMap(u => u.creditId ? [u.creditId] : []))
 

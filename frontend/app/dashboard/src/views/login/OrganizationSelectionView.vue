@@ -1,6 +1,6 @@
 <template>
     <div class="st-view shade">
-        <STNavigationBar :large="true" :sticky="false">
+        <STNavigationBar :large="true" :sticky="true">
             <template slot="left">
                 <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
                     <Logo class="responsive" />
@@ -28,7 +28,8 @@
                     <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
                         <h1>{{ organization.name }}</h1>
                         <p>{{ organization.address }}</p>
-                        <span v-if="isSignedInFor(organization)" class="icon success floating" />
+                        <Spinner v-if="loadingSession === organization.id" class="floating" />
+                        <span v-else-if="isSignedInFor(organization)" class="icon success floating" />
                         <span v-else class="icon arrow-right-small floating" />
                     </button>
                 </template>
@@ -94,6 +95,7 @@ const throttle = (func, limit) => {
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     loading = false;
+    loadingSession: string | null = null;
     q = ""
     results: OrganizationSimple[] = []
 
@@ -195,14 +197,20 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     loginOrganization(organization: OrganizationSimple) {
+        if (this.loadingSession) {
+            return
+        }
         const session = SessionManager.getSessionForOrganization(organization.id)
         if (session && session.canGetCompleted()) {
+            this.loadingSession = organization.id
             SessionManager.setCurrentSession(session).then(() => {
+                this.loadingSession = null
                 this.updateDefault()
                 if (!session.canGetCompleted() && !session.isComplete()) {
                     this.loginOrganization(organization)
                 }
             }).catch(e => {
+                this.loadingSession = null
                 this.updateDefault()
                 Toast.fromError(e).show()
                 console.error(e)
@@ -270,7 +278,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 line-height: 1.2;
             }
 
-            > .icon.floating {
+            > .floating {
                 position: absolute;
                 right: 10px;
                 top: 50%;
