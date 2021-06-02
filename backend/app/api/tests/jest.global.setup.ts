@@ -1,9 +1,14 @@
 import { Database, Migration } from "@simonbackx/simple-database";
-
+const emailPath = require.resolve("@stamhoofd/email")
+const modelsPath = require.resolve("@stamhoofd/models")
 import { User } from "@stamhoofd/models";
+import path from "path";
 
 export default async () => {
-    await Migration.runAll(__dirname + "/../src/migrations");
+    // External migrations
+    await Migration.runAll(path.dirname(modelsPath) + "/migrations");
+    await Migration.runAll(path.dirname(emailPath) + "/migrations");
+
     await Database.delete("DELETE FROM " + User.table);
     await Database.delete("DELETE FROM `tokens`");
     await Database.delete("DELETE FROM `users`");
