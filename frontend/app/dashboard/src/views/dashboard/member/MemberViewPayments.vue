@@ -5,7 +5,12 @@
             <template v-else>
                 <div v-for="(payment, index) in payments" :key="payment.id" class="container">
                     <hr v-if="index > 0">
-                    <h2>Afrekening</h2>
+                    <h2 class="style-with-button">
+                        <div>Afrekening</div>
+                        <div class="hover-show">
+                            <button v-if="hasWrite" class="button icon gray edit" @click="editPayment(payment)" />
+                        </div>
+                    </h2>
 
                     <dl class="details-grid">
                         <dt>
@@ -88,10 +93,10 @@
 
 <script lang="ts">
 import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { CreatePaymentGeneral, EncryptedPaymentDetailed, MemberWithRegistrations, PaymentDetailed, PaymentPatch, PaymentStatus } from '@stamhoofd/structures';
+import { CreatePaymentGeneral, EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentPatch, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop,Vue } from "vue-property-decorator";
 
@@ -121,7 +126,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     loading = false
     loadingPayments = true
 
-    payments: PaymentDetailed[] = []
+    payments: PaymentGeneral[] = []
 
     organization = OrganizationManager.organization
 
@@ -131,7 +136,31 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         })
     }
 
-    paymentDescription(payment: PaymentDetailed) {
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
+        }
+
+        if (OrganizationManager.user.permissions.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
+            // Can edit members without groups
+            return true
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    paymentDescription(payment: PaymentGeneral) {
         return payment.getRegistrationList()
     }
 
@@ -143,9 +172,24 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditPaymentView, { 
             payment: CreatePaymentGeneral.create({
                 registrationIds: this.member.registrations.filter(r => r.payment === null).map(r => r.id),
-                price: 0,
+                price: 0
             }),
-            isNew: true
+            isNew: true,
+            callback: async (payments: EncryptedPaymentGeneral[]) => {
+                await this.appendPayments(payments).catch(console.error)
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    editPayment(payment: PaymentGeneral) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditPaymentView, { 
+                payment,
+                isNew: false,
+                callback: async (payments: EncryptedPaymentGeneral[]) => {
+                    await this.appendPayments(payments).catch(console.error)
+                }
+            })
         }).setDisplayStyle("popup"))
     }
 
@@ -156,7 +200,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             const response = await session.authenticatedServer.request({
                 method: "GET",
                 path: "/organization/members/"+this.member.id+"/payments",
-                decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
             })
             await this.setPayments(response.data)
         } catch (e) {
@@ -165,14 +209,50 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         this.loadingPayments = false
     }
 
-    async setPayments(encryptedPayments: EncryptedPaymentDetailed[]) {
+    async appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         const organization = OrganizationManager.organization
 
         // Decrypt data
-        const payments: PaymentDetailed[] = []
+        const payments = new Map<string, PaymentGeneral>()
+
+        for (const payment of this.payments) {
+            payments.set(payment.id, payment)
+        }
+
         for (const encryptedPayment of encryptedPayments) {
             // Create a detailed payment without registrations
-            const payment = PaymentDetailed.create({
+            const payment = PaymentGeneral.create({
+                ...encryptedPayment, 
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+            })
+
+            // Set payment reference
+            for (const registration of payment.registrations) {
+                registration.payment = payment
+            }
+
+
+            payments.set(payment.id, payment)
+        }
+
+        const arr = [...payments.values()]
+
+        // Sort
+        arr.sort((a, b) => {
+            return b.createdAt.getTime() - a.createdAt.getTime()
+        })
+
+        this.payments = arr
+    }
+
+    async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+        const organization = OrganizationManager.organization
+
+        // Decrypt data
+        const payments: PaymentGeneral[] = []
+        for (const encryptedPayment of encryptedPayments) {
+            // Create a detailed payment without registrations
+            const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
                 registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
             })
@@ -218,34 +298,15 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                this.updatePayments(response.data)
+                await this.appendPayments(response.data)
                 MemberManager.callListeners("payment", this.member)
             } catch (e) {
                 Toast.fromError(e).show()
             }
             this.loading = false
             
-        }
-    }
-
-    updatePayments(payments: EncryptedPaymentDetailed[]) {
-        for (const payment of payments) {
-            // We loop all members of this family because they might have shared payments
-            for (const memberPayment of this.payments) {
-                if (payment.id == memberPayment.id) {
-                    // Copy usefull data
-                    memberPayment.status = payment.status
-                    memberPayment.paidAt = payment.paidAt
-
-                    memberPayment.transferDescription = payment.transferDescription
-                    memberPayment.price = payment.price
-                    memberPayment.method = payment.method
-                    memberPayment.updatedAt = payment.updatedAt
-                    memberPayment.createdAt = payment.createdAt
-                }
-            }
         }
     }
 
@@ -275,10 +336,10 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
 
-                this.updatePayments(response.data)
+                await this.appendPayments(response.data)
                 MemberManager.callListeners("payment", this.member)
             } catch (e) {
                 Toast.fromError(e).show()

@@ -8,7 +8,7 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentGeneral, getPermissionLevelNumber, Order as OrderStruct, PaymentPatch, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
+import { EncryptedPaymentGeneral, getPermissionLevelNumber, Order as OrderStruct, PaymentMethod, PaymentPatch, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PaymentPatch[]
@@ -53,6 +53,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
         const payments = await PatchOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId)
         const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
+        const changedPayments: (PaymentWithRegistrations | PaymentWithOrder)[] = []
 
         let groups: Group[] = []
         let webshops: Webshop[] = []
@@ -111,20 +112,58 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 model.status = patch.status
             }
 
+            if (patch.price || patch.method || patch.paidAt !== undefined) {
+                if (model.method && ![PaymentMethod.Unknown, PaymentMethod.Transfer].includes(model.method)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid payment method",
+                        human: "Je kan online betalingen niet wijzigen"
+                    })
+                }
+            }
+
+            if (patch.method) {
+                if (![PaymentMethod.Unknown, PaymentMethod.Transfer].includes(patch.method)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid payment method",
+                        human: "De betaalmethode die je wilt gebruiken is niet toegestaan",
+                        field: "method"
+                    })
+                }
+                model.method = patch.method
+
+                if (model.method === PaymentMethod.Transfer && patch.transferDescription === undefined && !model.transferDescription) {
+                    model.transferDescription = Payment.generateDescription(user.organization.meta.transferSettings, pay?.registrations.map(r => r.member.firstName).join(", ") ?? orderPay?.order.number?.toString() ?? "")
+                }
+            }
+
+            if (patch.transferDescription && model.method == PaymentMethod.Transfer) {
+                model.transferDescription = patch.transferDescription
+            }
+
+            if (patch.paidAt !== undefined) {
+                if ((patch.paidAt === null && model.status === PaymentStatus.Succeeded) || (patch.paidAt !== null && model.status !== PaymentStatus.Succeeded)) {
+                    // Ignore this change: this is invalid
+                } else {
+                    model.paidAt = patch.paidAt
+                }
+            }
+
+            if (patch.price) {
+                model.price = patch.price
+            }
+
+            changedPayments.push(model)
         }
 
-        for (const payment of payments) {
-            // Automatically checks if it is changed or not
-            await payment.save()
-        }
-
-        for (const payment of orderPayments) {
+        for (const payment of changedPayments) {
             // Automatically checks if it is changed or not
             await payment.save()
         }
 
          return new Response(
-            [...payments, ...orderPayments].map((p: any) => {
+            (request.request.getVersion() >= 97 ? changedPayments : [...payments, ...orderPayments]).map((p: any) => {
                 return PatchOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );

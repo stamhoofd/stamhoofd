@@ -1,15 +1,15 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
 import { Group } from "@stamhoofd/models";
-
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { EncryptedPaymentGeneral } from "@stamhoofd/structures";
+
 import { PatchOrganizationPaymentsEndpoint } from "./PatchOrganizationPaymentsEndpoint";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
-type ResponseBody = EncryptedPaymentDetailed[]
+type ResponseBody = EncryptedPaymentGeneral[]
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once

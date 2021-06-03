@@ -220,6 +220,48 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }
     }
 
+     async appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+        const organization = OrganizationManager.organization
+
+        // Decrypt data
+        const payments = new Map<string, SelectablePayment>()
+
+        for (const payment of this.payments) {
+            payments.set(payment.payment.id, payment)
+        }
+
+        for (const encryptedPayment of encryptedPayments) {
+            // Create a detailed payment without registrations
+            const payment = PaymentGeneral.create({
+                ...encryptedPayment, 
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+            })
+
+            // Set payment reference
+            for (const registration of payment.registrations) {
+                registration.payment = payment
+            }
+
+            
+            payments.set(payment.id, new SelectablePayment(payment))
+        }
+
+        const arr = [...payments.values()]
+
+        // Sort
+        arr.sort((a, b) => {
+            const sa = this.getPaymentTimingOrder(a.payment)
+            const sb = this.getPaymentTimingOrder(b.payment)
+
+            if (sa == sb) {
+                return b.payment.createdAt.getTime() - a.payment.createdAt.getTime()
+            }
+            return sa - sb;
+        })
+
+        this.payments = arr
+    }
+
     async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
@@ -293,7 +335,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                this.setPayments(response.data)
+                await this.appendPayments(response.data)
             } catch(e) {
                 Toast.fromError(e).show()
             }
@@ -328,7 +370,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                await this.setPayments(response.data)
+                await this.appendPayments(response.data)
             } catch(e) {
                 Toast.fromError(e).show()
             }

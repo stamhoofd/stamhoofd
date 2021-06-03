@@ -97,7 +97,7 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
             const payment = new Payment().setManyRelation(paymentRegistrationsRelation, []) as PaymentWithRegistrations
             payment.organizationId = user.organizationId
             payment.method = create.method
-            payment.status = PaymentStatus.Created
+            payment.status = create.status
             payment.price = create.price
             payment.freeContribution = create.freeContribution
 
@@ -107,8 +107,14 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
             } else {
                 payment.transferDescription = create.transferDescription
             }
+            
             payment.paidAt = create.paidAt
-            payment.status = create.status
+
+            if (payment.status !== PaymentStatus.Succeeded) {
+                payment.paidAt = null
+            } else {
+                payment.paidAt = payment.paidAt ?? new Date()
+            }
             await payment.save()
 
             // Save registrations and add extra data if needed

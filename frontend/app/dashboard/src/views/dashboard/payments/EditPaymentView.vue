@@ -13,16 +13,50 @@
             <h1 v-else>
                 Afrekening bewerken
             </h1>
+
+            <p v-if="isNew" class="info-box">
+                Je moet het lid zelf op de hoogte brengen van de nieuwe afrekening
+            </p>
         
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" />
+            <STInputBox v-if="!isOnlinePayment" title="Betaalmethode" error-fields="method" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-for="m in paymentMethods" :key="m" v-model="paymentMethod" :value="m">
+                        {{ getPaymentName(m) }}
+                    </Radio>
+                </RadioGroup>
             </STInputBox>
 
+            <div class="split-inputs">
+                <div>
+                    <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
+                        <PriceInput v-model="price" />
+                    </STInputBox>
+                    <p v-if="!isNew" class="style-description-small">
+                        Als je de prijs aanpast moet je dat zelf communiceren naar het lid. Deze is wel altijd zichtbaar als het lid zelf inlogt.
+                    </p>
+                </div>
+                <STInputBox v-if="isTransfer" title="Mededeling" error-fields="transferDescription" :error-box="errorBox">
+                    <input
+                        v-model="transferDescription"
+                        class="input"
+                        type="text"
+                        :placeholder="isNew ? 'Automatisch toewijzen' : 'Niet wijzigen'"
+                    >
+                </STInputBox>
+            </div>
+
             <Checkbox v-model="isPaid">
-                Betaald
+                De afrekening is betaald
             </Checkbox>
+
+            <div v-if="isPaid && paidAt" class="split-inputs">
+                <STInputBox title="Betaald op" error-fields="paidAt" :error-box="errorBox">
+                    <DateSelection v-model="paidAt" />
+                </STInputBox>
+                <TimeInput v-model="paidAt" title="Om" :validator="validator" /> 
+            </div>
         </main>
 
         <STToolbar>
@@ -39,11 +73,12 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, PriceInput, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,DateSelection,ErrorBox, PriceInput, Radio,RadioGroup, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { CreatePaymentGeneral, EncryptedPaymentGeneral, PaymentGeneral, PaymentPatch, PaymentStatus, Registration, Version } from "@stamhoofd/structures"
+import { CreatePaymentGeneral, EncryptedPaymentGeneral, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentPatch, PaymentStatus, Registration } from "@stamhoofd/structures"
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
@@ -55,7 +90,11 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         PriceInput,
         Spinner,
         STList,
-        Checkbox
+        Checkbox,
+        TimeInput,
+        DateSelection,
+        RadioGroup,
+        Radio
     },
 })
 export default class EditPaymentView extends Mixins(NavigationMixin) {
@@ -70,6 +109,9 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     isNew!: boolean
+
+    @Prop({ required: true })
+    callback!: (payments: EncryptedPaymentGeneral[]) => Promise<void>
 
     patchPayment = PaymentPatch.create({ id: "" })
 
@@ -88,7 +130,61 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     set isPaid(isPaid: boolean) {
-        this.patchPayment = this.patchPayment.patch({ status: isPaid ? PaymentStatus.Succeeded : PaymentStatus.Created })
+        this.patchPayment = this.patchPayment.patch({ 
+            status: isPaid ? PaymentStatus.Succeeded : PaymentStatus.Created,
+            paidAt: isPaid && !this.paidAt ? new Date() : undefined
+        })
+    }
+
+    get paidAt() {
+        return this.patchPayment.paidAt !== undefined ? this.patchPayment.paidAt : this.payment.paidAt
+    }
+
+    set paidAt(paidAt: Date | null) {
+        this.patchPayment = this.patchPayment.patch({ paidAt })
+    }
+
+    get paymentMethod() {
+        return (this.patchPayment.method !== undefined ? this.patchPayment.method : this.payment.method) ?? PaymentMethod.Unknown
+    }
+
+    set paymentMethod(method: PaymentMethod) {
+        this.patchPayment = this.patchPayment.patch({ method })
+    }
+
+
+    get transferDescription() {
+        return (this.patchPayment.transferDescription !== undefined ? this.patchPayment.transferDescription : this.payment.transferDescription) ?? ""
+    }
+
+    set transferDescription(transferDescription: string | null) {
+        if (this.transferDescription === transferDescription) {
+            return
+        }
+
+        if (transferDescription !== null && transferDescription.length == 0) {
+            const p = this.patchPayment.patch({ transferDescription: null })
+            p.transferDescription = this.isNew ? null : undefined
+            this.patchPayment = p
+            return
+        }
+        this.patchPayment = this.patchPayment.patch({ transferDescription })
+    }
+
+    get isOnlinePayment() {
+        return !this.payment.method || !this.paymentMethods.includes(this.payment.method)
+    }
+
+    get isTransfer() {
+        return this.paymentMethod === PaymentMethod.Transfer
+    }
+
+    get paymentMethods() {
+        return [PaymentMethod.Transfer, PaymentMethod.Unknown]
+    }
+
+    getPaymentName(method: PaymentMethod) {
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method))
     }
 
     async save() {
@@ -99,14 +195,26 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
 
         try {
             if (this.isNew) {
-                const request = await SessionManager.currentSession?.authenticatedServer.request({
+                const request = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
                     path: "/organization/payments",
                     body: [this.payment.patch(this.patchPayment)],
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
+                await this.callback(request.data)
             } else {
-                // todo
+                if (this.payment instanceof PaymentGeneral) {
+                    this.patchPayment.id = this.payment.id
+                } else {
+                    console.warn("Received wrong payment type")
+                }
+                const request = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: [this.patchPayment],
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
+                })
+                await this.callback(request.data)
             }
             // save here
             this.pop({ force: true })
@@ -121,7 +229,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
-        return patchContainsChanges(this.patchPayment, this.payment, { version: Version })
+        return (this.patchPayment.price !== undefined && this.patchPayment.price !== this.payment.price) || (this.patchPayment.status !== undefined && this.patchPayment.status !== this.payment.status)
     }
 
     async shouldNavigateAway() {
