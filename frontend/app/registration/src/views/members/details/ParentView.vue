@@ -38,7 +38,7 @@
                     <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
                 </div>
                 
-                <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />                
+                <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />
             </div>
         </main>
 

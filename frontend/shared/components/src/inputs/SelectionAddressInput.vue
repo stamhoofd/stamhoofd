@@ -40,6 +40,9 @@ export default class SelectionAddressInput extends Vue {
     @Prop({ required: true }) 
     addresses: Address[];
 
+    @Prop({ default: true })
+    required: boolean
+
     /**
      * Assign a validator if you want to offload the validation to components
      */
@@ -59,13 +62,17 @@ export default class SelectionAddressInput extends Vue {
 
     @Watch('value')
     onValueChanged(val: Address | null) {
-        if (!val) {
-            // Ignore: null value is only allowed temporarily
-            return
-        }
-        
         if (val === this.selectedAddress ?? this.customAddress ?? null) {
             // Not changed
+            return
+        }
+
+        if (!val) {
+            if (!this.required) {
+                this.selectedAddress = null
+                this.editingAddress = false
+                this.customAddress = null
+            }
             return
         }
         
@@ -92,7 +99,7 @@ export default class SelectionAddressInput extends Vue {
             this.editingAddress = false
             this.customAddress = this.value
 
-            if (!this.value && this.addresses.length > 0) {
+            if (this.required && !this.value && this.addresses.length > 0) {
                 this.$emit("input", this.addresses[0])
             }
         }
@@ -119,6 +126,10 @@ export default class SelectionAddressInput extends Vue {
         const a = this.selectedAddress ?? this.customAddress
         if (a) {
             this.$emit("input", a)
+        } else {
+            if (!this.required) {
+               this.$emit("input", null) 
+            }
         }
     }
 
@@ -156,7 +167,7 @@ export default class SelectionAddressInput extends Vue {
             return true
         }
 
-        if (!this.customAddress) {
+        if (this.required && !this.customAddress) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "invalid_field",
                 message: "Vul een adres in",
