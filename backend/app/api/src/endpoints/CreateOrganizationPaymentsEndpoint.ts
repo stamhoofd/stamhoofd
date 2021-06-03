@@ -94,7 +94,7 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
                 }
             }
 
-            const payment = new Payment().setManyRelation(paymentRegistrationsRelation, []) as PaymentWithRegistrations
+            const payment = new Payment().setManyRelation(paymentRegistrationsRelation, registrations) as PaymentWithRegistrations
             payment.organizationId = user.organizationId
             payment.method = create.method
             payment.status = create.status
