@@ -80,6 +80,50 @@ import SignupView from './SignupView.vue';
         LoadingButton,
         OrganizationLogo,
         GroupTree
+    },
+    metaInfo() {
+        return {
+            title: "Inschrijven bij "+OrganizationManager.organization.name,
+            meta: [
+                {
+                    vmid: 'description',
+                    name: 'description',
+                    content: "Via deze website kan je jouw inschrijvingen beheren.",
+                },
+                {
+                    hid: 'og:site_name',
+                    name: 'og:site_name',
+                    content: OrganizationManager.organization.name,
+                },
+                {
+                    hid: 'og:title',
+                    name: 'og:title',
+                    content: "Inschrijven bij "+OrganizationManager.organization.name,
+                },
+                ...(this.firstImageResolution ? [
+                     {
+                        hid: 'og:image',
+                        name: 'og:image',
+                        content: this.firstImageResolution.file.getPublicPath()
+                    },
+                    {
+                        hid: 'og:image:width',
+                        name: 'og:image:width',
+                        content: this.firstImageResolution.width
+                    },
+                    {
+                        hid: 'og:image:height',
+                        name: 'og:image:height',
+                        content: this.firstImageResolution.height
+                    },
+                    {
+                        hid: 'og:image:type',
+                        name: 'og:image:type',
+                        content: this.firstImageResolution.file.getPublicPath().endsWith(".png") ? 'image/png' : 'image/jpeg'
+                    },
+                ] : [])
+            ]
+        }
     }
 })
 export default class HomeView extends Mixins(NavigationMixin){
@@ -122,6 +166,19 @@ export default class HomeView extends Mixins(NavigationMixin){
         CenteredMessage.addListener(this, (centeredMessage) => {
             this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })
+    }
+
+    get firstImage() {
+        for (const group of this.organization.groups) {
+            if (group.settings.coverPhoto) {
+                return group.settings.coverPhoto
+            }
+        }
+        return null
+    }
+
+    get firstImageResolution() {
+        return this.firstImage?.getResolutionForSize(2000, 2000)
     }
 
     beforeDestroy() {
