@@ -112,15 +112,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
-    mounted() {
-        if (!this.email) {
-            // Recommend the current user's email
-            this.email = SessionManager.currentSession?.user?.email ?? null
-
-            // We'll clear this if at the end, the age is less than 11
-        }
-    }
-
     get age() {
         return this.details.age ?? 99
     }
@@ -243,6 +234,13 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
 
     set birthDay(birthDay: Date | null) {
         this.details.birthDay = birthDay
+
+        if (this.details.age && this.details.age >= 18) {
+            if (!this.email) {
+                // Recommend the current user's email
+                this.email = SessionManager.currentSession?.user?.email ?? null
+            }
+        }
     }
 
     get gender() {

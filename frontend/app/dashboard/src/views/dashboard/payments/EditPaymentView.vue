@@ -28,7 +28,7 @@
                 </RadioGroup>
             </STInputBox>
 
-            <div class="split-inputs">
+            <div v-if="!isOnlinePayment" class="split-inputs">
                 <div>
                     <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
                         <PriceInput v-model="price" />
@@ -51,7 +51,7 @@
                 De afrekening is betaald
             </Checkbox>
 
-            <div v-if="isPaid && paidAt" class="split-inputs">
+            <div v-if="!isOnlinePayment && isPaid && paidAt" class="split-inputs">
                 <STInputBox title="Betaald op" error-fields="paidAt" :error-box="errorBox">
                     <DateSelection v-model="paidAt" />
                 </STInputBox>
