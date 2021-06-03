@@ -199,6 +199,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             isNew: true,
             callback: async (payments: EncryptedPaymentGeneral[]) => {
                 await this.appendPayments(payments).catch(console.error)
+                MemberManager.callListeners("payment", this.member)
             }
         }).setDisplayStyle("popup"))
     }
@@ -210,6 +211,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 isNew: false,
                 callback: async (payments: EncryptedPaymentGeneral[]) => {
                     await this.appendPayments(payments).catch(console.error)
+                    MemberManager.callListeners("payment", this.member)
                 }
             })
         }).setDisplayStyle("popup"))
