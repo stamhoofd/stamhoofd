@@ -9,7 +9,7 @@ import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { CreatePaymentGeneral, EncryptedPaymentGeneral, PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
 
-import { PatchOrganizationPaymentsEndpoint } from './PatchOrganizationPaymentsEndpoint';
+import { GetOrganizationPaymentsEndpoint } from './GetOrganizationPaymentsEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = CreatePaymentGeneral[]
@@ -127,7 +127,7 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
 
         return new Response(
             payments.map((p: any) => {
-                return PatchOrganizationPaymentsEndpoint.getPaymentStructure(p)
+                return GetOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );
     }

@@ -6,7 +6,7 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentGeneral,Order as OrderStruct } from "@stamhoofd/structures";
+import { EncryptedPaymentGeneral,Order as OrderStruct, OrderStatus } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -50,37 +50,40 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
 
         // Get all payments that are connected with one or more registrations.
         // Also link the members of those registrations, so we know the names.
-        const payments = await this.getPaymentsWithRegistrations(user.organizationId)
-        const orderPayments = await this.getPaymentsWithOrder(user.organizationId)
+        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId)
+        const orderPayments = await GetOrganizationPaymentsEndpoint.getPaymentsWithOrder(user.organizationId)
 
         return new Response(
-            [...payments, ...orderPayments].map((p: any) => {
-                return EncryptedPaymentGeneral.create({
-                    id: p.id,
-                    method: p.method,
-                    status: p.status,
-                    price: p.price,
-                    freeContribution: p.freeContribution,
-                    transferDescription: p.transferDescription,
-                    paidAt: p.paidAt,
-                    createdAt: p.createdAt,
-                    updatedAt: p.updatedAt,
-                    registrations: p.registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
-                    order: p.order ? OrderStruct.create(Object.assign({...p.order}, { payment: null })) : null,
-                })
+            [...payments, ...orderPayments].map((p) => {
+                return GetOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );
     }
 
-    /**
-     * Fetch all members with their corresponding (valid) registrations and payment
-     */
-    async getPaymentsWithOrder(organizationId: string): Promise<PaymentWithOrder[]> {
+    static getPaymentStructure(p: PaymentWithRegistrations | PaymentWithOrder): EncryptedPaymentGeneral {
+        return EncryptedPaymentGeneral.create({
+            id: p.id,
+            method: p.method,
+            status: p.status,
+            price: p.price,
+            freeContribution: p.freeContribution,
+            transferDescription: p.transferDescription,
+            paidAt: p.paidAt,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null,
+        })
+    }
+    
+    static async getPaymentsWithOrder(organizationId: string): Promise<PaymentWithOrder[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Order.getDefaultSelect()} from \`${Payment.table}\`\n`;
         query += `JOIN \`${Order.table}\` ON \`${Order.table}\`.\`${Order.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\`\n`
-        query += `where \`${Order.table}\`.\`organizationId\` = ?`
+        query += `where \`${Order.table}\`.\`organizationId\` = ? AND \`${Order.table}\`.\`status\` != ?`
 
-        const [results] = await Database.select(query, [organizationId])
+        const [results] = await Database.select(query, [organizationId, OrderStatus.Canceled])
         const payments: PaymentWithOrder[] = []
 
         // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
@@ -107,15 +110,30 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
     }
 
     /**
+     * This needs to be here to prevent reference cycles (temporary)
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    async getPaymentsWithRegistrations(organizationId: string): Promise<PaymentWithRegistrations[]> {
+    static async getPaymentsWithRegistrations(organizationId: string, memberId: string | null = null): Promise<PaymentWithRegistrations[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()} from \`${Payment.table}\`\n`;
+        if (memberId) {
+            query += `JOIN \`${Registration.table}\` AS \`MemberCheckTable\` ON \`MemberCheckTable\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`MemberCheckTable\`.\`registeredAt\` is not null\n`
+        }
+
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        
+
         query += `JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+
         query += `where \`${Member.table}\`.\`organizationId\` = ?`
 
-        const [results] = await Database.select(query, [organizationId])
+        const params = [organizationId]
+
+        if (memberId) {
+            query += ` AND \`MemberCheckTable\`.\`${Member.registrations.foreignKey}\` = ?`
+            params.push(memberId)
+        }
+
+        const [results] = await Database.select(query, params)
         const payments: PaymentWithRegistrations[] = []
 
         // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.

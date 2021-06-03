@@ -5,6 +5,7 @@ import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { EncryptedPaymentGeneral } from "@stamhoofd/structures";
 
+import { GetOrganizationPaymentsEndpoint } from "./GetOrganizationPaymentsEndpoint";
 import { PatchOrganizationPaymentsEndpoint } from "./PatchOrganizationPaymentsEndpoint";
 type Params = { id: string };
 type Query = undefined
@@ -51,11 +52,11 @@ export class GetMemberPaymentsEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        const payments = await PatchOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId, member.id)
+        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId, member.id)
 
         return new Response(
             payments.map((p: any) => {
-                return PatchOrganizationPaymentsEndpoint.getPaymentStructure(p)
+                return GetOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );
     }
