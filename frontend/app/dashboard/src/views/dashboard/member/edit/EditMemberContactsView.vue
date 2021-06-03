@@ -56,7 +56,7 @@
             <STList v-if="emergencyContacts.length > 0">
                 <STListItem v-for="contact in emergencyContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
                     <h2 class="style-title-list">
-                        {{ contact.name }} ({{ contact.title }})
+                        {{ contact.name }} ({{ contact.title }})
                     </h2>
                     <p v-if="contact.phone" class="style-description-small">
                         {{ contact.phone }}
