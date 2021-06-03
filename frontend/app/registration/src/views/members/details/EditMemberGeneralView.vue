@@ -98,6 +98,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     loading = false
+    didAutofillEmail = false
 
     @Prop({ required: true })
     isNew: boolean
@@ -225,6 +226,11 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     set email(email: string | null) {
+        if (email !== this.email) {
+            if (this.didAutofillEmail) {
+                this.didAutofillEmail = false
+            }
+        }
         this.details.email = email
     }
 
@@ -239,6 +245,13 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
             if (!this.email) {
                 // Recommend the current user's email
                 this.email = SessionManager.currentSession?.user?.email ?? null
+                this.didAutofillEmail = this.email !== null
+            }
+            
+        } else {
+            if (this.email && this.didAutofillEmail) {
+                this.email = ""
+                this.didAutofillEmail = false
             }
         }
     }
