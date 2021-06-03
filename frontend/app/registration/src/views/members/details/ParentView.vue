@@ -37,24 +37,8 @@
                     <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer van ouder" />
                     <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
                 </div>
-
-                <div>
-                    <STInputBox v-if="availableAddresses.length > 0" title="Kies een adres">
-                        <STList>
-                            <STListItem v-for="_address in availableAddresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
-                                <Radio slot="left" v-model="address" :value="_address" />
-                                {{ _address.street }} {{ _address.number }}<br>
-                                {{ _address.postalCode }} {{ _address.city }}
-                                <button slot="right" class="button icon gray edit" @click.stop="doEditAddress(_address)" />
-                            </STListItem>
-                            <STListItem element-name="label" :selectable="true" class="left-center">
-                                <Radio slot="left" v-model="address" :value="customAddress" />
-                                Een ander adres ingeven
-                            </STListItem>
-                        </STList>
-                    </STInputBox>
-                    <AddressInput v-if="editingAddress || address === customAddress" v-model="editAddress" :title="address === customAddress ? 'Nieuw adres' : 'Adres bewerken'" :validator="validator" :required="false" />
-                </div>
+                
+                <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />                
             </div>
         </main>
 
@@ -69,7 +53,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, Checkbox, EmailInput,ErrorBox, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { Checkbox, EmailInput,ErrorBox, PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -81,13 +65,13 @@ import { MemberManager } from '../../../classes/MemberManager';
         STNavigationBar,
         STErrorsDefault,
         STInputBox,
-        AddressInput,
         Radio,
         PhoneInput,
         EmailInput,
         Checkbox,
         STList,
-        STListItem
+        STListItem,
+        SelectionAddressInput
     }
 })
 export default class ParentView extends Mixins(NavigationMixin) {
@@ -108,8 +92,6 @@ export default class ParentView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     address: Address | null = null
-    customAddress: Address | null = null
-    editingAddress = false
 
     validator = new Validator()
 
@@ -123,10 +105,6 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.email = this.parent.email
             this.address = this.parent.address ? Address.create(this.parent.address) : null
             this.type = this.parent.type
-        } else {
-            if (this.availableAddresses.length > 0) {
-                this.address = this.availableAddresses[0]
-            }
         }
     }
 
@@ -150,27 +128,11 @@ export default class ParentView extends Mixins(NavigationMixin) {
         return addresses
     }
 
-    get editAddress() {
-        return this.address
-    }
-
-    set editAddress(address: Address | null) {
-        if (this.address && address) {
-            MemberManager.updateAddress(this.address, address)
-            if (this.memberDetails) {
-                this.memberDetails.updateAddress(this.address, address)
-            }
-        } else {
-            if (this.address === this.customAddress) {
-                this.customAddress = address
-            }
+    modifyAddress({ from, to }: { from: Address, to: Address }) {
+        MemberManager.updateAddress(from, to)
+        if (this.memberDetails) {
+            this.memberDetails.updateAddress(from, to)
         }
-        this.address = address
-    }
-
-    doEditAddress(address: Address) {
-        this.$set(this, "address", address)
-        this.editingAddress = true
     }
 
     async goNext() {
@@ -196,7 +158,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.errorBox = new ErrorBox(errors)
             return;
         } 
-        
+
         if (!valid) {
             this.errorBox = null
             return;
