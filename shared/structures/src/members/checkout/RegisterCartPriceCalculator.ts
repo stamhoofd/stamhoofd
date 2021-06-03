@@ -86,6 +86,12 @@ export class RegisterCartPriceCalculator {
             let existingCount = 0
             for (const member of members) {
                 for (const registration of member.registrations) {
+
+                    // Skip this if we have an item in the cart with the same properties
+                    const inCart = !!items.find(i => i.memberId === member.id && i.groupId === registration.groupId)
+                    if (inCart) {
+                        continue
+                    }
                     const group = groups.find(g => g.id === registration.groupId)
                     if (group && !registration.waitingList && registration.cycle === group.cycle && registration.registeredAt !== null && registration.deactivatedAt === null) {
                         // Active registration

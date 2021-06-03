@@ -77,7 +77,8 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,DateSelection,ErrorBox, PriceInput, Radio,RadioGroup, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { CreatePaymentGeneral, EncryptedPaymentGeneral, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentPatch, PaymentStatus, Registration } from "@stamhoofd/structures"
+import { CreatePaymentGeneral, EncryptedPaymentGeneral, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentPatch, PaymentStatus, RegisterItem, Registration } from "@stamhoofd/structures"
+import { RegisterCartPriceCalculator } from '@stamhoofd/structures/src/members/checkout/RegisterCartPriceCalculator';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -116,7 +117,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     patchPayment = PaymentPatch.create({ id: "" })
 
     saving = false
-
+    
     get price() {
         return this.patchPayment.price ?? this.payment.price
     }

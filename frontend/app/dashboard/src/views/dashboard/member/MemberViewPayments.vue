@@ -96,7 +96,8 @@ import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { CreatePaymentGeneral, EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentPatch, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
+import { CreatePaymentGeneral, EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentPatch, PaymentStatus, PermissionLevel, RecordType, RegisterCart, RegisterItem } from '@stamhoofd/structures';
+import { RegisterCartPriceCalculator } from '@stamhoofd/structures/src/members/checkout/RegisterCartPriceCalculator';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop,Vue } from "vue-property-decorator";
 
@@ -169,10 +170,31 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     addPayment() {
+        const registrations = this.member.registrations.filter(r => r.payment === null)
+        const groups = OrganizationManager.organization.groups
+        const items = registrations.flatMap(r => {
+            const group = groups.find(g => g.id == r.groupId)
+            if (!group) {
+                return []
+            }
+            return [new RegisterItem(
+                this.member, 
+                group, 
+                { 
+                    reduced: !!this.member.details.records.find(r => r.type == RecordType.FinancialProblems), 
+                    waitingList: r.waitingList 
+                }
+            )]
+        })
+
+        const cart = new RegisterCart(items)
+        // Calculate price
+        cart.calculatePrices(this.familyManager.members, groups, OrganizationManager.organization.meta.categories)
+
         this.present(new ComponentWithProperties(EditPaymentView, { 
             payment: CreatePaymentGeneral.create({
-                registrationIds: this.member.registrations.filter(r => r.payment === null).map(r => r.id),
-                price: 0
+                registrationIds: registrations.map(r => r.id),
+                price: cart.price
             }),
             isNew: true,
             callback: async (payments: EncryptedPaymentGeneral[]) => {
