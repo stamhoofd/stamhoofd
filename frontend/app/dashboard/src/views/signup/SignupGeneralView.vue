@@ -152,9 +152,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
         if (!this.initialRegisterCode) {
             try {
+                const currentCount = localStorage.getItem("what-is-new")
                 const saved = localStorage.getItem("savedRegisterCode")
                 const dString = localStorage.getItem("savedRegisterCodeDate")
-                if (saved !== null && dString !== null) {
+                if (currentCount === null && saved !== null && dString !== null) {
                     const d = parseInt(dString)
                     if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
                         const parsed = JSON.parse(saved)

@@ -9,7 +9,7 @@
             <h1>
                 Geef 25 euro, krijg tot 100 euro per vereniging
             </h1>
-            <p>Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 15 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
+            <p>Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
 
             <Spinner v-if="loading" />
             <template v-if="!loading && status">
@@ -138,7 +138,7 @@
                             Je hebt jouw tegoed ontvangen!
                         </p>
                         <p v-else class="style-description">
-                            Registreerde op {{ used.createdAt | date }}. Je ontvangt jouw tegoed zodra deze vereniging 15 euro heeft besteed.
+                            Registreerde op {{ used.createdAt | date }}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.
                         </p>
                         <span v-if="used.creditValue !== null" slot="right" class="style-tag large success">{{ used.creditValue | price }}</span>
                     </STListItem>

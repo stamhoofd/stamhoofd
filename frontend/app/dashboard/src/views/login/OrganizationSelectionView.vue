@@ -132,17 +132,29 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         HistoryManager.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
+            try {
+                const currentCount = localStorage.getItem("what-is-new")
 
-            const code = queryString.get("code")
-            const organization = queryString.get("org")
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
-                    initialRegisterCode: code && organization ? {
-                        code,
-                        organization
-                    } : null
-                })
-            }).setDisplayStyle("popup").setAnimated(false))
+                let code = queryString.get("code")
+                let organization = queryString.get("org")
+
+                if (currentCount !== null && (code || organization)) {
+                    console.warn("Already has an organization. Skip referral discount.")
+                    code = null;
+                    organization = null;
+                }
+                this.present(new ComponentWithProperties(NavigationController, {
+                    root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                        initialRegisterCode: code && organization ? {
+                            code,
+                            organization
+                        } : null
+                    })
+                }).setDisplayStyle("popup").setAnimated(false))
+                
+            } catch (e) {
+                console.error(e)
+            }
         }
 
         this.updateDefault()
