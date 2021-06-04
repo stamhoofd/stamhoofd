@@ -74,12 +74,16 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.timer = setTimeout(this.poll.bind(this), 10000)
     }
 
-    destroyed() {
+    stopPolling() {
         if (this.timer) {
             console.log("Stopped e-mail polling")
             clearTimeout(this.timer)
             this.timer = null
         }
+    }
+
+    destroyed() {
+        this.stopPolling()
     }
 
     async poll() {
@@ -127,6 +131,8 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
             this.dismiss({ force: true })
 
         } catch (e) {
+            // Prevent closing now that we showed an error
+            this.stopPolling()
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false

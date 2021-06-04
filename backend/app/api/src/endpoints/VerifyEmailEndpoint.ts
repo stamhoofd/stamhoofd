@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode } from '@stamhoofd/models';
+import { EmailVerificationCode, Member } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
 import { Token } from '@stamhoofd/models';
 import { User } from "@stamhoofd/models";
@@ -54,6 +54,29 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (user.email != code.email) {
+            const other = await User.getForRegister(organization, code.email)
+
+            if (other) {
+                if (other.hasAccount()) {
+                    throw new SimpleError({
+                        code: "email_in_use",
+                        message: "This e-mail is already in use, we cannot set it",
+                        human: "We kunnen het e-mailadres van deze gebruiker niet instellen naar "+code.email+", omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons (hallo@stamhoofd.be) als we de gebruikers moeten combineren tot één gebruiker."
+                    })
+                }
+
+                // Delete placeholder account, but migrate members first
+                const members = await Member.getMembersWithRegistrationForUser(other)
+
+                if (members.length > 0) {
+                    console.log("Moving mebers from user "+other.id+" to "+user.id)
+                    await Member.users.reverse("members").link(user, members)
+                }
+
+                await other.delete()
+            }
+
+            
             // change user email
             user.email = code.email
 
