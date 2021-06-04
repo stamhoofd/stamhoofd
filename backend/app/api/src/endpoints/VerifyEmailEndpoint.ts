@@ -69,7 +69,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 const members = await Member.getMembersWithRegistrationForUser(other)
 
                 if (members.length > 0) {
-                    console.log("Moving mebers from user "+other.id+" to "+user.id)
+                    console.log("Moving members from user "+other.id+" to "+user.id)
                     await Member.users.reverse("members").link(user, members)
                 }
 
