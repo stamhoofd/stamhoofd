@@ -81,6 +81,13 @@ export class Formatter {
         return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
+    /**
+     * 12:00
+     */
+    static timeIso(date: Date): string {
+        return (date.getHours()+"").padStart(2, "0")+":"+(date.getMinutes()+"").padStart(2, "0")
+    }
+
     static uniqueArray<T extends any>(array: T[]): T[] {
         function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
