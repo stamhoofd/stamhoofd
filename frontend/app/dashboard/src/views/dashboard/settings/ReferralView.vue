@@ -291,11 +291,6 @@ export default class ReferralView extends Mixins(NavigationMixin) {
 
         event.target.contentEditable = false;
 
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
         const displayedComponent = new ComponentWithProperties(Tooltip, {
             text: "📋 Gekopieerd!",
             x: event.clientX,

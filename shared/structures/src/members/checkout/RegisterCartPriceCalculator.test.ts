@@ -1,6 +1,6 @@
 import { Group } from "../../Group"
 import { GroupCategory, GroupCategorySettings } from "../../GroupCategory"
-import { GroupPrices } from "../../GroupPrices"
+import { GroupPrice, GroupPrices } from "../../GroupPrices"
 import { GroupSettings } from "../../GroupSettings"
 import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 import { Registration } from "../Registration"
@@ -18,10 +18,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -36,10 +46,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 10
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 10,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -53,10 +73,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 70,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 70,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -138,10 +168,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -156,10 +196,19 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 10
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 10
+                            })
+                        ]
                     })
                 ]
             })
@@ -173,10 +222,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 70,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 70,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -190,8 +249,11 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 80,
-                        // no discount
+                        prices: [
+                            GroupPrice.create({
+                                price: 80,
+                            })
+                        ]
                     })
                 ]
             })
@@ -289,10 +351,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -307,10 +379,19 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 10
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 10
+                            })
+                        ]
                     })
                 ]
             })
@@ -324,10 +405,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 70,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 70,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -403,10 +494,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -421,10 +522,19 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 10
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 10
+                            })
+                        ]
                     })
                 ]
             })
@@ -438,10 +548,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 70,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 70,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -518,10 +638,18 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 50,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 50,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                            })
+                        ]
                     })
                 ]
             })
@@ -604,10 +732,20 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 20
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 20,
+                                reducedPrice: 10,
+                            })
+                        ]
                     })
                 ]
             })
@@ -622,10 +760,19 @@ describe("Test register cart price calculations", () => {
                 endDate: new Date(),
                 prices: [
                     GroupPrices.create({
-                        price: 60,
-                        reducedPrice: 10,
-                        familyPrice: 40,
-                        extraFamilyPrice: 10
+                        prices: [
+                            GroupPrice.create({
+                                price: 60,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 40,
+                                reducedPrice: 10,
+                            }),
+                            GroupPrice.create({
+                                price: 10
+                            })
+                        ]
                     })
                 ]
             })

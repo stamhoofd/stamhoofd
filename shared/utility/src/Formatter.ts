@@ -177,4 +177,20 @@ export class Formatter {
         }
         return array.join(separator)+lastSeparator+last
     }
+
+    static ordinalNumber(number: number): string {
+        if (number == 1) {
+            return "eerste"
+        }
+
+        if (number == 2) {
+            return "tweede"
+        }
+
+        if (number == 3) {
+            return "derde"
+        }
+
+        return number+"e"
+    }
 }

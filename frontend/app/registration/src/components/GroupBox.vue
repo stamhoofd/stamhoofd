@@ -57,21 +57,6 @@ export default class GroupBox extends Mixins(NavigationMixin){
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
-    get minimumPrice(): number | null {
-        const prices = this.group.settings.getGroupPrices(new Date())
-        const nums: number[] = [
-            prices?.familyPrice,
-            prices?.extraFamilyPrice,
-            prices?.reducedPrice
-        ].filter(p => p !== undefined && p !== null) as number[]
-
-        if (nums.length === 0) {
-            return null
-        }
-
-        return Math.min(...nums)
-    }
-
     get selectedCount() {
         return CheckoutManager.cart.items.filter(i => i.group.id === this.group.id).length
     }

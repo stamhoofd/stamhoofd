@@ -403,21 +403,3 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-#member-records-view {
-    > main {
-        > .checkbox + .textarea-container {
-            padding-bottom: 20px;
-            padding-left: 35px;
-
-            @media (max-width: 450px) {
-                padding-left: 0;
-            }
-        }
-    }
-}
-</style>

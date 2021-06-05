@@ -244,7 +244,7 @@
             </template>
             <template v-if="tab == 'payments'">
                 <STErrorsDefault :error-box="errorBox" />
-                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" @patch="addPricesPatch" />
             </template>
 
             <template v-if="tab == 'permissions'">
@@ -322,7 +322,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     tabs = ["general", "payments", "permissions"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld", "Toegang"];
+    tabLabels = ["Algemeen", "Prijs", "Toegang"];
 
     saving = false
 
@@ -671,7 +671,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         let patch = this.patchOrganization
 
         // Check if reduced price is enabled
-        if (this.patchedGroup.settings.prices.find(g => g.reducedPrice !== null) && !this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+        if (!this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems) && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
             console.log("Auto enabled financial problems record")
 
             const p = OrganizationRecordsConfiguration.patch({});
@@ -684,7 +684,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
             patch = patch.patch(patchOrganization)
 
-            new Toast("We vragen nu ook bij het inschrijven of een lid in een kansarm gezin leeft zodat we het verminderd lidgeld kunnen toepassen", "info-filled").show()
+            new Toast("We vragen nu ook bij het inschrijven of een lid het financieel moeilijk heeft, zodat we de verminderde prijzen kunnen toepassen", "info-filled").show()
         }
 
         this.errorBox = null
