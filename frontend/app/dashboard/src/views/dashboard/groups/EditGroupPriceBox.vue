@@ -65,44 +65,6 @@
             <span v-if="prices.length > 0">Andere prijs na bepaalde datum</span>
             <span v-else>Prijs toevoegen</span>
         </button>
-
-        
-        <!--<STInputBox v-if="enableReducedPrice" title="Verlaagd tarief" error-fields="reducedPrice" :error-box="errorBox">
-            <PriceInput v-model="reducedPrice" placeholder="Gratis" />
-        </STInputBox>
-        
-        <Checkbox v-model="enableLatePrice">
-            Verlaagd tarief na een bepaalde datum
-        </Checkbox>
-
-        <div v-if="enableLatePrice" class="split-inputs">
-            <STInputBox title="Verminder het lidgeld vanaf" error-fields="reducedPriceDate" :error-box="errorBox">
-                <DateSelection v-model="latePriceDate" />
-            </STInputBox>
-
-            <STInputBox title="Standaard tarief na deze datum" error-fields="reducedPriceDate" :error-box="errorBox">
-                <PriceInput v-model="latePrice" placeholder="Gratis" />
-            </STInputBox>
-        </div>
-
-        <STInputBox v-if="enableLatePrice && enableReducedPrice" title="Verlaagd tarief na deze datum" error-fields="reducedLatePrice" :error-box="errorBox">
-            <PriceInput v-model="reducedLatePrice" placeholder="Gratis" />
-        </STInputBox>
-
-        <Checkbox v-model="enableFamilyPrice">
-            Verlaagd tarief voor broers/zussen
-        </Checkbox>
-        <div v-if="enableFamilyPrice" class="split-inputs">
-            <STInputBox title="Voor tweede broer/zus" error-fields="reducedPrice" :error-box="errorBox">
-                <PriceInput v-model="familyPrice" placeholder="Gratis" />
-            </STInputBox>
-            <STInputBox title="Daaropvolgende broers/zussen" error-fields="reducedPrice" :error-box="errorBox">
-                <PriceInput v-model="extraFamilyPrice" placeholder="Gratis" />
-            </STInputBox>
-        </div>
-        <p v-if="enableFamilyPrice" class="style-description">
-            Het verlaagd tarief voor broers/zussen is enkel van toepassing voor broers/zussen die inschrijven voor dezelfde groep; OF een andere groep uit dezelfde categorie ALS een lid maar voor één groep in die categorie kan inschrijven. Voor dat laatste moet je in de categorie 'Een lid kan maar in één groep inschrijven' aanzetten.
-        </p>-->
     </div>
 </template>
 

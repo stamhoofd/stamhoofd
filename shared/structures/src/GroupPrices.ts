@@ -60,16 +60,6 @@ export class GroupPrices extends AutoEncoder {
         }
 
         return price.price
-        /*
-            let price = reduced && this.reducedPrice !== null ? this.reducedPrice : this.price
-            if (this.familyPrice && alreadyRegisteredCount == 1 && this.familyPrice < price) {
-                price = this.familyPrice
-            }
-            if (this.extraFamilyPrice && alreadyRegisteredCount >= 2 && this.extraFamilyPrice < price) {
-                price = this.extraFamilyPrice
-            }
-            return price
-        */
     }
 
     /** 
