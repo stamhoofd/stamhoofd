@@ -94,10 +94,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     get url() {
-        if (process.env.NODE_ENV == "production") {
-            return "https://stamhoofd.app/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
-        }
-        return "https://dashboard.stamhoofd.dev/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
+        return "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")+"/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
     }
 
     get canShare() {
@@ -109,11 +106,11 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
             title: "Uitnodiging voor Stamhoofd",
             text: "Registreer je binnen het uur via deze link.",
             url: this.url,
-        })
+        }).catch(console.error)
     }
 
     mounted() {
-        this.generateQRCode()
+        this.generateQRCode().catch(console.error)
     }
 
     async generateQRCode() {
