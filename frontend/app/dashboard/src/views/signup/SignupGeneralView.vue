@@ -120,6 +120,21 @@ import SignupAccountView from './SignupAccountView.vue';
         AddressInput,
         LoadingButton,
         Checkbox
+    },
+    metaInfo() {
+        return {
+            title: "Sluit jouw vereniging aan | Stamhoofd",
+            meta: [
+                {
+                    vmid: 'description',
+                    name: 'description',
+                    content: "Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.",
+                }
+            ],
+            link: [
+                { rel: "canonical", href: "https://"+window.location.hostname+"/aansluiten" }
+            ]
+        }
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {

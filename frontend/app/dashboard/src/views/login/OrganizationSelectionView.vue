@@ -8,9 +8,9 @@
             </template>
 
             <template slot="right">
-                <button class="button primary" @click="gotoSignup">
+                <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
                     Aansluiten
-                </button>
+                </a>
             </template>
         </STNavigationBar>
         <main class="limit-width">
@@ -43,10 +43,10 @@
                     <span>Mijn vereniging staat er niet tussen</span>
                 </button>
 
-                <button class="button text full" @click="gotoSignup">
+                <a href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
                     <span class="icon add" />
                     <span>Nieuwe vereniging aansluiten</span>
-                </button>
+                </a>
             </div>
         </main>
     </div>
@@ -91,6 +91,21 @@ const throttle = (func, limit) => {
         Spinner,
         STNavigationBar,
         Logo
+    },
+    metaInfo() {
+        return {
+            title: "Stamhoofd webapp | Beheer je vereniging",
+            meta: [
+                {
+                    vmid: 'description',
+                    name: 'description',
+                    content: "Via de Stamhoofd webapp kan je jouw vereniging beheren in je browser.",
+                }
+            ],
+            link: [
+                { rel: "canonical", href: "https://"+window.location.hostname }
+            ]
+        }
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin){
