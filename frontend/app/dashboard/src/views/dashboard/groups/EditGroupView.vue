@@ -214,7 +214,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hs" />
+                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hs" />
                     </div>
                 </h2>
 
@@ -232,7 +232,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hsSquare" />
+                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hsSquare" />
                     </div>
                 </h2>
 

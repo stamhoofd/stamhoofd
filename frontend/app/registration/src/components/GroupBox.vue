@@ -25,7 +25,6 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Group, WaitingListType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from "../classes/CheckoutManager";
@@ -41,9 +40,6 @@ import GroupTag from "./GroupTag.vue";
         LoadingView,
         Checkbox,
         GroupTag
-    },
-    filters: {
-        price: Formatter.price
     }
 })
 export default class GroupBox extends Mixins(NavigationMixin){
@@ -59,10 +55,6 @@ export default class GroupBox extends Mixins(NavigationMixin){
 
     get selectedCount() {
         return CheckoutManager.cart.items.filter(i => i.group.id === this.group.id).length
-    }
-
-    get price() {
-        return this.group.settings.getGroupPrices(new Date())?.price ?? 0
     }
 
     get preRegistrations() {
@@ -87,7 +79,6 @@ export default class GroupBox extends Mixins(NavigationMixin){
                 group: this.group
             })
         }).setDisplayStyle("popup"))
-        //this.show(new ComponentWithProperties(GroupView, { group: this.group }))
     }
 
 }

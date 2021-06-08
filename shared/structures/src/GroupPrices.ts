@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 export class GroupPrice extends AutoEncoder {
@@ -18,6 +18,12 @@ export class GroupPrices extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     startDate: Date | null = null
+
+    /**
+     * Whether the array count is per member of the same family (true) or only the same member (false)
+     */
+    @field({ decoder: BooleanDecoder, upgrade: () => true, version: 99 })
+    familyDiscount = true
 
     /**
      * The array contains prices: for first member, second member... If more members are present in a family, the last price is used

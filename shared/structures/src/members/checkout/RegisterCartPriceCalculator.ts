@@ -102,8 +102,12 @@ export class RegisterCartPriceCalculator {
                 }
             }
 
+            // todo: move those without discounts to the start and remove them from the combinations that need to get calculated. They always need to be added first because they don't give discount
+ 
+            const maxFamilyMembersDiscount = 3 // discount for third + more members
+
             // Order in all possible ways (where only the first X places matter)
-            const combinations = getPossibleCombinations(items, 2 - existingCount)
+            const combinations = getPossibleCombinations(items, maxFamilyMembersDiscount - 1 - existingCount)
 
             let minimumPrice: number | null = null
             let minimumCombination: RegisterItemWithPriceAndGroupPrices[] = []
