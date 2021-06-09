@@ -1,8 +1,5 @@
 <template>
     <div class="container">
-        <p v-if="familyText" class="info-box">
-            {{ familyText }}
-        </p>
         <div v-for="priceGroup in prices" :key="priceGroup.id" class="container">
             <hr>
             <h2 v-if="!priceGroup.startDate">
@@ -31,7 +28,7 @@
             <STList>
                 <STListItem v-for="(p, index) of priceGroup.prices" :key="index">
                     <div class="split-inputs">
-                        <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox" class="no-padding">
+                        <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(priceGroup, index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox" class="no-padding">
                             <PriceInput :value="p.price" placeholder="Gratis" @input="setPrice(priceGroup, index, $event)" />
 
                             <button v-if="index > 0 && index == priceGroup.prices.length - 1" slot="right" class="button text" @click="removeFamilyPrice(priceGroup, index)">
@@ -48,14 +45,49 @@
                 </STListItem>
             </STList>
 
+            <button v-if="!priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1" class="button text full" @click="addFamilyPrice(priceGroup)">
+                <span class="icon add" />
+                <span>Korting voor extra gezinslid</span>
+            </button>
+
+            <button v-if="priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1" class="button text full" @click="addMultipleDiscount(priceGroup)">
+                <span class="icon add" />
+                <span>
+                    Korting voor meerdere inschrijvingen**
+                </span>
+            </button>
+
+
             <p class="style-description-small">
                 * Verlaagd tarief voor leden met financiële moeilijkheden. Laat leeg indien je die niet wilt gebruiken.
             </p>
 
-            <button class="button text" @click="addFamilyPrice(priceGroup)">
-                <span class="icon add" />
-                <span>Andere prijs voor extra gezinslid</span>
-            </button>
+            <template v-if="priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1">
+                <p v-if="category" class="style-description-small">
+                    ** Van hetzelfde lid, in de categorie '{{ category.settings.name }}'
+                </p>
+                <p v-else class="style-description-small">
+                    ** In hetzelfde lid in dezelfde categorie
+                </p>
+            </template>
+            
+            <STInputBox v-if="!priceGroup.sameMemberOnlyDiscount && priceGroup.prices.length > 1" title="Aantal gezinsleden tellen als..." error-fields="genderType" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio :model-value="getOnlySameGroup(priceGroup)" :value="true" @change="setOnlySameGroup(priceGroup, $event)">
+                        Gezinsleden die inschrijven voor deze inschrijvingsgroep
+                        <template v-if="group">
+                            ({{ group.settings.name }})
+                        </template>
+                    </Radio>
+
+                    <Radio :model-value="getOnlySameGroup(priceGroup)" :value="false" @change="setOnlySameGroup(priceGroup, $event)">
+                        Gezinsleden die inschrijven voor gelijk welke inschrijvingsgroep in de bovenliggende categorie
+                        <template v-if="category">
+                            ({{ category.settings.name }})
+                        </template>
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
         </div>
 
         <hr>
@@ -71,8 +103,8 @@
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupPrice, GroupPrices } from "@stamhoofd/structures"
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio,RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
+import { Group, GroupCategory, GroupPrice, GroupPrices, Organization } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -90,7 +122,9 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         Checkbox,
         TimeInput,
         STList,
-        STListItem
+        STListItem,
+        RadioGroup,
+        Radio
     }
 })
 export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
@@ -109,6 +143,9 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     group!: Group | null
 
+    @Prop({ default: null })
+    patchedOrganization!: Organization | null
+
     formatPrice(price: number) {
         return Formatter.price(price)
     }
@@ -121,7 +158,10 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         return Formatter.dateTime(date)
     }
 
-    ordinalNumber(num: number, total: number) {
+    ordinalNumber(price: GroupPrices, num: number, total: number) {
+        if (price.sameMemberOnlyDiscount) {
+            return Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(num))+" inschrijving"+(num === total ? " en daarna" : "")+"**"
+        }
         return Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(num))+" gezinslid"+(num === total ? " en daarna" : "")
     }
 
@@ -171,56 +211,43 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         this.addPatch(patch)
     }
 
-    get familyText() {
-        let ok = false
-        for (const group of this.prices) {
-            if (group.prices.length <= 1) {
-                continue
-            }
-            ok = true
-            break
+    get category() {
+        if (!this.group) {
+            return null
         }
-        if (!ok) {
-            return ""
-        }
-
-        return this.generateFamilyWarnText()
+        const parents = this.group.getParentCategories((this.patchedOrganization ?? OrganizationManager.organization).meta.categories, false)
+        return parents[0] ?? null
     }
 
-    generateFamilyWarnText() {
-        if (this.group) {
-            const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
-            let maximumRegistrations: GroupCategory | null = null
-            let firstCategory: GroupCategory | null = null
+    getOnlySameGroup(group: GroupPrices) {
+        return group.onlySameGroup
+    }
 
-            for (const parent of parents) {
-                if (!firstCategory) {
-                    firstCategory = parent
-                }
-                if (parent.settings.maximumRegistrations === 1) {
-                    maximumRegistrations = parent
-                    break
-                }
-            }
+    setOnlySameGroup(group: GroupPrices, onlySameGroup: boolean) {
+        const gp = GroupPrices.patch({ id: group.id })
+        gp.onlySameGroup = onlySameGroup
 
-            return "Aantal gezinsleden = het aantal gezinsleden die inschrijven voor "
-            + (maximumRegistrations ?
-                "een groep in de categorie "+maximumRegistrations.settings.name+"." : 
-                this.group.settings.name+". Je kan ook instellen dat het aantal gezinsleden wordt geteld in de categorie "+(firstCategory?.settings.name ?? "")+", en niet enkel in de groep "+this.group.settings.name+". Op die manier krijgen gezinsleden korting die in verschillende groepen inschrijven. Dat doe je door "+(firstCategory?.settings.name ?? "")+" te bewerken en aan te duiden dat een lid voor maar één groep in die categorie kan inschrijven."
-            )
-        }
-        return "Het verlaagd tarief voor gezinsleden is enkel van toepassing voor gezinsleden die inschrijven voor dezelfde groep; of bij een andere groep uit dezelfde categorie ALS een lid maar voor één groep in die categorie kan inschrijven. Voor dat laatste moet je in de categorie 'Een lid kan maar in één groep inschrijven' aanzetten."
+        const patch = this.getPricesPatch()
+        patch.addPatch(gp)
+        this.addPatch(patch)
+    }
+
+    addMultipleDiscount(group: GroupPrices) {
+        const gp = GroupPrices.patch({ id: group.id })
+        gp.prices = [...group.prices, GroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
+        gp.sameMemberOnlyDiscount = true
+        gp.onlySameGroup = false // other combination is not possible
+
+        const patch = this.getPricesPatch()
+        patch.addPatch(gp)
+        this.addPatch(patch)
     }
 
     addFamilyPrice(group: GroupPrices) {
-        if (group.prices.length <= 1) {
-            new CenteredMessage(
-                "Opgelet", 
-                this.generateFamilyWarnText()).addCloseButton().show()
-        }
-
         const gp = GroupPrices.patch({ id: group.id })
         gp.prices = [...group.prices, GroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
+        gp.sameMemberOnlyDiscount = false
+
         const patch = this.getPricesPatch()
         patch.addPatch(gp)
         this.addPatch(patch)

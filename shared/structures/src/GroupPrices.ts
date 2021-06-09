@@ -22,11 +22,17 @@ export class GroupPrices extends AutoEncoder {
     /**
      * Whether the array count is per member of the same family (true) or only the same member (false)
      */
-    @field({ decoder: BooleanDecoder, upgrade: () => true, version: 99 })
-    familyDiscount = true
+    @field({ decoder: BooleanDecoder, upgrade: () => false, version: 99 })
+    sameMemberOnlyDiscount = false
 
     /**
-     * The array contains prices: for first member, second member... If more members are present in a family, the last price is used
+     * Count members in same category or only for the same group?
+     */
+    @field({ decoder: BooleanDecoder, upgrade: () => false, version: 99 })
+    onlySameGroup = false
+    
+    /**
+     * The array contains prices: for first member, second member... If more members are present in a family (or member itself), the last price is used
      */
     @field({ decoder: new ArrayDecoder(GroupPrice), version: 98, upgrade: function(this: GroupPrices) {
         const arr: GroupPrice[] = [

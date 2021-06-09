@@ -244,7 +244,7 @@
             </template>
             <template v-if="tab == 'payments'">
                 <STErrorsDefault :error-box="errorBox" />
-                <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" @patch="addPricesPatch" />
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" :patched-organization="patchedOrganization" @patch="addPricesPatch" />
             </template>
 
             <template v-if="tab == 'permissions'">

@@ -1665,10 +1665,10 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
-"@simonbackx/simple-database@^1.14.2":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.14.2.tgz#6fed6b40b4b1ab979aa172c48fabda0874e61d27"
-  integrity sha512-76V049Qkl03ovESnhz98E1PLqxPXBZo7RDhV1wOAialSzTT1lq06Ktq1ChPyunvjVqR7sGaUM6b3OYlC7d1OPg==
+"@simonbackx/simple-database@^1.15.1":
+  version "1.15.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.15.1.tgz#a40665bf26b28ea909f602554390a4eca0040721"
+  integrity sha512-7+JIHqTrALIBu+nZFGE7LpTYJpqrCOaU9jZ4H4TIB8FBg+7Vz5AY1ExMYYwAW91OhO/31ttj3EjWVcALE2S7+A==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"

@@ -361,7 +361,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 endDate: this.organization.meta.defaultEndDate,
                 registrationStartDate: this.organization.meta.defaultStartDate,
                 registrationEndDate: this.organization.meta.defaultEndDate,
-                prices: this.organization.meta.defaultPrices,
+                prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
             privateSettings: GroupPrivateSettings.create({})
