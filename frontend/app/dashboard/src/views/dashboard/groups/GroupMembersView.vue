@@ -169,7 +169,7 @@
             </div>
 
             <button v-if="canEnd" class="button text gray" @click="goEnd">
-                <span class="icon sync" />
+                <span class="icon redo" />
                 <span>Begin nieuwe inschrijvingsperiode</span>
             </button>
 
@@ -415,11 +415,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canEnd() {
-        return this.group !== null && this.members.length > 0
+        return this.group !== null && this.members.length > 0 && this.hasFull
     }
 
     get canUndoEnd() {
-        return this.group !== null && this.members.length == 0
+        return this.group !== null && this.members.length == 0 && this.hasFull
     }
 
     goEnd() {

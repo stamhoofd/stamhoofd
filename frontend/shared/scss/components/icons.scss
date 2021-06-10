@@ -276,6 +276,10 @@
     &.undo:after {
         font-icon: url(@stamhoofd/assets/images/icons/undo.svg);
     }
+
+    &.redo:after {
+        font-icon: url(@stamhoofd/assets/images/icons/redo.svg);
+    }
 }
 
 .android-icons {
