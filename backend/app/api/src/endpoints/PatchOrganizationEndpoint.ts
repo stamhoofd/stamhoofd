@@ -292,6 +292,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     })
                 }
             }
+
+            if (struct.cycle !== undefined) {
+                model.cycle = struct.cycle
+            }
             
             await model.updateOccupancy()
             await model.save();

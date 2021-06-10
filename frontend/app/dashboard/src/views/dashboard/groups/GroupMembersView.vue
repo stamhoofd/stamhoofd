@@ -172,6 +172,11 @@
                 <span class="icon sync" />
                 <span>Begin nieuwe inschrijvingsperiode</span>
             </button>
+
+            <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
+                <span class="icon undo" />
+                <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
+            </button>
         </main>
 
         <STToolbar>
@@ -410,7 +415,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canEnd() {
-        return this.group !== null
+        return this.group !== null && this.members.length > 0
+    }
+
+    get canUndoEnd() {
+        return this.group !== null && this.members.length == 0
     }
 
     goEnd() {
@@ -420,6 +429,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
         const ids = parents.flatMap(p => p.groupIds)
         this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids }).setDisplayStyle("popup"))
+    }
+
+    goUndoEnd() {
+        if (!this.group) {
+            return
+        }
+        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+        const ids = parents.flatMap(p => p.groupIds)
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids, undo: true }).setDisplayStyle("popup"))
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {

@@ -272,6 +272,10 @@
     &.qr-code:after {
         font-icon: url(@stamhoofd/assets/images/icons/qr-code.svg);
     }
+
+    &.undo:after {
+        font-icon: url(@stamhoofd/assets/images/icons/undo.svg);
+    }
 }
 
 .android-icons {

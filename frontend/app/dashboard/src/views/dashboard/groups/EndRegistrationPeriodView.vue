@@ -8,19 +8,31 @@
         </STNavigationBar>
 
         <main>
-            <h1>
+            <h1 v-if="!undo">
                 Inschrijvingsperiode beïndigen en een nieuwe periode starten
             </h1>
-            
-            <p>Stamhoofd werkt met inschrijvingsperiodes: aan het einde van jouw werkjaar, semester, kwartaal, week... kan je jouw inschrijvingsperiode beïndigen en een nieuwe starten. Je kiest zelf in welke intervallen je werkt, en bij elke inschrijvingsgroep kan je onafhankelijk van elkaar naar een nieuwe inschrijvingsperiode gaan. Alle leden die op dat moment zijn ingeschreven verhuizen dan naar de vorige inschrijvingsperiode en zijn in principe niet langer ingeschreven. Je kan dan wel nog steeds aan alle gegevens van die leden. Je kan leden dus herinneren om zeker in te schrijven voor de nieuwe inschrijvingsperiode.</p>
+            <h1 v-else>
+                Nieuwe inschrijvingsperiode ongedaan maken
+            </h1>
 
-            <p class="style-description">
-                Het is aan te raden om leden niet gewoon uit te schrijven of te verwijderen, want op die manier kan je niet langer gebruik maken van handige functies in Stamhoofd. Zo kan bijvoorbeeld inschrijven beperkten tot leden die de vorige inschrijvingsperiode al ingeschreven waren, of kan je met voorinschrijvingen werken: leden die de vorige inschrijvingsperiode al waren ingeschreven kunnen al sneller beginnen met inschrijven.
-            </p>
+            <template v-if="!undo">
+                <p>Stamhoofd werkt met inschrijvingsperiodes: aan het einde van jouw werkjaar, semester, kwartaal, week... kan je jouw inschrijvingsperiode beïndigen en een nieuwe starten. Je kiest zelf in welke intervallen je werkt, en bij elke inschrijvingsgroep kan je onafhankelijk van elkaar naar een nieuwe inschrijvingsperiode gaan. Alle leden die op dat moment zijn ingeschreven verhuizen dan naar de vorige inschrijvingsperiode en zijn in principe niet langer ingeschreven. Je kan dan wel nog steeds aan alle gegevens van die leden. Je kan leden dus herinneren om zeker in te schrijven voor de nieuwe inschrijvingsperiode.</p>
 
-            <p class="info-box">
-                Kies hieronder voor welke inschrijvingsgroepen je een nieuwe inschrijvingsperiode wilt starten.
-            </p>
+                <p class="style-description">
+                    Het is aan te raden om leden niet gewoon uit te schrijven of te verwijderen, want op die manier kan je niet langer gebruik maken van handige functies in Stamhoofd. Zo kan bijvoorbeeld inschrijven beperkten tot leden die de vorige inschrijvingsperiode al ingeschreven waren, of kan je met voorinschrijvingen werken: leden die de vorige inschrijvingsperiode al waren ingeschreven kunnen al sneller beginnen met inschrijven.
+                </p>
+
+                <p class="info-box">
+                    Kies hieronder voor welke inschrijvingsgroepen je een nieuwe inschrijvingsperiode wilt starten.
+                </p>
+            </template>
+            <template v-else>
+                <p>Er werd een nieuwe inschrijvingsperiode gestart voor bepaalde inschrijvingsgroepen. Aangezien er nog geen leden zijn ingeschreven in de nieuwe periode, kan je de nieuwe periode nog ongedaan maken en terug schakelen naar de vorige inschrijvingsperiode.</p>
+                
+                <p class="info-box">
+                    Kies hieronder voor welke inschrijvingsgroepen je terug wilt naar de vorige inschrijvingsperiode
+                </p>
+            </template>
 
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                 <hr>
@@ -42,8 +54,11 @@
                     Annuleren
                 </button>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
+                    <button v-if="!undo" class="button primary" @click="save">
                         Nieuwe inschrijvingsperiode
+                    </button>
+                    <button v-else class="button primary" @click="save">
+                        Vorige inschrijvingsperiode
                     </button>
                 </LoadingButton>
             </template>
@@ -54,9 +69,10 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Group, Organization, OrganizationType } from "@stamhoofd/structures"
+import { Group, GroupSettings, Organization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
@@ -80,9 +96,15 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     initialGroupIds!: string[]
 
+    @Prop({ required: false, default: false })
+    undo!: boolean
+
     groupIds = this.initialGroupIds.slice()
 
     get categoryTree() {
+        if (this.undo) {
+            return OrganizationManager.organization.getCategoryTreeWithDepth(1).filter(g => g.cycle > 0)
+        }
         return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true, true)
     }
 
@@ -123,21 +145,49 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
                 id: OrganizationManager.organization.id
             })
 
+            const now = new Date()
+            const nowFuture = new Date()
+            nowFuture.setTime(nowFuture.getTime() + 3 * 1000 * 60 * 60 * 24 * 30)
+
             for (const id of this.groupIds) {
                 const group = OrganizationManager.organization.groups.find(g => g.id === id)
                 if (!group) {
                     throw new Error("Een groep bestaat niet meer")
                 }
-                p.groups.addPatch(Group.patch({
+
+                const settings = GroupSettings.patch({})
+
+                const pp = Group.patch({
                     id,
-                    cycle: group.cycle + 1
-                }))
+                    cycle: !this.undo ? (group.cycle + 1) : (group.cycle - 1),
+                    settings
+                })
+
+                if (!this.undo && group.settings.registrationStartDate < now && group.settings.registrationEndDate < nowFuture) {
+                    if (group.settings.endDate.getTime() - group.settings.startDate.getTime() > 1000 * 60 * 60 * 24 * 30 * 6) {
+                        // Move a year in the future
+                        settings.registrationEndDate = new Date(group.settings.registrationEndDate)
+                        settings.registrationStartDate = new Date(group.settings.registrationStartDate)
+
+                        settings.registrationEndDate.setFullYear(settings.registrationEndDate.getFullYear() + 1)
+                        settings.registrationStartDate.setFullYear(settings.registrationStartDate.getFullYear() + 1)
+
+                        settings.startDate = new Date(group.settings.startDate)
+                        settings.endDate = new Date(group.settings.endDate)
+
+                        settings.endDate.setFullYear(settings.endDate.getFullYear() + 1)
+                        settings.startDate.setFullYear(settings.startDate.getFullYear() + 1)
+                    }
+                }
+                p.groups.addPatch(pp)
             }
             
             await OrganizationManager.patch(p)
             this.pop({ force: true })
 
-            new Toast("De nieuwe inschrijvingsperiode is gestart. Vergeet niet om ook de inschrijvingsdatums aan te passen.").show()
+            MemberManager.callListeners("changedGroup", null)
+
+            new Toast("Vergeet niet om ook de inschrijvingsdatums aan te passen.", "warning yellow").show()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
