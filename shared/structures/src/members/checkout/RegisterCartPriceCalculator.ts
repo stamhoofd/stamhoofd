@@ -77,11 +77,7 @@ export class RegisterCartPriceCalculator {
             }
 
             if (!item.waitingList) {
-                const groupPrices = group.settings.getGroupPrices(now)
-                if (!groupPrices) {
-                    throw new Error("We konden geen passende prijs vinden voor deze inschrijving. Contacteer ons zodat we dit probleem kunnen recht zetten")
-                }
-
+                const groupPrices = group.settings.getGroupPrices(now) ?? GroupPrices.create({})
                 const category = this.getParentCategory(group, categories)
 
                 if (!category) {

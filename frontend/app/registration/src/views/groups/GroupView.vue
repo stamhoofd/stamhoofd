@@ -268,6 +268,23 @@ export default class GroupView extends Mixins(NavigationMixin){
             }
         }
 
+        if (this.group.settings.preventPreviousGroupIds.length > 0) {
+            const prefix = "Iedereen die de vorige keer niet ingeschreven was bij "+Formatter.joinLast(this.group.settings.preventPreviousGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            if (!who) {
+                who += prefix
+            } else {
+                who = prefix + "\n" + who
+            }
+        }
+
+        if (this.group.settings.requirePreviousGroupIds.length > 0) {
+            const prefix = "Iedereen die de vorige keer ingeschreven was bij "+Formatter.joinLast(this.group.settings.requirePreviousGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            if (!who) {
+                who += prefix
+            } else {
+                who = prefix + "\n" + who
+            }
+        }
 
         if (!who) {
             return "Iedereen kan inschrijven"

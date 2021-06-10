@@ -146,6 +146,16 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 83 })
     requireGroupIds: string[] = []
 
+    /**
+     * Require that the member is already registered for one of these groups before allowing to register for this group.
+     * If it is empty, then it is not enforced
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 100 })
+    requirePreviousGroupIds: string[] = []
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
+    preventPreviousGroupIds: string[] = []
+
     getGroupPrices(date: Date) {
         let foundPrice: GroupPrices | undefined = undefined
 

@@ -154,6 +154,20 @@ export class MemberWithRegistrations extends Member {
             }
         }
 
+        // Check if registrations are limited
+        if (group.settings.requirePreviousGroupIds.length > 0) {
+            if (!this.registrations.find(r => group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+                return "Niet toegelaten"
+            }
+        }
+
+        // Check if registrations are limited
+        if (group.settings.preventPreviousGroupIds.length > 0) {
+            if (this.registrations.find(r => group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+                return "Niet toegelaten"
+            }
+        }
+
         // Already registered
         if (this.groups.find(g => g.id === group.id)) {
             return "Al ingeschreven"

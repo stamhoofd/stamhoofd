@@ -3,7 +3,7 @@
 import { ArrayDecoder,ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import {  EncryptedMemberWithRegistrations, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures'
+import {  EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -342,6 +342,48 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         this.callListeners("deleted", null)
+    }
+
+    async deleteDataExceptContacts(members: MemberWithRegistrations[]) {
+        for (const member of members) {
+            member.details.records = []
+            member.details.reviewTimes.removeReview("records")
+
+            member.details.emergencyContacts = []
+            member.details.doctor = null
+            member.details.reviewTimes.removeReview("emergencyContacts")
+
+            if (!member.details.age || member.details.age >= 18) {
+                member.details.parents = []
+                member.details.reviewTimes.removeReview("parents")
+            }
+        }
+        await this.patchMembersDetails(members)
+    }
+
+    async deleteData(members: MemberWithRegistrations[]) {
+        for (const member of members) {
+            member.details.address = null
+            member.details.gender = Gender.Other
+
+            member.details.phone = null
+            member.details.email = null
+            member.details.birthDay = null
+            member.details.address = null
+
+            member.details.reviewTimes.removeReview("details")
+
+            member.details.records = []
+            member.details.reviewTimes.removeReview("records")
+
+            member.details.emergencyContacts = []
+            member.details.doctor = null
+            member.details.reviewTimes.removeReview("emergencyContacts")
+
+            member.details.parents = []
+            member.details.reviewTimes.removeReview("parents")
+        }
+        await this.patchMembersDetails(members)
     }
 
     async moveToWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {

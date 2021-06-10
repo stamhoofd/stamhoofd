@@ -167,6 +167,11 @@
                     <span class="icon arrow-right" />
                 </button>
             </div>
+
+            <button v-if="canEnd" class="button text gray" @click="goEnd">
+                <span class="icon sync" />
+                <span>Begin nieuwe inschrijvingsperiode</span>
+            </button>
         </main>
 
         <STToolbar>
@@ -231,6 +236,7 @@ import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditGroupView from "./EditGroupView.vue";
+import EndRegistrationPeriodView from "./EndRegistrationPeriodView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 
 class SelectableMember {
@@ -401,6 +407,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     goBack() {
         this.cycleOffset++
         this.reload()
+    }
+
+    get canEnd() {
+        return this.group !== null
+    }
+
+    goEnd() {
+        if (!this.group) {
+            return
+        }
+        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+        const ids = parents.flatMap(p => p.groupIds)
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids }).setDisplayStyle("popup"))
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {

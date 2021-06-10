@@ -206,6 +206,70 @@
                     </p>
                 </template>
 
+                <template v-if="useActivities || patchedGroup.settings.requirePreviousGroupIds.length > 0">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verplicht vorige inschrijvingsperiode ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.requirePreviousGroupIds.length == 0" class="button text" @click="editRequirePreviousGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editRequirePreviousGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Leden kunnen enkel zelf inschrijven voor deze inschrijvingsgroep als ze de vorige inschrijvingsperiode ingeschreven waren voor één van de volgende inschrijvingsgroepen.</p>
+
+                    <STList v-if="patchedGroup.settings.requirePreviousGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.requirePreviousGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removeRequirePreviousGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen verplichte vorige inschrijvingen noodzakelijk
+                    </p>
+                </template>
+
+                <template v-if="useActivities || patchedGroup.settings.preventPreviousGroupIds.length > 0">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verhinder inschrijven als vorige keer ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.preventPreviousGroupIds.length == 0" class="button text" @click="editPreventPreviousGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editPreventPreviousGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Leden kunnen niet inschrijven voor deze inschrijvingsgroep als ze de vorige inschrijvingsperiode ingeschreven waren voor één van de volgende inschrijvingsgroepen.</p>
+
+                    <STList v-if="patchedGroup.settings.preventPreviousGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.preventPreviousGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removePreventPreviousGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen vorige inschrijvingsgroepen die uitgesloten worden
+                    </p>
+                </template>
+
                 <hr>
                 <h2 class="style-with-button">
                     <div>Omslagfoto</div>
@@ -431,6 +495,62 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     removeRequireGroupId(id: string) {
         const diff = GroupSettings.patch({})
         diff.requireGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
+    }
+
+    editRequirePreviousGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.requirePreviousGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.requirePreviousGroupIds.includes(id)) {
+                        diff.requirePreviousGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.requirePreviousGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.requirePreviousGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removeRequirePreviousGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.requirePreviousGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
+    }
+
+    editPreventPreviousGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.preventPreviousGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.preventPreviousGroupIds.includes(id)) {
+                        diff.preventPreviousGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.preventPreviousGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.preventPreviousGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removePreventPreviousGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.preventPreviousGroupIds.addDelete(id)
         this.addSettingsPatch(diff)
     }
 

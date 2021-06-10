@@ -48,6 +48,30 @@ export class RegisterCartValidator {
             }
         }
 
+        // Check if registrations are limited
+        if (group.settings.preventPreviousGroupIds.length > 0) {
+            if (member.registrations.find(r => group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Niet toegelaten",
+                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer niet was ingeschreven voor "+Formatter.joinLast(group.settings.preventPreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")
+                }
+            }
+        }
+
+        // Check if registrations are limited
+        if (group.settings.requirePreviousGroupIds.length > 0) {
+            if (!member.registrations.find(r => group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Niet toegelaten",
+                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer was ingeschreven voor "+Formatter.joinLast(group.settings.requirePreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")
+                }
+            }
+        }
+
         // Check all categories maximum limits
         if (this.hasReachedCategoryMaximum(member, group, groups, categories, cart)) {
             // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
