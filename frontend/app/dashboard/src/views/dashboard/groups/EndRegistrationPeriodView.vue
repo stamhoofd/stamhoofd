@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Inschrijvingsperiode beïndigen">
+        <STNavigationBar title="Inschrijvingsperiode beëindigen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
                 <button v-if="!canPop" class="button icon close gray" @click="pop" />
@@ -9,17 +9,17 @@
 
         <main>
             <h1 v-if="!undo">
-                Inschrijvingsperiode beïndigen en een nieuwe periode starten
+                Inschrijvingsperiode beëindigen en een nieuwe periode starten
             </h1>
             <h1 v-else>
                 Nieuwe inschrijvingsperiode ongedaan maken
             </h1>
 
             <template v-if="!undo">
-                <p>Stamhoofd werkt met inschrijvingsperiodes: aan het einde van jouw werkjaar, semester, kwartaal, week... kan je jouw inschrijvingsperiode beïndigen en een nieuwe starten. Je kiest zelf in welke intervallen je werkt, en bij elke inschrijvingsgroep kan je onafhankelijk van elkaar naar een nieuwe inschrijvingsperiode gaan. Alle leden die op dat moment zijn ingeschreven verhuizen dan naar de vorige inschrijvingsperiode en zijn in principe niet langer ingeschreven. Je kan dan wel nog steeds aan alle gegevens van die leden. Je kan leden dus herinneren om zeker in te schrijven voor de nieuwe inschrijvingsperiode.</p>
+                <p>Stamhoofd werkt met inschrijvingsperiodes: aan het einde van jouw werkjaar, semester, kwartaal, week... kan je jouw inschrijvingsperiode beëindigen en een nieuwe starten. Je kiest zelf in welke intervallen je werkt, en bij elke inschrijvingsgroep kan je onafhankelijk van elkaar naar een nieuwe inschrijvingsperiode gaan. Alle leden die op dat moment zijn ingeschreven verhuizen dan naar de vorige inschrijvingsperiode en zijn in principe niet langer ingeschreven. Je kan dan wel nog steeds aan alle gegevens van die leden. Je kan leden dus herinneren om zeker in te schrijven voor de nieuwe inschrijvingsperiode.</p>
 
                 <p class="style-description">
-                    Het is aan te raden om leden niet gewoon uit te schrijven of te verwijderen, want op die manier kan je niet langer gebruik maken van handige functies in Stamhoofd. Zo kan je bijvoorbeeld inschrijvingen per groep beperkten tot leden die de vorige inschrijvingsperiode al ingeschreven waren, of kan je met voorinschrijvingen werken: leden die de vorige inschrijvingsperiode al waren ingeschreven kunnen al sneller beginnen met inschrijven. Of je kan voorrang geven in wachtlijsten aan bestaande leden. Om dat te laten werken moeten die leden dus ook nog in het systeem zitten bij de vorige inschrijvingsperiode.
+                    Het is aan te raden om leden niet gewoon uit te schrijven of te verwijderen, want op die manier kan je niet langer gebruik maken van handige functies in Stamhoofd. Zo kan je bijvoorbeeld inschrijvingen per groep beperken tot leden die de vorige inschrijvingsperiode al ingeschreven waren, of kan je met voorinschrijvingen werken: leden die de vorige inschrijvingsperiode al waren ingeschreven kunnen al sneller beginnen met inschrijven. Je kan ook voorrang geven aan bestaande leden in wachtlijsten. Om dat te laten werken moeten die leden dus ook nog in het systeem zitten bij de vorige inschrijvingsperiode.
                 </p>
 
                 <p class="info-box">
