@@ -352,11 +352,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.group) {
             return false
         }
-        return this.group.cycle >= this.cycleOffset // always allow to go to -1
+        return this.group.cycle >= this.cycleOffset && !this.loading // always allow to go to -1
     }
 
     get canGoNext() {
-        return this.cycleOffset > 0
+        return this.cycleOffset > 0 && !this.loading
     }
 
     get hasFull(): boolean {
@@ -415,11 +415,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canEnd() {
-        return this.group !== null && this.members.length > 0 && this.hasFull
+        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length > 0 && this.hasFull
     }
 
     get canUndoEnd() {
-        return this.group !== null && this.members.length == 0 && this.hasFull
+        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull
     }
 
     goEnd() {
