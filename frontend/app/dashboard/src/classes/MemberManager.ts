@@ -346,6 +346,10 @@ export class MemberManagerStatic extends MemberManagerBase {
 
     async deleteDataExceptContacts(members: MemberWithRegistrations[]) {
         for (const member of members) {
+            member.details.birthDay = null
+            member.details.gender = Gender.Other
+            member.details.reviewTimes.removeReview("details")
+
             member.details.records = []
             member.details.reviewTimes.removeReview("records")
 
