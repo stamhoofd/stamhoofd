@@ -146,7 +146,7 @@
 
             <template v-if="!loading && members.length == 0">
                 <p v-if="cycleOffset === 0" class="info-box">
-                    Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.
+                    Er zijn nog geen leden ingeschreven in deze inschrijvingsgroep.
                 </p>
 
                 <p v-else class="info-box">
