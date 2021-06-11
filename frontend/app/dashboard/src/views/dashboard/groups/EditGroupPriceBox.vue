@@ -50,7 +50,7 @@
                 <span>Korting voor extra gezinslid</span>
             </button>
 
-            <button v-if="priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1" class="button text full" @click="addMultipleDiscount(priceGroup)">
+            <button v-if="(priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1) && canRegisterMultipleGroups" class="button text full" @click="addMultipleDiscount(priceGroup)">
                 <span class="icon add" />
                 <span>
                     Korting voor meerdere inschrijvingen**
@@ -62,7 +62,7 @@
                 * Verlaagd tarief voor leden met financiële moeilijkheden. Laat leeg indien je die niet wilt gebruiken.
             </p>
 
-            <template v-if="priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1">
+            <template v-if="(priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1) && canRegisterMultipleGroups">
                 <p v-if="category" class="style-description-small">
                     ** Van hetzelfde lid, in de categorie '{{ category.settings.name }}'
                 </p>
@@ -145,6 +145,19 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
     @Prop({ default: null })
     patchedOrganization!: Organization | null
+
+    get canRegisterMultipleGroups() {
+        if (!this.group) {
+            return true
+        }
+        const parents = this.group.getParentCategories((this.patchedOrganization ?? OrganizationManager.organization).meta.categories, false)
+        for (const parent of parents) {
+            if (parent.settings.maximumRegistrations !== 1) {
+                return true
+            }
+        }
+        return false
+    }
 
     formatPrice(price: number) {
         return Formatter.price(price)
