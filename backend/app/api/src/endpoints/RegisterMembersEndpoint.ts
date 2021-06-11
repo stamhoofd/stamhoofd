@@ -116,7 +116,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!group) {
                 throw new SimpleError({
                     code: "invalid_member",
-                    message: "De leeftijdsgroep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
+                    message: "De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
                 })
             }
 
