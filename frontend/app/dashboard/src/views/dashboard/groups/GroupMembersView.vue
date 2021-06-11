@@ -419,7 +419,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canUndoEnd() {
-        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull
+        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull && this.group.cycle > 0
     }
 
     goEnd() {
