@@ -13,6 +13,10 @@
                     </button>
 
                     <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
+
+                    <button class="button text" @click="duplicateGroup">
+                        <span class="icon copy" />
+                    </button>
                     
                     <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                         <span class="icon add" />
@@ -43,6 +47,10 @@
                 </button>
 
                 <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
+
+                <button class="button text" @click="duplicateGroup">
+                    <span class="icon copy" />
+                </button>
 
                 <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                     <span class="icon add" />
@@ -207,7 +215,20 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration, WaitingListType } from '@stamhoofd/structures';
+import {
+  EncryptedMemberWithRegistrationsPatch,
+  getPermissionLevelNumber,
+  Group,
+  GroupCategory,
+  GroupCategoryTree, GroupPrivateSettings,
+  GroupSettings,
+  Member,
+  MemberWithRegistrations,
+  Organization, OrganizationMetaData,
+  PermissionLevel,
+  Registration,
+  WaitingListType
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -521,6 +542,44 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             })
         }).setDisplayStyle("popup"))
+    }
+
+    duplicateGroup() {
+      if (!this.group && !this.category && this.group) {
+        return;
+      }
+
+      const newGroup = Group.create({
+        settings: GroupSettings.create({...this.group?.settings}),
+        privateSettings: GroupPrivateSettings.create({})
+      })
+      newGroup.settings.name = newGroup.settings.name + " Kopie"
+      const meta = OrganizationMetaData.patch({})
+
+      console.log(this.category);
+
+      const me = GroupCategory.patch({id: this.category?.id})
+      me.groupIds.addPut(newGroup.id)
+      meta.categories.addPatch(me)
+
+      const p = Organization.patch({
+        id: OrganizationManager.organization.id,
+        meta
+      })
+
+      p.groups.addPut(newGroup)
+
+      this.present(new ComponentWithProperties(EditGroupView, {
+        group: newGroup,
+        organization: OrganizationManager.organization.patch(p),
+        saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+          await OrganizationManager.patch(p.patch(patch))
+          console.log("saved")
+          this.show(new ComponentWithProperties(GroupMembersView, {
+            group: newGroup
+          }))
+        }
+      }).setDisplayStyle("popup"))
     }
 
     modifyGroup() {

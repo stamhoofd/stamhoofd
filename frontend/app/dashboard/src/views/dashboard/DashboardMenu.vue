@@ -45,7 +45,7 @@
                         :key="group.id"
                         class="menu-button button"
                         :class="{ selected: currentlySelected == 'group-'+group.id }"
-                        @click="openGroup(group)"
+                        @click="openGroup(category,group)"
                     >
                         <span>{{ group.settings.name }}</span>
                     </button>
@@ -125,7 +125,16 @@ import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Logo, Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import {
+  Category,
+  Group,
+  GroupCategory,
+  GroupCategoryTree,
+  OrganizationType,
+  Permissions,
+  UmbrellaOrganization,
+  WebshopPreview
+} from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -225,7 +234,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             for (const group of this.organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(group, false)
+                    this.openGroup(this.organization.categoryTree,group, false)
                     didSet = true
                     break;
                 }
@@ -351,9 +360,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
     }
 
-    openGroup(group: Group, animated = true) {
+    openGroup(category: GroupCategoryTree, group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group, category }) }).setAnimated(animated));
     }
 
     manageKeys(animated = true) {

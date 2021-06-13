@@ -160,7 +160,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     openGroup(group: Group) {
         this.show(new ComponentWithProperties(GroupMembersView, {
-            group
+            group,
+            category: this.category
         }))
     }
 
