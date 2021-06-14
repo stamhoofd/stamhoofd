@@ -60,6 +60,7 @@
         "@types/jest": "^26.0.20",
         "@typescript-eslint/eslint-plugin": "^4.23",
         "@typescript-eslint/parser": "^4.23",
+        "@vue/preload-webpack-plugin": "^2.0.0",
         "autoprefixer": "^10.1.0",
         "babel-loader": "^8.2.2",
         "circular-dependency-plugin": "^5.2.2",

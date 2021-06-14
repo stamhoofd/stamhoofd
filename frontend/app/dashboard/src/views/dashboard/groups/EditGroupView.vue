@@ -206,6 +206,70 @@
                     </p>
                 </template>
 
+                <template v-if="useActivities || patchedGroup.settings.requirePreviousGroupIds.length > 0">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verplicht vorige inschrijvingsperiode ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.requirePreviousGroupIds.length == 0" class="button text" @click="editRequirePreviousGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editRequirePreviousGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Leden kunnen enkel zelf inschrijven voor deze inschrijvingsgroep als ze de vorige inschrijvingsperiode ingeschreven waren voor één van de volgende inschrijvingsgroepen.</p>
+
+                    <STList v-if="patchedGroup.settings.requirePreviousGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.requirePreviousGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removeRequirePreviousGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen verplichte vorige inschrijvingen noodzakelijk
+                    </p>
+                </template>
+
+                <template v-if="useActivities || patchedGroup.settings.preventPreviousGroupIds.length > 0">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>Verhinder inschrijven als vorige keer ingeschreven bij...</div>
+                        <div>
+                            <button v-if="patchedGroup.settings.preventPreviousGroupIds.length == 0" class="button text" @click="editPreventPreviousGroups">
+                                <span class="icon add" />
+                                <span>Toevoegen</span>
+                            </button>
+                            <button v-else class="button text" @click="editPreventPreviousGroups">
+                                <span class="icon edit" />
+                                <span>Wijzigen</span>
+                            </button>
+                        </div>
+                    </h2>
+                    <p>Leden kunnen niet inschrijven voor deze inschrijvingsgroep als ze de vorige inschrijvingsperiode ingeschreven waren voor één van de volgende inschrijvingsgroepen.</p>
+
+                    <STList v-if="patchedGroup.settings.preventPreviousGroupIds.length > 0">
+                        <STListItem v-for="id of patchedGroup.settings.preventPreviousGroupIds" :key="id">
+                            {{ getGroupName(id) }}
+
+                            <button slot="right" class="button text" @click="removePreventPreviousGroupId(id)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </STListItem>
+                    </STList>
+                    <p v-else class="info-box">
+                        Geen vorige inschrijvingsgroepen die uitgesloten worden
+                    </p>
+                </template>
+
                 <hr>
                 <h2 class="style-with-button">
                     <div>Omslagfoto</div>
@@ -214,7 +278,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hs" />
+                        <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hs" />
                     </div>
                 </h2>
 
@@ -232,7 +296,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :hs="hsSquare" />
+                        <UploadButton v-model="squarePhoto" :text="squarePhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hsSquare" />
                     </div>
                 </h2>
 
@@ -244,7 +308,7 @@
             </template>
             <template v-if="tab == 'payments'">
                 <STErrorsDefault :error-box="errorBox" />
-                <EditGroupPriceBox :validator="validator" :prices="getPrices()" @patch="addPricesPatch" />
+                <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" :patched-organization="patchedOrganization" @patch="addPricesPatch" />
             </template>
 
             <template v-if="tab == 'permissions'">
@@ -322,7 +386,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
     tabs = ["general", "payments", "permissions"];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Lidgeld", "Toegang"];
+    tabLabels = ["Algemeen", "Prijs", "Toegang"];
 
     saving = false
 
@@ -431,6 +495,62 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     removeRequireGroupId(id: string) {
         const diff = GroupSettings.patch({})
         diff.requireGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
+    }
+
+    editRequirePreviousGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.requirePreviousGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.requirePreviousGroupIds.includes(id)) {
+                        diff.requirePreviousGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.requirePreviousGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.requirePreviousGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removeRequirePreviousGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.requirePreviousGroupIds.addDelete(id)
+        this.addSettingsPatch(diff)
+    }
+
+    editPreventPreviousGroups() {
+        this.present(new ComponentWithProperties(SelectGroupsView, {
+            initialGroupIds: this.patchedGroup.settings.preventPreviousGroupIds,
+            callback: (groupIds: string[]) => {
+                const diff = GroupSettings.patch({})
+                for (const id of groupIds) {
+                    if (!this.patchedGroup.settings.preventPreviousGroupIds.includes(id)) {
+                        diff.preventPreviousGroupIds.addPut(id)
+                    }
+                }
+
+                for (const id of this.patchedGroup.settings.preventPreviousGroupIds) {
+                    if (!groupIds.includes(id)) {
+                        diff.preventPreviousGroupIds.addDelete(id)
+                    }
+                }
+                this.addSettingsPatch(diff)
+                return Promise.resolve()
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    removePreventPreviousGroupId(id: string) {
+        const diff = GroupSettings.patch({})
+        diff.preventPreviousGroupIds.addDelete(id)
         this.addSettingsPatch(diff)
     }
 
@@ -671,7 +791,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         let patch = this.patchOrganization
 
         // Check if reduced price is enabled
-        if (this.patchedGroup.settings.prices.find(g => g.reducedPrice !== null) && !this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+        if (!this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems) && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
             console.log("Auto enabled financial problems record")
 
             const p = OrganizationRecordsConfiguration.patch({});
@@ -684,7 +804,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
             patch = patch.patch(patchOrganization)
 
-            new Toast("We vragen nu ook bij het inschrijven of een lid in een kansarm gezin leeft zodat we het verminderd lidgeld kunnen toepassen", "info-filled").show()
+            new Toast("We vragen nu ook bij het inschrijven of een lid het financieel moeilijk heeft, zodat we de verminderde prijzen kunnen toepassen", "info-filled").show()
         }
 
         this.errorBox = null

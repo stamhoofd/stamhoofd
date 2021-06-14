@@ -6,6 +6,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
@@ -313,7 +314,14 @@ module.exports = {
                     }
                 },
             }
-        )]
+        )],
+
+        new PreloadWebpackPlugin({
+            rel: 'preload',
+            as: 'font',
+            include: 'all',
+            fileWhitelist: [/\.woff2/]
+        })
     ],
     experiments: {
         syncWebAssembly: true // temporary, until fixed

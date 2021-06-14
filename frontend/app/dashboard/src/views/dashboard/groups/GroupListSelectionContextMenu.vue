@@ -5,7 +5,7 @@
         </ContextMenuItem>
 
         <ContextMenuLine />-->
-        <ContextMenuItem @click="samenvatting" v-if="!waitingList">
+        <ContextMenuItem v-if="!waitingList" @click="samenvatting">
             Samenvatting
         </ContextMenuItem>
         <ContextMenuItem @click="excel">
@@ -24,10 +24,10 @@
 
         <ContextMenuLine />
 
-        <ContextMenuItem @click="acceptWaitingList" v-if="waitingList">
+        <ContextMenuItem v-if="waitingList" @click="acceptWaitingList">
             Schrijf in
         </ContextMenuItem>
-        <ContextMenuItem @click="moveToWaitingList" v-else-if="hasWaitingList">
+        <ContextMenuItem v-else-if="hasWaitingList" @click="moveToWaitingList">
             Verplaatst naar wachtlijst
             <span slot="right" class="icon clock-small" />
         </ContextMenuItem>
@@ -36,11 +36,14 @@
             Uitschrijven
             <span slot="right" class="icon unregister" />
         </ContextMenuItem>
+        <ContextMenuItem @click="deleteRecords">
+            <span slot="right" class="icon trash" />
+            Gegevens gedeeltelijk wissen
+        </ContextMenuItem>
         <ContextMenuItem @click="deleteData">
             <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
-
     </ContextMenu>
 </template>
 
@@ -52,8 +55,8 @@ import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
-import { MemberManager } from "../../../classes/MemberManager";
 
+import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
 import MemberSummaryView from "../member/MemberSummaryView.vue";
 import SMSView from "../sms/SMSView.vue";
@@ -126,6 +129,32 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
                 },
                 type: "destructive",
                 icon: "download"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    deleteRecords() {
+        new CenteredMessage("Gegevens van "+this.members.length+" leden wissen", "Opgelet, je kan dit niet ongedaan maken! Deze functie houdt de leden wel in het systeem, maar verwijdert een deel van de gegevens (o.a. handig om in orde te zijn met GDPR).")
+            .addButton(new CenteredMessageButton("Behoud contactgegevens", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam, e-mailadres en telefoonnummer (van leden zelf en ouders indien -18jaar) worden verwijderd.")) {
+                        await MemberManager.deleteDataExceptContacts(this.members)
+                        new Toast("De steekkaart van "+this.members.length+" leden is verwijderd.", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "trash"
+            }))
+            .addButton(new CenteredMessageButton("Behoud enkel naam", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam worden verwijderd.")) {
+                        await MemberManager.deleteData(this.members)
+                        new Toast("De steekkaart van "+this.members.length+" leden is verwijderd.", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "trash"
             }))
             .addCloseButton("Annuleren")
             .show()

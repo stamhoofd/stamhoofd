@@ -295,7 +295,7 @@ export class MollieToken extends Model {
                 profile: {
                     name: organization.name+" inschrijvingsformulier",
                     url: "https://"+organization.getHost(),
-                    description: "Betalen van het lidgeld en inschrijvingsgelden voor onze vereniging via Stamhoofd (partner).",
+                    description: "Betalen van inschrijvingsgelden voor onze vereniging via Stamhoofd (partner).",
                     categoryCode: 8398
                 }
             })

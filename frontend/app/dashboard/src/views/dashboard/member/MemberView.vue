@@ -25,7 +25,7 @@
                 <button class="button icon gray more" @click="showContextMenu" />
             </h1>
 
-            <SegmentedControl v-if="payments.length > 0" v-model="tab" :items="tabs" :labels="tabLabels" />
+            <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
             <component :is="tab" :member="member" :family-manager="familyManager" />
         </main>
     </div>

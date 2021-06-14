@@ -13,7 +13,7 @@
     
             <Spinner v-if="loading" />
             <STList v-else>
-                <STListItem v-for="payment in filteredPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
+                <STListItem v-for="payment in paginatedPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
                     <Checkbox slot="left" v-model="payment.selected" />
 
                     <h2 class="style-title-list">
@@ -35,6 +35,10 @@
                     </template>
                 </STListItem>
             </STList>
+            <button v-if="!loading && hasMore" class="button text" @click="showMore">
+                <span class="icon arrow-down" />
+                <span>Meer tonen</span>
+            </button>
 
             <p v-if="!loading && payments.length == 0 && filteredPayments.length == 0" class="info-box">
                 Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt als een lid bij het inschrijven de betaalmethode 'overschrijven' kiest.
@@ -110,6 +114,8 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
     searchQuery = ""
     payments: SelectablePayment[] = []
 
+    paginationLimit: null | number = null
+
     mounted() {
         this.loading = true
 
@@ -123,10 +129,30 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         document.title = "Stamhoofd - Overschrijvingen"
     }
 
+    get hasMore() {
+        return this.paginatedPayments.length < this.filteredPayments.length
+    }
+
+    showMore() {
+        if (!this.paginationLimit) {
+            return
+        }
+        this.paginationLimit += 20
+    }
+
+    get paginatedPayments(): SelectablePayment[] {
+        const p = this.filteredPayments
+        if (this.paginationLimit && p.length > this.paginationLimit) {
+            return p.slice(0, this.paginationLimit)
+        }
+        return p
+    }
+
     get filteredPayments(): SelectablePayment[] {
         if (this.searchQuery == "") {
             return this.payments;
         }
+        console.log("Did filter payments")
 
         return this.payments.filter((payment: SelectablePayment) => {
             if (payment.payment.matchQuery(this.searchQuery)) {
@@ -220,6 +246,48 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
         }
     }
 
+     async appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+        const organization = OrganizationManager.organization
+
+        // Decrypt data
+        const payments = new Map<string, SelectablePayment>()
+
+        for (const payment of this.payments) {
+            payments.set(payment.payment.id, payment)
+        }
+
+        for (const encryptedPayment of encryptedPayments) {
+            // Create a detailed payment without registrations
+            const payment = PaymentGeneral.create({
+                ...encryptedPayment, 
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+            })
+
+            // Set payment reference
+            for (const registration of payment.registrations) {
+                registration.payment = payment
+            }
+
+            
+            payments.set(payment.id, new SelectablePayment(payment))
+        }
+
+        const arr = [...payments.values()]
+
+        // Sort
+        arr.sort((a, b) => {
+            const sa = this.getPaymentTimingOrder(a.payment)
+            const sb = this.getPaymentTimingOrder(b.payment)
+
+            if (sa == sb) {
+                return b.payment.createdAt.getTime() - a.payment.createdAt.getTime()
+            }
+            return sa - sb;
+        })
+
+        this.payments = arr
+    }
+
     async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
@@ -252,6 +320,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             return sa - sb;
         })
 
+        this.paginationLimit = Math.max(20, Math.min(50, payments.reduce((c, p) => c + (p.paidAt ? 0 : 1), 0)))
         this.payments = payments.map(p => new SelectablePayment(p))
     }
 
@@ -293,7 +362,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                this.setPayments(response.data)
+                await this.appendPayments(response.data)
             } catch(e) {
                 Toast.fromError(e).show()
             }
@@ -328,7 +397,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                await this.setPayments(response.data)
+                await this.appendPayments(response.data)
             } catch(e) {
                 Toast.fromError(e).show()
             }

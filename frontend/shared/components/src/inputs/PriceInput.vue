@@ -13,8 +13,8 @@
             inputmode="decimal"
             step="any"
             @blur="clean"
-            @keydown.up.prevent="step(1)"
-            @keydown.down.prevent="step(-1)"
+            @keydown.up.prevent="step(100)"
+            @keydown.down.prevent="step(-100)"
         >
         <div v-if="!valid">
             <span>{{ valueString }}</span>
@@ -22,7 +22,7 @@
         <div v-else-if="valueString != ''">
             <span>{{ valueString }}</span> {{ currency }}
         </div>
-        <div v-else>{{ placeholder }}</div>
+        <div v-else class="placeholder">{{ placeholder }}</div>
     </label>
 </template>
 
@@ -43,19 +43,31 @@ export default class PriceInput extends Vue {
     valid = true;
 
     /** Price in cents */
-    @Prop({ default: 0 })
-    value!: number
+    @Prop({ default: null })
+    value!: number | null
 
     currency = "euro";
 
     @Prop({ default: "" })
     placeholder!: string
 
+    @Prop({ default: true })
+    required!: boolean
+
     @Watch('value')
-    onRealValueChanged(val: number, old: number) {
+    onRealValueChanged(val: number | null, old: number | null) {
         if (old === val) {
             return
         }
+
+        if (val === null)  {
+            if (this.required) {
+                this.internalValue = this.constrain(this.value ?? this.min ?? 0);
+            }
+            this.clean();
+            return;
+        }
+
         this.internalValue = this.constrain(val);
         this.clean();
     }
@@ -64,7 +76,7 @@ export default class PriceInput extends Vue {
         return this.value
     }
 
-    set internalValue(val: number) {
+    set internalValue(val: number | null) {
         this.$emit("input", val)
     }
 
@@ -78,7 +90,12 @@ export default class PriceInput extends Vue {
         // but for our placeholder system we need exactly the same string
         if (value == "") {
             this.valid = true;
-            this.internalValue = Math.max(0, this.min ?? 0);
+
+            if (this.required) {
+                this.internalValue = Math.max(0, this.min ?? 0);
+            } else {
+                this.internalValue = null
+            }
         } else {
             if (!value.includes(".")) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
@@ -110,8 +127,16 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
+
+        const value = this.internalValue
+
+        if (value === null) {
+            this.valueString = ""
+            return
+        }
+
         // Check if has decimals
-        const float = this.internalValue / 100
+        const float = value / 100
         const decimals = float % 1;
         const abs = Math.abs(float);
 
@@ -142,7 +167,7 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        this.internalValue = this.constrain(this.internalValue + add);
+        this.internalValue = this.constrain((this.value ?? this.min ?? 0) + add);
         this.$nextTick(() => {
             this.clean();
         })
@@ -166,6 +191,10 @@ export default class PriceInput extends Vue {
 
         span {
             white-space: pre;
+        }
+
+        &.placeholder {
+            opacity: 0.5;
         }
     }
 

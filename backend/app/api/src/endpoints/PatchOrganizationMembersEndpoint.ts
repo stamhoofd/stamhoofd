@@ -2,8 +2,6 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, PaymentMethod, PaymentStatus, User as UserStruct, Registration as RegistrationStruct, getPermissionLevelNumber, PermissionLevel } from "@stamhoofd/structures";
-
 import { EncryptedMemberFactory } from '@stamhoofd/models';
 import { Group } from '@stamhoofd/models';
 import { Member, MemberWithRegistrations } from '@stamhoofd/models';
@@ -12,6 +10,7 @@ import { Payment } from '@stamhoofd/models';
 import { Registration, RegistrationWithPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel,Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -237,6 +236,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
+            let shouldUsePayment: Payment | null = null
+
             for (const deleteId of patch.registrations.getDeletes()) {
                 const registration = member.registrations.find(r => r.id === deleteId)
                 if (!registration || registration.memberId != member.id) {
@@ -253,6 +254,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (oldGroup) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(oldGroup.id, oldGroup)
+                }
+
+                if (registration.payment) {
+                    shouldUsePayment = registration.payment
                 }
             }
 
@@ -277,7 +282,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                await this.addRegistration(user, member, struct)
+                const reg = await this.addRegistration(user, member, struct)
+                if (!reg.payment && shouldUsePayment) {
+                    reg.setRelation(Registration.payment, shouldUsePayment)
+                    await reg.save()
+                }
 
                 // We need to update this group occupancy because we moved one member away from it
                 updateGroups.set(group.id, group)
@@ -376,6 +385,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         await registration.save()
         member.registrations.push(registration)
+
+        return registration
     }
 
     async createDummyMembers(organization: Organization, group: Group) {

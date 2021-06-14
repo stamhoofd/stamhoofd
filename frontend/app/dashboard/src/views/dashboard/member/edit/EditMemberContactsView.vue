@@ -13,7 +13,7 @@
             
             <STErrorsDefault :error-box="errorBox" />
 
-            <STList>
+            <STList v-if="parents.length > 0">
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                     <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
 
@@ -30,12 +30,16 @@
                         {{ parent.parent.address }}
                     </p>
 
-                    <button slot="right" class="button text limit-space" @click.stop="editParent(parent.parent)">
+                    <button slot="right" class="button text limit-space" @click.stop="editParent(parent)">
                         <span class="icon edit" />
                         <span>Bewerken</span>
                     </button>
                 </STListItem>
             </STList>
+
+            <p v-else class="info-box">
+                Er zijn geen ouders ingesteld bij dit lid
+            </p>
 
             <hr>
 
@@ -49,10 +53,10 @@
                 </div>
             </h2>
 
-            <STList>
+            <STList v-if="emergencyContacts.length > 0">
                 <STListItem v-for="contact in emergencyContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
                     <h2 class="style-title-list">
-                        {{ contact.name }} ({{ contact.title }})
+                        {{ contact.name }} ({{ contact.title }})
                     </h2>
                     <p v-if="contact.phone" class="style-description-small">
                         {{ contact.phone }}
@@ -64,6 +68,10 @@
                     </button>
                 </STListItem>
             </STList>
+
+            <p v-else class="info-box">
+                Er is geen noodcontact ingesteld bij dit lid
+            </p>
         </main>
     </div>
 </template>
@@ -120,7 +128,11 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     cachedParents: SelectableParent[] | null = null
 
-    editParent(parent: Parent) {
+    editParent(selectable: SelectableParent) {
+        // Make sure we select it (else we risk losing it if we return)
+        selectable.selected = true
+        this.onChangedSelection()
+        const parent = selectable.parent
         this.present(new ComponentWithProperties(EditMemberParentView, {
             memberDetails: this.memberDetails,
             familyManager: this.familyManager,
@@ -132,7 +144,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
                 const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
                 this.$emit("change", memberDetails)
-
+                this.cachedParents = null
                 component.pop({ force: true })
             }
         }).setDisplayStyle("popup"))

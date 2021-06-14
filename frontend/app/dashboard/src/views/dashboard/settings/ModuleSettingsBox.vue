@@ -90,6 +90,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
+import ActivatedView from './modules/members/ActivatedView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 
 @Component({
@@ -104,16 +105,6 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
-    }
-
-
-
-    manageGroups(animated = true) {
-        const component = buildManageGroupsComponent(this.organization)
-            
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: component
-        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
     get isMembersTrial() {
@@ -161,7 +152,9 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             } else {
                 this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten").then(() => {
                     // Wait for the backend to fill in all the default categories and groups
-                    this.manageGroups(true)
+                    this.present(new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(ActivatedView, {})
+                    }).setDisplayStyle("popup"))
                 }).catch(e => console.error(e))
             }
         } else {

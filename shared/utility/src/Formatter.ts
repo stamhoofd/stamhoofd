@@ -81,6 +81,13 @@ export class Formatter {
         return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
+    /**
+     * 12:00
+     */
+    static timeIso(date: Date): string {
+        return (date.getHours()+"").padStart(2, "0")+":"+(date.getMinutes()+"").padStart(2, "0")
+    }
+
     static uniqueArray<T extends any>(array: T[]): T[] {
         function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
@@ -169,5 +176,21 @@ export class Formatter {
             return last+""
         }
         return array.join(separator)+lastSeparator+last
+    }
+
+    static ordinalNumber(number: number): string {
+        if (number == 1) {
+            return "eerste"
+        }
+
+        if (number == 2) {
+            return "tweede"
+        }
+
+        if (number == 3) {
+            return "derde"
+        }
+
+        return number+"e"
     }
 }

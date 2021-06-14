@@ -48,6 +48,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const user = token.user
+        let deleteUnreachable = false
 
         if (!user.permissions) {
             throw new SimpleError({
@@ -168,6 +169,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         })
                     }
                 }
+
+                if (request.body.meta.categories) {
+                    deleteUnreachable = true
+                }
             }
 
             // Save the organization
@@ -287,6 +292,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     })
                 }
             }
+
+            if (struct.cycle !== undefined) {
+                model.cycle = struct.cycle
+            }
             
             await model.updateOccupancy()
             await model.save();
@@ -317,6 +326,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
             
             await model.save();
+        }
+
+        if (deleteUnreachable) {
+            await Group.deleteUnreachable(organization.id, organization.meta)
         }
 
         errors.throwIfNotEmpty()

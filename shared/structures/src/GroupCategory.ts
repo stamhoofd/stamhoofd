@@ -194,6 +194,27 @@ export class GroupCategoryTree extends GroupCategory {
     }
 
     /**
+     * Filter groups
+     */
+    filter(keep: (group: Group) => boolean): GroupCategoryTree {
+        const categories = this.categories.flatMap((category) => {
+            const filtered = category.filter(keep)
+            if (filtered.groups.length == 0 && filtered.categories.length == 0) {
+                return []
+            }
+            return [filtered]
+        })
+
+        const groups = this.groups.filter(keep)
+        return GroupCategoryTree.create(
+            Object.assign({}, this, {
+                categories,
+                groups
+            })
+        )
+    }
+
+    /**
      * Remove empty categories and non-public categories
      * @param admin Whether not-public categories should be visible
      */

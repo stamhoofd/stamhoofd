@@ -289,10 +289,6 @@ export class LoginHelper {
      * Return true when the polling should end + confirmation should stop
      */
     static async pollEmail(session: Session, token: string): Promise<boolean> {
-        const savedKeys = this.getTemporaryKey(token)
-        if (!savedKeys) {
-            return true
-        }
         const response = await session.server.request({
             method: "POST",
             path: "/verify-email/poll",

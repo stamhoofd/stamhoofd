@@ -70,7 +70,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
-import { CheckoutStep, CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
+import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import CategoryBox from "./products/CategoryBox.vue"
 import ProductGrid from "./products/ProductGrid.vue"
@@ -90,6 +90,51 @@ import ProductGrid from "./products/ProductGrid.vue"
     filters: {
         price: Formatter.price.bind(Formatter),
         time: Formatter.time.bind(Formatter)
+    },
+    metaInfo() {
+        return {
+            title: WebshopManager.webshop.meta.name,
+            titleTemplate: '%s | '+WebshopManager.organization.name,
+            meta: [
+                {
+                    vmid: 'description',
+                    name: 'description',
+                    content: WebshopManager.webshop.meta.description,
+                },
+                {
+                    hid: 'og:site_name',
+                    name: 'og:site_name',
+                    content: WebshopManager.organization.name
+                },
+                {
+                    hid: 'og:title',
+                    name: 'og:title',
+                    content: WebshopManager.webshop.meta.title ?? WebshopManager.webshop.meta.name
+                },
+                ...(this.bannerImageSrc ? [
+                     {
+                        hid: 'og:image',
+                        name: 'og:image',
+                        content: this.bannerImageSrc
+                    },
+                    {
+                        hid: 'og:image:width',
+                        name: 'og:image:width',
+                        content: this.bannerImageWidth
+                    },
+                    {
+                        hid: 'og:image:height',
+                        name: 'og:image:height',
+                        content: this.bannerImageHeight
+                    },
+                    {
+                        hid: 'og:image:type',
+                        name: 'og:image:type',
+                        content: this.bannerImageSrc.endsWith(".png") ? 'image/png' : 'image/jpeg'
+                    },
+                ] : [])
+            ]
+        }
     }
 })
 export default class WebshopView extends Mixins(NavigationMixin){

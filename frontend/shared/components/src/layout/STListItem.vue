@@ -195,7 +195,7 @@ a.st-list-item {
 
     &:last-child, &.no-border {
         > .main > hr {
-            display: none;
+            visibility: hidden;
         }
     }
 

@@ -21,7 +21,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     value: Date
 
     get dateText() {
-        return Formatter.date(this.value)
+        return Formatter.date(this.value, true)
     }
 
     openContextMenu(event) {

@@ -6,8 +6,8 @@
         </STNavigationBar>
 
         <main>
-            <h1>Lidgeld</h1>
-            <p>Je kan later nog het lidgeld per (leeftijds)groep wijzigen.</p>
+            <h1>Standaard inschrijvingsgeld</h1>
+            <p>Je kan later nog de prijs per inschrijvingsgroep wijzigen, maar deze prijs zal automatisch ingesteld worden als je nieuwe inschrijvingsgroepen maakt.</p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -27,35 +27,24 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Toast, Validator} from "@stamhoofd/components";
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, GroupCategory, GroupCategorySettings, GroupCategoryTree, GroupPrices, Image, Organization, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationPrivateMetaData,OrganizationTypeHelper,PaymentMethod, ResolutionFit, ResolutionRequest, STPackageBundle, Version } from "@stamhoofd/structures"
+import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
-import EditCategoryGroupsView from '../../../groups/EditCategoryGroupsView.vue';
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
-import EditGroupsView from '../../../groups/EditGroupsView.vue';
-import { buildManageGroupsComponent } from '../../buildManageGroupsComponent';
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
+import ActivatedView from './ActivatedView.vue';
 
 @Component({
     components: {
         STNavigationBar,
         STToolbar,
-        STInputBox,
         STErrorsDefault,
-        Checkbox,
-        DateSelection,
-        RadioGroup,
-        Radio,
         BackButton,
-        TimeInput,
         LoadingButton,
         EditGroupPriceBox
     },
@@ -126,17 +115,12 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
             await this.checkout(STPackageBundle.TrialMembers)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('Je kan nu de ledenadministratie uittesten', "success green").show()
-            this.manageGroups(true)
+            this.navigationController!.push(new ComponentWithProperties(ActivatedView), true, this.navigationController?.components.length)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
 
         this.saving = false
-    }
-
-    manageGroups(animated = true) {
-        const component = buildManageGroupsComponent(this.organization)
-        this.navigationController!.push(component, animated, this.navigationController!.components.length)
     }
 
     async shouldNavigateAway() {

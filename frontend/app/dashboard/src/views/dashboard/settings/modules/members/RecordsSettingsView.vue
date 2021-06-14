@@ -331,7 +331,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     set financialProblems(enabled: boolean) {
         const hasReduced = !!this.organization.groups.find(g => {
-            return !!g.settings.prices.find(p => p.reducedPrice !== null)
+            return !!g.settings.prices.find(p => !!p.prices.find(gg => gg.reducedPrice !== null))
         })
         if (hasReduced && !enabled) {
             new Toast("Eén of meerdere leeftijdsgroepen maken gebruik van verminderd lidgeld. Schakel dat eerst overal uit.", "error red").show()

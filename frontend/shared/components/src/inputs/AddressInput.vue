@@ -69,6 +69,11 @@ export default class AddressInput extends Vue {
     @Watch('value', { deep: true })
     onValueChanged(val: Address | null) {
         if (!val) {
+            if (!this.required && !this.pendingErrorBox && !this.errorBox) {
+                this.addressLine1 = ""
+                this.city = ""
+                this.postalCode = ""
+            }
             return
         }
         this.addressLine1 = val.street+" "+val.number
