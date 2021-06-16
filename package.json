@@ -13,6 +13,7 @@
     "engines": {
         "yarn": "1.19.0"
     },
+    "license": "AGPL-3.0-only",
     "scripts": {
         "build": "cd shared/crypto && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
