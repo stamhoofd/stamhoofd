@@ -8,7 +8,7 @@
             <h1>
                 Nieuwe vereniging aansluiten bij Stamhoofd
             </h1>
-            <p>Met een account kan je alle functies eerst gratis uitproberen zolang je nodig hebt.</p>
+            <p>Met een account kan je alle functies eerst gratis uitproberen.</p>
 
             <p v-if="registerCode" class="success-box gift">
                 Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
@@ -120,6 +120,21 @@ import SignupAccountView from './SignupAccountView.vue';
         AddressInput,
         LoadingButton,
         Checkbox
+    },
+    metaInfo() {
+        return {
+            title: "Sluit jouw vereniging aan | Stamhoofd",
+            meta: [
+                {
+                    vmid: 'description',
+                    name: 'description',
+                    content: "Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.",
+                }
+            ],
+            link: [
+                { rel: "canonical", href: "https://"+window.location.hostname+"/aansluiten" }
+            ]
+        }
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {
@@ -152,9 +167,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
         if (!this.initialRegisterCode) {
             try {
+                const currentCount = localStorage.getItem("what-is-new")
                 const saved = localStorage.getItem("savedRegisterCode")
                 const dString = localStorage.getItem("savedRegisterCodeDate")
-                if (saved !== null && dString !== null) {
+                if (currentCount === null && saved !== null && dString !== null) {
                     const d = parseInt(dString)
                     if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
                         const parsed = JSON.parse(saved)

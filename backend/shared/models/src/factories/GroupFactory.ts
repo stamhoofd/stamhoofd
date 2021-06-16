@@ -1,5 +1,5 @@
 import { Factory } from "@simonbackx/simple-database";
-import { GroupPrices,GroupSettings } from "@stamhoofd/structures";
+import { GroupPrice, GroupPrices,GroupSettings } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { Organization } from "../models/Organization";
@@ -29,8 +29,10 @@ export class GroupFactory extends Factory<Options, Group> {
             registrationEndDate: new Date(new Date().getTime() + 10 * 1000),
             prices: [
                 GroupPrices.create({
-                    price: this.options.price ?? 400,
-                    reducedPrice: this.options.reducedPrice ?? null
+                    prices: [GroupPrice.create({
+                        price: this.options.price ?? 400,
+                        reducedPrice: this.options.reducedPrice ?? null
+                    })],
                 })
             ],
         })
@@ -38,8 +40,10 @@ export class GroupFactory extends Factory<Options, Group> {
         if (this.options.delayPrice !== undefined) {
             group.settings.prices.push(GroupPrices.create({
                 startDate: this.options.delayDate ?? new Date(),
-                price: this.options.delayPrice,
-                reducedPrice: this.options.delayReducedPrice ?? null
+                prices: [GroupPrice.create({
+                    price: this.options.delayPrice,
+                    reducedPrice: this.options.delayReducedPrice ?? null
+                })],
             }))
         }
 

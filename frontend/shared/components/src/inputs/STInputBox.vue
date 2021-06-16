@@ -51,6 +51,11 @@ export default class STInputBox extends Vue {
         }
     }
 
+    &.no-padding {
+        // Keep 5px padding at bottom to compensate height of label
+        padding: 0 0 5px 0;
+    }
+
     > h4 {
         margin: 0;
         @extend .style-title-small;

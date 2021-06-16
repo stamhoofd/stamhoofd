@@ -17,8 +17,7 @@
             </h1>
             
             <p v-if="isRoot && enableActivities">
-                Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen kan onderverdelen. Zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
-                Jouw leden krijgen dan alle mogelijke (openbare) inschrijvingsgroepen te zien op jouw inschrijvingspagina.
+                Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen wilt onderverdelen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen in een categorie. Een categorie is puur voor de structuur: zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
             </p>
           
             <STErrorsDefault :error-box="errorBox" />
@@ -65,19 +64,19 @@
             <p v-if="categories.length == 0 && !isRoot">
                 <button class="button text" @click="createGroup">
                     <span class="icon add" />
-                    <span>Nieuwe groep toevoegen</span>
+                    <span>Nieuwe inschrijvingsgroep</span>
                 </button>
             </p>
             <p v-if="enableActivities && groups.length == 0">
                 <button class="button text" @click="createCategory">
                     <span class="icon add" />
-                    <span>Nieuwe categorie toevoegen</span>
+                    <span>Nieuwe categorie</span>
                 </button>
             </p>
 
             <div v-if="!isRoot && enableActivities" class="container">
                 <hr>
-                <h2>Wie kan groepen maken in deze categorie?</h2>
+                <h2>Wie kan inschrijvingsgroepen maken in deze categorie?</h2>
                 <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
     
                 <STList v-if="roles.length > 0">
@@ -87,7 +86,7 @@
                     </STListItem>
                     <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
                         <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />
-                        {{ role.name }}
+                        {{ role.name }}
                     </STListItem>
                 </STList>
 
@@ -120,7 +119,6 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditCategoryView from './EditCategoryView.vue';
 import EditGroupView from './EditGroupView.vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue"
 import GroupRow from "./GroupRow.vue"
@@ -355,16 +353,6 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    editMe() {
-        this.present(new ComponentWithProperties(EditCategoryView, { 
-            category: this.patchedCategory, 
-            organization: this.patchedOrganization, 
-            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                this.addPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
-    }
-
     createGroup() {
         const group = Group.create({
             settings: GroupSettings.create({
@@ -373,7 +361,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 endDate: this.organization.meta.defaultEndDate,
                 registrationStartDate: this.organization.meta.defaultStartDate,
                 registrationEndDate: this.organization.meta.defaultEndDate,
-                prices: this.organization.meta.defaultPrices,
+                prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
             privateSettings: GroupPrivateSettings.create({})

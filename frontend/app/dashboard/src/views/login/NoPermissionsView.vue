@@ -1,19 +1,26 @@
 <template>
-    <div class="boxed-view">
-        <div class="st-view">
+    <div class="st-view boxed">
+        <STNavigationBar :large="true" :sticky="true">
+            <template slot="left">
+                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                    <Logo class="responsive" />
+                </a>
+            </template>
+        </STNavigationBar>
+
+        <div class="box">
             <main>
                 <h1>Deze pagina is voor beheerders</h1>
-                <p>Oeps, deze pagina is enkel voor beheerders van {{ organization.name }}. Ga naar de inschrijvingspagina als je je wilt inschrijven als lid. Deze website is enkel voor beheerders.</p> 
-                <p>
-                    <button class="button primary" @click="logout">
-                        Uitloggen
-                    </button>
-                </p>              
+                <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar de inschrijvingspagina als je je wilt inschrijven als lid.</p> 
             </main>
 
             <STToolbar>
                 <button slot="right" class="primary button" @click="gotoRegistration">
                     <span>Naar inschrijvingspagina</span>
+                </button>
+
+                <button slot="right" class="button secundary" @click="logout">
+                    <span class="icon logout" /><span>Uitloggen</span>
                 </button>
             </STToolbar>
         </div>
@@ -22,7 +29,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Logo,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -34,6 +41,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         STToolbar,
         STList,
         STListItem,
+        Logo
     }
 })
 export default class NoPermissionsView extends Mixins(NavigationMixin){

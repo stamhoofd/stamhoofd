@@ -27,7 +27,7 @@
                 <span class="icon add" />
                 <span>Nieuw lid toevoegen</span>
             </button>
-            <button slot="right" class="primary button" @click="goToBasket">
+            <button v-if="hasItems" slot="right" class="primary button" @click="goToBasket">
                 <span>Doorgaan</span>
                 <span class="icon arrow-right" />
             </button>
@@ -67,6 +67,7 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     group!: Group
 
     MemberManager = MemberManager
+    CheckoutManager = CheckoutManager
 
     get members() {
         return this.MemberManager.members ?? []
@@ -78,6 +79,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
 
     get canRegister() {
         return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items).closed)
+    }
+
+    get hasItems() {
+        return !!CheckoutManager.cart.items.find(i => i.group.id === this.group.id)
     }
 
     goToBasket() {

@@ -16,7 +16,7 @@
             <hr>
             <h2>Inschrijvingstatus</h2>
 
-            <STInputBox v-if="needsPaidStatus" title="Hebben deze leden het lidgeld al betaald?" error-fields="paid" :error-box="errorBox" class="max">
+            <STInputBox v-if="needsPaidStatus" title="Hebben deze leden al betaald?" error-fields="paid" :error-box="errorBox" class="max">
                 <RadioGroup>
                     <Radio v-model="paid" :value="true">
                         Al betaald

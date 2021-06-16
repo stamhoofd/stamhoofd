@@ -116,7 +116,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!group) {
                 throw new SimpleError({
                     code: "invalid_member",
-                    message: "De leeftijdsgroep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
+                    message: "De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen."
                 })
             }
 
@@ -167,6 +167,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (payRegistrations.length > 0) {
             const payment = new Payment()
             payment.userId = user.id
+            payment.organizationId = user.organizationId
             payment.method = request.body.paymentMethod
             payment.status = PaymentStatus.Created
             payment.price = totalPrice

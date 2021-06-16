@@ -44,7 +44,7 @@ export default class TimeInput extends Vue {
         if (val === null) {
             return
         }
-        this.timeRaw = Formatter.time(this.value)
+        this.timeRaw = Formatter.timeIso(this.value)
     }
 
     mounted() {
@@ -53,7 +53,7 @@ export default class TimeInput extends Vue {
                 return this.validate()
             })
         }
-        this.timeRaw = Formatter.time(this.value)
+        this.timeRaw = Formatter.timeIso(this.value)
 
     }
 
@@ -98,8 +98,6 @@ export default class TimeInput extends Vue {
                 return false
             }
  
-            const time = Math.max(0, Math.min(hours*60, 24*60 - 1))
-
             const d = new Date(this.value.getTime())
             d.setHours(hours, minutes, 0, 0)
             this.$emit("input", d)

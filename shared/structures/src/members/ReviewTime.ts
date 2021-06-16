@@ -35,6 +35,10 @@ export class ReviewTimes extends AutoEncoder {
         }))
     }
 
+    removeReview(name: "records" | "parents" | "emergencyContacts" | "details") {
+        this.times = this.times.filter(t => t.name !== name)
+    }
+
     getLastReview(name: "records" | "parents" | "emergencyContacts" | "details"): Date | undefined {
         for (const time of this.times) {
             if (time.name === name) {

@@ -48,9 +48,6 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" @click="skip">
-                    Overslaan
-                </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="save">
                         Volgende
@@ -71,7 +68,6 @@ import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
-import EditGroupsView from '../../../groups/EditGroupsView.vue';
 import MembersYearSetupView from './MembersYearSetupView.vue';
 
 @Component({
@@ -174,26 +170,6 @@ export default class MembersStructureSetupView extends Mixins(NavigationMixin) {
         this.organizationPatch = this.organizationPatch.patch(OrganizationPatch.create({ 
             meta: OrganizationMetaData.patch(patch)
         }))
-    }
-
-    async skip() {
-        if (this.saving) {
-            return;
-        }
-
-        this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
-        this.addMetaPatch({ modules: OrganizationModules.patch({ useMembers: true })})
-        this.saving = true
-
-        try {
-            await OrganizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
-            this.navigationController!.push(new ComponentWithProperties(EditGroupsView, {}), true, this.navigationController!.components.length)
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-        }
-
-        this.saving = false
     }
 
     async save() {

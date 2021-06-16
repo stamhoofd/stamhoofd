@@ -1,5 +1,5 @@
 import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupPrivateSettings, GroupSettings, Group as GroupStruct, Permissions } from '@stamhoofd/structures';
+import { GroupPrivateSettings, GroupSettings, Group as GroupStruct, Permissions, OrganizationMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member,MemberWithRegistrations } from './Member';
@@ -166,6 +166,46 @@ export class Group extends Model {
         } else {
             console.error("Unexpected result for occupancy", results)
         }
+    }
+
+    static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData) {
+        const reachable = new Map<string, boolean>()
+
+        const visited = new Map<string, boolean>()
+        const queue = [organizationMetaData.rootCategoryId]
+        visited.set(organizationMetaData.rootCategoryId, true)
+
+        while (queue.length > 0) {
+            const id = queue.shift()
+            if (!id) {
+                break
+            }
+
+            const category = organizationMetaData.categories.find(c => c.id === id)
+            if (!category) {
+                continue
+            }
+
+            for (const i of category.categoryIds) {
+                if (!visited.get(i)) {
+                    queue.push(i)
+                    visited.set(i, true)
+                }
+            }
+
+            for (const g of category.groupIds) {
+                reachable.set(g, true)
+            }
+        }
+
+        const reachableGroupIds = [...reachable.keys()]
+
+        // Delete all groups that are not reachable anymore
+        console.log("Deleting all groups from organization "+organizationId+" not in ("+reachableGroupIds.join(", ")+")")
+
+        const query = reachableGroupIds.length > 0 ? `DELETE FROM \`${Group.table}\` where organizationId = ? AND id NOT IN (?)` : `DELETE FROM \`${Group.table}\` where organizationId = ?`
+        const [result] = await Database.delete(query, [organizationId, reachableGroupIds])
+        console.log("Deleted "+result.affectedRows+" groups.")
     }
 
 }

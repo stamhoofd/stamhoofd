@@ -21,6 +21,10 @@ export class RegisterCart {
     items: RegisterItem[] = []
     freeContribution = 0
 
+    constructor(items: RegisterItem[] = []) {
+        this.items = items
+    }
+
     clear() {
         this.items = []
         this.freeContribution = 0

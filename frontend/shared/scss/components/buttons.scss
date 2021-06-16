@@ -248,6 +248,10 @@
         transition: 0.2s opacity, 0.2s color;
         position: relative;
 
+        &.full {
+            display: block;
+        }
+
         &.small {
             font-size: 12px;
         }

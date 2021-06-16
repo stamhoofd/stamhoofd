@@ -113,12 +113,22 @@
                             <p v-if="!group" class="style-description-small">
                                 {{ member.member.groups.map(g => g.settings.name ).join(", ") }}
                             </p>
-                            <p v-if="member.member.details && !member.member.details.isPlaceholder" class="style-description-small only-smartphone">
-                                {{ member.member.details.age }} jaar
+                            <p v-if="member.member.details && !member.member.details.isRecovered" class="style-description-small only-smartphone">
+                                <template v-if="member.member.details.age !== null">
+                                    {{ member.member.details.age }} jaar
+                                </template>
+                                <template v-else>
+                                    /
+                                </template>
                             </p>
                         </td>
-                        <td v-if="member.member.details && !member.member.details.isPlaceholder" class="minor hide-smartphone">
-                            {{ member.member.details.age }} jaar
+                        <td v-if="member.member.details && !member.member.details.isRecovered" class="minor hide-smartphone">
+                            <template v-if="member.member.details.age !== null">
+                                {{ member.member.details.age }} jaar
+                            </template>
+                            <template v-else>
+                                /
+                            </template>
                         </td>
                         <td v-else class="minor hide-smartphone">
                             /
@@ -127,7 +137,7 @@
                             <p v-text="getMemberDescription(member.member)" />
                         </td>
                         <td>
-                            <button v-if="!member.member.details || member.member.details.isPlaceholder" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
+                            <button v-if="!member.member.details || member.member.details.isRecovered" v-tooltip="'De sleutel om de gegevens van dit lid te bekijken ontbreekt'" class="button icon gray key-lost" />
                             <button class="button icon gray more" @click.stop="showMemberContextMenu($event, member.member)" />
                         </td>
                     </tr>
@@ -136,7 +146,7 @@
 
             <template v-if="!loading && members.length == 0">
                 <p v-if="cycleOffset === 0" class="info-box">
-                    Er zijn nog geen leden ingeschreven in deze leeftijdsgroep.
+                    Er zijn nog geen leden ingeschreven in deze inschrijvingsgroep.
                 </p>
 
                 <p v-else class="info-box">
@@ -157,6 +167,16 @@
                     <span class="icon arrow-right" />
                 </button>
             </div>
+
+            <button v-if="canEnd" class="button text gray" @click="goEnd">
+                <span class="icon redo" />
+                <span>Begin nieuwe inschrijvingsperiode</span>
+            </button>
+
+            <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
+                <span class="icon undo" />
+                <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
+            </button>
         </main>
 
         <STToolbar>
@@ -221,6 +241,7 @@ import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditGroupView from "./EditGroupView.vue";
+import EndRegistrationPeriodView from "./EndRegistrationPeriodView.vue";
 import GroupListSelectionContextMenu from "./GroupListSelectionContextMenu.vue";
 
 class SelectableMember {
@@ -331,11 +352,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.group) {
             return false
         }
-        return this.group.cycle >= this.cycleOffset // always allow to go to -1
+        return this.group.cycle >= this.cycleOffset && !this.loading // always allow to go to -1
     }
 
     get canGoNext() {
-        return this.cycleOffset > 0
+        return this.cycleOffset > 0 && !this.loading
     }
 
     get hasFull(): boolean {
@@ -391,6 +412,32 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     goBack() {
         this.cycleOffset++
         this.reload()
+    }
+
+    get canEnd() {
+        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length > 0 && this.hasFull
+    }
+
+    get canUndoEnd() {
+        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull && this.group.cycle > 0
+    }
+
+    goEnd() {
+        if (!this.group) {
+            return
+        }
+        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+        const ids = parents.flatMap(p => p.groupIds)
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids }).setDisplayStyle("popup"))
+    }
+
+    goUndoEnd() {
+        if (!this.group) {
+            return
+        }
+        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+        const ids = parents.flatMap(p => p.groupIds)
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids, undo: true }).setDisplayStyle("popup"))
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {

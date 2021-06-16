@@ -1,11 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { GroupPermissions,OrganizationSimple, PermissionLevel,Permissions, TradedInvite, User as UserStruct } from "@stamhoofd/structures";
-
 import { Invite } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
-import { Token, TokenWithUser } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { OrganizationSimple, PermissionLevel,Permissions, TradedInvite, User as UserStruct } from "@stamhoofd/structures";
+
 type Params = { key: string };
 type Query = undefined;
 type Body = undefined
@@ -101,6 +100,7 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             user.permissions.roles = invite.permissions.roles
+            user.permissions.level = invite.permissions.level
 
             await user.save();
         }
