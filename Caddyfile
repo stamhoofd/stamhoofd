@@ -1,0 +1,17 @@
+localhost {
+	reverse_proxy api:5000
+	tls internal {
+    		client_auth {
+    			mode request
+    		}
+    	}
+}
+
+*.localhost {
+	reverse_proxy api:5000
+	tls internal {
+    		client_auth {
+    			mode request
+    		}
+    	}
+}

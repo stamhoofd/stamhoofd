@@ -8,6 +8,6 @@ COPY ./shared/ ./shared/
 COPY ./backend/shared/ ./shared/
 
 # This version must be used accoriding to the docs
-RUN yarn policies set-version 1.22.5
+RUN yarn policies set-version 1.19.0
 RUN yarn
 RUN yarn build

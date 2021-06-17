@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # Builds the shared depenencies and fetches the shared packages
+  #Builds the shared depenencies and fetches the shared packages
   common:
     build: .
     image: stamhoofd_common
@@ -26,7 +26,7 @@ services:
   migrations:
     build:
       context: ./backend/app/api
-      dockerfile: migrations.Dockerfile
+      dockerfile: Dockerfile.migrations
     image:
       stamhoofd_migratios
     environment:
@@ -40,40 +40,43 @@ services:
       - backend_db
     restart: on-failure
 
-#  backend:
-#    build:
-#      context: ./backend/app/api
-#      dockerfile: Dockerfile
-#    image: stamhoofd_backend
-#    expose:
-#      - 80
-#    environment:
-#      DB_HOST: db
-#      DB_USER: stamhoofd
-#      DB_PASS: stamhoofd
-#      DB_DATABASE: stamhoofd
-#      PORT: 80
-#    links:
-#      - 'backend_db:db'
-#    depends_on:
-#      - common
-#      - backend_db
-#      - migrations
+  backend:
+    build:
+      context: ./backend/app/api
+      dockerfile: Dockerfile
+    image: stamhoofd_backend
+    expose:
+      - 5000
+    environment:
+      DB_HOST: db
+      DB_USER: stamhoofd
+      DB_PASS: stamhoofd
+      DB_DATABASE: stamhoofd
+      PORT: 5000
+    links:
+      - 'backend_db:db'
+    depends_on:
+      - common
+      - backend_db
+      - migrations
 
-#  proxy:
-#    build: ./proxy
-#    image: stamhoofd_proxy
-#    restart: unless-stopped
-#    ports:
-#      - '80:80'
-#      - '443:443'
-#    links:
-#      - "backend:api"
-#    depends_on:
-#      - backend
-#    expose:
-#      - '80'
-#      - '443'
+  proxy:
+    image: caddy:2.3.0
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    links:
+      - "backend:api"
+    depends_on:
+      - backend
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data:/data
+      - ./config:/config
+    expose:
+      - '80'
+      - '443'
 
 volumes:
   db:
