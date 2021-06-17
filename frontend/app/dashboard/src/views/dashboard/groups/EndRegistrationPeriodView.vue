@@ -26,6 +26,7 @@
                     Kies hieronder voor welke inschrijvingsgroepen je een nieuwe inschrijvingsperiode wilt starten.
                 </p>
             </template>
+
             <template v-else>
                 <p>Er werd een nieuwe inschrijvingsperiode gestart voor bepaalde inschrijvingsgroepen. Aangezien er nog geen leden zijn ingeschreven in de nieuwe periode, kan je de nieuwe periode nog ongedaan maken en terug schakelen naar de vorige inschrijvingsperiode.</p>
                 
@@ -33,6 +34,8 @@
                     Kies hieronder voor welke inschrijvingsgroepen je terug wilt naar de vorige inschrijvingsperiode
                 </p>
             </template>
+
+            <STErrorsDefault :error-box="errorBox" />
 
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                 <hr>
@@ -90,7 +93,6 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 })
 export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
-    validator = new Validator()
     saving = false
 
     @Prop({ required: true })
@@ -131,13 +133,7 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
             return
         }
 
-        const valid = await this.validator.validate()
-
-        if (!valid) {
-            return;
-        }
         this.saving = true
-
         this.errorBox = null
 
         try {
@@ -194,6 +190,7 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
 
             new Toast("Vergeet niet om ook de inschrijvingsdatums aan te passen.", "warning yellow").show()
         } catch (e) {
+            console.log(e)
             this.errorBox = new ErrorBox(e)
         }
 
