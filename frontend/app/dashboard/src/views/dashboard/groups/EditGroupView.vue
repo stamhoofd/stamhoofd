@@ -345,7 +345,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
-import { GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -827,7 +827,23 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         if (!await CenteredMessage.confirm("Ben je zeker dat je deze inschrijvingsgroep wilt verwijderen?", "Verwijderen")) {
             return
         }
-        const p = Organization.patch({})
+        
+        // Find all parent categories and delete this group
+        const parents = this.patchedGroup.getParentCategories(this.patchedOrganization.meta.categories, false)
+        const metaPatch = OrganizationMetaData.patch({})
+        for (const category of parents) {
+            const gp = GroupCategory.patch({
+                id: category.id,
+            })
+            gp.groupIds.addDelete(this.group.id)
+            metaPatch.categories.addPatch(gp)
+        }
+
+        const p = Organization.patch({
+            meta: metaPatch
+        })
+
+        // Delete the group from the organization
         p.groups.addDelete(this.group.id)
 
         this.errorBox = null
