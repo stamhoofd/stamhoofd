@@ -2,12 +2,8 @@
 @use "../base/text-styles" as *;
 
 .split-view-controller {
-    background: $color-white-shade;
-
     > .master {
-        z-index: 100;
-        background: $color-white-shade;
-        
+        z-index: 100;        
     }
 
     > .detail {
@@ -17,6 +13,7 @@
     &[data-has-detail="true"] {
         > .master {
             border-right: 2px solid $color-border;
+            background: $color-white-shade;
         }
     }
 }

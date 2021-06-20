@@ -14,14 +14,14 @@
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
     padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) var(--st-horizontal-padding, 40px);
+    
+    padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
-    > * {
+    > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
-    }
-
-    > main {
+        --keyboard-height: 0px;
 
         &.limit-width {
             display: flex;

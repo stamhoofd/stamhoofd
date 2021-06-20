@@ -172,4 +172,9 @@ export default class App extends Vue {
 // We need to include the component styling of vue-app-navigation first
 @use "~@stamhoofd/scss/main";
 @import "~@simonbackx/vue-app-navigation/dist/main.css";
+
+html {
+    -webkit-touch-callout:none;
+    user-select: none;
+}
 </style>

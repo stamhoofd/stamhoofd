@@ -26,7 +26,7 @@ export default class LoadingView extends Vue {
 @use '~@stamhoofd/scss/base/text-styles';
 
 .loading-view {
-    position: fixed;
+    position: absolute;
     z-index: 20;
     left: 0;
     top: 0;

@@ -1,121 +1,127 @@
 <template>
-    <div class="st-menu">
-        <div class="padding-group">
-            <Logo />
-            <button id="organization-switcher" @click="switchOrganization">
-                <span class="text">{{ organization.name }}</span>
-            </button>
+    <div class="st-menu st-view">
+        <STNavigationBar :title="organization.name" />
+        <main>
+            <h1 @click="switchOrganization">
+                <span>{{ organization.name }}</span>
+                <span class="icon arrow-down" />
+            </h1>
 
-            <input v-if="false" class="input search" placeholder="Zoeken">
-        </div>
-
-        <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
-            <span class="icon info-filled" />
-            <span>Documentatie</span>
-        </a>
-
-        <a v-if="enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
-            <span class="icon external" />
-            <span>Jouw inschrijvingspagina</span>
-        </a>
-
-        <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
-            <span class="icon gift" />
-            <span>Wat is er nieuw?</span>
-            <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
-        </button>
-
-        <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
-            <span class="icon key" />
-            <span>Gebruikers goedkeuren</span>
-            <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
-        </button>
-
-        <hr v-if="whatsNewBadge || enableMemberModule || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
-
-        <template v-if="enableMemberModule">
-            <div v-for="category in tree.categories">
-                <div>
-                    <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
-                        <span class="icon group" />
-                        <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
-                    </button>
-
-                    <button
-                        v-for="group in category.groups"
-                        :key="group.id"
-                        class="menu-button button"
-                        :class="{ selected: currentlySelected == 'group-'+group.id }"
-                        @click="openGroup(group)"
-                    >
-                        <span>{{ group.settings.name }}</span>
-                    </button>
-
-                    <button
-                        v-for="c in category.categories"
-                        :key="c.id"
-                        class="menu-button button"
-                        :class="{ selected: currentlySelected == 'category-'+c.id }"
-                        @click="openCategory(c)"
-                    >
-                        <span>{{ c.settings.name }}</span>
-                    </button>
-                </div>
-                <hr>
-            </div>
-        </template>
-    
-
-        <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
-            <button class="menu-button heading">
-                <span class="icon basket" />
-                <span>Verkopen</span>
-                <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
+            <div v-if="false" class="padding-group">
+                <Logo />
+                <button id="organization-switcher" @click="switchOrganization">
+                    <span class="text">{{ organization.name }}</span>
                 </button>
+            </div>
+
+            <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
+                <span class="icon info-filled" />
+                <span>Documentatie</span>
+            </a>
+
+            <a v-if="enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
+                <span class="icon external" />
+                <span>Jouw inschrijvingspagina</span>
+            </a>
+
+            <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
+                <span class="icon gift" />
+                <span>Wat is er nieuw?</span>
+                <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
             </button>
 
-            <button
-                v-for="webshop in webshops"
-                :key="webshop.id"
-                class="menu-button button"
-                :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
-                @click="openWebshop(webshop)"
-            >
-                {{ webshop.meta.name }}
-            </button>
-        </div>
-        <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
-
-        <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
-            <span class="icon card" />
-            <span>Overschrijvingen</span>
-        </button>
-
-        <div v-if="fullAccess">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
-                <span class="icon settings" />
-                <span>Instellingen</span>
+            <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+                <span class="icon key" />
+                <span>Gebruikers goedkeuren</span>
+                <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
             </button>
 
-            <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
-                <span class="icon sync" />
-                <span>Groepsadministratie</span>
+            <hr v-if="whatsNewBadge || enableMemberModule || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
+
+            <template v-if="enableMemberModule">
+                <div v-for="category in tree.categories">
+                    <div>
+                        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                            <span class="icon group" />
+                            <span>{{ category.settings.name }}</span>
+                            <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
+                        </button>
+
+                        <button
+                            v-for="group in category.groups"
+                            :key="group.id"
+                            class="menu-button button"
+                            :class="{ selected: currentlySelected == 'group-'+group.id }"
+                            @click="openGroup(group)"
+                        >
+                            <span>{{ group.settings.name }}</span>
+                        </button>
+
+                        <button
+                            v-for="c in category.categories"
+                            :key="c.id"
+                            class="menu-button button"
+                            :class="{ selected: currentlySelected == 'category-'+c.id }"
+                            @click="openCategory(c)"
+                        >
+                            <span>{{ c.settings.name }}</span>
+                        </button>
+                    </div>
+                    <hr>
+                </div>
+            </template>
+        
+
+            <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
+                <button class="menu-button heading">
+                    <span class="icon basket" />
+                    <span>Verkopen</span>
+                    <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
+                        <span class="icon add" />
+                        <span>Nieuw</span>
+                    </button>
+                </button>
+
+                <button
+                    v-for="webshop in webshops"
+                    :key="webshop.id"
+                    class="menu-button button"
+                    :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
+                    @click="openWebshop(webshop)"
+                >
+                    {{ webshop.meta.name }}
+                </button>
+            </div>
+            <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
+
+            <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
+                <span class="icon card" />
+                <span>Overschrijvingen</span>
             </button>
-        </div>
-        <hr v-if="fullAccess || canManagePayments">
-        <div class="">
-            <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
-                <span class="icon user" />
-                <span>Mijn account</span>
-            </button>
-            <button class="menu-button button heading" @click="logout">
-                <span class="icon logout" />
-                <span>Uitloggen</span>
-            </button>
-        </div>
+
+            <div v-if="fullAccess">
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
+                    <span class="icon settings" />
+                    <span>Instellingen</span>
+                </button>
+
+                <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
+                    <span class="icon sync" />
+                    <span>Groepsadministratie</span>
+                </button>
+            </div>
+            <hr v-if="fullAccess || canManagePayments">
+            <div class="">
+                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
+                    <span class="icon user" />
+                    <span>Mijn account</span>
+                </button>
+                <button class="menu-button button heading" @click="logout">
+                    <span class="icon logout" />
+                    <span>Uitloggen</span>
+                </button>
+            </div>
+        </main>
     </div>
 </template>
 
@@ -124,7 +130,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo, Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -148,7 +154,8 @@ import WebshopView from './webshop/WebshopView.vue';
 
 @Component({
     components: {
-        Logo
+        Logo,
+        STNavigationBar
     },
     directives: {
         tooltip: TooltipDirective

@@ -1,0 +1,23 @@
+{
+    "name": "@stamhoofd/mobile",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "serve": "NODE_ENV=development webpack serve --hot",
+        "build": "NODE_ENV=development webpack --progress ",
+        "sync": "cap sync",
+        "ios": "cap open ios",
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
+    },
+    "dependencies": {
+        "@capacitor/cli": "^3.0.1",
+        "@capacitor/core": "^3.0.1",
+        "@capacitor/ios": "^3.0.1",
+        "@capacitor/keyboard": "^1.0.1",
+        "@capacitor/status-bar": "^1.0.1",
+        "@stamhoofd/assets": "1.0.0",
+        "@stamhoofd/components": "1.0.0",
+        "@stamhoofd/scss": "1.0.0",
+        "smoothscroll-polyfill": "^0.4.4"
+    }
+}
