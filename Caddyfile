@@ -1,14 +1,12 @@
-localhost {
-	reverse_proxy api:5000
-	tls internal {
-    		client_auth {
-    			mode request
-    		}
-    	}
+(cors) {
+  @origin{args.0} header Origin {args.0}
+  header @origin{args.0} Access-Control-Allow-Origin "{args.0}"
 }
 
-*.localhost {
-	reverse_proxy api:5000
+localhost, *.localhost {
+    header Access-Control-Allow-Methods "POST, GET, OPTIONS"
+    header Access-Control-Allow-Headers "*"
+	reverse_proxy localhost:5000
 	tls internal {
     		client_auth {
     			mode request
