@@ -13,10 +13,6 @@
                     </button>
 
                     <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-
-                    <button class="button text" @click="duplicateGroup">
-                        <span class="icon copy" />
-                    </button>
                     
                     <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                         <span class="icon add" />
@@ -47,10 +43,6 @@
                 </button>
 
                 <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-
-                <button class="button text" @click="duplicateGroup">
-                    <span class="icon copy" />
-                </button>
 
                 <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
                     <span class="icon add" />
@@ -529,42 +521,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             })
         }).setDisplayStyle("popup"))
-    }
-
-    duplicateGroup() {
-      if (!this.group && !this.category && this.group) {
-        return;
-      }
-
-      const newGroup = Group.create({
-        settings: GroupSettings.create({...this.group?.settings}),
-        privateSettings: GroupPrivateSettings.create({})
-      })
-      newGroup.settings.name = newGroup.settings.name + " Kopie"
-      const meta = OrganizationMetaData.patch({})
-
-      const me = GroupCategory.patch({id: this.category?.id})
-      me.groupIds.addPut(newGroup.id)
-      meta.categories.addPatch(me)
-
-      const p = Organization.patch({
-        id: OrganizationManager.organization.id,
-        meta
-      })
-
-      p.groups.addPut(newGroup)
-
-      this.present(new ComponentWithProperties(EditGroupView, {
-        group: newGroup,
-        organization: OrganizationManager.organization.patch(p),
-        saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-          await OrganizationManager.patch(p.patch(patch))
-          console.log("saved")
-          this.show(new ComponentWithProperties(GroupMembersView, {
-            group: newGroup
-          }))
-        }
-      }).setDisplayStyle("popup"))
     }
 
     modifyGroup() {
