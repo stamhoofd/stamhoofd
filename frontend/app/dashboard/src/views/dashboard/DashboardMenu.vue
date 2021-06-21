@@ -45,7 +45,7 @@
                         :key="group.id"
                         class="menu-button button"
                         :class="{ selected: currentlySelected == 'group-'+group.id }"
-                        @click="openGroup(category,group)"
+                        @click="openGroup(group)"
                     >
                         <span>{{ group.settings.name }}</span>
                     </button>
@@ -63,7 +63,7 @@
                 <hr>
             </div>
         </template>
-    
+
 
         <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
             <button class="menu-button heading">
@@ -87,7 +87,7 @@
         </div>
         <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
-        <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
+        <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)">
             <span class="icon card" />
             <span>Overschrijvingen</span>
         </button>
@@ -160,11 +160,11 @@ export default class Menu extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization
     }
-    
+
     get registerUrl() {
         if (this.organization.registerDomain) {
             return "https://"+this.organization.registerDomain
-        } 
+        }
 
         return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
@@ -225,7 +225,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             for (const group of this.organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(this.organization.categoryTree,group, false)
+                    this.openGroup(group, false)
                     didSet = true
                     break;
                 }
@@ -245,7 +245,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet) {
             HistoryManager.setUrl("/")
         }
-        
+
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
             //if (this.groups.length > 0) {
                 //this.openGroup(this.groups[0], false)
@@ -307,7 +307,7 @@ export default class Menu extends Mixins(NavigationMixin) {
                     console.error(e)
                     new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
                 }
-                
+
                 // Remove invite if succeeded
                 await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
@@ -351,9 +351,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
     }
 
-    openGroup(category: GroupCategoryTree, group: Group, animated = true) {
+    openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group, category }) }).setAnimated(animated));
+        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
     }
 
     manageKeys(animated = true) {
