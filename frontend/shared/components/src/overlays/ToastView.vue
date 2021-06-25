@@ -7,7 +7,7 @@
             <div>
                 <div>{{ message }}</div>
                 <button v-if="toast.button" class="button text" @click.stop="clickedButton">
-                    {{ toast.button.text }}
+                    {{ toast.button.text }}
                 </button>
             </div>
             <span v-if="toast.action" class="icon arrow-right" />
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, FramedComponent,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import Spinner from '../Spinner.vue';
@@ -81,7 +81,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
 @use '~@stamhoofd/scss/base/text-styles' as *;
 
 .toast-view-container {
-    padding: 10px 0;
+    padding: 5px 0;
 }
 
 .toast-view {
@@ -94,6 +94,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
 
     @media (max-width: 450px) {
         padding: 15px 20px;
+        width: 100%;
     }
 
     box-sizing: border-box;

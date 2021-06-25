@@ -4,7 +4,7 @@
         <main>
             <h1 @click="switchOrganization">
                 <span>{{ organization.name }}</span>
-                <span class="icon arrow-down" />
+                <span class="icon arrow-down-small gray" />
             </h1>
 
             <div v-if="false" class="padding-group">

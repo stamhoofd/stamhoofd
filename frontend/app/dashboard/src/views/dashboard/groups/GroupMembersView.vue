@@ -299,8 +299,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     checkingInaccurate = false
 
     mounted() {
-        //this.reload();
-
         // Set url
         if (this.group) {
             HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
@@ -446,8 +444,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
     }
 
-    activated() {
+    created() {
         this.reload();
+    }
+
+    activated() {
         MemberManager.addListener(this, this.onUpdateMember)
     }
 

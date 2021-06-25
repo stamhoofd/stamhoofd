@@ -42,7 +42,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                 member.users,
                 groups
             )
-            members.push(decryptedMember)
+            members.push(Object.freeze(decryptedMember) as any)
         }
 
         return members;

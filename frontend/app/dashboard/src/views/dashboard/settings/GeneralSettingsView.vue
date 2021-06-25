@@ -2,7 +2,7 @@
     <div id="general-settings-view" class="st-view background">
         <STNavigationBar title="Instellingen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else class="button icon close gray" @click="pop" slot="right" />
+            <button v-else slot="right" class="button icon close gray" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -58,18 +58,14 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, File, Image, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { Address, Organization, OrganizationPatch, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import DNSRecordsView from './DNSRecordsView.vue';
-import DomainSettingsView from './DomainSettingsView.vue';
-import EmailSettingsView from './EmailSettingsView.vue';
 
 @Component({
     components: {

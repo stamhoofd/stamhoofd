@@ -104,6 +104,20 @@
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg">
+                        <h2 class="style-title-list">
+                            Jouw inschrijvingspagina
+                        </h2>
+                        <p class="style-description">
+                            Via deze weg kunnen leden zelf online inschrijven
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
@@ -159,7 +173,7 @@
                 <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                     <h2 class="style-title-list">
-                        Mijn pakketten
+                        Jouw pakketten
                     </h2>
                     <p class="style-description">
                         Wijzig je pakketten of activeer nieuwe functies
@@ -228,6 +242,7 @@ import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import ReferralView from './ReferralView.vue';
+import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 
 @Component({
     components: {
@@ -329,6 +344,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     openBilling(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(BillingSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    manageRegistrationPage(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(RegistrationPageSettingsView)
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
