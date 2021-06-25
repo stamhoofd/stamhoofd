@@ -18,7 +18,6 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         max-width: 100%;
-        box-sizing: border-box;
     
         > .text {
             overflow: hidden;
@@ -75,6 +74,7 @@
         height: 45px;
         transition: transform 0.2s, background-color 0.2s, color 0.2s;
         text-align: left;
+        box-sizing: content-box;
 
         text-overflow: ellipsis;
         vertical-align: middle;

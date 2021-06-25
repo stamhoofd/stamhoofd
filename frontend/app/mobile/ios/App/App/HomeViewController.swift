@@ -19,5 +19,6 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.scrollView.bounces = true
         self.webView!.allowsLinkPreview = false
         self.webView!.scrollView.keyboardDismissMode = .interactive
+        self.webView!.configuration.suppressesIncrementalRendering = true
     }
 }

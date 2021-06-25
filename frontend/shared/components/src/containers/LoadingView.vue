@@ -32,6 +32,8 @@ export default class LoadingView extends Vue {
     top: 0;
     bottom: 0;
     right: 0;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
     opacity: 1;
     background: $color-white-shade;
     display: flex;

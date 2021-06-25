@@ -81,13 +81,10 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 
 // Faster click handling
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-document.body.addEventListener("touchstart", () => { }, { passive: true });
+window.addEventListener("touchstart", () => { }, { passive: true });
 
 // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
 document.documentElement.style.setProperty("--navigation-bar-margin", `0px`);
 
 // Disable swipe back animations (or they will play twice)
 HistoryManager.animateHistoryPop = false;
-
-// Click next to an input to blur it and lose focus (remove the keyboard)
-(document.body.firstElementChild! as HTMLElement).tabIndex = -1

@@ -456,9 +456,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             }).setDisplayStyle("popup").setAnimated(false))
         }
 
-        this.loadAdmins().catch(e => {
+        /*this.loadAdmins().catch(e => {
             console.error(e)
-        })
+        })*/
     }
 }
 </script>
