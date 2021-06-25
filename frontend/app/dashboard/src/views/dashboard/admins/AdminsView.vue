@@ -18,7 +18,7 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
+            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan in meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
 
             <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
                 Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
