@@ -15,6 +15,7 @@
             android:name="app.stamhoofd.stamhoofd.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTask">
 
             <intent-filter>
