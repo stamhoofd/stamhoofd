@@ -1,8 +1,8 @@
 <template>
-    <div class="st-view" id="dns-records-view">
+    <div id="dns-records-view" class="st-view">
         <STNavigationBar title="Instellingen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon close gray" v-if="!canPop && canDismiss" @click="dismiss"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -10,14 +10,20 @@
                 Pas de volgende instellingen aan
             </h1>
         
-            <p class="st-list-description">Stel volgende de DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.</p>
+            <p class="st-list-description">
+                Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
+            </p>
             
             <div v-for="record in records" :key="record.id">
                 <DNSRecordBox :record="record" />
             </div>
 
-            <p class="warning-box">Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.</p>
-            <p class="warning-box">Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.</p>
+            <p class="warning-box">
+                Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
+            </p>
+            <p class="warning-box">
+                Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
+            </p>
         </main>
 
         <STToolbar>
@@ -35,13 +41,14 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationDomains } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
+
 import { OrganizationManager } from "../../../classes/OrganizationManager"
-import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
+import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
 
 @Component({
     components: {

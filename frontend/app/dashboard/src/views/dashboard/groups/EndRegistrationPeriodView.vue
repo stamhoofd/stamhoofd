@@ -148,7 +148,8 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
             for (const id of this.groupIds) {
                 const group = OrganizationManager.organization.groups.find(g => g.id === id)
                 if (!group) {
-                    throw new Error("Een groep bestaat niet meer")
+                    // Skip this error: probably an invalid group ID in a category which was caused by deleting a group directly
+                    continue
                 }
 
                 const settings = GroupSettings.patch({})

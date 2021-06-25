@@ -28,7 +28,9 @@ This is what you need to know:
 1. Try to keep all communication in English, even when you know everyone is speaking the same language. It makes it easier for others to find answers to some questions later on and to join a conversation. We know the software is currently in Dutch only, but that will change in the future ;) 
 2. We recommend you to create an issue before starting to build something (unless it is a bugfix or a small improvement, then you can open up a PR right away). Big features should be discussed first.
 3. Look at the issues if you want to help build something, or open an issue if you want to help but don't know where to start
-4. Before we can merge a pull request, you'll need to sign a contributor license agreement (CLA in short, we use the Apache template). This is to both protect your work and the project (to make sure all the work of the community doesn't get endangered by an individual). We'll send you the contributor license agreement when you need it (todo: upload the CLA to the website).
+4. Create a pull request, make a draft if you feel some discussion is needed or if you want to show your WIP
+
+We're experimenting with a better way to communicate with the community. We've joined the [Matrix network](https://matrix.org). Join our private, end-to-end encrypted chat at [chat.stamhoofd.dev](https://chat.stamhoofd.dev) and say hi 👋 in the `General` channel.
 
 ## Development
 

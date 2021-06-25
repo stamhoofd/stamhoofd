@@ -36,7 +36,7 @@
                 </Checkbox>
 
                 <p v-if="!allowData && dataRequired" class="warning-box">
-                    Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet op kan reageren in de juiste situaties (bv. allergisch voor bepaalde stof).
+                    Je bent vrij om geen gevoelige gegevens in te vullen, maar dan aanvaard je uiteraard ook de risico's die ontstaan doordat {{ organization.name }} geen weet heeft van belangrijke zaken en daar niet juist op kan reageren in bepaalde situaties (bv. allergisch voor bepaalde stof).
                 </p>
             </template>
 
