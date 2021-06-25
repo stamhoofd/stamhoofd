@@ -19,7 +19,7 @@
                 <span>Documentatie</span>
             </a>
 
-            <a v-if="enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
+            <a v-if="false && enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
                 <span class="icon external" />
                 <span>Jouw inschrijvingspagina</span>
             </a>
@@ -36,7 +36,7 @@
                 <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
             </button>
 
-            <hr v-if="whatsNewBadge || enableMemberModule || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
+            <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
 
             <template v-if="enableMemberModule">
                 <div v-for="category in tree.categories">

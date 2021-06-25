@@ -79,6 +79,9 @@
                 transition: background-color 0.15s;
                 cursor: pointer;
                 touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                user-select: none;
+
                 @media (hover: hover) {
                     &:hover {
                         background-color: $color-primary-lighter;

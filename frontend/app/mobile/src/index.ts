@@ -58,6 +58,9 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 
     if (Capacitor.getPlatform() === 'ios') {
         StatusBar.setStyle({ style: Style.Light }).catch(e => console.error(e));
+
+        // Disable swipe back animations (or they will play twice)
+        HistoryManager.animateHistoryPop = false;
     }
 
     Keyboard.addListener('keyboardWillShow', info => {
@@ -85,6 +88,3 @@ window.addEventListener("touchstart", () => { }, { passive: true });
 
 // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
 document.documentElement.style.setProperty("--navigation-bar-margin", `0px`);
-
-// Disable swipe back animations (or they will play twice)
-HistoryManager.animateHistoryPop = false;

@@ -1,0 +1,23 @@
+{
+	"appId": "app.stamhoofd.stamhoofd",
+	"appName": "Stamhoofd",
+	"webDir": "dist",
+	"bundledWebRuntime": false,
+	"loggingBehavior": "none",
+	"plugins": {
+		"Keyboard": {
+			"resize": "none"
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	},
+	"server": {
+		"url": "http://192.168.0.7:8080",
+		"cleartext": true
+	}
+}
