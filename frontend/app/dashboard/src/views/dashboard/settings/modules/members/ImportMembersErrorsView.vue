@@ -7,7 +7,7 @@
 
         <main>
             <h1>Kijk deze fouten na</h1>
-            <p>In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden intepreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.</p>
+            <p>In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.</p>
 
             <table class="data-table">
                 <thead>
