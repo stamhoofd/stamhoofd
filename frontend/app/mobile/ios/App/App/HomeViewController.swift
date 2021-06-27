@@ -20,5 +20,19 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.allowsLinkPreview = false
         self.webView!.scrollView.keyboardDismissMode = .interactive
         self.webView!.configuration.suppressesIncrementalRendering = true
+        
+        // Disable 3D Touch
+        self.webView!.allowsLinkPreview = false
+        
+        // Better defaults
+        self.webView!.configuration.allowsInlineMediaPlayback = true
+        self.webView!.configuration.mediaTypesRequiringUserActionForPlayback = []
+        
+        self.webView!.configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+        /*if #available(iOS 14.5, *) {
+            self.webView!.configuration.preferences.textInteractionEnabled = false
+        } else {
+            // Fallback on earlier versions
+        }*/
     }
 }

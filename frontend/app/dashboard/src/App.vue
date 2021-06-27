@@ -177,6 +177,6 @@ html {
     -webkit-touch-callout:none;
     user-select: none;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
--webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent;
 }
 </style>

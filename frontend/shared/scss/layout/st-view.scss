@@ -17,6 +17,7 @@
     
     padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
+    transition: padding-bottom 0.2s;
 
     > main {
         // We fixed the safe area, no need to recorrect it again
@@ -158,13 +159,5 @@
     > main.limit-width {
         --st-horizontal-padding: var(--st-view-horizontal-padding);
         padding: 0;
-    }
-}
-
-
-// Improve animation performance
-.navigation-controller {
-    > * > * {
-        will-change: scroll-position;
     }
 }

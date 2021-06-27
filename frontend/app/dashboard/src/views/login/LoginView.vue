@@ -1,5 +1,5 @@
 <template>
-    <form class="auto st-view login-view" @submit.prevent="submit">
+    <form class=" st-view login-view" @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
@@ -38,7 +38,7 @@
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { AppManager, LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -61,6 +61,10 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     email = this.initialEmail
     password = ""
+
+    get isNative() {
+        return AppManager.shared.isNative
+    }
 
     mounted() {
         // Search for the session

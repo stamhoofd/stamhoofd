@@ -6,6 +6,7 @@
 
     #organization-switcher {
         margin-bottom: 15px;
+        padding-left: 40px;
         display: flex;
         align-items: center;
         touch-action: manipulation;
@@ -30,15 +31,6 @@
         &:active {  
             opacity: 0.4;
             transition: none;
-        }
-
-        &::after {
-            content: "";
-            display: block;
-            width: 10px;
-            height: 10px;
-            margin-left: 5px;;
-            background: url("~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg") center center no-repeat;
         }
     }
 

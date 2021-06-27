@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { LoginHelper, SessionManager } from '@stamhoofd/networking'
-import { Invite, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus, User } from '@stamhoofd/structures'
+import { Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures'
 
 /**
  * Convenient access to the organization of the current session

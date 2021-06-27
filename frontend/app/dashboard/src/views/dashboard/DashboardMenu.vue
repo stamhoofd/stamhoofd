@@ -1,16 +1,17 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="organization.name" />
+        <STNavigationBar v-if="isNative" :title="organization.name" />
         <main>
-            <h1 @click="switchOrganization">
+            <h1 v-if="isNative" @click="switchOrganization">
                 <span>{{ organization.name }}</span>
                 <span class="icon arrow-down-small gray" />
             </h1>
 
-            <div v-if="false" class="padding-group">
+            <div v-else class="padding-group">
                 <Logo />
                 <button id="organization-switcher" @click="switchOrganization">
                     <span class="text">{{ organization.name }}</span>
+                    <span class="icon arrow-down-small gray" />
                 </button>
             </div>
 
@@ -39,7 +40,7 @@
             <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
 
             <template v-if="enableMemberModule">
-                <div v-for="category in tree.categories">
+                <div v-for="category in tree.categories" :key="category.id">
                     <div>
                         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                             <span class="icon group" />
@@ -132,7 +133,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
-import { Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { AppManager, Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -176,6 +177,10 @@ export default class Menu extends Mixins(NavigationMixin) {
         } 
 
         return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
+    }
+
+    get isNative() {
+        return AppManager.shared.isNative
     }
 
     get isSGV() {

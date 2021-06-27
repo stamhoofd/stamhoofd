@@ -1,6 +1,6 @@
 <template>
     <div class="st-view shade">
-        <STNavigationBar :large="true" :sticky="true">
+        <STNavigationBar v-if="!isNative" :large="true" :sticky="true">
             <template slot="left">
                 <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
                     <Logo class="responsive" />
@@ -13,15 +13,18 @@
                 </a>
             </template>
         </STNavigationBar>
+        <STNavigationBar v-else :sticky="true" title="Kies jouw vereniging" />
         <main class="limit-width">
-            <div class="organization-selection-view">
-                <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
+            <div class="organization-selection-view" :class="{native: isNative}">
+                <a v-if="!isNative" class="button text" href="https://www.stamhoofd.be" rel="noopener">
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>
                 <h1>Kies jouw vereniging</h1>
-                <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.</p>
                 <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                <p v-if="!loading && filteredResults.length == 0 && !query">
+                    Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                </p>
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
@@ -43,7 +46,7 @@
                     <span>Mijn vereniging staat er niet tussen</span>
                 </button>
 
-                <a href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
+                <a v-if="!isNative" href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
                     <span class="icon add" />
                     <span>Nieuwe vereniging aansluiten</span>
                 </a>
@@ -56,7 +59,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { NetworkManager,SessionManager } from '@stamhoofd/networking';
+import { AppManager, NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -114,6 +117,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     q = ""
     results: OrganizationSimple[] = []
 
+    get isNative() {
+        return AppManager.shared.isNative
+    }
+
     get query() {
         return this.q
     }
@@ -126,7 +133,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     help() {
-        new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+        if (this.isNative) {
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.").addCloseButton("Sluiten").show()
+        } else {
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+        }
     }
 
     gotoSignup() {
@@ -255,87 +266,92 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 </script>
 
 <style lang="scss">
-    @use "~@stamhoofd/scss/base/variables.scss" as *;
-    @use "~@stamhoofd/scss/base/text-styles.scss" as *;
+@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
-    .organization-selection-view {
-        max-width: 500px;
-        margin: 0 auto;
+.organization-selection-view {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
 
-        @media (min-height: 800px) {
-            padding-top: 40px;
-        }
+    @media (min-height: 800px) {
+        padding-top: 40px;
+    }
+
+    &.native {
+        padding-top: 0;
+    }
+
+    > h1 {
+        @extend .style-title-1;
+        padding-bottom: 10px;
+    }
+
+    > p:not([class]) {
+        @extend .style-description;
+        padding-bottom: 20px;
+    }
+
+    > input.search {
+        max-width: none;
+    }
+
+    > .spinner-container {
+        padding: 10px 0;
+    }
+
+    > .search-result {
+        @extend .style-input-shadow;
+        background: $color-white;
+        border: $border-width solid $color-gray-light;
+        padding: 20px 20px;
+        border-radius: $border-radius;
+        margin: 10px 0;
+        transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        display: block;
+        width: 100%;
+        text-align: left;
+        position: relative;
 
         > h1 {
-            @extend .style-title-1;
-            padding-bottom: 10px;
+            @extend .style-title-list;
+            line-height: 1.2;
         }
 
-        > p:not([class]) {
-            @extend .style-description;
-            padding-bottom: 20px;
+        > .floating {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translate(0, -50%);
+            color: $color-gray;
+            transition: color 0.2s;
         }
 
-        > input.search {
-            max-width: none;
+        > p {
+            @extend .style-description-small;
         }
 
-        > .spinner-container {
-            padding: 10px 0;
+        &:hover {
+            border-color: $color-primary-gray-light;
+            background-color: $color-primary-background;
+
+            > .icon.floating {
+                color: $color-primary;
+            }
         }
 
-        > .search-result {
-            @extend .style-input-shadow;
-            background: $color-white;
-            border: $border-width solid $color-gray-light;
-            padding: 20px 20px;
-            border-radius: $border-radius;
-            margin: 10px 0;
-            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            display: block;
-            width: 100%;
-            text-align: left;
-            position: relative;
 
-            > h1 {
-                @extend .style-title-list;
-                line-height: 1.2;
-            }
+        &:active {
+            transform: scale(0.95, 0.95);
+            border-color: $color-primary;
 
-            > .floating {
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translate(0, -50%);
-                color: $color-gray;
-                transition: color 0.2s;
-            }
-
-            > p {
-                @extend .style-description-small;
-            }
-
-            &:hover {
-                border-color: $color-primary-gray-light;
-                background-color: $color-primary-background;
-
-                > .icon.floating {
-                    color: $color-primary;
-                }
-            }
-
-
-            &:active {
-                transform: scale(0.95, 0.95);
-                border-color: $color-primary;
-
-                > .icon.floating {
-                    color: $color-primary;
-                }
+            > .icon.floating {
+                color: $color-primary;
             }
         }
     }
+}
 </style>

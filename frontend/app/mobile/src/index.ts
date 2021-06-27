@@ -7,15 +7,9 @@ import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
+import { AppManager } from '../../../shared/networking';
+
 Vue.use(VueMeta)
-
-import App from "../../dashboard/src/App.vue";
-
-const app = new Vue({
-    render: (h) => h(App),
-}).$mount("#app");
-
-(window as any).app = app;
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -47,10 +41,15 @@ function setKeyboardHeight(height: number) {
     }
 }
 
-const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 150)
+const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 50)
 
 // Implement smooth keyboard behavior on both iOS and Android instead of the bad default handling
 if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
+    AppManager.shared.isNative = true
+    AppManager.shared.platform = Capacitor.getPlatform() as "android" | "ios" | "web"
+
+    // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
+    document.documentElement.style.setProperty("--navigation-bar-margin", `0px`);
 
     // note: for this to work on android, android:windowSoftInputMode="adjustPan" is needed in the activity (manifest)
     // kick off the polyfill!
@@ -86,5 +85,16 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.addEventListener("touchstart", () => { }, { passive: true });
 
-// Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
-document.documentElement.style.setProperty("--navigation-bar-margin", `0px`);
+// Plausible placeholder
+(window as any).plausible = function() {
+    //console.log("Debug plausible with args ", arguments)
+}
+
+// Kick off the app
+import App from "../../dashboard/src/App.vue";
+
+const app = new Vue({
+    render: (h) => h(App),
+}).$mount("#app");
+
+(window as any).app = app;
