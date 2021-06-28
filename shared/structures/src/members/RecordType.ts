@@ -268,7 +268,7 @@ export class RecordTypeHelper {
             case RecordType.TiredQuickly:
                 return "Is snel moe";
             case RecordType.CanNotParticipateInSport:
-                return "Kan niet deelenemen aan sport en spel afgestemd op leeftijd";
+                return "Kan niet deelnemen aan sport en spel afgestemd op leeftijd";
             case RecordType.SpecialSocialCare:
                 return "Bijzondere aandacht nodig bij sociale omgang";
             case RecordType.MedicinePermissions:
