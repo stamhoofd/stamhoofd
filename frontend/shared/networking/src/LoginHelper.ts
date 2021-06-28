@@ -397,7 +397,6 @@ export class LoginHelper {
         const response = await session.server.request({
             method: "POST",
             path: "/oauth/token",
-            // eslint-disable-next-line @typescript-eslint/camelcase
             body: { grant_type: "request_challenge", email: email },
             decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>
         })
@@ -432,8 +431,12 @@ export class LoginHelper {
             tokenResponse = await session.server.request({
                 method: "POST",
                 path: "/oauth/token",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
+                body: { 
+                    grant_type: "challenge", 
+                    email: email, 
+                    challenge: challengeResponse.challenge, 
+                    signature 
+                },
                 decoder: Token as Decoder<Token>
             })
         } catch (e) {
@@ -467,7 +470,6 @@ export class LoginHelper {
 
         // No need to keep awaiting keys now
         this.clearAwaitingKeys()
-
 
         // Clear session first
         // needed to make sure we don't use old keys now

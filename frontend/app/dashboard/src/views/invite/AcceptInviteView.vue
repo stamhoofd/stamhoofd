@@ -84,13 +84,11 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder,Decoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, STErrorsDefault, STToolbar, STInputBox, STNavigationBar, Validator, PasswordStrength } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, KeyConstants,NewUser, OrganizationSimple, Token, TradedInvite,User, Version } from '@stamhoofd/structures';
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components"
+import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { Invite } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import LoginView from '../login/LoginView.vue';
@@ -142,11 +140,19 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
         this.loggedIn = !!this.session && this.session.isComplete()
     }
 
-    tryLogin() {
+    async tryLogin() {
         const session = SessionManager.getSessionForOrganization(this.invite.organization.id)
         if (session && session.canGetCompleted()) {
-            SessionManager.setCurrentSession(session)
-            return
+            try {
+                await SessionManager.setCurrentSession(session)
+            } catch (e) {
+                Toast.fromError(e).show()
+                console.error(e)
+            }
+            if (SessionManager.currentSession?.isComplete()) {
+                // Logged in successfully
+                return
+            }
         }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { 
             initialEmail: this.email,

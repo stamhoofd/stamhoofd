@@ -289,7 +289,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     > p:not([class]) {
         @extend .style-description;
-        padding-bottom: 20px;
+        padding: 10px 0;
     }
 
     > input.search {

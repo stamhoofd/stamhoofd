@@ -1,8 +1,8 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
+import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
-import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
 import { Keychain } from './Keychain'
