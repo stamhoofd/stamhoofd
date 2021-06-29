@@ -134,14 +134,14 @@ export class MemberWithRegistrations extends Member {
     /**
      * Return true if this is a suggested group for this members
      */
-    shouldShowGroup(group: Group, all: GroupCategory[]): boolean {
-        return this.shouldShowGroupError(group, all) === null
+    shouldShowGroup(group: Group, groups: Group[], all: GroupCategory[]): boolean {
+        return this.shouldShowGroupError(group, groups, all) === null
     }
 
     /**
      * These messages are generally not visible, just for reference
      */
-    private shouldShowGroupError(group: Group, all: GroupCategory[]): string | null {        
+    private shouldShowGroupError(group: Group, groups: Group[], all: GroupCategory[]): string | null {        
         // Check all categories maximum limits
         if (this.hasReachedCategoryMaximum(group, all)) {
             return "Al ingeschreven voor maximum aantal"
@@ -149,21 +149,39 @@ export class MemberWithRegistrations extends Member {
 
         // Check if registrations are limited
         if (group.settings.requireGroupIds.length > 0) {
-            if (!this.registrations.find(r => group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
-                return "Niet toegelaten"
-            }
-        }
-
-        // Check if registrations are limited
-        if (group.settings.requirePreviousGroupIds.length > 0) {
-            if (!this.registrations.find(r => group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+            if (!this.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle
+            })) {
                 return "Niet toegelaten"
             }
         }
 
         // Check if registrations are limited
         if (group.settings.preventPreviousGroupIds.length > 0) {
-            if (this.registrations.find(r => group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+            if (this.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
+                return "Niet toegelaten"
+            }
+        }
+
+        // Check if registrations are limited
+        if (group.settings.requirePreviousGroupIds.length > 0) {
+            if (!this.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
                 return "Niet toegelaten"
             }
         }
