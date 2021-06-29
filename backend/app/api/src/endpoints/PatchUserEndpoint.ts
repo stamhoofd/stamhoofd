@@ -1,12 +1,11 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
-import { DevOpsGuru } from 'aws-sdk';
-
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
+import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
+
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<NewUser>
