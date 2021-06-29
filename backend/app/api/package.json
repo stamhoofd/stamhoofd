@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "build": "tsc -b",
+        "build": "rm -rf ./dist/src/migrations && tsc -b",
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "test": "yarn build:full && jest",

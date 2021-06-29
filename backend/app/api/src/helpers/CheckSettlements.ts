@@ -24,7 +24,7 @@ let lastSettlementCheck: Date | null = null
 
 // Check settlements once a week on tuesday morning/night
 export async function checkSettlements(checkAll = false) {
-    if (lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 6 * 24 * 60 * 60 * 1000) || new Date().getDay() != 2)) {
+    if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 6 * 24 * 60 * 60 * 1000) || new Date().getDay() != 2)) {
         console.log("Skip settlement check")
         return
     }
