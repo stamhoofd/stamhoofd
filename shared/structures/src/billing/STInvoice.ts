@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
 import { File } from "../files/File";
-import { Payment } from "../members/Payment";
+import { Payment, Settlement } from "../members/Payment";
 import { OrganizationSimple } from "../OrganizationSimple";
 import { STPackage, STPackageTypeHelper, STPricingType } from "./STPackage";
 
@@ -234,6 +234,9 @@ export class STInvoice extends AutoEncoder {
 export class STInvoicePrivate extends STInvoice {
     @field({ decoder: OrganizationSimple, optional: true })
     organization?: OrganizationSimple
+
+    @field({ decoder: Settlement, nullable: true })
+    settlement: Settlement | null = null
 }
 
 export class STPendingInvoice extends AutoEncoder {

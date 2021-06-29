@@ -25,6 +25,7 @@
         "@simonbackx/simple-endpoints": "^1.7.2",
         "@types/mysql": "^2.15.9",
         "aws-sdk": "^2.885.0",
+        "axios": "^0.21.1",
         "base-x": "^3.0.8",
         "dotenv": "^8.2.0",
         "formidable": "^1.2.2",
