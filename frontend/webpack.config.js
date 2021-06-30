@@ -7,7 +7,7 @@ const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
-
+const CopyPlugin = require("copy-webpack-plugin");
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
 require('dotenv').config({path: __dirname+'/.env'})
@@ -91,39 +91,25 @@ module.exports = {
             { 
                 test: /\.tsx?$/, 
                 use: [
-                    ...(process.env.NODE_ENV === "production" ? [{
+                    ...(process.env.NODE_ENV === "production" || true ? [{
                         loader: 'babel-loader',
                         options: {
                             babelrc: false,
                             presets: [
                                 [
                                    "@babel/preset-env",
-                                   // Use this for modern build in the future
-                                    /*{
-                                        modules: false,
-                                        useBuiltIns: 'usage',
-                                        targets: {
-                                            "esmodules": true
-                                        },
-                                        corejs: "3.6"
-                                    }*/
                                     {		
                                         "useBuiltIns": "usage",		
-                                        "corejs": "3.8",
-                                        "bugfixes": true // Makes bundle size a bit smaller
+                                        "corejs": { 
+                                            version: "3.15", 
+                                            proposals: true // Somehow this is needed to make string.replaceAll work, don't know why that is a 'proposal'.
+                                        },
+                                        "bugfixes": true, // Makes bundle size a bit smaller
+                                        "debug": true,
+                                        "shippedProposals": true // Also include proposals that are shipped in browsers for a while (such as replcaeAll)
                                     }
                                 ]
-                            ],
-
-                            plugins: [
-                                // for iOS 10 + iOS 11
-                                "@babel/plugin-proposal-object-rest-spread"
                             ]
-
-                            // Remove for modern build:
-                            //"plugins": [		
-                            //    "@babel/plugin-transform-regenerator"		
-                            //]
                         }
                     }] : []),
                     {
@@ -321,7 +307,14 @@ module.exports = {
             as: 'font',
             include: 'all',
             fileWhitelist: [/\.woff2/]
-        })
+        }),
+
+        new CopyPlugin({
+            patterns: [
+                { from: "../../public/out-of-date.html" },
+                { from: "../../public/robots.txt" },
+            ],
+        }),
     ],
     experiments: {
         syncWebAssembly: true // temporary, until fixed

@@ -1,4 +1,4 @@
-import zxcvbn from '@zxcvbn-ts/core'
+import { zxcvbn, ZxcvbnOptions} from '@zxcvbn-ts/core'
 import zxcvbnCommonPackage from '@zxcvbn-ts/language-common'
 import zxcvbnNlBePackage from '@zxcvbn-ts/language-nl-be'
 
@@ -11,5 +11,6 @@ const options = {
 }
 
 export function checkPassword(password: string) {
-    return zxcvbn(password, options)
+  ZxcvbnOptions.setOptions(options)
+  return zxcvbn(password)
 }
