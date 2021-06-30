@@ -164,6 +164,11 @@ export default class App extends Vue {
                 }).setDisplayStyle("popup").setAnimated(false));
             }
         }
+
+        if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+            // Load Windows stylesheet
+            import("@stamhoofd/scss/layout/windows-scrollbars.scss").catch(console.error);
+        }
     }
 }
 </script>

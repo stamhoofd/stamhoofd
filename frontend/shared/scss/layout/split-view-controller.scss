@@ -1,13 +1,17 @@
 @use "../base/variables" as *;
 @use "../base/text-styles" as *;
 
+
 .split-view-controller {
     background: $color-white-shade;
 
     > .master {
         z-index: 100;
         background: $color-white-shade;
-        
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
+
+        overscroll-behavior: contain;
     }
 
     > .detail {
@@ -23,6 +27,10 @@
 
 .popup {
     transform: translate3d(0, 0, 0);
+
+    & > div {
+        overscroll-behavior: contain;
+    }
 }
 
 .sheet {
@@ -30,5 +38,6 @@
 
     > div {
         width: 400px;
+        overscroll-behavior: contain;
     }
 }
