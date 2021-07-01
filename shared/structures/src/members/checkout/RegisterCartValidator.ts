@@ -38,7 +38,13 @@ export class RegisterCartValidator {
 
         // Check if registrations are limited
         if (group.settings.requireGroupIds.length > 0) {
-            if (!member.registrations.find(r => group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
+            if (!member.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle
+            })) {
                 return {
                     closed: true,
                     waitingList: false,
@@ -50,7 +56,13 @@ export class RegisterCartValidator {
 
         // Check if registrations are limited
         if (group.settings.preventPreviousGroupIds.length > 0) {
-            if (member.registrations.find(r => group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+            if (member.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
                 return {
                     closed: true,
                     waitingList: false,
@@ -62,7 +74,13 @@ export class RegisterCartValidator {
 
         // Check if registrations are limited
         if (group.settings.requirePreviousGroupIds.length > 0) {
-            if (!member.registrations.find(r => group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle - 1)) {
+            if (!member.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
                 return {
                     closed: true,
                     waitingList: false,

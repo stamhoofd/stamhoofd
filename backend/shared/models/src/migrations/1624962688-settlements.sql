@@ -1,0 +1,1 @@
+ALTER TABLE `payments` ADD COLUMN `settlement` json NULL COMMENT '' AFTER `id`;

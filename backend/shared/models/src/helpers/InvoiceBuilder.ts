@@ -139,7 +139,7 @@ export class InvoiceBuilder {
         this.document.fontSize(3 * MM);
         this.document.fillColor(COLOR_GRAY_DARK);
         this.document.font('Metropolis-Medium')
-        const date = (this.invoice.paidAt ?? this.invoice.meta.date!)
+        const date = this.invoice.createdAt ?? new Date()
 
         this.document.text("Datum", logoX * MM, this.posY * MM, { align: 'left' })
         this.document.text(Formatter.date(date, true), 43 * MM, this.posY * MM, { align: 'left' })

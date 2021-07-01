@@ -11,6 +11,15 @@
 
 <body>
     <div id="app"></div>
+    <!-- Browser detection script to redirect -->
+    <script lang="text/javascript">
+        // The browsers that we support in the dashboard match the ones that support flatMap
+        var testArray = []
+        if (!(typeof testArray.flatMap === "function")) {
+            window.location = "/out-of-date.html?back="+encodeURIComponent(window.location.pathname+window.location.search);
+            throw new Error("Browser not supported");
+        }
+    </script>
     <!-- built files will be auto injected -->
 </body>
 

@@ -14,6 +14,7 @@ import AWS from 'aws-sdk';
 
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
+import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 
 let isRunningCrons = false
@@ -337,6 +338,9 @@ async function checkReservedUntil() {
     }
 }
 
+
+
+
 // Wait for midnight before checking billing
 let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""
@@ -385,7 +389,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkBilling().then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkSettlements().then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

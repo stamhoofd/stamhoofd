@@ -2,6 +2,26 @@
     "apps": {
         "http": {
             "servers": {
+                "redirect": {
+                    "listen": [
+                        ":80"
+                    ],
+                    "routes": [
+                        {
+                            "handle": [
+                                {
+                                    "handler": "static_response",
+                                    "status_code": "301",
+                                    "headers": {
+                                        "Location": [
+                                            "https://{http.request.hostport}{http.request.uri}"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
                 "stamhoofd.dev": {
                     "listen": [
                         ":443"

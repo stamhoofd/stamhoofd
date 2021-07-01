@@ -155,17 +155,20 @@
             </template>
 
             
-
+            <hr>
+                
             <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
                 <button v-if="canGoBack" class="button text gray" @click="goBack">
                     <span class="icon arrow-left" />
                     <span>Vorige inschrijvingsperiode</span>
                 </button>
+                <div v-else />
 
                 <button v-if="canGoNext" class="button text gray" @click="goNext">
                     <span>Volgende inschrijvingsperiode</span>
                     <span class="icon arrow-right" />
                 </button>
+                <div v-else />
             </div>
 
             <button v-if="canEnd" class="button text gray" @click="goEnd">
@@ -350,7 +353,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.group) {
             return false
         }
-        return this.group.cycle >= this.cycleOffset && !this.loading // always allow to go to -1
+        return !this.loading // always allow to go to -1
     }
 
     get canGoNext() {
@@ -426,7 +429,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
         const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
         const ids = parents.flatMap(p => p.groupIds)
-        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids }).setDisplayStyle("popup"))
+        // Only select groups with the same cycle
+        const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id))
+        const cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: cleanedIds }).setDisplayStyle("popup"))
     }
 
     goUndoEnd() {
@@ -435,7 +441,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
         const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
         const ids = parents.flatMap(p => p.groupIds)
-        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: ids, undo: true }).setDisplayStyle("popup"))
+        // Only select groups with the same cycle
+        const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id))
+        const cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: cleanedIds, undo: true }).setDisplayStyle("popup"))
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
@@ -935,7 +944,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     .history-navigation-bar {
         display: flex;
-        padding-top: 20px;
         justify-content: space-between;
         align-items: center;
         flex-direction: row;

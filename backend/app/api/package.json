@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "build": "tsc -b",
+        "build": "rm -rf ./dist/src/migrations && tsc -b",
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "test": "yarn build:full && jest",
@@ -25,6 +25,7 @@
         "@simonbackx/simple-endpoints": "^1.7.2",
         "@types/mysql": "^2.15.9",
         "aws-sdk": "^2.885.0",
+        "axios": "^0.21.1",
         "base-x": "^3.0.8",
         "dotenv": "^8.2.0",
         "formidable": "^1.2.2",

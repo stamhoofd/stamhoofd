@@ -21,6 +21,9 @@ const start = async () => {
     // External migrations
     await Migration.runAll(path.dirname(modelsPath) + "/migrations");
     await Migration.runAll(path.dirname(emailPath) + "/migrations");
+
+    // Internal
+    await Migration.runAll(__dirname + "/src/migrations");
 };
 
 start()

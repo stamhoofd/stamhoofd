@@ -34,3 +34,23 @@ export class Payment extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date
 }
+
+export class Settlement extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string
+
+    @field({ decoder: StringDecoder })
+    reference: string
+
+    @field({ decoder: DateDecoder })
+    settledAt: Date
+
+    @field({ decoder: IntegerDecoder })
+    amount: number
+}
+
+export class PrivatePayment extends Payment {
+    @field({ decoder: Settlement, nullable: true })
+    settlement: Settlement | null = null
+}
+
