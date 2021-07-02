@@ -1,6 +1,9 @@
 export class AppManager {
     static shared = new AppManager()
 
-    isNative = false
     platform: "android" | "ios" | "web" = "web"
+
+    get isNative(): boolean {
+        return this.platform !== "web"
+    }
 }

@@ -45,7 +45,6 @@ const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 50)
 
 // Implement smooth keyboard behavior on both iOS and Android instead of the bad default handling
 if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
-    AppManager.shared.isNative = true
     AppManager.shared.platform = Capacitor.getPlatform() as "android" | "ios" | "web"
 
     // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
