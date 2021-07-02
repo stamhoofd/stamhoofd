@@ -105,7 +105,7 @@ module.exports = {
                                             proposals: true // Somehow this is needed to make string.replaceAll work, don't know why that is a 'proposal'.
                                         },
                                         "bugfixes": true, // Makes bundle size a bit smaller
-                                        "debug": true,
+                                        // "debug": true, // If you enable, in the debug output, at the top, it will list the used browsers
                                         "shippedProposals": true // Also include proposals that are shipped in browsers for a while (such as replcaeAll)
                                     }
                                 ]
