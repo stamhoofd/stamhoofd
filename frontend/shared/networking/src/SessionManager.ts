@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { Organization, Version } from '@stamhoofd/structures';
 
 import { Session } from './Session';
@@ -104,7 +105,12 @@ export class SessionManagerStatic {
         this.callListeners()
     }
 
-    async setCurrentSession(session: Session) {
+    /**
+     * 
+     * @param session 
+     * @param shouldRetry If you set this to false, setting the session might fail, so make sure to catch this
+     */
+    async setCurrentSession(session: Session, shouldRetry = true) {
         console.log("Changing current session")
         if (this.currentSession) {
             this.currentSession.removeListener(this)
@@ -112,10 +118,11 @@ export class SessionManagerStatic {
         this.currentSession = session
 
         if (session.canGetCompleted() && !session.isComplete()) {
+            // Always request a new user (the organization is not needed)
             session.user = null
 
             try {
-                await session.updateData()
+                await session.updateData(false, shouldRetry)
             } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
@@ -130,8 +137,17 @@ export class SessionManagerStatic {
                     }
                 }
 
+                if (!shouldRetry && Request.isNetworkError(e)) {
+                    // Undo setting the session
+                    this.clearCurrentSession()
+                    throw new SimpleError({
+                        code: "no_internet_connection",
+                        message: e.message,
+                        human: "We konden geen verbinding maken met internet. Kijk jouw internetverbinding na en probeer opnieuw."
+                    })
+                }
+
                 // still set the current session, but logout that session
-                console.log(e)
                 session.temporaryLogout()
             }
         }

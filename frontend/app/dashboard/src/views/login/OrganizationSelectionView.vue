@@ -57,6 +57,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager,SessionManager } from '@stamhoofd/networking';
@@ -191,7 +192,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         HistoryManager.setUrl("/")
     }
 
-    throttleUpdateResults = throttle(this.updateResults.bind(this), 1000);
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
+
+    throttleUpdateResults = throttle(this.updateResults.bind(this), 500);
 
     defaultOrganizations: Organization[] = []
 
@@ -209,8 +214,18 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     startUpdateResults() {
         this.loading = true
+        this.counter++
+        Request.cancelAll(this)
+
+        if (this.query.length == 0) {
+            this.results = []
+            this.loading = false
+            return
+        }
         this.throttleUpdateResults()
     }
+
+    counter = 0
 
     updateResults() {
         if (this.query.length == 0) {
@@ -219,17 +234,31 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             return
         }
         this.loading = true
+        let cachedCount = this.counter
         NetworkManager.server.request({
             method: "GET",
             path: "/organizations/search",
             query: {query: this.query },
-            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>)
+            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>),
+            owner: this
         }).then((response) => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             this.results = response.data
         }).catch(e => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             console.error(e)
             this.results = []
         }).finally(() => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             this.loading = false
         })
     }
@@ -241,7 +270,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const session = SessionManager.getSessionForOrganization(organization.id)
         if (session && session.canGetCompleted()) {
             this.loadingSession = organization.id
-            SessionManager.setCurrentSession(session).then(() => {
+            SessionManager.setCurrentSession(session, false).then(() => {
                 this.loadingSession = null
                 this.updateDefault()
                 if (!session.canGetCompleted() && !session.isComplete()) {

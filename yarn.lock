@@ -2043,10 +2043,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-errors/-/simple-errors-1.3.0.tgz#a2ffbcc942d5950e69fc620bb4a1c7215524a697"
   integrity sha512-IHPCqWe42zO8Op5PWPMi5IewtlDwwwYfUjAmTjoNF0EAS8PDuKGm5wBLtObRpAgIce8WNRz3S0ZGJ2MCInDHvQ==
 
-"@simonbackx/simple-networking@~1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.5.2.tgz#940b1e69d63800dc86c23d54d815ee797e6fd8f7"
-  integrity sha512-1No5Xi/1hMNl60Gyqa7gMy9NNITn3s5LLJw/yyQg6jER5M0s0vtArDULPXA9WP8FB/Rb0TRg6ZScNtVFwzKZHA==
+"@simonbackx/simple-networking@~1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.8.0.tgz#0de75a67f4294ab9d3792be7b1f991df30c58d7b"
+  integrity sha512-Z2fh4uNm8OcY4leEqqKBT8coxlE4OYmr2szsHQlV4/5uZMQm5AvcgljMxjJf9JvVH22Qwcw2vocYsuEGVdjaWA==
 
 "@simonbackx/vue-app-navigation@^1.13.1":
   version "1.13.1"

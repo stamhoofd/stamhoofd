@@ -35,7 +35,7 @@
         "@sentry/integrations": "^6.0.1",
         "@simonbackx/simple-encoding": "^2.2.3",
         "@simonbackx/simple-errors": "^1.3.0",
-        "@simonbackx/simple-networking": "~1.5.2",
+        "@simonbackx/simple-networking": "~1.8.0",
         "@simonbackx/vue-app-navigation": "^1.13.1",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",

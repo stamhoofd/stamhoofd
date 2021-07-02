@@ -398,7 +398,8 @@ export class LoginHelper {
             method: "POST",
             path: "/oauth/token",
             body: { grant_type: "request_challenge", email: email },
-            decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>
+            decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>,
+            shouldRetry: false
         })
         const challengeResponse = response.data
 
@@ -435,9 +436,10 @@ export class LoginHelper {
                     grant_type: "challenge", 
                     email: email, 
                     challenge: challengeResponse.challenge, 
-                    signature 
+                    signature,
                 },
-                decoder: Token as Decoder<Token>
+                decoder: Token as Decoder<Token>,
+                shouldRetry: false
             })
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
@@ -497,7 +499,7 @@ export class LoginHelper {
 
         // if user / orgaznization got cleared due to an invite
         if (!session.isComplete()) {
-            await session.updateData()
+            await session.updateData(false, false)
             // need to wait on this because it changes the permissions
         }
 

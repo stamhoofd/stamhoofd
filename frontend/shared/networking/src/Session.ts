@@ -1,5 +1,5 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
-import { SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
 import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
@@ -206,12 +206,13 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    async fetchUser(): Promise<MyUser> {
+    async fetchUser(shouldRetry = true): Promise<MyUser> {
         console.log("Fetching session user...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
-            decoder: MyUser as Decoder<MyUser>
+            decoder: MyUser as Decoder<MyUser>,
+            shouldRetry
         })
         this.user = response.data
         this.callListeners()
@@ -222,12 +223,13 @@ export class Session implements RequestMiddleware {
         Vue.set(this, "organization", organization)
     }
 
-    async fetchOrganization(): Promise<Organization> {
+    async fetchOrganization(shouldRetry = true): Promise<Organization> {
         console.log("Fetching session organization...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/organization",
-            decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>)
+            decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),
+            shouldRetry
         })
         this.organization = response.data.data
 
@@ -237,19 +239,28 @@ export class Session implements RequestMiddleware {
         return this.organization
     }
 
-    async updateData(force = false) {
+    /**
+     * 
+     * @param force Always fetch new information, even when it is available
+     * @param shouldRetry Keep retrying on network or server issues
+     */
+    async updateData(force = false, shouldRetry = true) {
         console.log("Session update data")
         try {
             if (force || !this.user) {
-                await this.fetchUser()
+                await this.fetchUser(shouldRetry)
             }
 
             if (force || !this.organization || !this.user || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))) {
-                await this.fetchOrganization()
+                await this.fetchOrganization(shouldRetry)
             }
             await this.updateKeys()
         } catch (e) {
-            this.temporaryLogout()
+            if ((isSimpleError(e) || isSimpleErrors(e)) && (e.hasCode("network_error") || e.hasCode("network_timeout"))) {
+                // Network error: do not logout
+            } else {
+                this.temporaryLogout()
+            }
             throw e;
         }
     }

@@ -48,20 +48,20 @@ export class MemberManagerStatic extends MemberManagerBase {
         return members;
     }
 
-    async loadMembers(groupIds: string[] = [], waitingList: boolean | null = false, cycleOffset: number | null = 0): Promise<MemberWithRegistrations[]> {
+    async loadMembers(groupIds: string[] = [], waitingList: boolean | null = false, cycleOffset: number | null = 0, owner?: any): Promise<MemberWithRegistrations[]> {
         if (waitingList === null) {
             // Load both waiting list and without waiting list
             const members: MemberWithRegistrations[] = []
-            members.push(...(await this.loadMembers(groupIds, true, cycleOffset)))
-            members.push(...(await this.loadMembers(groupIds, false, cycleOffset)))
+            members.push(...(await this.loadMembers(groupIds, true, cycleOffset, owner)))
+            members.push(...(await this.loadMembers(groupIds, false, cycleOffset, owner)))
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
         if (cycleOffset === null) {
-            // Load both waiting list and without waiting list
+            // Load both current and future cycle
             const members: MemberWithRegistrations[] = []
-            members.push(...(await this.loadMembers(groupIds, waitingList, 1)))
-            members.push(...(await this.loadMembers(groupIds, waitingList, 0)))
+            members.push(...(await this.loadMembers(groupIds, waitingList, 1, owner)))
+            members.push(...(await this.loadMembers(groupIds, waitingList, 0, owner)))
 
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
@@ -72,7 +72,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             const members: MemberWithRegistrations[] = []
             for (const group of session.organization!.groups) {
                 if (group.privateSettings && group.privateSettings.permissions.getPermissionLevel(session.user!.permissions!) !== PermissionLevel.None) {
-                    members.push(...(await this.loadMembers([group.id], waitingList, cycleOffset)))
+                    members.push(...(await this.loadMembers([group.id], waitingList, cycleOffset, owner)))
                 }
             }
             // remove duplicates
@@ -82,16 +82,19 @@ export class MemberManagerStatic extends MemberManagerBase {
         if (groupIds.length > 1) {
             const members: MemberWithRegistrations[] = []
             for (const groupId of groupIds) {
-                members.push(...(await this.loadMembers([groupId], waitingList, cycleOffset)))
+                members.push(...(await this.loadMembers([groupId], waitingList, cycleOffset, owner)))
             }
             // remove duplicates
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
+
+        console.log("Loading members with owner "+owner, owner)
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupIds[0] + "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)),
-            query: { waitingList, cycleOffset }
+            query: { waitingList, cycleOffset },
+            owner
         })
 
         Keychain.addItems(response.data.keychainItems)

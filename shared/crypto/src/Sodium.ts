@@ -1,3 +1,6 @@
+import { SimpleError } from "@simonbackx/simple-errors";
+import { sleep } from "@stamhoofd/utility"
+
 type Sodium = typeof import("libsodium-wrappers")
 type StringKeyPair = import("libsodium-wrappers").StringKeyPair
 
@@ -5,18 +8,55 @@ class SodiumStatic {
     loaded = false;
     sodium!: Sodium
 
+    private retriedLoading = 0
+
+    // Prevent loading multiple times
+    private loadingPromise: Promise<void> | null = null
+
     async loadIfNeeded() {
         if (this.loaded) {
             return;
         }
+        if (this.loadingPromise) {
+            return this.loadingPromise
+        }
+        
+        this.loadingPromise = this.doLoad()
+        try {
+            await this.loadingPromise
+        } finally {
+            // If it fails, we also need to clear it
+            // so we can retry it later (or it will keep returning the same error)
+            this.loadingPromise = null
+        }
+    }
+
+    private async doLoad() {
         await this.importSodium()
         await this.sodium.ready;
         this.loaded = true;
     }
 
     private async importSodium() {
-        const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers");
-        this.sodium = d.default;
+        // We try once if it fails
+        try {
+            const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers");
+            this.sodium = d.default;
+        } catch (e) {
+            this.retriedLoading++
+
+            if (this.retriedLoading >= 2) {
+                // Throw the same network error as 
+                throw new SimpleError({
+                    code: "network_error",
+                    message: "Network error"
+                })
+            }
+
+            // Wait 1s and try again if it failed
+            await sleep(1000)
+            await this.importSodium()
+        }        
     }
 
     async getSodium(): Promise<Sodium> {

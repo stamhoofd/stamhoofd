@@ -222,6 +222,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
@@ -230,7 +231,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration, WaitingListType } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -465,6 +466,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         MemberManager.removeListener(this)
     }
 
+    beforeDestroy() {
+        console.log("beforeDestory GroupMembersView")
+        Request.cancelAll(this)
+    }
+
     get isFull() {
         if (!this.group || this.group.settings.maxMembers === null) {
             return false;
@@ -490,7 +496,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     checkWaitingList() {
-        MemberManager.loadMembers(this.groupIds, true).then((members) => {
+        MemberManager.loadMembers(this.groupIds, true, 0, this).then((members) => {
             this.cachedWaitingList = members.length > 0
         }).catch((e) => {
             console.error(e)
@@ -498,8 +504,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     reload() {
+        Request.cancelAll(this)
         this.loading = true;
-        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset).then((members) => {
+        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
             this.members = members.map((member) => {
                 const selected = this.members.find(m => m.member.id === member.id)?.selected
                 return new SelectableMember(member, selected !== undefined ?  selected : !this.waitingList);
@@ -507,14 +514,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             this.checkInaccurateMetaData().catch(e => {
                 console.error(e)
             })
-        }).catch((e) => {
-            console.error(e)
-        }).finally(() => {
-            this.loading = false
-
             if (!this.waitingList && this.group && !this.group.hasWaitingList()) {
                 this.checkWaitingList()
             }
+        }).catch((e) => {
+            console.error(e)
+
+            if (!Request.isNetworkError(e)) {
+                Toast.fromError(e).show()
+            }
+        }).finally(() => {
+            this.loading = false
         })
     }
 
