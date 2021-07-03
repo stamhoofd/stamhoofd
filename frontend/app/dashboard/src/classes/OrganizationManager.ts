@@ -25,12 +25,13 @@ export class OrganizationManagerStatic {
         })
     }
 
-    async patch(patch: AutoEncoderPatchType<Organization>) {
+    async patch(patch: AutoEncoderPatchType<Organization>, shouldRetry = false) {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "PATCH",
             path: "/organization",
             body: patch,
-            decoder: Organization as Decoder<Organization>
+            decoder: Organization as Decoder<Organization>,
+            shouldRetry
         })
 
         // Keep admins + invites loaded
@@ -47,12 +48,12 @@ export class OrganizationManagerStatic {
         }
     }
 
-    async loadAdmins(force = false): Promise<OrganizationAdmins> {
+    async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         if (!force && this.organization.admins && this.organization.invites) {
             return this.organization as any
         }
 
-        const loaded = await LoginHelper.loadAdmins()
+        const loaded = await LoginHelper.loadAdmins(shouldRetry, owner)
         this.organization.admins = loaded.users
         this.organization.invites = loaded.invites
         return this.organization as any

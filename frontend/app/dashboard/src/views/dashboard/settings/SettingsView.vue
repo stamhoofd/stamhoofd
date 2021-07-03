@@ -221,8 +221,9 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
+import { AsyncComponent, BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -283,14 +284,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     async loadAdmins() {
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/admins",
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
-        })
-        this.admins = response.data.users
-        this.invites = response.data.invites
+        await OrganizationManager.loadAdmins(false, false, this)
     }
 
     openReferrals(animated = true) {
@@ -374,12 +368,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }
 
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    const comp = (await import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue")).default
-                    return new ComponentWithProperties(comp, {})
-                }
-            })
+            root: AsyncComponent(() => import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue"))
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
@@ -477,9 +466,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             }).setDisplayStyle("popup").setAnimated(false))
         }
 
-        /*this.loadAdmins().catch(e => {
+        this.loadAdmins().catch(e => {
             console.error(e)
-        })*/
+        })
+    }
+
+    beforeDestroy() {
+        // Clear all pending requests
+        Request.cancelAll(this)
     }
 }
 </script>

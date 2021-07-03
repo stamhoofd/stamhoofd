@@ -45,6 +45,9 @@ export class ImportingMember {
     equal: MemberWithRegistrations | null = null
     probablyEqual: MemberWithRegistrations | null = null
 
+    /// Set to true to prevent syncing multiple times on internet issues
+    synced = false
+
     // todo: also add registration data (groups, cycle, registered at, paid...)
     // todo: also add possible existing member
 

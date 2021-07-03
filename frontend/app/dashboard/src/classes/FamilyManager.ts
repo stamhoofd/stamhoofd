@@ -1,8 +1,8 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Sodium } from '@stamhoofd/crypto';
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration,User } from '@stamhoofd/structures';
 
+import { Toast } from '../../../../shared/components';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
 
@@ -17,6 +17,7 @@ export class FamilyManager {
         if (members.length == 1) {
             this.loadFamily(members[0].id).catch(e => {
                 console.error(e)
+                Toast.fromError(e).show()
             })
         }
     }
@@ -27,7 +28,8 @@ export class FamilyManager {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/members/"+id+"/family",
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            shouldRetry: false
         })
         this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
     }
@@ -67,7 +69,8 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patch,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            shouldRetry: false
         })
 
         this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
@@ -91,7 +94,8 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            shouldRetry: false
         })
         const m = (await MemberManager.decryptMembersWithRegistrations(response.data))[0]
 
@@ -127,7 +131,8 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
+            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            shouldRetry: false
         })
 
         this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))

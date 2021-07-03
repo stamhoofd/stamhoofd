@@ -513,6 +513,10 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
             // todo: group family
             for (const member of this.members) {
+                if (member.synced) {
+                    // Already synced: prevent doing it twice
+                    continue
+                }
                 const family =  new FamilyManager([])
 
                 if (member.equal) {
@@ -532,6 +536,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                         this.buildRegistration(member)
                     ])
                 }
+                member.synced = true
             }
 
             toast.hide()
