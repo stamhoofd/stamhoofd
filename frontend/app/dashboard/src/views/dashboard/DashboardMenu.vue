@@ -131,7 +131,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { AsyncComponent,CenteredMessage, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { AppManager, Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -141,17 +141,6 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
-import SignupModulesView from "../signup/SignupModulesView.vue";
-import AccountSettingsView from './account/AccountSettingsView.vue';
-import CategoryView from "./groups/CategoryView.vue";
-import GroupMembersView from "./groups/GroupMembersView.vue";
-import KeysView from "./keys/KeysView.vue";
-import NoKeyView from './NoKeyView.vue';
-import PaymentsView from './payments/PaymentsView.vue';
-import SettingsView from './settings/SettingsView.vue';
-import SGVGroepsadministratieView from './settings/SGVGroepsadministratieView.vue';
-import EditWebshopView from './webshop/EditWebshopView.vue';
-import WebshopView from './webshop/WebshopView.vue';
 
 @Component({
     components: {
@@ -290,7 +279,9 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (!didSet) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
-                this.present(new ComponentWithProperties(SignupModulesView, { }).setDisplayStyle("popup").setAnimated(false))
+                this.present(
+                    AsyncComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue")
+                ).setDisplayStyle("popup").setAnimated(false))
             }
         }
     }
@@ -347,7 +338,9 @@ export default class Menu extends Mixins(NavigationMixin) {
 
             // Show warnign instead
             new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
-                this.present(new ComponentWithProperties(NoKeyView, {}).setDisplayStyle("popup"))
+                this.present(
+                    AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './NoKeyView.vue')).setDisplayStyle("popup")
+                )
             })).show()
         }
     }
@@ -360,53 +353,78 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.deactivateSession()
     }
 
-    openAll(animated = true) {
-        this.currentlySelected = "group-all"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {}) }).setAnimated(animated));
-    }
-
     openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, { group }) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */  "./groups/GroupMembersView.vue"), { group })
+            }).setAnimated(animated)
+        );
     }
 
     manageKeys(animated = true) {
         this.currentlySelected = "keys"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(KeysView) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "KeysView" */ "./keys/KeysView.vue"))
+            }).setAnimated(animated)
+        );
     }
 
     openCategory(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CategoryView, { category }) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "CategoryView" */ "./groups/CategoryView.vue"), { category })
+            }).setAnimated(animated)
+        );
     }
 
     openCategoryMembers(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
 
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(GroupMembersView, {
-            category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
-        }) }).setAnimated(animated));
+        this.showDetail(new ComponentWithProperties(NavigationController, { 
+            root: AsyncComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */ "./groups/GroupMembersView.vue"), {
+                category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
+            })
+        }).setAnimated(animated));
     }
 
     openWebshop(webshop: WebshopPreview, animated = true) {
         this.currentlySelected = "webshop-"+webshop.id
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(WebshopView, { preview: webshop }) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "WebshopView" */ './webshop/WebshopView.vue'), { preview: webshop })
+            }).setAnimated(animated)
+        );
     }
 
     managePayments(animated = true) {
         this.currentlySelected = "manage-payments"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(PaymentsView, {}) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "PaymentsView" */ './payments/PaymentsView.vue'))
+            }).setAnimated(animated)
+        );
     }
 
     manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SettingsView, {}) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView" */ './settings/SettingsView.vue'))
+            }).setAnimated(animated)
+        );
     }
 
     manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(AccountSettingsView, {}) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ './account/AccountSettingsView.vue'))
+            }).setAnimated(animated)
+        );
     }
 
     manageWhatsNew() {
@@ -425,7 +443,11 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     openSyncScoutsEnGidsen(animated = true) {
         this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.showDetail(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(SGVGroepsadministratieView, {}) }).setAnimated(animated));
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: AsyncComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'))
+            }).setAnimated(animated)
+        );
     }
 
     importMembers() {
@@ -433,7 +455,9 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     addWebshop() {
-        this.present(new ComponentWithProperties(EditWebshopView, { }).setDisplayStyle("popup"))
+        this.present(
+            AsyncComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/EditWebshopView.vue')).setDisplayStyle("popup")
+        )
     }
 
     get canCreateWebshops() {

@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'Stamhoofd',
   webDir: 'dist',
   bundledWebRuntime: false,
-  loggingBehavior: "none",
+  //loggingBehavior: "none",
   plugins: {
     Keyboard: {
       // iOS Only
@@ -18,10 +18,10 @@ const config: CapacitorConfig = {
     }
   },
   // For development: enable live reload
-  server: {
+  /*server: {
     url: "http://192.168.0.7:8080",
     cleartext: true
-  }
+  }*/
 };
 
 export default config;

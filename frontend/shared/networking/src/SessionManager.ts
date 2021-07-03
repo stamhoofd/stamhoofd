@@ -4,6 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Request } from '@simonbackx/simple-networking';
 import { Organization, Version } from '@stamhoofd/structures';
 
+import { Keychain } from './Keychain';
 import { Session } from './Session';
 
 class SessionStorage extends AutoEncoder {
@@ -27,6 +28,10 @@ export class SessionManagerStatic {
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     async restoreLastSession() {
+        // Restore keychain before setting the current session
+        // to prevent fetching the organization to refetch the missing keychain items
+        Keychain.load()
+
         const id = this.getSessionStorage().lastOrganizationId
         if (id) {
             const session = this.getSessionForOrganization(id)
@@ -119,7 +124,7 @@ export class SessionManagerStatic {
 
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
-            session.user = null
+            // session.user = null
 
             try {
                 await session.updateData(false, shouldRetry)
@@ -141,7 +146,7 @@ export class SessionManagerStatic {
                     // Undo setting the session
                     this.clearCurrentSession()
                     throw new SimpleError({
-                        code: "no_internet_connection",
+                        code: "network_error",
                         message: e.message,
                         human: "We konden geen verbinding maken met internet. Kijk jouw internetverbinding na en probeer opnieuw."
                     })

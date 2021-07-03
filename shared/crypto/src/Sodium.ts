@@ -32,13 +32,14 @@ class SodiumStatic {
     }
 
     private async doLoad() {
+        this.retriedLoading = 0;
         await this.importSodium()
         await this.sodium.ready;
         this.loaded = true;
     }
 
     private async importSodium() {
-        // We try once if it fails
+        // We try once again if it fails
         try {
             const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers");
             this.sodium = d.default;

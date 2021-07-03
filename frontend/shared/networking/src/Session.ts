@@ -1,4 +1,4 @@
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding'
+import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
@@ -16,17 +16,20 @@ export class Session implements RequestMiddleware {
     organization: Organization | null = null
     user: MyUser | null = null
 
+    /** 
+     * Manually mark the session as incomplete by setting this to true
+    */
     preventComplete = false
 
     protected token: ManagedToken | null = null
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
+    // Storage is required since otherwise you would have to enter your password again every time you reload the page
     protected authEncryptionKey: string | null = null
 
-    // Not stored:
+    // We can store the private key in the browser, because on password change it will get changed
     protected userPrivateKey: string | null = null // Used to decrypt messages for this user
 
-    // Not stored:
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     constructor(organizationId: string) {
@@ -99,6 +102,19 @@ export class Session implements RequestMiddleware {
                     console.error(e)
                 }
             }
+
+            if (this.token && this.authEncryptionKey) {
+                // Also check if we have the user
+                const json = localStorage.getItem('user-' + this.organizationId)
+                if (json) {
+                    try {
+                        const parsed = JSON.parse(json)
+                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(MyUser as Decoder<MyUser>) as Decoder<VersionBox<MyUser>>).data
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+            }
         } catch (e) {
             console.error("Localstorage error")
             console.error(e)
@@ -111,9 +127,16 @@ export class Session implements RequestMiddleware {
             if (this.token && this.authEncryptionKey) {
                 localStorage.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
                 localStorage.setItem('key-' + this.organizationId, this.authEncryptionKey)
+
+                if (this.user) {
+                    localStorage.setItem('user-' + this.organizationId, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
+                } else {
+                    localStorage.removeItem('user-' + this.organizationId)
+                }
             } else {
                 localStorage.removeItem('token-' + this.organizationId)
                 localStorage.removeItem('key-' + this.organizationId)
+                localStorage.removeItem('user-' + this.organizationId)
             }
         } catch (e) {
             console.error("Localstorage error when saving session")
@@ -215,6 +238,7 @@ export class Session implements RequestMiddleware {
             shouldRetry
         })
         this.user = response.data
+        this.saveToStorage()
         this.callListeners()
         return response.data
     }
@@ -245,7 +269,11 @@ export class Session implements RequestMiddleware {
      * @param shouldRetry Keep retrying on network or server issues
      */
     async updateData(force = false, shouldRetry = true) {
-        console.log("Session update data")
+        if (force) {
+            console.log("Session force update data")
+        } else {
+            console.log("Session update data")
+        }
         try {
             if (force || !this.user) {
                 await this.fetchUser(shouldRetry)

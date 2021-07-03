@@ -59,12 +59,11 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager,SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { asyncComponent } from '../../App.vue';
 import LoginView from './LoginView.vue';
 
 const throttle = (func, limit) => {
@@ -144,7 +143,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     gotoSignup() {
         this.present(
             new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
+                root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
             }).setDisplayStyle("popup")
         )
         plausible('openSignup');
@@ -171,7 +170,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                     organization = null;
                 }
                 this.present(new ComponentWithProperties(NavigationController, {
-                    root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                    root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
                         initialRegisterCode: code && organization ? {
                             code,
                             organization

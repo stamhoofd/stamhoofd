@@ -8,22 +8,13 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
 import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-
-export function asyncComponent(component: () => Promise<any>, properties = {}) {
-    return new ComponentWithProperties(PromiseView, {
-        promise: async function() {
-            const c = (await component()).default
-            return new ComponentWithProperties(c, properties)
-        }
-    })
-}
 
 // kick off the polyfill!
 //smoothscroll.polyfill();
@@ -36,10 +27,10 @@ export function asyncComponent(component: () => Promise<any>, properties = {}) {
 export default class App extends Vue {
     root = new ComponentWithProperties(AuthenticatedView, {
         root: new ComponentWithProperties(SplitViewController, {
-            root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
         }),
         loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-        noPermissionsRoot: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
+        noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
     });
 
     mounted() {
