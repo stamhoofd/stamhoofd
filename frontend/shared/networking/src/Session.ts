@@ -284,9 +284,7 @@ export class Session implements RequestMiddleware {
             }
             await this.updateKeys()
         } catch (e) {
-            if ((isSimpleError(e) || isSimpleErrors(e)) && (e.hasCode("network_error") || e.hasCode("network_timeout"))) {
-                // Network error: do not logout
-            } else {
+            if (!Request.isNetworkError(e)) {
                 this.temporaryLogout()
             }
             throw e;
