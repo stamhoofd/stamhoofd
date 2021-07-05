@@ -127,7 +127,7 @@ export class SessionManagerStatic {
             // session.user = null
 
             try {
-                await session.updateData(false, shouldRetry)
+                await session.updateData(false, shouldRetry, true)
             } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
@@ -155,13 +155,20 @@ export class SessionManagerStatic {
                 // still set the current session, but logout that session
                 session.temporaryLogout()
             }
+        } else {
+            // Initiate a slow background update without retry
+            // = we don't need to block the UI for this ;)
+            session.updateData(true, false).catch(e => {
+                // Ignore network errors
+                console.error(e)
+            })
         }
 
         const storage = this.getSessionStorage()
         storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
 
-        let needsResync = !session.organization
+        const needsResync = true
         if (session.organization) {
             this.addOrganizationToStorage(session.organization)
         }
@@ -170,7 +177,7 @@ export class SessionManagerStatic {
 
         this.currentSession.addListener(this, () => {
             if (needsResync && session.organization) {
-                needsResync = false
+                //needsResync = false
                 this.addOrganizationToStorage(session.organization)
             }
             this.setUserId();

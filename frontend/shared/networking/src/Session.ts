@@ -1,5 +1,5 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
+import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Sodium } from '@stamhoofd/crypto'
 import { KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
@@ -237,7 +237,11 @@ export class Session implements RequestMiddleware {
             decoder: MyUser as Decoder<MyUser>,
             shouldRetry
         })
-        this.user = response.data
+        if (this.user) {
+            this.user.set(response.data)
+        } else {
+            this.user = response.data
+        }
         this.saveToStorage()
         this.callListeners()
         return response.data
@@ -255,8 +259,13 @@ export class Session implements RequestMiddleware {
             decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),
             shouldRetry
         })
-        this.organization = response.data.data
 
+        if (!this.organization) {
+            this.organization = response.data.data
+        } else {
+            this.organization.set(response.data.data)
+        }
+        
         Keychain.addItems(response.data.keychainItems)
        
         this.callListeners()
@@ -267,22 +276,35 @@ export class Session implements RequestMiddleware {
      * 
      * @param force Always fetch new information, even when it is available
      * @param shouldRetry Keep retrying on network or server issues
+     * @param background If we don't need to update the data right away, initiate a background update
      */
-    async updateData(force = false, shouldRetry = true) {
+    async updateData(force = false, shouldRetry = true, background = false) {
         if (force) {
             console.log("Session force update data")
         } else {
             console.log("Session update data")
         }
         try {
+            let fetched = false
             if (force || !this.user) {
+                fetched = true
                 await this.fetchUser(shouldRetry)
             }
 
             if (force || !this.organization || !this.user || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))) {
+                fetched = true
                 await this.fetchOrganization(shouldRetry)
             }
             await this.updateKeys()
+
+            if (!fetched && background) {
+                // Initiate a slow background update without retry
+                // = we don't need to block the UI for this ;)
+                this.updateData(true, false, false).catch(e => {
+                    // Ignore network errors
+                    console.error(e)
+                })
+            }
         } catch (e) {
             if (!Request.isNetworkError(e)) {
                 this.temporaryLogout()
@@ -355,7 +377,7 @@ export class Session implements RequestMiddleware {
         if (this.token.isRefreshing() || this.token.needsRefresh()) {
             // Already expired.
             console.log("Request started with expired access token, refreshing before starting request...")
-            await this.token.refresh(this.server)
+            await this.token.refresh(this.server, () => request.shouldRetry)
         }
 
         request.headers["Authorization"] = "Bearer " + this.token.token.accessToken;
@@ -380,10 +402,14 @@ export class Session implements RequestMiddleware {
             // Try to refresh
             try {
                 console.log("Request failed due to expired access token, refreshing...")
-                await this.token.refresh(this.server)
+                await this.token.refresh(this.server, () => request.shouldRetry)
                 console.log("Retrying request...")
             } catch (e) {
-                this.logout();
+                if (Request.isNetworkError(e)) {
+                    this.temporaryLogout()
+                } else {
+                    this.logout();
+                }
                 return false;
             }
             return true

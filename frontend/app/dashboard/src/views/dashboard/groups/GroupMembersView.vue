@@ -486,7 +486,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
-        console.log("beforeDestory GroupMembersView")
         Request.cancelAll(this)
     }
 

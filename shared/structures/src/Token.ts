@@ -34,6 +34,6 @@ export class Token implements Encodeable {
     }
 
     needsRefresh(): boolean {
-        return this.accessToken.length == 0 || this.accessTokenValidUntil < new Date()
+        return this.accessToken.length == 0 || this.accessTokenValidUntil < new Date(new Date().getTime() + 3600 * 1000 - 20000)
     }
 }

@@ -1,5 +1,7 @@
-import { Server } from '@simonbackx/simple-networking';
+import { Request, Server } from '@simonbackx/simple-networking';
 import { Token } from '@stamhoofd/structures';
+
+import { NetworkManager } from './NetworkManager';
 
 /**
  * A token that can get saved and refreshed
@@ -22,12 +24,11 @@ export class ManagedToken {
             method: "POST",
             path: "/oauth/token",
             body: {
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 grant_type: "refresh_token",
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 refresh_token: this.token.refreshToken
             },
-            decoder: Token
+            decoder: Token,
+            shouldRetry: false
         })
 
         this.token = result.data
@@ -46,15 +47,35 @@ export class ManagedToken {
      * Refreshes the token and sets a new acces token. Throws on failure.
      * Multiple calls only do one refresh at a time and resolve simultaneously
      */
-    async refresh(server: Server): Promise<void> {
-        if (this.refreshPromise) {
-            return this.refreshPromise
-        }
+    async refresh(server: Server, shouldRetry?: () => boolean): Promise<void> {
         try {
-            this.refreshPromise = this.doRefresh(server)
-            await this.refreshPromise
-        } finally {
-            this.refreshPromise = undefined
+            if (this.refreshPromise) {
+                return this.refreshPromise
+            }
+
+            try {
+                this.refreshPromise = this.doRefresh(server)
+                await this.refreshPromise
+            } finally {
+                this.refreshPromise = undefined
+            }
+        } catch (e) {
+            if (shouldRetry && Request.isNetworkError(e)) {
+                const should = shouldRetry()
+                if (!should) {
+                    throw e;
+                }
+                console.log("Retry token refresh due to network error")
+                await NetworkManager.networkOnlinePromise(7000)
+
+                // Check again, the value could have changed
+                const should2 = shouldRetry()
+                if (!should2) {
+                    throw e;
+                }
+                return await this.refresh(server, shouldRetry)
+            }
+            throw e;
         }
     }
 }
