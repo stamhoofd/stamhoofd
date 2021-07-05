@@ -88,7 +88,6 @@ export class MemberManagerStatic extends MemberManagerBase {
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
-        console.log("Loading members with owner "+owner, owner)
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupIds[0] + "/members",
