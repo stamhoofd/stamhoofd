@@ -311,6 +311,7 @@ module.exports = {
 
         new CopyPlugin({
             patterns: [
+                { from: "../../public/.well-known" },
                 { from: "../../public/out-of-date.html" },
                 { from: "../../public/robots.txt" },
             ],
