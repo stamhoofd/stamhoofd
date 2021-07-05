@@ -131,7 +131,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent,CenteredMessage, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { AsyncComponent, CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { AppManager, Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -183,30 +183,32 @@ export default class Menu extends Mixins(NavigationMixin) {
     mounted() {
         const path = window.location.pathname;
         const parts = path.substring(1).split("/");
+
+        HistoryManager.setUrl("/")
         let didSet = false
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
             if (this.fullAccess) {
-                this.manageSettings(false)
+                this.manageSettings(false).catch(console.error)
                 didSet = true
             }
         }
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
             if (this.canManagePayments) {
-                this.managePayments(false)
+                this.managePayments(false).catch(console.error)
                 didSet = true
             }
         }
 
         if (parts.length >= 1 && parts[0] == 'account') {
-            this.manageAccount(false)
+            this.manageAccount(false).catch(console.error)
             didSet = true
         }
 
         if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
             if (this.fullAccess) {
-                this.openSyncScoutsEnGidsen(false)
+                this.openSyncScoutsEnGidsen(false).catch(console.error)
                 didSet = true
             }
         }
@@ -215,9 +217,9 @@ export default class Menu extends Mixins(NavigationMixin) {
             for (const category of this.organization.meta.categories) {
                 if (parts[1] == Formatter.slug(category.settings.name)) {
                     if (parts[2] && parts[2] == "all") {
-                        this.openCategoryMembers(category, false)
+                        this.openCategoryMembers(category, false).catch(console.error)
                     } else {
-                        this.openCategory(category, false)
+                        this.openCategory(category, false).catch(console.error)
                     }
                     didSet = true
                     break;
@@ -228,7 +230,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             for (const group of this.organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(group, false)
+                    this.openGroup(group, false).catch(console.error)
                     didSet = true
                     break;
                 }
@@ -238,15 +240,11 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
             for (const webshop of this.organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop, false)
+                    this.openWebshop(webshop, false).catch(console.error)
                     didSet = true
                     break;
                 }
             }
-        }
-
-        if (!didSet) {
-            HistoryManager.setUrl("/")
         }
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
@@ -254,9 +252,9 @@ export default class Menu extends Mixins(NavigationMixin) {
                 //this.openGroup(this.groups[0], false)
             //} else {
                 if (this.fullAccess) {
-                    this.manageSettings(false)
+                    this.manageSettings(false).catch(console.error)
                 } else {
-                    this.manageAccount(false)
+                    this.manageAccount(false).catch(console.error)
                 }
             //}
         }
@@ -279,9 +277,9 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (!didSet) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
-                this.present(
-                    AsyncComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue")
-                ).setDisplayStyle("popup").setAnimated(false))
+                LoadComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue"), {}, { instant: true }).then((component) => {
+                    this.present(component.setDisplayStyle("popup").setAnimated(false))
+                }).catch(console.error)
             }
         }
     }
@@ -353,76 +351,76 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.deactivateSession()
     }
 
-    openGroup(group: Group, animated = true) {
+    async openGroup(group: Group, animated = true) {
         this.currentlySelected = "group-"+group.id
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */  "./groups/GroupMembersView.vue"), { group })
+                root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */  "./groups/GroupMembersView.vue"), { group }, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    manageKeys(animated = true) {
+    async manageKeys(animated = true) {
         this.currentlySelected = "keys"
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "KeysView" */ "./keys/KeysView.vue"))
+                root: await LoadComponent(() => import(/* webpackChunkName: "KeysView" */ "./keys/KeysView.vue"), {}, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    openCategory(category: GroupCategory, animated = true) {
+    async openCategory(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "CategoryView" */ "./groups/CategoryView.vue"), { category })
+                root: await LoadComponent(() => import(/* webpackChunkName: "CategoryView" */ "./groups/CategoryView.vue"), { category }, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    openCategoryMembers(category: GroupCategory, animated = true) {
+    async openCategoryMembers(category: GroupCategory, animated = true) {
         this.currentlySelected = "category-"+category.id
 
         this.showDetail(new ComponentWithProperties(NavigationController, { 
-            root: AsyncComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */ "./groups/GroupMembersView.vue"), {
+            root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */ "./groups/GroupMembersView.vue"), {
                 category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
-            })
+            }, { instant: !animated })
         }).setAnimated(animated));
     }
 
-    openWebshop(webshop: WebshopPreview, animated = true) {
+    async openWebshop(webshop: WebshopPreview, animated = true) {
         this.currentlySelected = "webshop-"+webshop.id
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "WebshopView" */ './webshop/WebshopView.vue'), { preview: webshop })
+                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopView" */ './webshop/WebshopView.vue'), { preview: webshop }, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    managePayments(animated = true) {
+    async managePayments(animated = true) {
         this.currentlySelected = "manage-payments"
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "PaymentsView" */ './payments/PaymentsView.vue'))
+                root: await LoadComponent(() => import(/* webpackChunkName: "PaymentsView" */ './payments/PaymentsView.vue'), {}, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    manageSettings(animated = true) {
+    async manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView" */ './settings/SettingsView.vue'))
+                root: await LoadComponent(() => import(/* webpackChunkName: "SettingsView" */ './settings/SettingsView.vue'), {}, { instant: !animated })
             }).setAnimated(animated)
         );
     }
 
-    manageAccount(animated = true) {
+    async manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ './account/AccountSettingsView.vue'))
+                root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
             }).setAnimated(animated)
         );
     }
@@ -441,11 +439,11 @@ export default class Menu extends Mixins(NavigationMixin) {
         SessionManager.logout()
     }
 
-    openSyncScoutsEnGidsen(animated = true) {
+    async openSyncScoutsEnGidsen(animated = true) {
         this.currentlySelected = "manage-sgv-groepsadministratie"
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: AsyncComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'))
+                root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
             }).setAnimated(animated)
         );
     }
@@ -454,9 +452,9 @@ export default class Menu extends Mixins(NavigationMixin) {
         new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
     }
 
-    addWebshop() {
+    async addWebshop() {
         this.present(
-            AsyncComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/EditWebshopView.vue')).setDisplayStyle("popup")
+            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/EditWebshopView.vue'))).setDisplayStyle("popup")
         )
     }
 

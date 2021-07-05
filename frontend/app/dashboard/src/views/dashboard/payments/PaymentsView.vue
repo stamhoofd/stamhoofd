@@ -13,7 +13,7 @@
     
             <Spinner v-if="loading" />
             <STList v-else>
-                <STListItem v-for="payment in paginatedPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-description" element-name="label">
+                <STListItem v-for="payment in paginatedPayments" :key="payment.payment.id" :selectable="true" class="right-stack right-small" element-name="label">
                     <Checkbox slot="left" v-model="payment.selected" />
 
                     <h2 class="style-title-list">

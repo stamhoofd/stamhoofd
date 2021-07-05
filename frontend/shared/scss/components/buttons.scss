@@ -47,7 +47,7 @@
         padding: 0 27px;
         background: linear-gradient(to right, $color-primary, $color-primary-destination);
         text-align: center;
-        word-wrap: nowrap;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         height: 42px;
@@ -124,7 +124,7 @@
         padding: 0 27px;
         background: $color-error;
         text-align: center;
-        word-wrap: nowrap;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         height: 42px;
@@ -151,7 +151,7 @@
         padding: 0 27px;
         background: $color-gray-lighter;
         text-align: center;
-        word-wrap: nowrap;
+        white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         border-radius: $border-radius;
@@ -247,6 +247,7 @@
         white-space: nowrap;
         transition: 0.2s opacity, 0.2s color;
         position: relative;
+        max-width: 100%;
 
         &.full {
             display: block;

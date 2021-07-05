@@ -33,13 +33,20 @@ export default class App extends Vue {
         noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
     });
 
-    mounted() {
+    created() {
         HistoryManager.activate();
         SessionManager.restoreLastSession().catch(e => {
             console.error(e)
         })
-        //ColorHelper.darkTheme()
 
+        if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+            // Load Windows stylesheet
+            import("@stamhoofd/scss/layout/windows-scrollbars.scss").catch(console.error);
+        }
+    }
+
+    mounted() {
+        //ColorHelper.darkTheme()
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);
             if (this.$refs.modalStack === undefined) {
@@ -154,11 +161,6 @@ export default class App extends Vue {
                     })
                 }).setDisplayStyle("popup").setAnimated(false));
             }
-        }
-
-        if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
-            // Load Windows stylesheet
-            import("@stamhoofd/scss/layout/windows-scrollbars.scss").catch(console.error);
         }
     }
 }

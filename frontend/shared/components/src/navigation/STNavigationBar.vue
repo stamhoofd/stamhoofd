@@ -164,6 +164,12 @@ export default class STNavigationBar extends Vue {
         align-items: center;
 
         &:first-child {
+            /*min-width: 30px;
+
+            &:empty {
+                min-width: 0;
+            }*/
+            
             > * {
                 margin: 0 10px;
 
@@ -181,6 +187,21 @@ export default class STNavigationBar extends Vue {
 
                 &:last-child {
                     margin-right: 0;
+                }
+            }
+        }
+    }
+
+    &.wrap {
+        height: auto;
+
+        > div {
+            &:last-child {
+                flex-wrap: wrap;
+                margin: -5px -10px;
+
+                > * {
+                    margin: 5px 10px;
                 }
             }
         }
@@ -215,6 +236,11 @@ export default class STNavigationBar extends Vue {
         width: 220px;
         display: inline-block;
         margin: 5px 5px;
+
+        @media (max-width: 500px) {
+            width: 100%;
+            min-width: 150px;
+        }
     }
 
     select.input {

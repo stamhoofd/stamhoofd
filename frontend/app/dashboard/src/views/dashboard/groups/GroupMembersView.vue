@@ -1,6 +1,6 @@
 <template>
     <div class="st-view group-members-view background">
-        <STNavigationBar :sticky="false">
+        <STNavigationBar :sticky="false" :class="{ 'wrap': !canPop }">
             <template #left>
                 <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
@@ -53,7 +53,7 @@
 
             <BillingWarningBox filter-types="members" />
 
-            <Spinner v-if="loading && sortedMembers.length == 0" class="center" />
+            <Spinner v-if="loading" class="center gray" />
             <table v-else class="data-table">
                 <thead>
                     <tr>
@@ -154,32 +154,33 @@
                 </p>
             </template>
 
-            
-            <hr>
-                
-            <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
-                <button v-if="canGoBack" class="button text gray" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige inschrijvingsperiode</span>
+            <template v-if="!loading">
+                <hr>
+                    
+                <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
+                    <button v-if="canGoBack" class="button text gray" @click="goBack">
+                        <span class="icon arrow-left" />
+                        <span>Vorige inschrijvingsperiode</span>
+                    </button>
+                    <div v-else />
+
+                    <button v-if="canGoNext" class="button text gray" @click="goNext">
+                        <span>Volgende inschrijvingsperiode</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                    <div v-else />
+                </div>
+
+                <button v-if="canEnd" class="button text gray" @click="goEnd">
+                    <span class="icon redo" />
+                    <span>Begin nieuwe inschrijvingsperiode</span>
                 </button>
-                <div v-else />
 
-                <button v-if="canGoNext" class="button text gray" @click="goNext">
-                    <span>Volgende inschrijvingsperiode</span>
-                    <span class="icon arrow-right" />
+                <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
+                    <span class="icon undo" />
+                    <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
                 </button>
-                <div v-else />
-            </div>
-
-            <button v-if="canEnd" class="button text gray" @click="goEnd">
-                <span class="icon redo" />
-                <span>Begin nieuwe inschrijvingsperiode</span>
-            </button>
-
-            <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
-                <span class="icon undo" />
-                <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
-            </button>
+            </template>
         </main>
 
         <STToolbar>
@@ -296,11 +297,29 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     cycleOffset = 0
 
     loading = false;
+    delayedLoading = false
+
+    isTransitioning = false
 
     actionLoading = false
     cachedWaitingList: boolean | null = null
 
     checkingInaccurate = false
+
+    beforeBeforeEnterAnimation() {
+        console.log("beforeBeforeEnterAnimation")
+        this.isTransitioning = true
+    }
+
+    finishedEnterAnimation() {
+        console.log("finishedEnterAnimation")
+        this.isTransitioning = false
+
+        if (this.delayedLoading) {
+            this.loading = false
+            this.delayedLoading = false
+        }
+    }
 
     mounted() {
         // Set url
@@ -524,7 +543,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 Toast.fromError(e).show()
             }
         }).finally(() => {
-            this.loading = false
+            if (this.isTransitioning && this.loading) {
+                this.delayedLoading = true
+            } else {
+                this.loading = false
+            }
         })
     }
 

@@ -6,7 +6,7 @@
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Logger } from '@stamhoofd/logger';
-import { Component, Mixins,Prop, Vue } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
 
@@ -22,7 +22,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     root: ComponentWithProperties | null = null
 
-    mounted() {
+    created() {
         this.run()
     }
 

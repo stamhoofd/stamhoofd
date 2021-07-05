@@ -38,39 +38,34 @@ export class KeychainStatic {
 
     /// In the app we store the keychain to allow better offline usage and to allow faster startup speeds
     save() {
-        if (AppManager.shared.isNative) {
-            // todo: use other storage mechanism
-            try {
-                localStorage.setItem("keychain", JSON.stringify(new VersionBox(this.items).encode({ version: Version })))
-            } catch (e) {
-                console.error("Failed to save keychain")
-                console.error(e)
-            }
+        // todo: use other storage mechanism
+        try {
+            localStorage.setItem("keychain", JSON.stringify(new VersionBox(this.items).encode({ version: Version })))
+        } catch (e) {
+            console.error("Failed to save keychain")
+            console.error(e)
         }
     }
 
     load(append = true) {
-        if (AppManager.shared.isNative) {
-            
-            try {
-                const json = localStorage.getItem("keychain")
-                if (json) {
-                    const data = new ObjectData(JSON.parse(json), { version: 0 })
-                    const versionBox = new VersionBoxDecoder(new MapDecoder(StringDecoder, KeychainItem as Decoder<KeychainItem>)).decode(data)
+        try {
+            const json = localStorage.getItem("keychain")
+            if (json) {
+                const data = new ObjectData(JSON.parse(json), { version: 0 })
+                const versionBox = new VersionBoxDecoder(new MapDecoder(StringDecoder, KeychainItem as Decoder<KeychainItem>)).decode(data)
 
-                    if (append) {
-                        for (const [publicKey, item] of versionBox.data) {
-                            this.items.set(publicKey, item)
-                        }
-                    } else {
-                        this.items = versionBox.data
+                if (append) {
+                    for (const [publicKey, item] of versionBox.data) {
+                        this.items.set(publicKey, item)
                     }
-                    console.log('Loaded keychain from storage')
+                } else {
+                    this.items = versionBox.data
                 }
-            } catch (e) {
-                console.error("Failed to load keychain")
-                console.error(e)
+                console.log('Loaded keychain from storage')
             }
+        } catch (e) {
+            console.error("Failed to load keychain")
+            console.error(e)
         }
     }
 }
