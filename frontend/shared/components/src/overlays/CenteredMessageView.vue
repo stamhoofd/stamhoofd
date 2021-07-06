@@ -52,6 +52,9 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
+        if (document.activeElement && (document.activeElement as any).blur) {
+            (document.activeElement as any).blur();
+        }
         this.centeredMessage.doHide = () => {
             this.close()
         }

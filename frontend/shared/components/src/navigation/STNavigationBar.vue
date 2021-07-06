@@ -225,7 +225,7 @@ export default class STNavigationBar extends Vue {
 
 
     &.scrolled {
-        box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 2px 3px $color-shadow;
         > h1 {
             opacity: 1;
         }

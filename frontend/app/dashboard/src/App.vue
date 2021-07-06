@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
 import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
@@ -34,6 +34,13 @@ export default class App extends Vue {
     });
 
     created() {
+        try {
+            ColorHelper.setColor("#0053ff")
+            ColorHelper.setupDarkTheme()
+        } catch (e) {
+            console.error("Color setup failed")
+            console.error(e)
+        }
         HistoryManager.activate();
         SessionManager.restoreLastSession().catch(e => {
             console.error(e)
@@ -46,7 +53,6 @@ export default class App extends Vue {
     }
 
     mounted() {
-        //ColorHelper.darkTheme()
         CenteredMessage.addListener(this, async (centeredMessage) => {
             console.log(this.$refs.modalStack);
             if (this.$refs.modalStack === undefined) {
@@ -169,6 +175,7 @@ export default class App extends Vue {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "~@stamhoofd/scss/main";
+@import "~@stamhoofd/scss/base/dark-modus";
 @import "~@simonbackx/vue-app-navigation/dist/main.css";
 
 html {

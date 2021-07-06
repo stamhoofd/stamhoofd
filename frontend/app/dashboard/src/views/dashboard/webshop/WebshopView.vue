@@ -24,14 +24,14 @@
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop">
+            <h1 v-if="canPop" class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
 
                 <button v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
                 <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
-            <BillingWarningBox filter-types="webshops" />
+            <BillingWarningBox filter-types="webshops" class="data-table-prefix"/>
 
             <Spinner v-if="loading" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">

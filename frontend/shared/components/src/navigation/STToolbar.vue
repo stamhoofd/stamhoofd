@@ -45,7 +45,7 @@ export default class STToolbar extends Vue {
         padding: 10px var(--st-horizontal-padding, 40px);
         padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 10px);
         background: $color-white;
-        border-top: $border-width solid $color-white-shade;
+        border-top: $border-width solid $color-shadow;
         display: flex;
         align-items: center;
         justify-content: space-between;

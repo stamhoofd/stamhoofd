@@ -34,7 +34,7 @@
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop">
+            <h1 v-if="canPop" class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
 
                 <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
@@ -49,7 +49,7 @@
                     <span>Nieuw</span>
                 </button>
             </h1>
-            <span v-if="titleDescription" class="style-description title-description">{{ titleDescription }}</span>
+            <span v-if="titleDescription" class="style-description title-description data-table-prefix">{{ titleDescription }}</span>
 
             <BillingWarningBox filter-types="members" />
 

@@ -34,7 +34,10 @@ class HomeViewController: CAPBridgeViewController {
         } else {
             // Fallback on earlier versions
         }*/
-        
-        self.webView!.passwo
+        if #available(iOS 14.0, *) {
+            self.webView!.configuration.limitsNavigationsToAppBoundDomains = true
+        } else {
+            // Fallback on earlier versions
+        }
     }
 }

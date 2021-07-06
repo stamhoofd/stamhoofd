@@ -55,7 +55,7 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     //smoothscroll.polyfill();
 
     if (Capacitor.getPlatform() === 'ios') {
-        StatusBar.setStyle({ style: Style.Light }).catch(e => console.error(e));
+        //StatusBar.setStyle({ style: Style.Light }).catch(e => console.error(e));
 
         // Disable swipe back animations (or they will play twice)
         HistoryManager.animateHistoryPop = false;

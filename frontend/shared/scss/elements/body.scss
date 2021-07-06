@@ -10,10 +10,6 @@
     --st-vertical-padding: 40px;
     --st-safe-area-top: 0px;
     --st-safe-area-top: env(safe-area-inset-top, 0px);
-
-    --color-current-background: #{$color-white};
-    --color-current-border: #{$color-border};
-    --color-current-background-shade: #{$color-white-shade};
     --st-safe-area-bottom: 0px;
     --st-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -27,6 +23,15 @@
     }    
 }
 
+body {
+    --color-current-background: #{$color-white};
+    --color-current-border: #{$color-border};
+    --color-current-background-shade: #{$color-white-shade};
+
+    background: $color-background;
+    color: $color-dark;
+}
+
 body,
 html {
     margin: 0;
@@ -34,10 +39,8 @@ html {
     font-family: "Metropolis", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: $color-dark;
+    
     -webkit-overflow-scrolling: auto;
-
     /* Disabel text resize as this doesn't work across animations */
     text-size-adjust: none;
-    background: $color-background;
 }
