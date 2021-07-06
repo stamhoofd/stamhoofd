@@ -279,11 +279,17 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         });
 
         var blob = new Blob([buffer], {type: "application/pdf"});
-        var link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        var fileName = Formatter.slug(title)+".pdf";
-        link.download = fileName;
-        link.click();
+
+        if (!(navigator as any).openFile) {
+            var link = document.createElement('a');
+            const href = window.URL.createObjectURL(blob);
+            link.href = href        
+            var fileName = Formatter.slug(title)+".pdf";
+            link.download = fileName;
+            link.click();
+        } else {
+            (navigator as any).openFile(blob, Formatter.slug(title)+".pdf")
+        }
     }
 
     drawBoxes(doc: PDFKit.PDFDocument, columns: number, data: SamenvattingGroep[]) {

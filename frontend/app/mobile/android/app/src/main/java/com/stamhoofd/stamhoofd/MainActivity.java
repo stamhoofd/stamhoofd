@@ -3,13 +3,15 @@ package com.stamhoofd.stamhoofd;
 import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 public class MainActivity extends BridgeActivity {
     void setDarkMode() {
         // Android "fix" for enabling dark mode
         // @see: https://github.com/ionic-team/capacitor/discussions/1978
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        WebSettings webSettings = this.bridge.getWebView().getSettings();
+        WebView webView = this.bridge.getWebView();
+        WebSettings webSettings = webView.getSettings();
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 // As of Android 10, you can simply force the dark mode
@@ -20,8 +22,12 @@ public class MainActivity extends BridgeActivity {
                 webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
             }
         }
-        // Would like to add this, but causes strange blur bug on the webview
-        //this.bridge.getWebView().setHorizontalScrollBarEnabled(false);
+
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
     }
 
     @Override
