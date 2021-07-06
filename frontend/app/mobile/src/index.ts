@@ -1,4 +1,5 @@
 
+import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Keyboard } from '@capacitor/keyboard';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -97,3 +98,10 @@ const app = new Vue({
 }).$mount("#app");
 
 (window as any).app = app;
+
+CApp.addListener('appUrlOpen', (data: any) => {
+    console.log("Open app url location:", data)
+    const url = new URL(data.url);
+    window.location.href = url.pathname + url.search
+    console.log(url.pathname + url.search)
+});

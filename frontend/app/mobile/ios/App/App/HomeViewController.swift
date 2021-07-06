@@ -39,5 +39,7 @@ class HomeViewController: CAPBridgeViewController {
         } else {
             // Fallback on earlier versions
         }
+        self.webView?.backgroundColor = .clear
+        self.webView?.isOpaque = false
     }
 }
