@@ -1,8 +1,6 @@
-
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Keyboard } from '@capacitor/keyboard';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 //import smoothscroll from 'smoothscroll-polyfill';
 import Vue from "vue";
@@ -90,6 +88,10 @@ window.addEventListener("touchstart", () => { }, { passive: true });
     //console.log("Debug plausible with args ", arguments)
 }
 
+// Override XMLHttpRequest in some situation (S&GV) since we don't have domain here
+import { WrapperHTTPRequest } from './WrapperHTTPRequest';
+AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
+
 // Kick off the app
 import App from "../../dashboard/src/App.vue";
 
@@ -104,4 +106,5 @@ CApp.addListener('appUrlOpen', (data: any) => {
     const url = new URL(data.url);
     window.location.href = url.pathname + url.search
     console.log(url.pathname + url.search)
-});
+}).catch(console.error);
+

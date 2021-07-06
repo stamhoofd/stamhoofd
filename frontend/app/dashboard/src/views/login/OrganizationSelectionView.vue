@@ -211,6 +211,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     startUpdateResults() {
+        if (this.query === this.lastQuery) {
+            return
+        }
+        this.lastQuery = this.query
         this.loading = true
         this.counter++
         Request.cancelAll(this)
@@ -224,6 +228,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     counter = 0
+    lastQuery = ""
 
     updateResults() {
         if (this.query.length == 0) {

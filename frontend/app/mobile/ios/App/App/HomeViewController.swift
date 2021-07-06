@@ -39,7 +39,15 @@ class HomeViewController: CAPBridgeViewController {
         } else {
             // Fallback on earlier versions
         }
-        self.webView?.backgroundColor = .clear
-        self.webView?.isOpaque = false
+        
+        // Dark mode fix
+        if #available(iOS 13.0, *) {
+            self.webView?.backgroundColor = UIColor.systemBackground
+            self.view?.backgroundColor = UIColor.systemBackground
+        } else {
+            // Fallback on earlier versions
+        }
+        self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
     }
 }

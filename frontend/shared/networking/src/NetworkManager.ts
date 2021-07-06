@@ -2,6 +2,8 @@ import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networkin
 import { Toast } from '@stamhoofd/components';
 import { Version } from '@stamhoofd/structures';
 
+import { AppManager } from './AppManager';
+
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -26,6 +28,8 @@ export class NetworkManagerStatic implements RequestMiddleware {
     onBeforeRequest(request: Request<any>): Promise<void> {
         request.version = Version;
         (request as any).retryCount = ((request as any).retryCount ?? 0) + 1
+
+        request.headers["X-Platform"] = AppManager.shared.platform
         return Promise.resolve()
     }
 
@@ -101,6 +105,12 @@ export class NetworkManagerStatic implements RequestMiddleware {
         if (this.networkErrorToast && this.retryingRequestsCount == 0) {
             this.networkErrorToast.hide()
             this.networkErrorToast = null;
+        }
+
+        // Check headers
+        const latestVersion = response.getResponseHeader("X-Platform-Latest-Version")
+        if (latestVersion) {
+            console.log("Latest platform version is "+latestVersion)
         }
     }
 }

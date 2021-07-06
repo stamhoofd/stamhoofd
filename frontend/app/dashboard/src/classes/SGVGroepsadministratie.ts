@@ -4,7 +4,7 @@ import { isSimpleErrors,SimpleError, SimpleErrors } from '@simonbackx/simple-err
 import { Request, RequestMiddleware, RequestResult,Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { sleep, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
 import { Country, CountryDecoder, Gender, MemberWithRegistrations, Organization, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
@@ -329,7 +329,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 },
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
-                }
+                },
+                overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
 
             this.token = {
@@ -368,7 +369,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 },
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
-                }
+                },
+                overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
 
             this.token = {
@@ -934,6 +936,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await this.refreshToken()
         }
 
+        request.overrideXMLHttpRequest = AppManager.shared.overrideXMLHttpRequest
         request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
     }

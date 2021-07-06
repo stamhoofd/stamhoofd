@@ -18,7 +18,7 @@ export class UrlHelper {
     }
 
     getSearchParams() {
-        return new URL(this.href ?? "/").searchParams
+        return new URL(this.href ?? "/", "https://"+window.location.hostname).searchParams
     }
 
     getHashParams() {

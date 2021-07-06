@@ -1,8 +1,9 @@
 {
-	"appId": "app.stamhoofd.stamhoofd",
+	"appId": "com.stamhoofd.stamhoofd",
 	"appName": "Stamhoofd",
 	"webDir": "dist",
 	"bundledWebRuntime": false,
+	"hideLogs": true,
 	"plugins": {
 		"Keyboard": {
 			"resize": "none"
@@ -14,9 +15,5 @@
 				"alert"
 			]
 		}
-	},
-	"server": {
-		"url": "http://192.168.0.7:8080",
-		"cleartext": true
 	}
 }
