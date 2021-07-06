@@ -39,6 +39,7 @@ const start = async () => {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
+        "Access-Control-Expose-Headers": "*",
         "Access-Control-Max-Age": "86400"
     };
 

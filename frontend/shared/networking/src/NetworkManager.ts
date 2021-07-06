@@ -10,6 +10,7 @@ export function sleep(ms: number) {
 
 export class NetworkManagerStatic implements RequestMiddleware {
     networkErrorToast: Toast | null = null
+    platformLatestVersion: number | null = null
 
     /**
      * Total request with a network error that are being retried
@@ -108,9 +109,17 @@ export class NetworkManagerStatic implements RequestMiddleware {
         }
 
         // Check headers
-        const latestVersion = response.getResponseHeader("X-Platform-Latest-Version")
-        if (latestVersion) {
-            console.log("Latest platform version is "+latestVersion)
+        const str = response.getResponseHeader("X-Platform-Latest-Version")
+        if (str) {
+            const latestVersion = parseInt(str);
+            if (!this.platformLatestVersion || this.platformLatestVersion < latestVersion) {
+                console.log("Latest platform version is "+latestVersion)
+                this.platformLatestVersion = latestVersion
+
+                if (this.platformLatestVersion > Version) {
+                    new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
+                }
+            }  
         }
     }
 }
