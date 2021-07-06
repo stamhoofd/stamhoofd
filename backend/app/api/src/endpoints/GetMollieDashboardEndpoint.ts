@@ -1,7 +1,7 @@
 
 import { AutoEncoder, Decoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors'
 import { MollieToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
@@ -37,8 +37,8 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
+        
         const mollie = await MollieToken.getTokenFor(user.organizationId)
-
         if (!mollie) {
             throw new SimpleError({
                 code: "not_yet_linked",
@@ -46,10 +46,21 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
-        const url = await mollie.getOnboardingLink()
+        try {
+            const url = await mollie.getOnboardingLink() as string
 
-        const response = new Response(url)
-        response.headers['Content-Type'] = "text/plain"
-        return response
+            const response = new Response(url)
+            response.headers['Content-Type'] = "text/plain"
+            return response
+        } catch (e) {
+            if (isSimpleErrors(e) || isSimpleError(e)) {
+                throw e;
+            }
+            await mollie.delete()
+            throw new SimpleError({
+                code: "not_yet_linked",
+                message: "Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult"
+            })
+        }
     }
 }

@@ -133,7 +133,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
-import { AppManager, Keychain, LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { AppManager, Keychain, LoginHelper,SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -181,8 +181,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
+        const parts = UrlHelper.shared.getParts()
 
         HistoryManager.setUrl("/")
         let didSet = false
@@ -196,13 +195,13 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         if (parts.length >= 1 && parts[0] == 'transfers') {
             if (this.canManagePayments) {
-                this.managePayments(false).catch(console.error)
+                this.managePayments(false).catch(console.error).finally(() => UrlHelper.shared.clear())
                 didSet = true
             }
         }
 
         if (parts.length >= 1 && parts[0] == 'account') {
-            this.manageAccount(false).catch(console.error)
+            this.manageAccount(false).catch(console.error).finally(() => UrlHelper.shared.clear())
             didSet = true
         }
 
@@ -217,9 +216,9 @@ export default class Menu extends Mixins(NavigationMixin) {
             for (const category of this.organization.meta.categories) {
                 if (parts[1] == Formatter.slug(category.settings.name)) {
                     if (parts[2] && parts[2] == "all") {
-                        this.openCategoryMembers(category, false).catch(console.error)
+                        this.openCategoryMembers(category, false).catch(console.error).finally(() => UrlHelper.shared.clear())
                     } else {
-                        this.openCategory(category, false).catch(console.error)
+                        this.openCategory(category, false).catch(console.error).finally(() => UrlHelper.shared.clear())
                     }
                     didSet = true
                     break;
@@ -230,7 +229,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             for (const group of this.organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(group, false).catch(console.error)
+                    this.openGroup(group, false).catch(console.error).finally(() => UrlHelper.shared.clear())
                     didSet = true
                     break;
                 }
@@ -240,7 +239,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
             for (const webshop of this.organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop, false).catch(console.error)
+                    this.openWebshop(webshop, false).catch(console.error).finally(() => UrlHelper.shared.clear())
                     didSet = true
                     break;
                 }
@@ -248,6 +247,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         }
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
+            UrlHelper.shared.clear()
             //if (this.groups.length > 0) {
                 //this.openGroup(this.groups[0], false)
             //} else {

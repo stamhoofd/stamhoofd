@@ -10,7 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
 import { Logger } from "@stamhoofd/logger"
-import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -63,17 +63,18 @@ export default class App extends Vue {
             (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })
 
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const queryString = new URL(window.location.href).searchParams;
+        const parts = UrlHelper.shared.getParts();
+        const queryString = UrlHelper.shared.getSearchParams()
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
+            UrlHelper.shared.clear()
             const session = new Session(parts[1]);
             const token = queryString.get('token');
             (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false));
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
+            UrlHelper.shared.clear()
             const id = queryString.get('id')
             const token = queryString.get('token')
 
@@ -103,7 +104,7 @@ export default class App extends Vue {
         }
 
         if (parts.length == 2 && parts[0] == 'verify-email') {
-            const queryString = new URL(window.location.href).searchParams;
+            UrlHelper.shared.clear()
             const token = queryString.get('token')
             const code = queryString.get('code')
                 
@@ -124,12 +125,13 @@ export default class App extends Vue {
         }
 
         if (parts.length == 3 && parts[0] == 'invite') {
+            UrlHelper.shared.clear()
             // out of date
             new CenteredMessage("Deze link is niet meer geldig", "De uitnodiging die je hebt gekregen is niet langer geldig. Vraag om een nieuwe uitnodiging te versturen.", "error").addCloseButton().show()
         }
 
         if (parts.length == 1 && parts[0] == 'invite') {
-            const queryString = new URL(window.location.href).searchParams;
+            UrlHelper.shared.clear()
             const key = queryString.get('key');
             const secret = queryString.get('secret');
 

@@ -224,7 +224,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -400,10 +400,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useActivities
     }
 
+
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const params = new URL(window.location.href).searchParams
+        const parts = UrlHelper.shared.getParts()
+        const params = UrlHelper.shared.getSearchParams()
+
+        console.log(parts, params)
 
         document.title = "Stamhoofd - Instellingen"
 
@@ -412,6 +414,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPayment(false)
             return
         }
+
+        // We can clear now
+        UrlHelper.shared.clear()
 
         // First set current url already, to fix back
         HistoryManager.setUrl("/settings")

@@ -4,7 +4,7 @@ import { isSimpleErrors,SimpleError, SimpleErrors } from '@simonbackx/simple-err
 import { Request, RequestMiddleware, RequestResult,Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { sleep } from '@stamhoofd/networking';
+import { sleep, UrlHelper } from '@stamhoofd/networking';
 import { Country, CountryDecoder, Gender, MemberWithRegistrations, Organization, RecordType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
@@ -881,21 +881,19 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     checkUrl(): boolean | null {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
+        const parts =  UrlHelper.shared.getParts()
+        const parsedHash =  UrlHelper.shared.getHashParams()
+        const urlParams =  UrlHelper.shared.getSearchParams()
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv') {
-            // Support for both fragment and query string codes.
+            UrlHelper.shared.clear()
 
-            const parsedHash = new URLSearchParams(
-                window.location.hash.substr(1) // skip the first char (#)
-            );
-            const urlParams = new URLSearchParams(window.location.search);
+            // Support for both fragment and query string codes.
             const code = urlParams.get('code') ?? parsedHash.get("code");
             const state = urlParams.get('state') ?? parsedHash.get("state");
 
             if (code && state) {
-                this.getToken(code);
+                this.getToken(code).catch(console.error);
                 return true;
             } else {
                 new Toast("Inloggen bij groepsadministratie mislukt", "error red").show()

@@ -60,7 +60,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager,SessionManager } from '@stamhoofd/networking';
+import { AppManager, NetworkManager,SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -150,14 +150,13 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const queryString = new URL(window.location.href).searchParams;
+        const parts =  UrlHelper.shared.getParts()
+        const queryString =  UrlHelper.shared.getSearchParams()
 
-        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
+            UrlHelper.shared.clear()
             try {
                 const currentCount = localStorage.getItem("what-is-new")
 
