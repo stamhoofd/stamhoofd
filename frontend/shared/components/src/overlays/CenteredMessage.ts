@@ -55,6 +55,11 @@ export class CenteredMessage {
                 message: errors.message
             }))
         }
+
+        if (simpleErrors.hasCode("network_error") || simpleErrors.hasCode("network_timeout")) {
+            return new CenteredMessage("Geen internetverbinding", "Kijk jouw verbinding na en probeer opnieuw", "error")
+        }
+
         return new CenteredMessage(simpleErrors.getHuman(), "", "error")
     }
 

@@ -117,7 +117,11 @@ export class NetworkManagerStatic implements RequestMiddleware {
                 this.platformLatestVersion = latestVersion
 
                 if (this.platformLatestVersion > Version) {
-                    new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
+                    if (AppManager.shared.isNative) {
+                        new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
+                    } else {
+                        new Toast("Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.", "yellow download").setHide(null).show()
+                    }
                 }
             }  
         }
