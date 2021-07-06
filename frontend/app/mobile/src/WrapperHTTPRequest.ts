@@ -74,9 +74,9 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
 	}
 
 	send(body?: Document | BodyInit | null): void {
-		console.log("Starting new HTTP request...")
+		/*console.log("Starting new HTTP request...")
 		console.log(this.method, this.url)
-		console.log(body)
+		console.log(body)*/
 
 		const contentType = this.requestHeaders["Content-Type"] as string | undefined
 
@@ -101,7 +101,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
 			headers: this.requestHeaders,
 			responseType: "text"
 		}).then((response) => {
-			console.log("received response", response)
+			//console.log("received response", response)
 
 			this.readyState = 4
 			this.status = response.status
