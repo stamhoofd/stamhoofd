@@ -50,5 +50,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto&apos;s.</string>
 </dict>
 </plist>

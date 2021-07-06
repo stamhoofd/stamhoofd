@@ -3,6 +3,7 @@
 	"appName": "Stamhoofd",
 	"webDir": "dist",
 	"bundledWebRuntime": false,
+	"loggingBehavior": "none",
 	"hideLogs": true,
 	"plugins": {
 		"Keyboard": {
@@ -15,5 +16,9 @@
 				"alert"
 			]
 		}
+	},
+	"server": {
+		"url": "http://192.168.0.7:8080",
+		"cleartext": true
 	}
 }

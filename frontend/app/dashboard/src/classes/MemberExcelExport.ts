@@ -104,6 +104,19 @@ export class MemberExcelExport {
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, ws, wsName);
 
-        XLSX.writeFile(wb, "leden.xlsx");
+        // Fix for app
+        if ((navigator as any).nativeShare) {
+            /* bookType can be any supported output type */
+            const wbout = XLSX.write(wb, { bookType:'xlsx', bookSST: false, type: 'base64' });
+            (navigator as any).nativeShare({
+                data: wbout,
+                fileName: "leden.xlsx"
+            })
+            .then(() => console.log('Share was successful.'))
+            .catch((error) => console.log('Sharing failed', error));
+        } else {
+            XLSX.writeFile(wb, "leden.xlsx");
+        }
+
     }
 }

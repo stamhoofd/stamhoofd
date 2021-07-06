@@ -239,11 +239,21 @@ export default class ReferralView extends Mixins(NavigationMixin) {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
             const url = await QRCode.toDataURL(this.href, { scale: 10 })
 
-            const anchor = document.createElement('a');
-            anchor.href = url;
-            anchor.download = "qr-code.png";
-            anchor.click();
-
+            if ((navigator as any).nativeShare) {
+                //window.open(url, "_blank")
+                console.log(url);
+                (navigator as any).nativeShare({
+                    data: url,
+                    fileName: "qr-code.png"
+                })
+                .then(() => console.log('Share was successful.'))
+                .catch((error) => console.log('Sharing failed', error));
+            } else {
+                 const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = "qr-code.png";
+                anchor.click();
+            }
         } catch (e) {
             console.error(e)
             return;

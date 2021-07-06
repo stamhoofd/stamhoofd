@@ -115,9 +115,14 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     }
 
     async excel() {
-        const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
-        const MemberExcelExport = d.MemberExcelExport
-        MemberExcelExport.export(this.members);
+        try {
+            const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
+            const MemberExcelExport = d.MemberExcelExport
+            MemberExcelExport.export(this.members);
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
     }
 
     acceptWaitingList() {

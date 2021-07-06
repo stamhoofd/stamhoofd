@@ -108,3 +108,29 @@ CApp.addListener('appUrlOpen', (data: any) => {
     console.log(url.pathname + url.search)
 }).catch(console.error);
 
+// Load share dialog
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+
+/**
+ * Data should be base64 encoded
+ */
+(navigator as any).nativeShare = async function(obj: { data: string, fileName: string }) {
+    const fileName = obj.fileName
+    await Filesystem.requestPermissions()
+    await Filesystem.writeFile({
+        path: fileName,
+        directory: Directory.Data,
+        data: obj.data
+    });
+
+    const finalPhotoUri = await Filesystem.getUri({
+        directory: Directory.Data,
+        path: fileName
+    });
+
+    await Share.share({
+        title: fileName,
+        url: finalPhotoUri.uri
+    })
+}

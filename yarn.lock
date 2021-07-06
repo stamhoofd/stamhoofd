@@ -1232,7 +1232,7 @@
   dependencies:
     tslib "^2.1.0"
 
-"@capacitor/filesystem@^1.0.0":
+"@capacitor/filesystem@^1.0.0", "@capacitor/filesystem@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@capacitor/filesystem/-/filesystem-1.0.2.tgz#5327454addf354de0ad89e9a970443dc5563c646"
   integrity sha512-cDxNUubS/l1WLt94pviB657l/pA17jIZQ2wQBDyTvXPflOBL0sFC4QR9TT6nuOBX2oVWsgG3HogEdmgwXeGeHA==
@@ -1246,6 +1246,11 @@
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@capacitor/keyboard/-/keyboard-1.0.2.tgz#c703f0c9480b1daefc2be60ff4182238b3b98b61"
   integrity sha512-JdIkYXfrfiuP/iLxO65GJe8rY+VcCoGesPzu/eMHRoWOuRyRcwjw9AtVOPyAXj4qPq1bbmGB8if/m2/R1S1X9A==
+
+"@capacitor/share@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/share/-/share-1.0.2.tgz#3496fb09a010a4a3c8c0c8d08fa1f4aace5c782b"
+  integrity sha512-q09kydPsW69afasqc0C+PqXIiwYH3O7R/rHb2uq3prKPk2B3L2zu69H8vMhjrzzfi5AbpLpFc6lpoS7ApxWjvg==
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"

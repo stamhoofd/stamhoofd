@@ -6,22 +6,15 @@ const config: CapacitorConfig = {
   appName: 'Stamhoofd',
   webDir: 'dist',
   bundledWebRuntime: false,
-  //loggingBehavior: "none",
+  loggingBehavior: "none",
   hideLogs: true,
   plugins: {
     Keyboard: {
-      // iOS Only
       resize: KeyboardResize.None,
-      //style: "dark"
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
     }
-  },
-  // For development: enable live reload
-  server: {
-    url: "http://192.168.0.7:8080",
-    cleartext: true
   }
 };
 
