@@ -225,7 +225,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -285,7 +285,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     get areSalesDisabled() {
-        return this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
+        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     async loadAdmins() {
