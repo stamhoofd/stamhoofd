@@ -8,9 +8,10 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
+import { Sodium } from '@stamhoofd/crypto';
 import { Logger } from "@stamhoofd/logger"
-import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -56,6 +57,11 @@ export default class App extends Vue {
     }
 
     mounted() {
+        SessionManager.addListener(this, (changed) => {
+            if (changed == "organization") {
+                this.checkKey().catch(console.error)
+            }
+        })
         CenteredMessage.addListener(this, async (centeredMessage) => {
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
@@ -182,6 +188,58 @@ export default class App extends Vue {
             }
         }
     }
+
+    async checkKey() {
+        console.log("Checking key...")
+
+        // Check if public and private key matches
+        if (!SessionManager.currentSession) {
+            return
+        }
+
+        const session = SessionManager.currentSession
+
+        const user = session.user
+
+        if (!user) {
+            return
+        }
+        const privateKey = session.getUserPrivateKey()
+
+        if (!privateKey) {
+            return
+        }
+        const publicKey = user.publicKey
+
+        if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
+
+            // Gather all keychain items, and check which ones are still valid
+            // Oops! Error with public private key
+            await LoginHelper.fixPublicKey(session)
+            new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
+            GlobalEventBus.sendEvent("encryption", null).catch(console.error)
+        }
+
+        try {
+            const keychainItem = Keychain.getItem(session.organization!.publicKey)
+            if (!keychainItem) {
+                throw new Error("Missing organization keychain")
+            }
+
+            await session.decryptKeychainItem(keychainItem)
+
+            console.log("We have access to the current organization private key")
+        } catch (e) {
+            console.error(e)
+
+            // Show warnign instead
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+                (this.$refs.modalStack as any).present(
+                    AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
+                )
+            })).show()
+        }
+    }
 }
 </script>
 
@@ -193,7 +251,7 @@ export default class App extends Vue {
 
 html {
     -webkit-touch-callout:none;
-    user-select: none;
+    //user-select: none;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
     -webkit-tap-highlight-color: transparent;
 }

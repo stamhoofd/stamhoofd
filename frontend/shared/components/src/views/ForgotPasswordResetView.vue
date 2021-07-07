@@ -125,11 +125,11 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                 this.user = user
                 this.loadingToken = false;
             }).catch(e => {
-                new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error").show()
+                new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error red").show()
                 this.dismiss({ force: true })
             })
         } else {
-            new Toast("Deze link is ongeldig", "error").show()
+            new Toast("Deze link is ongeldig", "error red").show()
             this.dismiss({ force: true })
         }
     }

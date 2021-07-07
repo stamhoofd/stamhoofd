@@ -227,7 +227,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
@@ -468,7 +468,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
-        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment" || type == "encryption") {
+        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment") {
             this.reload()
         }
     }
@@ -479,10 +479,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     activated() {
         MemberManager.addListener(this, this.onUpdateMember)
+        GlobalEventBus.addListener(this, "encryption", async () => {
+            this.reload()
+            return Promise.resolve()
+        })
     }
 
     deactivated() {
         MemberManager.removeListener(this)
+        GlobalEventBus.removeListener(this)
     }
 
     beforeDestroy() {

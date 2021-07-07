@@ -79,7 +79,7 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,HistoryManager,ModalStackComponent,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, LoadingView, OrganizationLogo,PromiseView,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox, GlobalEventBus, LoadingView, OrganizationLogo,PromiseView,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
 import { Sodium } from "@stamhoofd/crypto";
 import { LoginHelper, SessionManager } from "@stamhoofd/networking";
 import { EncryptedPaymentDetailed, Member, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
@@ -236,45 +236,21 @@ export default class OverviewView extends Mixins(NavigationMixin){
             HistoryManager.setUrl("/")
         }
 
-        this.checkInvites().finally(() => {
-            if (setPath && this.members.find(m => m.details.isRecovered)) {
-                // Show error message
-                this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
-            }
+        if (setPath && this.members.find(m => m.details.isRecovered)) {
+            // Show error message
+            this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
+        }
+    }
+
+    activated() {
+        GlobalEventBus.addListener(this, "encryption", async () => {
+            // Reload members if encryption key changed
+            await MemberManager.loadMembers()
         })
     }
 
-    async checkInvites() {
-        const user = SessionManager.currentSession!.user!
-        const privateKey = SessionManager.currentSession!.getUserPrivateKey()!
-        const publicKey = user.publicKey
-        
-        if (user.incomingInvites.length > 0) {
-            for (const invite of user.incomingInvites) {
-                try {
-                    const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
-                    await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
-
-                    if (invite.sender.permissions) {
-                        new Toast("We hebben jouw toegang goedgekeurd", "key green").setHide(15*1000).show()
-                    } else {
-                        new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
-                    }
-                } catch (e) {
-                    console.error(e)
-                    new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
-                }
-                
-                // Remove invite if succeeded
-                await SessionManager.currentSession!.authenticatedServer.request({
-                    method: "POST",
-                    path: "/invite/"+encodeURIComponent(invite.key)+"/trade"
-                })
-            }
-
-            // Reload members
-            await MemberManager.loadMembers()
-        }
+    deactivated() {
+        GlobalEventBus.removeListener(this)
     }
 
     async addNewMember() {

@@ -16,7 +16,7 @@ class SessionStorage extends AutoEncoder {
     lastOrganizationId: string | null = null
 }
 
-type AuthenticationStateListener = () => void
+type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token" | "session") => void
 
 /**
  * The SessionManager manages the storage of Sessions for different organizations. You can request the session for a given organization.
@@ -55,9 +55,9 @@ export class SessionManagerStatic {
         this.listeners.delete(owner)
     }
 
-    protected callListeners() {
+    protected callListeners(changed: "userPrivateKey" | "user" | "organization" | "token" | "session") {
         for (const listener of this.listeners.values()) {
-            listener()
+            listener(changed)
         }
     }
 
@@ -66,7 +66,7 @@ export class SessionManagerStatic {
             this.currentSession.removeListener(this)
         }
         this.currentSession = null;
-        this.callListeners();
+        this.callListeners("session");
 
         // Not important async block: we don't need to wait for a save here
         (async () => {
@@ -112,7 +112,7 @@ export class SessionManagerStatic {
             this.currentSession.removeListener(this)
         }
         this.currentSession = null
-        this.callListeners()
+        this.callListeners("session")
     }
 
     /**
@@ -130,6 +130,20 @@ export class SessionManagerStatic {
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
+            if (!session.organization) {
+                console.log("Doing a sync session update because organization is missing")
+            }
+            if (!session.user) {
+                console.log("Doing a sync session update because user is missing")
+            }
+
+            if (session.preventComplete) {
+                console.log("Doing a sync session update because preventComplete")
+            }
+
+            if (session.organization && session.user && !session.preventComplete) {
+                console.log("Doing a sync session update other")
+            }
 
             try {
                 await session.updateData(false, shouldRetry, true)
@@ -178,15 +192,15 @@ export class SessionManagerStatic {
             this.addOrganizationToStorage(session.organization).catch(console.error)
         }
 
-        this.callListeners()
+        this.callListeners("session")
 
-        this.currentSession.addListener(this, () => {
+        this.currentSession.addListener(this, (changed: "userPrivateKey" | "user" | "organization" | "token") => {
             if (needsResync && session.organization) {
                 //needsResync = false
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }
             this.setUserId();
-            this.callListeners()
+            this.callListeners(changed)
         })
 
         this.setUserId();

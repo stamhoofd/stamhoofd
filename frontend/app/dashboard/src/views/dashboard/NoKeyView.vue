@@ -1,6 +1,7 @@
 <template>
-    <div class="st-view background" id="no-key-view">
+    <div id="no-key-view" class="st-view background">
         <STNavigationBar title="Sleutel kwijt">
+            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -8,11 +9,15 @@
                 Hoe kan je terug aan de gegevens van leden?
             </h1>
 
-            <p class="style-description">Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:</p>
+            <p class="style-description">
+                Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:
+            </p>
 
             <hr>
             <h2>Een hoofdbeheerder helpt je uit de nood</h2>
-            <p class="style-description">Vraag het volgende aan een hoofdbeheerder.</p>
+            <p class="style-description">
+                Vraag het volgende aan een hoofdbeheerder.
+            </p>
 
             <ol>
                 <li>Ga naar Stamhoofd, klik op Instellingen > Beheerders in het menu.</li>
@@ -20,15 +25,21 @@
                 <li>Onderaan bij 'Encryptiesleutels' geef je toegang tot alle sleutels</li>
             </ol>
 
-            <p class="style-description">Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je de een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.</p>
+            <p class="style-description">
+                Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je de een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.
+            </p>
 
             <hr>
             <h2>Andere beheerders zijn geen hoofdbeheerders</h2>
-            <p class="style-description">Verander een bestaande beheerder in een hoofdbeheerder (instellingen > beheerders) en volg de stappen hierboven. Opgelet: Je kan geen nieuwe beheerders aanmaken als je de sleutel mist. Voor je verder gaat moet je zeker een nieuwe sleutel aanmaken anders heb je ook geen toegang tot nieuwe leden of aanpassingen.</p>
+            <p class="style-description">
+                Verander een bestaande beheerder in een hoofdbeheerder (instellingen > beheerders) en volg de stappen hierboven. Opgelet: Je kan geen nieuwe beheerders aanmaken als je de sleutel mist. Voor je verder gaat moet je zeker een nieuwe sleutel aanmaken anders heb je ook geen toegang tot nieuwe leden of aanpassingen.
+            </p>
 
             <hr>
             <h2>Er zijn geen andere beheerders</h2>
-            <p class="style-description">Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. De leden zelf kunnen wel nog aan al hun gegevens en hoeven niet alles opnieuw in te geven, via goede communicatie kan je dus relatief eenvoudig alle gegevens terug halen. Je kan ondertussen nog de voornaam van de leden zien, ten minste één e-mailadres en de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn. </p>
+            <p class="style-description">
+                Slecht nieuws! Je bent de toegang tot de gegevens van je leden kwijt. De leden zelf kunnen wel nog aan al hun gegevens en hoeven niet alles opnieuw in te geven, via goede communicatie kan je dus relatief eenvoudig alle gegevens terug halen. Je kan ondertussen nog de voornaam van de leden zien, ten minste één e-mailadres en de betalingen bekijken en zien in welke groepen de leden ingeschreven zijn.
+            </p>
             
             <ol>
                 <li>Maak een nieuwe sleutel aan via de knop onderaan</li>
@@ -37,7 +48,7 @@
             </ol>
 
             <button class="button destructive" @click="openNewKey">
-                <span class="icon trash"/><span>Alle toegang vernietigen en een nieuwe sleutel maken</span>
+                <span class="icon trash" /><span>Alle toegang vernietigen en een nieuwe sleutel maken</span>
             </button>
         </main>
 
@@ -53,8 +64,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STInputBox, STNavigationBar, STToolbar, LoadingButton } from "@stamhoofd/components";
+import { LoadingButton,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Component, Mixins } from "vue-property-decorator";
+
 import CreateNewKeyView from './CreateNewKeyView.vue';
 
 @Component({

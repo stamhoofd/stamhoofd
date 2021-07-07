@@ -131,6 +131,10 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 
         event.target.contentEditable = false;
 
+        if (document.activeElement && (document.activeElement as any).blur) {
+            (document.activeElement as any).blur();
+        }
+
         const el = event.target;
         const rect = event.target.getBoundingClientRect();
 

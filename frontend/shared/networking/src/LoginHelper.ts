@@ -2,8 +2,9 @@ import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
+import { GlobalEventBus, Toast } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -273,7 +274,7 @@ export class LoginHelper {
         
         if (encryptedKeychainItems) {
             const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, secret)
-            await LoginHelper.addToKeychain(session, decrypted)
+            await session.addToKeychain(decrypted)
         }
 
         // Clear user since permissions have changed
@@ -835,25 +836,5 @@ export class LoginHelper {
             authSignPrivateKey: keys.authSignKeyPair.privateKey
         }))
         return response.data.token
-    }
-
-    static async addToKeychain(session: Session, decryptedKeychainItems: string) {
-        // unbox
-        const keychainItems = new ObjectData(JSON.parse(decryptedKeychainItems), { version: Version }).decode(new VersionBoxDecoder(new ArrayDecoder(InviteKeychainItem as Decoder<InviteKeychainItem>))).data
-
-        // Add the keys to the keychain (if not already present)
-        const encryptedItems: KeychainItem[] = []
-        for (const item of keychainItems) {
-            const encryptedItem = await session.createKeychainItem(item)
-            encryptedItems.push(encryptedItem)
-        }
-
-        if (encryptedItems.length > 0) {
-            const response = await session.authenticatedServer.request({
-                method: "POST",
-                path: "/keychain",
-                body: encryptedItems
-            })
-        }
     }
 }

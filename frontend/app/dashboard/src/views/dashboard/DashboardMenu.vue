@@ -131,7 +131,7 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
+import { AsyncComponent, CenteredMessage, GlobalEventBus, LoadComponent, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
 import { Sodium } from "@stamhoofd/crypto";
 import { AppManager, Keychain, LoginHelper,SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
@@ -261,10 +261,6 @@ export default class Menu extends Mixins(NavigationMixin) {
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
 
-        this.checkKey().catch(e => {
-            console.error(e)
-        })
-
         const currentCount = localStorage.getItem("what-is-new")
         if (currentCount) {
             const c = parseInt(currentCount)
@@ -281,65 +277,6 @@ export default class Menu extends Mixins(NavigationMixin) {
                     this.present(component.setDisplayStyle("popup").setAnimated(false))
                 }).catch(console.error)
             }
-        }
-    }
-
-    async checkKey() {
-        // Check if public and private key matches
-        const user = SessionManager.currentSession!.user!
-        const privateKey = SessionManager.currentSession!.getUserPrivateKey()!
-        const publicKey = user.publicKey
-
-        if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
-
-            // Gather all keychain items, and check which ones are still valid
-            // Oops! Error with public private key
-            await LoginHelper.fixPublicKey(SessionManager.currentSession!)
-            new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
-            MemberManager.callListeners("encryption", null)
-        }
-
-
-        if (SessionManager.currentSession!.user!.incomingInvites.length > 0) {
-            for (const invite of user.incomingInvites) {
-                try {
-                    const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
-                    await LoginHelper.addToKeychain(SessionManager.currentSession!, decryptedKeychainItems)
-                    new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
-                } catch (e) {
-                    console.error(e)
-                    new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
-                }
-                
-                // Remove invite if succeeded
-                await SessionManager.currentSession!.authenticatedServer.request({
-                    method: "POST",
-                    path: "/invite/"+encodeURIComponent(invite.key)+"/trade"
-                })
-            }
-
-            // Reload all views
-            MemberManager.callListeners("encryption", null)
-        }
-
-        try {
-            const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
-            if (!keychainItem) {
-                throw new Error("Missing organization keychain")
-            }
-
-            const session = SessionManager.currentSession!
-            await session.decryptKeychainItem(keychainItem)
-
-        } catch (e) {
-            console.error(e)
-
-            // Show warnign instead
-            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
-                this.present(
-                    AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './NoKeyView.vue')).setDisplayStyle("popup")
-                )
-            })).show()
         }
     }
 

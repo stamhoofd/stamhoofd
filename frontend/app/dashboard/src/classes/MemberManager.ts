@@ -7,7 +7,7 @@ import {  EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDec
 
 import { OrganizationManager } from './OrganizationManager';
 
-export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment" | "encryption"
+export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
 export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
 
 
