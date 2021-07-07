@@ -6,6 +6,7 @@
         "serve": "NODE_ENV=development webpack serve --hot",
         "build": "NODE_ENV=development webpack --progress ",
         "sync": "cap sync",
+        "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts && mv -n capacitor.config.production.ts capacitor.config.ts; cap sync; mv -n capacitor.config.ts capacitor.config.production.ts && mv -n capacitor.config.development.ts capacitor.config.ts ",
         "ios": "cap open ios",
         "android": "cap open android",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
