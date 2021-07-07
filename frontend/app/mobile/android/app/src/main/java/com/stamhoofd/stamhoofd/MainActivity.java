@@ -4,6 +4,8 @@ import com.getcapacitor.BridgeActivity;
 import android.content.res.Configuration;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 public class MainActivity extends BridgeActivity {
     void setDarkMode() {
@@ -12,10 +14,16 @@ public class MainActivity extends BridgeActivity {
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         WebView webView = this.bridge.getWebView();
         WebSettings webSettings = webView.getSettings();
+
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 // As of Android 10, you can simply force the dark mode
                 webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
+
+                // Only let CSS do the work
+                if(WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
+                    WebSettingsCompat.setForceDarkStrategy(webSettings, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY);
+                }
             }
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
