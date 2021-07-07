@@ -8,22 +8,14 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, PromiseView, Toast,ToastBox } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
+import { Sodium } from '@stamhoofd/crypto';
 import { Logger } from "@stamhoofd/logger"
-import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
+import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-
-export function asyncComponent(component: () => Promise<any>, properties = {}) {
-    return new ComponentWithProperties(PromiseView, {
-        promise: async function() {
-            const c = (await component()).default
-            return new ComponentWithProperties(c, properties)
-        }
-    })
-}
 
 // kick off the polyfill!
 //smoothscroll.polyfill();
@@ -34,42 +26,67 @@ export function asyncComponent(component: () => Promise<any>, properties = {}) {
     },
 })
 export default class App extends Vue {
-    root = new ComponentWithProperties(AuthenticatedView, {
-        root: new ComponentWithProperties(SplitViewController, {
-            root: asyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-        }),
-        loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-        noPermissionsRoot: asyncComponent(() => import(/* webpackChunkName: "NoPermissionsView", webpackPrefetch: true */ './views/login/NoPermissionsView.vue'), {})
-    });
+    root = new ComponentWithProperties(PromiseView, {
+        promise: async () => {
+            await SessionManager.restoreLastSession()
+
+            if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+                // Load Windows stylesheet
+                await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+            }
+
+            return new ComponentWithProperties(AuthenticatedView, {
+                root: new ComponentWithProperties(SplitViewController, {
+                    root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+                }),
+                loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+                noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+            });
+        }
+    })
+
+    created() {
+        try {
+            ColorHelper.setColor("#0053ff")
+            ColorHelper.setupDarkTheme()
+        } catch (e) {
+            console.error("Color setup failed")
+            console.error(e)
+        }
+        HistoryManager.activate();
+    }
 
     mounted() {
-        HistoryManager.activate();
-        SessionManager.restoreLastSession().catch(e => {
-            console.error(e)
+        SessionManager.addListener(this, (changed) => {
+            if (changed == "organization") {
+                this.checkKey().catch(console.error)
+            }
         })
-        //ColorHelper.darkTheme()
-
         CenteredMessage.addListener(this, async (centeredMessage) => {
-            console.log(this.$refs.modalStack);
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                console.error("modalStack ref not found!")
                 await this.$nextTick()
             }
             (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })
 
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const queryString = new URL(window.location.href).searchParams;
+        const parts = UrlHelper.shared.getParts();
+        const queryString = UrlHelper.shared.getSearchParams()
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
-            const session = new Session(parts[1]);
+            UrlHelper.shared.clear()
             const token = queryString.get('token');
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false));
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    const session = new Session(parts[1]);
+                    await session.loadFromStorage()
+                    return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
+                }
+            }).setDisplayStyle("popup").setAnimated(false));
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
+            UrlHelper.shared.clear()
             const id = queryString.get('id')
             const token = queryString.get('token')
 
@@ -99,17 +116,16 @@ export default class App extends Vue {
         }
 
         if (parts.length == 2 && parts[0] == 'verify-email') {
-            const queryString = new URL(window.location.href).searchParams;
+            UrlHelper.shared.clear()
             const token = queryString.get('token')
             const code = queryString.get('code')
                 
             if (token && code) {
-                // tood: password reset view
                 const session = new Session(parts[1]);
-
-                // tood: password reset view
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
-                LoginHelper.verifyEmail(session, code, token).then(() => {
+                session.loadFromStorage()
+                .then(() => LoginHelper.verifyEmail(session, code, token))
+                .then(() => {
                     toast.hide()
                     new Toast("E-mailadres is gevalideerd", "success green").show()
                 }).catch(e => {
@@ -120,12 +136,13 @@ export default class App extends Vue {
         }
 
         if (parts.length == 3 && parts[0] == 'invite') {
+            UrlHelper.shared.clear()
             // out of date
             new CenteredMessage("Deze link is niet meer geldig", "De uitnodiging die je hebt gekregen is niet langer geldig. Vraag om een nieuwe uitnodiging te versturen.", "error").addCloseButton().show()
         }
 
         if (parts.length == 1 && parts[0] == 'invite') {
-            const queryString = new URL(window.location.href).searchParams;
+            UrlHelper.shared.clear()
             const key = queryString.get('key');
             const secret = queryString.get('secret');
 
@@ -147,8 +164,14 @@ export default class App extends Vue {
                                         invite: response.data
                                     })
                                 }
+                                let session = await SessionManager.getSessionForOrganization(response.data.organization.id)
+                                if (!session) {
+                                    session = new Session(response.data.organization.id)
+                                    await session.loadFromStorage()
+                                }
                                 const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
                                 return new ComponentWithProperties(AcceptInviteView, {
+                                    session,
                                     invite: response.data,
                                     secret
                                 })
@@ -164,10 +187,57 @@ export default class App extends Vue {
                 }).setDisplayStyle("popup").setAnimated(false));
             }
         }
+    }
 
-        if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
-            // Load Windows stylesheet
-            import("@stamhoofd/scss/layout/windows-scrollbars.scss").catch(console.error);
+    async checkKey() {
+        console.log("Checking key...")
+
+        // Check if public and private key matches
+        if (!SessionManager.currentSession) {
+            return
+        }
+
+        const session = SessionManager.currentSession
+
+        const user = session.user
+
+        if (!user) {
+            return
+        }
+        const privateKey = session.getUserPrivateKey()
+
+        if (!privateKey) {
+            return
+        }
+        const publicKey = user.publicKey
+
+        if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
+
+            // Gather all keychain items, and check which ones are still valid
+            // Oops! Error with public private key
+            await LoginHelper.fixPublicKey(session)
+            new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
+            GlobalEventBus.sendEvent("encryption", null).catch(console.error)
+        }
+
+        try {
+            const keychainItem = Keychain.getItem(session.organization!.publicKey)
+            if (!keychainItem) {
+                throw new Error("Missing organization keychain")
+            }
+
+            await session.decryptKeychainItem(keychainItem)
+
+            console.log("We have access to the current organization private key")
+        } catch (e) {
+            console.error(e)
+
+            // Show warnign instead
+            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+                (this.$refs.modalStack as any).present(
+                    AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
+                )
+            })).show()
         }
     }
 }
@@ -176,5 +246,13 @@ export default class App extends Vue {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "~@stamhoofd/scss/main";
+@import "~@stamhoofd/scss/base/dark-modus";
 @import "~@simonbackx/vue-app-navigation/dist/main.css";
+
+html {
+    -webkit-touch-callout:none;
+    //user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;
+}
 </style>

@@ -165,10 +165,10 @@
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -491,28 +491,28 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
+        const parts = UrlHelper.shared.getParts()
+        const urlParams = UrlHelper.shared.getSearchParams()
 
-        console.log(path);
+        // We can clear now
+        UrlHelper.shared.clear()
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
-            const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
 
             if (code && state) {
-                this.doLinkMollie(code);
+                this.doLinkMollie(code).catch(console.error);
             } else {
                 const error = urlParams.get('error') ?? "";
                 if (error) {
                     new Toast("Koppelen mislukt", "error red").show()
                 }
             }
-            this.updateMollie();
+            this.updateMollie().catch(console.error);
         } else {
             if (this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) {
-                this.updateMollie();
+                this.updateMollie().catch(console.error);
             }
         }
         HistoryManager.setUrl("/settings/payments")
@@ -527,11 +527,14 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/mollie/check",
-                decoder: Organization as Decoder<Organization>
+                decoder: Organization as Decoder<Organization>,
+                shouldRetry: false
             })
            
             SessionManager.currentSession!.setOrganization(response.data)
         } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
         }
     }
 
@@ -541,19 +544,31 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
         this.loadingMollie = true;
 
-        const tab = window.open('about:blank')!;
+        const tab = (AppManager.shared.isNative ? null : window.open('about:blank'));
+
+        if (!tab && !AppManager.shared.isNative) {
+            this.loadingMollie = false;
+            new Toast('Kon geen scherm openen', "error red").show()
+            return
+        }
 
         try {
             const url = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "GET",
-                path: "/mollie/dashboard"
+                path: "/mollie/dashboard",
+                shouldRetry: false
             })
             console.log(url.data)
 
-            tab.location = url.data as any;
-            tab.focus();
+            if (AppManager.shared.isNative) {
+                window.open(url.data as any)
+            } else {
+                tab!.location = url.data as any;
+                tab!.focus();
+            }
         } catch (e) {
-            tab.close()
+            await this.updateMollie()
+            tab?.close()
             this.errorBox = new ErrorBox(e)
         }
         

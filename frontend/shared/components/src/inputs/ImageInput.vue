@@ -116,7 +116,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     @extend .style-input-shadow;
     border: $border-width solid $color-gray-light;
     color: $color-gray;
-    background: var(--color-white, white);
+    background: $color-white;
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 60px;
@@ -166,13 +166,14 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         right: 0;
         top: 0;
         bottom: 0;
-        background: rgba(white, 0.9);
+        background: $color-white;
         text-align: center;
         opacity: 0;
         width: 100%;
         height: 100%;
         z-index: 1;
         transition: opacity 0.2s;
+        color: $color-error;
     }
 
     &:hover {

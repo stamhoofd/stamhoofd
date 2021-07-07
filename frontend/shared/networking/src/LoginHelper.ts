@@ -2,8 +2,9 @@ import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
+import { GlobalEventBus, Toast } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PermissionLevel, Permissions, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -273,7 +274,7 @@ export class LoginHelper {
         
         if (encryptedKeychainItems) {
             const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, secret)
-            await LoginHelper.addToKeychain(session, decrypted)
+            await session.addToKeychain(decrypted)
         }
 
         // Clear user since permissions have changed
@@ -397,9 +398,9 @@ export class LoginHelper {
         const response = await session.server.request({
             method: "POST",
             path: "/oauth/token",
-            // eslint-disable-next-line @typescript-eslint/camelcase
             body: { grant_type: "request_challenge", email: email },
-            decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>
+            decoder: ChallengeResponseStruct as Decoder<ChallengeResponseStruct>,
+            shouldRetry: false
         })
         const challengeResponse = response.data
 
@@ -432,9 +433,14 @@ export class LoginHelper {
             tokenResponse = await session.server.request({
                 method: "POST",
                 path: "/oauth/token",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                body: { grant_type: "challenge", email: email, challenge: challengeResponse.challenge, signature },
-                decoder: Token as Decoder<Token>
+                body: { 
+                    grant_type: "challenge", 
+                    email: email, 
+                    challenge: challengeResponse.challenge, 
+                    signature,
+                },
+                decoder: Token as Decoder<Token>,
+                shouldRetry: false
             })
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
@@ -468,7 +474,6 @@ export class LoginHelper {
         // No need to keep awaiting keys now
         this.clearAwaitingKeys()
 
-
         // Clear session first
         // needed to make sure we don't use old keys now
         // we are sure we'll have good, new keys
@@ -495,7 +500,7 @@ export class LoginHelper {
 
         // if user / orgaznization got cleared due to an invite
         if (!session.isComplete()) {
-            await session.updateData()
+            await session.updateData(false, false)
             // need to wait on this because it changes the permissions
         }
 
@@ -590,12 +595,14 @@ export class LoginHelper {
         return response.data
     }
 
-    static async loadAdmins(): Promise<OrganizationAdmins> {
+    static async loadAdmins(shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/admins",
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
+            shouldRetry,
+            owner
         })
 
         return response.data
@@ -829,25 +836,5 @@ export class LoginHelper {
             authSignPrivateKey: keys.authSignKeyPair.privateKey
         }))
         return response.data.token
-    }
-
-    static async addToKeychain(session: Session, decryptedKeychainItems: string) {
-        // unbox
-        const keychainItems = new ObjectData(JSON.parse(decryptedKeychainItems), { version: Version }).decode(new VersionBoxDecoder(new ArrayDecoder(InviteKeychainItem as Decoder<InviteKeychainItem>))).data
-
-        // Add the keys to the keychain (if not already present)
-        const encryptedItems: KeychainItem[] = []
-        for (const item of keychainItems) {
-            const encryptedItem = await session.createKeychainItem(item)
-            encryptedItems.push(encryptedItem)
-        }
-
-        if (encryptedItems.length > 0) {
-            const response = await session.authenticatedServer.request({
-                method: "POST",
-                path: "/keychain",
-                body: encryptedItems
-            })
-        }
     }
 }

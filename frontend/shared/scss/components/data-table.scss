@@ -1,24 +1,35 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
+.data-table-prefix {
+    position: relative;
+    z-index: 1;
+}
+
 .data-table {
     user-select: none;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     width: 100%;
     width: calc(100% + 2 * var(--st-horizontal-padding, 40px));
     border-collapse: separate;
+    margin-top: calc(-1 * var(--current-view-safe-area-top, 0px));
+    position: relative;
+    z-index: 0;
 
     thead {
         text-align: left;
         font-weight: 600;
+            
 
         th {
             background: $color-white;
             position: sticky;
             top: 0;
-            border-bottom: $border-width solid $color-white-shade;
+            border-bottom: $border-width solid $color-border;
             @extend .style-table-head;
+            margin-top: 0px;
             padding: 10px;
+            padding-top: calc(var(--current-view-safe-area-top, 0px) + 10px);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -26,6 +37,18 @@
 
             &:first-child {
                 padding-left: 0;
+            }
+
+            &.prefix:first-child {
+                padding-top: var(--current-view-safe-area-top, 0px) !important;
+            }
+
+            &::after {
+                content: "";
+                position: sticky;
+                top: 0;
+                background: $color-white;
+                padding-top: calc(var(--current-view-safe-area-top, 0px) + 10px);
             }
 
             .sort-arrow {
@@ -56,7 +79,7 @@
 
         tr {
             td {
-                border-top: $border-width-thin solid $color-white-shade;
+                border-top: $border-width-thin solid $color-shadow;
 
                 &.prefix:first-child {
                     border-top: 0;
@@ -79,6 +102,9 @@
                 transition: background-color 0.15s;
                 cursor: pointer;
                 touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                user-select: none;
+
                 @media (hover: hover) {
                     &:hover {
                         background-color: $color-primary-lighter;

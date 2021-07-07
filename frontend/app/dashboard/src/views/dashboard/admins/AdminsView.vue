@@ -204,8 +204,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData,PermissionRoleDetailed, User } from '@stamhoofd/structures';
 import { PermissionRole } from "@stamhoofd/structures";
@@ -241,8 +242,13 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     async load(force = false) {
-        await OrganizationManager.loadAdmins(force)
+        await OrganizationManager.loadAdmins(force, true, this)
         this.loading = false
+    }
+
+    beforeDestroy() {
+        // Clear all pending requests
+        Request.cancelAll(this)
     }
 
     get admins() {
@@ -308,7 +314,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             id: this.organization.id,
             privateMeta
         })
-        OrganizationManager.patch(patch)
+        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
     }
 
     moveRoleDown(index: number, role: PermissionRoleDetailed) {
@@ -322,7 +328,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             id: this.organization.id,
             privateMeta
         })
-        OrganizationManager.patch(patch)
+        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
     }
 
     editAdmin(admin: User) {

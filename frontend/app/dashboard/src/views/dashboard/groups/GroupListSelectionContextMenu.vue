@@ -5,16 +5,16 @@
         </ContextMenuItem>
 
         <ContextMenuLine />-->
-        <ContextMenuItem v-if="!waitingList" @click="samenvatting">
+        <ContextMenuItem v-if="!waitingList && !isNative" @click="samenvatting">
             Samenvatting
         </ContextMenuItem>
-        <ContextMenuItem @click="excel">
+        <ContextMenuItem v-if="!isNative" @click="excel">
             Exporteer als Excel
         </ContextMenuItem>
         <!--<ContextMenuItem @click="excel">
             Exporteer als CSV
         </ContextMenuItem>-->
-        <ContextMenuLine />
+        <ContextMenuLine v-if="!isNative" />
         <ContextMenuItem @click="sms">
             SMS'en
         </ContextMenuItem>
@@ -53,6 +53,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@stamhoofd/components";
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
+import { AppManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -87,6 +88,10 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     @Prop({ default: false })
     waitingList!: boolean
 
+    get isNative() {
+        return AppManager.shared.isNative
+    }
+
     sms() {
         const displayedComponent = new ComponentWithProperties(SMSView, {
             members: this.members,
@@ -115,9 +120,14 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
     }
 
     async excel() {
-        const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
-        const MemberExcelExport = d.MemberExcelExport
-        MemberExcelExport.export(this.members);
+        try {
+            const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
+            const MemberExcelExport = d.MemberExcelExport
+            MemberExcelExport.export(this.members);
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
     }
 
     acceptWaitingList() {

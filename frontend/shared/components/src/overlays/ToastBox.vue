@@ -51,7 +51,13 @@ export default class ToastBox extends Vue {
     show(component: ComponentWithProperties) {
         // Make sure this component is not counted in navigation stuff
         component.modalDisplayStyle = "overlay"
-        this.components.push(component);
+
+        // if mobile: add to beginning
+        if (document.body.offsetWidth <= 450) {
+            this.components.unshift(component);
+        } else {
+            this.components.push(component);
+        }
     }
 
     removeAt(index, key) {
@@ -96,22 +102,25 @@ export default class ToastBox extends Vue {
     padding: 10px 20px;
     pointer-events:none;   
     width: 350px + 40px;
+    padding-bottom: calc(10px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
+    padding-top: calc(10px + var(--st-safe-area-top, 0px));
 
     @media (max-width: 450px) {
-        padding: 10px 15px;
-        width: 350px + 30px;
+        padding-right: 15px;
+        padding-left: 15px;
+        width: 100%;
     }
 
     max-width: 100vw;
     box-sizing: border-box;
-    transition: transform 0.35s;
+    transition: transform 0.3s;
     
     &.withOffset {
         transform: translateY(-60px);
     }
 
     > div > div {
-        transition: transform 0.35s, opacity 0.35s;
+        transition: transform 0.3s, opacity 0.3s;
         transform: scale(1, 1) translate(0, 0);
     }
 

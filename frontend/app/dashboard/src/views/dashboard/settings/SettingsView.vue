@@ -11,7 +11,7 @@
 
             <BillingWarningBox />
 
-            <p class="info-box gift selectable with-button" @click="openReferrals(true)">
+            <p v-if="!areSalesDisabled" class="info-box gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
                 <button class="button text">
@@ -104,6 +104,20 @@
                 <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg">
+                        <h2 class="style-title-list">
+                            Jouw inschrijvingspagina
+                        </h2>
+                        <p class="style-description">
+                            Via deze weg kunnen leden zelf online inschrijven
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
@@ -152,64 +166,66 @@
                 </STList>
             </template>
 
-            <hr>
-            <h2>Stamhoofd administratie</h2>
+            <template v-if="!areSalesDisabled">
+                <hr>
+                <h2>Stamhoofd administratie</h2>
+                <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
+                        <h2 class="style-title-list">
+                            Jouw pakketten
+                        </h2>
+                        <p class="style-description">
+                            Wijzig je pakketten of activeer nieuwe functies
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
 
-            <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
-                    <h2 class="style-title-list">
-                        Mijn pakketten
-                    </h2>
-                    <p class="style-description">
-                        Wijzig je pakketten of activeer nieuwe functies
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                    <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
+                        <h2 class="style-title-list">
+                            Facturen en betalingen
+                        </h2>
+                        <p class="style-description">
+                            Download jouw facturen en bekijk jouw tegoed
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
-                    <h2 class="style-title-list">
-                        Facturen en betalingen
-                    </h2>
-                    <p class="style-description">
-                        Download jouw facturen en bekijk jouw tegoed
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                    <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/credits.svg">
+                        <h2 class="style-title-list">
+                            Verdien tegoed door Stamhoofd te promoten
+                        </h2>
+                        <p class="style-description">
+                            Geef 25 euro en krijg tot 100 euro per vereniging
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
 
-                <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/credits.svg">
-                    <h2 class="style-title-list">
-                        Verdien tegoed door Stamhoofd te promoten
-                    </h2>
-                    <p class="style-description">
-                        Geef 25 euro en krijg tot 100 euro per vereniging
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                <hr>
+                <h2>Functies gratis uitproberen</h2>
+                <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
-            <hr>
-            <h2>Functies gratis uitproberen</h2>
-            <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
-
-            <ModuleSettingsBox />
+                <ModuleSettingsBox />
+            </template>
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { AsyncComponent, BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -228,6 +244,7 @@ import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import ReferralView from './ReferralView.vue';
+import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 
 @Component({
     components: {
@@ -267,15 +284,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
+    get areSalesDisabled() {
+        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
+    }
+
     async loadAdmins() {
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            path: "/organization/admins",
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>
-        })
-        this.admins = response.data.users
-        this.invites = response.data.invites
+        await OrganizationManager.loadAdmins(false, false, this)
     }
 
     openReferrals(animated = true) {
@@ -332,6 +346,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
+    manageRegistrationPage(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(RegistrationPageSettingsView)
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
     manageGroups(animated = true) {
         const component = buildManageGroupsComponent(this.organization)
             
@@ -353,12 +373,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }
 
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    const comp = (await import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue")).default
-                    return new ComponentWithProperties(comp, {})
-                }
-            })
+            root: AsyncComponent(() => import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue"))
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
@@ -390,10 +405,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useActivities
     }
 
+
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const params = new URL(window.location.href).searchParams
+        const parts = UrlHelper.shared.getParts()
+        const params = UrlHelper.shared.getSearchParams()
+
+        console.log(parts, params)
 
         document.title = "Stamhoofd - Instellingen"
 
@@ -402,6 +419,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPayment(false)
             return
         }
+
+        // We can clear now
+        UrlHelper.shared.clear()
 
         // First set current url already, to fix back
         HistoryManager.setUrl("/settings")
@@ -459,6 +479,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         this.loadAdmins().catch(e => {
             console.error(e)
         })
+    }
+
+    beforeDestroy() {
+        // Clear all pending requests
+        Request.cancelAll(this)
     }
 }
 </script>

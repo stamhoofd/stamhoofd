@@ -1,0 +1,20 @@
+{
+	"appId": "com.stamhoofd.stamhoofd",
+	"appName": "Stamhoofd",
+	"webDir": "dist",
+	"bundledWebRuntime": false,
+	"loggingBehavior": "none",
+	"hideLogs": true,
+	"plugins": {
+		"Keyboard": {
+			"resize": "none"
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	}
+}

@@ -4,6 +4,7 @@ import { CORSPreflightEndpoint, EncodedResponse, Request, Router, RouterServer }
 import { Version } from '@stamhoofd/structures';
 
 import { crons } from './src/crons';
+import { AppVersionMiddleware } from "./src/helpers/AppVersionMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -31,11 +32,14 @@ const start = async () => {
 
     const routerServer = new RouterServer(router);
     routerServer.verbose = false
-    // tmp
+    
+    // Send the app version along
+    routerServer.addResponseMiddleware(AppVersionMiddleware)
     routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
+        "Access-Control-Expose-Headers": "*",
         "Access-Control-Max-Age": "86400"
     };
 

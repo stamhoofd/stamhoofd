@@ -31,9 +31,14 @@ export class MemberManagerBase {
             if (!encryptedDetails.meta.isRecovered) {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                    latest = await this.decryptMemberDetails(encryptedDetails)
-                    latestEncryptedDetails = encryptedDetails
-                    break
+                    try {
+                        latest = await this.decryptMemberDetails(encryptedDetails)
+                        latestEncryptedDetails = encryptedDetails
+                        break
+                    } catch (e) {
+                        // Probably wrong key /reencrypted key in keychain: ignore it
+                        console.error(e)
+                    }
                 }
             }
         }
@@ -44,11 +49,16 @@ export class MemberManagerBase {
             for (const encryptedDetails of oldToNew) {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                    latest = await this.decryptMemberDetails(encryptedDetails)
-                    latestEncryptedDetails = encryptedDetails
+                    try {
+                        latest = await this.decryptMemberDetails(encryptedDetails)
+                        latestEncryptedDetails = encryptedDetails
 
-                    // We need the oldest
-                    break
+                        // We need the oldest
+                        break
+                    } catch (e) {
+                        // Probably wrong key /reencrypted key in keychain: ignore it
+                        console.error(e)
+                    }
                 } else {
                     // Does it have public data?
                     if (encryptedDetails.publicData) {
@@ -82,8 +92,18 @@ export class MemberManagerBase {
         for (const encryptedDetails of oldToNew) {
             if (encryptedDetails.id !== latestEncryptedDetails.id && encryptedDetails.meta.isRecovered && latestEncryptedDetails.meta.date < encryptedDetails.meta.date) {
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                    const updates = await this.decryptMemberDetails(encryptedDetails)
-                    details.merge(updates)
+                    try {
+                        const updates = await this.decryptMemberDetails(encryptedDetails)
+                        details.merge(updates)
+                    } catch (e) {
+                        // Probably wrong key /reencrypted key in keychain: ignore it
+                        console.error(e)
+
+                        if (encryptedDetails.publicData) {
+                            // Merge the non-encrypted blob of data
+                            details.merge(encryptedDetails.publicData)
+                        }
+                    }
                 } else {
                     if (encryptedDetails.publicData) {
                         // Merge the non-encrypted blob of data

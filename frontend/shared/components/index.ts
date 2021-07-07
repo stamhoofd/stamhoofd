@@ -1,4 +1,3 @@
-
 // Errors
 export * from "./src/errors/ErrorBox"
 export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
@@ -31,6 +30,7 @@ export { default as CopyableDirective } from "./src/directives/Copyable"
 export { default as TooltipDirective } from "./src/directives/Tooltip"
 
 // Cotnainers
+export * from "./src/containers/AsyncComponent"
 export { default as AuthenticatedView } from "./src/containers/AuthenticatedView.vue"
 export { default as LoadingView } from "./src/containers/LoadingView.vue"
 export { default as PromiseView } from "./src/containers/PromiseView.vue"

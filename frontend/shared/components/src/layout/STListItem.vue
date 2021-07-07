@@ -75,6 +75,14 @@ a.st-list-item {
         }
     }
 
+    &.right-small {
+        > .main > div > .right {
+            @extend .style-description-small;
+            text-align: right;
+            padding-left: 10px;
+        }
+    }
+
     &.right-description {
         > .main > div > .right {
             @extend .style-description;

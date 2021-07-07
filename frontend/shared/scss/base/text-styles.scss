@@ -1,20 +1,26 @@
 @use 'variables' as *;
 
 @mixin style-side-view-shadow() {
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 5px $color-side-view-shadow;
 }
 @mixin style-box-shadow() {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 4px 10px $color-box-shadow;
 }
 
 .style-side-view-shadow {
     @include style-side-view-shadow();
 }
 .style-input-shadow {
-    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 2px 3px $color-box-shadow;
 }
 .style-overlay-shadow {
-    box-shadow: 0px 7px 15px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 5px 15px 3px $color-overlay-shadow;
+}
+
+.style-nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .style-hr {
@@ -199,7 +205,6 @@
 .style-table-head {
     font-size: 16px;
     font-weight: 600;
-    margin-top: 20px;
 }
 
 .style-placeholder {

@@ -111,25 +111,25 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                     token: token
                 },
                 decoder: Token
-            }).then(response => {
+            }).then(async (response) => {
                 // Create new session to prevent signing in
                 this.session = new Session(this.initialSession.organizationId)
-                this.session.organization = this.initialSession.organization
-
+                await this.session.loadFromStorage()
                 this.session.setToken(response.data)
-                
-                return this.session.fetchUser()
-            }).then((user) => {
+                this.session.organization = this.initialSession.organization
+                return await this.session.fetchUser()
+            })
+            .then((user) => {
                 this.email = user.email
                 localStorage.setItem("email", this.email)
                 this.user = user
                 this.loadingToken = false;
             }).catch(e => {
-                new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error").show()
+                new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error red").show()
                 this.dismiss({ force: true })
             })
         } else {
-            new Toast("Deze link is ongeldig", "error").show()
+            new Toast("Deze link is ongeldig", "error red").show()
             this.dismiss({ force: true })
         }
     }

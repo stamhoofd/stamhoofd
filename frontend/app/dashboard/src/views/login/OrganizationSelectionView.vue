@@ -1,6 +1,6 @@
 <template>
     <div class="st-view shade">
-        <STNavigationBar :large="true" :sticky="true">
+        <STNavigationBar v-if="!isNative" :large="true" :sticky="true">
             <template slot="left">
                 <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
                     <Logo class="responsive" />
@@ -13,15 +13,18 @@
                 </a>
             </template>
         </STNavigationBar>
+        <STNavigationBar v-else :sticky="true" title="Kies jouw vereniging" />
         <main class="limit-width">
-            <div class="organization-selection-view">
-                <a class="button text" href="https://www.stamhoofd.be" rel="noopener">
+            <div class="organization-selection-view" :class="{native: isNative}">
+                <a v-if="!isNative" class="button text" href="https://www.stamhoofd.be" rel="noopener">
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>
                 <h1>Kies jouw vereniging</h1>
-                <p>Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.</p>
                 <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                <p v-if="!loading && filteredResults.length == 0 && !query">
+                    Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                </p>
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
@@ -43,7 +46,7 @@
                     <span>Mijn vereniging staat er niet tussen</span>
                 </button>
 
-                <a href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
+                <a v-if="!isNative" href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
                     <span class="icon add" />
                     <span>Nieuwe vereniging aansluiten</span>
                 </a>
@@ -54,13 +57,13 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { NetworkManager,SessionManager } from '@stamhoofd/networking';
+import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { AppManager, NetworkManager,Session,SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { asyncComponent } from '../../App.vue';
 import LoginView from './LoginView.vue';
 
 const throttle = (func, limit) => {
@@ -114,6 +117,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     q = ""
     results: OrganizationSimple[] = []
 
+    get isNative() {
+        return AppManager.shared.isNative
+    }
+
     get query() {
         return this.q
     }
@@ -126,27 +133,30 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     help() {
-        new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+        if (this.isNative) {
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.").addCloseButton("Sluiten").show()
+        } else {
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+        }
     }
 
     gotoSignup() {
         this.present(
             new ComponentWithProperties(NavigationController, {
-                root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
+                root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
             }).setDisplayStyle("popup")
         )
         plausible('openSignup');
     }
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        const queryString = new URL(window.location.href).searchParams;
+        const parts =  UrlHelper.shared.getParts()
+        const queryString =  UrlHelper.shared.getSearchParams()
 
-        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
+            UrlHelper.shared.clear()
             try {
                 const currentCount = localStorage.getItem("what-is-new")
 
@@ -159,7 +169,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                     organization = null;
                 }
                 this.present(new ComponentWithProperties(NavigationController, {
-                    root: asyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                    root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
                         initialRegisterCode: code && organization ? {
                             code,
                             organization
@@ -171,22 +181,27 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 console.error(e)
             }
         }
-
-        this.updateDefault()
+        this.updateDefault().catch(console.error)
     }
 
     activated() {
-        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
+        this.updateDefault().catch(console.error)
     }
 
-    throttleUpdateResults = throttle(this.updateResults.bind(this), 1000);
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
 
-    defaultOrganizations: Organization[] = []
+    throttleUpdateResults = throttle(this.updateResults.bind(this), 500);
 
-    updateDefault() {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.defaultOrganizations = SessionManager.availableSessions().filter(s => !!s.organization).map(s => s.organization!)
+    availableSessions: Session[] = []
+    get defaultOrganizations(): Organization[] {
+        return this.availableSessions.filter(s => !!s.organization).map(s => s.organization!)
+    }
+
+    async updateDefault() {
+        this.availableSessions = await SessionManager.availableSessions()
     }
 
     get filteredResults() {
@@ -197,9 +212,24 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     startUpdateResults() {
+        if (this.query === this.lastQuery) {
+            return
+        }
+        this.lastQuery = this.query
         this.loading = true
+        this.counter++
+        Request.cancelAll(this)
+
+        if (this.query.length == 0) {
+            this.results = []
+            this.loading = false
+            return
+        }
         this.throttleUpdateResults()
     }
+
+    counter = 0
+    lastQuery = ""
 
     updateResults() {
         if (this.query.length == 0) {
@@ -208,134 +238,163 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             return
         }
         this.loading = true
+        let cachedCount = this.counter
         NetworkManager.server.request({
             method: "GET",
             path: "/organizations/search",
             query: {query: this.query },
-            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>)
+            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>),
+            owner: this
         }).then((response) => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             this.results = response.data
         }).catch(e => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             console.error(e)
             this.results = []
         }).finally(() => {
+            if (cachedCount !== this.counter) {
+                // A new request have started already
+                return
+            }
             this.loading = false
         })
     }
 
-    loginOrganization(organization: OrganizationSimple) {
+    async loginOrganization(organization: OrganizationSimple) {
         if (this.loadingSession) {
             return
         }
-        const session = SessionManager.getSessionForOrganization(organization.id)
-        if (session && session.canGetCompleted()) {
-            this.loadingSession = organization.id
-            SessionManager.setCurrentSession(session).then(() => {
+        this.loadingSession = organization.id
+
+        try {
+            let session = await SessionManager.getSessionForOrganization(organization.id)
+            if (!session) {
+                session = new Session(organization.id)
+                await session.loadFromStorage()
+            }
+
+            if (session.canGetCompleted()) {
+                this.loadingSession = organization.id
+                await SessionManager.setCurrentSession(session, false)
                 this.loadingSession = null
-                this.updateDefault()
+                await this.updateDefault()
                 if (!session.canGetCompleted() && !session.isComplete()) {
-                    this.loginOrganization(organization)
+                    await this.loginOrganization(organization)
+                    return
                 }
-            }).catch(e => {
-                this.loadingSession = null
-                this.updateDefault()
-                Toast.fromError(e).show()
-                console.error(e)
-            })
-            return
+                return
+            }
+            this.loadingSession = null
+            this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization, session }) }).setDisplayStyle("sheet"))
+        } catch (e) {
+            console.error(e)
+            this.loadingSession = null
+            Toast.fromError(e).show()
+            await this.updateDefault()
         }
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))
     }
 
     isSignedInFor(organization: OrganizationSimple) {
-        const session = SessionManager.getSessionForOrganization(organization.id)
+        const session = this.availableSessions.find(s => s.organizationId === organization.id)
         return session && session.canGetCompleted()
     }
 }
 </script>
 
 <style lang="scss">
-    @use "~@stamhoofd/scss/base/variables.scss" as *;
-    @use "~@stamhoofd/scss/base/text-styles.scss" as *;
+@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
-    .organization-selection-view {
-        max-width: 500px;
-        margin: 0 auto;
+.organization-selection-view {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
 
-        @media (min-height: 800px) {
-            padding-top: 40px;
-        }
+    @media (min-height: 800px) {
+        padding-top: 40px;
+    }
+
+    &.native {
+        padding-top: 0;
+    }
+
+    > h1 {
+        @extend .style-title-1;
+        padding-bottom: 10px;
+    }
+
+    > p:not([class]) {
+        @extend .style-description;
+        padding: 10px 0;
+    }
+
+    > input.search {
+        max-width: none;
+    }
+
+    > .spinner-container {
+        padding: 10px 0;
+    }
+
+    > .search-result {
+        @extend .style-input-shadow;
+        background: $color-white;
+        border: $border-width solid $color-gray-light;
+        padding: 20px 20px;
+        border-radius: $border-radius;
+        margin: 10px 0;
+        transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        display: block;
+        width: 100%;
+        text-align: left;
+        position: relative;
 
         > h1 {
-            @extend .style-title-1;
-            padding-bottom: 10px;
+            @extend .style-title-list;
+            line-height: 1.2;
         }
 
-        > p:not([class]) {
-            @extend .style-description;
-            padding-bottom: 20px;
+        > .floating {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translate(0, -50%);
+            color: $color-gray;
+            transition: color 0.2s;
         }
 
-        > input.search {
-            max-width: none;
+        > p {
+            @extend .style-description-small;
         }
 
-        > .spinner-container {
-            padding: 10px 0;
+        &:hover {
+            border-color: $color-primary-gray-light;
+            background-color: $color-primary-background;
+
+            > .icon.floating {
+                color: $color-primary;
+            }
         }
 
-        > .search-result {
-            @extend .style-input-shadow;
-            background: $color-white;
-            border: $border-width solid $color-gray-light;
-            padding: 20px 20px;
-            border-radius: $border-radius;
-            margin: 10px 0;
-            transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            display: block;
-            width: 100%;
-            text-align: left;
-            position: relative;
 
-            > h1 {
-                @extend .style-title-list;
-                line-height: 1.2;
-            }
+        &:active {
+            transform: scale(0.95, 0.95);
+            border-color: $color-primary;
 
-            > .floating {
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translate(0, -50%);
-                color: $color-gray;
-                transition: color 0.2s;
-            }
-
-            > p {
-                @extend .style-description-small;
-            }
-
-            &:hover {
-                border-color: $color-primary-gray-light;
-                background-color: $color-primary-background;
-
-                > .icon.floating {
-                    color: $color-primary;
-                }
-            }
-
-
-            &:active {
-                transform: scale(0.95, 0.95);
-                border-color: $color-primary;
-
-                > .icon.floating {
-                    color: $color-primary;
-                }
+            > .icon.floating {
+                color: $color-primary;
             }
         }
     }
+}
 </style>

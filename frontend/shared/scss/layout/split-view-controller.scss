@@ -3,14 +3,8 @@
 
 
 .split-view-controller {
-    background: $color-white-shade;
-
     > .master {
         z-index: 100;
-        background: $color-white-shade;
-        --color-current-background: #{$color-background-shade};
-        --color-current-background-shade: #{$color-background-shade-darker};
-
         overscroll-behavior: contain;
     }
 
@@ -21,6 +15,9 @@
     &[data-has-detail="true"] {
         > .master {
             border-right: 2px solid $color-border;
+            background: $color-white-shade;
+            --color-current-background: #{$color-background-shade};
+            --color-current-background-shade: #{$color-background-shade-darker};
         }
     }
 }

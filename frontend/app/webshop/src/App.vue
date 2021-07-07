@@ -65,10 +65,8 @@ export default class App extends Vue {
         HistoryManager.activate();
 
         CenteredMessage.addListener(this, async (centeredMessage) => {
-            console.log(this.$refs.modalStack);
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                console.error("modalStack ref not found!")
                 await this.$nextTick()
             }
             (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))

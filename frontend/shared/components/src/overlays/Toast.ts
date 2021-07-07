@@ -44,7 +44,10 @@ export class Toast {
                 message: errors.message
             }))
         }
-        console.log(simpleErrors.errors)
+
+        if (simpleErrors.hasCode("network_error") || simpleErrors.hasCode("network_timeout")) {
+            return new Toast("Geen of slechte internetverbinding", "error red")
+        }
         return new Toast(simpleErrors.getHuman(), "error red")
     }
 

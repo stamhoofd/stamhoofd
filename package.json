@@ -1,4 +1,6 @@
 {
+    "name": "stamhoofd",
+    "version": "1.0.0",
     "private": true,
     "workspaces": [
         "frontend/app/*",
@@ -33,8 +35,8 @@
         "@sentry/integrations": "^6.0.1",
         "@simonbackx/simple-encoding": "^2.2.3",
         "@simonbackx/simple-errors": "^1.3.0",
-        "@simonbackx/simple-networking": "~1.5.2",
-        "@simonbackx/vue-app-navigation": "^1.12.1",
+        "@simonbackx/simple-networking": "~1.10.0",
+        "@simonbackx/vue-app-navigation": "^1.13.5",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
         "@zxcvbn-ts/language-nl-be": "^0.3.0",
@@ -102,6 +104,5 @@
         "prosemirror-model": "1.9.1",
         "**/axios": "^0.21.1",
         "elliptic": "^6.5.4"
-    },
-    "version": "1.0.0"
+    }
 }

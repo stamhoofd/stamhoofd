@@ -37,10 +37,7 @@ export class MollieToken extends Model {
         }
         const tokens = await MollieToken.where({ organizationId })
         if (tokens.length == 0) {
-            throw new SimpleError({
-                code: "not_linked",
-                message: "Mollie is not yet linked"
-            })
+            return undefined
         }
         this.knownTokens.set(organizationId, tokens[0])
         return tokens[0]

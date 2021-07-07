@@ -14,14 +14,16 @@
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
     padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) var(--st-horizontal-padding, 40px);
+    
+    padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
-
-    > * {
-        // We fixed the safe area, no need to recorrect it again
-        --st-safe-area-top: 0px;
-    }
+    transition: padding-bottom 0.2s;
+    --current-view-safe-area-top: var(--st-safe-area-top, 0px);
 
     > main {
+        // We fixed the safe area, no need to recorrect it again
+        --st-safe-area-top: 0px;
+        --keyboard-height: 0px;
 
         &.limit-width {
             display: flex;
@@ -146,12 +148,6 @@
 
 .sheet .st-view {
     min-height: auto;
-}
-
-.popup, .sheet{
-    > div {
-        background: $color-white;
-    }
 }
 
 .popup .st-view {

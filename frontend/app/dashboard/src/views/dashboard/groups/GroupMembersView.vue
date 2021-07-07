@@ -1,6 +1,6 @@
 <template>
     <div class="st-view group-members-view background">
-        <STNavigationBar :sticky="false">
+        <STNavigationBar :sticky="false" :class="{ 'wrap': !canPop }">
             <template #left>
                 <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
@@ -34,7 +34,7 @@
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop">
+            <h1 v-if="canPop" class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
 
                 <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
@@ -49,11 +49,11 @@
                     <span>Nieuw</span>
                 </button>
             </h1>
-            <span v-if="titleDescription" class="style-description title-description">{{ titleDescription }}</span>
+            <span v-if="titleDescription" class="style-description title-description data-table-prefix">{{ titleDescription }}</span>
 
             <BillingWarningBox filter-types="members" />
 
-            <Spinner v-if="loading && sortedMembers.length == 0" class="center" />
+            <Spinner v-if="loading" class="center gray" />
             <table v-else class="data-table">
                 <thead>
                     <tr>
@@ -154,32 +154,33 @@
                 </p>
             </template>
 
-            
-            <hr>
-                
-            <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
-                <button v-if="canGoBack" class="button text gray" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige inschrijvingsperiode</span>
+            <template v-if="!loading">
+                <hr>
+                    
+                <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
+                    <button v-if="canGoBack" class="button text gray" @click="goBack">
+                        <span class="icon arrow-left" />
+                        <span>Vorige inschrijvingsperiode</span>
+                    </button>
+                    <div v-else />
+
+                    <button v-if="canGoNext" class="button text gray" @click="goNext">
+                        <span>Volgende inschrijvingsperiode</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                    <div v-else />
+                </div>
+
+                <button v-if="canEnd" class="button text gray" @click="goEnd">
+                    <span class="icon redo" />
+                    <span>Begin nieuwe inschrijvingsperiode</span>
                 </button>
-                <div v-else />
 
-                <button v-if="canGoNext" class="button text gray" @click="goNext">
-                    <span>Volgende inschrijvingsperiode</span>
-                    <span class="icon arrow-right" />
+                <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
+                    <span class="icon undo" />
+                    <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
                 </button>
-                <div v-else />
-            </div>
-
-            <button v-if="canEnd" class="button text gray" @click="goEnd">
-                <span class="icon redo" />
-                <span>Begin nieuwe inschrijvingsperiode</span>
-            </button>
-
-            <button v-if="canUndoEnd" class="button text gray" @click="goUndoEnd">
-                <span class="icon undo" />
-                <span>Nieuwe inschrijvingsperiode ongedaan maken</span>
-            </button>
+            </template>
         </main>
 
         <STToolbar>
@@ -222,15 +223,16 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategory, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration, WaitingListType } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -295,15 +297,31 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     cycleOffset = 0
 
     loading = false;
+    delayedLoading = false
+
+    isTransitioning = false
 
     actionLoading = false
     cachedWaitingList: boolean | null = null
 
     checkingInaccurate = false
 
-    mounted() {
-        //this.reload();
+    beforeBeforeEnterAnimation() {
+        console.log("beforeBeforeEnterAnimation")
+        this.isTransitioning = true
+    }
 
+    finishedEnterAnimation() {
+        console.log("finishedEnterAnimation")
+        this.isTransitioning = false
+
+        if (this.delayedLoading) {
+            this.loading = false
+            this.delayedLoading = false
+        }
+    }
+
+    mounted() {
         // Set url
         if (this.group) {
             HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
@@ -450,18 +468,30 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
-        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment" || type == "encryption") {
+        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment") {
             this.reload()
         }
     }
 
-    activated() {
+    created() {
         this.reload();
+    }
+
+    activated() {
         MemberManager.addListener(this, this.onUpdateMember)
+        GlobalEventBus.addListener(this, "encryption", async () => {
+            this.reload()
+            return Promise.resolve()
+        })
     }
 
     deactivated() {
         MemberManager.removeListener(this)
+        GlobalEventBus.removeListener(this)
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
     }
 
     get isFull() {
@@ -489,7 +519,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     checkWaitingList() {
-        MemberManager.loadMembers(this.groupIds, true).then((members) => {
+        MemberManager.loadMembers(this.groupIds, true, 0, this).then((members) => {
             this.cachedWaitingList = members.length > 0
         }).catch((e) => {
             console.error(e)
@@ -497,8 +527,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     reload() {
+        Request.cancelAll(this)
         this.loading = true;
-        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset).then((members) => {
+        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
             this.members = members.map((member) => {
                 const selected = this.members.find(m => m.member.id === member.id)?.selected
                 return new SelectableMember(member, selected !== undefined ?  selected : !this.waitingList);
@@ -506,13 +537,20 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             this.checkInaccurateMetaData().catch(e => {
                 console.error(e)
             })
-        }).catch((e) => {
-            console.error(e)
-        }).finally(() => {
-            this.loading = false
-
             if (!this.waitingList && this.group && !this.group.hasWaitingList()) {
                 this.checkWaitingList()
+            }
+        }).catch((e) => {
+            console.error(e)
+
+            if (!Request.isNetworkError(e)) {
+                Toast.fromError(e).show()
+            }
+        }).finally(() => {
+            if (this.isTransitioning && this.loading) {
+                this.delayedLoading = true
+            } else {
+                this.loading = false
             }
         })
     }

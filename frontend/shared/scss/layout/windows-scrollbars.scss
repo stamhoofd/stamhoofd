@@ -39,14 +39,16 @@
 }
 
 .split-view-controller {
-    > .master {       
-        // On Windows Webkit based browsers let the scrollbar overlay the content instead of creating extra space
-        overflow: overlay;
+    &[data-has-detail="true"] {
+        > .master {       
+            // On Windows Webkit based browsers let the scrollbar overlay the content instead of creating extra space
+            overflow: overlay;
 
-        // Set Firefox scrollbar width
-        scrollbar-width: thin;
+            // Set Firefox scrollbar width
+            scrollbar-width: thin;
 
-        @include scrollbars();
+            @include scrollbars();
+        }
     }
 }
 

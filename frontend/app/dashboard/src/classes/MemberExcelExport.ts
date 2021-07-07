@@ -2,6 +2,8 @@ import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
+import { AppManager } from '../../../../shared/networking';
+
 export class MemberExcelExport {
     static export(members: MemberWithRegistrations[]) {
         const wsName = "Leden";
@@ -103,7 +105,6 @@ export class MemberExcelExport {
 
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, ws, wsName);
-
         XLSX.writeFile(wb, "leden.xlsx");
     }
 }

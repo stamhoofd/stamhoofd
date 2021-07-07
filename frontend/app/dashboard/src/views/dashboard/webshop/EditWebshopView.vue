@@ -38,7 +38,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,SegmentedControl, STToolbar, GlobalEventBus } from "@stamhoofd/components";
+import { BackButton, GlobalEventBus,LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { PermissionRole } from '@stamhoofd/structures';
 import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
@@ -125,14 +125,20 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         if (!confirm("Ben je zeker dat je deze webshop en alle bijhorende bestellingen definitief wilt verwijderen?")) {
             return;
         }
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
-            method: "DELETE",
-            path: "/webshop/"+this.webshop.id,
-        })
-        new Toast("Webshop verwijderd", "success green").show()
 
-        OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshop.id)
-        this.dismiss({ force: true })
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "DELETE",
+                path: "/webshop/"+this.webshop.id,
+                shouldRetry: false
+            })
+            new Toast("Webshop verwijderd", "success green").show()
+
+            OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshop.id)
+            this.dismiss({ force: true })
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
     }
 
     async save() {
@@ -156,7 +162,8 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
                     method: "POST",
                     path: "/webshop",
                     body: this.patchedWebshop,
-                    decoder: PrivateWebshop as Decoder<PrivateWebshop>
+                    decoder: PrivateWebshop as Decoder<PrivateWebshop>,
+                    shouldRetry: false
                 })
 
                 this.webshopPatch = PrivateWebshop.patch({})

@@ -147,6 +147,7 @@ export default class SignupView extends Mixins(NavigationMixin){
 
         try {
             const session = new Session(OrganizationManager.organization.id)
+            await session.loadFromStorage()
             session.organization = OrganizationManager.organization
 
             const token = await LoginHelper.signUp(session, this.email, this.password)

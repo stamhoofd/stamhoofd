@@ -1,5 +1,5 @@
 <template>
-    <form class="auto st-view login-view" @submit.prevent="submit">
+    <form class=" st-view login-view" @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
@@ -36,9 +36,10 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -53,7 +54,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})
     organization: OrganizationSimple
+
+    @Prop({ required: true})
     session!: Session
+
     loading = false
 
     @Prop({ default: ""})
@@ -62,9 +66,11 @@ export default class LoginView extends Mixins(NavigationMixin){
     email = this.initialEmail
     password = ""
 
+    get isNative() {
+        return AppManager.shared.isNative
+    }
+
     mounted() {
-        // Search for the session
-        this.session = SessionManager.getSessionForOrganization(this.organization.id) ?? new Session(this.organization.id)
         this.email = this.session.user?.email ?? ""
     }
 
@@ -100,7 +106,9 @@ export default class LoginView extends Mixins(NavigationMixin){
             console.error(e)
             this.loading = false;
 
-            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+            if (Request.isNetworkError(e)) {
+                new CenteredMessage("Geen internetverbinding", "Kijk jouw internetverbinding na en probeer het opnieuw.", "error").addCloseButton().show()           
+            } else if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
                 new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven.", "error").addCloseButton().show()           
             } else {
                 new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
@@ -112,8 +120,3 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-    .login-view {
-    }
-</style>

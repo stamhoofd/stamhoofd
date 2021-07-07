@@ -7,7 +7,7 @@
 
         <main>
             <h1>
-                Mijn pakketten
+                Jouw pakketten
             </h1>
 
             <p>

@@ -35,7 +35,7 @@
                         </h2>
                         <span slot="left" class="icon share" />
                     </STListItem>
-                    <STListItem :selectable="true" @click="downloadQR">
+                    <STListItem v-if="!isNative" :selectable="true" @click="downloadQR">
                         <h2 class="style-title-list">
                             Download de QR-code
                         </h2>
@@ -170,14 +170,13 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner,STErrorsDefault,STInputBox, STList,STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingSettingsView from "./packages/BillingSettingsView.vue";
-import CreditsView from "./packages/CreditsView.vue";
 
 @Component({
     components: {
@@ -205,6 +204,10 @@ export default class ReferralView extends Mixins(NavigationMixin) {
 
     created() {
         this.loadCode().catch(console.error)
+    }
+
+    get isNative() {
+        return AppManager.shared.isNative
     }
 
     get href() {
@@ -238,12 +241,10 @@ export default class ReferralView extends Mixins(NavigationMixin) {
          try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
             const url = await QRCode.toDataURL(this.href, { scale: 10 })
-
             const anchor = document.createElement('a');
             anchor.href = url;
             anchor.download = "qr-code.png";
             anchor.click();
-
         } catch (e) {
             console.error(e)
             return;

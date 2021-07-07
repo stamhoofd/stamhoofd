@@ -1,12 +1,15 @@
 <template>
-    <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
-    <LoadingView v-else />
+    <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
+    <div>
+        <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+        <LoadingView v-else key="loadingView" />
+    </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Logger } from '@stamhoofd/logger';
-import { Component, Mixins,Prop, Vue } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
 
@@ -22,7 +25,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     root: ComponentWithProperties | null = null
 
-    mounted() {
+    created() {
         this.run()
     }
 

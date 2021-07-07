@@ -1,9 +1,12 @@
 import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { Organization, Version } from '@stamhoofd/structures';
 
+import { Keychain } from './Keychain';
 import { Session } from './Session';
+import { Storage } from './Storage';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -13,7 +16,7 @@ class SessionStorage extends AutoEncoder {
     lastOrganizationId: string | null = null
 }
 
-type AuthenticationStateListener = () => void
+type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token" | "session") => void
 
 /**
  * The SessionManager manages the storage of Sessions for different organizations. You can request the session for a given organization.
@@ -23,13 +26,19 @@ type AuthenticationStateListener = () => void
 export class SessionManagerStatic {
     currentSession: Session | null = null
 
+    protected cachedStorage?: SessionStorage
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     async restoreLastSession() {
-        const id = this.getSessionStorage().lastOrganizationId
+        // Restore keychain before setting the current session
+        // to prevent fetching the organization to refetch the missing keychain items
+        await Keychain.load()
+
+        const id = (await this.getSessionStorage()).lastOrganizationId
         if (id) {
-            const session = this.getSessionForOrganization(id)
+            const session = await this.getSessionForOrganization(id)
             if (session && session.canGetCompleted()) {
+                
                 await this.setCurrentSession(session)
             } else {
                 console.log("session can not get completed, no autosignin")
@@ -46,9 +55,9 @@ export class SessionManagerStatic {
         this.listeners.delete(owner)
     }
 
-    protected callListeners() {
+    protected callListeners(changed: "userPrivateKey" | "user" | "organization" | "token" | "session") {
         for (const listener of this.listeners.values()) {
-            listener()
+            listener(changed)
         }
     }
 
@@ -56,16 +65,19 @@ export class SessionManagerStatic {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
         }
-        this.currentSession = null
+        this.currentSession = null;
+        this.callListeners("session");
 
-        const storage = this.getSessionStorage()
-        storage.lastOrganizationId = null
-        this.saveSessionStorage(storage)
-        this.callListeners()
+        // Not important async block: we don't need to wait for a save here
+        (async () => {
+            const storage = await this.getSessionStorage()
+            storage.lastOrganizationId = null
+            this.saveSessionStorage(storage)
+        })().catch(console.error)
     }
 
-    addOrganizationToStorage(organization: Organization) {
-        const storage = this.getSessionStorage()
+    async addOrganizationToStorage(organization: Organization) {
+        const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organization.id)
 
         // todo: improve this a lot
@@ -76,9 +88,8 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    removeOrganizationFromStorage(organizationId: string) {
-        console.log("remove organization from storage")
-        const storage = this.getSessionStorage()
+    async removeOrganizationFromStorage(organizationId: string) {
+        const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organizationId)
 
         // todo: improve this a lot
@@ -101,10 +112,15 @@ export class SessionManagerStatic {
             this.currentSession.removeListener(this)
         }
         this.currentSession = null
-        this.callListeners()
+        this.callListeners("session")
     }
 
-    async setCurrentSession(session: Session) {
+    /**
+     * 
+     * @param session 
+     * @param shouldRetry If you set this to false, setting the session might fail, so make sure to catch this
+     */
+    async setCurrentSession(session: Session, shouldRetry = true) {
         console.log("Changing current session")
         if (this.currentSession) {
             this.currentSession.removeListener(this)
@@ -112,15 +128,30 @@ export class SessionManagerStatic {
         this.currentSession = session
 
         if (session.canGetCompleted() && !session.isComplete()) {
-            session.user = null
+            // Always request a new user (the organization is not needed)
+            // session.user = null
+            if (!session.organization) {
+                console.log("Doing a sync session update because organization is missing")
+            }
+            if (!session.user) {
+                console.log("Doing a sync session update because user is missing")
+            }
+
+            if (session.preventComplete) {
+                console.log("Doing a sync session update because preventComplete")
+            }
+
+            if (session.organization && session.user && !session.preventComplete) {
+                console.log("Doing a sync session update other")
+            }
 
             try {
-                await session.updateData()
+                await session.updateData(false, shouldRetry, true)
             } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
                         // Clear from session storage
-                        this.removeOrganizationFromStorage(session.organizationId)
+                        await this.removeOrganizationFromStorage(session.organizationId)
                         this.logout()
                         throw new SimpleError({
                             code: "invalid_organization",
@@ -130,30 +161,48 @@ export class SessionManagerStatic {
                     }
                 }
 
+                if (!shouldRetry && Request.isNetworkError(e)) {
+                    // Undo setting the session
+                    this.clearCurrentSession()
+                    throw new SimpleError({
+                        code: "network_error",
+                        message: e.message,
+                        human: "We konden geen verbinding maken met internet. Kijk jouw internetverbinding na en probeer opnieuw."
+                    })
+                }
+
                 // still set the current session, but logout that session
-                console.log(e)
                 session.temporaryLogout()
+            }
+        } else {
+            if (session.canGetCompleted()) {
+                // Initiate a slow background update without retry
+                // = we don't need to block the UI for this ;)
+                session.updateData(true, false).catch(e => {
+                    // Ignore network errors
+                    console.error(e)
+                })
             }
         }
 
-        const storage = this.getSessionStorage()
+        const storage = await this.getSessionStorage()
         storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
 
-        let needsResync = !session.organization
+        const needsResync = true
         if (session.organization) {
-            this.addOrganizationToStorage(session.organization)
+            this.addOrganizationToStorage(session.organization).catch(console.error)
         }
 
-        this.callListeners()
+        this.callListeners("session")
 
-        this.currentSession.addListener(this, () => {
+        this.currentSession.addListener(this, (changed: "userPrivateKey" | "user" | "organization" | "token") => {
             if (needsResync && session.organization) {
-                needsResync = false
-                this.addOrganizationToStorage(session.organization)
+                //needsResync = false
+                this.addOrganizationToStorage(session.organization).catch(console.error)
             }
             this.setUserId();
-            this.callListeners()
+            this.callListeners(changed)
         })
 
         this.setUserId();
@@ -168,11 +217,11 @@ export class SessionManagerStatic {
         }
     }
 
-    getSessionForOrganization(id: string) {
+    async getSessionForOrganization(id: string) {
         if (this.currentSession && this.currentSession.organizationId == id) {
             return this.currentSession
         }
-        for (const session of this.availableSessions()) {
+        for (const session of await this.availableSessions()) {
             if (session.organizationId === id) {
                 return session
             }
@@ -181,20 +230,28 @@ export class SessionManagerStatic {
 
     saveSessionStorage(storage: SessionStorage) {
         try {
-            localStorage.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version })))
+            this.cachedStorage = storage
+
+            // keep this method fast, we don't need to wait because we use cached storage
+            Storage.keyValue.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version }))).catch(console.error)
         } catch (e) {
             console.error(e)
         }
     }
 
-    getSessionStorage(): SessionStorage {
+    async getSessionStorage(): Promise<SessionStorage> {
+        if (this.cachedStorage) {
+            return this.cachedStorage
+        }
         // Loop thru organizations
         try {
-            const json = localStorage.getItem('organizations')
+            const json = await Storage.keyValue.getItem('organizations')
             if (json) {
                 try {
                     const parsed = JSON.parse(json)
-                    return new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
+                    const cache = new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
+                    this.cachedStorage = cache
+                    return cache
                 } catch (e) {
                     console.error(e)
                 }
@@ -202,16 +259,23 @@ export class SessionManagerStatic {
         } catch (e) {
             console.error(e)
         }
-        return SessionStorage.create({})
+        const cache = SessionStorage.create({})
+        this.cachedStorage = cache
+        return cache
     }
 
-    availableSessions(): Session[] {
-        return this.getSessionStorage().organizations.map(o => {
+    async availableSessions(): Promise<Session[]> {
+        const sessionStorage = await this.getSessionStorage()
+        const sessions: Session[] = []
+
+        for (const o of sessionStorage.organizations) {
             const session = new Session(o.id)
             session.setOrganization(o)
+            await session.loadFromStorage()
+            sessions.push(session)
+        }
 
-            return session
-        })
+        return sessions
     }
 }
 

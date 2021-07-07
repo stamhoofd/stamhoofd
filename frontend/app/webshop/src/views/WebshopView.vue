@@ -213,7 +213,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
             if (!nextStep) {
                 // Not possible
-                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error").show()
+                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error red").show()
                 return;
             }
 

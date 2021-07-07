@@ -1,8 +1,11 @@
 <template>
-    <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
-    <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
-    <LoadingView v-else-if="hasToken" />
-    <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
+    <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
+    <div>
+        <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
+        <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
+        <LoadingView v-else-if="hasToken" key="loadingView" />
+        <ComponentWithPropertiesInstance v-else :key="loginRoot.key" :component="loginRoot" />
+    </div>
 </template>
 
 <script lang="ts">

@@ -52,6 +52,9 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
+        if (document.activeElement && (document.activeElement as any).blur) {
+            (document.activeElement as any).blur();
+        }
         this.centeredMessage.doHide = () => {
             this.close()
         }
@@ -188,14 +191,23 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     background: rgba(0, 0, 0, 0.3);
     opacity: 1;
 
-    &.show-enter-active,
-    &.show-leave-active {
-        transition: opacity 0.35s;
+    &.show-enter-active {
+        transition: opacity 0.30s;
 
         > .centered-message  {
-            transition: transform 0.35s;
+            transition: transform 0.30s;
         }
     }
+
+
+    &.show-leave-active {
+        transition: opacity 0.25s;
+
+        > .centered-message  {
+            transition: transform 0.25s;
+        }
+    }
+
     &.show-enter, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
         // Instant appearing context menu! (only leave animation)
         opacity: 0;

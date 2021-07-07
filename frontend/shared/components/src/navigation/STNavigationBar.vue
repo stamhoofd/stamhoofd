@@ -121,13 +121,13 @@ export default class STNavigationBar extends Vue {
 .st-navigation-bar {
     // Todo: replace padding with variable padding
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-    margin-top: calc(-1 * var(--st-vertical-padding, 20px) + 20px);
+    margin-top: calc(-1 * var(--st-vertical-padding, 20px) + var(--navigation-bar-margin, 20px) - var(--st-safe-area-top, 0px));
     padding: var(--st-safe-area-top, 0px) var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
     height: 60px;
 
     &.large {
         height: 80px;
-        margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+        margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
         margin-bottom: 20px;
         padding: var(--st-safe-area-top, 0px) 20px 0 20px;
 
@@ -164,6 +164,12 @@ export default class STNavigationBar extends Vue {
         align-items: center;
 
         &:first-child {
+            /*min-width: 30px;
+
+            &:empty {
+                min-width: 0;
+            }*/
+            
             > * {
                 margin: 0 10px;
 
@@ -181,6 +187,21 @@ export default class STNavigationBar extends Vue {
 
                 &:last-child {
                     margin-right: 0;
+                }
+            }
+        }
+    }
+
+    &.wrap {
+        height: auto;
+
+        > div {
+            &:last-child {
+                flex-wrap: wrap;
+                margin: -5px -10px;
+
+                > * {
+                    margin: 5px 10px;
                 }
             }
         }
@@ -204,7 +225,7 @@ export default class STNavigationBar extends Vue {
 
 
     &.scrolled {
-        box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0px 2px 3px $color-shadow;
         > h1 {
             opacity: 1;
         }
@@ -215,6 +236,11 @@ export default class STNavigationBar extends Vue {
         width: 220px;
         display: inline-block;
         margin: 5px 5px;
+
+        @media (max-width: 500px) {
+            width: 100%;
+            min-width: 150px;
+        }
     }
 
     select.input {

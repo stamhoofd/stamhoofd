@@ -84,13 +84,11 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder,Decoder, ObjectData, StringDecoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, STErrorsDefault, STToolbar, STInputBox, STNavigationBar, Validator, PasswordStrength } from "@stamhoofd/components"
-import { Sodium } from '@stamhoofd/crypto';
-import { LoginHelper,NetworkManager,Session, SessionManager } from '@stamhoofd/networking';
-import { ChallengeResponseStruct,Invite, InviteKeychainItem, InviteUserDetails, KeychainItem, KeyConstants,NewUser, OrganizationSimple, Token, TradedInvite,User, Version } from '@stamhoofd/structures';
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components"
+import { LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { Invite } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import LoginView from '../login/LoginView.vue';
@@ -125,7 +123,9 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    session: Session | null = SessionManager.getSessionForOrganization(this.invite.organization.id) ?? null
+    @Prop({ required: true })
+    session!: Session
+
     loggedIn = false
 
     mounted() {
@@ -138,17 +138,25 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     }
 
     updateSession() {
-        this.session = SessionManager.getSessionForOrganization(this.invite.organization.id) ?? null
         this.loggedIn = !!this.session && this.session.isComplete()
     }
 
-    tryLogin() {
-        const session = SessionManager.getSessionForOrganization(this.invite.organization.id)
+    async tryLogin() {
+        const session = this.session
         if (session && session.canGetCompleted()) {
-            SessionManager.setCurrentSession(session)
-            return
+            try {
+                await SessionManager.setCurrentSession(session)
+            } catch (e) {
+                Toast.fromError(e).show()
+                console.error(e)
+            }
+            if (SessionManager.currentSession?.isComplete()) {
+                // Logged in successfully
+                return
+            }
         }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { 
+            session,
             initialEmail: this.email,
             organization: this.invite.organization
         }) }).setDisplayStyle("sheet"))
@@ -207,10 +215,6 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
 
                 const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
                 try {
-                    if (!this.session) {
-                        this.session = new Session(this.invite.organization.id)
-                    }
-
                     const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                     LoginHelper.saveInvite(this.invite, this.secret)
                     this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session }))

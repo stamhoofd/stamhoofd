@@ -39,10 +39,11 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const mollie = await MollieToken.getTokenFor(user.organizationId)
 
         if (!mollie) {
-            throw new SimpleError({
-                code: "not_yet_linked",
-                message: "Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult"
-            })
+            const organization = user.organization
+            organization.privateMeta.mollieOnboarding = null
+            await organization.save()
+
+            return new Response(await user.getOrganizatonStructure(organization));
         }
 
         const organization = user.organization

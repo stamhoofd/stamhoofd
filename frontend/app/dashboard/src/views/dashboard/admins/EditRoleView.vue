@@ -155,6 +155,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
@@ -436,8 +437,13 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     async load() {
-        await OrganizationManager.loadAdmins(false)
+        await OrganizationManager.loadAdmins(false, true, this)
         this.loading = false
+    }
+
+    beforeDestroy() {
+        // Clear all pending requests
+        Request.cancelAll(this)
     }
 
     get admins() {
