@@ -1,6 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize } from '@capacitor/keyboard';
 
+// This is de development capacitor configuration
+
 const config: CapacitorConfig = {
   appId: 'com.stamhoofd.stamhoofd',
   appName: 'Stamhoofd',
@@ -16,7 +18,7 @@ const config: CapacitorConfig = {
       presentationOptions: ["badge", "sound", "alert"]
     }
   },
-  // For development: enable live reload
+  // Uncomment to enable live reload
   /*server: {
     url: "http://192.168.0.7:8080",
     cleartext: true

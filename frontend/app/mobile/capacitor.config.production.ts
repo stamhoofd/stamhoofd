@@ -1,6 +1,9 @@
 import { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize } from '@capacitor/keyboard';
 
+// This is the production capacitor configuration
+// During syncing capacitor for production, capacitor.config.production.ts will temporarily be renamed to capacitor.config.ts
+
 const config: CapacitorConfig = {
   appId: 'com.stamhoofd.stamhoofd',
   appName: 'Stamhoofd',
