@@ -11,7 +11,7 @@
 
             <BillingWarningBox />
 
-            <p class="info-box gift selectable with-button" @click="openReferrals(true)">
+            <p v-if="!areSalesDisabled" class="info-box gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
                 <button class="button text">
@@ -166,55 +166,56 @@
                 </STList>
             </template>
 
-            <hr>
-            <h2>Stamhoofd administratie</h2>
+            <template v-if="!areSalesDisabled">
+                <hr>
+                <h2>Stamhoofd administratie</h2>
+                <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
+                        <h2 class="style-title-list">
+                            Jouw pakketten
+                        </h2>
+                        <p class="style-description">
+                            Wijzig je pakketten of activeer nieuwe functies
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
 
-            <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
-                    <h2 class="style-title-list">
-                        Jouw pakketten
-                    </h2>
-                    <p class="style-description">
-                        Wijzig je pakketten of activeer nieuwe functies
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                    <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
+                        <h2 class="style-title-list">
+                            Facturen en betalingen
+                        </h2>
+                        <p class="style-description">
+                            Download jouw facturen en bekijk jouw tegoed
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
-                    <h2 class="style-title-list">
-                        Facturen en betalingen
-                    </h2>
-                    <p class="style-description">
-                        Download jouw facturen en bekijk jouw tegoed
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                    <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/credits.svg">
+                        <h2 class="style-title-list">
+                            Verdien tegoed door Stamhoofd te promoten
+                        </h2>
+                        <p class="style-description">
+                            Geef 25 euro en krijg tot 100 euro per vereniging
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
 
-                <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/credits.svg">
-                    <h2 class="style-title-list">
-                        Verdien tegoed door Stamhoofd te promoten
-                    </h2>
-                    <p class="style-description">
-                        Geef 25 euro en krijg tot 100 euro per vereniging
-                    </p>
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                <hr>
+                <h2>Functies gratis uitproberen</h2>
+                <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
-            <hr>
-            <h2>Functies gratis uitproberen</h2>
-            <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
-
-            <ModuleSettingsBox />
+                <ModuleSettingsBox />
+            </template>
         </main>
     </div>
 </template>
@@ -281,6 +282,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get areSalesDisabled() {
+        return this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     async loadAdmins() {
