@@ -8,6 +8,7 @@ import { Vue } from "vue-property-decorator";
 import { Keychain } from './Keychain'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
+import { Storage } from './Storage'
 
 type AuthenticationStateListener = () => void
 
@@ -79,10 +80,10 @@ export class Session implements RequestMiddleware {
         return item
     }
 
-    loadFromStorage() {
+    async loadFromStorage() {
         // Check localstorage
         try {
-            const json = localStorage.getItem('token-' + this.organizationId)
+            const json = await Storage.secure.getItem('token-' + this.organizationId)
             if (json) {
                 try {
                     const parsed = JSON.parse(json)
@@ -90,7 +91,7 @@ export class Session implements RequestMiddleware {
                         this.onTokenChanged()
                     })
 
-                    const key = localStorage.getItem('key-' + this.organizationId)
+                    const key = await Storage.secure.getItem('key-' + this.organizationId)
                     if (key) {
                         this.authEncryptionKey = key
                         // console.log('Successfully loaded token from storage')
@@ -105,7 +106,7 @@ export class Session implements RequestMiddleware {
 
             if (this.token && this.authEncryptionKey) {
                 // Also check if we have the user
-                const json = localStorage.getItem('user-' + this.organizationId)
+                const json = await Storage.secure.getItem('user-' + this.organizationId)
                 if (json) {
                     try {
                         const parsed = JSON.parse(json)
@@ -125,21 +126,21 @@ export class Session implements RequestMiddleware {
         try {
             // Save token to localStorage
             if (this.token && this.authEncryptionKey) {
-                localStorage.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
-                localStorage.setItem('key-' + this.organizationId, this.authEncryptionKey)
+                void Storage.secure.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
+                void Storage.secure.setItem('key-' + this.organizationId, this.authEncryptionKey)
 
                 if (this.user) {
-                    localStorage.setItem('user-' + this.organizationId, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
+                    void Storage.secure.setItem('user-' + this.organizationId, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
                 } else {
-                    localStorage.removeItem('user-' + this.organizationId)
+                    void Storage.secure.removeItem('user-' + this.organizationId)
                 }
             } else {
-                localStorage.removeItem('token-' + this.organizationId)
-                localStorage.removeItem('key-' + this.organizationId)
-                localStorage.removeItem('user-' + this.organizationId)
+                void Storage.secure.removeItem('token-' + this.organizationId)
+                void Storage.secure.removeItem('key-' + this.organizationId)
+                void Storage.secure.removeItem('user-' + this.organizationId)
             }
         } catch (e) {
-            console.error("Localstorage error when saving session")
+            console.error("Storage error when saving session")
             console.error(e)
         }
         

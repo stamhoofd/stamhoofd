@@ -16,3 +16,6 @@ project(':capacitor-keyboard').projectDir = new File('../../../../node_modules/@
 
 include ':capacitor-share'
 project(':capacitor-share').projectDir = new File('../../../../node_modules/@capacitor/share/android')
+
+include ':capacitor-storage'
+project(':capacitor-storage').projectDir = new File('../../../../node_modules/@capacitor/storage/android')

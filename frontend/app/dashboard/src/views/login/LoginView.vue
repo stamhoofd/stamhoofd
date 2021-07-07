@@ -39,7 +39,7 @@ import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { AppManager, LoginHelper,Session, SessionManager } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
 import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -54,7 +54,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})
     organization: OrganizationSimple
+
+    @Prop({ required: true})
     session!: Session
+
     loading = false
 
     @Prop({ default: ""})
@@ -68,8 +71,6 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        // Search for the session
-        this.session = SessionManager.getSessionForOrganization(this.organization.id) ?? new Session(this.organization.id)
         this.email = this.session.user?.email ?? ""
     }
 
@@ -119,8 +120,3 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-    .login-view {
-    }
-</style>

@@ -6,7 +6,11 @@ import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
-import { AppManager } from '../../../shared/networking';
+import { AppManager, Storage } from '../../../shared/networking';
+// Kick off the app
+import App from "../../dashboard/src/App.vue";
+import { CapacitorStorage } from './CapacitorStorage';
+import { WrapperHTTPRequest } from './WrapperHTTPRequest';
 
 Vue.use(VueMeta)
 
@@ -40,7 +44,7 @@ function setKeyboardHeight(height: number) {
     }
 }
 
-const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 50)
+const throttledSetKeyboardHeight = throttle(setKeyboardHeight, 100)
 
 // Implement smooth keyboard behavior on both iOS and Android instead of the bad default handling
 if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') {
@@ -61,7 +65,7 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     }
 
     Keyboard.addListener('keyboardWillShow', info => {
-        console.log('keyboard will show with height:', info.keyboardHeight, info);
+        //console.log('keyboard will show with height:', info.keyboardHeight, info);
         throttledSetKeyboardHeight(info.keyboardHeight)
         /*document.documentElement.style.setProperty("--keyboard-height", `${info.keyboardHeight}px`);
         requestAnimationFrame(() => {
@@ -70,11 +74,11 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     }).catch(e => console.error(e));
 
     Keyboard.addListener('keyboardDidShow', info => {
-        console.log('keyboard did show with height:', info.keyboardHeight, info);
+        //console.log('keyboard did show with height:', info.keyboardHeight, info);
     }).catch(e => console.error(e));
 
     Keyboard.addListener('keyboardWillHide', () => {
-        console.log('keyboard will hide');
+        //console.log('keyboard will hide');
         throttledSetKeyboardHeight(0)
     }).catch(e => console.error(e));
 }
@@ -89,11 +93,7 @@ window.addEventListener("touchstart", () => { }, { passive: true });
 }
 
 // Override XMLHttpRequest in some situation (S&GV) since we don't have domain here
-import { WrapperHTTPRequest } from './WrapperHTTPRequest';
 AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
-
-// Kick off the app
-import App from "../../dashboard/src/App.vue";
 
 const app = new Vue({
     render: (h) => h(App),
@@ -107,3 +107,7 @@ CApp.addListener('appUrlOpen', (data: any) => {
     window.location.href = url.pathname + url.search
     console.log(url.pathname + url.search)
 }).catch(console.error);
+
+// Replace default storage mechanism for some things
+Storage.secure = new CapacitorStorage()
+Storage.keychain = new CapacitorStorage()

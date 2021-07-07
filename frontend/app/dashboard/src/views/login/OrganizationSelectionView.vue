@@ -60,7 +60,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager,SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, NetworkManager,Session,SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -181,13 +181,12 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 console.error(e)
             }
         }
-
-        this.updateDefault()
+        this.updateDefault().catch(console.error)
     }
 
     activated() {
-        console.log('reset url path org selection view')
         HistoryManager.setUrl("/")
+        this.updateDefault().catch(console.error)
     }
 
     beforeDestroy() {
@@ -196,11 +195,13 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     throttleUpdateResults = throttle(this.updateResults.bind(this), 500);
 
-    defaultOrganizations: Organization[] = []
+    availableSessions: Session[] = []
+    get defaultOrganizations(): Organization[] {
+        return this.availableSessions.filter(s => !!s.organization).map(s => s.organization!)
+    }
 
-    updateDefault() {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.defaultOrganizations = SessionManager.availableSessions().filter(s => !!s.organization).map(s => s.organization!)
+    async updateDefault() {
+        this.availableSessions = await SessionManager.availableSessions()
     }
 
     get filteredResults() {
@@ -266,32 +267,42 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
-    loginOrganization(organization: OrganizationSimple) {
+    async loginOrganization(organization: OrganizationSimple) {
         if (this.loadingSession) {
             return
         }
-        const session = SessionManager.getSessionForOrganization(organization.id)
-        if (session && session.canGetCompleted()) {
-            this.loadingSession = organization.id
-            SessionManager.setCurrentSession(session, false).then(() => {
+        this.loadingSession = organization.id
+
+        try {
+            let session = await SessionManager.getSessionForOrganization(organization.id)
+            if (!session) {
+                session = new Session(organization.id)
+                await session.loadFromStorage()
+            }
+
+            if (session.canGetCompleted()) {
+                this.loadingSession = organization.id
+                await SessionManager.setCurrentSession(session, false)
                 this.loadingSession = null
-                this.updateDefault()
+                await this.updateDefault()
                 if (!session.canGetCompleted() && !session.isComplete()) {
-                    this.loginOrganization(organization)
+                    await this.loginOrganization(organization)
+                    return
                 }
-            }).catch(e => {
-                this.loadingSession = null
-                this.updateDefault()
-                Toast.fromError(e).show()
-                console.error(e)
-            })
-            return
+                return
+            }
+            this.loadingSession = null
+            this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization, session }) }).setDisplayStyle("sheet"))
+        } catch (e) {
+            console.error(e)
+            this.loadingSession = null
+            Toast.fromError(e).show()
+            await this.updateDefault()
         }
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization }) }).setDisplayStyle("sheet"))
     }
 
     isSignedInFor(organization: OrganizationSimple) {
-        const session = SessionManager.getSessionForOrganization(organization.id)
+        const session = this.availableSessions.find(s => s.organizationId === organization.id)
         return session && session.canGetCompleted()
     }
 }

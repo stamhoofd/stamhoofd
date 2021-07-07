@@ -2,6 +2,7 @@ import { Decoder, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxD
 import { KeychainItem, Version } from '@stamhoofd/structures';
 
 import { AppManager } from './AppManager';
+import { Storage } from './Storage';
 
 /**
  * Holds encrypted keys in memory for the current user
@@ -12,7 +13,7 @@ export class KeychainStatic {
     addItem(item: KeychainItem, save = true) {
         this.items.set(item.publicKey, item)
         if (save) {
-            this.save()
+            this.save().catch(console.error)
         }
     }
 
@@ -20,12 +21,12 @@ export class KeychainStatic {
         for (const item of items) {
             this.addItem(item, false)
         }
-        this.save()
+        this.save().catch(console.error)
     }
 
     removeItem(publicKey: string) {
         this.items.delete(publicKey)
-        this.save()
+        this.save().catch(console.error)
     }
 
     getItem(publicKey: string) {
@@ -37,19 +38,19 @@ export class KeychainStatic {
     }
 
     /// In the app we store the keychain to allow better offline usage and to allow faster startup speeds
-    save() {
+    async save() {
         // todo: use other storage mechanism
         try {
-            localStorage.setItem("keychain", JSON.stringify(new VersionBox(this.items).encode({ version: Version })))
+            await Storage.keychain.setItem("keychain", JSON.stringify(new VersionBox(this.items).encode({ version: Version })))
         } catch (e) {
             console.error("Failed to save keychain")
             console.error(e)
         }
     }
 
-    load(append = true) {
+    async load(append = true) {
         try {
-            const json = localStorage.getItem("keychain")
+            const json = await Storage.keychain.getItem("keychain")
             if (json) {
                 const data = new ObjectData(JSON.parse(json), { version: 0 })
                 const versionBox = new VersionBoxDecoder(new MapDecoder(StringDecoder, KeychainItem as Decoder<KeychainItem>)).decode(data)

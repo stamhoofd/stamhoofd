@@ -6,6 +6,7 @@ import { Organization, Version } from '@stamhoofd/structures';
 
 import { Keychain } from './Keychain';
 import { Session } from './Session';
+import { Storage } from './Storage';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -25,17 +26,19 @@ type AuthenticationStateListener = () => void
 export class SessionManagerStatic {
     currentSession: Session | null = null
 
+    protected cachedStorage?: SessionStorage
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     async restoreLastSession() {
         // Restore keychain before setting the current session
         // to prevent fetching the organization to refetch the missing keychain items
-        Keychain.load()
+        await Keychain.load()
 
-        const id = this.getSessionStorage().lastOrganizationId
+        const id = (await this.getSessionStorage()).lastOrganizationId
         if (id) {
-            const session = this.getSessionForOrganization(id)
+            const session = await this.getSessionForOrganization(id)
             if (session && session.canGetCompleted()) {
+                
                 await this.setCurrentSession(session)
             } else {
                 console.log("session can not get completed, no autosignin")
@@ -62,16 +65,19 @@ export class SessionManagerStatic {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
         }
-        this.currentSession = null
+        this.currentSession = null;
+        this.callListeners();
 
-        const storage = this.getSessionStorage()
-        storage.lastOrganizationId = null
-        this.saveSessionStorage(storage)
-        this.callListeners()
+        // Not important async block: we don't need to wait for a save here
+        (async () => {
+            const storage = await this.getSessionStorage()
+            storage.lastOrganizationId = null
+            this.saveSessionStorage(storage)
+        })().catch(console.error)
     }
 
-    addOrganizationToStorage(organization: Organization) {
-        const storage = this.getSessionStorage()
+    async addOrganizationToStorage(organization: Organization) {
+        const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organization.id)
 
         // todo: improve this a lot
@@ -82,9 +88,8 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    removeOrganizationFromStorage(organizationId: string) {
-        console.log("remove organization from storage")
-        const storage = this.getSessionStorage()
+    async removeOrganizationFromStorage(organizationId: string) {
+        const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organizationId)
 
         // todo: improve this a lot
@@ -132,7 +137,7 @@ export class SessionManagerStatic {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
                         // Clear from session storage
-                        this.removeOrganizationFromStorage(session.organizationId)
+                        await this.removeOrganizationFromStorage(session.organizationId)
                         this.logout()
                         throw new SimpleError({
                             code: "invalid_organization",
@@ -164,13 +169,13 @@ export class SessionManagerStatic {
             })
         }
 
-        const storage = this.getSessionStorage()
+        const storage = await this.getSessionStorage()
         storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
 
         const needsResync = true
         if (session.organization) {
-            this.addOrganizationToStorage(session.organization)
+            this.addOrganizationToStorage(session.organization).catch(console.error)
         }
 
         this.callListeners()
@@ -178,7 +183,7 @@ export class SessionManagerStatic {
         this.currentSession.addListener(this, () => {
             if (needsResync && session.organization) {
                 //needsResync = false
-                this.addOrganizationToStorage(session.organization)
+                this.addOrganizationToStorage(session.organization).catch(console.error)
             }
             this.setUserId();
             this.callListeners()
@@ -196,11 +201,11 @@ export class SessionManagerStatic {
         }
     }
 
-    getSessionForOrganization(id: string) {
+    async getSessionForOrganization(id: string) {
         if (this.currentSession && this.currentSession.organizationId == id) {
             return this.currentSession
         }
-        for (const session of this.availableSessions()) {
+        for (const session of await this.availableSessions()) {
             if (session.organizationId === id) {
                 return session
             }
@@ -209,20 +214,28 @@ export class SessionManagerStatic {
 
     saveSessionStorage(storage: SessionStorage) {
         try {
-            localStorage.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version })))
+            this.cachedStorage = storage
+
+            // keep this method fast, we don't need to wait because we use cached storage
+            Storage.keyValue.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version }))).catch(console.error)
         } catch (e) {
             console.error(e)
         }
     }
 
-    getSessionStorage(): SessionStorage {
+    async getSessionStorage(): Promise<SessionStorage> {
+        if (this.cachedStorage) {
+            return this.cachedStorage
+        }
         // Loop thru organizations
         try {
-            const json = localStorage.getItem('organizations')
+            const json = await Storage.keyValue.getItem('organizations')
             if (json) {
                 try {
                     const parsed = JSON.parse(json)
-                    return new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
+                    const cache = new ObjectData(parsed, { version: Version }).decode(new VersionBoxDecoder(SessionStorage as Decoder<SessionStorage>)).data
+                    this.cachedStorage = cache
+                    return cache
                 } catch (e) {
                     console.error(e)
                 }
@@ -230,16 +243,23 @@ export class SessionManagerStatic {
         } catch (e) {
             console.error(e)
         }
-        return SessionStorage.create({})
+        const cache = SessionStorage.create({})
+        this.cachedStorage = cache
+        return cache
     }
 
-    availableSessions(): Session[] {
-        return this.getSessionStorage().organizations.map(o => {
+    async availableSessions(): Promise<Session[]> {
+        const sessionStorage = await this.getSessionStorage()
+        const sessions: Session[] = []
+
+        for (const o of sessionStorage.organizations) {
             const session = new Session(o.id)
             session.setOrganization(o)
+            await session.loadFromStorage()
+            sessions.push(session)
+        }
 
-            return session
-        })
+        return sessions
     }
 }
 

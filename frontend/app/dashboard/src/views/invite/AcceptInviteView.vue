@@ -123,7 +123,9 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    session: Session | null = SessionManager.getSessionForOrganization(this.invite.organization.id) ?? null
+    @Prop({ required: true })
+    session!: Session
+
     loggedIn = false
 
     mounted() {
@@ -136,12 +138,11 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     }
 
     updateSession() {
-        this.session = SessionManager.getSessionForOrganization(this.invite.organization.id) ?? null
         this.loggedIn = !!this.session && this.session.isComplete()
     }
 
     async tryLogin() {
-        const session = SessionManager.getSessionForOrganization(this.invite.organization.id)
+        const session = this.session
         if (session && session.canGetCompleted()) {
             try {
                 await SessionManager.setCurrentSession(session)
@@ -155,6 +156,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
             }
         }
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { 
+            session,
             initialEmail: this.email,
             organization: this.invite.organization
         }) }).setDisplayStyle("sheet"))
@@ -213,10 +215,6 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
 
                 const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
                 try {
-                    if (!this.session) {
-                        this.session = new Session(this.invite.organization.id)
-                    }
-
                     const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                     LoginHelper.saveInvite(this.invite, this.secret)
                     this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session }))

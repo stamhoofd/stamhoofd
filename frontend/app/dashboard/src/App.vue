@@ -25,13 +25,24 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
     },
 })
 export default class App extends Vue {
-    root = new ComponentWithProperties(AuthenticatedView, {
-        root: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-        }),
-        loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-        noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
-    });
+    root = new ComponentWithProperties(PromiseView, {
+        promise: async () => {
+            await SessionManager.restoreLastSession()
+
+            if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+                // Load Windows stylesheet
+                await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+            }
+
+            return new ComponentWithProperties(AuthenticatedView, {
+                root: new ComponentWithProperties(SplitViewController, {
+                    root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+                }),
+                loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+                noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+            });
+        }
+    })
 
     created() {
         try {
@@ -42,22 +53,12 @@ export default class App extends Vue {
             console.error(e)
         }
         HistoryManager.activate();
-        SessionManager.restoreLastSession().catch(e => {
-            console.error(e)
-        })
-
-        if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
-            // Load Windows stylesheet
-            import("@stamhoofd/scss/layout/windows-scrollbars.scss").catch(console.error);
-        }
     }
 
     mounted() {
         CenteredMessage.addListener(this, async (centeredMessage) => {
-            console.log(this.$refs.modalStack);
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                console.error("modalStack ref not found!")
                 await this.$nextTick()
             }
             (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
@@ -68,9 +69,14 @@ export default class App extends Vue {
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
             UrlHelper.shared.clear()
-            const session = new Session(parts[1]);
             const token = queryString.get('token');
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false));
+            (this.$refs.modalStack as any).present(new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    const session = new Session(parts[1]);
+                    await session.loadFromStorage()
+                    return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
+                }
+            }).setDisplayStyle("popup").setAnimated(false));
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
@@ -109,12 +115,11 @@ export default class App extends Vue {
             const code = queryString.get('code')
                 
             if (token && code) {
-                // tood: password reset view
                 const session = new Session(parts[1]);
-
-                // tood: password reset view
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
-                LoginHelper.verifyEmail(session, code, token).then(() => {
+                session.loadFromStorage()
+                .then(() => LoginHelper.verifyEmail(session, code, token))
+                .then(() => {
                     toast.hide()
                     new Toast("E-mailadres is gevalideerd", "success green").show()
                 }).catch(e => {
@@ -153,8 +158,14 @@ export default class App extends Vue {
                                         invite: response.data
                                     })
                                 }
+                                let session = await SessionManager.getSessionForOrganization(response.data.organization.id)
+                                if (!session) {
+                                    session = new Session(response.data.organization.id)
+                                    await session.loadFromStorage()
+                                }
                                 const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
                                 return new ComponentWithProperties(AcceptInviteView, {
+                                    session,
                                     invite: response.data,
                                     secret
                                 })

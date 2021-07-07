@@ -5,6 +5,10 @@ $input-height: 44px;
 
 .input-spacing {
     max-width: 340px;
+
+    @media (max-width: 450px) {
+        max-width: none;
+    }
 }
 
 .input {
