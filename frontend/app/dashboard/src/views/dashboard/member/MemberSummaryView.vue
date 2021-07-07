@@ -300,6 +300,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
         while(data.length > 0) {        
             let maxHeight = 0;
+            let maxPages = 0
             
             const cp = data.slice()
             for (let index = 0; index < columns; index++) {
@@ -308,18 +309,28 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     // done
                     break;
                 }
-                let height = this.drawBox(doc, next, margin, y, width, true);
-                if (height > maxHeight) {
+                let [height, pages] = this.drawBox(doc, next, margin, y, width, true);
+                if (pages >= maxPages && height > maxHeight) {
+                    maxHeight = height
+                }
+                if (pages > maxPages) {
+                    maxPages = pages
                     maxHeight = height
                 }
             }
 
-            if (y + maxHeight > docHeight - margin) {
+            // If the biggest one doesnt fit nicely, give it a full page
+            if (maxPages == 1 && maxHeight < docHeight - margin*2) {
                 // Go to next page
                 doc.addPage()
                 doc.moveTo(margin, margin)
                 y = margin
             }
+
+            const range = doc.bufferedPageRange();
+
+            let maxLastY = 0;
+            maxPages = 0
 
             for (let index = 0; index < columns; index++) {
                 const next = data.shift()
@@ -327,18 +338,33 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     // done
                     break;
                 }
-                this.drawBox(doc, next, margin + index*width + columnGap*index, y, width, false);
+                const [_, pages, lastY] =  this.drawBox(doc, next, margin + index*width + columnGap*index, y, width, false);
+
+                if (pages > 0 && index < columns - 1) {
+                    // Go to last page before we did draw anything
+                    doc.switchToPage(range.start + range.count);
+                }
+
+                if (pages > maxPages) {
+                    maxPages = pages
+                    maxLastY = lastY
+                } else if (pages === maxPages && maxLastY < lastY) {
+                    maxLastY = lastY
+                }
             }
 
-            y += maxHeight
+            y = maxLastY
             y += columnGap
      }
     }
 
-    drawBox(doc: PDFKit.PDFDocument, data: SamenvattingGroep, x: number, y: number, width: number, calcHeight: boolean) {
+    drawBox(doc: PDFKit.PDFDocument, data: SamenvattingGroep, x: number, y: number, width: number, calcHeight: boolean): [number, number, number] {
         // Calculate height + width
         // Check if we need to start on a new page
+
         let height = 0;
+        let pages =  0;
+
         const gap = 1.5 * mm;
 
         // Title
@@ -349,8 +375,21 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         if (!calcHeight) {
             doc.text(data.title, x, y + height, { align: 'left', width })
         }
-        height += doc.heightOfString(data.title, { align: 'left', width })
+        const titleH = doc.heightOfString(data.title, { align: 'left', width })
+        y += titleH
+        y += 4*mm;
+        height += titleH
         height += 4*mm;
+
+        if (y > docHeight - margin) {
+            y = margin
+            pages++
+
+            if (!calcHeight) {
+                doc.addPage()
+                doc.moveTo(margin, margin)
+            }
+        }
 
         // Items
         doc.fontSize(9);
@@ -378,7 +417,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
             h = Math.max(h, doc.heightOfString(title, { align: 'left', width: maxWidth, lineGap: gap }))
             if (!calcHeight) {
-                doc.text(title, x, y + height, { align: 'left', width: maxWidth, lineGap: gap })
+                doc.text(title, x, y, { align: 'left', width: maxWidth, lineGap: gap })
             }
 
             doc.fillColor(colorGray);
@@ -388,12 +427,24 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
             h = Math.max(h, doc.heightOfString(t, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap }))
             if (!calcHeight) {
-                doc.text(t, x + maxWidth + 5*mm, y + height, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap })
+                doc.text(t, x + maxWidth + 5*mm, y, { align: 'left', width: width - maxWidth - 5*mm, lineGap: gap })
             }
+
             height += h + gap
+            y += h + gap
+
+            if (y > docHeight - margin) {
+                y = margin
+                pages++
+
+                if (!calcHeight) {
+                    doc.addPage()
+                    doc.moveTo(margin, margin)
+                }
+            }
         }
 
-        return height
+        return [height, pages, y]
     }
 
 
