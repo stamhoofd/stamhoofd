@@ -10,9 +10,7 @@ const config: CapacitorConfig = {
   hideLogs: true,
   plugins: {
     Keyboard: {
-      // iOS Only
       resize: KeyboardResize.None,
-      //style: "dark"
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]

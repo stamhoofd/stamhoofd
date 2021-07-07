@@ -5,6 +5,7 @@
         "**/dist": true,
         "**/node_modules": true,
         "**/android/app/src/main/assets": true,
+        "**/android/app/build": true,
         "**/ios/App/App/public": true,
 
     },
