@@ -49,7 +49,6 @@ export default class AuthenticatedView extends Vue {
     }
 
     changed() {
-        
         if (this.noPermissionsRoot) {
             this.loggedIn = (SessionManager.currentSession?.isComplete() ?? false) && !!SessionManager.currentSession!.user && SessionManager.currentSession!.user.permissions != null
             this.hasToken = SessionManager.currentSession?.hasToken() ?? false
@@ -59,10 +58,6 @@ export default class AuthenticatedView extends Vue {
             this.hasToken = SessionManager.currentSession?.hasToken() ?? false
             this.showPermissionsRoot = false
         }
-        console.log("authenticated view changed")
-        console.log("loggedIn", this.loggedIn)
-        console.log("hasToken", this.hasToken)
-        console.log("showPermissionsRoot", this.showPermissionsRoot)
     }
 }
 </script>
