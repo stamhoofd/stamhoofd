@@ -15,10 +15,10 @@ import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
+import { TabBarItem } from "./classes/TabBarItem"
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
-import { TabBarItem } from "./classes/TabBarItem"
 
 async function getDefaultView() {
     //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
@@ -63,7 +63,8 @@ export default class App extends Vue {
 
             // Set organization and session
             const session = new Session(response.data.id)
-            session.setOrganization(response.data)                
+            await session.loadFromStorage()       
+            session.setOrganization(response.data)         
 
             // Set color
             if (response.data.meta.color) {

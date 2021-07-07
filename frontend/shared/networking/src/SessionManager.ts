@@ -175,12 +175,14 @@ export class SessionManagerStatic {
                 session.temporaryLogout()
             }
         } else {
-            // Initiate a slow background update without retry
-            // = we don't need to block the UI for this ;)
-            session.updateData(true, false).catch(e => {
-                // Ignore network errors
-                console.error(e)
-            })
+            if (session.canGetCompleted()) {
+                // Initiate a slow background update without retry
+                // = we don't need to block the UI for this ;)
+                session.updateData(true, false).catch(e => {
+                    // Ignore network errors
+                    console.error(e)
+                })
+            }
         }
 
         const storage = await this.getSessionStorage()

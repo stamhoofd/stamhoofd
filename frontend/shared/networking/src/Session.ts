@@ -286,7 +286,7 @@ export class Session implements RequestMiddleware {
                     await this.addToKeychain(decryptedKeychainItems)
 
                     if (invite.sender.permissions && !user.permissions) {
-                        new Toast("We hebben jouw toegang goedgekeurd", "key green").setHide(15*1000).show()
+                        new Toast("We hebben jou toegang gegeven tot bepaalde gegevens van leden", "key green").setHide(15*1000).show()
                     } else {
                         new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
                     }
