@@ -828,7 +828,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
                 // Patch in Stamhoofd
                 if (match.stamhoofd.details && updateResponse.data.verbondsgegevens && match.stamhoofd.details.memberNumber != updateResponse.data.verbondsgegevens.lidnummer) {
-                    match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer
+                    match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
                     await MemberManager.patchMembersDetails([match.stamhoofd])
                 }
 
