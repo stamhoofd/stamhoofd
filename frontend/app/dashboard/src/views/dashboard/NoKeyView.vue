@@ -10,7 +10,7 @@
             </h1>
 
             <p class="style-description">
-                Doordat je je wachtwoord vergeten bent heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:
+                Doordat je je wachtwoord vergeten bent, heb je geen toegang meer tot de laatste encryptie-sleutel waarmee je de gegevens van nieuwe leden kan ontcijferen. Er zijn enkele oplossingen:
             </p>
 
             <hr>
@@ -26,7 +26,7 @@
             </ol>
 
             <p class="style-description">
-                Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je de een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.
+                Daarna ga je terug naar stamhoofd.app. Je krijgt normaal een melding dat je een encryptiesleutel hebt gekregen. Je kan nu terug alle gegevens bekijken.
             </p>
 
             <hr>
