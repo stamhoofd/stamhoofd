@@ -48,7 +48,7 @@
                 </p>
 
                 <template v-else>
-                    <p>Selecteer de functies die je wilt activeren en klik op 'afrekenen'. Meer info over alle pakketten kan je terugvinden op <a href="https://www.stamhoofd.be/prijzen" class="inline-link" target="_blank">onze website</a>. Neem gerust contact op via hallo@stamhoofd.be als je bijkomende vragen zou hebben.</p>
+                    <p>Selecteer de functies die je wilt activeren en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a href="https://www.stamhoofd.be/prijzen" class="inline-link" target="_blank">onze website</a>. Neem gerust contact op via hallo@stamhoofd.be als je bijkomende vragen zou hebben.</p>
 
                     <STList>
                         <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
