@@ -300,7 +300,7 @@
                     </div>
                 </h2>
 
-                <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens up te loaden.</p>
+                <p>Deze foto wordt getoond in het overzicht bij de keuze tussen alle groepen. Upload bij voorkeur een foto groter dan 200 x 200 pixels. Als je deze niet uploadt gebruiken we gewoon de omslagfoto (als die er is). Je hoeft dus niet dezelfde foto nog eens te uploaden.</p>
 
                 <figure v-if="squarePhotoSrc" class="square-photo">
                     <img :src="squarePhotoSrc">
