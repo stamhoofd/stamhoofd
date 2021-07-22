@@ -77,7 +77,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 throw new SimpleError({
                     code: "payment_not_found",
                     message: "Payment with id "+patch.id+" does not exist",
-                    human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
+                    human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang toe"
                 })
             }
 
@@ -88,7 +88,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                         throw new SimpleError({
                             code: "payment_not_found",
                             message: "Payment with id "+patch.id+" does not exist",
-                            human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang tot"
+                            human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang toe"
                         })
                     }
                 } else {
