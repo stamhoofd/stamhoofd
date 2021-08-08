@@ -329,7 +329,7 @@ export class Organization extends Model {
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: "too_many_fields",
                                 message: "",
-                                human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
+                                human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt"
                             }))
                         } else {
                             const val = records[0].join("").trim()

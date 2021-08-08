@@ -40,7 +40,7 @@
             </div>
 
             <p v-if="fileWarning" class="warning-box">
-                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie op Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
+                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
             </p>
 
             <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">

@@ -219,7 +219,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             { 
                 value: TransferDescriptionType.Structured,
                 name: "Gestructureerde mededeling",
-                description: "Geen kans op typefouten vanwege validatie in bankapps. Er zijn doorgaans ook minder overschrijvingen zonder mededelingen omdat men in de andere gevallen soms niet begrijpt dat ze het exact moeten overnemen (mensen lezen niet, ongeacht alle uitroepingstekens). Hiermee willen we later automatisatie mogelijk maken."
+                description: "Geen kans op typefouten vanwege validatie in bankapps. Er zijn doorgaans ook minder overschrijvingen zonder mededelingen omdat men in de andere gevallen soms niet begrijpt dat ze het exact moeten overnemen (mensen lezen niet, ongeacht alle uitroeptekens). Hiermee willen we later automatisatie mogelijk maken."
             },
             { 
                 value: TransferDescriptionType.Reference,

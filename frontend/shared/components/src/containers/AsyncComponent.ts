@@ -29,7 +29,7 @@ export async function LoadComponent(component: () => Promise<any>, properties = 
                             return new ComponentWithProperties(c, properties)
                         } catch (e) {
                             if (AppManager.shared.isNative) {
-                                new Toast("Geen internetverbinding. Helaad de applicatie.", "error red").show()
+                                new Toast("Geen internetverbinding. Herlaad de applicatie.", "error red").show()
                             } else {
                                 new Toast("Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.", "error red").show()
                             }
@@ -44,7 +44,7 @@ export async function LoadComponent(component: () => Promise<any>, properties = 
         return new ComponentWithProperties(c, properties)
     } catch (e) {
         if (AppManager.shared.isNative) {
-            new Toast("Geen internetverbinding. Helaad de applicatie.", "error red").show()
+            new Toast("Geen internetverbinding. Herlaad de applicatie.", "error red").show()
         } else {
             new Toast("Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.", "error red").show()
         }
@@ -61,7 +61,7 @@ export function AsyncComponent(component: () => Promise<any>, properties = {}) {
                 return new ComponentWithProperties(c, properties)
             } catch (e) {
                 if (AppManager.shared.isNative) {
-                    new Toast("Geen internetverbinding. Helaad de applicatie.", "error red").show()
+                    new Toast("Geen internetverbinding. Herlaad de applicatie.", "error red").show()
                 } else {
                     new Toast("Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.", "error red").show()
                 }

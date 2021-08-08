@@ -56,7 +56,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: "not_found",
                 message: "No members found",
-                human: "Geen leden gevonden, of je hebt geen toegang to deze leden"
+                human: "Geen leden gevonden, of je hebt geen toegang tot deze leden"
             })
         }
 

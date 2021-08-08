@@ -41,7 +41,7 @@
             </button>
 
             <p v-if="!loading && payments.length == 0 && filteredPayments.length == 0" class="info-box">
-                Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt als een lid bij het inschrijven de betaalmethode 'overschrijven' kiest.
+                Er zijn nog geen overschrijvingen aangemaakt. Deze worden aangemaakt wanneer 'overschrijven' als betaalmethode wordt gekozen bij het inschrijven of het bestellen in een webshop.
             </p>
             <p v-else-if="!loading && filteredPayments.length == 0" class="info-box">
                 Geen zoekresultaten
