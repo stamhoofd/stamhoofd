@@ -30,7 +30,7 @@ export class WebshopTimeSlot extends AutoEncoder {
     startTime: number = 12*60
 
     /**
-     * Saved in minutes since midnight
+     * Saved in minutes since midnight (so can also keep going after midnight to indicate an event that keeps going until e.g. 03:00)
      */
     @field({ decoder: IntegerDecoder })
     endTime: number = 14*60
@@ -58,6 +58,7 @@ export class WebshopTimeSlots extends AutoEncoder {
 
 
 export enum CheckoutMethodType {
+    "OnSite" = "OnSite",
     "Takeout" = "Takeout",
     "Delivery" = "Delivery"
 }
@@ -83,6 +84,27 @@ export class WebshopTakeoutMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Takeout }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Takeout = CheckoutMethodType.Takeout
 
+    @field({ decoder: Address })
+    address: Address
+}
+
+/**
+ * E.g. tickets / bought orders are resolved on site and eat / consumed on site
+ */
+export class WebshopOnSiteMethod extends CheckoutMethod {
+    // Indicate this field exists for all versions, but the downgrade should get executed
+    @field({ decoder: new EnumDecoder(CheckoutMethodType) })
+    @field({ 
+        decoder: new EnumDecoder(CheckoutMethodType), 
+        version: 104, downgrade: () => {
+            // Return takeout method for old clients
+            return CheckoutMethodType.Takeout
+        },
+        patchDefaultValue: () => CheckoutMethodType.OnSite 
+    }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    type: CheckoutMethodType.OnSite = CheckoutMethodType.OnSite
+
+    // TODO: transform into an address with coordinates (used by e-tickets)
     @field({ decoder: Address })
     address: Address
 }
@@ -122,8 +144,8 @@ export class WebshopDeliveryMethod extends CheckoutMethod {
     countries: Country[] = [];
 }
 
-export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod
-export type AnyCheckoutMethodPatch = AutoEncoderPatchType<WebshopTakeoutMethod> | AutoEncoderPatchType<WebshopDeliveryMethod>
+export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod | WebshopOnSiteMethod
+export type AnyCheckoutMethodPatch = AutoEncoderPatchType<WebshopTakeoutMethod> | AutoEncoderPatchType<WebshopDeliveryMethod> | AutoEncoderPatchType<WebshopOnSiteMethod>
 
 export class AnyCheckoutMethodPatchDecoder {
     static decode(data: Data): AnyCheckoutMethodPatch {
@@ -134,6 +156,10 @@ export class AnyCheckoutMethodPatchDecoder {
 
         if (base.type == CheckoutMethodType.Delivery) {
             return WebshopDeliveryMethod.patchType().decode(data)
+        }
+
+        if (base.type == CheckoutMethodType.OnSite) {
+            return WebshopOnSiteMethod.patchType().decode(data)
         }
 
         throw new SimpleError({
@@ -159,6 +185,10 @@ export class AnyCheckoutMethodDecoder {
 
         if (base.type == CheckoutMethodType.Delivery) {
             return WebshopDeliveryMethod.decode(data)
+        }
+
+        if (base.type == CheckoutMethodType.OnSite) {
+            return WebshopOnSiteMethod.decode(data)
         }
 
         throw new SimpleError({
