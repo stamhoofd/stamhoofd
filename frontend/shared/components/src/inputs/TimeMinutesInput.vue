@@ -48,7 +48,7 @@ export default class TimeMinutesInput extends Vue {
         if (val === null) {
             return
         }
-        this.timeRaw = Formatter.minutes(val)
+        this.timeRaw = Formatter.minutesPadded(val)
     }
 
     mounted() {
@@ -58,7 +58,7 @@ export default class TimeMinutesInput extends Vue {
             })
         }
         if (this.value) {
-            this.timeRaw = Formatter.minutes(this.value)
+            this.timeRaw = Formatter.minutesPadded(this.value)
         } else {
             this.timeRaw = ""
         }
