@@ -14,7 +14,7 @@
             </h1>
 
             <p v-if="member.details.isRecovered" class="warning-box">
-                Een deel van de gegevens van dit lid zijn versleuteld (zie uitleg onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet allemaal bekijken tot we jou terug toegang hebben gegeven of tot je zelf alles terug ingeeft.
+                Een deel van de gegevens van dit lid zijn versleuteld (zie uitleg onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuwe account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet allemaal bekijken tot we jou terug toegang hebben gegeven of tot je zelf alles terug ingeeft.
             </p>
 
             <div class="member-view-details">
