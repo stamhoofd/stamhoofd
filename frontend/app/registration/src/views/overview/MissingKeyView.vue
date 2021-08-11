@@ -8,7 +8,7 @@
             </h1>
 
             <p class="style-description">
-                Doordat je een nieuwe account hebt aangemaakt of doordat je jouw wachtwoord vergeten was, heb je tijdelijk geen toegang meer tot de encryptie-sleutel waarmee je jouw gegevens kan ontcijferen. Maar geen paniek, je kan nog gewoon inschrijven en eventueel zelf alle gegevens aanvullen. Als je even geduld hebt, keuren we jouw account terug goed en krijg je terug toegang.
+                Doordat je een nieuw account hebt aangemaakt of doordat je jouw wachtwoord vergeten was, heb je tijdelijk geen toegang meer tot de encryptie-sleutel waarmee je jouw gegevens kan ontcijferen. Maar geen paniek, je kan nog gewoon inschrijven en eventueel zelf alle gegevens aanvullen. Als je even geduld hebt, keuren we jouw account terug goed en krijg je terug toegang.
             </p>
         </main>
 
