@@ -115,6 +115,7 @@
                         <td>
                             <span v-if="order.order.payment && order.order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
                             <span v-if="order.order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                            <span v-if="order.order.status == 'Pickup'" v-tooltip="'Ophalen'" class="success icon green" />
                             <span v-if="order.order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
                             <span v-if="order.order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
                         </td>
