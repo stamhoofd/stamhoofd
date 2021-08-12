@@ -61,7 +61,7 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Category, PrivateWebshop, Product, Version } from "@stamhoofd/structures"
+import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditProductView from '../products/EditProductView.vue';
@@ -129,7 +129,9 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     addProduct() {
-        const product = Product.create({})
+        const product = Product.create({
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
+        })
         const p = PrivateWebshop.patch({})
         p.products.addPut(product)
 

@@ -89,7 +89,7 @@ export class WebshopTakeoutMethod extends CheckoutMethod {
 }
 
 /**
- * E.g. tickets / bought orders are resolved on site and eat / consumed on site
+ * Choose a location and time to eat / consume the order
  */
 export class WebshopOnSiteMethod extends CheckoutMethod {
     // Indicate this field exists for all versions, but the downgrade should get executed
@@ -209,6 +209,22 @@ export class AnyCheckoutMethodDecoder {
     }
 }
 
+export enum WebshopTicketType {
+    "None" = "None",
+
+    /**
+     * Create a single ticket for every order. Used to scan the order on takeout
+     */
+    "SingleTicket" = "SingleTicket",
+
+    /**
+     * Create a single ticket for every product in an order
+     * + this disables the use of checkout methods
+     * + this enables the use of locations and times on products
+     */
+    "Tickets" = "Tickets"
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -218,6 +234,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
+    ticketType = WebshopTicketType.None
 
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null

@@ -40,7 +40,7 @@ import { CenteredMessage, STNavigationTitle, Toast } from "@stamhoofd/components
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, GlobalEventBus,LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PermissionRole } from '@stamhoofd/structures';
+import { PermissionRole, WebshopTicketType } from '@stamhoofd/structures';
 import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -62,7 +62,6 @@ import EditWebshopProductsView from './EditWebshopProductsView.vue';
 export default class EditWebshopView extends Mixins(NavigationMixin) {
     tabs = [EditWebshopGeneralView, EditWebshopProductsView, EditWebshopPageView];
     tab = this.tabs[0];
-    tabLabels = ["Algemeen", "Artikels", "Pagina"];
 
     @Prop({ default: null })
     editWebshop: PrivateWebshop | null
@@ -71,6 +70,13 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
     webshopPatch = PrivateWebshop.patch({})
     isNew = true
     saving = false
+
+    get tabLabels() {
+        if (this.patchedWebshop.meta.ticketType === WebshopTicketType.Tickets) {
+            return ["Algemeen", "Tickets", "Pagina"]
+        }
+        return ["Algemeen", "Artikels", "Pagina"]
+    }
 
     created() {
         if (this.editWebshop) {
@@ -114,7 +120,7 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
         if (!this.isNew) {
             return this.webshop.meta.name+" wijzigen"
         }
-        return "Webshop maken"
+        return "Webshop of ticketverkoop starten"
     }
 
     patch(patch: AutoEncoderPatchType<PrivateWebshop>) {

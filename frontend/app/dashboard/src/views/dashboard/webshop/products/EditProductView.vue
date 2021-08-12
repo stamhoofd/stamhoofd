@@ -1,6 +1,6 @@
 <template>
     <div class="st-view product-edit-view">
-        <STNavigationBar :title="isNew ? 'Artikel toevoegen' : name+' bewerken'">
+        <STNavigationBar :title="isNew ? typeName+' toevoegen' : name+' bewerken'">
             <template slot="right">
                 <button v-if="!isNew" class="button text" @click="deleteMe">
                     <span class="icon trash" />
@@ -12,23 +12,36 @@
 
         <main>
             <h1 v-if="isNew">
-                Artikel toevoegen
+                {{ typeName }} toevoegen
             </h1>
             <h1 v-else>
-                {{ name || 'Artikel' }} bewerken
+                {{ name || typeName }} bewerken
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van dit artikel"
-                    autocomplete=""
-                >
-            </STInputBox>
+
+            <div class="split-inputs">
+                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        :placeholder="'Naam '+typeName"
+                        autocomplete=""
+                    >
+                </STInputBox>
+                <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
+                    <select
+                        v-model="type"
+                        class="input"
+                        type="text"
+                    >
+                        <option>Ticket</option>
+                        <option>Voucher</option>
+                    </select>
+                </STInputBox>
+            </div>
 
             <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
                 <textarea
@@ -39,6 +52,36 @@
                     autocomplete=""
                 />
             </STInputBox>
+
+            <template v-if="isTicket">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Locatie</div>
+                    <div>
+                        <button class="button text" @click="addProductPrice">
+                            <span class="icon add" />
+                            <span>Prijs</span>
+                        </button>
+                    </div>
+                </h2>
+
+                <p>Deze locatie zal op het ticket staan. Je kan dus meerdere tickets verkopen voor verschillende locaties.</p>
+
+                <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="validator" @modify="modifyLocation" />
+
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Tijdstip</div>
+                    <div>
+                        <button class="button text" @click="addProductPrice">
+                            <span class="icon add" />
+                            <span>Prijs</span>
+                        </button>
+                    </div>
+                </h2>
+
+                <p>Het begintijdstip zal op het ticket staan. De rest wordt gebruikt voor de digitale tickets zodat deze op een smartphone (via Apple Wallet en Google Pay Passes) op het juiste moment zichtbaar worden om snel te kunnen scannen.</p>
+            </template>
 
             <hr>
             <h2 class="style-with-button">
@@ -144,7 +187,7 @@
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopField } from "@stamhoofd/structures"
+import { Image, OptionMenu, PrivateWebshop, Product, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
@@ -153,6 +196,7 @@ import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue"
 import ProductPriceBox from "./ProductPriceBox.vue"
 import ProductPriceRow from "./ProductPriceRow.vue"
+import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
 
 @Component({
     components: {
@@ -173,7 +217,8 @@ import ProductPriceRow from "./ProductPriceRow.vue"
         STList,
         OptionMenuSection,
         ProductPriceBox,
-        WebshopFieldsBox
+        WebshopFieldsBox,
+        ProductSelectLocationInput
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -189,6 +234,9 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     webshop: PrivateWebshop
 
+
+    /// For now only used to update locations and times of other products that are shared
+    patchWebshop:  AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({})
     patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id })
 
     /**
@@ -197,8 +245,24 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
+    get isTicket() {
+        return this.type !== ProductType.Product || this.webshop.meta.ticketType === WebshopTicketType.Tickets
+    }
+
+    get patchedWebshop() {
+        return this.webshop.patch(this.patchWebshop)
+    }
+
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
+    }
+
+    get typeName(): string {
+        switch (this.product.type) {
+            case ProductType.Product: return "Artikel"
+            case ProductType.Ticket: return "Ticket"
+            case ProductType.Voucher: return "Voucher"
+        }
     }
 
     get fields() {
@@ -217,6 +281,47 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     set name(name: string) {
         this.patchProduct = this.patchProduct.patch({ name })
+    }
+
+    get location() {
+        return this.patchedProduct.location
+    }
+
+    set location(location: ProductLocation | null) {
+        this.patchProduct = this.patchProduct.patch({ location })
+    }
+
+    get allLocations() {
+        const locations = new Map<string, ProductLocation>()
+
+        // Always use the non-patched product here -> only list the locations as they are before starting the editing
+        // But do use the patched webshop, because that is where we modify the locations in case of edits
+        for (const product of this.patchedWebshop.products) {
+            if (product.location) {
+                locations.set(product.location.id, product.location)
+            }
+        }
+        return [...locations.values()]
+    }
+
+    modifyLocation({ from, to }: { from: ProductLocation, to: ProductLocation }) {
+        // We edited/modified a location, so change it in all products
+        for (const product of this.patchedWebshop.products) {
+            if (product.location && product.location.id === from.id) {
+                this.patchWebshop.products.addPatch(Product.patch({
+                    id: product.id,
+                    location: to
+                }))
+            }
+        }
+    }
+
+    get type() {
+        return this.patchedProduct.type
+    }
+
+    set type(type: ProductType) {
+        this.patchProduct = this.patchProduct.patch({ type })
     }
 
     get description() {
@@ -409,8 +514,12 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         this.addPatch(p)
     }
 
-    save() {
-        const p = PrivateWebshop.patch({})
+    async save() {
+        const isValid = await this.validator.validate()
+        if (!isValid) {
+            return
+        }
+        const p = PrivateWebshop.patch(this.patchWebshop)
         p.products.addPatch(this.patchProduct)
         this.saveHandler(p)
         this.pop({ force: true })

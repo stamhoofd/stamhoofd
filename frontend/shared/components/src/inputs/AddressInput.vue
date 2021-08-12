@@ -76,7 +76,7 @@ export default class AddressInput extends Vue {
             }
             return
         }
-        this.addressLine1 = val.street+" "+val.number
+        this.addressLine1 = val.street.length > 0 ? (val.street+" "+val.number) : (val.number+"")
         this.city = val.city
         this.postalCode = val.postalCode
         this.country = val.country
@@ -98,7 +98,7 @@ export default class AddressInput extends Vue {
         }
 
         if (this.value) {
-            this.addressLine1 = this.value.street+" "+this.value.number
+            this.addressLine1 = this.value.street.length > 0 ? (this.value.street+" "+this.value.number) : (this.value.number+"")
             this.city = this.value.city
             this.postalCode = this.value.postalCode
             this.country = this.value.country

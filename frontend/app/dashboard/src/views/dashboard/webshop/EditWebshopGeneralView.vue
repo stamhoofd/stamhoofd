@@ -1,6 +1,7 @@
 <template>
     <main class="webshop-view-details">
         <STErrorsDefault :error-box="errorBox" />
+        
         <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errorBox">
             <input
                 v-model="name"
@@ -10,6 +11,25 @@
                 autocomplete=""
             >
         </STInputBox>
+
+        <hr>
+        <h2>Scannen van tickets en bestellingen</h2>
+        <p>Stamhoofd kan automatisch scanbare tickets aanmaken. Je kan dan via de scanner van Stamhoofd tickets scannen. Die worden dan automatisch gemarkeerd als 'gescand' waardoor je ze niet onopgemerkt dubbel kan scannen. De scanner blijft werken als het internet wegvalt, maar bij de start van het evenement is even een internetverbinding nodig.</p>
+
+        <RadioGroup class="column">
+            <Radio v-model="ticketType" :value="WebshopTicketType.None">
+                Geen scanners gebruiken
+                <span class="radio-description">Bij het afhalen en leveren werk je gewoon met een lijst waarin je een bestelling opzoekt. Er worden geen QR-codes of tickets aangemaakt die je kan scannen.</span>
+            </Radio>
+            <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket">
+                Maak één scanbaar ticket om bestelling af te halen
+                <span class="radio-description">Per bestelling wordt er maar één ticket met QR-code aangemaakt die gemakkelijk kan worden gescand bij het afhalen. Ideaal voor een eetfestijn waar je het ticket aan de ingang omruilt voor bonnetjes, of handig als je bestellingen wilt scannen zodat je ze niet moet opzoeken en aanvinken in een lijst. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.</span>
+            </Radio>
+            <Radio v-model="ticketType" :value="WebshopTicketType.Tickets">
+                Verkoop individuele tickets en vouchers
+                <span class="radio-description">Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).</span>
+            </Radio>
+        </RadioGroup>
 
         <hr>
         <h2>Betaalmethodes</h2>
@@ -28,6 +48,10 @@
         <Checkbox v-model="enableIDEAL">
             iDEAL (29 cent)
         </Checkbox>
+
+        <p v-if="isAnyTicketType" class="warning-box">
+            Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
+        </p>
 
         <template v-if="enableTransfers">
             <hr>
@@ -84,34 +108,44 @@
             <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
         </div>
 
-        <hr>
-        <h2>Afhaal- en leveringsopties</h2>
+        <template v-if="!isTicketType">
+            <hr>
+            <h2>Afhaal- en leveringsopties</h2>
+            <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel.</p>
 
-        <STList>
-            <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" @click="editCheckoutMethod(method)">
-                {{ method.type == 'Takeout' ? 'Afhalen' : 'Leveren' }}: {{ method.name }}
+            <STList>
+                <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" @click="editCheckoutMethod(method)">
+                    {{ method.type == 'OnSite' ? 'Ter plaatse consumeren' : (method.type == 'Takeout' ? 'Afhalen' : 'Leveren') }}: {{ method.name }}
 
-                <template slot="right">
-                    <button class="button icon arrow-up gray" @click.stop="moveCheckoutUp(method)" />
-                    <button class="button icon arrow-down gray" @click.stop="moveCheckoutDown(method)" />
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
+                    <template slot="right">
+                        <button class="button icon arrow-up gray" @click.stop="moveCheckoutUp(method)" />
+                        <button class="button icon arrow-down gray" @click.stop="moveCheckoutDown(method)" />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+            
+            <p>
+                <button class="button text" @click="addOnSiteMethod">
+                    <span class="icon add" />
+                    <span>Ter plaatse consumeren toevoegen</span>
+                </button>
+            </p>
 
-        <p>
-            <button class="button text" @click="addTakeoutMethod">
-                <span class="icon add" />
-                <span>Afhaallocatie toevoegen</span>
-            </button>
-        </p>
+            <p>
+                <button class="button text" @click="addTakeoutMethod">
+                    <span class="icon add" />
+                    <span>Afhaallocatie toevoegen</span>
+                </button>
+            </p>
 
-        <p>
-            <button class="button text" @click="addDeliveryMethod">
-                <span class="icon add" />
-                <span>Leveringsoptie toevoegen</span>
-            </button>
-        </p>
+            <p>
+                <button class="button text" @click="addDeliveryMethod">
+                    <span class="icon add" />
+                    <span>Leveringsoptie toevoegen</span>
+                </button>
+            </p>
+        </template>
 
         <hr>
         <h2>Open vragen</h2>
@@ -136,7 +170,7 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { WebshopField } from '@stamhoofd/structures';
+import { WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -170,6 +204,10 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
+    get WebshopTicketType() {
+        return WebshopTicketType
+    }
+
     get name() {
         return this.webshop.meta.name
     }
@@ -179,12 +217,29 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
     }
 
+    get ticketType() {
+        return this.webshop.meta.ticketType
+    }
+
+    set ticketType(ticketType: WebshopTicketType) {
+        const patch = WebshopMetaData.patch({ ticketType })
+        this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
+    }
+
     get roles() {
         return this.organization.privateMeta?.roles ?? []
     }
 
     get fields() {
         return this.webshop.meta.customFields
+    }
+
+    get isTicketType() {
+        return (this.webshop.meta.ticketType === WebshopTicketType.Tickets)
+    }
+
+    get isAnyTicketType() {
+        return (this.webshop.meta.ticketType !== WebshopTicketType.None)
     }
 
     addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
@@ -197,6 +252,22 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<PrivateWebshop>) {
         this.$emit("patch", patch)
+    }
+
+    addOnSiteMethod() {
+        const onSiteMethod = WebshopOnSiteMethod.create({
+            address: OrganizationManager.organization.address
+        })
+       
+        const p = PrivateWebshop.patch({})
+        const meta = WebshopMetaData.patch({})
+        meta.checkoutMethods.addPut(onSiteMethod)
+        p.meta = meta
+
+        this.present(new ComponentWithProperties(EditTakeoutMethodView, { takeoutMethod: onSiteMethod, webshop: this.webshop.patch(p), saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+            // Merge both patches
+            this.$emit("patch", p.patch(patch))
+        }}).setDisplayStyle("popup"))
     }
 
     addTakeoutMethod() {
@@ -230,7 +301,7 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
     }
 
     editCheckoutMethod(checkoutMethod: AnyCheckoutMethod) {
-        if (checkoutMethod instanceof WebshopTakeoutMethod) {
+        if (checkoutMethod instanceof WebshopTakeoutMethod || checkoutMethod instanceof WebshopOnSiteMethod) {
             this.present(new ComponentWithProperties(EditTakeoutMethodView, { takeoutMethod: checkoutMethod, webshop: this.webshop, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
                 // Merge both patches
                 this.$emit("patch", patch)

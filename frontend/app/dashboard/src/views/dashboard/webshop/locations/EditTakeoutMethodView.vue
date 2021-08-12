@@ -1,6 +1,6 @@
 <template>
     <div class="st-view product-edit-view">
-        <STNavigationBar title="Afhaallocatie">
+        <STNavigationBar :title="locationTitleName">
             <template slot="right">
                 <button v-if="!isNew" class="button text" @click="deleteMe">
                     <span class="icon trash" />
@@ -12,10 +12,10 @@
 
         <main>
             <h1 v-if="isNew">
-                Afhaallocatie toevoegen
+                {{ locationTitleName }} toevoegen
             </h1>
             <h1 v-else>
-                Afhaallocatie bewerken
+                {{ locationTitleName }} bewerken
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
@@ -48,8 +48,11 @@
                 </div>
             </div>
 
-            <EditTimeSlotsSection :time-slots="patchedTakeoutMethod.timeSlots" title="Keuze uit afhaalintervallen" @patch="patchTimeSlots">
+            <EditTimeSlotsSection v-if="isTakeout" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
                 <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+            </EditTimeSlotsSection>
+            <EditTimeSlotsSection v-else :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
+                <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
             </EditTimeSlotsSection>
         </main>
 
@@ -67,10 +70,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, AnyCheckoutMethodPatch, Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
@@ -99,18 +102,29 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    takeoutMethod!: WebshopTakeoutMethod
+    takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod
 
     @Prop({ required: true })
     webshop: PrivateWebshop
 
-    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod> = WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id })
+    patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id })
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+
+    get isTakeout() {
+        return this.takeoutMethod.type === CheckoutMethodType.Takeout
+    }
+
+    get locationTitleName() {
+        if (this.isTakeout) {
+            return "Afhaallocatie"
+        }
+        return "Ter plaatse consumeren"
+    }
 
     get patchedTakeoutMethod() {
         return this.takeoutMethod.patch(this.patchTakeoutMethod)
@@ -144,12 +158,12 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
         this.patchTakeoutMethod = this.patchTakeoutMethod.patch({ description })
     }
 
-    addPatch(patch: AutoEncoderPatchType<WebshopTakeoutMethod>) {
+    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod>>) {
         this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch)
     }
    
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
-        this.addPatch(WebshopTakeoutMethod.patch({ timeSlots: patch }))
+        this.addPatch({ timeSlots: patch })
     }
   
     async save() {
@@ -165,7 +179,7 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze afhaallocatie wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze locatie wilt verwijderen?", "Verwijderen")) {
             return
         }
 
