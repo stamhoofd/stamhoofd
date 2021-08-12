@@ -43,8 +43,8 @@
             
             <ol>
                 <li>Maak een nieuwe sleutel aan via de knop onderaan</li>
-                <li>Vraag aan alle leden om terug naar de inschrijvingspagina te gaan en hun gegevens na te kijken. Het is belangrijk dat ze elk lid 'bewerken' en opslaan (ookal passen ze niets aan). Alle leden kunnen gelukkig nog aan al hun gegevens en moeten niet meer alles nakijken (tenzij ze zelf hun wachtwoord vergeten zijn).</li>
-                <li>Vul eventueel zelf gegevens aan van leden, maar let op: zodra jij de gegevens aanpast verliest ook het lid alle gegevens die hij eerder had ingegeven en worden deze overschreven door jouw wijzigingen (ookal heb je bepaalde velden leeg gelaten).</li>
+                <li>Vraag aan alle leden om terug naar de inschrijvingspagina te gaan en hun gegevens na te kijken. Het is belangrijk dat ze elk lid 'bewerken' en opslaan (ook al passen ze niets aan). Alle leden kunnen gelukkig nog aan al hun gegevens en moeten niet meer alles nakijken (tenzij ze zelf hun wachtwoord vergeten zijn).</li>
+                <li>Vul eventueel zelf gegevens aan van leden, maar let op: zodra jij de gegevens aanpast verliest ook het lid alle gegevens die hij eerder had ingegeven en worden deze overschreven door jouw wijzigingen (ook al heb je bepaalde velden leeg gelaten).</li>
             </ol>
 
             <button class="button destructive" @click="openNewKey">
