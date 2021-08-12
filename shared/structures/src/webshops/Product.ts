@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../addresses/Address';
@@ -91,6 +92,20 @@ export class ProductDateRange extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     endDate = new Date()
+
+    toString() {
+        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(this.endDate)) {
+            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
+        }
+        
+        // If start in evening and end on the next morning: only mention date once
+        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(new Date(this.endDate.getTime() - 24*60*60*1000)) && Formatter.timeIso(this.endDate) <= "12:00" && Formatter.timeIso(this.startDate) >= "12:00") {
+            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
+        }
+
+        return Formatter.dateTime(this.startDate)+" - "+Formatter.dateTime(this.endDate)
+
+    }
 }
 
 export class Product extends AutoEncoder {
@@ -119,7 +134,7 @@ export class Product extends AutoEncoder {
     location: ProductLocation | null = null
 
     @field({ decoder: ProductDateRange, nullable: true, version: 105 })
-    time: ProductDateRange | null = null
+    dateRange: ProductDateRange | null = null
     
     /**
      * WIP: not yet supported

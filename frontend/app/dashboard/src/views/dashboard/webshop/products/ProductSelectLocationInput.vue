@@ -14,11 +14,11 @@
                 </STListItem>
                 <STListItem element-name="label" :selectable="true" class="left-center">
                     <Radio slot="left" v-model="selectedLocation" :value="null" @change="changeSelected" />
-                    Een nieuwe locatie toevoegen
+                    Een andere locatie
                 </STListItem>
             </STList>
         </STInputBox>
-        <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :title="selectedLocation === null ? 'Nieuwe locatie' : 'Locatie bewerken'" :validator="internalValidator" />
+        <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>
@@ -130,7 +130,6 @@ export default class ProductSelectLocationInput extends Vue {
     }
 
     changeSelected() {
-        console.log("ChangeSelected")
         if (this.editingLocation) {
             this.customLocation = null
         }
@@ -150,15 +149,10 @@ export default class ProductSelectLocationInput extends Vue {
     }
 
     doEditLocation(location: ProductLocation) {
-        console.log("Do edit location"+location)
-        this.editingLocation = true
-        this.selectedLocation = location
-        this.customLocation = location
         this.$emit("input", location)
         this.editingLocation = true
         this.selectedLocation = location
         this.customLocation = location
-        console.log(this.customLocation)
     }
 
     get editLocation() {

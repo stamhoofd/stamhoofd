@@ -18,16 +18,28 @@
 
         <RadioGroup class="column">
             <Radio v-model="ticketType" :value="WebshopTicketType.None">
-                Geen scanners gebruiken
-                <span class="radio-description">Bij het afhalen en leveren werk je gewoon met een lijst waarin je een bestelling opzoekt. Er worden geen QR-codes of tickets aangemaakt die je kan scannen.</span>
+                <h3 class="style-title-list">
+                    Geen scanners gebruiken
+                </h3>
+                <p class="style-description">
+                    Bij het afhalen en leveren werk je gewoon met een lijst waarin je een bestelling opzoekt. Er worden geen QR-codes of tickets aangemaakt die je kan scannen.
+                </p>
             </Radio>
             <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket">
-                Maak één scanbaar ticket om bestelling af te halen
-                <span class="radio-description">Per bestelling wordt er maar één ticket met QR-code aangemaakt die gemakkelijk kan worden gescand bij het afhalen. Ideaal voor een eetfestijn waar je het ticket aan de ingang omruilt voor bonnetjes, of handig als je bestellingen wilt scannen zodat je ze niet moet opzoeken en aanvinken in een lijst. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.</span>
+                <h3 class="style-title-list">
+                    Maak één scanbaar ticket om bestelling af te halen
+                </h3>
+                <p class="style-description">
+                    Per bestelling wordt er maar één ticket met QR-code aangemaakt die gemakkelijk kan worden gescand bij het afhalen. Ideaal voor een eetfestijn waar je het ticket aan de ingang omruilt voor bonnetjes, of handig als je bestellingen wilt scannen zodat je ze niet moet opzoeken en aanvinken in een lijst. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+                </p>
             </Radio>
             <Radio v-model="ticketType" :value="WebshopTicketType.Tickets">
-                Verkoop individuele tickets en vouchers
-                <span class="radio-description">Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).</span>
+                <h3 class="style-title-list">
+                    Verkoop individuele tickets en vouchers
+                </h3>
+                <p class="style-description">
+                    Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+                </p>
             </Radio>
         </RadioGroup>
 

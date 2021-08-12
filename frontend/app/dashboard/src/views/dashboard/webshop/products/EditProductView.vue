@@ -55,32 +55,12 @@
 
             <template v-if="isTicket">
                 <hr>
-                <h2 class="style-with-button">
-                    <div>Locatie</div>
-                    <div>
-                        <button class="button text" @click="addProductPrice">
-                            <span class="icon add" />
-                            <span>Prijs</span>
-                        </button>
-                    </div>
-                </h2>
-
-                <p>Deze locatie zal op het ticket staan. Je kan dus meerdere tickets verkopen voor verschillende locaties.</p>
-
+                <h2>Locatie</h2>
                 <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="validator" @modify="modifyLocation" />
 
                 <hr>
-                <h2 class="style-with-button">
-                    <div>Tijdstip</div>
-                    <div>
-                        <button class="button text" @click="addProductPrice">
-                            <span class="icon add" />
-                            <span>Prijs</span>
-                        </button>
-                    </div>
-                </h2>
-
-                <p>Het begintijdstip zal op het ticket staan. De rest wordt gebruikt voor de digitale tickets zodat deze op een smartphone (via Apple Wallet en Google Pay Passes) op het juiste moment zichtbaar worden om snel te kunnen scannen.</p>
+                <h2>Datum en tijd</h2>            
+                <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="validator" @modify="modifyDateRange" />
             </template>
 
             <hr>
@@ -187,7 +167,7 @@
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
+import { Image, OptionMenu, PrivateWebshop, Product, ProductLocation, ProductDateRange, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
@@ -197,6 +177,7 @@ import OptionMenuSection from "./OptionMenuSection.vue"
 import ProductPriceBox from "./ProductPriceBox.vue"
 import ProductPriceRow from "./ProductPriceRow.vue"
 import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
+import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue"
 
 @Component({
     components: {
@@ -218,7 +199,8 @@ import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
         OptionMenuSection,
         ProductPriceBox,
         WebshopFieldsBox,
-        ProductSelectLocationInput
+        ProductSelectLocationInput,
+        ProductSelectDateRangeInput
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -311,6 +293,39 @@ export default class EditProductView extends Mixins(NavigationMixin) {
                 this.patchWebshop.products.addPatch(Product.patch({
                     id: product.id,
                     location: to
+                }))
+            }
+        }
+    }
+
+    get dateRange() {
+        return this.patchedProduct.dateRange
+    }
+
+    set dateRange(dateRange: ProductDateRange | null) {
+        this.patchProduct = this.patchProduct.patch({ dateRange })
+    }
+
+    get allDateRanges() {
+        const dateRanges = new Map<string, ProductDateRange>()
+
+        // Always use the non-patched product here -> only list the locations as they are before starting the editing
+        // But do use the patched webshop, because that is where we modify the locations in case of edits
+        for (const product of this.patchedWebshop.products) {
+            if (product.dateRange) {
+                dateRanges.set(product.dateRange.id, product.dateRange)
+            }
+        }
+        return [...dateRanges.values()]
+    }
+
+    modifyDateRange({ from, to }: { from: ProductDateRange, to: ProductDateRange }) {
+        // We edited/modified a location, so change it in all products
+        for (const product of this.patchedWebshop.products) {
+            if (product.dateRange && product.dateRange.id === from.id) {
+                this.patchWebshop.products.addPatch(Product.patch({
+                    id: product.id,
+                    dateRange: to
                 }))
             }
         }
@@ -565,9 +580,5 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         height: 140px;
         border-radius: $border-radius;
     }
-}
-
-.upload-button {
-
 }
 </style>

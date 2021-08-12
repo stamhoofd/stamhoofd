@@ -20,9 +20,6 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
     }
 })
 export default class ProductLocationInput extends Vue {
-    @Prop({ default: "" }) 
-    title: string;
-
     /**
      * Assign a validator if you want to offload the validation to components
      */
@@ -33,14 +30,6 @@ export default class ProductLocationInput extends Vue {
     
     @Prop({ default: null })
     value: ProductLocation | null
-
-    @Watch('value', { deep: true })
-    onValueChanged(val: ProductLocation | null) {
-        if (!this.value) {
-            return
-        }
-
-    }
 
     mounted() {
         if (this.validator) {
