@@ -86,6 +86,7 @@ import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stam
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../classes/OrganizationManager';
 import { FamilyManager } from '../../../../classes/FamilyManager';
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './EditMemberParentView.vue';
