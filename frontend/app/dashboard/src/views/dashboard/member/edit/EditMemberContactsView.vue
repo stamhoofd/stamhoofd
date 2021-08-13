@@ -41,7 +41,7 @@
                 Er zijn geen ouders ingesteld bij dit lid
             </p>
 
-            <div v-if="isNotAsked">
+            <template v-if="isNotAsked">
                 <hr>
                 <h2 :class="{ 'style-with-button': emergencyContacts.length == 0}">
                     <span>Noodcontact</span>
@@ -72,7 +72,7 @@
                 <p v-else class="info-box">
                     Er is geen noodcontact ingesteld bij dit lid
                 </p>
-            </div> 
+            </template> 
             
         </main>
     </div>
