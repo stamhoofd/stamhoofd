@@ -6,8 +6,8 @@
         <ContextMenuItem @click="markAs(OrderStatus.Prepared)">
             Verwerkt
         </ContextMenuItem>
-        <ContextMenuItem @click="markAs(OrderStatus.Pickup)">
-            Ophalen
+        <ContextMenuItem @click="markAs(OrderStatus.Collect)">
+            Ligt klaar
         </ContextMenuItem>
         <ContextMenuItem @click="markAs(OrderStatus.Completed)">
             Voltooid
