@@ -15,7 +15,7 @@ export class StatusFilter implements Filter {
         switch (this.status) {
             case OrderStatus.Created: return this.invert ? "Niet nieuw" : "Nieuw";
             case OrderStatus.Prepared: return this.invert ? "Niet verwerkt" :"Verwerkt";
-            case OrderStatus.Pickup: return this.invert ? "Niet ophalen" :"Ophalen";
+            case OrderStatus.Collect: return this.invert ? "Ligt niet klaar" :"Ligt klaar";
             case OrderStatus.Completed: return this.invert ? "Niet voltooid" :"Voltooid";
             case OrderStatus.Canceled: return this.invert ? "Niet geannuleerd" : "Geannuleerd";
         }
@@ -31,7 +31,7 @@ export class StatusFilter implements Filter {
 
         base.push(new StatusFilter(OrderStatus.Created, true))
         base.push(new StatusFilter(OrderStatus.Prepared, true))
-        base.push(new StatusFilter(OrderStatus.Pickup, true))
+        base.push(new StatusFilter(OrderStatus.Collect, true))
         base.push(new StatusFilter(OrderStatus.Completed, true))
         base.push(new StatusFilter(OrderStatus.Canceled, true))
 
