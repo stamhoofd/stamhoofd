@@ -7,7 +7,7 @@ import { Checkout } from './Checkout';
 export enum OrderStatus {
     Created = "Created",
     Prepared = "Prepared",
-    Pickup = "Pickup",
+    Collect = "Collect",
     Completed = "Completed",
     Canceled = "Canceled",
 }
@@ -17,7 +17,7 @@ export class OrderStatusHelper {
         switch (status) {
             case OrderStatus.Created: return "Nieuw"
             case OrderStatus.Prepared: return "Verwerkt"
-            case OrderStatus.Pickup: return "Ophalen"
+            case OrderStatus.Collect: return "Ligt klaar"
             case OrderStatus.Completed: return "Voltooid"
             case OrderStatus.Canceled: return "Geannuleerd"
         }
