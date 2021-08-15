@@ -6,6 +6,9 @@
         <ContextMenuItem @click="setPermission('write')">
             Bekijken en bewerken
         </ContextMenuItem>
+        <ContextMenuItem @click="setPermission('Manage')">
+            Beheren
+        </ContextMenuItem>
         <ContextMenuItem @click="setPermission('full')">
             Volledige toegang
         </ContextMenuItem>
@@ -33,7 +36,7 @@ export default class GroupPermissionContextMenu extends Mixins(NavigationMixin) 
     y!: number;
 
     @Prop()
-    callback!: (status: "read" | "write" | "full") => void;
+    callback!: (status: "read" | "write" | "Manage" | "full") => void;
 
     setPermission(status) {
         this.callback(status)
