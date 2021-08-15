@@ -77,7 +77,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         }
     }
 
-    getGroupPermission(group: Group): "none" | "write" | "read" | "manage" | "full" {
+    getGroupPermission(group: Group): "none" | "read" | "write" | "manage" | "full" {
         for (const role of group.privateSettings!.permissions.full) {
             if (role.id === this.role.id) {
                 return "full"
@@ -105,7 +105,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         return "none"
     }
 
-    setGroupPermission(group: Group, level: "none" | "write" | "read" | "manage" | "full") {
+    setGroupPermission(group: Group, level: "none" | "read" | "write" | "manage" | "full") {
         if (this.getGroupPermission(group) === level) {
             return
         }
@@ -198,11 +198,11 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         }
     }
 
-    getLevelText(level: "none" | "write" | "read" | "manage" | "full"): string {
+    getLevelText(level: "none" | "read" | "write" | "manage" | "full"): string {
         switch(level) {
             case "none": return "Geen toegang";
-            case "write": return "Bekijken en bewerken";
             case "read": return "Bekijken";
+            case "write": return "Bekijken en bewerken";
             case "manage": return "Beheren";
             case "full": return "Volledige toegang";
         }
@@ -212,7 +212,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
             x: event.clientX,
             y: event.clientY,
-            callback: (level: "none" | "write" | "read" | "manage" | "full") => {
+            callback: (level: "none" | "read" | "write" | "manage" | "full") => {
                 this.setGroupPermission(group, level)
             }
         });
