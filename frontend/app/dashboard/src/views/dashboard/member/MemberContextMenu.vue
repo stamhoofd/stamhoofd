@@ -10,7 +10,8 @@
                 Gegevens wijzigen
                 <span slot="right" class="icon edit" />
             </ContextMenuItem>
-
+        </template>
+        <template v-if="hasManage">
             <ContextMenuItem @click="changeGroup">
                 Inschrijvingen wijzigen
                 <span slot="right" class="icon sync" />
@@ -46,9 +47,9 @@
             </ContextMenuItem>
         </template>
 
-        <ContextMenuLine v-if="hasWrite || canDelete" />
+        <ContextMenuLine v-if="hasManage || canDelete" />
 
-        <ContextMenuItem v-if="hasWrite" @click="deleteRegistration">
+        <ContextMenuItem v-if="hasManage" @click="deleteRegistration">
             Uitschrijven
             <span slot="right" class="icon unregister" />
         </ContextMenuItem>
@@ -117,7 +118,7 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.member.groups) {
-            if(!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            if(!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Manage)) {
                 return false
             }
         }
@@ -132,6 +133,20 @@ export default class MemberContextMenu extends Mixins(NavigationMixin) {
 
         for (const group of this.member.groups) {
             if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    get hasManage(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Manage)) {
                 return true
             }
         }
