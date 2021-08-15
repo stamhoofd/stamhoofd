@@ -22,28 +22,30 @@
             Mailen
         </ContextMenuItem>
 
-        <ContextMenuLine />
+        <template v-if="hasManage">
+            <ContextMenuLine />
 
-        <ContextMenuItem v-if="waitingList" @click="acceptWaitingList">
-            Schrijf in
-        </ContextMenuItem>
-        <ContextMenuItem v-else-if="hasWaitingList" @click="moveToWaitingList">
-            Verplaatst naar wachtlijst
-            <span slot="right" class="icon clock-small" />
-        </ContextMenuItem>
+            <ContextMenuItem v-if="waitingList" @click="acceptWaitingList">
+                Schrijf in
+            </ContextMenuItem>
+            <ContextMenuItem v-else-if="hasWaitingList" @click="moveToWaitingList">
+                Verplaatst naar wachtlijst
+                <span slot="right" class="icon clock-small" />
+            </ContextMenuItem>
 
-        <ContextMenuItem @click="deleteRegistration">
-            Uitschrijven
-            <span slot="right" class="icon unregister" />
-        </ContextMenuItem>
-        <ContextMenuItem @click="deleteRecords">
-            <span slot="right" class="icon trash" />
-            Gegevens gedeeltelijk wissen
-        </ContextMenuItem>
-        <ContextMenuItem @click="deleteData">
-            <span slot="right" class="icon trash" />
-            Verwijderen
-        </ContextMenuItem>
+            <ContextMenuItem @click="deleteRegistration">
+                Uitschrijven
+                <span slot="right" class="icon unregister" />
+            </ContextMenuItem>
+            <ContextMenuItem @click="deleteRecords">
+                <span slot="right" class="icon trash" />
+                Gegevens gedeeltelijk wissen
+            </ContextMenuItem>
+            <ContextMenuItem @click="deleteData">
+                <span slot="right" class="icon trash" />
+                Verwijderen
+            </ContextMenuItem>
+        </template>
     </ContextMenu>
 </template>
 
@@ -57,6 +59,7 @@ import { AppManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
 import MemberSummaryView from "../member/MemberSummaryView.vue";
@@ -117,6 +120,19 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
 
     get hasWaitingList() {
         return this.group?.hasWaitingList() ?? false
+    }
+    
+    get hasManage(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Manage)) {
+                return true
+            }
+        }
+        
+        return false
     }
 
     async excel() {
