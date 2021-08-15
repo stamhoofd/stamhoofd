@@ -215,11 +215,11 @@ export class OrdersExcelExport {
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
-                const id = item.id
-                let existing = counter.get(id)
+                const code = item.code
+                let existing = counter.get(code)
                 if (!existing) {
                     existing = { amount: 0, name: item.product.name,  variant: item.description}
-                    counter.set(id, existing)
+                    counter.set(code, existing)
                 }
                 existing.amount += item.amount
             }

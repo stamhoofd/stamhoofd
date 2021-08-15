@@ -262,6 +262,7 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
+    // todo: only select the ID + organizationId
     const payments = await Payment.where({
         status: {
             sign: "IN",
@@ -286,7 +287,7 @@ async function checkPayments() {
             if (payment.organizationId) {
                 const organization = await Organization.getByID(payment.organizationId)
                 if (organization) {
-                    await ExchangePaymentEndpoint.pollStatus(payment, organization)
+                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization)
                 }
             } else {
                 // Try stamhoofd payment

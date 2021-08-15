@@ -73,6 +73,7 @@ import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
+import TicketView from "./orders/TicketView.vue";
 import CategoryBox from "./products/CategoryBox.vue"
 import ProductGrid from "./products/ProductGrid.vue"
 
@@ -231,9 +232,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
             UrlHelper.shared.clear()
             const orderId = path[1];
             this.show(new ComponentWithProperties(OrderView, { orderId }).setAnimated(false))
+        } else if (path.length == 2 && path[0] == 'tickets') {
+            UrlHelper.shared.clear()
+            const secret = path[1];
+            this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
         } else if (path.length == 1 && path[0] == 'payment') {
             UrlHelper.shared.clear()
-            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server ,finishedHandler: (payment: Payment | null) => {
+            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server, finishedHandler: (payment: Payment | null) => {
                 if (payment && payment.status == PaymentStatus.Succeeded) {
                     this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
                 } else {

@@ -125,12 +125,9 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     transferSettings: WebshopManager.webshop.meta.transferSettings,
                     type: "order"
                 }, (payment: Payment) => {
-                    console.log("Success")
-                    // success
                     this.loading = false
                     this.goToOrder(response.data.order.id)
                 }, (payment: Payment) => {
-                    console.log(payment)
                     // failure
                     this.loading = false
                 })

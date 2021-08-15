@@ -139,6 +139,12 @@
         }
     }
 
+    &.environment {
+        &::before {
+            font-icon: url(@stamhoofd/assets/images/icons/environment.svg);
+        }
+    }
+
     +.error-box, +.success-box, +.info-box, +.warning-box  {
         margin-top: -10px;
     }

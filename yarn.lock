@@ -2059,10 +2059,10 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
-"@simonbackx/simple-database@^1.15.1":
-  version "1.15.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.15.1.tgz#a40665bf26b28ea909f602554390a4eca0040721"
-  integrity sha512-7+JIHqTrALIBu+nZFGE7LpTYJpqrCOaU9jZ4H4TIB8FBg+7Vz5AY1ExMYYwAW91OhO/31ttj3EjWVcALE2S7+A==
+"@simonbackx/simple-database@^1.17":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.17.0.tgz#c0659974e16d5d2165e9696dfe84c25b46f9e074"
+  integrity sha512-8k7ZzdRqDWWrG/Y8utB4iD1QOKrYktS8vTqJqoPY7nXCzpk7mHkpdu2TsxfgVuoeJvGo3zY7Uoggrh/n4xafkA==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"
@@ -3326,6 +3326,18 @@ bl@^4.0.3:
     buffer "^5.5.0"
     inherits "^2.0.4"
     readable-stream "^3.4.0"
+
+blob-stream@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/blob-stream/-/blob-stream-0.1.3.tgz#98d668af6996e0f32ef666d06e215ccc7d77686c"
+  integrity sha1-mNZor2mW4PMu9mbQbiFczH13aGw=
+  dependencies:
+    blob "0.0.4"
+
+blob@0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/blob/-/blob-0.0.4.tgz#bcf13052ca54463f30f9fc7e95b9a47630a94921"
+  integrity sha1-vPEwUspURj8w+fx+lbmkdjCpSSE=
 
 bluebird@^3.1.1, bluebird@^3.5.5:
   version "3.7.2"

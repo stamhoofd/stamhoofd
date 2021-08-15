@@ -7,7 +7,9 @@
         "**/android/app/src/main/assets": true,
         "**/android/app/build": true,
         "**/ios/App/App/public": true,
-
+        "**/yarn-error.log": true,
+        "LICENSE": true,
+        ".yarn/releases": true,
     },
     "eslint.options": {
         "extensions": [
@@ -38,5 +40,6 @@
     "vetur.format.defaultFormatter.html": "none",
     "vetur.format.defaultFormatter.js": "none",
     "vetur.format.defaultFormatter.ts": "none",
-    "search.useIgnoreFiles": false
+    "search.useIgnoreFiles": false,
+    "vetur.trace.server": "messages"
 }

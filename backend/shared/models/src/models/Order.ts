@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData, OrderStatus, PaymentMethod } from '@stamhoofd/structures';
+import { OrderData, OrderStatus, PaymentMethod, ProductType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -7,6 +7,8 @@ import { Organization } from './Organization';
 import { Payment } from './Payment';
 import { Webshop } from './Webshop';
 import { WebshopCounter } from '../helpers/WebshopCounter';
+import { QueueHandler } from "@stamhoofd/queues";
+import { Ticket } from "./Ticket";
 
 
 export class Order extends Model {
@@ -71,46 +73,49 @@ export class Order extends Model {
         return "https://"+this.webshop.getHost()+"/order/"+this.id
     }
 
-     /**
-     * Fetch all registrations with members with their corresponding (valid) registrations and payment
+    /**
+     * Fetch an order
      */
-    static async getForPayment(organization: Organization, paymentId: string): Promise<(Order & { webshop: Webshop & { organization: Organization } }) | undefined> {
-        let query = `SELECT ${Order.getDefaultSelect()}, ${Webshop.getDefaultSelect()} from \`${Order.table}\`\n`;
-        
-        query += `JOIN \`${Webshop.table}\` ON \`${Order.table}\`.\`${Order.webshop.foreignKey}\` = \`${Webshop.table}\`.\`${Webshop.primary.name}\`\n`
-
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Order.table}\`.\`paymentId\` = ? LIMIT 1`
-
-        const [results] = await Database.select(query, [paymentId])
-
-        const orders = Order.fromRows(results, Order.table)
-        if (orders.length != 1) {
-            return undefined;
+    static async getForPayment(organizationId: string, paymentId: string): Promise<Order | undefined> {
+        const order = await this.where({ paymentId }, { limit: 1 })[0]
+        if (!order) {
+            return
         }
-        
-        const webshops = Webshop.fromRows(results, Webshop.table)
-        if (webshops.length != 1) {
-            return undefined;
+        if (order.organizationId !== organizationId) {
+            // Security check
+            return
         }
-
-        return orders[0].setRelation(Order.webshop, webshops[0].setRelation(Webshop.organization, organization))
+        return order
     }
 
     shouldIncludeStock() {
         return this.status !== OrderStatus.Canceled
     }
 
-    async onPaymentFailed(this: Order & { webshop: Webshop }) {
+    async onPaymentFailed(this: Order) {
         if (this.status !== OrderStatus.Canceled) {
             this.status = OrderStatus.Canceled
             await this.save()
-            await this.updateStock(false) // remove reserved stock
+
+            await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+                // Fetch webshop inside queue to make sure the stock is up to date
+                const webshop = await Webshop.getByID(this.webshopId);
+                if (!webshop) {
+                    // ignore for now
+                    console.error("Missing webshop with id "+this.webshopId+" in webshop stock queue for order "+this.id)
+                    return
+                }
+                
+                await this.setRelation(Order.webshop, webshop).updateStock(false) // remove reserved stock
+            })
         }
     }
 
+    /**
+     * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
+     * + in combination with validation and reading the webshop
+     */
     async updateStock(this: Order & { webshop: Webshop }, add = true) {
-        // Update product stock
         let changed = false
         for (const item of this.data.cart.items) {
             if (item.product.stock !== null) {
@@ -133,11 +138,99 @@ export class Order extends Model {
         }
     }
 
-    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null) {
+    /**
+     * Only call this once! Make sure you use the queues correctly
+     */
+    async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
+        if (!webshop) {
+            console.error("Missing webshop for order "+this.id)
+            return
+        }
+
+        // Create tickets if needed (we might already be valid in case of transfer payments)
+        // TODO: check if we already have the tickets generated and skip if so
+        let tickets: Ticket[] = []
+        for (const item of this.data.cart.items) {
+
+            if (item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) {
+                // Separate ticket if multiple amounts
+                for (let index = 0; index < item.amount; index++) {
+                    const ticket = new Ticket()
+                    ticket.orderId = this.id
+                    ticket.itemId = item.id
+                    ticket.organizationId = this.organizationId
+                    ticket.webshopId = this.webshopId
+
+                    // Do not save yet
+                    tickets.push(ticket)
+                }
+            }
+        }
+
+        let didCreateTickets = false
+
+        if (tickets.length > 0) {
+            // First check if we already have tickets
+            const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id }, { limit: 1, select: "id" })
+            if (existingTickets.length > 0) {
+                // Skip
+                tickets = existingTickets
+            } else {
+                // Create the tickets
+                didCreateTickets = true
+
+                if (!this.id) {
+                    await this.save()
+                    for (const ticket of tickets) {
+                        ticket.orderId = this.id
+                    }
+                }
+
+                // Wait to save them all
+                await Promise.all(tickets.map((ticket) => ticket.save()))
+            }
+        }
+
+        // Needs to happen before validation, because we can include the tickets in the validation that way
+
+        if (this.validAt === null) {
+            await this.setRelation(Order.webshop, webshop).markValid(payment, tickets)
+        } else {
+            if (didCreateTickets && this.data.customer.email.length > 0) {
+                const organization = webshop.organization
+                
+                const { from, replyTo } = organization.getDefaultEmail()
+            
+                const customer = this.data.customer
+
+                const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
+
+                // Also send a copy
+                Email.send({
+                    from,
+                    replyTo,
+                    to: toStr,
+                    subject: "["+webshop.meta.name+"] Jouw tickets zijn beschikbaar",
+                    text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu vinden via de link hieronder:"
+                    + "\n"
+                    + this.setRelation(Order.webshop, webshop).getUrl()
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                })
+            }
+        }
+    }
+
+    /**
+     * WARNING: this should always run inside a queue so it only runs once for the same orde
+     * Include any tickets that are generated and should be included in the e-mail
+     */
+    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null, tickets: Ticket[]) {
         const wasValid = this.validAt !== null
 
         if (wasValid) {
             console.warn("Warning: already validated an order")
+            return
         }
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
@@ -162,7 +255,10 @@ export class Order extends Model {
                 subject: "["+webshop.meta.name+"] Bestelling "+this.number,
                 text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
                     ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
-                +" \n"+this.getUrl()+"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                + "\n"
+                + this.setRelation(Order.webshop, webshop).getUrl()
+                + ((tickets.length > 0) ? "\n\nJouw tickets vind je ook in de link hierboven." : "")
+                +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
             })
         }
     }

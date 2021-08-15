@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from "uuid";
 
 import { Option, OptionMenu, Product, ProductPrice } from './Product';
 import { Webshop } from './Webshop';
@@ -15,7 +16,13 @@ export class CartItemOption extends AutoEncoder {
 }
 
 export class CartItem extends AutoEncoder {
-
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4(), version: 106, upgrade: function(this: CartItem) {
+        // Warning: this id will always be too long for storage in a normal database record.
+        // But that is not a problem, since only new orders will use tickets that need this field
+        return this.code
+    } })
+    id: string;
+    
     @field({ decoder: Product })
     product: Product;
 
@@ -30,6 +37,12 @@ export class CartItem extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amount = 1;
+
+    /**
+     * Saved unitPrice (migration needed)
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 107 })
+    unitPrice: number | null = null;
 
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T>  {
         const c = super.create(object) as CartItem
@@ -57,7 +70,7 @@ export class CartItem extends AutoEncoder {
     /**
      * Unique identifier to check if two cart items are the same
      */
-    get id(): string {
+    get code(): string {
         return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".")+"."+this.fieldAnswers.map(a => a.field.id+"-"+Formatter.slug(a.answer)).join(".");
     }
 
@@ -77,7 +90,7 @@ export class CartItem extends AutoEncoder {
         }, 0) + this.amount
     }
 
-    getUnitPrice(cart: Cart): number {
+    calculateUnitPrice(cart: Cart): number {
         const amount = this.getTotalAmount(cart)
         let price = this.productPrice.price
 
@@ -87,7 +100,18 @@ export class CartItem extends AutoEncoder {
         for (const option of this.options) {
             price += option.option.price
         }
-        return Math.max(0, price)
+        this.unitPrice = Math.max(0, price)
+        return this.unitPrice
+    }
+
+    /**
+     * Use this method if you need temporary prices in case it is not yet calculated
+     */
+    getUnitPrice(cart: Cart): number {
+        if (this.unitPrice) {
+            return this.unitPrice
+        }
+        return this.calculateUnitPrice(cart)
     }
 
     getPrice(cart: Cart): number {
@@ -145,7 +169,7 @@ export class CartItem extends AutoEncoder {
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop) {
+    validate(webshop: Webshop, cart: Cart) {
         const product = webshop.products.find(p => p.id == this.product.id)
         if (!product || !product.enabled) {
             throw new SimpleError({
@@ -229,6 +253,9 @@ export class CartItem extends AutoEncoder {
         }
 
         this.validateAnswers()
+
+        // Update prices
+        this.calculateUnitPrice(cart)
     }
 
 }
@@ -238,9 +265,9 @@ export class Cart extends AutoEncoder {
     items: CartItem[] = []
 
     addItem(item: CartItem) {
-        const c = item.id
+        const c = item.code
         for (const i of this.items) {
-            if (i.id === c) {
+            if (i.code === c) {
                 i.amount += item.amount
                 return
             }
@@ -249,9 +276,9 @@ export class Cart extends AutoEncoder {
     }
 
     removeItem(item: CartItem) {
-        const c = item.id
+        const c = item.code
         for (const [index, i] of this.items.entries()) {
-            if (i.id === c) {
+            if (i.code === c) {
                 this.items.splice(index, 1)
                 return
             }
@@ -271,7 +298,7 @@ export class Cart extends AutoEncoder {
         const errors = new SimpleErrors()
         for (const item of this.items) {
             try {
-                item.validate(webshop)
+                item.validate(webshop, this)
                 newItems.push(item)
             } catch (e) {
                 errors.addError(e)

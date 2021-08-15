@@ -139,7 +139,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     addToCart() {
         try {
-            this.cartItem.validate(WebshopManager.webshop)
+            this.cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return

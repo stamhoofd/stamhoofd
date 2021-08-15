@@ -1,14 +1,34 @@
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData, OrderStatus, PaymentMethod } from '@stamhoofd/structures';
+import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { v4 as uuidv4 } from "uuid";
 
-import { Email } from '@stamhoofd/email';
 import { Organization } from './Organization';
-import { Payment } from './Payment';
 import { Webshop } from './Webshop';
-import { WebshopCounter } from '../helpers/WebshopCounter';
+import { Order } from "./Order";
 
+import basex from "base-x";
+import crypto from "crypto";
 
+// Note: 0 and O is removed to prevent typing it in wrong
+const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
+const bs58 = basex(ALPHABET)
+
+async function randomBytes(size: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(buf);
+        });
+    });
+}
+
+/**
+ * Use this method when you don't need access to the items of an order.
+ * This avoids the select in the database, saving some bytes in network communication 
+ * (especially needed when clients requests all the changed tickets)
+ */
 export class Ticket extends Model {
     static table = "webshop_tickets";
 
@@ -20,20 +40,35 @@ export class Ticket extends Model {
     })
     id!: string;
 
-    @column({ foreignKey: Order.organization, type: "string" })
+    /**
+     * Unique per webshop. Used for lookups
+     */
+    @column({ type: "string", async beforeSave(value) {
+        return value ?? bs58.encode(await randomBytes(10));
+    } })
+    secret!: string
+
+
+    @column({ foreignKey: Ticket.organization, type: "string" })
     organizationId: string;
 
-    @column({ foreignKey: Order.webshop, type: "string" })
+    @column({ foreignKey: Ticket.webshop, type: "string" })
     webshopId: string;
 
-    @column({ type: "string", nullable: true, foreignKey: Order.payment })
-    paymentId: string | null = null
-    
-    @column({ type: "json", decoder: OrderData })
-    data: OrderData
+    /**
+     * Important note: access to a ticket doesn't guarantee access to an order
+     * because one person could buy 10 tickets and share them with friends.
+     * The order details should remain private to a ticket holder except for the item details
+     * + also the orderID should remain private for the holder (since this provides access via URL, need to add a secret here)
+     */
+    @column({ foreignKey: Ticket.order, type: "string" })
+    orderId: string
 
-    @column({ type: "integer", nullable: true })
-    number: number | null = null
+    /**
+     * null = whole order
+     */
+    @column({ type: "string", nullable: true })
+    itemId: string | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -58,114 +93,16 @@ export class Ticket extends Model {
     updatedAt: Date
 
     @column({ type: "datetime", nullable: true })
-    validAt: Date | null = null
+    scannedAt: Date | null = null
 
-    @column({ type: "string" })
-    status = OrderStatus.Created
+    @column({ type: "string", nullable: true })
+    scannedBy: string | null = null
 
     static webshop = new ManyToOneRelation(Webshop, "webshop");
-    static payment = new ManyToOneRelation(Payment, "payment");
+    static order = new ManyToOneRelation(Order, "order");
     static organization = new ManyToOneRelation(Organization, "organization");
 
-    getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        return "https://"+this.webshop.getHost()+"/order/"+this.id
+    getUrl(this: Ticket & { webshop: Webshop & { organization: Organization } }) {
+        return "https://"+this.webshop.getHost()+"/ticket/"+this.secret
     }
-
-     /**
-     * Fetch all registrations with members with their corresponding (valid) registrations and payment
-     */
-    static async getForPayment(organization: Organization, paymentId: string): Promise<(Order & { webshop: Webshop & { organization: Organization } }) | undefined> {
-        let query = `SELECT ${Order.getDefaultSelect()}, ${Webshop.getDefaultSelect()} from \`${Order.table}\`\n`;
-        
-        query += `JOIN \`${Webshop.table}\` ON \`${Order.table}\`.\`${Order.webshop.foreignKey}\` = \`${Webshop.table}\`.\`${Webshop.primary.name}\`\n`
-
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Order.table}\`.\`paymentId\` = ? LIMIT 1`
-
-        const [results] = await Database.select(query, [paymentId])
-
-        const orders = Order.fromRows(results, Order.table)
-        if (orders.length != 1) {
-            return undefined;
-        }
-        
-        const webshops = Webshop.fromRows(results, Webshop.table)
-        if (webshops.length != 1) {
-            return undefined;
-        }
-
-        return orders[0].setRelation(Order.webshop, webshops[0].setRelation(Webshop.organization, organization))
-    }
-
-    shouldIncludeStock() {
-        return this.status !== OrderStatus.Canceled
-    }
-
-    async onPaymentFailed(this: Order & { webshop: Webshop }) {
-        if (this.status !== OrderStatus.Canceled) {
-            this.status = OrderStatus.Canceled
-            await this.save()
-            await this.updateStock(false) // remove reserved stock
-        }
-    }
-
-    async updateStock(this: Order & { webshop: Webshop }, add = true) {
-        // Update product stock
-        let changed = false
-        for (const item of this.data.cart.items) {
-            if (item.product.stock !== null) {
-                const product = this.webshop.products.find(p => p.id === item.product.id)
-                if (product) {
-                    if (add) {
-                        product.usedStock += item.amount
-                    } else {
-                        product.usedStock -= item.amount
-                        if (product.usedStock < 0) {
-                            product.usedStock = 0
-                        }
-                    }
-                    changed = true
-                }
-            }
-        }
-        if (changed) {
-            await this.webshop.save()
-        }
-    }
-
-    async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null) {
-        const wasValid = this.validAt !== null
-
-        if (wasValid) {
-            console.warn("Warning: already validated an order")
-        }
-        this.validAt = new Date() // will get flattened AFTER calculations
-        this.validAt.setMilliseconds(0)
-        this.number = await WebshopCounter.getNextNumber(this.webshopId)
-        await this.save()
-
-        if (this.data.customer.email.length > 0) {
-            const webshop = this.webshop
-            const organization = webshop.organization
-            
-            const { from, replyTo } = organization.getDefaultEmail()
-           
-            const customer = this.data.customer
-
-            const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
-
-            // Also send a copy
-            Email.send({
-                from,
-                replyTo,
-                to: toStr,
-                subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                    ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
-                +" \n"+this.getUrl()+"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
-            })
-        }
-    }
-
-
 }

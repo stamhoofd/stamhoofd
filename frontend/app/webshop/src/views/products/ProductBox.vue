@@ -2,16 +2,13 @@
     <article class="product-box" :class="{ selected: count > 0, ticket: product.type != 'Product'}" @click="onClicked">
         <svg width="100%" height="100%" class="maskingSvg">
             <defs>
-                <mask id="Mask">
+                <mask :id="'ProductBoxMask-'+product.id">
                     <rect x="0" y="0" width="100%" height="100%" fill="white" rx="5px" />
                     <circle cx="0" cy="50%" r="15px" fill="black" />
                 </mask>
-                <clipPath id="product-svg">
-                    <rect x="0" y="0" width="100%" height="100%" fill="white" mask="url(#Mask)" />
-                </clipPath>
             </defs>
 
-            <rect x="0" y="0" width="100%" height="100%" fill="white" mask="url(#Mask)" class="svg-background" />
+            <rect x="0" y="0" width="100%" height="100%" fill="white" :mask="'url(#ProductBoxMask-'+product.id+')'" class="svg-background" />
         </svg>
 
         <div class="left" />

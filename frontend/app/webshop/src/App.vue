@@ -29,7 +29,7 @@ export default class App extends Vue {
         promise: async () => {
             // get organization
             try {
-                const ignorePath = ["checkout", "order", "cart", "payment"];
+                const ignorePath = ["checkout", "order", "cart", "payment", "tickets"];
                 const path = UrlHelper.shared.getParts()
                 const response = await NetworkManager.server.request({
                     method: "GET",
