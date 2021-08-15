@@ -77,10 +77,16 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         }
     }
 
-    getGroupPermission(group: Group): "none" | "write" | "read" | "full" {
+    getGroupPermission(group: Group): "none" | "write" | "read" | "manage" | "full" {
         for (const role of group.privateSettings!.permissions.full) {
             if (role.id === this.role.id) {
                 return "full"
+            }
+        }
+        
+        for (const role of group.privateSettings!.permissions.manage) {
+            if (role.id === this.role.id) {
+                return "manage"
             }
         }
 
@@ -99,7 +105,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         return "none"
     }
 
-    setGroupPermission(group: Group, level: "none" | "write" | "read" | "full") {
+    setGroupPermission(group: Group, level: "none" | "write" | "read" | "manage" | "full") {
         if (this.getGroupPermission(group) === level) {
             return
         }
@@ -118,6 +124,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
                     permissions: PermissionsByRole.patch({
                         read: del,
                         write: del,
+                        manage: del,
                         full: del
                     })
                 })
@@ -133,6 +140,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
                     permissions: PermissionsByRole.patch({
                         read: add,
                         write: del,
+                        manage: del,
                         full: del
                     })
                 })
@@ -148,6 +156,23 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
                     permissions: PermissionsByRole.patch({
                         read: del,
                         write: add,
+                        manage: del,
+                        full: del
+                    })
+                })
+            }))
+            this.addPatch(p)
+            return
+        }
+        
+        if (level === "manage") {
+            p.groups.addPatch(Group.patch({
+                id: group.id,
+                privateSettings: GroupPrivateSettings.patch({
+                    permissions: PermissionsByRole.patch({
+                        read: del,
+                        write: del,
+                        manage: add,
                         full: del
                     })
                 })
@@ -163,6 +188,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
                     permissions: PermissionsByRole.patch({
                         read: del,
                         write: del,
+                        manage: del,
                         full: add
                     })
                 })
@@ -172,11 +198,12 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         }
     }
 
-    getLevelText(level: "none" | "write" | "read" | "full"): string {
+    getLevelText(level: "none" | "write" | "read" | "manage" | "full"): string {
         switch(level) {
             case "none": return "Geen toegang";
             case "write": return "Bekijken en bewerken";
             case "read": return "Bekijken";
+            case "manage": return "Beheren";
             case "full": return "Volledige toegang";
         }
     }
@@ -185,7 +212,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
             x: event.clientX,
             y: event.clientY,
-            callback: (level: "none" | "write" | "read" | "full") => {
+            callback: (level: "none" | "write" | "read" | "manage" | "full") => {
                 this.setGroupPermission(group, level)
             }
         });
