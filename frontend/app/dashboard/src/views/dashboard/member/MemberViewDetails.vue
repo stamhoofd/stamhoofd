@@ -1,7 +1,7 @@
 <template>
     <div class="member-view-details">
         <div>
-            <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
+            <p v-if="hasManage && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
                 {{ member.firstName }} is niet ingeschreven
                 <span class="button icon edit" />
             </p>
@@ -371,6 +371,25 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
         for (const group of this.member.groups) {
             if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+        get hasManage(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Manage)) {
                 return true
             }
         }
