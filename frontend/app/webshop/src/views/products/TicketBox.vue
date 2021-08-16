@@ -17,7 +17,10 @@
                     <p class="event-name">
                         {{ webshop.meta.name }}
                     </p>
-                    <h3>{{ name }}</h3>
+                    <h3>
+                        {{ name }}
+                        <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
+                    </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
                     <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
@@ -179,6 +182,8 @@ export default class TicketBox extends Mixins(NavigationMixin){
     filter: drop-shadow($color-side-view-shadow 0px 2px 5px);
     margin: 0;
 
+   
+
     > .content {
         flex-grow: 1;
         min-width: 0;
@@ -198,6 +203,11 @@ export default class TicketBox extends Mixins(NavigationMixin){
 
             > .event-name {
                 @extend .style-definition-label;
+            }
+
+            .ticket-index {
+                @extend .style-definition-label;
+                display: inline-block;
             }
 
             > h3 {

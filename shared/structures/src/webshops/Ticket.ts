@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { CartItem } from "./Cart";
@@ -23,6 +23,12 @@ export class Ticket extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     secret: string;
+
+    @field({ decoder: IntegerDecoder })
+    index: number
+
+    @field({ decoder: IntegerDecoder })
+    total: number
 }
 
 /** 
@@ -33,6 +39,33 @@ export class Ticket extends AutoEncoder {
 export class TicketPublic extends Ticket {
     @field({ decoder: new ArrayDecoder(CartItem) })
     items: CartItem[] = []
+
+    getTitle() {
+        if (this.items.length != 1) {
+            return "Bestelbewijs"
+        }
+        return this.items[0].product.name
+    }
+
+    getIndexText(): string | null {
+        if (this.items.length != 1) {
+            if (this.total > 1) {
+                return this.index+" / "+this.total
+            }
+            return null
+        }
+
+        const item = this.items[0]
+        const nameField = item.fieldAnswers.findIndex(a => a.field.name.toLowerCase().includes("naam"))
+        if (nameField !== -1) {
+            return item.fieldAnswers[nameField].answer
+        }
+
+        if (this.total > 1) {
+            return this.index+" / "+this.total
+        }
+        return null
+    }
 }
 
 /**

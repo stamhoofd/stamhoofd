@@ -42,7 +42,6 @@ export class TicketBuilder {
 
     async download() {
 
-        
         const metropolisMedium = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
         const metropolisBold = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
 
@@ -73,7 +72,8 @@ export class TicketBuilder {
         const link = document.createElement('a');
         const href = window.URL.createObjectURL(blob);
         link.href = href        
-        const fileName = "tickets.pdf";
+
+        const fileName = (this.tickets.length == 1 ? Formatter.fileSlug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? (" "+this.tickets[0].getIndexText()): "")) : Formatter.fileSlug("Tickets "+this.webshop.meta.name)) + ".pdf";
         link.download = fileName;
         link.click();
     }
@@ -130,20 +130,20 @@ export class TicketBuilder {
         this.document.fillColor(COLOR_DARK);
         
         if (!dryRun) {
-            this.document.text(ticket.items[0].product.name, PAGE_MARGIN, y + height, { align: 'left' })
+            this.document.text(ticket.getTitle(), PAGE_MARGIN, y + height, { align: 'left' })
         }
-        height += this.document.heightOfString(ticket.items[0].product.name, { align: 'left' })
+        height += this.document.heightOfString(ticket.getTitle(), { align: 'left' })
 
         // Margin
         height += 5*MM
 
         // Draw horizontal line
         if (!dryRun) {
-            this.document.lineWidth(1);
+            this.document.lineWidth(0.5);
             this.document.strokeColor(COLOR_BORDER);
             this.document.moveTo(0, y + height).lineTo(PAGE_WIDTH, y + height).stroke()   
         }
-        height += 1
+        height += 0.5
 
         // Save height
         const initialColumnHeight = height
@@ -242,25 +242,25 @@ export class TicketBuilder {
 
         // Draw vertical lines
         if (!dryRun) {
-            this.document.lineWidth(1);
+            this.document.lineWidth(0.5);
             this.document.strokeColor(COLOR_BORDER);
             this.document.moveTo(PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH, y + initialColumnHeight - 1).lineTo(PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH, y + height).stroke()   
         }
 
         // Draw vertical lines
         if (!dryRun && ticket.items[0].description) {
-            this.document.lineWidth(1);
+            this.document.lineWidth(0.5);
             this.document.strokeColor(COLOR_BORDER);
             this.document.moveTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + initialColumnHeight - 1).lineTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + height).stroke()   
         }
 
         // Draw horizontal line
         if (!dryRun) {
-            this.document.lineWidth(1);
+            this.document.lineWidth(0.5);
             this.document.strokeColor(COLOR_BORDER);
             this.document.moveTo(0, y + height).lineTo(PAGE_WIDTH, y + height).stroke()   
         }
-        height += 1
+        height += 0.5
         height += 5*MM
 
         // Share and download text
@@ -269,10 +269,32 @@ export class TicketBuilder {
         this.document.fillColor(COLOR_GRAY);
 
         const shareText = "Scan de QR-code om op te slaan op jouw smartphone of om te delen.\nTicketverkoop via Stamhoofd. Software voor verenigingen."
+        const expectedHeight = this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
         if (!dryRun) {
-            this.document.text(shareText, PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2 })
+            const badgeWidth = (PAGE_WIDTH - PAGE_MARGIN*2) * 3/7
+            const appleWalletWidth = badgeWidth / 3
+            const badgesHeight = appleWalletWidth*0.308
+            const gpWidth = badgesHeight/0.153
+
+            this.document.text("Scan de QR-code om op te slaan op jouw smartphone of om te delen.\nTicketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - badgeWidth - 4*MM , lineGap: 2, paragraphGap: 2, continued: true })
+            this.document.font('Metropolis-SemiBold');
+            this.document.fillColor(COLOR_PRIMARY);
+            this.document.text("Stamhoofd", { continued: true, link: 'https://www.stamhoofd.be', })
+            
+            this.document.font('Metropolis-Medium');
+            this.document.fillColor(COLOR_GRAY);
+            this.document.text(". Software voor verenigingen.")
+
+            const appleWallet = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/apple-wallet-nl.png')).default
+            const googlePayPass = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/google-pay-pass-nl.png')).default
+
+            this.document.image(appleWallet,   PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, { width: appleWalletWidth })
+            this.document.image(googlePayPass, PAGE_WIDTH - PAGE_MARGIN - badgeWidth - 2*MM, y + height + expectedHeight/2 - badgesHeight/2, { width: gpWidth })
+
+            this.document.link(PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, appleWalletWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/apple/"+ticket.secret)
+            this.document.link(PAGE_WIDTH - PAGE_MARGIN - badgeWidth - 2*MM, y + height + expectedHeight/2 - badgesHeight/2, gpWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/google/"+ticket.secret)
         }
-        height += this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 })
+        height += expectedHeight + 2
 
 
         // Add end margin

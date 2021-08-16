@@ -70,6 +70,18 @@ export class Ticket extends Model {
     @column({ type: "string", nullable: true })
     itemId: string | null = null
 
+    /**
+     * If multiple items are made for the same product, this contains the index
+     */
+    @column({ type: "number" })
+    index: number = 0
+
+    /**
+     * total items with index
+     */
+    @column({ type: "number" })
+    total: number = 0
+
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {

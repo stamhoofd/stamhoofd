@@ -151,9 +151,12 @@ export class Order extends Model {
         // Create tickets if needed (we might already be valid in case of transfer payments)
         // TODO: check if we already have the tickets generated and skip if so
         let tickets: Ticket[] = []
+        const ticketMap = new Map<string, number>()
         for (const item of this.data.cart.items) {
 
             if (item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) {
+                const offset = ticketMap.get(item.product.id) ?? 0
+
                 // Separate ticket if multiple amounts
                 for (let index = 0; index < item.amount; index++) {
                     const ticket = new Ticket()
@@ -162,9 +165,15 @@ export class Order extends Model {
                     ticket.organizationId = this.organizationId
                     ticket.webshopId = this.webshopId
 
+                    // Relative index for items with same properties
+                    ticket.index = offset + index + 1
+                    ticket.total = item.getTotalAmount(this.data.cart)
+
                     // Do not save yet
                     tickets.push(ticket)
                 }
+
+                ticketMap.set(item.product.id, offset + item.amount)
             }
         }
 
