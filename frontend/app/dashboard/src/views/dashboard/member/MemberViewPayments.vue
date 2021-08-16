@@ -69,23 +69,26 @@
                     <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
                         Betaald op {{ payment.paidAt | date }}
                     </p>
-
-                    <LoadingButton :loading="loading">
-                        <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
-                            Toch niet betaald
-                        </button>
-                        <button v-else class="button primary" @click="markPaid(payment)">
-                            Markeer als betaald
-                        </button>
-                    </LoadingButton>
+                    <template v-if="hasManage">
+                        <LoadingButton :loading="loading">
+                            <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
+                                Toch niet betaald
+                            </button>
+                            <button v-else class="button primary" @click="markPaid(payment)">
+                                Markeer als betaald
+                            </button>
+                        </LoadingButton>
+                    </template>
                 </div>
                 <p v-if="payments.length == 0" class="info-box">
                     Er zijn nog geen betalingen aangemaakt voor dit lid. Hiermee kan je bijhouden dat er nog een bepaald bedrag verschuldigd is voor een inschrijving.
                 </p>
-                <button v-if="hasRegistrationsWithoutPayments" class="button text" @click="addPayment">
-                    <span class="icon add" />
-                    <span>Afrekening aanmaken</span>
-                </button>
+                <template v-if="hasManage">
+                    <button v-if="hasRegistrationsWithoutPayments" class="button text" @click="addPayment">
+                        <span class="icon add" />
+                        <span>Afrekening aanmaken</span>
+                    </button>
+                </template>
             </template>
         </main>
     </div>
