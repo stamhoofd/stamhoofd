@@ -407,7 +407,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                         continue
                     }
 
-                    if(getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                    if(getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Manage)) {
                         return true
                     }
                 }
@@ -419,7 +419,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return false
         }
 
-        if(getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+        if(getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Manage)) {
             return false
         }
         return true
