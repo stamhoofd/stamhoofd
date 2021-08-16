@@ -159,7 +159,7 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -167,7 +167,7 @@ import { NoFilter, NotPaidFilter,StatusFilter } from '../../../classes/order-fil
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import MailView from '../mail/MailView.vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditWebshopView from './EditWebshopView.vue';
+import EditWebshopView from './edit/EditWebshopView.vue';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';

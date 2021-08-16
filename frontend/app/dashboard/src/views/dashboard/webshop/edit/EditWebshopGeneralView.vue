@@ -186,8 +186,8 @@ import { WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd
 import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
-import WebshopRolePermissionRow from '../admins/WebshopRolePermissionRow.vue';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
 import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
 import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';

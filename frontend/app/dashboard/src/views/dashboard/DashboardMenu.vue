@@ -391,7 +391,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     async addWebshop() {
         this.present(
-            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/EditWebshopView.vue'))).setDisplayStyle("popup")
+            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/edit/EditWebshopView.vue'))).setDisplayStyle("popup")
         )
     }
 

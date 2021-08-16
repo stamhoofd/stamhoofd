@@ -44,7 +44,7 @@ import { PermissionRole, WebshopTicketType } from '@stamhoofd/structures';
 import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
 import EditWebshopPageView from './EditWebshopPageView.vue';
 import EditWebshopProductsView from './EditWebshopProductsView.vue';
