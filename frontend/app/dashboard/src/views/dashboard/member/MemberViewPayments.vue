@@ -153,7 +153,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Manage)) {
                 return true
             }
         }
