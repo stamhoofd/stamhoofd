@@ -8,7 +8,7 @@
                     <h2 class="style-with-button">
                         <div>Afrekening</div>
                         <div class="hover-show">
-                            <button v-if="hasWrite" class="button icon gray edit" @click="editPayment(payment)" />
+                            <button v-if="hasManage" class="button icon gray edit" @click="editPayment(payment)" />
                         </div>
                     </h2>
 
@@ -137,7 +137,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         })
     }
 
-    get hasWrite(): boolean {
+    get hasManage(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false
         }
