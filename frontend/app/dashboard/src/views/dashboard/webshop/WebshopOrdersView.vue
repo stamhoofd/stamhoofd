@@ -204,7 +204,7 @@ class SelectableOrder {
     },
     directives: { Tooltip },
 })
-export default class WebshopView extends Mixins(NavigationMixin) {
+export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     @Prop()
     preview: WebshopPreview ;
     webshop: PrivateWebshop | null = null
