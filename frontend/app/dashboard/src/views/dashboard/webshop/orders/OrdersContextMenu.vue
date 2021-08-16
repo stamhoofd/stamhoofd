@@ -14,14 +14,14 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
-import { Group, MemberWithRegistrations, Order } from '@stamhoofd/structures';
+import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner } from "@stamhoofd/components";
+import { Order } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailView from "../mail/MailView.vue";
-import SMSView from "../sms/SMSView.vue";
+import MailView from "../../mail/MailView.vue";
+import SMSView from "../../sms/SMSView.vue";
 
 @Component({
     components: {
@@ -60,7 +60,7 @@ export default class OrdersContextMenu extends Mixins(NavigationMixin) {
     }
 
     async exportToExcel() {
-        const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../classes/OrdersExcelExport");
+        const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../../classes/OrdersExcelExport");
         const OrdersExcelExport = d.OrdersExcelExport
         OrdersExcelExport.export(this.orders);
     }

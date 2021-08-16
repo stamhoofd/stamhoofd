@@ -24,7 +24,7 @@ import { SessionManager } from "@stamhoofd/networking";
 import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailView from "../mail/MailView.vue";
+import MailView from "../../mail/MailView.vue";
 
 @Component({
     components: {

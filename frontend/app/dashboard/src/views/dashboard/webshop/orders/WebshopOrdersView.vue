@@ -31,7 +31,7 @@
                 <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
-            <BillingWarningBox filter-types="webshops" class="data-table-prefix"/>
+            <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
             <Spinner v-if="loading" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
@@ -163,11 +163,11 @@ import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, Permission
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { NoFilter, NotPaidFilter,StatusFilter } from '../../../classes/order-filters';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
-import MailView from '../mail/MailView.vue';
-import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditWebshopView from './edit/EditWebshopView.vue';
+import { NoFilter, NotPaidFilter,StatusFilter } from '../../../../classes/order-filters';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import MailView from '../../mail/MailView.vue';
+import BillingWarningBox from '../../settings/packages/BillingWarningBox.vue';
+import EditWebshopView from '../edit/EditWebshopView.vue';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';

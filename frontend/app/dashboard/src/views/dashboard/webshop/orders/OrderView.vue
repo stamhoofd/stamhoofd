@@ -184,7 +184,7 @@ import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Pa
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 
 @Component({
     components: {
