@@ -27,7 +27,7 @@
             <h1 v-if="canPop" class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <button v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
+                <button v-if="hasFullPermissions" v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
                 <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
@@ -134,7 +134,7 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
+                <button v-if="hasWrite" class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
                     <span class="dropdown-text">Markeren als...</span>
                 </button>
                 <LoadingButton :loading="actionLoading">
@@ -260,6 +260,13 @@ export default class WebshopView extends Mixins(NavigationMixin) {
             return false
         }
         return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
+    }
+    
+    get hasWrite() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) >= PermissionLevel.Write
     }
 
     toggleSort(field: string) {
@@ -506,6 +513,9 @@ export default class WebshopView extends Mixins(NavigationMixin) {
     }
 
     showOrderContextMenu(event, order: Order) {
+        if (!hasWrite) {
+            return;
+        }
         const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
             x: event.clientX,
             y: event.clientY,
@@ -514,7 +524,7 @@ export default class WebshopView extends Mixins(NavigationMixin) {
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
-
+    
 }
 </script>
 
