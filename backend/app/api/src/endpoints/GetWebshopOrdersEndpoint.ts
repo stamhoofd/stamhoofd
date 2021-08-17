@@ -1,12 +1,11 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
-
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = WebshopOrdersQuery

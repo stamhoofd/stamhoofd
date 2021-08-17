@@ -168,6 +168,7 @@ import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import MailView from '../../mail/MailView.vue';
 import BillingWarningBox from '../../settings/packages/BillingWarningBox.vue';
 import EditWebshopView from '../edit/EditWebshopView.vue';
+import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
@@ -206,8 +207,16 @@ class SelectableOrder {
 })
 export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     @Prop()
-    preview: WebshopPreview ;
-    webshop: PrivateWebshop | null = null
+    webshopManager: WebshopManager
+
+    get preview() {
+        return this.webshopManager.preview
+    }
+
+    get webshop() {
+        return this.webshopManager.webshop
+    }
+
     loading = false;
     actionLoading = false;
 
@@ -227,8 +236,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.loadNextOrders()
 
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
-        document.title = "Stamhoofd - " + this.preview.meta.name
+        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
+        document.title = this.preview.meta.name+" - Bestellingen"
     }
 
     activated() {
@@ -247,7 +256,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get webshopUrl() {
-        return this.webshop?.getUrl(OrganizationManager.organization) ?? ""
+        return this.webshop?.getUrl(OrganizationManager.organization) ?? this.preview.getUrl(OrganizationManager.organization)
     }
 
     formatDateTime(date: Date) {
@@ -277,16 +286,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     reload() {
         this.loading = true;
 
-        SessionManager.currentSession!.authenticatedServer.request({
-            method: "GET",
-            path: "/webshop/"+this.preview.id,
-            decoder: PrivateWebshop as Decoder<PrivateWebshop>
-        }).then((response) => {
-            this.webshop = response.data
-
-            // Clone data and keep references
-            OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
-        }).catch((e) => {
+        this.webshopManager.loadWebshopIfNeeded().catch((e) => {
             console.error(e)
             Toast.fromError(e).show()
         }).finally(() => {
@@ -311,6 +311,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         }).then((response) => {
             this.orders.push(...response.data.results.map(o => new SelectableOrder(o)))
             this.nextQuery = response.data.next ?? null
+
+            // Save these orders to the local database
+            this.webshopManager.storeOrders(response.data.results).then(() => {
+                console.log("Saved orders to the local database")
+            }).catch(console.error)
+            
             this.loadNextOrders()
         }).catch((e) => {
             console.error(e)

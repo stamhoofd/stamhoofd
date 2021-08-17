@@ -329,7 +329,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.currentlySelected = "webshop-"+webshop.id
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOrdersView" */ './webshop/orders/WebshopOrdersView.vue'), { preview: webshop }, { instant: !animated })
+                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './webshop/WebshopOverview.vue'), { preview: webshop }, { instant: !animated })
             }).setAnimated(animated)
         );
     }

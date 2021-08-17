@@ -221,12 +221,11 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, FileInput,IBANInput, LoadingButton, PromiseView, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective,Validator} from "@stamhoofd/components";
-import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite, OrganizationAdmins, PaymentMethod, User } from "@stamhoofd/structures"
+import { AsyncComponent, BackButton, CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, TooltipDirective,Validator} from "@stamhoofd/components";
+import { AppManager, UrlHelper } from '@stamhoofd/networking';
+import { Invite, PaymentMethod, User } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -249,17 +248,7 @@ import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 @Component({
     components: {
         STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        DateSelection,
-        RadioGroup,
-        Radio,
         BackButton,
-        LoadingButton,
-        IBANInput,
-        FileInput,
         STList,
         STListItem,
         ModuleSettingsBox,
