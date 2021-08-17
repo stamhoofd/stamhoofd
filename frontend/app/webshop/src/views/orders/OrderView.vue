@@ -166,13 +166,13 @@
                 </STList>
             </main>
 
-            <STToolbar v-if="canShare || order.payment.status != 'Succeeded'">
+            <STToolbar v-if="canShare || (order.payment && order.payment.status != 'Succeeded')">
                 <template slot="right">
                     <button v-if="canShare" class="button secundary" @click="share">
                         <span class="icon share" />
                         <span>Delen</span>
                     </button>
-                    <button v-if="order.payment.status != 'Succeeded'" class="button primary" @click="openTransferView">
+                    <button v-if="order.payment && order.payment.status != 'Succeeded'" class="button primary" @click="openTransferView">
                         <span class="icon card" />
                         <span>Betaalinstructies</span>
                     </button>
