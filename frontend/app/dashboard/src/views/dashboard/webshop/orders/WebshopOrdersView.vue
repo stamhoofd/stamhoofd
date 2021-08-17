@@ -283,8 +283,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         try {
             const orders = await this.webshopManager.getOrdersFromDatabase()
             this.orders = orders.map(o => new SelectableOrder(o))
-
-            
         } catch (e) {
             // Database error. We can ignore this and simply move on.
             Toast.fromError(e).show()

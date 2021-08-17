@@ -265,7 +265,13 @@ export class WebshopManager {
         try {
             if (this.lastUpdatedOrder === undefined) {
                 // Only once (if undefined)
-                this.lastUpdatedOrder = await this.readSettingKey("lastUpdatedOrder") ?? null
+                try {
+                    this.lastUpdatedOrder = await this.readSettingKey("lastUpdatedOrder") ?? null
+                } catch (e) {
+                    console.error(e)
+                    // Probably no database support. Ignore it and load everything.
+                    this.lastUpdatedOrder = null
+                }
             }
             let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
                 updatedSince: this.lastUpdatedOrder ? this.lastUpdatedOrder.updatedAt : undefined,
