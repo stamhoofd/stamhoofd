@@ -29,7 +29,9 @@
                         <p v-if="!isPaid" class="warning-box">
                             Je ontvangt jouw tickets via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.
                         </p>
-                        <p v-else>Zorg dat je jouw tickets zeker meeneemt.</p>
+                        <p v-else>
+                            Zorg dat je jouw tickets zeker meeneemt.
+                        </p>
 
                         <a v-if="isPaid" href="#tickets" class="button primary">
                             <span class="icon arrow-down" />
@@ -87,6 +89,7 @@
 
                             <template slot="right">
                                 <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                                <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
                                 <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
                                 <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
                                 <span v-else>Geplaatst</span>

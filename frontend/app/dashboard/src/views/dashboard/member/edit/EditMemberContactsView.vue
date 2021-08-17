@@ -41,37 +41,38 @@
                 Er zijn geen ouders ingesteld bij dit lid
             </p>
 
-            <hr>
+            <template v-if="areEmergencyContactsAsked || emergencyContacts.length > 0">
+                <hr>
+                <h2 :class="{ 'style-with-button': emergencyContacts.length == 0}">
+                    <span>Noodcontact</span>
+                    <div v-if="emergencyContacts.length == 0">
+                        <button type="button" class="button text" @click="addEmergencyContact">
+                            <span class="icon add" />
+                            <span>Toevoegen</span>
+                        </button>
+                    </div>
+                </h2>
 
-            <h2 :class="{ 'style-with-button': emergencyContacts.length == 0}">
-                <span>Noodcontact</span>
-                <div v-if="emergencyContacts.length == 0">
-                    <button type="button" class="button text" @click="addEmergencyContact">
-                        <span class="icon add" />
-                        <span>Toevoegen</span>
-                    </button>
-                </div>
-            </h2>
+                <STList v-if="emergencyContacts.length > 0">
+                    <STListItem v-for="contact in emergencyContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
+                        <h2 class="style-title-list">
+                            {{ contact.name }} ({{ contact.title }})
+                        </h2>
+                        <p v-if="contact.phone" class="style-description-small">
+                            {{ contact.phone }}
+                        </p>
 
-            <STList v-if="emergencyContacts.length > 0">
-                <STListItem v-for="contact in emergencyContacts" :key="contact.id" :selectable="true" element-name="label" class="right-stack">
-                    <h2 class="style-title-list">
-                        {{ contact.name }} ({{ contact.title }})
-                    </h2>
-                    <p v-if="contact.phone" class="style-description-small">
-                        {{ contact.phone }}
-                    </p>
+                        <button slot="right" class="button text limit-space" @click.stop="editEmergencyContact()">
+                            <span class="icon edit" />
+                            <span>Bewerken</span>
+                        </button>
+                    </STListItem>
+                </STList>
 
-                    <button slot="right" class="button text limit-space" @click.stop="editEmergencyContact()">
-                        <span class="icon edit" />
-                        <span>Bewerken</span>
-                    </button>
-                </STListItem>
-            </STList>
-
-            <p v-else class="info-box">
-                Er is geen noodcontact ingesteld bij dit lid
-            </p>
+                <p v-else class="info-box">
+                    Er is geen noodcontact ingesteld bij dit lid
+                </p>
+            </template>
         </main>
     </div>
 </template>
@@ -80,11 +81,12 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox, LoadingButton,Slider, STErrorsDefault, STInputBox, STList, STListItem, STToolbar } from "@stamhoofd/components"
-import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
+import { AskRequirement, EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './EditMemberParentView.vue';
 
@@ -191,6 +193,10 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     get emergencyContacts(): EmergencyContact[]  {
         return this.memberDetails?.emergencyContacts ?? []
+    }
+    
+    get areEmergencyContactsAsked() {
+        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.NotAsked
     }
 
     get parents(): SelectableParent[]  {

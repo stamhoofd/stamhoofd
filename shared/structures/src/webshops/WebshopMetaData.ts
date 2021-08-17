@@ -96,7 +96,7 @@ export class WebshopOnSiteMethod extends CheckoutMethod {
     @field({ decoder: new EnumDecoder(CheckoutMethodType) })
     @field({ 
         decoder: new EnumDecoder(CheckoutMethodType), 
-        version: 104, downgrade: () => {
+        version: 105, downgrade: () => {
             // Return takeout method for old clients
             return CheckoutMethodType.Takeout
         },

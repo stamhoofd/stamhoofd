@@ -13,7 +13,7 @@
 
             <hr>
             <h2>Hoe werkt het?</h2>
-            <p>Stamhoofd voegt alle leden toe in de groepsadministratie en maakt de nodige wijzigingen. Dat doen we op basis van de voor, achternaam en geboortedatum. Leden die op elkaar lijken proberen we zoveel mogelijk te 'matchen' met elkaar.</p>
+            <p>Stamhoofd voegt alle leden toe in de groepsadministratie en maakt de nodige wijzigingen. Dat doen we op basis van de voornaam, achternaam en geboortedatum. Leden die op elkaar lijken proberen we zoveel mogelijk te 'matchen' met elkaar.</p>
 
             <ul>
                 <li>Nieuwe leden in groepsadministratie zetten</li>

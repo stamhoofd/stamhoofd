@@ -34,7 +34,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
         const users = await User.where({ email: request.body.email, organizationId: organization.id }, { limit: 1 })
         const { from, replyTo } = organization.getDefaultEmail()
 
-        if (users.length == 0) {
+        if (users.length == 0 || !users[0].hasAccount()) {
             // Send email
             Email.send({
                 from,

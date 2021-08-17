@@ -112,7 +112,7 @@
                 <h3 class="style-title-list">
                     Voeg magische inlogknop toe (aangeraden)
                 </h3>
-                <span v-if="addButton" class="radio-description">Als een lid op de knop duwt wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
+                <span v-if="addButton" class="radio-description">Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
             </Checkbox>
             <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
                 Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
