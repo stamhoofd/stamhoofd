@@ -253,7 +253,8 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? []) || p.hasFullAccess()) {
             return true
         }
-        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) >= PermissionLevel.Write
+        
     }
 
 
