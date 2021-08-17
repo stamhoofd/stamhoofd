@@ -75,6 +75,9 @@ export class Order extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt: Date
 
+    @field({ decoder: DateDecoder, version: 107 })
+    updatedAt: Date
+
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
 

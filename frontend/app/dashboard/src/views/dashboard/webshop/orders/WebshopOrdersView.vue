@@ -5,9 +5,6 @@
                 <BackButton v-if="canPop" slot="left" @click="pop" />
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
-
-                    <button v-if="hasFullPermissions" v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
-                    <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
                 </STNavigationTitle>
             </template>
             <template #middle>
@@ -26,14 +23,11 @@
         <main>
             <h1 v-if="canPop" class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
-
-                <button v-tooltip="'Instellingen'" class="button gray icon settings" @click="editSettings" />
-                <a v-tooltip="'Webshop openen'" class="button gray icon external" :href="'https://'+webshopUrl" target="_blank" />
             </h1>
 
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
-            <Spinner v-if="loading" class="center" />
+            <Spinner v-if="loading && !isRefreshingOrders" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
                 Je hebt nog geen bestellingen ontvangen
             </p>
@@ -122,9 +116,8 @@
                     </tr>
                 </tbody>
             </table>
-            
 
-            <Spinner v-if="isLoadingOrders" class="center" />
+            <Spinner v-if="isRefreshingOrders" class="center" />
         </main>
 
         <STToolbar :class="{'hide-smartphone': selectionCount == 0 }">
@@ -150,7 +143,7 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
@@ -159,8 +152,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Order, OrderStatus, PaginatedResponseDecoder, PaymentStatus, PermissionLevel, PrivateWebshop, WebshopOrdersQuery, WebshopPreview } from '@stamhoofd/structures';
+import { Order, OrderStatus, PaymentStatus, PermissionLevel, WebshopOrdersQuery } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -168,10 +160,8 @@ import { NoFilter, NotPaidFilter,StatusFilter } from '../../../../classes/order-
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import MailView from '../../mail/MailView.vue';
 import BillingWarningBox from '../../settings/packages/BillingWarningBox.vue';
-import EditWebshopView from '../edit/EditWebshopView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
-import OrdersContextMenu from './OrdersContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
 import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
@@ -232,9 +222,36 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     filters = [new NoFilter(), ...StatusFilter.generateAll(), new NotPaidFilter()];
     selectedFilter = 0;
 
+    created() {
+        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
+        this.loadOrders().catch(console.error)
+    }
+
+    /**
+     * Insert or update an order
+     */
+    putOrder(order: Order) {
+        for (const [index, _order] of this.orders.entries()) {
+            if (order.id === _order.order.id) {
+                // replace
+                this.orders.splice(index, 1, new SelectableOrder(order, _order.selected))
+                return
+            }
+        }
+        this.orders.push(new SelectableOrder(order, false))
+    }
+
+    onNewOrders(orders: Order[]) {
+        console.log("Received new orders from network")
+        // Search for the orders and replace / add them
+        for (const order of orders) {
+            this.putOrder(order)
+        }
+    }
+
     mounted() {
         this.reload();
-        this.loadNextOrders()
+        
 
         // Set url
         HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
@@ -250,14 +267,48 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     onDeleteOrder(): Promise<void> {
+        // todo: needs an update
         this.nextQuery = WebshopOrdersQuery.create({})
         this.orders = []
-        this.loadNextOrders()
+        this.loadOrders().catch(console.error)
         return Promise.resolve()
     }
 
+    isLoadingOrders = true
+    isRefreshingOrders = false
+
+    async loadOrders() {
+        this.orders = []
+        this.isLoadingOrders = true
+        try {
+            const orders = await this.webshopManager.getOrdersFromDatabase()
+            this.orders = orders.map(o => new SelectableOrder(o))
+
+            
+        } catch (e) {
+            // Database error. We can ignore this and simply move on.
+            Toast.fromError(e).show()
+        }
+
+        try {
+            // Initiate a refresh
+            // don't wait
+            this.isRefreshingOrders = true
+            this.isLoadingOrders = false
+            await this.webshopManager.fetchNewOrders(true)
+        } catch (e) {
+            // Fetching failed
+            if (!Request.isNetworkError(e)) {
+                Toast.fromError(e).show()
+            }
+        }
+
+        this.isRefreshingOrders = false
+        this.isLoadingOrders = false
+    }
+
     get webshopUrl() {
-        return this.webshop?.getUrl(OrganizationManager.organization) ?? this.preview.getUrl(OrganizationManager.organization)
+        return this.preview.getUrl(OrganizationManager.organization)
     }
 
     formatDateTime(date: Date) {
@@ -292,37 +343,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             Toast.fromError(e).show()
         }).finally(() => {
             this.loading = false
-        })
-    }
-
-    get isLoadingOrders() {
-        return !!this.nextQuery
-    }
-
-    loadNextOrders() {
-        if (!this.nextQuery) {
-            return
-        }
-
-        SessionManager.currentSession!.authenticatedServer.request({
-            method: "GET",
-            path: "/webshop/"+this.preview.id+"/orders",
-            query: this.nextQuery,
-            decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>)
-        }).then((response) => {
-            this.orders.push(...response.data.results.map(o => new SelectableOrder(o)))
-            this.nextQuery = response.data.next ?? null
-
-            // Save these orders to the local database
-            this.webshopManager.storeOrders(response.data.results).then(() => {
-                console.log("Saved orders to the local database")
-            }).catch(console.error)
-            
-            this.loadNextOrders()
-        }).catch((e) => {
-            console.error(e)
-            Toast.fromError(e).show()
-            this.nextQuery = null
         })
     }
 
@@ -413,16 +433,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.webshop?.meta?.name ?? this.preview.meta.name
-    }
-
-    editSettings() {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditWebshopView, {
-                editWebshop: this.webshop
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        return this.preview.meta.name
     }
 
     get selectAll() {
@@ -439,7 +450,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
                 initialOrder: order.order,
-                webshop: this.webshop,
+                webshopManager: this.webshopManager,
                 getNextOrder: this.getNextOrder,
                 getPreviousOrder: this.getPreviousOrder,
             })
@@ -491,10 +502,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         if (this.selectionCount == 0) {
             return;
         }
-        const displayedComponent = new ComponentWithProperties(OrdersContextMenu, {
+        const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
             x: event.clientX,
             y: event.clientY,
-            orders: this.getSelectedOrders()
+            orders: this.getSelectedOrders(),
+            webshopManager: this.webshopManager
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -507,7 +519,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY,
             orders: this.getSelectedOrders(),
-            webshop: this.preview
+            webshopManager: this.webshopManager
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -517,7 +529,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             x: event.clientX,
             y: event.clientY,
             orders: [order],
-            webshop: this.preview
+            webshopManager: this.webshopManager
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

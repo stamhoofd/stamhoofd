@@ -239,7 +239,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
             for (const webshop of this.organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop, false).catch(console.error).finally(() => UrlHelper.shared.clear())
+                    this.openWebshop(webshop, false).catch(console.error)
                     didSet = true
                     break;
                 }

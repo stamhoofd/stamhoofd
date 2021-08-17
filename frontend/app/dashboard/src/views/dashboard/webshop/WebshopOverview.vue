@@ -47,7 +47,7 @@
 
             <hr>
 
-            <STList class="illustration-list">
+            <STList v-if="hasFullPermissions" class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/gear.svg">
                     <h2 class="style-title-list">
@@ -69,7 +69,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective} from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PrivateWebshop, WebshopPreview } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateWebshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -105,6 +105,13 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     get webshopUrl() {
         return this.preview.getUrl(OrganizationManager.organization)
+    }
+
+    get hasFullPermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
     }
    
     openOrders(animated = true) {
@@ -155,6 +162,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     beforeDestroy() {
         // Clear all pending requests
         Request.cancelAll(this)
+        this.webshopManager.close()
     }
 }
 </script>

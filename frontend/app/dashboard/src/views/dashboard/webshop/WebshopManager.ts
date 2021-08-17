@@ -1,9 +1,10 @@
-import { Decoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { SessionManager } from "@stamhoofd/networking";
-import { Order, PaginatedResponseDecoder, PrivateWebshop, Version, WebshopOrdersQuery, WebshopPreview } from "@stamhoofd/structures";
-import { restore } from "pdfkit";
+import { Request } from "@simonbackx/simple-networking";
+import { NetworkManager, SessionManager } from "@stamhoofd/networking";
+import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, Version, WebshopOrdersQuery, WebshopPreview } from "@stamhoofd/structures";
 
+import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 /**
@@ -17,6 +18,15 @@ export class WebshopManager {
 
     database: IDBDatabase | null = null
     private databasePromise: Promise<IDBDatabase> | null = null
+
+
+    lastUpdatedOrder: { updatedAt: Date, number: number } | null = null
+    isLoadingOrders = false
+
+    /**
+     * Listen for new orders that are being fetched or loaded
+     */
+    ordersEventBus = new EventBus<string, Order[]>()
 
     constructor(preview: WebshopPreview) {
         this.preview = preview
@@ -62,7 +72,7 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = 1
+            const version = Version
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
@@ -85,6 +95,11 @@ export class WebshopManager {
                     db.createObjectStore("orders", { keyPath: "id" });
                     db.createObjectStore("tickets", { keyPath: "id" });
                     db.createObjectStore("settings", {});
+                } else {
+                    // For now: we clear all stores if we have a version update
+                    DBOpenRequest.transaction!.objectStore("orders").clear()
+                    DBOpenRequest.transaction!.objectStore("tickets").clear()
+                    DBOpenRequest.transaction!.objectStore("settings").clear()
                 }
             };
         })
@@ -95,15 +110,11 @@ export class WebshopManager {
         })
     }
 
-    async readSettingKey(key: IDBValidKey) {
+    async readSettingKey(key: IDBValidKey): Promise<any | undefined> {
         const db = await this.getDatabase()
 
         return new Promise<void>((resolve, reject) => {
             const transaction = db.transaction(["settings"], "readonly");
-
-            transaction.oncomplete = () => {
-                resolve()
-            };
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -112,15 +123,19 @@ export class WebshopManager {
 
             // Do the actual saving
             const objectStore = transaction.objectStore("settings");
-            objectStore.get(key)
+            const request = objectStore.get(key)
+
+            request.onsuccess = () => {
+                resolve(request.result)
+            }
         })
     }
 
-    async storeSettingKey(key: IDBValidKey) {
+    async storeSettingKey(key: IDBValidKey, value: any) {
         const db = await this.getDatabase()
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["settings"], "readonly");
+            const transaction = db.transaction(["settings"], "readwrite");
 
             transaction.oncomplete = () => {
                 resolve()
@@ -133,7 +148,7 @@ export class WebshopManager {
 
             // Do the actual saving
             const objectStore = transaction.objectStore("settings");
-            objectStore.get(key)
+            objectStore.put(value, key)
         })
     }
 
@@ -161,13 +176,120 @@ export class WebshopManager {
         })
     }
 
-    fetchOrders(query: WebshopOrdersQuery) {
+    async getOrdersFromDatabase(): Promise<Order[]> {
+        const db = await this.getDatabase()
+
+        return new Promise<Order[]>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readwrite");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+
+            const request = objectStore.getAll()
+            request.onsuccess = () => {
+                const rawOrders = request.result
+
+                // Todo: need version fix here
+                const orders = new ArrayDecoder(Order as Decoder<Order>).decode(new ObjectData(rawOrders, { version: Version }))
+                resolve(orders)
+            }
+
+        })
+    }
+
+    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<Order, WebshopOrdersQuery>> {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/orders",
             query,
-            decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>)
+            shouldRetry: retry,
+            decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
+            owner: this
         })
-        return response.data.results
+
+        return response.data
     }
+
+    async patchOrders(patches: AutoEncoderPatchType<Order>[]) {
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "PATCH",
+            path: "/webshop/"+this.preview.id+"/orders",
+            decoder: new ArrayDecoder(Order as Decoder<Order>),
+            body: patches,
+            shouldRetry: false
+        })
+
+        // Move all data to original order
+        try {
+            await this.storeOrders(response.data)
+        } catch (e) {
+            console.error(e)
+            // No db support or other error. Should ignore
+        }
+
+        await this.ordersEventBus.sendEvent("fetched", response.data)
+        return response.data
+    }
+
+    async setLastUpdatedOrder(order: Order) {
+        this.lastUpdatedOrder = {
+            updatedAt: order.updatedAt,
+            number: order.number!
+        }
+        await this.storeSettingKey("lastUpdatedOrder", this.lastUpdatedOrder)
+    }
+
+    /**
+     * Cancel all pending loading states and retries
+     */
+    close() {
+        Request.cancelAll(this)
+    }
+
+    /**
+     * Fetch new orders from the server.
+     * Try to avoid this if needed and use the cache first + fetch changes
+     */
+    async fetchNewOrders(retry = false, reset = false) {
+        // Todo: clear local database if resetting
+        if (this.isLoadingOrders) {
+            return
+        }
+        this.isLoadingOrders = true
+
+        try {
+            let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
+                updatedSince: this.lastUpdatedOrder ? this.lastUpdatedOrder.updatedAt : undefined,
+                afterNumber: this.lastUpdatedOrder ? this.lastUpdatedOrder.number : undefined,
+            })
+
+            while (query) {
+                const response: PaginatedResponse<Order, WebshopOrdersQuery> = await this.fetchOrders(query, retry)
+
+                if (response.results.length > 0) {
+                    // Save these orders to the local database
+                    // Non-critical:
+                    this.storeOrders(response.results).then(() => {
+                        console.log("Saved orders to the local database")
+                    }).catch(console.error)
+
+                    // Non-critical:
+                    this.setLastUpdatedOrder(response.results[response.results.length - 1]).catch(console.error)
+
+                    // Already send these new orders to our listeners, who want to know new incoming orders
+                    this.ordersEventBus.sendEvent("fetched", response.results).catch(console.error)
+                }
+                
+                query = response.next
+            }
+        } finally {
+            this.isLoadingOrders = false
+        }
+    }
+
 }

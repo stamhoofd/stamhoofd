@@ -271,6 +271,4 @@ export class Order extends Model {
             })
         }
     }
-
-
 }
