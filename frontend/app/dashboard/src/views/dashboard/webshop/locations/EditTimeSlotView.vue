@@ -1,6 +1,6 @@
 <template>
     <div class="st-view product-price-edit-view">
-        <STNavigationBar :title="isNew ? 'Tijdsvak toevoegen' : 'Tijdsvak bewerken'">
+        <STNavigationBar :title="isNew ? 'Tijdvak toevoegen' : 'Tijdvak bewerken'">
             <template slot="right">
                 <button class="button text" v-if="!isNew" @click="deleteMe">
                     <span class="icon trash"/>
@@ -12,10 +12,10 @@
 
         <main>
             <h1 v-if="isNew">
-                Tijdsvak toevoegen
+                Tijdvak toevoegen
             </h1>
             <h1 v-else>
-                Tijdsvak bewerken
+                Tijdvak bewerken
             </h1>
           
             <STErrorsDefault :error-box="errorBox" />
@@ -122,7 +122,7 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je dit tijdsvak wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit tijdvak wilt verwijderen?", "Verwijderen")) {
             return
         }
        const p = WebshopTimeSlots.patch({})

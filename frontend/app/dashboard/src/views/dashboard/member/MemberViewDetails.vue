@@ -276,7 +276,7 @@
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
                         v-tooltip="
-                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
+                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op de inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
                         "
                         class="icon gray help"
                     />

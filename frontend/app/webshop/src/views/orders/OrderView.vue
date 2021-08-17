@@ -69,6 +69,7 @@
 
                         <template slot="right">
                             <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                            <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
                             <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
                             <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
                             <span v-else>Geplaatst</span>
