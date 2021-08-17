@@ -41,7 +41,7 @@
                 Er zijn geen ouders ingesteld bij dit lid
             </p>
 
-            <template v-if="isNotAsked">
+            <template v-if="areEmergencyContactsAsked || emergencyContacts.length > 0">
                 <hr>
                 <h2 :class="{ 'style-with-button': emergencyContacts.length == 0}">
                     <span>Noodcontact</span>
@@ -72,8 +72,7 @@
                 <p v-else class="info-box">
                     Er is geen noodcontact ingesteld bij dit lid
                 </p>
-            </template> 
-            
+            </template>
         </main>
     </div>
 </template>
@@ -82,12 +81,12 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox, LoadingButton,Slider, STErrorsDefault, STInputBox, STList, STListItem, STToolbar } from "@stamhoofd/components"
-import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
+import { AskRequirement, EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
 import { FamilyManager } from '../../../../classes/FamilyManager';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './EditMemberParentView.vue';
 
@@ -196,8 +195,8 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         return this.memberDetails?.emergencyContacts ?? []
     }
     
-    get isNotAsked() {
-        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
+    get areEmergencyContactsAsked() {
+        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.NotAsked
     }
 
     get parents(): SelectableParent[]  {
