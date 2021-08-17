@@ -24,5 +24,5 @@ export class WebshopOrdersQuery extends AutoEncoder {
      * You should always use Ascending. Descanding is dropped for performance reasons
      */
     @field({ decoder: new EnumDecoder(SortDirection), optional: true })
-    sort = SortDirection.Ascending
+    sort?: SortDirection
 }

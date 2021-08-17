@@ -295,7 +295,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // don't wait
             this.isRefreshingOrders = true
             this.isLoadingOrders = false
-            await this.webshopManager.fetchNewOrders(true)
+            await this.webshopManager.fetchNewOrders(true, false)
         } catch (e) {
             // Fetching failed
             if (!Request.isNetworkError(e)) {

@@ -20,7 +20,7 @@ export class WebshopManager {
     private databasePromise: Promise<IDBDatabase> | null = null
 
 
-    lastUpdatedOrder: { updatedAt: Date, number: number } | null = null
+    lastUpdatedOrder: { updatedAt: Date, number: number } | null | undefined = undefined
     isLoadingOrders = false
 
     /**
@@ -263,6 +263,10 @@ export class WebshopManager {
         this.isLoadingOrders = true
 
         try {
+            if (this.lastUpdatedOrder === undefined) {
+                // Only once (if undefined)
+                this.lastUpdatedOrder = await this.readSettingKey("lastUpdatedOrder") ?? null
+            }
             let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
                 updatedSince: this.lastUpdatedOrder ? this.lastUpdatedOrder.updatedAt : undefined,
                 afterNumber: this.lastUpdatedOrder ? this.lastUpdatedOrder.number : undefined,
