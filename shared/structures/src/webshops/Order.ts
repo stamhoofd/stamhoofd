@@ -4,6 +4,13 @@ import { Payment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Checkout } from './Checkout';
 
+export enum OrderStatusV103 {
+    Created = "Created",
+    Prepared = "Prepared",
+    Completed = "Completed",
+    Canceled = "Canceled",
+}
+
 export enum OrderStatus {
     Created = "Created",
     Prepared = "Prepared",
@@ -71,7 +78,22 @@ export class Order extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
 
-    @field({ decoder: new EnumDecoder(OrderStatus), version: 47 })
+    @field({ decoder: new EnumDecoder(OrderStatusV103), version: 47 })
+    // Migrate newer order status .collect in case of older client
+    @field({ 
+        decoder: new EnumDecoder(OrderStatus), 
+        version: 104, 
+        upgrade: (old: OrderStatusV103): OrderStatus => {
+            return old as any as OrderStatus
+        }, 
+        downgrade: (n: OrderStatus): OrderStatusV103 => {
+            if (n === OrderStatus.Collect) {
+                // Map to other status
+                return OrderStatusV103.Prepared
+            }
+            return n as any as OrderStatusV103
+        } 
+    })
     status: OrderStatus
 }
 
