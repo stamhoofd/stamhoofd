@@ -5,7 +5,7 @@
         </STNavigationBar>
 
         <div class="video-container">
-            <video v-once ref="video" />
+            <video ref="video" />
             <div class="scan-overlay" />
 
             <div class="video-footer">
@@ -133,6 +133,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     async start() {
+        if (this.scanner) {
+            console.warn("Multiple calls to start")
+            return
+        }
         QrScanner.WORKER_PATH = QrScannerWorkerPath;
 
         this.cameras = await QrScanner.listCameras(true)
@@ -282,18 +286,19 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     deactivated() {
-        this.scanner?.pause()
+        this.scanner?.stop()
+        this.scanner?.destroy()
+        this.scanner = undefined
     }
 
     activated() {
         // Prevent scanning previous one for 3 seconds
         this.cooldown = new Date(new Date().getTime() + 3 * 1000)
 
-        // We add a small delay to prevent a qr-scanner glitch that stops working
-        // probably because the video element isn't yet available
-        window.setTimeout(() => {
-            this.scanner?.start()
-        }, 200)
+        // We restart the scanner every time because there is a bug in the qr scanner
+        // that randomly breaks the scanning after some time when going back (recreating the video element)
+        this.start().catch(console.error)
+        
     }
 
     beforeDestroy() {
