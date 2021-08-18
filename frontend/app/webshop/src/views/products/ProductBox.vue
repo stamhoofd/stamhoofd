@@ -130,8 +130,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
     display: flex;
     flex-direction: row;
     align-items: center;
-    overflow: hidden;
-
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);

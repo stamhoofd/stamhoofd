@@ -94,6 +94,7 @@ export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"
+export * from "./src/endpoints/WebshopTicketsQuery"
 export * from "./src/webshops/Cart"
 export * from "./src/webshops/Category"
 export * from "./src/webshops/Checkout"

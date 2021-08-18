@@ -76,6 +76,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
+import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
 
 @Component({
@@ -120,8 +121,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         }).setAnimated(animated))
     }
 
-    openTickets() {
-        // todo
+    openTickets(animated = true) {
+        this.show(new ComponentWithProperties(TicketScannerSetupView, {
+            webshopManager: this.webshopManager
+        }).setAnimated(animated))
     }
 
     openSettings(animated = true) {
@@ -156,6 +159,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
         if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'orders') {
             this.openOrders(false)
+        }
+
+        if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'tickets') {
+            this.openTickets(false)
         }
     }
 

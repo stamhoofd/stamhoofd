@@ -11,11 +11,11 @@ export class Ticket extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     scannedAt: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true })
-    createdAt: Date | null = null;
+    @field({ decoder: DateDecoder})
+    createdAt: Date
 
-    @field({ decoder: DateDecoder, nullable: true })
-    updatedAt: Date | null = null;
+    @field({ decoder: DateDecoder })
+    updatedAt: Date
 
     /**
      * Unique secret (per webshop) that is printed on the ticket and is required for lookups

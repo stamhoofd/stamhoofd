@@ -17,7 +17,7 @@
         font-size: 14px;
     }
 
-     &::before {
+    &::after {
         position: absolute;
         content: "";
         color: $color-error;
@@ -58,7 +58,7 @@
         font-size: 14px;
     }
 
-    &::before {
+    &::after {
         position: absolute;
         content: "";
         color: $color-warning-primary;
@@ -86,7 +86,7 @@
         font-size: 14px;
     }
 
-    &::before {
+    &::after {
         position: absolute;
         content: "";
         color: $color-primary;
@@ -114,7 +114,7 @@
         font-size: 14px;
     }
 
-    &::before {
+    &::after {
         position: absolute;
         content: "";
         color: $color-success;
@@ -127,22 +127,39 @@
 }
 
 .error-box, .success-box, .info-box, .warning-box {
+    /**
+    @deprecated, use .icon.email
+    */
     &.email {
-        &::before {
+        &::after {
             font-icon: url(@stamhoofd/assets/images/icons/email.svg);
         }
     }
 
+    /**
+    @deprecated, use .icon.gift
+    */
     &.gift {
-        &::before {
+        &::after {
             font-icon: url(@stamhoofd/assets/images/icons/gift.svg);
         }
     }
 
+    /**
+    @deprecated, use .icon.environment
+    */
     &.environment {
-        &::before {
+        &::after {
             font-icon: url(@stamhoofd/assets/images/icons/environment.svg);
         }
+    }
+
+    &.icon {
+        display: block;
+        width: auto;
+        height: auto;
+        overflow: visible;
+        white-space: inherit;
     }
 
     +.error-box, +.success-box, +.info-box, +.warning-box  {

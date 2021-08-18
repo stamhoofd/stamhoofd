@@ -280,6 +280,26 @@
     &.redo:after {
         font-icon: url(@stamhoofd/assets/images/icons/redo.svg);
     }
+
+    &.play:after {
+        font-icon: url(@stamhoofd/assets/images/icons/play.svg);
+    }
+
+    &.wifi:after {
+        font-icon: url(@stamhoofd/assets/images/icons/wifi.svg);
+    }
+
+    &.lightning:after {
+        font-icon: url(@stamhoofd/assets/images/icons/lightning.svg);
+    }
+
+    &.reverse:after {
+        font-icon: url(@stamhoofd/assets/images/icons/reverse.svg);
+    }
+
+    &.flashlight:after {
+        font-icon: url(@stamhoofd/assets/images/icons/flashlight.svg);
+    }
 }
 
 .android-icons {

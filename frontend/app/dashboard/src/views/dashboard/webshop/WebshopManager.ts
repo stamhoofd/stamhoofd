@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonb
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { NetworkManager, SessionManager } from "@stamhoofd/networking";
-import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, Version, WebshopOrdersQuery, WebshopPreview } from "@stamhoofd/structures";
+import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -20,8 +20,10 @@ export class WebshopManager {
     private databasePromise: Promise<IDBDatabase> | null = null
 
 
-    lastUpdatedOrder: { updatedAt: Date, number: number } | null | undefined = undefined
+    lastFetchedOrder: { updatedAt: Date, number: number } | null | undefined = undefined
+    lastFetchedTicket: { updatedAt: Date, id: string } | null | undefined = undefined
     isLoadingOrders = false
+    isLoadingTickets = false
 
     /**
      * Listen for new orders that are being fetched or loaded
@@ -31,6 +33,14 @@ export class WebshopManager {
     constructor(preview: WebshopPreview) {
         this.preview = preview
     }
+
+    /**
+     * Cancel all pending loading states and retries
+     */
+    close() {
+        Request.cancelAll(this)
+    }
+
 
     async loadWebshop() {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
@@ -56,6 +66,7 @@ export class WebshopManager {
 
         this.webshopPromise = this.loadWebshop()
         return this.webshopPromise.then((webshop: PrivateWebshop) => {
+            this.webshop = webshop
             this.webshopPromise = null
             return webshop
         })
@@ -72,7 +83,7 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = Version
+            const version = Version + 2
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
@@ -93,13 +104,21 @@ export class WebshopManager {
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
                     db.createObjectStore("orders", { keyPath: "id" });
-                    db.createObjectStore("tickets", { keyPath: "id" });
+                    db.createObjectStore("tickets", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
                 } else {
+                    db.deleteObjectStore("orders");
+                    db.deleteObjectStore("tickets");
+                    db.deleteObjectStore("settings");
+
+                    db.createObjectStore("orders", { keyPath: "id" });
+                    db.createObjectStore("tickets", { keyPath: "secret" });
+                    db.createObjectStore("settings", {});
+
                     // For now: we clear all stores if we have a version update
-                    DBOpenRequest.transaction!.objectStore("orders").clear()
+                    /*DBOpenRequest.transaction!.objectStore("orders").clear()
                     DBOpenRequest.transaction!.objectStore("tickets").clear()
-                    DBOpenRequest.transaction!.objectStore("settings").clear()
+                    DBOpenRequest.transaction!.objectStore("settings").clear()*/
                 }
             };
         })
@@ -180,7 +199,7 @@ export class WebshopManager {
         const db = await this.getDatabase()
 
         return new Promise<Order[]>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readwrite");
+            const transaction = db.transaction(["orders"], "readonly");
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -236,19 +255,12 @@ export class WebshopManager {
         return response.data
     }
 
-    async setLastUpdatedOrder(order: Order) {
-        this.lastUpdatedOrder = {
+    async setlastFetchedOrder(order: Order) {
+        this.lastFetchedOrder = {
             updatedAt: order.updatedAt,
             number: order.number!
         }
-        await this.storeSettingKey("lastUpdatedOrder", this.lastUpdatedOrder)
-    }
-
-    /**
-     * Cancel all pending loading states and retries
-     */
-    close() {
-        Request.cancelAll(this)
+        await this.storeSettingKey("lastFetchedOrder", this.lastFetchedOrder)
     }
 
     /**
@@ -263,19 +275,19 @@ export class WebshopManager {
         this.isLoadingOrders = true
 
         try {
-            if (this.lastUpdatedOrder === undefined) {
+            if (this.lastFetchedOrder === undefined) {
                 // Only once (if undefined)
                 try {
-                    this.lastUpdatedOrder = await this.readSettingKey("lastUpdatedOrder") ?? null
+                    this.lastFetchedOrder = await this.readSettingKey("lastFetchedOrder") ?? null
                 } catch (e) {
                     console.error(e)
                     // Probably no database support. Ignore it and load everything.
-                    this.lastUpdatedOrder = null
+                    this.lastFetchedOrder = null
                 }
             }
             let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
-                updatedSince: this.lastUpdatedOrder ? this.lastUpdatedOrder.updatedAt : undefined,
-                afterNumber: this.lastUpdatedOrder ? this.lastUpdatedOrder.number : undefined,
+                updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,
+                afterNumber: this.lastFetchedOrder ? this.lastFetchedOrder.number : undefined,
             })
 
             while (query) {
@@ -289,10 +301,165 @@ export class WebshopManager {
                     }).catch(console.error)
 
                     // Non-critical:
-                    this.setLastUpdatedOrder(response.results[response.results.length - 1]).catch(console.error)
+                    this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
                     this.ordersEventBus.sendEvent("fetched", response.results).catch(console.error)
+                }
+                
+                query = response.next
+            }
+        } finally {
+            this.isLoadingOrders = false
+        }
+    }
+
+
+
+    /// TICKETS
+
+    async storeTickets(tickets: TicketPrivate[]) {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["tickets"], "readwrite");
+
+            transaction.oncomplete = () => {
+                resolve()
+            };
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("tickets");
+
+            for (const ticket of tickets) {
+                objectStore.put(ticket.encode({ version: Version }));
+            }
+        })
+    }
+
+    async getTicketFromDatabase(secret: string): Promise<TicketPrivate | undefined> {
+        const db = await this.getDatabase()
+
+        return new Promise<TicketPrivate | undefined>((resolve, reject) => {
+            const transaction = db.transaction(["tickets"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("tickets");
+
+            const request = objectStore.get(secret)
+            request.onsuccess = () => {
+                const rawTicket = request.result
+
+                if (rawTicket === undefined) {
+                    resolve(undefined)
+                }
+
+                const ticket = (TicketPrivate as Decoder<TicketPrivate>).decode(new ObjectData(rawTicket, { version: Version }))
+                resolve(ticket)
+            }
+
+        })
+    }
+
+    async getOrderFromDatabase(id: string): Promise<Order | undefined> {
+        const db = await this.getDatabase()
+
+        return new Promise<Order | undefined>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+
+            const request = objectStore.get(id)
+            request.onsuccess = () => {
+                const rawOrder = request.result
+
+                if (rawOrder === undefined) {
+                    resolve(undefined)
+                }
+
+                const order = (Order as Decoder<Order>).decode(new ObjectData(rawOrder, { version: Version }))
+                resolve(order)
+            }
+
+        })
+    }
+
+    async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate, WebshopTicketsQuery>> {
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/webshop/"+this.preview.id+"/tickets/private",
+            query,
+            shouldRetry: retry,
+            decoder: new PaginatedResponseDecoder(TicketPrivate as Decoder<TicketPrivate>, WebshopTicketsQuery as Decoder<WebshopTicketsQuery>),
+            owner: this
+        })
+
+        return response.data
+    }
+
+    async setLastFetchedTicket(ticket: TicketPrivate) {
+        this.lastFetchedTicket = {
+            updatedAt: ticket.updatedAt,
+            id: ticket.id!
+        }
+        await this.storeSettingKey("lastFetchedTicket", this.lastFetchedTicket)
+    }
+
+    /**
+     * Fetch new orders from the server.
+     * Try to avoid this if needed and use the cache first + fetch changes
+     */
+    async fetchNewTickets(retry = false, reset = false) {
+        // Todo: clear local database if resetting
+        if (this.isLoadingTickets) {
+            return
+        }
+        this.isLoadingTickets = true
+
+        try {
+            if (this.lastFetchedTicket === undefined) {
+                // Only once (if undefined)
+                try {
+                    this.lastFetchedTicket = await this.readSettingKey("lastFetchedTicket") ?? null
+                } catch (e) {
+                    console.error(e)
+                    // Probably no database support. Ignore it and load everything.
+                    this.lastFetchedTicket = null
+                }
+            }
+            let query: WebshopTicketsQuery | undefined = reset ? WebshopTicketsQuery.create({}) : WebshopTicketsQuery.create({
+                updatedSince: this.lastFetchedTicket ? this.lastFetchedTicket.updatedAt : undefined,
+                lastId: this.lastFetchedTicket ? this.lastFetchedTicket.id : undefined,
+            })
+
+            while (query) {
+                const response: PaginatedResponse<TicketPrivate, WebshopTicketsQuery> = await this.fetchTickets(query, retry)
+
+                if (response.results.length > 0) {
+                    // Save these orders to the local database
+                    // Non-critical:
+                    this.storeTickets(response.results).then(() => {
+                        console.log("Saved tickets to the local database")
+                    }).catch(console.error)
+
+                    // Non-critical:
+                    this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error)
                 }
                 
                 query = response.next
