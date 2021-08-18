@@ -39,6 +39,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import QrScannerWorkerPath from '!!file-loader!qr-scanner/qr-scanner-worker.min.js';
 
 import { WebshopManager } from "../WebshopManager";
+import TicketAlreadyScannedView from "./status/TicketAlreadyScannedView.vue";
 import ValidTicketView from "./status/ValidTicketView.vue";
 
 //if you have another AudioContext class use that one, as some browsers have a limit
@@ -124,6 +125,9 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         // todo: keep polling in the future
         this.webshopManager.fetchNewTickets(true, false).catch(console.error)
         this.webshopManager.fetchNewOrders(true, false).catch(console.error)
+
+        // Do we still have some missing patches that are not yet synced with the server?
+        this.webshopManager.trySavePatches().catch(console.error)
         this.start().catch(console.error)
     }
 
@@ -212,7 +216,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     }
                     new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
                 } else {
-                    this.validTicket(ticket, order)
+                    if (ticket.scannedAt !== null) {
+                        this.alreadyScannedTicket(ticket, order)
+                    } else {
+                        this.validTicket(ticket, order)
+                    }
                 }
 
             } else {
@@ -229,6 +237,21 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         this.checkingTicket = false
+    }
+
+    alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate([100, 100, 100]);
+        }
+
+        // Disable scanning for 2 seconds
+        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+
+        this.show(new ComponentWithProperties(TicketAlreadyScannedView, {
+            webshopManager: this.webshopManager,
+            ticket,
+            order
+        }))
     }
 
     validTicket(ticket: TicketPrivate, order: Order) {
@@ -257,11 +280,17 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     deactivated() {
-        this.scanner?.stop()
+        this.scanner?.pause()
     }
 
     activated() {
-        this.scanner?.start()
+        this.cooldown = new Date(new Date().getTime() + 1 * 500)
+
+        // We add a small delay to prevent a qr-scanner glitch that stops working
+        // probably because the video element isn't yet available
+        window.setTimeout(() => {
+            this.scanner?.start()
+        }, 200)
     }
 
     beforeDestroy() {

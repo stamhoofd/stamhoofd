@@ -56,6 +56,12 @@
         </main>
 
         <STToolbar>
+            <button v-if="!ticket.scannedAt" slot="right" class="button secundary" @click="cancelScan">
+                Niet markeren
+            </button>
+            <button v-else slot="right" class="button secundary" @click="cancelScan">
+                Markering ongedaan maken
+            </button>
             <button slot="right" class="button primary" @click="markScanned">
                 <span class="icon qr-code" />
                 <span>Markeer als gescand</span>
@@ -67,6 +73,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { Order, Ticket, TicketPrivate } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -97,8 +104,28 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
     }
 
-    markScanned() {
-        // todo
+    async cancelScan() {
+        if (this.ticket.scannedAt) {
+            await this.webshopManager.addTicketPatch(TicketPrivate.patch({
+                id: this.ticket.id,
+                secret: this.ticket.secret, // needed for lookups
+                scannedAt: null,
+                scannedBy: null
+            }))
+        }
+        this.pop({ force: true })
+    }
+
+    async markScanned() {
+        if (!this.ticket.scannedAt) {
+            await this.webshopManager.addTicketPatch(TicketPrivate.patch({
+                id: this.ticket.id,
+                secret: this.ticket.secret, // needed for lookups
+                scannedAt: new Date(),
+                scannedBy: SessionManager.currentSession!.user?.firstName ?? null
+            }))
+        }
+
         this.pop({ force: true })
     }
 

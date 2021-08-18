@@ -24,6 +24,7 @@ export class WebshopManager {
     lastFetchedTicket: { updatedAt: Date, id: string } | null | undefined = undefined
     isLoadingOrders = false
     isLoadingTickets = false
+    savingTicketPatches = false
 
     /**
      * Listen for new orders that are being fetched or loaded
@@ -83,7 +84,7 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = Version + 2
+            const version = Version + 3
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
@@ -105,14 +106,17 @@ export class WebshopManager {
                     // Version 1 is the first version of the database.
                     db.createObjectStore("orders", { keyPath: "id" });
                     db.createObjectStore("tickets", { keyPath: "secret" });
+                    db.createObjectStore("ticketPatches", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
                 } else {
                     db.deleteObjectStore("orders");
                     db.deleteObjectStore("tickets");
                     db.deleteObjectStore("settings");
+                    //db.deleteObjectStore("ticketPatches");
 
                     db.createObjectStore("orders", { keyPath: "id" });
                     db.createObjectStore("tickets", { keyPath: "secret" });
+                    db.createObjectStore("ticketPatches", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
 
                     // For now: we clear all stores if we have a version update
@@ -221,6 +225,32 @@ export class WebshopManager {
         })
     }
 
+    async getTicketPatchesFromDatabase(): Promise<AutoEncoderPatchType<TicketPrivate>[]> {
+        const db = await this.getDatabase()
+
+        return new Promise<AutoEncoderPatchType<TicketPrivate>[]>((resolve, reject) => {
+            const transaction = db.transaction(["ticketPatches"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("ticketPatches");
+
+            const request = objectStore.getAll()
+            request.onsuccess = () => {
+                const rawOrders = request.result
+
+                // Todo: need version fix here
+                const patches = new ArrayDecoder(TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawOrders, { version: Version }))
+                resolve(patches)
+            }
+
+        })
+    }
+
     async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<Order, WebshopOrdersQuery>> {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
@@ -261,6 +291,60 @@ export class WebshopManager {
             number: order.number!
         }
         await this.storeSettingKey("lastFetchedOrder", this.lastFetchedOrder)
+    }
+
+    async addTicketPatch(patch: AutoEncoderPatchType<TicketPrivate>) {
+        // First save the patch in the local database
+        await this.storeTicketPatches([patch])
+
+        // Try to save all remaining patches to the server (once)
+        // Don't wait
+        this.trySavePatches().catch(console.error)
+    }
+
+    async trySavePatches() {
+        if (this.savingTicketPatches) {
+            // Already working on it
+            return
+        }
+        this.savingTicketPatches = true
+
+        const patches = await this.getTicketPatchesFromDatabase()
+        if (patches.length > 0) {
+            try {
+                await this.patchTickets(patches)
+            } catch (e) {
+                if (Request.isNetworkError(e)) {
+                    // failed.
+                    // ignore the error for now
+                } else {
+                    this.savingTicketPatches = false
+                    throw e;
+                }
+            }
+        }
+        this.savingTicketPatches = false
+    }
+
+    async patchTickets(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        // Then make one try for a request (might fail if we don't have internet)
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "PATCH",
+            path: "/webshop/"+this.preview.id+"/tickets/private",
+            decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
+            body: patches,
+            shouldRetry: false
+        })
+
+        // Move all data to original order
+        try {
+            await this.storeTickets(response.data)
+        } catch (e) {
+            console.error(e)
+            // No db support or other error. Should ignore
+        }
+
+        return response.data
     }
 
     /**
@@ -318,11 +402,11 @@ export class WebshopManager {
 
     /// TICKETS
 
-    async storeTickets(tickets: TicketPrivate[]) {
+    async storeTickets(tickets: TicketPrivate[], clearPatches = true) {
         const db = await this.getDatabase()
 
         return new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["tickets"], "readwrite");
+            const transaction = db.transaction(["tickets", "ticketPatches"], "readwrite");
 
             transaction.oncomplete = () => {
                 resolve()
@@ -335,18 +419,48 @@ export class WebshopManager {
 
             // Do the actual saving
             const objectStore = transaction.objectStore("tickets");
+            const ticketPatches = transaction.objectStore("ticketPatches");
 
             for (const ticket of tickets) {
                 objectStore.put(ticket.encode({ version: Version }));
+
+                // Remove any patches we might have saved
+                if (clearPatches) {
+                    ticketPatches.delete(ticket.secret);
+                }
             }
         })
     }
 
-    async getTicketFromDatabase(secret: string): Promise<TicketPrivate | undefined> {
+    async storeTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["ticketPatches"], "readwrite");
+
+            transaction.oncomplete = () => {
+                resolve()
+            };
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const ticketPatches = transaction.objectStore("ticketPatches");
+
+            for (const patch of patches) {
+                ticketPatches.put(patch.encode({ version: Version }));
+            }
+        })
+    }
+
+    async getTicketFromDatabase(secret: string, withPatches = true): Promise<TicketPrivate | undefined> {
         const db = await this.getDatabase()
 
         return new Promise<TicketPrivate | undefined>((resolve, reject) => {
-            const transaction = db.transaction(["tickets"], "readonly");
+            const transaction = db.transaction(["tickets", "ticketPatches"], "readonly");
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
@@ -355,17 +469,38 @@ export class WebshopManager {
 
             // Do the actual saving
             const objectStore = transaction.objectStore("tickets");
+            const ticketPatches = transaction.objectStore("ticketPatches");
 
             const request = objectStore.get(secret)
+
             request.onsuccess = () => {
                 const rawTicket = request.result
 
                 if (rawTicket === undefined) {
                     resolve(undefined)
+                    return
                 }
 
                 const ticket = (TicketPrivate as Decoder<TicketPrivate>).decode(new ObjectData(rawTicket, { version: Version }))
-                resolve(ticket)
+
+                if (withPatches) {
+                    const request2 = ticketPatches.get(secret)
+                    request2.onsuccess = () => {
+                        const rawPatch = request2.result
+
+                        if (rawPatch === undefined) {
+                            // no patch found
+                            resolve(ticket)
+                            return
+                        }
+
+                        const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
+                        resolve(ticket.patch(patch))
+                        console.log("Found patched ticket in database", patch)
+                    }
+                } else {
+                    resolve(ticket)
+                }
             }
 
         })
@@ -391,6 +526,7 @@ export class WebshopManager {
 
                 if (rawOrder === undefined) {
                     resolve(undefined)
+                    return
                 }
 
                 const order = (Order as Decoder<Order>).decode(new ObjectData(rawOrder, { version: Version }))

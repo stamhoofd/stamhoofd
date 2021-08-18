@@ -31,7 +31,7 @@
                 </div>
             </div>
             <figure>
-                <img v-if="QRCodeUrl" :src="QRCodeUrl">
+                <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}">
                 <div v-else class="placeholder" />
                 <span>{{ ticket.secret }}</span>
             </figure>
@@ -269,6 +269,10 @@ export default class TicketBox extends Mixins(NavigationMixin){
             @media (max-width: 700px) {
                 width: 70vw;
                 height: 70vw;
+            }
+
+            &.scanned {
+                opacity: 0.3;
             }
         }
 
