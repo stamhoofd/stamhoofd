@@ -18,7 +18,7 @@
                     </button>
                 </div>
 
-                <div class="status-bar">
+                <div v-if="false" class="status-bar">
                     <p v-if="checkingTicket" slot="right">
                         Ticket controleren...
                     </p>
@@ -40,6 +40,39 @@ import QrScannerWorkerPath from '!!file-loader!qr-scanner/qr-scanner-worker.min.
 
 import { WebshopManager } from "../WebshopManager";
 import ValidTicketView from "./status/ValidTicketView.vue";
+
+//if you have another AudioContext class use that one, as some browsers have a limit
+var audioCtx = new (window.AudioContext || (window as any).webkitAudioContext || (window as any).audioContext);
+
+//All arguments are optional:
+
+//duration of the tone in milliseconds. Default is 500
+//frequency of the tone in hertz. default is 440
+//volume of the tone. Default is 1, off is 0.
+//type of tone. Possible values are sine, square, sawtooth, triangle, and custom. Default is sine.
+//callback to use on end of tone
+function beep(duration, frequency, volume, type, callback) {
+    var oscillator = audioCtx.createOscillator();
+    var gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    if (volume){gainNode.gain.value = volume;}
+    if (frequency){oscillator.frequency.value = frequency;}
+    if (type){oscillator.type = type;}
+    if (callback){oscillator.onended = callback;}
+
+    oscillator.start(audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(
+        frequency * 1.5, audioCtx.currentTime + ((duration || 500) / 1000)
+    )
+    gainNode.gain.exponentialRampToValueAtTime(
+        0.00001, audioCtx.currentTime + ((duration || 500) / 1000)
+    )
+    oscillator.stop(audioCtx.currentTime + ((duration || 500) / 1000));
+    
+}
 
 @Component({
     components: {
@@ -174,6 +207,9 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             if (ticket) {
                 const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
                 if (!order) {
+                    if (window.navigator.vibrate) {
+                        window.navigator.vibrate([100, 100, 100]);
+                    }
                     new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
                 } else {
                     this.validTicket(ticket, order)
@@ -186,12 +222,20 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             console.error(e)
             // database error
             Toast.fromError(e).show()
+
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate([100, 100, 100]);
+            }
         }
 
         this.checkingTicket = false
     }
 
     validTicket(ticket: TicketPrivate, order: Order) {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(100);
+        }
+
         // Disable scanning for 2 seconds
         this.cooldown = new Date(new Date().getTime() + 2 * 1000)
 
@@ -205,6 +249,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     invalidTicket() {
         // todo: show invalid ticket
         new Toast("Ongeldig ticket", "error red").show()
+
+        if (window.navigator.vibrate) {
+            // Vibrate twice
+            window.navigator.vibrate([100, 100, 100]);
+        }
     }
 
     deactivated() {
