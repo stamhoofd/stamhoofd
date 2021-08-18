@@ -9,7 +9,10 @@
                 <span class="icon warning yellow" />
                 <span>Ticket al gescand</span>
             </h1>
-            <p>
+            <p class="ticket-secret">
+                {{ ticket.secret }}
+            </p>
+            <p class="style-description">
                 Let op dat je hetzelfde ticket niet meerdere keren scant en zo hergebruik van een ticket mogelijk maakt.
             </p>
 
@@ -108,6 +111,7 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
         > h1 {
             color: $color-warning-dark;
             text-align: center;
+            padding-bottom: 0 !important;
 
             span {
                 display: block;
@@ -123,6 +127,15 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
                 text-align: center;
             }
         }
+    }
+
+    .ticket-secret {
+        text-align: center;
+        color: $color-gray;
+        font-size: 10px;
+        font-weight: bold;
+        padding-bottom: 20px;
+        padding-top: 5px;
     }
 }
 </style>

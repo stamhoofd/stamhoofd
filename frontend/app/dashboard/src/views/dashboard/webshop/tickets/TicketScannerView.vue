@@ -95,6 +95,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
     // Disable scanning before this date
     cooldown: Date | null = null
+    cooldownResult: string | null = null
 
     cameras: QrScanner.Camera[] = []
     cameraIndex = 0
@@ -140,13 +141,14 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
         this.scanner = new QrScanner(this.$refs.video as HTMLVideoElement, (result) => {
             console.log("QR-code result: "+result)
-            if (this.checkingTicket || (this.cooldown && this.cooldown > new Date())) {
+            if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date())) {
                 // Skip. Already working.
                 return
             }
 
             // Wait 2 seconds before rescanning
             this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+            this.cooldownResult = result
 
             // Go a QR-code with value: result
             this.checkTicket(result).catch(console.error)
@@ -244,7 +246,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             window.navigator.vibrate([100, 100, 100]);
         }
 
-        // Disable scanning for 2 seconds
+        // Disable scanning same one for 2 seconds
         this.cooldown = new Date(new Date().getTime() + 2 * 1000)
 
         this.show(new ComponentWithProperties(TicketAlreadyScannedView, {
@@ -259,7 +261,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             window.navigator.vibrate(100);
         }
 
-        // Disable scanning for 2 seconds
+        // Disable scanning same one for 2 seconds
         this.cooldown = new Date(new Date().getTime() + 2 * 1000)
 
         this.show(new ComponentWithProperties(ValidTicketView, {
@@ -284,7 +286,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     activated() {
-        this.cooldown = new Date(new Date().getTime() + 1 * 500)
+        // Prevent scanning previous one for 3 seconds
+        this.cooldown = new Date(new Date().getTime() + 3 * 1000)
 
         // We add a small delay to prevent a qr-scanner glitch that stops working
         // probably because the video element isn't yet available

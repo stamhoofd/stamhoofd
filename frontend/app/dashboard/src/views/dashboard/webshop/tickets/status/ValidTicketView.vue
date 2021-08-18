@@ -169,6 +169,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         font-size: 10px;
         font-weight: bold;
         padding-bottom: 20px;
+        padding-top: 5px;
     }
 }
 </style>

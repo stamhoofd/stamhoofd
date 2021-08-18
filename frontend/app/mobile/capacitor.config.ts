@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
   },
   // Uncomment to enable live reload
   server: {
-    url: "http://192.168.0.7:8080",
+    url: "https://dashboard.stamhoofd.dev",
     cleartext: true
   }
 };
