@@ -24,18 +24,32 @@
 
                     <template v-if="hasTickets">
                         <hr>
-                        <h2>Jouw tickets</h2>
+                        <h2 v-if="singleTicket">
+                            Jouw ticket
+                        </h2>
+                        <h2 v-else>
+                            Jouw tickets
+                        </h2>
 
                         <p v-if="!isPaid" class="warning-box">
-                            Je ontvangt jouw tickets via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Als jouw bedrag te laat op de rekening komt, ontvang je geen tickets en wordt het bedrag teruggestort. Klik onderaan op de knop om de instructies nog eens te tonen.
+                            Je ontvangt <template v-if="singleTicket">
+                                jouw ticket
+                            </template><template v-else>
+                                jouw tickets
+                            </template> via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Als jouw bedrag te laat op de rekening komt, ontvang je geen tickets en wordt het bedrag teruggestort. Klik onderaan op de knop om de instructies nog eens te tonen.
                         </p>
                         <p v-else>
-                            Zorg dat je jouw tickets zeker meeneemt.
+                            Zorg dat je <template v-if="singleTicket">
+                                jouw ticket
+                            </template><template v-else>
+                                jouw tickets
+                            </template> zeker meeneemt.
                         </p>
 
                         <a v-if="isPaid" href="#tickets" class="button primary">
                             <span class="icon arrow-down" />
-                            <span>Tickets bekijken</span>
+                            <span v-if="singleTicket">Ticket bekijken</span>
+                            <span v-else>Tickets bekijken</span>
                         </a>
 
                         <hr>
@@ -212,7 +226,12 @@
             </section>
             <section v-if="hasTickets && isPaid" class="gray-shadow view">
                 <main id="tickets">
-                    <h2>Download tickets</h2>
+                    <h2 v-if="singleTicket">
+                        Download ticket
+                    </h2>
+                    <h2 v-else>
+                        Download tickets
+                    </h2>
 
                     <div class="hide-smartphone">
                         <p class="success-box environment">
@@ -225,7 +244,8 @@
 
                     <button v-if="!loadingTickets" class="button primary" @click="downloadAllTickets">
                         <span class="icon download" />
-                        <span>Download alle tickets</span>
+                        <span v-if="singleTicket">Download ticket</span>
+                        <span v-else>Download alle tickets</span>
                     </button>
 
                     <Spinner v-if="loadingTickets" />
@@ -302,6 +322,10 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get webshop() {
         return WebshopManager.webshop
+    }
+
+    get singleTicket() {
+        return this.tickets.length == 1 || this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
 
     get canShare() {
