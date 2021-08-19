@@ -1,5 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
-import { Organization, TicketPublic, Webshop } from "@stamhoofd/structures";
+import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
 import PDFKit from "pdfkit"
@@ -26,6 +26,12 @@ const MAX_Y = PAGE_HEIGHT - 24*MM
 
 export class TicketBuilder {
     tickets: TicketPublic[]
+
+    /**
+     * Optional
+     */
+    order?: Order
+
     webshop: Webshop
     organization: Organization
 
@@ -33,10 +39,11 @@ export class TicketBuilder {
 
     private dataBuffer: any[] = []
 
-    constructor(tickets: TicketPublic[], webshop: Webshop, organization: Organization) {
+    constructor(tickets: TicketPublic[], webshop: Webshop, organization: Organization, order?: Order) {
         this.tickets = tickets
         this.webshop = webshop
         this.organization = organization
+        this.order = order
         this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN});
     }
 
@@ -165,42 +172,74 @@ export class TicketBuilder {
         this.document.fontSize(8);
         this.document.font('Metropolis-Medium');
 
-        const location = ticket.items[0].product.location
-        if (location) {
-            if (!dryRun) {
-                this.document.text(location.name+"\n"+location.address, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+        if (this.webshop.meta.ticketType === WebshopTicketType.Tickets || !this.order) {
+            const location = ticket.items[0].product.location
+            if (location) {
+                if (!dryRun) {
+                    this.document.text(location.name+"\n"+location.address, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+                }
+                height += this.document.heightOfString(location.name+"\n"+location.address, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
             }
-            height += this.document.heightOfString(location.name+"\n"+location.address, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+
+            const dateRange = ticket.items[0].product.dateRange
+            if (dateRange) {
+                const str = Formatter.capitalizeFirstLetter(dateRange.toString())
+                if (!dryRun) {
+                    this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+                }
+                height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+            }
+        } else {
+            if (!dryRun) {
+                this.document.text("Bestelling #"+this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+            }
+            height += this.document.heightOfString("Bestelling #"+this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+
+            const checkoutMethod = this.order.data.checkoutMethod
+            if (checkoutMethod) {
+                let str = checkoutMethod.name
+                if (checkoutMethod instanceof WebshopTakeoutMethod || checkoutMethod instanceof WebshopOnSiteMethod) {
+                    str += "\n"+checkoutMethod.address
+                }
+                if (!dryRun) {
+                    this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+                }
+                height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+            }
+
+            const timeSlot = this.order.data.timeSlot
+            if (timeSlot) {
+                const str = Formatter.capitalizeFirstLetter(timeSlot.toString())
+                if (!dryRun) {
+                    this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+                }
+                height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+            }
         }
 
-        const dateRange = ticket.items[0].product.dateRange
-        if (dateRange) {
-            const str = Formatter.capitalizeFirstLetter(dateRange.toString())
-            if (!dryRun) {
-                this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
-            }
-            height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
-        }
+       
 
+        const price = ticket.items.reduce((c, item) => c + (item.price ?? 0), 0)
         if (!dryRun) {
-            this.document.text(Formatter.price(ticket.items[0].unitPrice ?? 0).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
+            this.document.text(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         }
-        height += this.document.heightOfString(Formatter.price(ticket.items[0].unitPrice ?? 0).replace(/ /g, " ").replace(/,00/g, ""), { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
+        height += this.document.heightOfString(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         height += 5*MM
 
         // END LEFT COLUMN
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
 
         // SECOND COLUMN
-        if (ticket.items[0].description) {
+        const description = ticket.items.length > 1 ? ticket.items.map(item => item.amount+"x "+item.product.name+(item.description ? ("\n"+item.description) : "")).join("\n") : ticket.items[0].description
+        if (description) {
             // Second column
             height = initialColumnHeight
             height += 5*MM
 
             if (!dryRun) {
-                this.document.text(ticket.items[0].description, PAGE_MARGIN + COLUMN_MAX_WIDTH + 5*MM, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
+                this.document.text(description, PAGE_MARGIN + COLUMN_MAX_WIDTH + 5*MM, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
             }
-            height += this.document.heightOfString(ticket.items[0].description, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
+            height += this.document.heightOfString(description, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
             height += 5*MM
 
             MAX_COLUMN_HEIGHT = Math.max(height - initialColumnHeight, MAX_COLUMN_HEIGHT)
@@ -251,7 +290,7 @@ export class TicketBuilder {
         }
 
         // Draw vertical lines
-        if (!dryRun && ticket.items[0].description) {
+        if (!dryRun && description) {
             this.document.lineWidth(0.5);
             this.document.strokeColor(COLOR_BORDER);
             this.document.moveTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + initialColumnHeight - 1).lineTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + height).stroke()   

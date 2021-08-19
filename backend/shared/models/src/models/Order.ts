@@ -150,32 +150,48 @@ export class Order extends Model {
         }
 
         // Create tickets if needed (we might already be valid in case of transfer payments)
-        // TODO: check if we already have the tickets generated and skip if so
         let tickets: Ticket[] = []
-        const ticketMap = new Map<string, number>()
-        for (const item of this.data.cart.items) {
 
-            if (item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) {
-                const offset = ticketMap.get(item.product.id) ?? 0
+        if (webshop.meta.ticketType === WebshopTicketType.Tickets) {
+            const ticketMap = new Map<string, number>()
 
-                // Separate ticket if multiple amounts
-                for (let index = 0; index < item.amount; index++) {
-                    const ticket = new Ticket()
-                    ticket.orderId = this.id
-                    ticket.itemId = item.id
-                    ticket.organizationId = this.organizationId
-                    ticket.webshopId = this.webshopId
+            for (const item of this.data.cart.items) {
+                if (item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) {
+                    const offset = ticketMap.get(item.product.id) ?? 0
 
-                    // Relative index for items with same properties
-                    ticket.index = offset + index + 1
-                    ticket.total = item.getTotalAmount(this.data.cart)
+                    // Separate ticket if multiple amounts
+                    for (let index = 0; index < item.amount; index++) {
+                        const ticket = new Ticket()
+                        ticket.orderId = this.id
+                        ticket.itemId = item.id
+                        ticket.organizationId = this.organizationId
+                        ticket.webshopId = this.webshopId
 
-                    // Do not save yet
-                    tickets.push(ticket)
+                        // Relative index for items with same properties
+                        ticket.index = offset + index + 1
+                        ticket.total = item.getTotalAmount(this.data.cart)
+
+                        // Do not save yet
+                        tickets.push(ticket)
+                    }
+
+                    ticketMap.set(item.product.id, offset + item.amount)
                 }
-
-                ticketMap.set(item.product.id, offset + item.amount)
             }
+        } else if (webshop.meta.ticketType === WebshopTicketType.SingleTicket) {
+            // Create a shared ticket for the whole order
+            const ticket = new Ticket()
+            ticket.orderId = this.id
+            ticket.itemId = null
+            ticket.organizationId = this.organizationId
+            ticket.webshopId = this.webshopId
+
+            // Relative index for items with same properties
+            ticket.index = 1
+            ticket.total = 1
+
+            // Do not save yet
+            tickets.push(ticket)
         }
 
         let didCreateTickets = false
@@ -198,7 +214,7 @@ export class Order extends Model {
                 }
 
                 // Wait to save them all
-                console.log("Generating tickets for order "+this.id)
+                console.log("Saving tickets for order "+this.id)
                 await Promise.all(tickets.map((ticket) => ticket.save()))
             }
         }

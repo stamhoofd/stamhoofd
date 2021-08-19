@@ -101,6 +101,9 @@
                                 <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                                     Afhaallocatie
                                 </template>
+                                <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                    Locatie
+                                </template>
                                 <template v-else>
                                     Leveringsmethode
                                 </template>
@@ -126,6 +129,9 @@
                             <STListItem v-if="order.data.timeSlot" class="right-description">
                                 <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                                     Wanneer afhalen?
+                                </template>
+                                <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                    Wanneer?
                                 </template>
                                 <template v-else>
                                     Wanneer leveren?
@@ -156,6 +162,9 @@
                         <hr>
                         <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Afhaalopmerkingen
+                        </h2>
+                        <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Opmerkingen
                         </h2>
                         <h2 v-else>
                             Leveringsopmerkingen
@@ -221,7 +230,7 @@
 
                     <Spinner v-if="loadingTickets" />
                     <div v-else>
-                        <TicketBox v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" />
+                        <TicketBox v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" :order="order" />
                     </div>
                 </main>
             </section>
@@ -233,7 +242,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic } from '@stamhoofd/structures';
+import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -304,7 +313,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasTickets() {
-        return !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
     }
 
     get publicTickets() {
@@ -432,7 +441,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             '../../classes/TicketBuilder'
         )).TicketBuilder
 
-        const builder = new TicketBuilder(this.publicTickets, this.webshop, WebshopManager.organization)
+        const builder = new TicketBuilder(this.publicTickets, this.webshop, WebshopManager.organization, this.order ?? undefined)
         await builder.download()
     }
 

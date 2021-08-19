@@ -46,6 +46,10 @@ export class WebshopTimeSlot extends AutoEncoder {
         }
         return 0
     }
+
+    toString() {
+        return Formatter.dateWithDay(this.date)+", "+Formatter.minutes(this.startTime)+" - "+Formatter.minutes(this.endTime)
+    }
 }
 
 /**

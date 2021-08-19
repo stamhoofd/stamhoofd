@@ -139,11 +139,12 @@
                 </STListItem>
             </STList>
             
-            <p>
+            <p v-if="enableBetaFeatures">
                 <button class="button text" @click="addOnSiteMethod">
                     <span class="icon add" />
                     <span>Ter plaatse consumeren toevoegen</span>
                 </button>
+                <span class="style-tag">BETA</span>
             </p>
 
             <p>

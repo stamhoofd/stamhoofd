@@ -27,7 +27,7 @@
                     <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.address" />
                     <p v-if="cartItem.product.dateRange" class="description" v-text="formatDateRange(cartItem.product.dateRange)" />
 
-                    <p class="description" v-text="formatPrice(cartItem.unitPrice)" />
+                    <p class="description" v-text="formatPrice(price)" />
                 </div>
             </div>
             <figure>
@@ -54,7 +54,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { ProductDateRange, TicketPublic, Webshop } from '@stamhoofd/structures';
+import { Order, ProductDateRange, TicketPublic, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -77,6 +77,9 @@ export default class TicketBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
     ticket: TicketPublic
 
+    @Prop({ required: false, default: null })
+    order: Order | null
+
     QRCodeUrl: string | null = null
 
     get cartItem() {
@@ -85,11 +88,15 @@ export default class TicketBox extends Mixins(NavigationMixin){
     }
 
     get name() {
-        return this.cartItem.product.name
+        return this.ticket.getTitle()
     }
 
     get canShare() {
         return !!navigator.share
+    }
+
+    get price() {
+        return this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0)
     }
 
     share() {
@@ -123,7 +130,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
             '../../classes/TicketBuilder'
         )).TicketBuilder
 
-        const builder = new TicketBuilder([this.ticket], this.webshop, WebshopManager.organization)
+        const builder = new TicketBuilder([this.ticket], this.webshop, WebshopManager.organization, this.order ?? undefined)
         await builder.download()
     }
 

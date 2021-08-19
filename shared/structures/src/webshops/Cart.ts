@@ -44,6 +44,10 @@ export class CartItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, version: 107 })
     unitPrice: number | null = null;
 
+    get price() {
+        return this.unitPrice ? (this.unitPrice * this.amount) : null
+    }
+
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T>  {
         const c = super.create(object) as CartItem
 

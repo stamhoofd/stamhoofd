@@ -42,7 +42,7 @@ export class TicketPublic extends Ticket {
 
     getTitle() {
         if (this.items.length != 1) {
-            return "Bestelbewijs"
+            return "Ticket"
         }
         return this.items[0].product.name
     }
