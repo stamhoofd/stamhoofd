@@ -77,6 +77,9 @@
                         <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Afhaallocatie
                         </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Locatie
+                        </template>
                         <template v-else>
                             Leveringsmethode
                         </template>
@@ -102,6 +105,9 @@
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Wanneer afhalen?
+                        </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Wanneer?
                         </template>
                         <template v-else>
                             Wanneer leveren?

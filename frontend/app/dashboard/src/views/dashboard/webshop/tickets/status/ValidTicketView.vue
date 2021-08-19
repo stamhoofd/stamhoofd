@@ -6,8 +6,121 @@
 
         <main v-if="!ticket.itemId">
             <h1>
-                Bestelling {{ order.number }}
+                <span class="icon green success" />
+                <span>Bestelling {{ order.number }}</span>
             </h1>
+
+            <STList>
+                <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
+                    <h3>
+                        {{ cartItem.product.name }}
+                    </h3>
+                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+
+                    <footer>
+                        <p class="price">
+                            {{ cartItem.amount }} x
+                        </p>
+                    </footer>
+                </STListItem>
+            </STList>
+
+            <hr>
+
+            <STList>
+                <STListItem class="right-description">
+                    Naam
+
+                    <template slot="right">
+                        <p>{{ order.data.customer.name }}</p>
+                        <p>{{ order.data.customer.phone }}</p>
+                        <p>{{ order.data.customer.email }}</p>
+                    </template>
+                </STListItem>
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
+                    {{ a.field.name }}
+
+                    <template slot="right">
+                        {{ a.answer || "/" }}
+                    </template>
+                </STListItem>
+                <STListItem v-if="order.payment" class="right-description right-stack">
+                    Betaalmethode
+
+                    <template slot="right">
+                        {{ getName(order.payment.method) }}
+
+                        <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
+                        <span v-else class="icon clock" />
+                    </template>
+                </STListItem>
+                <STListItem v-if="order.validAt" class="right-description">
+                    Geplaatst op
+                    <template slot="right">
+                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                    </template>
+                </STListItem>
+                <template v-if="order.data.checkoutMethod">
+                    <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
+                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            Afhaallocatie
+                        </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Locatie
+                        </template>
+                        <template v-else>
+                            Leveringsmethode
+                        </template>
+
+                        <template slot="right">
+                            {{ order.data.checkoutMethod.name }}
+                        </template>
+                    </STListItem>
+                    <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
+                        Adres
+
+                        <template slot="right">
+                            {{ order.data.checkoutMethod.address }}
+                        </template>
+                    </STListItem>
+                    <STListItem v-if="order.data.address" class="right-description">
+                        Leveringsadres
+
+                        <template slot="right">
+                            {{ order.data.address }}
+                        </template>
+                    </STListItem>
+                    <STListItem v-if="order.data.timeSlot" class="right-description">
+                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                            Wanneer afhalen?
+                        </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Wanneer?
+                        </template>
+                        <template v-else>
+                            Wanneer leveren?
+                        </template>
+
+                        <template slot="right">
+                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
+                        </template>
+                    </STListItem>
+                </template>
+                <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
+                    Leveringskost
+
+                    <template slot="right">
+                        {{ order.data.deliveryPrice | price }}
+                    </template>
+                </STListItem>
+                <STListItem class="right-description">
+                    Totaal
+
+                    <template slot="right">
+                        {{ order.data.totalPrice | price }}
+                    </template>
+                </STListItem>
+            </STList>
         </main>
 
         <main v-else-if="item">
@@ -74,7 +187,8 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Order, Ticket, TicketPrivate } from "@stamhoofd/structures";
+import { Order, PaymentMethod, PaymentMethodHelper, TicketPrivate } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from "../../WebshopManager";
@@ -88,6 +202,14 @@ import { WebshopManager } from "../../WebshopManager";
         STToolbar,
         Spinner,
         Checkbox
+    },
+    filters: {
+        price: Formatter.price.bind(Formatter),
+        priceChange: Formatter.priceChange.bind(Formatter),
+        date: Formatter.dateWithDay.bind(Formatter),
+        dateTime: Formatter.dateTimeWithDay.bind(Formatter),
+        minutes: Formatter.minutes.bind(Formatter),
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     }
 })
 export default class ValidTicketView extends Mixins(NavigationMixin) {
@@ -102,6 +224,10 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
+    }
+
+    getName(paymentMethod: PaymentMethod): string {
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
     }
 
     async cancelScan() {
@@ -137,6 +263,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .valid-ticket-view {
     background: $color-success-background;
@@ -170,6 +297,44 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         font-weight: bold;
         padding-bottom: 20px;
         padding-top: 5px;
+    }
+
+    .cart-item-row {
+        h3 {
+            padding-top: 5px;
+            @extend .style-title-3;
+        }
+
+        .description {
+            @extend .style-description-small;
+            padding-top: 5px;
+            white-space: pre-wrap;
+        }
+
+        .price {
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 600;
+            padding-top: 10px;
+            color: $color-primary;
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            border-radius: $border-radius;
+        }
+    }
+
+    .pre-wrap {
+        @extend .style-description;
+        white-space: pre-wrap;
     }
 }
 </style>
