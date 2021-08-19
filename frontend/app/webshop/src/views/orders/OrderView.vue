@@ -61,6 +61,13 @@
 
                     <STList>
                         <STListItem class="right-description">
+                            Bestelnummer
+
+                            <template slot="right">
+                                {{ order.number }}
+                            </template>
+                        </STListItem>
+                        <STListItem class="right-description">
                             Naam
 
                             <template slot="right">
@@ -88,13 +95,6 @@
                             Geplaatst op
                             <template slot="right">
                                 {{ order.validAt | dateTime | capitalizeFirstLetter }}
-                            </template>
-                        </STListItem>
-                        <STListItem class="right-description">
-                            Bestelnummer
-
-                            <template slot="right">
-                                {{ order.number }}
                             </template>
                         </STListItem>
 
