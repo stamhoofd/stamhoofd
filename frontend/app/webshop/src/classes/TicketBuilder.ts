@@ -285,7 +285,8 @@ export class TicketBuilder {
             this.document.fillColor(COLOR_GRAY);
             this.document.text(". Software voor verenigingen.")
 
-            const appleWallet = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/apple-wallet-nl.png')).default
+            // Todo:
+            /*const appleWallet = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/apple-wallet-nl.png')).default
             const googlePayPass = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/google-pay-pass-nl.png')).default
 
             this.document.image(appleWallet,   PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, { width: appleWalletWidth })
@@ -293,6 +294,7 @@ export class TicketBuilder {
 
             this.document.link(PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, appleWalletWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/apple/"+ticket.secret)
             this.document.link(PAGE_WIDTH - PAGE_MARGIN - badgeWidth - 2*MM, y + height + expectedHeight/2 - badgesHeight/2, gpWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/google/"+ticket.secret)
+            */
         }
         height += expectedHeight + 2
 

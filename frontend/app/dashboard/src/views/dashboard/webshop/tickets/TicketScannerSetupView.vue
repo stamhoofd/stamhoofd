@@ -50,7 +50,7 @@
             </template>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="!noDatabaseSupport">
             <button slot="right" class="button primary" @click="start">
                 <span class="icon play" />
                 <span>Starten</span>

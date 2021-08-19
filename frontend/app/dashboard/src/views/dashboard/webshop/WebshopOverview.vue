@@ -9,7 +9,6 @@
                 {{ title }}
             </h1>
 
-           
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openOrders(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/box.svg">
@@ -25,7 +24,7 @@
                 <STListItem v-if="hasTickets && hasWritePermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
                     <h2 class="style-title-list">
-                        Scan tickets
+                        Scan tickets <span class="style-tag">BETA</span>
                     </h2>
                     <p class="style-description">
                         Gebruik je camera om snel tickets te scannen en te markeren als 'gescand'
@@ -43,13 +42,9 @@
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
-            </STList>
 
-            <hr>
-
-            <STList v-if="hasFullPermissions" class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/gear.svg">
+                <STListItem v-if="hasFullPermissions" :selectable="true" class="left-center" @click="openSettings(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/shop-settings.svg">
                     <h2 class="style-title-list">
                         Instellingen
                     </h2>

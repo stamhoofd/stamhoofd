@@ -84,7 +84,7 @@ export class WebshopManager {
 
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
-            const version = Version + 3
+            const version = Version
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
@@ -109,20 +109,11 @@ export class WebshopManager {
                     db.createObjectStore("ticketPatches", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
                 } else {
-                    db.deleteObjectStore("orders");
-                    db.deleteObjectStore("tickets");
-                    db.deleteObjectStore("settings");
-                    //db.deleteObjectStore("ticketPatches");
-
-                    db.createObjectStore("orders", { keyPath: "id" });
-                    db.createObjectStore("tickets", { keyPath: "secret" });
-                    db.createObjectStore("ticketPatches", { keyPath: "secret" });
-                    db.createObjectStore("settings", {});
-
                     // For now: we clear all stores if we have a version update
-                    /*DBOpenRequest.transaction!.objectStore("orders").clear()
+                    DBOpenRequest.transaction!.objectStore("orders").clear()
                     DBOpenRequest.transaction!.objectStore("tickets").clear()
-                    DBOpenRequest.transaction!.objectStore("settings").clear()*/
+                    DBOpenRequest.transaction!.objectStore("ticketPatches").clear()
+                    DBOpenRequest.transaction!.objectStore("settings").clear()
                 }
             };
         })
