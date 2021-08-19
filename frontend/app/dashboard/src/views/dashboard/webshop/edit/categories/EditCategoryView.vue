@@ -31,7 +31,12 @@
             </STInputBox>
 
             <hr>
-            <h2>Artikels</h2>
+            <h2 v-if="isTickets">
+                Tickets
+            </h2>
+            <h2 v-else>
+                Artikels
+            </h2>
             <STList>
                 <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
@@ -39,7 +44,8 @@
             <p>
                 <button class="button text" @click="addProduct">
                     <span class="icon add" />
-                    <span>Artikel toevoegen</span>
+                    <span v-if="isTickets">Ticket toevoegen</span>
+                    <span v-else>Artikel toevoegen</span>
                 </button>
             </p>
         </main>
@@ -100,6 +106,10 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     get patchedWebshop() {
         return this.webshop.patch(this.patchWebshop)
+    }
+
+    get isTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
     get patchedCategory() {

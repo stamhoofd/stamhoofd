@@ -10,7 +10,12 @@
         </template>
 
         <template v-else-if="webshop.products.length > 0">
-            <h2>Artikels</h2>
+            <h2 v-if="isTickets">
+                Tickets
+            </h2>
+            <h2 v-else>
+                Artikels
+            </h2>
             <STList>
                 <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
@@ -26,7 +31,8 @@
         <p v-if="webshop.categories.length == 0">
             <button class="button text" @click="addProduct">
                 <span class="icon add" />
-                <span>Artikel toevoegen</span>
+                <span v-if="isTickets">Ticket toevoegen</span>
+                <span v-else>Artikel toevoegen</span>
             </button>
         </p>
     </main>
@@ -61,6 +67,10 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
+
+    get isTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+    }
 
     addProduct() {
         const product = Product.create({
