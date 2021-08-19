@@ -27,7 +27,7 @@
                         <h2>Jouw tickets</h2>
 
                         <p v-if="!isPaid" class="warning-box">
-                            Je ontvangt jouw tickets via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.
+                            Je ontvangt jouw tickets via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Als jouw bedrag te laat op de rekening komt, ontvang je geen tickets en wordt het bedrag teruggestort. Klik onderaan op de knop om de instructies nog eens te tonen.
                         </p>
                         <p v-else>
                             Zorg dat je jouw tickets zeker meeneemt.
@@ -207,7 +207,7 @@
 
                     <div class="hide-smartphone">
                         <p class="success-box environment">
-                            Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan in Google Pay, Apple Wallet of als PDF. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
+                            Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
                         </p>
                     </div>
                     <p class="success-box environment only-smartphone">
@@ -415,6 +415,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                     const order = response.data
                     this.order = order
                     HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
+                    this.checkTickets().catch(console.error)
                 }).catch(e => {
                     // too: handle this
                     console.error(e)

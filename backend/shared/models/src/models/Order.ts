@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData, OrderStatus, PaymentMethod, ProductType } from '@stamhoofd/structures';
+import { OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -267,28 +267,40 @@ export class Order extends Model {
                     to: toStr,
                     subject: "["+webshop.meta.name+"] Jouw tickets (bestelling "+this.number+")",
                     text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via:"
+                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link::"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
                     +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
                 })
             } else {
-                // Also send a copy
-                Email.send({
-                    from,
-                    replyTo,
-                    to: toStr,
-                    subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                    text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                        ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
-                    + "\n"
-                    + this.setRelation(Order.webshop, webshop).getUrl()
-                    + ((tickets.length > 0) ? "\n\nJouw tickets vind je ook in de link hierboven." : "")
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
-                })
+                if (this.webshop.meta.ticketType === WebshopTicketType.None) {
+                    // Also send a copy
+                    Email.send({
+                        from,
+                        replyTo,
+                        to: toStr,
+                        subject: "["+webshop.meta.name+"] Bestelling "+this.number,
+                        text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                            ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
+                        + "\n"
+                        + this.setRelation(Order.webshop, webshop).getUrl()
+                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                    })
+                } else {
+                    // Also send a copy
+                    Email.send({
+                        from,
+                        replyTo,
+                        to: toStr,
+                        subject: "["+webshop.meta.name+"] Bestelling "+this.number,
+                        text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                            ((payment && payment.method === PaymentMethod.Transfer) ? "Zodra jouw overschrijving op onze rekening aankomt, ontvang je jouw tickets via e-mail. Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
+                        + "\n"
+                        + this.setRelation(Order.webshop, webshop).getUrl()
+                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                    })
+                }
             }
-
-            
         }
     }
 }

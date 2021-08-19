@@ -16,7 +16,7 @@
 
             <div class="hide-smartphone">
                 <p class="success-box environment">
-                    Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan in Google Pay, Apple Wallet of als PDF. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
+                    Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
                 </p>
             </div>
             <p class="success-box environment only-smartphone">
