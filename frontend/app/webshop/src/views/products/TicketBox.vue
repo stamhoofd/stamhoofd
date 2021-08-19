@@ -54,7 +54,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Order, ProductDateRange, TicketPublic, Webshop } from '@stamhoofd/structures';
+import { Order, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -96,7 +96,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
     }
 
     get price() {
-        return this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0) : (this.cartItem?.unitPrice ?? 0)
     }
 
     share() {
