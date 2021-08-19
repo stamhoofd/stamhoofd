@@ -88,25 +88,24 @@ export class TicketBuilder {
                 this.document.addPage()
                 this.document.moveTo(PAGE_MARGIN, PAGE_MARGIN)
                 isFirst = true
-            } else {
-                if (!isFirst) {
-                    this.document.y += 10*MM
-                    this.document.save()
-
-                    // Draw line
-                    this.document.lineWidth(1);
-                    this.document.strokeColor(COLOR_DARK);
-                    this.document.lineCap('round').moveTo(0, this.document.y - 5*MM).lineTo(PAGE_MARGIN - 5, this.document.y - 5*MM).dash(5, { space: 4 }).stroke()   
-
-                    this.document.lineCap('round').moveTo(PAGE_MARGIN + 12 + 5, this.document.y - 5*MM).lineTo(PAGE_WIDTH, this.document.y - 5*MM).dash(5, { space: 4 }).stroke()
-                    
-                    this.document.translate(PAGE_MARGIN, this.document.y - 5*MM - 5)
-                    this.document.path("M1.5 2.5C1.5 1.94772 1.94772 1.5 2.5 1.5C3.05228 1.5 3.5 1.94772 3.5 2.5C3.5 3.05228 3.05228 3.5 2.5 3.5C1.94772 3.5 1.5 3.05228 1.5 2.5ZM2.5 0.5C1.39543 0.5 0.5 1.39543 0.5 2.5C0.5 3.60457 1.39543 4.5 2.5 4.5C2.81987 4.5 3.1222 4.42491 3.39033 4.29139L4.81676 4.95654L3.29712 5.66516C3.05289 5.55891 2.78333 5.5 2.5 5.5C1.39543 5.5 0.5 6.39543 0.5 7.5C0.5 8.60457 1.39543 9.5 2.5 9.5C3.60457 9.5 4.5 8.60457 4.5 7.5C4.5 7.23871 4.44989 6.98912 4.35876 6.76032C4.39438 6.44286 4.59265 6.16442 4.88508 6.02806L5.99986 5.50823L9.79731 7.27901C10.5481 7.62912 11.4406 7.30429 11.7907 6.55348L8.36606 4.95654L11.7907 3.35961C11.4406 2.6088 10.5481 2.28397 9.79731 2.63407L5.99986 4.40485L4.88508 3.88503C4.6122 3.75778 4.42131 3.50682 4.36807 3.21588C4.4533 2.99361 4.5 2.75226 4.5 2.5C4.5 1.39543 3.60457 0.5 2.5 0.5ZM1.5 7.5C1.5 6.94772 1.94772 6.5 2.5 6.5C3.05228 6.5 3.5 6.94772 3.5 7.5C3.5 8.05228 3.05228 8.5 2.5 8.5C1.94772 8.5 1.5 8.05228 1.5 7.5Z").fill(COLOR_DARK)
-                    
-                    this.document.restore()
-                }
-                isFirst = false
             }
+            if (!isFirst) {
+                this.document.y += 10*MM
+                this.document.save()
+
+                // Draw line
+                this.document.lineWidth(1);
+                this.document.strokeColor(COLOR_DARK);
+                this.document.lineCap('round').moveTo(0, this.document.y - 5*MM).lineTo(PAGE_MARGIN - 5, this.document.y - 5*MM).dash(5, { space: 4 }).stroke()   
+
+                this.document.lineCap('round').moveTo(PAGE_MARGIN + 12 + 5, this.document.y - 5*MM).lineTo(PAGE_WIDTH, this.document.y - 5*MM).dash(5, { space: 4 }).stroke()
+                
+                this.document.translate(PAGE_MARGIN, this.document.y - 5*MM - 5)
+                this.document.path("M1.5 2.5C1.5 1.94772 1.94772 1.5 2.5 1.5C3.05228 1.5 3.5 1.94772 3.5 2.5C3.5 3.05228 3.05228 3.5 2.5 3.5C1.94772 3.5 1.5 3.05228 1.5 2.5ZM2.5 0.5C1.39543 0.5 0.5 1.39543 0.5 2.5C0.5 3.60457 1.39543 4.5 2.5 4.5C2.81987 4.5 3.1222 4.42491 3.39033 4.29139L4.81676 4.95654L3.29712 5.66516C3.05289 5.55891 2.78333 5.5 2.5 5.5C1.39543 5.5 0.5 6.39543 0.5 7.5C0.5 8.60457 1.39543 9.5 2.5 9.5C3.60457 9.5 4.5 8.60457 4.5 7.5C4.5 7.23871 4.44989 6.98912 4.35876 6.76032C4.39438 6.44286 4.59265 6.16442 4.88508 6.02806L5.99986 5.50823L9.79731 7.27901C10.5481 7.62912 11.4406 7.30429 11.7907 6.55348L8.36606 4.95654L11.7907 3.35961C11.4406 2.6088 10.5481 2.28397 9.79731 2.63407L5.99986 4.40485L4.88508 3.88503C4.6122 3.75778 4.42131 3.50682 4.36807 3.21588C4.4533 2.99361 4.5 2.75226 4.5 2.5C4.5 1.39543 3.60457 0.5 2.5 0.5ZM1.5 7.5C1.5 6.94772 1.94772 6.5 2.5 6.5C3.05228 6.5 3.5 6.94772 3.5 7.5C3.5 8.05228 3.05228 8.5 2.5 8.5C1.94772 8.5 1.5 8.05228 1.5 7.5Z").fill(COLOR_DARK)
+                
+                this.document.restore()
+            }
+            isFirst = false
             await this.drawItem(ticket, false)
         }
     }
@@ -121,18 +120,23 @@ export class TicketBuilder {
         this.document.font('Metropolis-SemiBold');
 
         if (!dryRun) {
-            this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left' })
+            this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 })
+
+            const indexText = ticket.getIndexText()
+            if (indexText) {
+                this.document.text(indexText.toLocaleUpperCase(), PAGE_WIDTH - PAGE_MARGIN  - 40*MM, y + height, { align: "right", width: 40*MM })
+            }
         }
-        height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left' })
+        height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 }) - 2
         height += 3
 
         this.document.fontSize(17);
         this.document.fillColor(COLOR_DARK);
         
         if (!dryRun) {
-            this.document.text(ticket.getTitle(), PAGE_MARGIN, y + height, { align: 'left' })
+            this.document.text(ticket.getTitle(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 })
         }
-        height += this.document.heightOfString(ticket.getTitle(), { align: 'left' })
+        height += this.document.heightOfString(ticket.getTitle(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
 
         // Margin
         height += 5*MM
@@ -173,10 +177,9 @@ export class TicketBuilder {
         if (dateRange) {
             const str = Formatter.capitalizeFirstLetter(dateRange.toString())
             if (!dryRun) {
-                this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM })
+                this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
             }
-            height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM })
-            height += 2
+            height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
         }
 
         if (!dryRun) {

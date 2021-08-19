@@ -22,7 +22,7 @@
                         Tijdstip
                     </h3>
                     <p class="style-definition-text">
-                        {{ ticket.scannedAt }}
+                        {{ formatDateTime(ticket.scannedAt) }}
                     </p>
                 </STListItem>
 
@@ -53,6 +53,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Order, TicketPrivate } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from "../../WebshopManager";
@@ -81,6 +82,10 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
+    }
+
+    formatDateTime(date: Date) {
+        return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date))
     }
 
     viewTicket() {

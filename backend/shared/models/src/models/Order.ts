@@ -77,7 +77,7 @@ export class Order extends Model {
      * Fetch an order
      */
     static async getForPayment(organizationId: string, paymentId: string): Promise<Order | undefined> {
-        const order = await this.where({ paymentId }, { limit: 1 })[0]
+        const order = (await this.where({ paymentId }, { limit: 1 }))[0]
         if (!order) {
             return
         }
@@ -142,6 +142,7 @@ export class Order extends Model {
      * Only call this once! Make sure you use the queues correctly
      */
     async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        console.log("Marking order "+this.id+" as paid")
         const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
         if (!webshop) {
             console.error("Missing webshop for order "+this.id)
@@ -197,6 +198,7 @@ export class Order extends Model {
                 }
 
                 // Wait to save them all
+                console.log("Generating tickets for order "+this.id)
                 await Promise.all(tickets.map((ticket) => ticket.save()))
             }
         }
@@ -220,8 +222,8 @@ export class Order extends Model {
                     from,
                     replyTo,
                     to: toStr,
-                    subject: "["+webshop.meta.name+"] Jouw tickets zijn beschikbaar",
-                    text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu vinden via de link hieronder:"
+                    subject: "["+webshop.meta.name+"] Jouw tickets zijn beschikbaar (bestelling "+this.number+")",
+                    text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
                     +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
@@ -235,6 +237,7 @@ export class Order extends Model {
      * Include any tickets that are generated and should be included in the e-mail
      */
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null, tickets: Ticket[]) {
+        console.log("Marking as valid: order "+this.id)
         const wasValid = this.validAt !== null
 
         if (wasValid) {
@@ -256,19 +259,36 @@ export class Order extends Model {
 
             const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
 
-            // Also send a copy
-            Email.send({
-                from,
-                replyTo,
-                to: toStr,
-                subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                    ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
-                + "\n"
-                + this.setRelation(Order.webshop, webshop).getUrl()
-                + ((tickets.length > 0) ? "\n\nJouw tickets vind je ook in de link hierboven." : "")
-                +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
-            })
+            if (tickets.length > 0) {
+                // Also send a copy
+                Email.send({
+                    from,
+                    replyTo,
+                    to: toStr,
+                    subject: "["+webshop.meta.name+"] Jouw tickets (bestelling "+this.number+")",
+                    text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via:"
+                    + "\n"
+                    + this.setRelation(Order.webshop, webshop).getUrl()
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                })
+            } else {
+                // Also send a copy
+                Email.send({
+                    from,
+                    replyTo,
+                    to: toStr,
+                    subject: "["+webshop.meta.name+"] Bestelling "+this.number,
+                    text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                        ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via" :  "Je kan jouw bestelling nakijken via")
+                    + "\n"
+                    + this.setRelation(Order.webshop, webshop).getUrl()
+                    + ((tickets.length > 0) ? "\n\nJouw tickets vind je ook in de link hierboven." : "")
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                })
+            }
+
+            
         }
     }
 }

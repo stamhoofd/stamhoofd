@@ -233,8 +233,8 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
-import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
@@ -284,7 +284,7 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     order: Order | null = this.initialOrder
 
-    tickets: TicketOrder[] = []
+    tickets: TicketPublic[] = []
     loadingTickets = false
 
     get organization() {
@@ -308,7 +308,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get publicTickets() {
-        return this.tickets.map(ticket => ticket.getPublic(this.order!))
+        return this.tickets
     }
 
     share() {
@@ -353,7 +353,14 @@ export default class OrderView extends Mixins(NavigationMixin){
                 },
                 decoder: new ArrayDecoder(TicketOrder as Decoder<TicketOrder>)
             })
-            this.tickets = response.data
+            this.tickets = response.data.map(ticket => ticket.getPublic(this.order!)).sort((a, b) => {
+                return Sorter.stack(
+                    Sorter.byNumberValue(a.items.length, b.items.length),
+                    Sorter.byStringValue(a.items[0]?.product?.name ?? "", b.items[0]?.product?.name ?? ""),
+                    Sorter.byStringValue(a.items[0]?.id ?? "", b.items[0]?.id ?? ""), // group same options and items
+                    -1 * Sorter.byNumberValue(a.index, b.index) as any,
+                )
+            })
         } catch (e) {
             Toast.fromError(e).show()
         }        

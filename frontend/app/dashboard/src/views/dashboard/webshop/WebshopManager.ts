@@ -93,6 +93,12 @@ export class WebshopManager {
 
             DBOpenRequest.onerror = (event) => {
                 console.error(event)
+                
+                // Try to delete this database
+                if (process.env.NODE_ENV == "development") {
+                    window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+                }
+
                 reject(new SimpleError({
                     code: "not_supported",
                     message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer in een andere browser te werken."

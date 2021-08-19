@@ -18,7 +18,7 @@
             </p>
 
             <p class="warning-box icon lightning">
-                De scanner verbruikt veel batterij. Voorzie een oplader of goede powerbank.
+                De scanner verbruikt veel energie van je batterij. Voorzie een oplader of grote powerbank. Denk ook aan een backup plan als er iets zou schelen met je toestel.
             </p>
 
             <p class="info-box icon qr-code">
