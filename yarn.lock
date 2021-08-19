@@ -2059,6 +2059,14 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
+"@simonbackx/simple-database@^1.18":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.18.0.tgz#7bf69574a84080f855f01d5040fa69d0ac6fc60a"
+  integrity sha512-xlKnutNpbaOMVAPX84b4gIIsfhFSK++P+TXQ8/I9iFLozOJS0B4M1/z+Iri74zBr1g+BabAZIfdj97klK34J4w==
+  dependencies:
+    colors "^1.4.0"
+    mysql "^2.18.1"
+
 "@simonbackx/simple-encoding@^2.2.3":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.2.3.tgz#dc074c5ae24dbdb8ce0e914d8b4fb8deaea598d5"
