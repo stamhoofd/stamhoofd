@@ -356,7 +356,7 @@ export class WebshopManager {
         this.isLoadingOrders = true
 
         try {
-            if (this.lastFetchedOrder === undefined) {
+            if (!reset && this.lastFetchedOrder === undefined) {
                 // Only once (if undefined)
                 try {
                     this.lastFetchedOrder = await this.readSettingKey("lastFetchedOrder") ?? null
@@ -365,6 +365,10 @@ export class WebshopManager {
                     // Probably no database support. Ignore it and load everything.
                     this.lastFetchedOrder = null
                 }
+            }
+
+            if (reset) {
+                // todo: clear full store!
             }
             let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
                 updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,

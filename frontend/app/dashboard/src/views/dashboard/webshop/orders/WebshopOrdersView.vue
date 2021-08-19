@@ -280,20 +280,22 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     async loadOrders() {
         this.orders = []
         this.isLoadingOrders = true
-        try {
+        
+        // Disabled for now: first fix needed for payment status + deleted orders
+        /*try {
             const orders = await this.webshopManager.getOrdersFromDatabase()
             this.orders = orders.map(o => new SelectableOrder(o))
         } catch (e) {
             // Database error. We can ignore this and simply move on.
             Toast.fromError(e).show()
-        }
+        }*/
 
         try {
             // Initiate a refresh
             // don't wait
             this.isRefreshingOrders = true
             this.isLoadingOrders = false
-            await this.webshopManager.fetchNewOrders(true, false)
+            await this.webshopManager.fetchNewOrders(true, true)
         } catch (e) {
             // Fetching failed
             if (!Request.isNetworkError(e)) {
