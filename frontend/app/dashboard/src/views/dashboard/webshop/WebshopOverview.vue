@@ -22,7 +22,7 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openTickets(true)">
+                <STListItem v-if="hasTickets && hasWritePermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
                     <h2 class="style-title-list">
                         Scan tickets
@@ -69,7 +69,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective} from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PermissionLevel, PrivateWebshop, WebshopPreview } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -113,6 +113,17 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
             return false
         }
         return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
+    }
+
+    get hasWritePermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    get hasTickets() {
+        return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None
     }
    
     openOrders(animated = true) {
