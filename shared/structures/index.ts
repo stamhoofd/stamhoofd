@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 104
+export const Version = 108
 
 // General
 export * from "./src/addresses/Address"
@@ -94,12 +94,14 @@ export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"
+export * from "./src/endpoints/WebshopTicketsQuery"
 export * from "./src/webshops/Cart"
 export * from "./src/webshops/Category"
 export * from "./src/webshops/Checkout"
 export * from "./src/webshops/Customer"
 export * from "./src/webshops/Order"
 export * from "./src/webshops/Product"
+export * from "./src/webshops/Ticket"
 export * from "./src/webshops/TransferSettings"
 export * from "./src/webshops/Webshop"
 export * from "./src/webshops/WebshopField"

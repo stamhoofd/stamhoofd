@@ -27,7 +27,8 @@ import { SessionManager } from "@stamhoofd/networking";
 import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import MailView from "../mail/MailView.vue";
+import MailView from "../../mail/MailView.vue";
+import { WebshopManager } from "../WebshopManager";
 
 @Component({
     components: {
@@ -47,30 +48,31 @@ export default class OrderStatusContextMenu extends Mixins(NavigationMixin) {
     y!: number;
 
     @Prop()
-    webshop!: WebshopPreview;
+    webshopManager!: WebshopManager;
+
+    get webshop() {
+        return this.webshopManager.preview
+    }
 
     @Prop()
     orders!: Order[];
 
-    async markAs(status: OrderStatus) {
-        SessionManager.currentSession!.authenticatedServer.request({
-            method: "PATCH",
-            path: "/webshop/"+this.webshop.id+"/orders",
-            decoder: new ArrayDecoder(Order as Decoder<Order>),
-            body: this.orders.map(o => Order.patch({ status, id: o.id }))
-        }).then((response) => {
+    markAs(status: OrderStatus) {
+        this.webshopManager.patchOrders(
+            this.orders.map(o => Order.patch({ status, id: o.id }))
+        ).then((orders) => {
             new Toast("Status gewijzigd", "success").setHide(1000).show()
 
-            if (status == OrderStatus.Canceled) {
-                this.openMail("Jouw bestelling werd geannuleerd")
-            }
-
             // Move all data to original order
-            for (const order of response.data) {
+            for (const order of orders) {
                 const original = this.orders.find(o => o.id === order.id)
                 if (original) {
                     original.set(order)
                 }
+            }
+
+            if (status == OrderStatus.Canceled) {
+                this.openMail("Jouw bestelling werd geannuleerd")
             }
         }).catch((e) => {
             Toast.fromError(e).show()

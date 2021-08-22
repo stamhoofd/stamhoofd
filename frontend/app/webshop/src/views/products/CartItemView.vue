@@ -9,11 +9,35 @@
 
             <figure v-if="imageSrc" class="image-box">
                 <div :style="{ paddingBottom: Math.min(image.height/image.width*100, 100)+'%'}">
-                    <img :src="imageSrc">
+                    <img :src="imageSrc" :width="image.width" :height="image.height">
                 </div>
             </figure>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
-            <hr v-if="cartItem.product.description || imageSrc">
+
+            <STList v-if="cartItem.product.type != 'Product' && cartItem.product.location" class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Locatie
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ cartItem.product.location.name }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ cartItem.product.location.address }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Wanneer?
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatDateRange(cartItem.product.dateRange) }}
+                    </p>
+                </STListItem>
+            </STList>
+
+            <hr v-if="cartItem.product.description || imageSrc || cartItem.product.type != 'Product'">
 
             <div v-if="cartItem.product.prices.length > 1" class="container">
                 <STList>
@@ -72,7 +96,7 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
-import { CartItem } from '@stamhoofd/structures';
+import { CartItem, ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
@@ -115,7 +139,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     addToCart() {
         try {
-            this.cartItem.validate(WebshopManager.webshop)
+            this.cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return
@@ -176,6 +200,9 @@ export default class CartItemView extends Mixins(NavigationMixin){
         return this.product.remainingStock 
     }
 
+    formatDateRange(dateRange: ProductDateRange) {
+        return Formatter.capitalizeFirstLetter(dateRange.toString())
+    }
 
 }
 </script>
@@ -189,7 +216,8 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     .image-box {
         position: relative;
-        max-height: 300px;
+        max-height: 350px;
+        overflow: hidden;
 
         > div {
             display: flex;
@@ -214,6 +242,19 @@ export default class CartItemView extends Mixins(NavigationMixin){
         @extend .style-description;
         padding-top: 15px;
         white-space: pre-wrap;
+    }
+
+    .info {
+        padding-top: 15px;
+    }
+
+    h1 + .description {
+        // Remove duplicate padding
+        padding-top: 0;
+    }
+
+    h1 + .info {
+        padding-top: 0;
     }
 }
 

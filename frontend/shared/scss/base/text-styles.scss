@@ -133,6 +133,22 @@
     }
 }
 
+.style-definition-label {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: $color-primary;
+    text-transform: uppercase;
+    padding-bottom: 3px;
+}
+
+.style-definition-text {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: 500;
+    color: $color-dark;
+}
+
 .style-description {
     font-size: 16px;
     line-height: 1.4;

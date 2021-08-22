@@ -101,13 +101,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
          try {
-            const values = await GlobalEventBus.sendEvent("checkout", "cart")
-            if (values.length == 1 && values[0] !== undefined) {
-                console.log("push instead of dismiss")
-                this.show(new ComponentWithProperties(values[0], {}).setAnimated(true))
-            } else {
-                this.dismiss({ force: true })
-            }
+            await GlobalEventBus.sendEvent("checkout", this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
@@ -129,7 +123,6 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     activated() {
-        console.log("set cart url")
         this.$nextTick(() => {
             HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
         })

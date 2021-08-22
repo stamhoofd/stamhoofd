@@ -28,9 +28,13 @@
 		<true/>
 	</dict>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto's.</string>
+	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto&apos;s.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We gebruiken de camera om tickets te kunnen scannen</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We gebruiken de camera om tickets te kunnen scannen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>

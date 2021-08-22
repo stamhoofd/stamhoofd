@@ -77,6 +77,9 @@
                         <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Afhaallocatie
                         </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Locatie
+                        </template>
                         <template v-else>
                             Leveringsmethode
                         </template>
@@ -102,6 +105,9 @@
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Wanneer afhalen?
+                        </template>
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                            Wanneer?
                         </template>
                         <template v-else>
                             Wanneer leveren?
@@ -184,7 +190,8 @@ import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Pa
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import { WebshopManager } from "../WebshopManager";
 
 @Component({
     components: {
@@ -218,7 +225,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     initialOrder!: Order | null
 
     @Prop({ required: true })
-    webshop!: PrivateWebshop
+    webshopManager!: WebshopManager
+
+    get webshop() {
+        return this.webshopManager.preview
+    }
 
     @Prop({ default: false })
     success: boolean
@@ -264,6 +275,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
         const component = new ComponentWithProperties(OrderView, {
             initialOrder: order,
+            webshopManager: this.webshopManager,
             getNextOrder: this.getNextOrder,
             getPreviousOrder: this.getPreviousOrder,
         });
@@ -277,6 +289,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
         const component = new ComponentWithProperties(OrderView, {
             initialOrder: order,
+            webshopManager: this.webshopManager,
             getNextOrder: this.getNextOrder,
             getPreviousOrder: this.getPreviousOrder,
         });

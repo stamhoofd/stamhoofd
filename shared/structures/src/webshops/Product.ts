@@ -1,6 +1,8 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { Address } from '../addresses/Address';
 import { Image } from '../files/Image';
 import { WebshopField } from './WebshopField';
 
@@ -56,11 +58,55 @@ export class OptionMenu extends AutoEncoder {
     ]
 }
 
-enum ProductType {
+export enum ProductType {
     Product = "Product",
-    Ticket = "Ticket"
+    Ticket = "Ticket",
+    Voucher = "Voucher"
 }
 
+/**
+ * This includes a location for a ticket (will be visible on the ticket)
+ */
+export class ProductLocation extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ""
+
+    @field({ decoder: Address })
+    address: Address
+
+    // todo: coordinates here (only filled in by backend)
+}
+
+/**
+ * This includes a time for a ticket (will be visible on the ticket)
+ */
+export class ProductDateRange extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: DateDecoder })
+    startDate = new Date()
+
+    @field({ decoder: DateDecoder })
+    endDate = new Date()
+
+    toString() {
+        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(this.endDate)) {
+            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
+        }
+        
+        // If start in evening and end on the next morning: only mention date once
+        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(new Date(this.endDate.getTime() - 24*60*60*1000)) && Formatter.timeIso(this.endDate) <= "12:00" && Formatter.timeIso(this.startDate) >= "12:00") {
+            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
+        }
+
+        return Formatter.dateTime(this.startDate)+" - "+Formatter.dateTime(this.endDate)
+
+    }
+}
 
 export class Product extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -83,9 +129,17 @@ export class Product extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(ProductType) })
     type = ProductType.Product
+
+    @field({ decoder: ProductLocation, nullable: true, version: 105 })
+    location: ProductLocation | null = null
+
+    @field({ decoder: ProductDateRange, nullable: true, version: 105 })
+    dateRange: ProductDateRange | null = null
     
     /**
+     * WIP: not yet supported
      * Set to true if you need to have a name for every ordered product. When this is true, you can't order this product mutliple times with the same name.
+     * + will validate the name better
      */
     @field({ decoder: BooleanDecoder })
     askName = false

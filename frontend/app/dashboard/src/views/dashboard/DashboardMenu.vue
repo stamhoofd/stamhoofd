@@ -239,7 +239,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
             for (const webshop of this.organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop, false).catch(console.error).finally(() => UrlHelper.shared.clear())
+                    this.openWebshop(webshop, false).catch(console.error)
                     didSet = true
                     break;
                 }
@@ -329,7 +329,7 @@ export default class Menu extends Mixins(NavigationMixin) {
         this.currentlySelected = "webshop-"+webshop.id
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
-                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopView" */ './webshop/WebshopView.vue'), { preview: webshop }, { instant: !animated })
+                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './webshop/WebshopOverview.vue'), { preview: webshop }, { instant: !animated })
             }).setAnimated(animated)
         );
     }
@@ -391,7 +391,7 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     async addWebshop() {
         this.present(
-            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/EditWebshopView.vue'))).setDisplayStyle("popup")
+            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/edit/EditWebshopView.vue'))).setDisplayStyle("popup")
         )
     }
 

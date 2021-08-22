@@ -63,6 +63,7 @@
 
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { UrlHelper } from "@stamhoofd/networking";
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -72,6 +73,7 @@ import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
+import TicketView from "./orders/TicketView.vue";
 import CategoryBox from "./products/CategoryBox.vue"
 import ProductGrid from "./products/ProductGrid.vue"
 
@@ -207,8 +209,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     canSetUrl = false
 
     mounted() {
-        GlobalEventBus.addListener(this, "checkout", async () => {
-            console.log("goto checkout")
+        GlobalEventBus.addListener(this, "checkout", async (cartComponent: CartView) => {
             const nextStep = await CheckoutStepsManager.getNextStep(undefined, true)
 
             if (!nextStep) {
@@ -219,20 +220,25 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
             const comp = await nextStep.getComponent();
             if (this.visible) {
+                cartComponent.dismiss({ force: true })
                 this.show(new ComponentWithProperties(comp, {}).setAnimated(true))
             } else {
-                return comp
+                cartComponent.show(new ComponentWithProperties(comp, {}).setAnimated(true))
             }
         })
 
-        ComponentWithProperties.debug = true
-        const path = this.webshop.removeSuffix(window.location.pathname.substring(1).split("/"));
+        const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
         if (path.length == 2 && path[0] == 'order') {
-            // tood: password reset view
+            UrlHelper.shared.clear()
             const orderId = path[1];
             this.show(new ComponentWithProperties(OrderView, { orderId }).setAnimated(false))
+        } else if (path.length == 2 && path[0] == 'tickets') {
+            UrlHelper.shared.clear()
+            const secret = path[1];
+            this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
         } else if (path.length == 1 && path[0] == 'payment') {
-            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server ,finishedHandler: (payment: Payment | null) => {
+            UrlHelper.shared.clear()
+            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server, finishedHandler: (payment: Payment | null) => {
                 if (payment && payment.status == PaymentStatus.Succeeded) {
                     this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
                 } else {
@@ -244,6 +250,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 }
             } }), false);
         } else if (path.length == 2 && path[0] == 'checkout') {
+            UrlHelper.shared.clear()
             const stepName = Formatter.capitalizeFirstLetter(path[1])
             if (Object.values(CheckoutStepType).includes(stepName as any)) {
                 const step = stepName as CheckoutStepType
@@ -252,9 +259,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 })
             }
         } else if (path.length == 1 && path[0] == 'cart') {
+            UrlHelper.shared.clear()
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
             this.openCart(false)
         } else {
+            UrlHelper.shared.clear()
             HistoryManager.setUrl(this.webshop.getUrlSuffix())
         }
 
@@ -292,7 +301,6 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     deactivated() {
-        console.log("deactivated")
         // For an unknown reason, activated is also called when the view is displayed for the first time
         // so we need to only start setting the url when we were deactivated first
         this.canSetUrl = true
@@ -306,10 +314,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     activated() {
         this.visible = true
-        console.log("activated "+this.canSetUrl)
         if (this.canSetUrl) {
-            console.log("set url!!!")
-
             // For an unknown reason, we need to set a timer to properly update the URL...
             window.setTimeout(() => {
                 HistoryManager.setUrl(this.webshop.getUrlSuffix())

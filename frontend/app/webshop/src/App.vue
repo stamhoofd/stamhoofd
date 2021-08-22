@@ -10,7 +10,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
-import { NetworkManager } from '@stamhoofd/networking';
+import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -29,8 +29,8 @@ export default class App extends Vue {
         promise: async () => {
             // get organization
             try {
-                const ignorePath = ["checkout", "order", "cart", "payment"];
-                const path = window.location.pathname.substring(1).split("/");
+                const ignorePath = ["checkout", "order", "cart", "payment", "tickets"];
+                const path = UrlHelper.shared.getParts()
                 const response = await NetworkManager.server.request({
                     method: "GET",
                     path: "/webshop-from-domain",
@@ -61,9 +61,11 @@ export default class App extends Vue {
         }
     })
 
-    mounted() {
+    created() {
         HistoryManager.activate();
+    }
 
+    mounted() {
         CenteredMessage.addListener(this, async (centeredMessage) => {
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early

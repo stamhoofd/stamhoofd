@@ -167,7 +167,7 @@
                     <span>Het lukt niet</span>
                 </button>
                 <button slot="right" class="button primary" @click="goNext">
-                    <span>Ik heb overgeschreven</span>
+                    <span>Doorgaan</span>
                     <span class="icon arrow-right" />
                 </button>
             </STToolbar>

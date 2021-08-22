@@ -1,4 +1,4 @@
-import { CartItem, CartItemOption } from './Cart';
+import { Cart, CartItem, CartItemOption } from './Cart';
 import { Option, OptionMenu, Product } from "./Product";
 import { Webshop } from './Webshop';
 
@@ -30,7 +30,7 @@ describe("Structure.CartItem", () => {
         const webshop = Webshop.create({
             products: [product]
         })
-        expect(() => cartItem.validate(webshop)).not.toThrow()
+        expect(() => cartItem.validate(webshop, Cart.create({}))).not.toThrow()
     });
 
     it("can not contain multiple options for the same multiple choice menu", () => {
@@ -59,6 +59,6 @@ describe("Structure.CartItem", () => {
         const webshop = Webshop.create({
             products: [product]
         })
-        expect(() => cartItem.validate(webshop)).toThrow()
+        expect(() => cartItem.validate(webshop, Cart.create({}))).toThrow()
     });
 });

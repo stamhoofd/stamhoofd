@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Capacitor
+import WebKit
 
 /**
     We enable the default swipe to go back behaviour in the WKWebView
@@ -49,5 +50,11 @@ class HomeViewController: CAPBridgeViewController {
         }
         self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        
+        
     }
+}
+
+extension HomeViewController: WKWebViewDelegate {
+    
 }

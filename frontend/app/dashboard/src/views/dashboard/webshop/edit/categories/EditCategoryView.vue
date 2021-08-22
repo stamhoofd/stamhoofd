@@ -31,7 +31,12 @@
             </STInputBox>
 
             <hr>
-            <h2>Artikels</h2>
+            <h2 v-if="isTickets">
+                Tickets
+            </h2>
+            <h2 v-else>
+                Artikels
+            </h2>
             <STList>
                 <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
@@ -39,7 +44,8 @@
             <p>
                 <button class="button text" @click="addProduct">
                     <span class="icon add" />
-                    <span>Artikel toevoegen</span>
+                    <span v-if="isTickets">Ticket toevoegen</span>
+                    <span v-else>Artikel toevoegen</span>
                 </button>
             </p>
         </main>
@@ -61,7 +67,7 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage,ErrorBox, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Category, PrivateWebshop, Product, Version } from "@stamhoofd/structures"
+import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditProductView from '../products/EditProductView.vue';
@@ -102,6 +108,10 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         return this.webshop.patch(this.patchWebshop)
     }
 
+    get isTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+    }
+
     get patchedCategory() {
         const c = this.patchedWebshop.categories.find(c => c.id == this.category.id)
         if (c) {
@@ -129,7 +139,9 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     }
 
     addProduct() {
-        const product = Product.create({})
+        const product = Product.create({
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
+        })
         const p = PrivateWebshop.patch({})
         p.products.addPut(product)
 

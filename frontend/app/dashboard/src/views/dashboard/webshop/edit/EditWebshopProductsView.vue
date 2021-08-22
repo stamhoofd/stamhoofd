@@ -10,7 +10,12 @@
         </template>
 
         <template v-else-if="webshop.products.length > 0">
-            <h2>Artikels</h2>
+            <h2 v-if="isTickets">
+                Tickets
+            </h2>
+            <h2 v-else>
+                Artikels
+            </h2>
             <STList>
                 <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
@@ -26,7 +31,8 @@
         <p v-if="webshop.categories.length == 0">
             <button class="button text" @click="addProduct">
                 <span class="icon add" />
-                <span>Artikel toevoegen</span>
+                <span v-if="isTickets">Ticket toevoegen</span>
+                <span v-else>Artikel toevoegen</span>
             </button>
         </p>
     </main>
@@ -36,7 +42,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault, STInputBox, STList, STListItem,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
-import { Category, PrivateWebshop, Product } from '@stamhoofd/structures';
+import { Category, PrivateWebshop, Product, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import CategoryRow from './categories/CategoryRow.vue';
@@ -62,8 +68,14 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
+    get isTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+    }
+
     addProduct() {
-        const product = Product.create({})
+        const product = Product.create({
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
+        })
         const p = PrivateWebshop.patch({})
         p.products.addPut(product)
         this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {

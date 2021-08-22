@@ -103,7 +103,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { DNSRecord, DNSRecordType,Image, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import DNSRecordBox from './../../../components/DNSRecordBox.vue';
+import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
 
 @Component({
     components: {

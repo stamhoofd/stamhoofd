@@ -104,9 +104,12 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 }
             }
 
+            let markPaid = false
+
             if (patch.status) {
                 if (model.status != PaymentStatus.Succeeded && model.paidAt === null && patch.status == PaymentStatus.Succeeded) {
                     model.paidAt = new Date()
+                    markPaid = true
                 } else if (model.paidAt !== null && patch.status != PaymentStatus.Succeeded) {
                     model.paidAt = null
                 }
@@ -154,6 +157,11 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
             if (patch.price) {
                 model.price = patch.price
+            }
+
+            if (markPaid) {
+                // Send e-mail if needed with tickets
+                await orderPay?.order?.markPaid(orderPay, user.organization)
             }
 
             changedPayments.push(model)

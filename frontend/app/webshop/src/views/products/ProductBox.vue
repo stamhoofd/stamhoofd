@@ -1,5 +1,16 @@
 <template>
-    <article class="product-box" :class="{selected: count > 0}" @click="onClicked">
+    <article class="product-box" :class="{ selected: count > 0, ticket: product.type != 'Product'}" @click="onClicked">
+        <svg width="100%" height="100%" class="maskingSvg">
+            <defs>
+                <mask :id="'ProductBoxMask-'+product.id">
+                    <rect x="0" y="0" width="100%" height="100%" fill="white" rx="5px" />
+                    <circle cx="0" cy="50%" r="15px" fill="black" />
+                </mask>
+            </defs>
+
+            <rect x="0" y="0" width="100%" height="100%" fill="white" :mask="'url(#ProductBoxMask-'+product.id+')'" class="svg-background" />
+        </svg>
+
         <div class="left" />
         <div class="content">
             <div>
@@ -9,7 +20,11 @@
                     </div>
                     {{ product.name }}
                 </h3>
-                <p v-if="product.description" class="description" v-text="product.description" />
+
+                <p v-if="product.type != 'Product' && product.location" class="description" v-text="product.location.name" />
+                <p v-if="product.type != 'Product' && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
+                <p v-else-if="product.description" class="description" v-text="product.description" />
+
                 <p class="price">
                     {{ price | price }}
 
@@ -30,7 +45,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
-import { CartItem, Product } from '@stamhoofd/structures';
+import { CartItem, Product, ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -100,6 +115,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
         return this.product.remainingStock
     }
 
+    formatDateRange(dateRange: ProductDateRange) {
+        return Formatter.capitalizeFirstLetter(dateRange.toString())
+    }
+
 }
 </script>
 
@@ -108,13 +127,9 @@ export default class ProductBox extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .product-box {
-    
-
     display: flex;
     flex-direction: row;
     align-items: center;
-    overflow: hidden;
-
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -122,6 +137,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
     transition: background-color 0.2s 0.1s;
 
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+
+    .maskingSvg {
+        display: none;
+    }
 
     > .content > hr {
         border: 0;
@@ -156,8 +175,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     &:active {
         transition: none;
-        background: $color-background-shade;
-        background: var(--color-current-background-shade, $color-background-shade);
+        background: $color-primary-background;
     }
 
     > .left {
@@ -236,6 +254,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 line-clamp: 2; /* number of lines to show */
                 -webkit-line-clamp: 2; /* number of lines to show */
                 -webkit-box-orient: vertical;
+
+                + .description {
+                    padding-top: 0;
+                }
             }
 
             > .price {
@@ -254,6 +276,52 @@ export default class ProductBox extends Mixins(NavigationMixin){
         }
         
     }
+
+    &.ticket {
+        position: relative;
+        
+        @media (min-width: 801px) {
+
+            .maskingSvg {
+                display: block;
+                z-index: -1;
+                position: absolute;
+            }
+            
+            background: none;
+            filter: drop-shadow($color-side-view-shadow 0px 2px 5px);
+            box-shadow: none;
+
+            > .left {
+                order: 30;
+                transform: translateX(4px);
+            }
+
+            &.selected > .left {
+                transform: translateX(0px);
+            }
+
+            > .content > div {
+                padding-left: 30px;
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+
+            .svg-background {
+                transition: fill 0.2s 0.1s;
+            }
+
+            &:active {
+                background: none;
+
+                .svg-background {
+                    transition: none;
+                    fill: $color-primary-background;
+                }
+            }
+        }
+    }
+
 
     &.selected {
         > .content > div {

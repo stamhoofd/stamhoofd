@@ -28,9 +28,11 @@ function hexToHSL(hex) {
 export class ColorHelper {
 	static primaryColor: string | null;
 
-    static setColor(color: string) {
+    static setColor(color: string, element?: HTMLElement) {
+		element = element ?? document.documentElement
+
 		this.primaryColor = color;
-        document.documentElement.style.setProperty("--color-primary", color)
+        element.style.setProperty("--color-primary", color)
 
         // Do color manipulation here
         let { h, s, l } = hexToHSL(color.substring(1));
@@ -41,25 +43,25 @@ export class ColorHelper {
 		console.log(h)
         
         const primaryBackground = "hsl(" + h + "," + s + "%," + l + "%)";
-        document.documentElement.style.setProperty("--color-primary-background", primaryBackground)
+        element.style.setProperty("--color-primary-background", primaryBackground)
 
         // Modify s + l
         l = 77
         s = 68
         const primaryGrayLight = "hsl(" + h + "," + s + "%," + l + "%)";
-        document.documentElement.style.setProperty("--color-primary-gray-light", primaryGrayLight)
+        element.style.setProperty("--color-primary-gray-light", primaryGrayLight)
 
 		// Modify s + l
         l = 94
         s = 100
         const primaryLight = "hsl(" + h + "," + s + "%," + l + "%)";
-        document.documentElement.style.setProperty("--color-primary-light", primaryLight)
+        element.style.setProperty("--color-primary-light", primaryLight)
 
 		// Modify s + l
         l = 98
         s = 100
         const primaryLighter = "hsl(" + h + "," + s + "%," + l + "%)";
-        document.documentElement.style.setProperty("--color-primary-lighter", primaryLighter)
+        element.style.setProperty("--color-primary-lighter", primaryLighter)
     }
 
 	static setupDarkTheme() {

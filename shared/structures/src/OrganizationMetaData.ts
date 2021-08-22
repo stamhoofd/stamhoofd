@@ -315,6 +315,12 @@ export class OrganizationMetaData extends AutoEncoder {
     type: OrganizationType;
 
     /**
+     * Show beta features in this organization
+     */
+    @field({ decoder: BooleanDecoder, version: 108 })
+    enableBetaFeatures = false
+
+    /**
      * @deprecated Only used for migrations
      */
     @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }), field: "modules" })

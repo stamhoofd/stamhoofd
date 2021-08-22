@@ -1,12 +1,11 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
-
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = WebshopOrdersQuery
@@ -53,26 +52,20 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         
         errors.throwIfNotEmpty()
 
-        const q: any = { 
-            webshopId: webshop.id,
-        }
+        let orders: Order[] | undefined = undefined
+        const limit = 50
 
-        if (request.query.afterNumber !== null) {
-            q.number = {
-                sign: request.query.sort == SortDirection.Ascending ? ">" : "<",
-                value: request.query.afterNumber ?? 0,
+        if (request.query.updatedSince !== undefined) {
+            if (request.query.afterNumber !== undefined) {
+                orders = await Order.select("WHERE webshopId = ? AND number is not null AND (updatedAt > ? OR (updatedAt = ? AND number > ?)) ORDER BY updatedAt, number LIMIT ?", [webshop.id, request.query.updatedSince, request.query.updatedSince, request.query.afterNumber, limit])
+            } else {
+                orders = await Order.select("WHERE webshopId = ? AND number is not null AND updatedAt >= ? ORDER BY updatedAt, number LIMIT ?", [webshop.id, request.query.updatedSince, limit])
             }
+        } else if (request.query.afterNumber !== undefined) {
+            orders = await Order.select("WHERE webshopId = ? AND number > ? ORDER BY updatedAt, number LIMIT ?", [webshop.id, request.query.afterNumber, limit])
+        } else {
+            orders = await Order.select("WHERE webshopId = ? AND number is not null ORDER BY updatedAt, number LIMIT ?", [webshop.id, limit])
         }
-
-        const limit = 100
-
-        const orders = await Order.where(q, {
-            limit: limit,
-            sort: [{
-                column: "number",
-                direction: request.query.sort == SortDirection.Ascending ? "ASC" : "DESC"
-            }]
-        })
 
         const paymentIds = orders.map(o => o.paymentId).filter(p => !!p) as string[]
         if (paymentIds.length > 0) {
@@ -93,8 +86,8 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
                     ...order
                 }, { payment: order.payment ? PaymentStruct.create(order.payment) : null }))),
                 next: orders.length >= limit ? WebshopOrdersQuery.create({
-                    afterNumber: orders[orders.length - 1].number ?? undefined,
-                    sort: request.query.sort
+                    updatedSince: orders[orders.length - 1].updatedAt ?? undefined,
+                    afterNumber: orders[orders.length - 1].number ?? undefined
                 }) : undefined
             })
         );
