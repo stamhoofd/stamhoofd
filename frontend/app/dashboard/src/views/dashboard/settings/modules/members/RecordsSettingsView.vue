@@ -373,7 +373,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
 
     setFreeContributionAmounts(index: number, amount: number) {
-        const amounts = this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
         const p = FreeContributionSettings.patch({})
         for (const a of amounts) (
             p.amounts.addDelete(a)
