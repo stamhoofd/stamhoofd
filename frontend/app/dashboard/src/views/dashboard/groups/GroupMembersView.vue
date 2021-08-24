@@ -111,7 +111,7 @@
                                 <span v-if="waitingList && canRegister(member.member)" v-tooltip="'Dit lid kan zich inschrijven via de uitnodiging'" class="style-tag warn">Toegelaten</span>
                             </h2>
                             <p v-if="!group" class="style-description-small">
-                                {{ member.member.groups.map(g => g.settings.name ).join(", ") }}
+                                {{ getMemberCycleOffsetGroups(member.member).map(g => g.settings.name ).join(", ") }}
                             </p>
                             <p v-if="member.member.details && !member.member.details.isRecovered" class="style-description-small only-smartphone">
                                 <template v-if="member.member.details.age !== null">
@@ -338,6 +338,30 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
     }
 
+    /**
+     * Return all groups a member was registered in, given the current cycle offset
+     */
+    getMemberCycleOffsetGroups(member: MemberWithRegistrations) {
+        if (this.cycleOffset == 0) {
+            // No changes
+            return member.groups
+        }
+        const groupMap = new Map<string, Group>()
+        const allGroups = OrganizationManager.organization.groups
+
+        for (const registration of member.registrations) {
+            const group = allGroups.find(g => g.id == registration.groupId)
+
+            if (group) {
+                if (group.cycle == registration.cycle + this.cycleOffset && registration.deactivatedAt === null && registration.waitingList === this.waitingList) {
+                    groupMap.set(group.id, group)
+                }
+            }
+        }
+
+        return [...groupMap.values()]
+    }
+
     async checkInaccurateMetaData() {
         if (this.checkingInaccurate) {
             return
@@ -370,9 +394,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canGoBack() {
-        if (!this.group) {
-            return false
-        }
         return !this.loading // always allow to go to -1
     }
 
@@ -382,7 +403,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get hasFull(): boolean {
         if (!this.group) {
-            return false
+            if (!this.category) {
+                return false
+            }
+            return !this.category.groups.find(g => {
+                if (!g.privateSettings || !OrganizationManager.user.permissions) {
+                    return true
+                }
+
+                if(g.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+                    return true
+                }
+                return false
+            })
         }
 
         if (!this.group.privateSettings || !OrganizationManager.user.permissions) {
@@ -436,34 +469,41 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get canEnd() {
-        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length > 0 && this.hasFull
+        return !this.loading && this.cycleOffset == 0 && this.members.length > 0 && this.hasFull
     }
 
     get canUndoEnd() {
-        return this.group !== null && !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull && this.group.cycle > 0
+        return !this.loading && this.cycleOffset == 0 && this.members.length == 0 && this.hasFull && ((this.group && this.group.cycle > 0) || (this.category && !this.category.groups.find(g => g.cycle <= 0)))
     }
 
     goEnd() {
-        if (!this.group) {
-            return
+        let cleanedIds: string[] = []
+
+        if (this.group) {
+            const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+            const ids = parents.flatMap(p => p.groupIds)
+            // Only select groups with the same cycle
+            const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id)!)
+            cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
+        } else {    
+            cleanedIds = this.category?.groups?.map(g => g.id) ?? []
         }
-        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
-        const ids = parents.flatMap(p => p.groupIds)
-        // Only select groups with the same cycle
-        const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id))
-        const cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
+        
         this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: cleanedIds }).setDisplayStyle("popup"))
     }
 
     goUndoEnd() {
-        if (!this.group) {
-            return
+        let cleanedIds: string[] = []
+
+        if (this.group) {
+            const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
+            const ids = parents.flatMap(p => p.groupIds)
+            // Only select groups with the same cycle
+            const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id)!)
+            cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
+        } else {    
+            cleanedIds = this.category?.groups?.map(g => g.id) ?? []
         }
-        const parents = this.group.getParentCategories(OrganizationManager.organization.meta.categories, false)
-        const ids = parents.flatMap(p => p.groupIds)
-        // Only select groups with the same cycle
-        const groups = ids.map(id => OrganizationManager.organization.groups.find(g => g.id === id))
-        const cleanedIds = groups.flatMap(g => g && g.cycle === this.group!.cycle ? [g.id] : [])
         this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds: cleanedIds, undo: true }).setDisplayStyle("popup"))
     }
 
