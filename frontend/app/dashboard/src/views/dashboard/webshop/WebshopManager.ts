@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
-import { NetworkManager, SessionManager } from "@stamhoofd/networking";
+import { SessionManager } from "@stamhoofd/networking";
 import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { EventBus } from "../../../../../../shared/components";
@@ -25,6 +25,9 @@ export class WebshopManager {
     isLoadingOrders = false
     isLoadingTickets = false
     savingTicketPatches = false
+
+    lastUpdatedOrders: Date | null = null
+    lastUpdatedTickets: Date | null = null
 
     /**
      * Listen for new orders that are being fetched or loaded
@@ -360,6 +363,10 @@ export class WebshopManager {
                 // Only once (if undefined)
                 try {
                     this.lastFetchedOrder = await this.readSettingKey("lastFetchedOrder") ?? null
+                    if (this.lastFetchedOrder?.updatedAt && !this.lastUpdatedOrders) {
+                        // Set initial timestamp in case of network error later on
+                        this.lastUpdatedOrders = this.lastFetchedOrder.updatedAt
+                    }
                 } catch (e) {
                     console.error(e)
                     // Probably no database support. Ignore it and load everything.
@@ -394,15 +401,14 @@ export class WebshopManager {
                 
                 query = response.next
             }
+            this.lastUpdatedOrders = new Date()
         } finally {
             this.isLoadingOrders = false
         }
     }
 
 
-
     /// TICKETS
-
     async storeTickets(tickets: TicketPrivate[], clearPatches = true) {
         const db = await this.getDatabase()
 
@@ -574,6 +580,11 @@ export class WebshopManager {
                 // Only once (if undefined)
                 try {
                     this.lastFetchedTicket = await this.readSettingKey("lastFetchedTicket") ?? null
+
+                    if (this.lastFetchedTicket?.updatedAt && !this.lastUpdatedTickets) {
+                        // Set initial timestamp in case of network error later on
+                        this.lastUpdatedTickets = this.lastFetchedTicket.updatedAt
+                    }
                 } catch (e) {
                     console.error(e)
                     // Probably no database support. Ignore it and load everything.
@@ -601,8 +612,9 @@ export class WebshopManager {
                 
                 query = response.next
             }
+            this.lastUpdatedTickets = new Date()
         } finally {
-            this.isLoadingOrders = false
+            this.isLoadingTickets = false
         }
     }
 

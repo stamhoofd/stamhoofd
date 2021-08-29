@@ -50,11 +50,5 @@ class HomeViewController: CAPBridgeViewController {
         }
         self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
-        
-        
     }
-}
-
-extension HomeViewController: WKWebViewDelegate {
-    
 }

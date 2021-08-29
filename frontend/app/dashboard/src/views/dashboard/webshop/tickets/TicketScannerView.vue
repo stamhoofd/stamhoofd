@@ -18,9 +18,20 @@
                     </button>
                 </div>
 
-                <div v-if="false" class="status-bar">
-                    <p v-if="checkingTicket" slot="right">
-                        Ticket controleren...
+                <div class="status-bar">
+                    <p v-if="isLoading">
+                        <Spinner /> Bijwerken...
+                    </p>
+                    <p v-else-if="hadNetworkError">
+                        Geen internetverbinding. Internet is noodzakelijk om nieuw aangekochte tickets te scannen of om dubbel scannen te detecteren tussen meerdere toestellen.<br>
+                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span><br>
+                        <button class="button text" @click="updateTickets">
+                            Opnieuw proberen
+                        </button>
+                    </p>
+                    <p v-else>
+                        Plaats de QR-code in het kader om te scannen.<br>
+                        <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span>
                     </p>
                 </div>
             </div>
@@ -29,6 +40,7 @@
 </template>
 
 <script lang="ts">
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Order, Product, TicketPrivate } from "@stamhoofd/structures";
@@ -103,8 +115,58 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     cameraIndex = 0
     hasFlash = false
     isFlashOn = false
+    stream: MediaStream | null = null
 
     pollInterval: number | null = null
+
+    hadNetworkError = false
+
+    currentDate = new Date()
+    updateCurrentDateInterval: number | null = null
+
+    get isLoading() {
+        return this.webshopManager.isLoadingOrders || this.webshopManager.isLoadingTickets
+    }
+
+    get lastUpdatedText() {
+        const min = Math.min(this.webshopManager.lastUpdatedTickets?.getTime() ?? 0, this.webshopManager.lastUpdatedOrders?.getTime() ?? 0)
+        if (min === 0) {
+            return "nooit"
+        }
+        const now = this.currentDate.getTime()
+        let diff = now - min
+
+        const days = Math.floor(diff / (60*1000*60*24))
+        
+        diff = diff % (60*1000*60*24)
+        const hours = Math.floor(diff / (60*1000*60))
+        diff = diff % (60*1000*60)
+
+        const minutes = Math.floor(diff / (60*1000))
+
+        if (days > 0) {
+            if (days === 1) {
+                return "één dag geleden"
+            }
+            return days+" dagen geleden"
+        }
+
+        if (hours > 0) {
+            if (hours === 1) {
+                return "één uur geleden"
+            }
+            return hours+" uur geleden"
+        }
+
+        if (minutes > 0) {
+            if (minutes === 1) {
+                return "één minuut geleden"
+            }
+            return minutes+" minuten geleden"
+        }
+
+        return "zojuist"
+    }
 
     switchCamera() {
         this.cameraIndex++
@@ -117,7 +179,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         this.setStream({ 
             video: { deviceId: this.cameras[this.cameraIndex].deviceId },
             audio: false,
-        }).catch(console.error)
+        }, true).catch(console.error)
     }
 
     toggleFlash() {
@@ -133,12 +195,27 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     mounted() {
         // Check for new tickets
         // todo: keep polling in the future
-        this.webshopManager.fetchNewTickets(true, false).catch(console.error)
-        this.webshopManager.fetchNewOrders(true, false).catch(console.error)
-
-        // Do we still have some missing patches that are not yet synced with the server?
-        this.webshopManager.trySavePatches().catch(console.error)
+        this.updateTickets().catch(console.error)
+        
         //this.start().catch(console.error)
+    }
+
+    async updateTickets() {
+        try {
+            await Promise.all([
+                this.webshopManager.fetchNewTickets(false, false),
+                this.webshopManager.fetchNewOrders(false, false)
+            ])
+            
+            this.hadNetworkError = false
+
+            // Do we still have some missing patches that are not yet synced with the server?
+            this.webshopManager.trySavePatches().catch(console.error)
+        } catch (e) {
+            if (Request.isNetworkError(e)) {
+                this.hadNetworkError = true
+            }
+        }
     }
 
     readingQR = false
@@ -173,33 +250,59 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             });
     }
 
-    async setStream(constraints: MediaStreamConstraints) {
+    stopStream() {
+        if (!this.stream) {
+            return
+        }
+
+        try {
+            // Old browsers use old deprecated stop api on stream
+            if (this.stream && (this.stream as any).stop) {
+                (this.stream as any).stop();
+                this.stream = null;
+            } else {
+                if (this.stream && this.stream.getTracks) {
+                    var track = this.stream.getTracks()[0]; // if only one media track
+                    track.stop();
+                    this.stream = null;
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async setStream(constraints: MediaStreamConstraints, force = false) {
         if (this.pollInterval) {
             clearInterval(this.pollInterval)
             this.pollInterval = null
         }
-
         const video = this.$refs.video as HTMLVideoElement
-
-        // iOS fix
+         // iOS fix
         video.setAttribute('autoplay', '');
         video.setAttribute('muted', '');
         video.setAttribute('playsinline', '');
 
-        // Not adding `{ audio: true }` since we only want video now
-        const stream = await navigator.mediaDevices
-            .getUserMedia(constraints)
-        video.srcObject = stream;
+        if (this.stream && this.stream.active && !force) {
+            // Keep existing stream
+            video.srcObject = this.stream;
+        } else {
+            this.stopStream()
+            // Not adding `{ audio: true }` since we only want video now
+            const stream = await navigator.mediaDevices
+                .getUserMedia(constraints)
+            this.stream = stream
+            video.srcObject = stream;
+        }
         video.play().catch(console.error);
-
-        this.pollInterval = window.setInterval(this.pollImage, 500)
+        this.pollInterval = window.setInterval(this.pollImage, 300)
 
         // Only request camera's after we got permission
         this.cameras = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput")
         console.log("Camera's", this.cameras)
 
         try {
-            const deviceId = stream.getVideoTracks()[0].getSettings().deviceId
+            const deviceId = this.stream.getVideoTracks()[0].getSettings().deviceId
             const index = this.cameras.findIndex(c => c.deviceId === deviceId)
             if (index != -1) {
                 this.cameraIndex = index
@@ -373,6 +476,12 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             clearInterval(this.pollInterval)
             this.pollInterval = null
         }
+        // We keep stream alive to prevent slow start / delays / permission dialogs
+
+        if (this.updateCurrentDateInterval) {
+            clearInterval(this.updateCurrentDateInterval)
+            this.updateCurrentDateInterval = null
+        }
     }
 
     activated() {
@@ -382,6 +491,16 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         // We restart the scanner every time because there is a bug in the qr scanner
         // that randomly breaks the scanning after some time when going back (recreating the video element)
         this.start().catch(console.error)
+
+        if (this.updateCurrentDateInterval) {
+            clearInterval(this.updateCurrentDateInterval)
+        }
+        this.updateCurrentDateInterval = window.setInterval(() => {
+            this.currentDate = new Date()
+            if (!this.isLoading) {
+                this.updateTickets().catch(console.error)
+            }
+        }, 60*1000*30)
     }
 
     beforeDestroy() {
@@ -389,6 +508,14 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             clearInterval(this.pollInterval)
             this.pollInterval = null
         }
+
+        if (this.updateCurrentDateInterval) {
+            clearInterval(this.updateCurrentDateInterval)
+            this.updateCurrentDateInterval = null
+        }
+
+        // Kill stream
+        this.stopStream()
     }
 }
 </script>
@@ -415,11 +542,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         .scan-overlay {
-            width: 2/3*100%;
+            width: 50%;
             position: absolute;
             left: 50%;
             top: 50%;
-            padding-bottom: 2/3*100%;
+            padding-bottom: 50%;
             border: 4px solid white;
             transform: translate(-50%, -50%);
         }
@@ -432,8 +559,16 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         right: 0;
 
         > .status-bar {
-            background: white;
-            padding: 15px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: $color-background;
+            padding: 15px 15px;
+            text-align: center;
+            color: $color-dark;
+            font-size: 14px;
+            line-height: 1.4;
         }
     }
 
