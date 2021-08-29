@@ -1,21 +1,20 @@
 import { Migration } from '@simonbackx/simple-database';
-import { column,Model } from '@simonbackx/simple-database';
 import { StringCompare } from '@stamhoofd/utility';
 import fs from "fs";
 import readline from "readline";
-import { v4 as uuidv4 } from "uuid";
+import { Country } from '@stamhoofd/structures';
 
 import { City } from '../models/addresses/City';
 import { PostalCode } from '../models/addresses/PostalCode';
 import { Province } from '../models/addresses/Province';
 
 async function getProvince(name: string, provinces: Province[]): Promise<Province> {
-    const p = provinces.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == "NL")
+    const p = provinces.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == Country.Netherlands)
     if (p) {
         return p
     }
     const province = new Province()
-    province.country = "NL"
+    province.country = Country.Netherlands
     province.name = name
     await province.save()
 
@@ -24,13 +23,13 @@ async function getProvince(name: string, provinces: Province[]): Promise<Provinc
 }
 
 async function getCity(name: string, provinceId: string, cities: City[]): Promise<City> {
-    const p = cities.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == "NL")
+    const p = cities.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == Country.Netherlands)
     if (p) {
         return p
     }
     const city = new City()
     city.name = name
-    city.country = "NL"
+    city.country = Country.Netherlands
     city.provinceId = provinceId
     await city.save()
 
@@ -52,7 +51,7 @@ export default new Migration(async () => {
                 return { path: folder + "/" + dirent.name, name: dirent.name }
             });
 
-    const allProvinces = await Province.where({ country: "NL"})
+    const allProvinces = await Province.where({ country: Country.Netherlands})
 
     for (const p of provinces) {
         console.log(p.name);
@@ -89,7 +88,7 @@ export default new Migration(async () => {
             const postalCode = new PostalCode()
             postalCode.postalCode = postcode
             postalCode.cityId = city.id
-            postalCode.country = "NL"
+            postalCode.country = Country.Netherlands
             await postalCode.save();
         }
     }

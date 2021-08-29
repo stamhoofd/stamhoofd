@@ -3,6 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
+import { Country } from "../addresses/CountryDecoder";
 
 
 export enum STPackageType {
@@ -264,7 +265,7 @@ export class STPackageStatus extends AutoEncoder {
 export function calculateVATPercentage(address: Address, VATNumber: string | null) {
     // Determine VAT rate
     let VATRate = 0
-    if (address.country === "BE") {
+    if (address.country === Country.Belgium) {
         VATRate = 21
     } else {
         if (VATNumber) {
@@ -272,13 +273,17 @@ export function calculateVATPercentage(address: Address, VATNumber: string | nul
         } else {
             // Apply VAT rate of the home country for consumers in the EU
 
-            if (address.country === "NL") {
-                VATRate = 21;
-            } else {
-                throw new SimpleError({
-                    code: "country_not_supported",
-                    message: "Non-business sales to your country are not yet supported. Please enter a valid VAT number.",
-                })
+            switch( address.country) {
+                case Country.Netherlands: VATRate = 21; break;
+                case Country.Luxembourg: VATRate = 17; break;
+                case Country.France: VATRate = 20; break;
+                case Country.Germany: VATRate = 19; break;
+                default: {
+                    throw new SimpleError({
+                        code: "country_not_supported",
+                        message: "Non-business sales to your country are not yet supported. Please enter a valid VAT number.",
+                    })
+                }
             }
         }
     }

@@ -41,7 +41,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, BackButton } from "@stamhoofd/components"
+import { BackButton,ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -103,6 +103,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         switch (type) {
             case CheckoutMethodType.Takeout: return "Afhalen";
             case CheckoutMethodType.Delivery: return "Levering";
+            case CheckoutMethodType.OnSite: return "Ter plaatse";
         }
     }
     

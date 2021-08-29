@@ -26,7 +26,7 @@ import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.sv
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
 import { LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Organization, PaymentMethod } from '@stamhoofd/structures';
+import { Country, Organization, PaymentMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
 @Component({
@@ -74,7 +74,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         const r: PaymentMethod[] = []
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "NL") {
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
@@ -89,7 +89,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country == "BE") {
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country != Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 

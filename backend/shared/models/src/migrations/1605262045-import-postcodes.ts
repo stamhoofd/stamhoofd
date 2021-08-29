@@ -2,6 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { column,Model } from '@simonbackx/simple-database';
 import { StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
+import { Country } from '../../../../../shared/structures/dist';
 
 import { City } from '../models/addresses/City';
 import { PostalCode } from '../models/addresses/PostalCode';
@@ -38,12 +39,12 @@ export class Gemeente extends Model {
 }
 
 async function getProvince(name: string, provinces: Province[]): Promise<Province> {
-    const p = provinces.find(p => StringCompare.typoCount(p.name, name) < 2 && p.country == "BE")
+    const p = provinces.find(p => StringCompare.typoCount(p.name, name) < 2 && p.country == Country.Belgium)
     if (p) {
         return p
     }
     const province = new Province()
-    province.country = "BE"
+    province.country = Country.Belgium
     province.name = name.trim()
     await province.save()
     provinces.push(province)
@@ -70,7 +71,7 @@ export default new Migration(async () => {
             // Create the city
             const city = new City()
             city.name = gemeente.gemeente.trim()
-            city.country = "BE"
+            city.country = Country.Belgium
             city.provinceId = province.id
 
             await city.save()
@@ -79,7 +80,7 @@ export default new Migration(async () => {
             const postalCode = new PostalCode()
             postalCode.postalCode = gemeente.postcode
             postalCode.cityId = city.id
-            postalCode.country = "BE"
+            postalCode.country = Country.Belgium
             await postalCode.save();
 
             gemeente.city = city
@@ -91,7 +92,7 @@ export default new Migration(async () => {
             const postalCode = new PostalCode()
             postalCode.postalCode = gemeente.postcode
             postalCode.cityId = found.id
-            postalCode.country = "BE"
+            postalCode.country = Country.Belgium
             await postalCode.save();
         }
         
@@ -107,7 +108,7 @@ export default new Migration(async () => {
             // Create the city
             const city = new City()
             city.name = gemeente.hoofdgemeente.trim()
-            city.country = "BE"
+            city.country = Country.Belgium
 
             const province = await getProvince(gemeente.provincie, provinces)
             city.provinceId = province.id

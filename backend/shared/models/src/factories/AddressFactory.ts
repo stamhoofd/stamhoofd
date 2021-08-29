@@ -1,6 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import StreetNames from "@simonbackx/simple-database/dist/src/classes/data/streets";
-import { Address } from "@stamhoofd/structures";
+import { Address, Country } from "@stamhoofd/structures";
 
 interface Options {}
 
@@ -35,7 +35,7 @@ export class AddressFactory extends Factory<Options, Address> {
                 address.postalCode = "9000";
                 break;
         }
-        address.country = "BE";
+        address.country = Country.Belgium;
 
         return Promise.resolve(address);
     }

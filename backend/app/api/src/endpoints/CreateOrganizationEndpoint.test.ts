@@ -1,11 +1,11 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeyConstantsHelper, SensitivityLevel, Sodium } from "@stamhoofd/crypto";
-import { KeychainItem, OrganizationGenderType, SignupResponse } from '@stamhoofd/structures';
+import { EmailVerificationCode } from "@stamhoofd/models";
+import { Organization } from "@stamhoofd/models";
+import { Country, KeychainItem, OrganizationGenderType, SignupResponse } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { EmailVerificationCode } from "@stamhoofd/models";
-import { Organization } from "@stamhoofd/models";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 describe("Endpoint.CreateOrganization", () => {
@@ -44,7 +44,7 @@ describe("Endpoint.CreateOrganization", () => {
                     number: "12",
                     city: "Gent",
                     postalCode: "9000",
-                    country: "BE"
+                    country: Country.Belgium
                 }
             },
             privateMeta: null,

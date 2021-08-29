@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
@@ -30,7 +30,7 @@ export class Address extends AutoEncoder {
             number: "",
             postalCode: "",
             city: "",
-            country: "BE"
+            country: Country.Belgium
         })
     }
 
@@ -69,7 +69,16 @@ export class Address extends AutoEncoder {
             })
         }
 
-        if (country != "BE" && country != "NL") {
+        try {
+            const c = CountryDecoder.decode(new ObjectData(country, { version: 0 }))
+            return Address.create({
+                street,
+                number,
+                postalCode: postalCode,
+                city: city,
+                country: c
+            })
+        } catch (e) {
             throw new SimpleError({
                 code: "invalid_field",
                 message: "Invalid country",
@@ -77,14 +86,6 @@ export class Address extends AutoEncoder {
                 field: "country"
             })
         }
-
-        return Address.create({
-            street,
-            number,
-            postalCode: postalCode,
-            city: city,
-            country: country
-        })
     }
 
     static splitAddressLine(addressLine1: string) {

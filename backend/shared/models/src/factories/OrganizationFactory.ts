@@ -1,6 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import { Sodium } from "@stamhoofd/crypto";
-import { Address,OrganizationMetaData, OrganizationType } from "@stamhoofd/structures";
+import { Address,Country,OrganizationMetaData, OrganizationType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility"; 
 
 import { Organization } from "../models/Organization";
@@ -35,7 +35,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             number: "12",
             city: this.options.city ?? "Gent",
             postalCode: "9000",
-            country: "BE"
+            country: Country.Belgium
         })
 
         if (this.options.publicKey) {

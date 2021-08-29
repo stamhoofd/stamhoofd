@@ -169,7 +169,7 @@ import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-
 import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
+import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -207,7 +207,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get isBelgium() {
-        return this.organization.address.country == "BE"
+        return this.organization.address.country == Country.Belgium
     }
 
     get enableMemberModule() {

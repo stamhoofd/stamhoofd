@@ -11,11 +11,8 @@
         </div>
 
         <select v-model="country" class="input" autocomplete="country" name="country" @change="updateAddress" @focus="onFocus" @blur="onBlur">
-            <option value="BE">
-                België
-            </option>
-            <option value="NL">
-                Nederland
+            <option v-for="country in countries" :key="country.value" :value="country.value">
+                {{ country.text }}
             </option>
         </select>
     </STInputBox>
@@ -26,7 +23,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, Country, ValidatedAddress} from "@stamhoofd/structures"
+import { Address, Country, CountryHelper, ValidatedAddress} from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
@@ -62,9 +59,13 @@ export default class AddressInput extends Vue {
     addressLine1 = ""
     city = ""
     postalCode = ""
-    country: Country = "BE"
+    country: Country = Country.Belgium
 
     hasFocus = false
+
+    get countries() {
+        return CountryHelper.getList()
+    }
 
     @Watch('value', { deep: true })
     onValueChanged(val: Address | null) {
@@ -162,7 +163,7 @@ export default class AddressInput extends Vue {
     }
 
     updateAddress() {
-       this.isValid()
+       this.isValid().catch(console.error)
     }
 }
 </script>

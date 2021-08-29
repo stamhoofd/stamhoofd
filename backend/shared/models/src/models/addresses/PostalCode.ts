@@ -73,7 +73,7 @@ export class PostalCode extends Model {
         }
 
         // Search parent in belgium only
-        if (country == "BE") {
+        if (country == Country.Belgium) {
             return this.getCityByParent(postalCode, cityName, country)
         }
 

@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PostalCode } from '@stamhoofd/models';
-import { Address, ValidatedAddress } from "@stamhoofd/structures";
+import { Address, Country, ValidatedAddress } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -27,7 +27,7 @@ export class ValidateAddressEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         let postalCode = request.body.postalCode
-        if (request.body.country == "NL") {
+        if (request.body.country == Country.Netherlands) {
             // Check if we have the right syntax
             const stripped = postalCode.replace(/\s/g, '')
             if (stripped.length != 6) {

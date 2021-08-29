@@ -1,4 +1,4 @@
-import { Address, Group, GroupSettings,MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
+import { Address, Country, Group, GroupSettings,MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
 
 import groepFuncties from './SGVDefaultFuncties.json';
 import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
@@ -12,7 +12,7 @@ describe("Groepsadministratie Sync", () => {
                 number: "11",
                 city: "Gent",
                 postalCode: "9000",
-                country: "BE"
+                country: Country.Belgium
             }),
             birthDay: new Date(),
             parents: [
@@ -24,7 +24,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 })
             ]
@@ -41,7 +41,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 }),
                 Parent.create({
@@ -52,7 +52,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 })
             ]
@@ -72,7 +72,7 @@ describe("Groepsadministratie Sync", () => {
                     "latitude": 51,
                     "longitude": 3.8
                 },
-                land: "BE",
+                land: Country.Belgium,
                 "omschrijving": "",
                 "unknownSGVProperty": "test"
 
@@ -88,7 +88,7 @@ describe("Groepsadministratie Sync", () => {
             nummer: "11",
             gemeente: "Gent",
             postcode: "9000",
-            land: "BE",
+            land: Country.Belgium,
             unknownSGVProperty: "test",
             postadres: true
         })
@@ -102,7 +102,7 @@ describe("Groepsadministratie Sync", () => {
             nummer: "11",
             gemeente: "Gent",
             postcode: "9000",
-            land: "BE",
+            land: Country.Belgium,
             unknownSGVProperty: "test",
             postadres: true
         })
@@ -112,7 +112,7 @@ describe("Groepsadministratie Sync", () => {
             nummer: "11",
             gemeente: "Gent",
             postcode: "9000",
-            land: "BE",
+            land: Country.Belgium,
             postadres: false
         })
 
@@ -128,7 +128,7 @@ describe("Groepsadministratie Sync", () => {
                 number: "11",
                 city: "Gent",
                 postalCode: "9000",
-                country: "BE"
+                country: Country.Belgium
             })
         })
 
@@ -147,7 +147,7 @@ describe("Groepsadministratie Sync", () => {
                     "latitude": 51,
                     "longitude": 3.8
                 },
-                land: "BE",
+                land: Country.Belgium,
                 "omschrijving": "",
                 "unknownSGVProperty": "test",
                 hasErrors: false,
@@ -227,7 +227,7 @@ describe("Groepsadministratie Sync", () => {
                 number: "11",
                 city: "Gent",
                 postalCode: "9000",
-                country: "BE"
+                country: Country.Belgium
             }),
             parents: [
                 Parent.create({
@@ -238,7 +238,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 })
             ]
@@ -257,7 +257,7 @@ describe("Groepsadministratie Sync", () => {
             nummer: "11",
             gemeente: "Gent",
             postcode: "9000",
-            land: "BE",
+            land: Country.Belgium,
             postadres: true
         })
 
@@ -266,7 +266,7 @@ describe("Groepsadministratie Sync", () => {
             nummer: "11",
             gemeente: "Gent",
             postcode: "9000",
-            land: "BE",
+            land: Country.Belgium,
             postadres: false
         })
     })
@@ -284,7 +284,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 }),
                 Parent.create({
@@ -296,7 +296,7 @@ describe("Groepsadministratie Sync", () => {
                         number: "11",
                         city: "Gent",
                         postalCode: "9000",
-                        country: "BE"
+                        country: Country.Belgium
                     })
                 })
             ]
@@ -318,7 +318,7 @@ describe("Groepsadministratie Sync", () => {
                         "latitude": 51,
                         "longitude": 3.8
                     },
-                    land: "BE",
+                    land: Country.Belgium,
                     "omschrijving": "",
                     "unknownSGVProperty": "test"
                 }

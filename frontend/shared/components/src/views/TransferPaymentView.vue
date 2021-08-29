@@ -178,7 +178,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox,CopyableDirective,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components"
-import { Organization,Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { Country, Organization,Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -305,7 +305,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     get isBelgium() {
-        return this.organization.address.country == "BE"
+        return this.organization.address.country == Country.Belgium
     }
 
     get isStructured() {

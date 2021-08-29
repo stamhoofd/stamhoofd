@@ -79,11 +79,11 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const countries: Country[] = []
         if (StringCompare.typoCount(request.query.query, "België") < 3) {
-            countries.push("BE")
+            countries.push(Country.Belgium)
         }
 
         if (StringCompare.typoCount(request.query.query, "Nederland") < 3) {
-            countries.push("NL")
+            countries.push(Country.Netherlands)
         }
         
         return new Response(SearchRegions.create({
