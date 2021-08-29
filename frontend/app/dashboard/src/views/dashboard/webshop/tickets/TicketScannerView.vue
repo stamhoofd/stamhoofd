@@ -23,7 +23,7 @@
                         <Spinner /> Bijwerken...
                     </p>
                     <p v-else-if="hadNetworkError">
-                        Geen internetverbinding. Internet is noodzakelijk om nieuw aangekochte tickets te scannen of om dubbel scannen te detecteren tussen meerdere toestellen.<br>
+                        Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
                         <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span><br>
                         <button class="button text" @click="updateTickets">
                             Opnieuw proberen
@@ -214,6 +214,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         } catch (e) {
             if (Request.isNetworkError(e)) {
                 this.hadNetworkError = true
+            } else {
+                Toast.fromError(e).show()
             }
         }
     }
@@ -500,7 +502,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             if (!this.isLoading) {
                 this.updateTickets().catch(console.error)
             }
-        }, 60*1000*30)
+        }, 1000*30)
     }
 
     beforeDestroy() {
