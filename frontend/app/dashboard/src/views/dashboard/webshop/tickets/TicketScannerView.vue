@@ -31,7 +31,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { Order, TicketPrivate } from "@stamhoofd/structures";
+import { Order, Product, TicketPrivate } from "@stamhoofd/structures";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -90,17 +90,21 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     webshopManager!: WebshopManager
 
-    scanner?: QrScanner
+    @Prop({ required: true })
+    disabledProducts: Product[]
+
     checkingTicket = false
 
     // Disable scanning before this date
     cooldown: Date | null = null
     cooldownResult: string | null = null
 
-    cameras: QrScanner.Camera[] = []
+    cameras: MediaDeviceInfo[] = []
     cameraIndex = 0
     hasFlash = false
     isFlashOn = false
+
+    pollInterval: number | null = null
 
     switchCamera() {
         this.cameraIndex++
@@ -108,15 +112,20 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.cameraIndex = 0
         }
         console.log(this.cameraIndex)
-        this.scanner?.setCamera(this.cameras[this.cameraIndex].id)
+        //this.scanner?.setCamera(this.cameras[this.cameraIndex].id)
+
+        this.setStream({ 
+            video: { deviceId: this.cameras[this.cameraIndex].deviceId },
+            audio: false,
+        }).catch(console.error)
     }
 
     toggleFlash() {
         if (this.isFlashOn) {
-            this.scanner?.turnFlashOff()
+            //this.scanner?.turnFlashOff()
             this.isFlashOn = false
         } else {
-            this.scanner?.turnFlashOn()
+            //this.scanner?.turnFlashOn()
             this.isFlashOn = true
         }
     }
@@ -129,56 +138,108 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
         // Do we still have some missing patches that are not yet synced with the server?
         this.webshopManager.trySavePatches().catch(console.error)
-        this.start().catch(console.error)
+        //this.start().catch(console.error)
+    }
+
+    readingQR = false
+
+    pollImage() {
+        if (this.checkingTicket || this.readingQR) {
+            // Skip. Already working.
+            return
+        }
+
+        this.readingQR = true
+
+        QrScanner.scanImage(this.$refs.video as HTMLVideoElement)
+            .then(result => {
+                this.readingQR = false
+                console.log("QR-code result: "+result)
+                if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date()) || !result) {
+                    // Skip. Already working.
+                    return
+                }
+
+                // Wait 2 seconds before rescanning
+                this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+                this.cooldownResult = result
+
+                // Go a QR-code with value: result
+                this.checkTicket(result).catch(console.error)
+            })
+            .catch(error => {
+                // ignore
+                this.readingQR = false
+            });
+    }
+
+    async setStream(constraints: MediaStreamConstraints) {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
+        }
+
+        const video = this.$refs.video as HTMLVideoElement
+
+        // iOS fix
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+
+        // Not adding `{ audio: true }` since we only want video now
+        const stream = await navigator.mediaDevices
+            .getUserMedia(constraints)
+        video.srcObject = stream;
+        video.play().catch(console.error);
+
+        this.pollInterval = window.setInterval(this.pollImage, 500)
+
+        // Only request camera's after we got permission
+        this.cameras = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "videoinput")
+        console.log("Camera's", this.cameras)
+
+        try {
+            const deviceId = stream.getVideoTracks()[0].getSettings().deviceId
+            const index = this.cameras.findIndex(c => c.deviceId === deviceId)
+            if (index != -1) {
+                this.cameraIndex = index
+                console.log("Found camera index ", index)
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     async start() {
-        if (this.scanner) {
-            console.warn("Multiple calls to start")
-            return
-        }
         QrScanner.WORKER_PATH = QrScannerWorkerPath;
 
-        this.cameras = await QrScanner.listCameras(true)
-        console.log(this.cameras)
-
-
-        this.scanner = new QrScanner(this.$refs.video as HTMLVideoElement, (result) => {
-            console.log("QR-code result: "+result)
-            if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date())) {
-                // Skip. Already working.
-                return
-            }
-
-            // Wait 2 seconds before rescanning
-            this.cooldown = new Date(new Date().getTime() + 2 * 1000)
-            this.cooldownResult = result
-
-            // Go a QR-code with value: result
-            this.checkTicket(result).catch(console.error)
-
-        }, undefined, undefined, "environment");
-        await this.scanner.start()
-
-        const v = this.$refs.video as HTMLVideoElement
-        const stream = v.srcObject as MediaStream
-
-        if (stream) {
-            try {
-                const deviceId = stream.getVideoTracks()[0].getSettings().deviceId
-                const index = this.cameras.findIndex(c => c.id === deviceId)
-                if (index != -1) {
-                    this.cameraIndex = index
-                    console.log("Found camera index ", index)
-                }
-            } catch (e) {
-                console.error(e)
-            }
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
         }
 
-        this.hasFlash = await this.scanner.hasFlash()
+        // Get access to the camera!
+        if (navigator.mediaDevices) {
+            await this.setStream(
+                this.cameras.length > 0 ? {
+                    video: { deviceId: this.cameras[this.cameraIndex].deviceId },
+                    audio: false,
+                } :
+                { 
+                video: { facingMode: "environment" },
+                audio: false,
+            })
+        }
+        
+        /*this.scanner = new QrScanner(this.$refs.video as HTMLVideoElement, (result) => {
+            
+
+        }, undefined, undefined, "environment");
+        await this.scanner.start()*/
+
+        /*this.hasFlash = await this.scanner.hasFlash()
         console.log('has flash', this.hasFlash)
-        this.isFlashOn = this.scanner.isFlashOn()
+        this.isFlashOn = this.scanner.isFlashOn()*/
     }
 
     async checkTicket(result: string) {
@@ -195,7 +256,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         let secret: string | null = null
 
         for (const part of parts) {
-            if (next) {
+            if (next && part !== "tickets") {
                 secret = part
                 break
             }
@@ -222,6 +283,18 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     }
                     new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
                 } else {
+
+                    if (ticket.itemId !== null) {
+                        const item = order.data.cart.items.find(i => i.id === ticket.itemId)
+                        if (item) {
+                            const product = this.disabledProducts.find(p => p.id === item.product.id)
+                            if (product) {
+                                this.disabledTicket(product, ticket.scannedAt)
+                                this.checkingTicket = false
+                                return
+                            }
+                        }
+                    }
                     if (ticket.scannedAt !== null) {
                         this.alreadyScannedTicket(ticket, order)
                     } else {
@@ -275,6 +348,16 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }))
     }
 
+    disabledTicket(product: Product, scannedAt: Date | null) {
+        // todo: show invalid ticket
+        new Toast("Dit is een ticket voor: "+product.name+(scannedAt ? ", en werd bovendien al eens gescand." : ""), "error red").show()
+
+        if (window.navigator.vibrate) {
+            // Vibrate twice
+            window.navigator.vibrate([100, 100, 100]);
+        }
+    }
+
     invalidTicket() {
         // todo: show invalid ticket
         new Toast("Ongeldig ticket", "error red").show()
@@ -286,9 +369,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     deactivated() {
-        this.scanner?.stop()
-        this.scanner?.destroy()
-        this.scanner = undefined
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
+        }
     }
 
     activated() {
@@ -298,13 +382,13 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         // We restart the scanner every time because there is a bug in the qr scanner
         // that randomly breaks the scanning after some time when going back (recreating the video element)
         this.start().catch(console.error)
-        
     }
 
     beforeDestroy() {
-        this.scanner?.stop()
-        this.scanner?.destroy()
-        this.scanner = undefined
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
+        }
     }
 }
 </script>

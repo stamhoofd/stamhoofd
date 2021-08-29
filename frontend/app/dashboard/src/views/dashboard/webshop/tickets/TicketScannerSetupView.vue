@@ -138,7 +138,10 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
 
     start() {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TicketScannerView, { webshopManager: this.webshopManager })
+            root: new ComponentWithProperties(TicketScannerView, { 
+                webshopManager: this.webshopManager,
+                disabledProducts: this.disabledProducts
+            })
         }))
     }
 }
