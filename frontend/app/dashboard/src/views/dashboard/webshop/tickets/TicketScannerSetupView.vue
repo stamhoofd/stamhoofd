@@ -89,7 +89,16 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
     noDatabaseSupport = false
 
     created() {
-        this.webshopManager.loadWebshopIfNeeded().catch(console.error)
+        this.webshopManager.loadWebshopIfNeeded().then(() => {
+            // Load disabled products in database
+            this.webshopManager.readSettingKey("disabledProducts").then(value => {
+                if (value && Array.isArray(value)) {
+                    if (this.ticketProducts) {
+                        this.disabledProducts = this.ticketProducts?.filter(p => value.includes(p.id))
+                    }
+                }
+            }).catch(console.error)
+        }).catch(console.error)
 
         // Initialize offlien storage: check if everything works okay
         this.isChecking = true
@@ -143,6 +152,9 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
                 disabledProducts: this.disabledProducts
             })
         }))
+
+        // Save disabled products in database
+        this.webshopManager.storeSettingKey("disabledProducts", this.disabledProducts.map(p => p.id)).catch(console.error)
     }
 }
 </script>

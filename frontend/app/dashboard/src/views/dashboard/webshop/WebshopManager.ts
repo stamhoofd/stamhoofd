@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonb
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { SessionManager } from "@stamhoofd/networking";
-import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, TicketPrivate, Version, Webshop, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -14,7 +14,10 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 export class WebshopManager {
     preview: WebshopPreview
     webshop: PrivateWebshop | null = null
+    lastFetchedWebshop: Date | null = null
+
     private webshopPromise: Promise<PrivateWebshop> | null = null
+    private webshopFetchPromise: Promise<PrivateWebshop> | null = null
 
     database: IDBDatabase | null = null
     private databasePromise: Promise<IDBDatabase> | null = null
@@ -45,34 +48,125 @@ export class WebshopManager {
         Request.cancelAll(this)
     }
 
-
-    async loadWebshop() {
+    /**
+     * Fetch a webshop every time
+     */
+    async fetchWebshop(shouldRetry = true) {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id,
-            decoder: PrivateWebshop as Decoder<PrivateWebshop>
+            decoder: PrivateWebshop as Decoder<PrivateWebshop>,
+            shouldRetry
         })
 
         // Clone data and keep references
         OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
 
+        // Save async (could fail in some unsupported browsers)
+        this.storeWebshop(response.data).catch(console.error)
+
         return response.data
     }
 
-    async loadWebshopIfNeeded(): Promise<PrivateWebshop> {
+    async loadWebshopFromDatabase(): Promise<PrivateWebshop | undefined> {
+        const raw = await this.readSettingKey("webshop")
+        if (raw === undefined) {
+            return undefined
+        }
+        const webshop = PrivateWebshop.decode(new ObjectData(raw, { version: Version }))
+        return webshop
+    }
+
+    async storeWebshop(webshop: PrivateWebshop) {
+        await this.storeSettingKey("webshop", webshop.encode({ version: Version }))
+    }
+
+    /**
+     * Try to get a webshop as fast as possible and also initiates a background update of the webshop
+     * if it is updated too long ago.
+     * The goal is to have a working webshop as soon as possible.
+     * Set shouldRetry to true if you don't want network errors and want to wait indefinitely for a network connection if we don't have any cached webshops
+     */
+    async loadWebshopIfNeeded(shouldRetry = true): Promise<PrivateWebshop> {
         if (this.webshop) {
+            // If too long ago, also initiate a background update
+
+            if (!this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+                // Do a background update if not yet already doing this
+                this.loadWebshop(false).catch(console.error)
+            }
+
+             console.log("Return webshop")
             return this.webshop
         }
 
         if (this.webshopPromise) {
+            console.log("Return webshopPromise")
             return this.webshopPromise
         }
+        
+        console.log("Init webshopPromise")
+        this.webshopPromise = (async () => {
+            // Try to get it from the database, also init a background fetch if it is too long ago
+            try {
+                const webshop = await this.loadWebshopFromDatabase()
+                if (webshop) {
+                    if (this.webshop) {
+                        this.webshop.set(webshop)
+                    } else {
+                        this.webshop = webshop
+                    }
+                    // todo: if too long ago, also initiate a background update
 
-        this.webshopPromise = this.loadWebshop()
-        return this.webshopPromise.then((webshop: PrivateWebshop) => {
-            this.webshop = webshop
+                    if (!this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+                        // Do a background update if not yet already doing this
+                        this.loadWebshop(false).catch(console.error)
+                    }
+                    return webshop
+                }
+            } catch (e) {
+                // Possible no database support
+                console.error(e)
+
+                // Do a normal fetch
+            }
+
+            return await this.loadWebshop(shouldRetry)
+        })()
+        
+        return this.webshopPromise.finally(() => {
             this.webshopPromise = null
+        })
+    }
+
+    /**
+     * Force fetch a new webshop, but prevent fetching multiple times at the same time
+     */
+    async loadWebshop(shouldRetry = true): Promise<PrivateWebshop> {
+        
+        if (this.webshopFetchPromise) {
+            console.log("Return webshopFetchPromise")
+            return this.webshopFetchPromise
+        }
+
+        console.log("Init webshopFetchPromise")
+        
+        this.webshopFetchPromise = (async () => {
+            // Try to get it from the database, also init a background fetch if it is too long ago
+            const webshop = await this.fetchWebshop(shouldRetry)
+            this.lastFetchedWebshop = new Date()
             return webshop
+        })()
+        
+        return this.webshopFetchPromise.then((webshop: PrivateWebshop) => {
+            if (this.webshop) {
+                this.webshop.set(webshop)
+            } else {
+                this.webshop = webshop
+            }
+            return webshop
+        }).finally(() => {
+            this.webshopFetchPromise = null
         })
     }
 
