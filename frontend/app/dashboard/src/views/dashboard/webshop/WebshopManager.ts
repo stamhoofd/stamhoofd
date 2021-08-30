@@ -61,11 +61,35 @@ export class WebshopManager {
 
         // Clone data and keep references
         OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
+        this.preview.set(response.data)
 
         // Save async (could fail in some unsupported browsers)
         this.storeWebshop(response.data).catch(console.error)
 
         return response.data
+    }
+
+    async patchWebshop(webshopPatch: AutoEncoderPatchType<PrivateWebshop>) {
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "PATCH",
+            path: "/webshop/"+this.preview.id,
+            body: webshopPatch,
+            decoder: PrivateWebshop as Decoder<PrivateWebshop>
+        })
+
+        if (this.webshop) {
+            this.webshop.set(response.data)
+        } else {
+            this.webshop = response.data
+        }
+
+        // Clone data and keep references
+        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
+        this.preview.set(response.data)
+        OrganizationManager.save().catch(console.error)
+
+        // Save async (could fail in some unsupported browsers)
+        this.storeWebshop(response.data).catch(console.error)
     }
 
     async loadWebshopFromDatabase(): Promise<PrivateWebshop | undefined> {
@@ -74,6 +98,11 @@ export class WebshopManager {
             return undefined
         }
         const webshop = PrivateWebshop.decode(new ObjectData(raw, { version: Version }))
+
+        // Clone data and keep references
+        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(webshop)
+        this.preview.set(webshop)
+
         return webshop
     }
 
@@ -96,7 +125,7 @@ export class WebshopManager {
                 this.loadWebshop(false).catch(console.error)
             }
 
-             console.log("Return webshop")
+            console.log("Return webshop")
             return this.webshop
         }
 

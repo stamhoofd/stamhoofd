@@ -131,14 +131,12 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, GlobalEventBus, LoadComponent, Logo, STNavigationBar,Toast, ToastButton, TooltipDirective } from '@stamhoofd/components';
-import { Sodium } from "@stamhoofd/crypto";
-import { AppManager, Keychain, LoginHelper,SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 
@@ -383,10 +381,6 @@ export default class Menu extends Mixins(NavigationMixin) {
                 root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
             }).setAnimated(animated)
         );
-    }
-
-    importMembers() {
-        new CenteredMessage("Binnenkort beschikbaar!", "Binnenkort kan je leden importeren via Excel of manueel.", "sync").addCloseButton().show()
     }
 
     async addWebshop() {

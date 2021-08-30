@@ -189,7 +189,6 @@ export class SessionManagerStatic {
         storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
 
-        const needsResync = true
         if (session.organization) {
             this.addOrganizationToStorage(session.organization).catch(console.error)
         }
@@ -197,8 +196,7 @@ export class SessionManagerStatic {
         this.callListeners("session")
 
         this.currentSession.addListener(this, (changed: "userPrivateKey" | "user" | "organization" | "token") => {
-            if (needsResync && session.organization) {
-                //needsResync = false
+            if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }
             this.setUserId();

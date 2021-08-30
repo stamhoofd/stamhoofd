@@ -46,6 +46,9 @@ export class OrganizationManagerStatic {
         if (invites && !this.organization.invites && patch.invites) {
             this.organization.invites = patch.invites.applyTo(invites)
         }
+
+        // Save organization in localstorage
+        this.save().catch(console.error)
     }
 
     async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
@@ -56,7 +59,19 @@ export class OrganizationManagerStatic {
         const loaded = await LoginHelper.loadAdmins(shouldRetry, owner)
         this.organization.admins = loaded.users
         this.organization.invites = loaded.invites
+
+        // Save organization in localstorage
+        this.save().catch(console.error)
+
         return this.organization as any
+    }
+
+    /**
+     * Save organization in localstorage
+     */
+    async save() {
+        // Save organization in localstorage
+        await SessionManager.addOrganizationToStorage(this.organization)
     }
 
     async loadBillingStatus() {

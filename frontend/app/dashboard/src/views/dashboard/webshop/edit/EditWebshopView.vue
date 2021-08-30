@@ -45,6 +45,7 @@ import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamh
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import { WebshopManager } from '../WebshopManager';
 import EditWebshopGeneralView from './EditWebshopGeneralView.vue';
 import EditWebshopPageView from './EditWebshopPageView.vue';
 import EditWebshopProductsView from './EditWebshopProductsView.vue';
@@ -63,8 +64,12 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
     tabs = [EditWebshopGeneralView, EditWebshopProductsView, EditWebshopPageView];
     tab = this.tabs[0];
 
+    /**
+     * When editing a webshop, set the manager here. Make sure it is already loaded!
+     */
     @Prop({ default: null })
-    editWebshop: PrivateWebshop | null
+    webshopManager: WebshopManager | null
+
     webshop: PrivateWebshop
 
     webshopPatch = PrivateWebshop.patch({})
@@ -79,21 +84,12 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
     }
 
     created() {
-        if (this.editWebshop) {
+        if (this.webshopManager) {
+            if (!this.webshopManager.webshop) {
+                throw new Error("Webshop not loaded")
+            }
             this.isNew = false
-            this.webshop = this.editWebshop
-
-            // Reload to make sure the stock is up to date
-            SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/webshop/"+this.webshop.id,
-                decoder: PrivateWebshop as Decoder<PrivateWebshop>
-            }).then((response) => {
-                this.webshop.set(response.data)
-            }).catch((e) => {
-                console.error(e)
-                Toast.fromError(e).show()
-            })
+            this.webshop = this.webshopManager.webshop
         } else {
             this.webshop = PrivateWebshop.create({})
             this.webshop.meta.paymentMethods = OrganizationManager.organization.meta.paymentMethods
@@ -181,19 +177,8 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
                 OrganizationManager.organization.webshops.push(WebshopPreview.create(this.webshop))
                 await GlobalEventBus.sendEvent("new-webshop", this.webshop)
             } else {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/webshop/"+this.webshop.id,
-                    body: this.webshopPatch,
-                    decoder: PrivateWebshop as Decoder<PrivateWebshop>
-                })
-
+                await this.webshopManager!.patchWebshop(this.webshopPatch)
                 this.webshopPatch = PrivateWebshop.patch({})
-                this.webshop.set(response.data)
-
-                // Clone data and keep references
-                OrganizationManager.organization.webshops.find(w => w.id == this.webshop.id)?.set(response.data)
-
                 new Toast("Wijzigingen opgeslagen", "success green").show()
             }
 

@@ -59,12 +59,11 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective} from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { UrlHelper } from '@stamhoofd/networking';
+import { getPermissionLevelNumber, PermissionLevel, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -138,9 +137,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(PromiseView, {
                 promise: async () => {
                     try {
-                        const webshop = await this.webshopManager.loadWebshopIfNeeded()
+                        // Make sure we have an up to date webshop
+                        await this.webshopManager.loadWebshopIfNeeded(false)
                         return new ComponentWithProperties(EditWebshopView, {
-                            editWebshop: webshop
+                            webshopManager: this.webshopManager
                         })
                     } catch (e) {
                         Toast.fromError(e).show()
