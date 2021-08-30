@@ -18,7 +18,7 @@
             </p>
 
             <p class="warning-box icon lightning">
-                De scanner verbruikt veel energie van je batterij. Voorzie een oplader of grote powerbank. Denk ook aan een backup plan als er iets zou schelen met je toestel.
+                De scanner verbruikt veel energie van je batterij, jouw toestel kan ook warm worden. Voorzie een oplader of grote powerbank. Denk ook aan een backup plan als er iets zou misgaan met je toestel.
             </p>
 
             <p class="info-box icon qr-code">
@@ -28,7 +28,7 @@
             <hr>
 
             <p class="info-box icon help">
-                Vragen? Stel ze voor aanvang van jouw evenement via hallo@stamhoofd.be
+                Belangrijk evenement gepland? Laat het ons op voorhand weten via hallo@stamhoofd.be en eventueel brengen we eens een bezoekje of zorgen we dat we standby staan.
             </p>
 
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />

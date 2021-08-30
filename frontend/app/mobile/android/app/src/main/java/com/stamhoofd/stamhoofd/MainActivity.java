@@ -5,7 +5,10 @@ import com.getcapacitor.BridgeActivity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.PermissionRequest;
@@ -15,10 +18,15 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 
 public class MainActivity extends BridgeActivity {
+    private static final int PERMISSION_REQUEST_CODE = 12445919;
+
+    protected PermissionRequest pendingPermissionRequest;
+
     void setDarkMode() {
         // Android "fix" for enabling dark mode
         // @see: https://github.com/ionic-team/capacitor/discussions/1978
@@ -48,36 +56,54 @@ public class MainActivity extends BridgeActivity {
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-        String[] permissions =
-                {Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.INTERNET,
-                        Manifest.permission.RECORD_AUDIO,
-                        Manifest.permission.CAMERA};
-
-        // todo: call this only when the webview asks for permissions + fix weird hanging
-        ActivityCompat.requestPermissions(
-                this,
-                permissions,
-                1010);
+        MainActivity me = this;
 
         webView.setWebChromeClient(new WebChromeClient(){
             @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                Log.d("TAG", "onPermissionRequest");
                 runOnUiThread(new Runnable() {
                     @TargetApi(Build.VERSION_CODES.M)
                     @Override
                     public void run() {
-                        Log.d("TAG", request.getOrigin().toString());
-                        Log.d("TAG", "GRANTED");
-                        Log.d("TAG", request.getResources().toString());
+                        if (ContextCompat.checkSelfPermission(me, Manifest.permission.CAMERA)
+                                == PackageManager.PERMISSION_DENIED) {
+                            me.pendingPermissionRequest = request;
+
+                            String[] permissions = { Manifest.permission.CAMERA };
+
+                            ActivityCompat.requestPermissions(
+                                me,
+                                permissions,
+                                PERMISSION_REQUEST_CODE);
+                            return;
+                        }
+
                         request.grant(request.getResources());
                     }
                 });
             }
+
+            // Remove default ugly play icon in video posters
+            @Override
+            public Bitmap getDefaultVideoPoster() {
+                return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+            }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    pendingPermissionRequest.grant(pendingPermissionRequest.getResources());
+                } else {
+                    pendingPermissionRequest.deny();
+                }
+                break;
+        }
     }
 
     @Override

@@ -239,8 +239,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     return
                 }
 
-                // Wait 2 seconds before rescanning
-                this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+                // Wait 5 seconds before rescanning
+                this.cooldown = new Date(new Date().getTime() + 5 * 1000)
                 this.cooldownResult = result
 
                 // Go a QR-code with value: result
@@ -428,8 +428,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             window.navigator.vibrate([100, 100, 100]);
         }
 
-        // Disable scanning same one for 2 seconds
-        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+        // Disable scanning same one for 5 seconds
+        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
 
         this.show(new ComponentWithProperties(TicketAlreadyScannedView, {
             webshopManager: this.webshopManager,
@@ -443,8 +443,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             window.navigator.vibrate(100);
         }
 
-        // Disable scanning same one for 2 seconds
-        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+        // Disable scanning same one for 5 seconds
+        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
 
         this.show(new ComponentWithProperties(ValidTicketView, {
             webshopManager: this.webshopManager,
@@ -487,8 +487,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     activated() {
-        // Prevent scanning previous one for 3 seconds
-        this.cooldown = new Date(new Date().getTime() + 3 * 1000)
+        // Prevent scanning previous one for 5 seconds
+        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
 
         // We restart the scanner every time because there is a bug in the qr scanner
         // that randomly breaks the scanning after some time when going back (recreating the video element)
