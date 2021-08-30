@@ -84,15 +84,15 @@
             <hr>
             <h2>Payconiq activeren</h2>
             <p class="st-list-description">
-                Wil je Payconiq activeren? Stuur ons dan een mailtje via hallo@stamhoofd.be. Wij zorgen dan voor jouw aansluiting (dit moet via ons verlopen). Je moet dit ook doen als je reeds Payconiq gebruikt voor betalingen via een vaste QR-sticker. Daarna ontvang je van Stamhoofd of Payconiq een API key die je hieronder moet ingeven.
+                Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a href="https://www.stamhoofd.be/docs/aansluiten-bij-payconiq" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
             </p>
 
-            <STInputBox title="API Key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
                 <input
                     v-model="payconiqApiKey"
                     class="input"
                     type="text"
-                    placeholder="API Key van Payconiq"
+                    placeholder="API-key van Payconiq"
                 >
             </STInputBox>
 
