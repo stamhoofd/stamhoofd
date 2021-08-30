@@ -2,7 +2,7 @@
     <div class="st-view webshop-view background">
         <STNavigationBar :sticky="false">
             <template #left>
-                <BackButton v-if="canPop" slot="left" @click="pop" />
+                <BackButton v-if="canPop" @click="pop" />
                 <STNavigationTitle v-else>
                     <span class="icon-spacer">{{ title }}</span>
                 </STNavigationTitle>
@@ -170,9 +170,15 @@ class SelectableOrder {
     order: Order;
     selected = false;
 
-    constructor(order: Order, selected = false) {
+    /**
+     * Whether this order came from the database or from the server
+     */
+    isRefreshed = false;
+
+    constructor(order: Order, selected = false, isRefreshed = true) {
         this.order = order;
         this.selected = selected
+        this.isRefreshed = isRefreshed
     }
 }
 
@@ -234,11 +240,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         for (const [index, _order] of this.orders.entries()) {
             if (order.id === _order.order.id) {
                 // replace
-                this.orders.splice(index, 1, new SelectableOrder(order, _order.selected))
+                this.orders.splice(index, 1, new SelectableOrder(order, _order.selected, true))
                 return
             }
         }
-        this.orders.push(new SelectableOrder(order, false))
+        this.orders.push(new SelectableOrder(order, false, true))
     }
 
     onNewOrders(orders: Order[]) {
@@ -282,25 +288,26 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.isLoadingOrders = true
         
         // Disabled for now: first fix needed for payment status + deleted orders
-        /*try {
+        try {
             const orders = await this.webshopManager.getOrdersFromDatabase()
-            this.orders = orders.map(o => new SelectableOrder(o))
+            this.orders = orders.map(o => new SelectableOrder(o, false, false))
         } catch (e) {
             // Database error. We can ignore this and simply move on.
-            Toast.fromError(e).show()
-        }*/
+            console.error(e)
+        }
 
         try {
             // Initiate a refresh
             // don't wait
             this.isRefreshingOrders = true
             this.isLoadingOrders = false
-            await this.webshopManager.fetchNewOrders(true, true)
+            await this.webshopManager.fetchNewOrders(false, true)
+
+            // Delete all orders that are not refreshed (those are deleted)
+            this.orders = this.orders.filter(o => o.isRefreshed)
         } catch (e) {
             // Fetching failed
-            if (!Request.isNetworkError(e)) {
-                Toast.fromError(e).show()
-            }
+            Toast.fromError(e).show()
         }
 
         this.isRefreshingOrders = false

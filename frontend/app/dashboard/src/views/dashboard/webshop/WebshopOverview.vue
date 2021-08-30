@@ -43,6 +43,17 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center" @click="openStatistics(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/diagram.svg">
+                    <h2 class="style-title-list">
+                        Statistieken
+                    </h2>
+                    <p class="style-description">
+                        Bekijk jouw omzet en andere statistieken
+                    </p>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
                 <STListItem v-if="hasFullPermissions" :selectable="true" class="left-center" @click="openSettings(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/shop-settings.svg">
                     <h2 class="style-title-list">
@@ -70,6 +81,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
+import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
 
@@ -126,6 +138,12 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         }).setAnimated(animated))
     }
 
+    openStatistics(animated = true) {
+        this.show(new ComponentWithProperties(WebshopStatisticsView, {
+            webshopManager: this.webshopManager
+        }).setAnimated(animated))
+    }
+
     openTickets(animated = true) {
         this.show(new ComponentWithProperties(TicketScannerSetupView, {
             webshopManager: this.webshopManager
@@ -169,6 +187,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'tickets') {
             this.openTickets(false)
+        }
+
+        if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
+            this.openStatistics(false)
         }
     }
 

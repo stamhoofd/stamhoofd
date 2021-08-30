@@ -322,6 +322,69 @@ export class WebshopManager {
         })
     }
 
+    async streamOrders(callback: (order: Order) => void): Promise<void> {
+        const db = await this.getDatabase()
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+
+            const request = objectStore.openCursor()
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawOrder = cursor.value
+                     // Todo: need version fix here
+                    const order = Order.decode(new ObjectData(rawOrder, { version: Version }))
+                    callback(order)
+                    cursor.continue();
+                } else {
+                    // no more results
+                    resolve()
+                }
+            }
+        })
+
+        const owner = {}
+        this.ordersEventBus.addListener(owner, "fetched", (orders: Order[]) => {
+            for (const order of orders) {
+                callback(order)
+            }
+            return Promise.resolve()
+        })
+        await this.fetchNewOrders(false, false)
+        this.ordersEventBus.removeListener(owner)
+    }
+
+    async clearOrdersFromDatabase(): Promise<void> {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readwrite");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+
+            const request = objectStore.clear()
+            request.onsuccess = () => {
+                resolve()
+            }
+
+        })
+    }
+
     async getOrdersFromDatabase(): Promise<Order[]> {
         const db = await this.getDatabase()
 
@@ -497,9 +560,8 @@ export class WebshopManager {
                 }
             }
 
-            if (reset) {
-                // todo: clear full store!
-            }
+            let didClear = false
+
             let query: WebshopOrdersQuery | undefined = reset ? WebshopOrdersQuery.create({}) : WebshopOrdersQuery.create({
                 updatedSince: this.lastFetchedOrder ? this.lastFetchedOrder.updatedAt : undefined,
                 afterNumber: this.lastFetchedOrder ? this.lastFetchedOrder.number : undefined,
@@ -507,6 +569,17 @@ export class WebshopManager {
 
             while (query) {
                 const response: PaginatedResponse<Order, WebshopOrdersQuery> = await this.fetchOrders(query, retry)
+
+                if (reset && !didClear) {
+                    // Clear only if we have internet access
+                    didClear = true
+                    try {
+                        await this.clearOrdersFromDatabase()
+                    } catch (e) {
+                        // ignore since some browsers don't support databases
+                        console.error(e)
+                    }
+                }
 
                 if (response.results.length > 0) {
                     // Save these orders to the local database
