@@ -43,6 +43,7 @@
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { AppManager } from "@stamhoofd/networking";
 import { Order, Product, TicketPrivate } from "@stamhoofd/structures";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
@@ -192,13 +193,6 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
     }
 
-    mounted() {
-        // Check for new tickets
-        // todo: keep polling in the future
-        this.updateTickets().catch(console.error)
-        
-        //this.start().catch(console.error)
-    }
 
     async updateTickets() {
         try {
@@ -397,9 +391,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             if (ticket) {
                 const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
                 if (!order) {
-                    if (window.navigator.vibrate) {
-                        window.navigator.vibrate([100, 100, 100]);
-                    }
+                    AppManager.shared.hapticError() 
                     new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
                 } else {
 
@@ -429,18 +421,14 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             // database error
             Toast.fromError(e).show()
 
-            if (window.navigator.vibrate) {
-                window.navigator.vibrate([100, 100, 100]);
-            }
+            AppManager.shared.hapticError() 
         }
 
         this.checkingTicket = false
     }
 
     alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
-        if (window.navigator.vibrate) {
-            window.navigator.vibrate([100, 100, 100]);
-        }
+        AppManager.shared.hapticWarning() 
 
         // Disable scanning same one for 5 seconds
         this.cooldown = new Date(new Date().getTime() + 5 * 1000)
@@ -453,9 +441,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     validTicket(ticket: TicketPrivate, order: Order) {
-        if (window.navigator.vibrate) {
-            window.navigator.vibrate(100);
-        }
+        AppManager.shared.hapticSuccess() 
 
         // Disable scanning same one for 5 seconds
         this.cooldown = new Date(new Date().getTime() + 5 * 1000)
@@ -470,21 +456,13 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     disabledTicket(product: Product, scannedAt: Date | null) {
         // todo: show invalid ticket
         new Toast("Dit is een ticket voor: "+product.name+(scannedAt ? ", en werd bovendien al eens gescand." : ""), "error red").show()
-
-        if (window.navigator.vibrate) {
-            // Vibrate twice
-            window.navigator.vibrate([100, 100, 100]);
-        }
+        AppManager.shared.hapticError() 
     }
 
     invalidTicket() {
         // todo: show invalid ticket
         new Toast("Ongeldig ticket", "error red").show()
-
-        if (window.navigator.vibrate) {
-            // Vibrate twice
-            window.navigator.vibrate([100, 100, 100]);
-        }
+        AppManager.shared.hapticError() 
     }
 
     deactivated() {
@@ -517,6 +495,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                 this.updateTickets().catch(console.error)
             }
         }, 1000*30)
+
+        if (!this.isLoading) {
+            this.updateTickets().catch(console.error)
+        }
     }
 
     beforeDestroy() {

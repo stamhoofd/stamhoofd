@@ -9,4 +9,22 @@ export class AppManager {
     get isNative(): boolean {
         return this.platform !== "web"
     }
+
+    hapticWarning = () => {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate([100, 100, 100]);
+        }
+    }
+
+    hapticError = () => {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate([100, 100, 100]);
+        }
+    }
+
+    hapticSuccess = () => {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(100);
+        }
+    }
 }

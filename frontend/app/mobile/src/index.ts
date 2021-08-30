@@ -1,5 +1,6 @@
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 //import smoothscroll from 'smoothscroll-polyfill';
@@ -111,3 +112,15 @@ CApp.addListener('appUrlOpen', (data: any) => {
 // Replace default storage mechanism for some things
 Storage.secure = new CapacitorStorage()
 Storage.keychain = new CapacitorStorage()
+
+AppManager.shared.hapticError = () => {
+    Haptics.notification({ type: NotificationType.Error }).catch(console.error);
+}
+
+AppManager.shared.hapticWarning = () => {
+    Haptics.notification({ type: NotificationType.Warning }).catch(console.error);
+}
+
+AppManager.shared.hapticSuccess = () => {
+    Haptics.notification({ type: NotificationType.Success }).catch(console.error);
+}
