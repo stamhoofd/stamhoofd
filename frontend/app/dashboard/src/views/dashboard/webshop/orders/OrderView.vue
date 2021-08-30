@@ -359,7 +359,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
+                    shouldRetry: false
                 })
                 const p = response.data.find(pp => pp.id === payment.id)
                 if (p) {
@@ -398,7 +399,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>)
+                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
+                    shouldRetry: false
                 })
                 const p = response.data.find(pp => pp.id === payment.id)
                 if (p) {
