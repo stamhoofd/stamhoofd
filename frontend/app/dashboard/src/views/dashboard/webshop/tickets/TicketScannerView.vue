@@ -44,7 +44,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { AppManager } from "@stamhoofd/networking";
-import { Order, Product, TicketPrivate } from "@stamhoofd/structures";
+import { Order, OrderStatus, Product, TicketPrivate } from "@stamhoofd/structures";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -406,7 +406,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                             }
                         }
                     }
-                    if (ticket.scannedAt !== null) {
+
+                    if (order.status === OrderStatus.Canceled) {
+                        this.canceledTicket()
+                    } else if (ticket.scannedAt !== null) {
                         this.alreadyScannedTicket(ticket, order)
                     } else {
                         this.validTicket(ticket, order)
@@ -451,6 +454,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             ticket,
             order
         }))
+    }
+
+    canceledTicket() {
+        new Toast("Oeps! Dit ticket werd geannuleerd en is dus niet geldig.", "error red").show()
+        AppManager.shared.hapticError() 
     }
 
     disabledTicket(product: Product, scannedAt: Date | null) {

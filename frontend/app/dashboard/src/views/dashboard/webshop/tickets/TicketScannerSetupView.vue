@@ -28,7 +28,7 @@
             <hr>
 
             <p class="info-box icon help">
-                Belangrijk evenement gepland? Laat het ons op voorhand weten via hallo@stamhoofd.be en eventueel brengen we eens een bezoekje of zorgen we dat we standby staan.
+                Belangrijk evenement gepland? Laat het ons op voorhand weten via hallo@stamhoofd.be en misschien brengen we wel een bezoekje om het scannen mee in goede banen te leiden.
             </p>
 
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
