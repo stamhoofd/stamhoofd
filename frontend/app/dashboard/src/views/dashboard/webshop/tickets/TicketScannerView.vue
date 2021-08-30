@@ -221,8 +221,9 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     readingQR = false
+    canvas = document.createElement('canvas')
 
-    pollImage() {
+    async pollImage() {
         if (this.checkingTicket || this.readingQR) {
             // Skip. Already working.
             return
@@ -230,7 +231,20 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
         this.readingQR = true
 
-        QrScanner.scanImage(this.$refs.video as HTMLVideoElement)
+        const video = this.$refs.video as HTMLVideoElement
+
+        const w = video.offsetWidth
+        const h = video.offsetHeight
+
+        const scale = 2/3
+        const size = w*scale
+
+        QrScanner.scanImage(video, {
+            x: (w - size)/2,
+            y: (h - size)/2,
+            width: size,
+            height: size
+        }, undefined, this.canvas) // reusing the worker randomly breaks on ios after a certain amount of scans, so currently not using it ? :/
             .then(result => {
                 this.readingQR = false
                 console.log("QR-code result: "+result)
@@ -544,12 +558,13 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         .scan-overlay {
-            width: 50%;
+            width: 40%;
             position: absolute;
             left: 50%;
             top: 50%;
-            padding-bottom: 50%;
+            padding-bottom: 40%;
             border: 4px solid white;
+            border-radius: 5px;
             transform: translate(-50%, -50%);
         }
     }
