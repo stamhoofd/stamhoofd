@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -27,14 +27,14 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto&apos;s.</string>
-	<key>UILaunchStoryboardName</key>
-	<string>Launch Screen</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We gebruiken de camera om tickets te kunnen scannen</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>We gebruiken de camera om tickets te kunnen scannen</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We gebruiken de camera om tickets te kunnen scannen</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto's.</string>
+	<key>UILaunchStoryboardName</key>
+	<string>Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -56,5 +56,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
