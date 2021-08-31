@@ -9,6 +9,8 @@
                 {{ title }}
             </h1>
 
+            <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
+
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openOrders(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/box.svg">
@@ -79,6 +81,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
+import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
@@ -91,6 +94,7 @@ import { WebshopManager } from './WebshopManager';
         BackButton,
         STList,
         STListItem,
+        BillingWarningBox
     },
     directives: {
         tooltip: TooltipDirective

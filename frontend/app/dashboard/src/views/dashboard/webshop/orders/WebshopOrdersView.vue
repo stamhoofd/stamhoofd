@@ -25,8 +25,6 @@
                 <span class="icon-spacer">{{ title }}</span>
             </h1>
 
-            <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
-
             <Spinner v-if="loading && !isRefreshingOrders" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
                 Je hebt nog geen bestellingen ontvangen
@@ -159,7 +157,6 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import { NoFilter, NotPaidFilter,StatusFilter } from '../../../../classes/order-filters';
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import MailView from '../../mail/MailView.vue';
-import BillingWarningBox from '../../settings/packages/BillingWarningBox.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
@@ -192,8 +189,7 @@ class SelectableOrder {
         BackButton,
         Spinner,
         LoadingButton,
-        SegmentedControl,
-        BillingWarningBox
+        SegmentedControl
     },
     filters: {
         price: Formatter.price.bind(Formatter),
