@@ -2092,10 +2092,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@^1.14.1":
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.14.1.tgz#4c001ae233504a39768e681c1c70a0911afa7928"
-  integrity sha512-HU8SreZb+kh44GpA4ZHDDcaSJwLg7H8Gdv8bmL0mtKV1NFQg2nSG3YCvdqyYS2wStQZ1mpjJBZuamUYC3EPk6A==
+"@simonbackx/vue-app-navigation@^1.15.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.15.0.tgz#195f3a83829dda8e26d175f0d1ecd4e5674b39f8"
+  integrity sha512-bgwEbJZvz2HBSk3AlIKHndzp2Wt1zFIQqxXRS2AAXLKrLc0GxI/+G8X7zFqjmsVFoEP6ikylSHNEozgOT1ERyg==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"

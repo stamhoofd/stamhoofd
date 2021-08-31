@@ -62,6 +62,9 @@ export default class App extends Vue {
     })
 
     created() {
+        if (process.env.NODE_ENV == "development") {
+            ComponentWithProperties.debug = true
+        }
         HistoryManager.activate();
     }
 

@@ -161,15 +161,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        console.log("set customer")
         HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
-    }
-
-    activated() {
-        // For an unknown reason, we need to set a timer to properly update the URL...
-        window.setTimeout(() => {
-            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
-        }, 100);
     }
 }
 </script>

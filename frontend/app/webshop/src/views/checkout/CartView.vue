@@ -122,13 +122,9 @@ export default class CartView extends Mixins(NavigationMixin){
         this.present(new ComponentWithProperties(CartItemView, { cartItem: cartItem.duplicate(Version), oldItem: cartItem }).setDisplayStyle("sheet"))
     }
 
-    activated() {
-        this.$nextTick(() => {
-            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
-        })
-    }
-
     mounted() {
+        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
+        
         try {
             this.cart.validate(WebshopManager.webshop)
         } catch (e) {

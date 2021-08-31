@@ -12,47 +12,89 @@
                 Geannuleerde bestellingen zijn niet inbegrepen.
             </p>
 
-            <hr>
 
             <div class="stats-grid">
-                <div class="container">
-                    <h2 class="style-with-button">
-                        <span>Omzet</span>
-                    </h2>
+                <STInputBox title="Omzet">
                     <p class="style-price-big">
-                        {{ loading ? '-' : formatPrice(totalRevenue) }}
+                        <span>
+                            {{ loading ? '-' : formatPrice(totalRevenue) }}
+                        </span>
                     </p>
-                </div>
+                </STInputBox>
 
-                <div class="container">
-                    <h2 class="style-with-button">
-                        <span>Bestellingen</span>
-                    </h2>
+                <STInputBox title="Bestellingen">
                     <p class="style-price-big">
-                        {{ loading ? '-' : totalOrders }}
+                        <span>
+                            {{ loading ? '-' : totalOrders }}
+                        </span>
                     </p>
-                </div>
+                </STInputBox>
 
-                <div class="container">
-                    <h2 class="style-with-button">
-                        <span>Gem. bestelbedrag</span>
-                    </h2>
+                <STInputBox title="Gemiddeld bestelbedrag">
                     <p class="style-price-big">
-                        {{ loading ? '-' : formatPrice(averagePrice) }}
+                        <span>
+                            {{ loading ? '-' : formatPrice(averagePrice) }}
+                        </span>
                     </p>
-                </div>
+                </STInputBox>
             </div>
+
+            <template v-if="hasTickets">
+                <hr>
+                <h2>Tickets</h2>
+
+                <div class="stats-grid">
+                    <STInputBox title="Verkocht">
+                        <p class="style-price-big">
+                            <span>
+                                {{ loading ? '-' : totalTickets }}
+                            </span>
+                        </p>
+                    </STInputBox>
+
+                    <STInputBox title="Gescand">
+                        <p class="style-price-big">
+                            <span>
+                                {{ loading ? '-' : totalScannedTickets }}
+                            </span>
+                        </p>
+                    </STInputBox>
+                </div>
+            </template>
+
+            <template v-if="hasVouchers">
+                <hr>
+                <h2>Vouchers</h2>
+
+                <div class="stats-grid">
+                    <STInputBox title="Verkocht">
+                        <p class="style-price-big">
+                            <span>
+                                {{ loading ? '-' : totalVouchers }}
+                            </span>
+                        </p>
+                    </STInputBox>
+
+                    <STInputBox title="Gescand">
+                        <p class="style-price-big">
+                            <span>
+                                {{ loading ? '-' : totalScannedVouchers }}
+                            </span>
+                        </p>
+                    </STInputBox>
+                </div>
+            </template>
         </main>
     </div>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { STInputBox,Toast } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, Spinner } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
-import { Order, OrderStatus } from "@stamhoofd/structures";
+import { Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -65,13 +107,8 @@ import { WebshopManager } from '../WebshopManager';
         STNavigationBar,
         BackButton,
         Spinner,
-    },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-    },
-    directives: { Tooltip },
+        STInputBox
+    }
 })
 export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     @Prop()
@@ -85,6 +122,14 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         return this.webshopManager.webshop
     }
 
+    get hasTickets() {
+        return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None
+    }
+
+    get hasVouchers() {
+        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets
+    }
+
     loading = false
 
     formatPrice(price: number) {
@@ -94,9 +139,18 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     totalRevenue = 0
     totalOrders = 0
     averagePrice = 0
+    totalTickets = 0
+    totalScannedTickets = 0
+
+    totalVouchers = 0
+    totalScannedVouchers = 0
 
     mounted() {
         this.reload().catch(console.error)
+
+        // Set url
+        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/statistics")
+        document.title = this.preview.meta.name+" - Statistieken"
     }
 
     async reload() {
@@ -106,9 +160,42 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                 if (order.status !== OrderStatus.Canceled) {
                     this.totalRevenue += order.data.totalPrice
                     this.totalOrders += 1
-                    this.averagePrice = this.totalRevenue / this.totalOrders
+                    this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
                 }
             })
+
+            if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
+                await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
+                    (async () => {
+                        let type: ProductType = ProductType.Ticket
+
+                        // determine ticket type
+                        if (ticket.itemId !== null) {
+                            const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
+                            if (order) {
+                                const item = order.data.cart.items.find(i => i.id === ticket.itemId)
+                                if (item) {
+                                    type = item.product.type
+                                }
+                            }
+                        }
+
+                        if (type === ProductType.Voucher) {
+                            if (ticket.scannedAt) {
+                                this.totalScannedVouchers++
+                            }
+                            this.totalVouchers += 1
+                        } else {
+                            if (ticket.scannedAt) {
+                                this.totalScannedTickets++
+                            }
+                            this.totalTickets += 1
+                        }
+                    })().catch(console.error)
+                })
+            }
+
+            
         } catch (e) {
             Toast.fromError(e).show()
         }

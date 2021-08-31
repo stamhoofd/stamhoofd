@@ -140,13 +140,6 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     mounted() {
         HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
     }
-
-    activated() {
-        // For an unknown reason, we need to set a timer to properly update the URL...
-        window.setTimeout(() => {
-            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
-        }, 100);
-    }
 }
 </script>
 

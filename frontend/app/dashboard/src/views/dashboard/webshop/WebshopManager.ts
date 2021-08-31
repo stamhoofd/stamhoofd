@@ -322,6 +322,42 @@ export class WebshopManager {
         })
     }
 
+    async streamTickets(callback: (ticket: TicketPrivate) => void): Promise<void> {
+        const db = await this.getDatabase()
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["tickets"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("tickets");
+
+            const request = objectStore.openCursor()
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawOrder = cursor.value
+                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+                    callback(ticket)
+                    cursor.continue();
+                } else {
+                    // no more results
+                    resolve()
+                }
+            }
+        })
+
+        await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
+            for (const ticket of tickets) {
+                callback(ticket)
+            }
+        })
+    }
+
     async streamOrders(callback: (order: Order) => void): Promise<void> {
         const db = await this.getDatabase()
 
@@ -764,7 +800,7 @@ export class WebshopManager {
      * Fetch new orders from the server.
      * Try to avoid this if needed and use the cache first + fetch changes
      */
-    async fetchNewTickets(retry = false, reset = false) {
+    async fetchNewTickets(retry = false, reset = false, callback?: (tickets: TicketPrivate[]) => void) {
         // Todo: clear local database if resetting
         if (this.isLoadingTickets) {
             return
@@ -804,6 +840,10 @@ export class WebshopManager {
 
                     // Non-critical:
                     this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error)
+
+                    if (callback) {
+                        callback(response.results)
+                    }
                 }
                 
                 query = response.next

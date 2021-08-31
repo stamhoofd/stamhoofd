@@ -24,7 +24,7 @@
                 <STListItem v-if="hasTickets && hasWritePermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
                     <h2 class="style-title-list">
-                        Scan tickets <span class="style-tag">BETA</span>
+                        Scan tickets
                     </h2>
                     <p class="style-description">
                         Gebruik je camera om snel tickets te scannen en te markeren als 'gescand'
@@ -38,7 +38,7 @@
                         Ga naar jouw webshop
                     </h2>
                     <p class="style-description">
-                        Jouw webshop is bereikbaar via {{ webshopUrl }}. Je kan deze link wijzigen bij de instellingen.
+                        Jouw webshop is bereikbaar via {{ webshopUrl }}
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>

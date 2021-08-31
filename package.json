@@ -36,7 +36,7 @@
         "@simonbackx/simple-encoding": "^2.2.3",
         "@simonbackx/simple-errors": "^1.3.0",
         "@simonbackx/simple-networking": "~1.10.0",
-        "@simonbackx/vue-app-navigation": "^1.14.1",
+        "@simonbackx/vue-app-navigation": "^1.15.0",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
         "@zxcvbn-ts/language-nl-be": "^0.3.0",
