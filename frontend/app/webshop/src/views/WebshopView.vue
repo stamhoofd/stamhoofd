@@ -49,8 +49,11 @@
                         <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
                     </template>
 
-                    <p class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
+                    <p v-if="hasTickets" class="stamhoofd-footer">
+                        <a href="https://www.stamhoofd.be/ticketverkoop" target="_blank" class="button text">Ticketverkoop door <strong>Stamhoofd</strong>, helemaal voor verenigingen</a>
+                    </p>
+                    <p v-else class="stamhoofd-footer">
+                        <a href="https://www.stamhoofd.be/webshops" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
                     </p>
                 </main>
             </section>
@@ -64,7 +67,7 @@
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { UrlHelper } from "@stamhoofd/networking";
-import { Payment, PaymentStatus } from '@stamhoofd/structures';
+import { Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -151,6 +154,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
     
     get webshop() {
         return WebshopManager.webshop
+    }
+
+    get hasTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
     get privacyUrl() {

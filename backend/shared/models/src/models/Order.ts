@@ -242,7 +242,7 @@ export class Order extends Model {
                     text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
                 })
             }
         }
@@ -313,7 +313,7 @@ export class Order extends Model {
                             ((payment && payment.method === PaymentMethod.Transfer) ? "Zodra jouw overschrijving op onze rekening aankomt, ontvang je jouw tickets via e-mail. Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
                         + "\n"
                         + this.setRelation(Order.webshop, webshop).getUrl()
-                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
                     })
                 }
             }
