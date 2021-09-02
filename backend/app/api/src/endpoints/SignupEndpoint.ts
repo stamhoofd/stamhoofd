@@ -32,7 +32,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Organization.fromApiHost(request.host);
 
-         if (request.request.getVersion() < 52) { 
+        if (request.request.getVersion() < 52) {
             // this allows a user enumeration attack, but we will support this for a couple of days
             // because we need this fallback for older clients
             // Automatically disabled after 15th February 2021
