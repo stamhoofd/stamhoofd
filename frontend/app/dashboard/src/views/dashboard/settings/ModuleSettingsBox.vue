@@ -30,7 +30,7 @@
             <label class="box" :class="{ selected: enableWebshopModule }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
-                    <h2 class="style-title-list">Webshops</h2>
+                    <h2 class="style-title-list">Webshops &amp; tickets</h2>
                     <p v-if="enableWebshopModule && !isWebshopsTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
                     <p v-else class="style-description">Probeer gratis uit</p>
                 </div>
@@ -44,17 +44,6 @@
         <h3>Verwacht in de toekomst</h3>
 
         <div class="module-box">
-            <label class="box disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Ticketverkoop</h2>
-                    <p class="style-description">Verkoop tickets via je webshop en scan ze zonder internet</p>
-                </div>
-                <div>
-                    <span class="style-tag">2021</span>
-                </div>
-            </label>
-
             <label class="box disabled">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg"></div>
                 <div>
