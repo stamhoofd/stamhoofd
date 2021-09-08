@@ -172,10 +172,10 @@
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -464,10 +464,15 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    linkMollie() {
+    async linkMollie() {
         // Start oauth flow
-        const client_id = process.env.NODE_ENV != "production" ? "app_8mK3BCPCqd8sSkQmuNC8xmgu" : "app_awGyMjwGgRue2zjJBrdkEWuK"
-        const state = new Buffer(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
+        const client_id = process.env.MOLLIE_CLIENT_ID
+        if (!client_id) {
+            new Toast("Mollie wordt momenteel niet ondersteund. Probeer later opnieuw.", "error red").show()
+            return
+        }
+        const state = Buffer.from(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
+        await Storage.keyValue.setItem("mollie-saved-state", state)
 
         const scope = "payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write"
         const url = "https://www.mollie.com/oauth2/authorize?client_id="+encodeURIComponent(client_id)+"&state="+encodeURIComponent(state)+"&scope="+encodeURIComponent(scope)+"&response_type=code&approval_prompt=force&locale=nl_BE"
@@ -492,10 +497,18 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async doLinkMollie(code: string) {
+    async doLinkMollie(code: string, state: string) {
         const toast = new Toast("Koppelen...", "spinner").setHide(null).show()
 
         try {
+            const savedState = await Storage.keyValue.getItem("mollie-saved-state")
+            if (savedState !== state) {
+                throw new SimpleError({
+                    code: "state_verification_failed",
+                    message: "State is not the same",
+                    human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via hallo@stamhoofd.be als je Mollie probeert te koppelen en het blijft mislukken."
+                })
+            }
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/mollie/connect",
@@ -508,7 +521,9 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             SessionManager.currentSession!.setOrganization(response.data)
             toast.hide()
             new Toast("Mollie is gekoppeld", "success green").show()
+            await Storage.keyValue.removeItem("mollie-saved-state")
         } catch (e) {
+            console.error(e)
             toast.hide()
             new Toast("Koppelen mislukt", "error red").show()
         }
@@ -526,7 +541,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             const state = urlParams.get('state');
 
             if (code && state) {
-                this.doLinkMollie(code).catch(console.error);
+                this.doLinkMollie(code, state).catch(console.error);
             } else {
                 const error = urlParams.get('error') ?? "";
                 if (error) {
