@@ -50,7 +50,7 @@
                     </template>
 
                     <p v-if="hasTickets" class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/ticketverkoop" target="_blank" class="button text">Ticketverkoop door <strong>Stamhoofd</strong>, helemaal voor verenigingen</a>
+                        <a href="https://www.stamhoofd.be/ticketverkoop" target="_blank" class="button text">Ticketverkoop door <strong>Stamhoofd</strong>, softwareplatform voor verenigingen</a>
                     </p>
                     <p v-else class="stamhoofd-footer">
                         <a href="https://www.stamhoofd.be/webshops" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>

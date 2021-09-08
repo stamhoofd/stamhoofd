@@ -3,6 +3,7 @@
 import { MolliePayment, MollieToken, Payment } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
 import axios from 'axios';
+import { env } from 'process';
 
 type MollieSettlement = {
     id: string;
@@ -35,9 +36,9 @@ export async function checkSettlements(checkAll = false) {
     const token = process.env.MOLLIE_ORGANIZATION_TOKEN
     if (!token) {
         console.error("Missing mollie organization token")
-        return
+    } else {
+        await checkSettlementsFor(token, checkAll)
     }
-    await this.checkSettlementsFor(token, checkAll)
 
     // Loop all mollie tokens created after given date (when settlement permission was added)
     try {
@@ -48,7 +49,7 @@ export async function checkSettlements(checkAll = false) {
             } else {
                 try {
                     await token.refreshIfNeeded()
-                    await this.checkSettlementsFor(token.accessToken, checkAll)
+                    await checkSettlementsFor(token.accessToken, checkAll)
                 } catch (e) {
                     console.error(e)
                 }
@@ -65,7 +66,7 @@ export async function checkSettlementsFor(token: string, checkAll = false) {
     const d = new Date()
     d.setDate(d.getDate() - 14)
 
-    console.log("Checking settlements for "+token+"...")
+    console.log("Checking settlements for given token...")
 
     // Loop all organizations with online paymetns the last week
     try {
@@ -83,7 +84,6 @@ export async function checkSettlementsFor(token: string, checkAll = false) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (data._embedded?.settlements) {
                     const settlements = data._embedded.settlements as MollieSettlement[];
-                    console.log(settlements)
 
                     for (const settlement of settlements) {
                         const settledAt = new Date(settlement.settledAt)
@@ -137,8 +137,11 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                         amount: Math.round(parseFloat(settlement.amount.value)*100)
                     })
                     await payment.save()
-                    console.log("Updated settlement of payment "+payment.id)
-                    console.log(payment.settlement)
+
+                    if (process.env.NODE_ENV === "development") {
+                        console.log("Updated settlement of payment "+payment.id)
+                        console.log(payment.settlement)
+                    }
                 } else {
                     console.log("Missing payment "+mp.paymentId)
                 }
@@ -148,8 +151,8 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
         }
 
         // Check next page
-        if (molliePayments.length >= limit && request.data._links.next) {
-            await this.updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id)
+        if (request.data._links.next) {
+            await updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id)
         }
     } else {
         console.error(request.data)

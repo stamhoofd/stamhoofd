@@ -56,7 +56,6 @@ export class MollieToken extends Model {
     }
 
     async delete() {
-        console.log(this)
         await super.delete()
         MollieToken.knownTokens.delete(this.organizationId)
     }
@@ -224,6 +223,9 @@ export class MollieToken extends Model {
             this.accessToken = data.access_token
             this.expiresOn = new Date(new Date().getTime() + 3600 * 1000 - 60*1000)
             await this.save()
+
+            // Update shared tokens if this object was fetched directly
+            MollieToken.knownTokens.set(this.organizationId, this)
             return
         }
         throw new SimpleError({ code: "", message: "Something went wrong in the response"})

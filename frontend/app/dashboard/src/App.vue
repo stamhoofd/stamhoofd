@@ -12,7 +12,7 @@ import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView
 import { Sodium } from '@stamhoofd/crypto';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite } from '@stamhoofd/structures';
+import { Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -87,6 +87,15 @@ export default class App extends Vue {
                     return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
                 }
             }).setDisplayStyle("popup").setAnimated(false));
+        }
+
+        if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id") && queryString.get("auth_encryption_key")) {
+            UrlHelper.shared.clear()
+            const organizationId = queryString.get("organization_id")!
+            const refreshToken = queryString.get("refresh_token")!
+            const authEncryptionKey = queryString.get("auth_encryption_key")!
+            
+            this.loginWithToken(organizationId, refreshToken, authEncryptionKey).catch(console.error)
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
@@ -193,6 +202,42 @@ export default class App extends Vue {
         }
     }
 
+    /**
+     * Login at a given organization, with the given refresh token
+     */
+    async loginWithToken(organizationId: string, refreshToken: string, authEncryptionKey: string) {
+        // todo: add security toggle in system configuration to disable this feature
+        if (!await CenteredMessage.confirm("Ben je zeker dat je wilt inloggen via deze link?", "Inloggen", "Klik op annuleren als je niet weet waar dit over gaat.")) {
+            return
+        }
+        try {
+            let session = await SessionManager.getSessionForOrganization(organizationId)
+            if (!session) {
+                session = new Session(organizationId)
+                await session.loadFromStorage()
+            }
+
+            if (session.user) {
+                // Clear user
+                session.user = null;
+            }
+
+            // Clear all known keys
+            session.clearKeys()
+
+            session.setToken(new Token({
+                accessToken: "",
+                refreshToken,
+                accessTokenValidUntil: new Date(0)
+            }))
+            await session.setEncryptionKey(authEncryptionKey)
+            await SessionManager.setCurrentSession(session, false)           
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
+    }
+
     async checkKey() {
         console.log("Checking key...")
 
@@ -205,9 +250,10 @@ export default class App extends Vue {
 
         const user = session.user
 
-        if (!user) {
+        if (!user || !user.permissions) {
             return
         }
+        
         const privateKey = session.getUserPrivateKey()
 
         if (!privateKey) {

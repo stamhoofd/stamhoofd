@@ -628,11 +628,20 @@ export class Organization extends Model {
     /**
      * These email addresess are private
      */
-    async getAdminToEmails() {
+    async getAdmins() {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
         const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+
+        return filtered
+    }
+
+    /**
+     * These email addresess are private
+     */
+    async getAdminToEmails() {
+        const filtered = await this.getAdmins()
 
         if (filtered.length > 0) {
             return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")

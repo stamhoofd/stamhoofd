@@ -40,7 +40,6 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
-import { OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -52,9 +51,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     }
 })
 export default class LoginView extends Mixins(NavigationMixin){
-    @Prop({ required: true})
-    organization: OrganizationSimple
-
     @Prop({ required: true})
     session!: Session
 

@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { KeychainItem } from '@stamhoofd/models';
+import { KeychainItem, Organization } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { KeychainedResponse, KeychainItem as KeychainItemStruct, Organization as OrganizationStruct  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
@@ -26,20 +26,21 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const token = await Token.optionalAuthenticate(request);
+        const user = token?.user
+        const organization = user?.organization ?? await Organization.fromApiHost(request.host);
 
         let keychainItems: KeychainItem[] = []
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions !== null) {
+        if (user && user.permissions !== null) {
             keychainItems = await KeychainItem.where({
                 userId: user.id,
                 publicKey: user.organization.publicKey
             })
         }
         return new Response(new KeychainedResponse({
-            data: await user.getOrganizatonStructure(user.organization),
+            data: user ? await user.getOrganizatonStructure(user.organization) : await organization.getStructure(),
             keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
         }));
     }

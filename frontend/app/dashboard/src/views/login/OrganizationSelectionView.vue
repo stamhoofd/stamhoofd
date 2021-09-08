@@ -28,11 +28,11 @@
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
-                    <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization)">
+                    <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization.id)">
                         <h1>{{ organization.name }}</h1>
                         <p>{{ organization.address }}</p>
                         <Spinner v-if="loadingSession === organization.id" class="floating" />
-                        <span v-else-if="isSignedInFor(organization)" class="icon success floating" />
+                        <span v-else-if="isSignedInFor(organization.id)" class="icon success floating" />
                         <span v-else class="icon arrow-right-small floating" />
                     </button>
                 </template>
@@ -181,6 +181,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 console.error(e)
             }
         }
+
         this.updateDefault().catch(console.error)
     }
 
@@ -267,32 +268,36 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
-    async loginOrganization(organization: OrganizationSimple) {
+    async loginOrganization(organizationId: string) {
         if (this.loadingSession) {
             return
         }
-        this.loadingSession = organization.id
+        this.loadingSession = organizationId
 
         try {
-            let session = await SessionManager.getSessionForOrganization(organization.id)
+            let session = await SessionManager.getSessionForOrganization(organizationId)
             if (!session) {
-                session = new Session(organization.id)
+                session = new Session(organizationId)
                 await session.loadFromStorage()
             }
 
             if (session.canGetCompleted()) {
-                this.loadingSession = organization.id
+                this.loadingSession = organizationId
                 await SessionManager.setCurrentSession(session, false)
                 this.loadingSession = null
                 await this.updateDefault()
                 if (!session.canGetCompleted() && !session.isComplete()) {
-                    await this.loginOrganization(organization)
+                    await this.loginOrganization(organizationId)
                     return
                 }
                 return
             }
             this.loadingSession = null
-            this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { organization, session }) }).setDisplayStyle("sheet"))
+            this.present(new ComponentWithProperties(NavigationController, { 
+                root: new ComponentWithProperties(LoginView, { 
+                    session 
+                }) 
+            }).setDisplayStyle("sheet"))
         } catch (e) {
             console.error(e)
             this.loadingSession = null
@@ -301,8 +306,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
     }
 
-    isSignedInFor(organization: OrganizationSimple) {
-        const session = this.availableSessions.find(s => s.organizationId === organization.id)
+    isSignedInFor(organizationId: string) {
+        const session = this.availableSessions.find(s => s.organizationId === organizationId)
         return session && session.canGetCompleted()
     }
 }

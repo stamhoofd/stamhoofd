@@ -9,7 +9,8 @@
                 {{ member.firstName }} is niet ingeschreven
             </p>
 
-            <div class="hover-box">
+            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box">
+                <hr v-if="member.activeRegistrations.length == 0">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
                     <div class="hover-show">
@@ -48,10 +49,10 @@
                         </dd>
                     </template>
                 </dl>
+                <hr v-if="member.activeRegistrations.length > 0">
             </div>
 
             <div v-if="member.activeRegistrations.length > 0" class="container">
-                <hr>
                 <h2 class="style-with-button with-list">
                     <div>Ingeschreven voor</div>
                     <div>
